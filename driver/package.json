@@ -1,0 +1,21 @@
+{
+  "name": "driver",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Playwright driver",
+  "bin": "main.js",
+  "scripts": {
+    "bake": "pkg --public --out-path=out ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "playwright": "next"
+  },
+  "devDependencies": {
+    "pkg": "^4.4.9"
+  }
+}

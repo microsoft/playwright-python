@@ -1,3 +1,43 @@
+# What is this?
+
+This is a Python3 version of the [https://github.com/microsoft/playwright](https://github.com/microsoft/playwright) project.
+
+# Install
+
+```sh
+pip3 install playwright_web
+```
+
+# Run
+
+```py
+import asyncio
+from playwright_web import create_playwright
+
+async def run():
+    playwright = await create_playwright()
+    browser = await playwright.webkit.launch(dict(headless=False))
+    context = await browser.newContext(dict(viewport=None))
+    page = await context.newPage()
+
+    page.on('framenavigated', lambda frame: print(f'Frame navigated to {frame.url}'))
+    page.on('request', lambda request: print(f'Request {request.url}'))
+
+    await page.goto('https://example.com')
+    print(await page.title())
+
+    body = await page.querySelector('body')
+    print(await body.textContent())
+
+    await page.click('text=More information...')
+    print(await page.title())
+
+    await browser.close()
+    await playwright.dispose()
+
+asyncio.run(run())
+
+```
 
 # Contributing
 
