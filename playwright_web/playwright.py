@@ -22,10 +22,14 @@ import subprocess
 
 from playwright_web.connection import Connection
 from playwright_web.object_factory import create_remote_object
+from playwright_web.browser_type import BrowserType
 
 class Playwright:
-  async def init(self) -> None:
+  def __init__(self) -> None:
     self.loop = asyncio.get_event_loop()
+    self.loop.run_until_complete(self._sync_init())
+
+  async def _sync_init(self):
 
     package_path = os.path.dirname(os.path.abspath(__file__))
     platform = sys.platform
@@ -54,20 +58,12 @@ class Playwright:
       stderr=asyncio.subprocess.PIPE,
       limit=32768)
     self._connection = Connection(self._proc.stdout, self._proc.stdin, create_remote_object, self.loop)
-    result = await asyncio.gather(
+    chromium, firefox, webkit = await asyncio.gather(
       self._connection.wait_for_object_with_known_name('chromium'),
       self._connection.wait_for_object_with_known_name('firefox'),
       self._connection.wait_for_object_with_known_name('webkit'))
-    self.chromium = result[0]
-    self.firefox = result[1]
-    self.webkit = result[2]
+    self.chromium = chromium
+    self.firefox = firefox
+    self.webkit = webkit
 
-  async def dispose(self) -> None:
-    self._proc.kill()
-    await self._proc.wait()
-
-
-async def create_playwright() -> Playwright:
-  playwright = Playwright()
-  await playwright.init()
-  return playwright
+playwright = Playwright()

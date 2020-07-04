@@ -14,13 +14,11 @@
 
 import asyncio
 
-from playwright_web import create_playwright
+from playwright_web import webkit
 
 async def run():
-    playwright = await create_playwright()
-
     print('Launching browser...')
-    browser = await playwright.webkit.launch(dict(headless=False))
+    browser = await webkit.launch(dict(headless=False))
     print('Contexts in browser: %d' % len(browser.contexts))
     print('Creating context...')
     context = await browser.newContext(dict(viewport=None))
@@ -70,6 +68,5 @@ async def run():
     print('Contexts in browser: %d' % len(browser.contexts))
     print('Closing browser')
     await browser.close()
-    await playwright.dispose()
 
-asyncio.run(run())
+asyncio.get_event_loop().run_until_complete(run())

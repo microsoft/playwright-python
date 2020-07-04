@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.playwright import create_playwright
+from playwright_web.playwright import playwright
+
+chromium = playwright.chromium
+firefox = playwright.firefox
+webkit = playwright.webkit
 
 __all__ = [
-  'create_playwright'
+  'chromium',
+  'firefox',
+  'webkit'
 ]

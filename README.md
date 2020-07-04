@@ -14,10 +14,10 @@ pip3 install playwright_web
 
 ```py
 import asyncio
-from playwright_web import create_playwright
+from playwright_web import webkit
 
 async def run():
-    playwright = await create_playwright()
+    browser = await webkit.launch(dict(headless=False))
     browser = await playwright.webkit.launch(dict(headless=False))
     context = await browser.newContext(dict(viewport=None))
     page = await context.newPage()
@@ -35,10 +35,8 @@ async def run():
     print(await page.title())
 
     await browser.close()
-    await playwright.dispose()
 
-asyncio.run(run())
-
+asyncio.get_event_loop().run_until_complete(run())
 ```
 
 # Contributing

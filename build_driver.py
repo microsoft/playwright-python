@@ -20,14 +20,24 @@ import subprocess
 driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'driver')
 package_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playwright_web')
 drivers_path = os.path.join(package_path, 'drivers')
-try:
-  os.makedirs(drivers_path)
-except:
-  print('%s already exits' % drivers_path)
 
+
+if not os.path.exists(drivers_path):
+  os.makedirs(drivers_path)
+if os.path.exists(os.path.join(driver_path, 'package-lock.json')):
+  os.remove(os.path.join(driver_path, 'package-lock.json'))
+if os.path.exists(os.path.join(driver_path, 'node_modules')):
+  shutil.rmtree(os.path.join(driver_path, 'node_modules'))
+if os.path.exists(os.path.join(driver_path, 'out')):
+  shutil.rmtree(os.path.join(driver_path, 'out'))
+
+subprocess.run(['npm', 'i'], cwd=driver_path)
 subprocess.run(['npm', 'run', 'bake'], cwd=driver_path)
 
 for driver in ['driver-linux', 'driver-macos', 'driver-win.exe']:
+  if os.path.exists(os.path.join(package_path, driver)):
+    os.remove(os.path.join(package_path, driver))
+
   in_path = os.path.join(driver_path, 'out', driver)
   out_path = os.path.join(drivers_path, driver + '.gz')
   with open(in_path, 'rb') as f_in, gzip.open(out_path, 'wb') as f_out:
