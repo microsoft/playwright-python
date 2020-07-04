@@ -1,6 +1,8 @@
 # What is this?
 
-This is a Python3 version of the [https://github.com/microsoft/playwright](https://github.com/microsoft/playwright) project.
+⚠️ **EXPERIMENTAL** ⚠️
+
+This is a Python3 version of the [https://github.com/microsoft/playwright](https://github.com/microsoft/playwright) project. In only contains initial stub implementation with **NO** tests. It can not be used in production yet.
 
 # Install
 
