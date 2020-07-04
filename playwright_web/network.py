@@ -79,7 +79,7 @@ class Route(ChannelOwner):
     super().__init__(scope, guid, initializer)
 
   def request(self) -> Request:
-    return from_channel(self._initializer.request)
+    return from_channel(self._initializer['request'])
 
   async def abort(self, error_code: str = 'failed') -> None:
     await self._channel.send('abort', dict(errorCode=error_code))

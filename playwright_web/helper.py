@@ -53,15 +53,15 @@ class TimeoutSettings:
   def __init__(self, parent: Optional['TimeoutSettings']) -> None:
     self._parent = parent
 
-  def setDefaultTimeout(self, timeout):
+  def set_default_timeout(self, timeout):
     self.timeout = timeout
 
 class Error(BaseException):
   def __init__(self, message: str) -> None:
     self.message = message
 
-def serializeError(ex: BaseException) -> ErrorPayload:
+def serialize_error(ex: BaseException) -> ErrorPayload:
   return dict(message=str(ex))
 
-def parseError(error: ErrorPayload):
+def parse_error(error: ErrorPayload):
   return Error('%s\n%s' % (error['message'], error['stack']))

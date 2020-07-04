@@ -45,10 +45,10 @@ class Frame(ChannelOwner):
   async def frameElement(self) -> ElementHandle:
     return from_channel(await self._channel.send('frameElement'))
 
-  async def evaluate(self, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
-  async def evaluateHandle(self, expression: str, is_function: bool, arg: Any) -> JSHandle:
+  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> JSHandle:
     return from_channel(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
   async def querySelector(self, selector: str) -> Optional[ElementHandle]:
@@ -60,10 +60,10 @@ class Frame(ChannelOwner):
   async def dispatchEvent(self, selector: str, type: str, eventInit: Dict = None) -> None:
     await self._channel.send('dispatchEvent', dict(selector=selector, type=type, eventInit=eventInit))
 
-  async def evalOnSelector(self, selector: str, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evalOnSelector(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evalOnSelector', dict(selector=selector, expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
-  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evalOnSelectorAll', dict(selector=selector, expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
   async def content(self) -> str:
@@ -145,7 +145,7 @@ class Frame(ChannelOwner):
   async def waitForTimeout(self, timeout: int) -> Awaitable[None]:
     return self._scope._loop.create_task(asyncio.sleep(timeout / 1000))
 
-  async def waitForFunction(self, expression: str, is_function: bool, arg: Any, options: Dict = dict()) -> JSHandle:
+  async def waitForFunction(self, expression: str, is_function: bool = False, arg: Any = None, options: Dict = dict()) -> JSHandle:
     return from_channel(await self._channel.send('waitForFunction', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
   async def title(self) -> str:

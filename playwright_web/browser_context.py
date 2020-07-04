@@ -36,7 +36,7 @@ class BrowserContext(ChannelOwner):
     self._browser: Optional['Browser'] = None
     self._owner_page: Optional[Page] = None
 
-    for channel in initializer.get('pages'):
+    for channel in initializer['pages']:
       page = from_channel(channel)
       self._pages.append(page)
       page._set_browser_context(self)
@@ -57,8 +57,8 @@ class BrowserContext(ChannelOwner):
         return
     route.continueRequest()
 
-  async def _on_binding(self, binding_call: BindingCall) -> None:
-    func = self._bindings.get(binding_call._initializer.name)
+  def _on_binding(self, binding_call: BindingCall) -> None:
+    func = self._bindings.get(binding_call._initializer['name'])
     if func == None:
       return
     binding_call.call(func)
@@ -67,7 +67,7 @@ class BrowserContext(ChannelOwner):
     self._channel.send('setDefaultNavigationTimeoutNoReply', dict(timeout=timeout))
 
   def setDefaultTimeout(self, timeout: int) -> None:
-    self._timeout_settings.setDefaultTimeout(timeout)
+    self._timeout_settings.set_default_timeout(timeout)
     self._channel.send('setDefaultTimeoutNoReply', dict(timeout=timeout))
 
   @property

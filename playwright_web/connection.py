@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import asyncio
+from playwright_web.helper import parse_error
 from playwright_web.transport import Transport
-from pyee import EventEmitter
+from pyee import BaseEventEmitter
 from types import SimpleNamespace
 from typing import Any, Awaitable, Dict, List, Optional
 
 
-class Channel(EventEmitter):
+class Channel(BaseEventEmitter):
   def __init__(self, scope: 'ConnectionScope', guid: str) -> None:
     super().__init__()
     self._scope = scope
@@ -35,7 +36,7 @@ class Channel(EventEmitter):
     self.emit(method, params)
 
 
-class ChannelOwner(EventEmitter):
+class ChannelOwner(BaseEventEmitter):
   def __init__(self, scope: 'ConnectionScope', guid: str, initializer: Dict, is_scope = False) -> None:
     super().__init__()
     self._guid = guid
@@ -127,7 +128,7 @@ class Connection:
     if msg.get('id'):
       callback = self._callbacks.pop(msg.get('id'))
       if msg.get('error'):
-        callback.set_exception(self._parse_error(msg.get('error')))
+        callback.set_exception(parse_error(msg.get('error')))
       else:
         result = self._replace_guids_with_channels(msg.get('result'))
         callback.set_result(result)
@@ -143,14 +144,11 @@ class Connection:
     object = self._objects[guid]
     object._channel.emit(method, self._replace_guids_with_channels(params))
 
-  def _parse_error(self, error: Dict):
-    return error
-
   def _replace_channels_with_guids(self, payload: Any) -> Any:
     if payload == None:
       return payload
     if isinstance(payload, list):
-      return map(lambda p: self._replace_channels_with_guids(p), payload)
+      return list(map(lambda p: self._replace_channels_with_guids(p), payload))
     if isinstance(payload, ChannelOwner):
       return dict(guid=payload._object.guid)
     if isinstance(payload, dict):
@@ -164,7 +162,7 @@ class Connection:
     if payload == None:
       return payload
     if isinstance(payload, list):
-      return map(lambda p: self._replace_guids_with_channels(p), payload)
+      return list(map(lambda p: self._replace_guids_with_channels(p), payload))
     if isinstance(payload, dict):
       if payload.get('guid') in self._objects:
         return self._objects[payload.get('guid')]._channel

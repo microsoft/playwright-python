@@ -25,8 +25,8 @@ class Worker(ChannelOwner):
   def url(self) -> str:
     return self._initializer['url']
 
-  async def evaluate(self, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
-  async def evaluateHandle(self, expression: str, is_function: bool, arg: Any) -> JSHandle:
+  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> JSHandle:
     return from_channel(await self._channel.send('evaluateExpressionHandle', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))

@@ -45,7 +45,7 @@ class Transport:
         msg = buffer.decode('utf-8')
         obj = json.loads(msg)
 
-        if 'DEBUGF' in os.environ:
+        if 'DEBUGP' in os.environ:
           print('\x1b[33mRECV>\x1b[0m', json.dumps(obj, indent=2))
         if 'DEBUG' in os.environ:
           print('\x1b[33mRECV>\x1b[0m', obj.get('method'))
@@ -56,7 +56,7 @@ class Transport:
 
   def send(self, message: Dict) -> Awaitable:
     msg = json.dumps(message)
-    if 'DEBUGF' in os.environ:
+    if 'DEBUGP' in os.environ:
       print('\x1b[32mSEND>\x1b[0m', json.dumps(message, indent=2))
     if 'DEBUG' in os.environ:
       print('\x1b[32mSEND>\x1b[0m', message.get('method'))

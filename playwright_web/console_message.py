@@ -36,7 +36,7 @@ class ConsoleMessage(ChannelOwner):
 
   @property
   def args(self) -> List[JSHandle]:
-    return map(from_channel, self._initializer['args'])
+    return list(map(from_channel, self._initializer['args']))
 
   @property
   def location(self) -> ConsoleMessageLocation:

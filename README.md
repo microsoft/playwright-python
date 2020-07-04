@@ -39,6 +39,25 @@ async def run():
 asyncio.get_event_loop().run_until_complete(run())
 ```
 
+# Development
+
+Build driver:
+```sh
+python3 ./build_driver.py
+```
+
+Run tests:
+```sh
+python3 -m unittest
+```
+
+Deploy:
+```sh
+python3 ./build_package.py
+... check
+python3 ./upload_package.py
+```
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

@@ -97,12 +97,12 @@ class ElementHandle(JSHandle):
     return from_nullable_channel(await self._channel.send('querySelector', dict(selector=selector)))
 
   async def querySelectorAll(self, selector: str) -> List['ElementHandle']:
-    return map(from_nullable_channel, await self._channel.send('querySelectorAll', dict(selector=selector)))
+    return list(map(from_nullable_channel, await self._channel.send('querySelectorAll', dict(selector=selector))))
 
-  async def evalOnSelector(self, selector: str, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evalOnSelector(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evalOnSelector', dict(selector=selector, expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
-  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evalOnSelectorAll', dict(selector=selector, expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
 
@@ -113,5 +113,5 @@ def convertSelectOptionValues(arg: ValuesToSelect) -> Any:
   if isinstance(arg, ElementHandle):
     return arg._channel
   if isinstance(arg, list) and len(arg) and isinstance(arg[0], ElementHandle):
-    return map(lambda e: e._channel, arg)
+    return list(map(lambda e: e._channel, arg))
   return arg

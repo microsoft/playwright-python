@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import base64
 from playwright_web.accessibility import Accessibility
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel, from_nullable_channel
@@ -23,7 +24,7 @@ from playwright_web.file_chooser import FileChooser
 from playwright_web.input import Keyboard, Mouse
 from playwright_web.js_handle import JSHandle
 from playwright_web.frame import Frame
-from playwright_web.helper import parseError, serializeError, Error, FilePayload, FrameMatch, FunctionWithSource, Optional, PendingWaitEvent, RouteHandler, RouteHandlerEntry, SelectOption, TimeoutSettings, URLMatch, URLMatcher
+from playwright_web.helper import parse_error, serialize_error, Error, FilePayload, FrameMatch, FunctionWithSource, Optional, PendingWaitEvent, RouteHandler, RouteHandlerEntry, SelectOption, TimeoutSettings, URLMatch, URLMatcher
 from playwright_web.network import Request, Response, Route
 from playwright_web.worker import Worker
 from types import SimpleNamespace
@@ -81,7 +82,7 @@ class Page(ChannelOwner):
     self._channel.on('frameDetached', lambda frame: self._on_frame_detached(from_channel(frame)))
     self._channel.on('frameNavigated', lambda params: self._on_frame_navigated(from_channel(params['frame']), params['url'], params['name']))
     self._channel.on('load', lambda _: self.emit(Page.Events.Load))
-    self._channel.on('pageError', lambda params: self.emit(Page.Events.PageError, parseError(params['error'])))
+    self._channel.on('pageError', lambda params: self.emit(Page.Events.PageError, parse_error(params['error'])))
     self._channel.on('popup', lambda popup: self.emit(Page.Events.Popup, from_channel(popup)))
     self._channel.on('request', lambda request: self.emit(Page.Events.Request, from_channel(request)))
     self._channel.on('requestFailed', lambda params: self._on_request_failed(from_channel(params['request']), params['failureText']))
@@ -125,7 +126,7 @@ class Page(ChannelOwner):
     self._browser_context._on_route(route, request)
 
   def _on_binding(self, binding_call: 'BindingCall') -> None:
-    func = self._bindings.get(binding_call._initializer.name)
+    func = self._bindings.get(binding_call._initializer['name'])
     if func:
       binding_call.call(func)
     self._browser_context._on_binding(binding_call)
@@ -179,7 +180,7 @@ class Page(ChannelOwner):
     self._channel.send('setDefaultNavigationTimeoutNoReply', dict(timeout=timeout))
 
   def setDefaultTimeout(self, timeout: int) -> None:
-    self._timeout_settings.setDefaultTimeout(timeout)
+    self._timeout_settings.set_default_timeout(timeout)
     self._channel.send('setDefaultTimeoutNoReply', dict(timeout=timeout))
 
   async def querySelector(self, selector: str) -> Optional[ElementHandle]:
@@ -194,16 +195,16 @@ class Page(ChannelOwner):
   async def dispatchEvent(self, selector: str, type: str, eventInit, Dict = None, options: Dict = dict()) -> None:
     return await self._main_frame.dispatchEvent(selector, type, eventInit, options)
 
-  async def evaluate(self, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
+    return await self._main_frame.evaluate(expression, is_function, arg)
+
+  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> JSHandle:
     return await self._main_frame.evaluateHandle(expression, is_function, arg)
 
-  async def evaluateHandle(self, expression: str, is_function: bool, arg: Any) -> JSHandle:
-    return await self._main_frame.evaluateHandle(expression, is_function, arg)
-
-  async def evalOnSelector(self, selector: str, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evalOnSelector(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return await self._main_frame.evalOnSelector(selector, expression, is_function, arg)
 
-  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return await self._main_frame.evalOnSelectorAll(selector, expression, is_function, arg)
 
   async def addScriptTag(self, options: Dict = dict()) -> ElementHandle:
@@ -364,7 +365,7 @@ class Page(ChannelOwner):
   async def waitForTimeout(self, timeout: int):
     await self._main_frame.waitForTimeout(timeout)
 
-  async def waitForFunction(self, expression: str, is_function: bool, arg: Any, options: Dict = dict()) -> JSHandle:
+  async def waitForFunction(self, expression: str, is_function: bool = False, arg: Any = None, options: Dict = dict()) -> JSHandle:
     return await self._main_frame.waitForFunction(expression, is_function, arg, options)
  
   def workers(self) -> List[Worker]:
@@ -395,10 +396,11 @@ class BindingCall(ChannelOwner):
   def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
     super().__init__(scope, guid, initializer)
 
-  async def call(self, func: FunctionWithSource) -> None:
+  def call(self, func: FunctionWithSource) -> None:
     try:
       frame = from_channel(self._initializer['frame'])
-      source = dict(context=frame._page.context(), page=frame._page, frame=frame)
-      self._channel.send('resolve', dict(result=await func(source, *self._initializer['args'])))
+      source = dict(context=frame._page.context, page=frame._page, frame=frame)
+      result = func(source, *self._initializer['args'])
+      asyncio.ensure_future(self._channel.send('resolve', dict(result=result)))
     except BaseException as e:
-      self._channel.send('reject', dict(error=serializeError(e)))
+      asyncio.ensure_future(self._channel.send('reject', dict(error=serialize_error(e))))

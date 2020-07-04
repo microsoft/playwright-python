@@ -24,11 +24,11 @@ class BrowserType(ChannelOwner):
 
   @property
   def name(self) -> str:
-    return self._initializer.get('name')
+    return self._initializer['name']
 
   @property
   def executablePath(self) -> str:
-    return self._initializer.get('executablePath')
+    return self._initializer['executablePath']
 
   async def launch(self, options: Dict = dict()) -> Browser:
     return from_channel(await self._channel.send('launch', dict(options=options)))

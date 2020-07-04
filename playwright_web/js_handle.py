@@ -26,10 +26,10 @@ class JSHandle(ChannelOwner):
   def _on_preview_updated(self, preview: str) -> None:
     self._preview = preview
 
-  async def evaluate(self, expression: str, is_function: bool, arg: Any) -> Any:
+  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
     return parseResult(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
-  async def evaluateHandle(self, expression: str, is_function: bool, arg: Any) -> 'JSHandle':
+  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> 'JSHandle':
     return from_channel(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
 
   async def getProperty(self, name: str) -> 'JSHandle':
@@ -55,7 +55,7 @@ class JSHandle(ChannelOwner):
 
 
 def is_primitive_value(value: Any):
-  return value == None or isinstance(value, bool) or isinstance(value, int) or isinstance(value, float) or isinstance(value, str)
+  return isinstance(value, bool) or isinstance(value, int) or isinstance(value, float) or isinstance(value, str)
 
 def serializeValue(value: Any, handles: List[JSHandle], depth: int) -> Any:
   if isinstance(value, JSHandle):
@@ -64,6 +64,8 @@ def serializeValue(value: Any, handles: List[JSHandle], depth: int) -> Any:
     return dict(h=h)
   if depth > 100:
     raise Error('Maximum argument depth exceeded')
+  if value == None:
+    return dict(v='undefined')
   if value == float('inf'):
     return dict(v='Infinity')
   if value == float('-inf'):
@@ -74,7 +76,7 @@ def serializeValue(value: Any, handles: List[JSHandle], depth: int) -> Any:
     return value
 
   if isinstance(value, list):
-    result = map(lambda a: serializeValue(a, handles, depth + 1), value)
+    result = list(map(lambda a: serializeValue(a, handles, depth + 1), value))
     return dict(a=result)
 
   if isinstance(value, dict):
@@ -82,14 +84,14 @@ def serializeValue(value: Any, handles: List[JSHandle], depth: int) -> Any:
     for name in value:
       result[name] = serializeValue(value[name], handles, depth + 1)
     return dict(o=result)
-  return None
+  return dict(v='undefined')
 
 def serializeArgument(arg: Any) -> Any:
   guids = list()
   value = serializeValue(arg, guids, 0)
   return dict(value=value, guids=guids)
 
-def parseValue(value: Any, handles: List[JSHandle]) -> Any:
+def parseValue(value: Any) -> Any:
   if value == None:
     return None
   if isinstance(value, dict):
@@ -101,21 +103,20 @@ def parseValue(value: Any, handles: List[JSHandle]) -> Any:
         return float('-inf')
       if v == '-0':
         return float('-0')
-      return None
+      if v == 'undefined':
+        return None
+      return v
 
     if 'a' in value:
-      return map(lambda e: parseValue(e, handles), value['a'])
+      return list(map(lambda e: parseValue(e), value['a']))
 
     if 'o' in value:
       o = value['o']
       result = dict()
       for name in o:
-        result[name] = parseValue(o[name], handles)
+        result[name] = parseValue(o[name])
       return result
-
-    if 'h' in value:
-      return handles[value['h']]
   return value
 
 def parseResult(result: Any) -> Any:
-  return parseValue(result['value'], result['handles'])
+  return parseValue(result)

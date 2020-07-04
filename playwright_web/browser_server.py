@@ -28,11 +28,11 @@ class BrowserServer(ChannelOwner):
 
   @property
   def pid(self) -> str:
-    return self._initializer.pid
+    return self._initializer['pid']
 
   @property
   def wsEndpoint(self) -> str:
-    return self._initializer.wsEndpoint
+    return self._initializer['wsEndpoint']
 
   async def kill(self) -> None:
     await self._channel.send('kill')

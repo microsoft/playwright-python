@@ -30,7 +30,6 @@ class Playwright:
     self.loop.run_until_complete(self._sync_init())
 
   async def _sync_init(self):
-
     package_path = os.path.dirname(os.path.abspath(__file__))
     platform = sys.platform
     if platform == 'darwin':
