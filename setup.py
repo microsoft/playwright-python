@@ -19,7 +19,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
   name='playwright-web',
-  version='0.0.2',
+  version='0.0.3',
   author='Microsoft Corporation',
   author_email='',
   description='A high-level API to automate web browsers',
