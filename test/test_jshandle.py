@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import json
+import math
 import unittest
-from .test import PageTestSpec
+from datetime import datetime
 from playwright_web.helper import Error
+from .test import PageTestSpec
 
 class JSHandleSpec(PageTestSpec):
   async def it_should_work(self):
@@ -65,6 +67,29 @@ class JSHandleSpec(PageTestSpec):
       error = e
     self.assertEqual(error.message, 'Maximum argument depth exceeded')
 
+  async def it_should_accept_same_nested_object_multiple_times(self):
+    foo = { 'x': 1 }
+    self.assertEqual(await self.page.evaluate('x => x', { 'foo': foo, 'bar': [foo], 'baz': { 'foo' : foo } }),
+      { 'foo': { 'x': 1 }, 'bar': [{ 'x' : 1 }], 'baz': { 'foo': { 'x' : 1 } } })
+
+  async def it_should_accept_object_handle_to_unserializable_value(self):
+    handle = await self.page.evaluateHandle('() => Infinity')
+    self.assertTrue(await self.page.evaluate('e => Object.is(e, Infinity)', handle))
+
+  async def it_should_pass_configurable_args(self):
+    result = await self.page.evaluate('''arg => {
+      if (arg.foo !== 42)
+        throw new Error('Not a 42');
+      arg.foo = 17;
+      if (arg.foo !== 17)
+        throw new Error('Not 17');
+      delete arg.foo;
+      if (arg.foo === 17)
+        throw new Error('Still 17');
+      return arg;
+    }''', { 'foo': 42 })
+    self.assertEqual(result, {})
+
   async def it_should_get_property(self):
     handle1 = await self.page.evaluateHandle('''() => ({
       one: 1,
@@ -73,5 +98,64 @@ class JSHandleSpec(PageTestSpec):
     })''')
     handle2 = await handle1.getProperty('two')
     self.assertEqual(await handle2.jsonValue(), 2)
+
+  async def it_should_work_with_undefined_null_and_empty(self):
+    handle = await self.page.evaluateHandle('''() => ({
+      undefined: undefined,
+      null: null,
+    })''')
+    undefined_handle = await handle.getProperty('undefined')
+    self.assertEqual(await undefined_handle.jsonValue(), None)
+    null_handle = await handle.getProperty('null')
+    self.assertEqual(await null_handle.jsonValue(), None)
+    empty_handle = await handle.getProperty('empty')
+    self.assertEqual(await empty_handle.jsonValue(), None)
+
+  async def it_should_work_with_unserializable_values(self):
+    handle = await self.page.evaluateHandle('''() => ({
+      infinity: Infinity,
+      negInfinity: -Infinity,
+      nan: NaN,
+      negZero: -0
+    })''')
+    infinity_handle = await handle.getProperty('infinity')
+    self.assertEqual(await infinity_handle.jsonValue(), float('inf'))
+    neg_infinity_handle = await handle.getProperty('negInfinity')
+    self.assertEqual(await neg_infinity_handle.jsonValue(), float('-inf'))
+    nan_handle = await handle.getProperty('nan')
+    self.assertTrue(math.isnan(await nan_handle.jsonValue()))
+    neg_zero_handle = await handle.getProperty('negZero')
+    self.assertEqual(await neg_zero_handle.jsonValue(), float('-0'))
+
+  async def it_should_json_value(self):
+    handle = await self.page.evaluateHandle('() => ({foo: "bar"})')
+    json = await handle.jsonValue()
+    self.assertEqual(json, {'foo': 'bar'})
+
+  async def it_should_work_with_dates(self):
+    handle = await self.page.evaluateHandle('() => new Date("2020-05-27T01:31:38.506Z")')
+    json = await handle.jsonValue()
+    self.assertEqual(json, datetime.fromisoformat('2020-05-27T01:31:38.506'))
+
+  async def it_should_throw_for_circular_object(self):
+    handle = await self.page.evaluateHandle('window')
+    error = None
+    try:
+      await handle.jsonValue()
+    except Error as e:
+      error = e
+    self.assertIn('Argument is a circular structure', error.message)
+
+  async def it_should_get_properties(self):
+    handle = await self.page.evaluateHandle('() => ({ foo: "bar" })')
+    properties = await handle.getProperties()
+    self.assertIn('foo', properties)
+    foo = properties['foo']
+    self.assertEqual(await foo.jsonValue(), 'bar')
+
+  async def it_should_return_empty_map_for_non_objects(self):
+    handle = await self.page.evaluateHandle('123')
+    properties = await handle.getProperties()
+    self.assertEqual(properties, {})
 
 JSHandleSpec()

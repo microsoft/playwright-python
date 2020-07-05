@@ -12,14 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import unittest
-from .test import PageTestSpec
+from datetime import datetime
 from playwright_web.helper import Error
+from .test import PageTestSpec
 
 class EvaluationSpec(PageTestSpec):
   async def it_should_work(self):
     result = await self.page.evaluate('7 * 3')
     self.assertEqual(result, 21)
+
+  async def it_should_return_none_for_null(self):
+    result = await self.page.evaluate('a => a', None)
+    self.assertIsNone(result)
+
+  async def it_should_transfer_nan(self):
+    result = await self.page.evaluate('a => a', float('nan'))
+    self.assertTrue(math.isnan(result))
 
   async def it_should_transfer_neg_zero(self):
     result = await self.page.evaluate('a => a', -0)
@@ -102,5 +112,58 @@ class EvaluationSpec(PageTestSpec):
     object = { 'foo': 'bar!' }
     result = await self.page.evaluate('a => a', object)
     self.assertEqual(result, object)
+
+  async def it_should_accept_none_as_one_of_multiple_parameters(self):
+    result = await self.page.evaluate('({ a, b }) => Object.is(a, undefined) && Object.is(b, "foo")', { 'a': None, 'b': 'foo' })
+    self.assertTrue(result)
+
+  async def it_should_properly_serialize_none_arguments(self):
+    self.assertEqual(await self.page.evaluate('x => ({a: x})', None), { 'a': None })
+
+  async def it_should_fail_for_circular_object(self):
+    self.assertIsNone(await self.page.evaluate('''() => {
+      const a = {};
+      const b = {a};
+      a.b = b;
+      return a;
+    }'''))
+
+  async def it_should_accept_string(self):
+    self.assertEqual(await self.page.evaluate('1 + 2'), 3)
+
+  async def it_should_accept_element_handle_as_an_argument(self):
+    await self.page.setContent('<section>42</section>')
+    element = await self.page.querySelector('section')
+    text = await self.page.evaluate('e => e.textContent', element)
+    self.assertEqual(text, '42')
+
+  async def it_should_throw_if_underlying_element_was_disposed(self):
+    await self.page.setContent('<section>39</section>')
+    element = await self.page.querySelector('section')
+    await element.dispose()
+    error = None
+    try:
+      await self.page.evaluate('e => e.textContent', element)
+    except Error as e:
+      error = e
+    self.assertIn('JSHandle is disposed', error.message)
+
+  async def it_should_evaluate_exception(self):
+    error = await self.page.evaluate('new Error("error message")')
+    self.assertIn('Error: error message', error)
+
+  async def it_should_evaluate_date(self):
+    result = await self.page.evaluate('() => ({ date: new Date("2020-05-27T01:31:38.506Z") })')
+    self.assertEqual(result, { 'date': datetime.fromisoformat('2020-05-27T01:31:38.506') })
+
+  async def it_should_roundtrip_date(self):
+    date = datetime.fromisoformat('2020-05-27T01:31:38.506')
+    result = await self.page.evaluate('date => date', date)
+    self.assertEqual(result, date)
+
+  async def it_should_jsonvalue_date(self):
+    date = datetime.fromisoformat('2020-05-27T01:31:38.506')
+    result = await self.page.evaluate('() => ({ date: new Date("2020-05-27T01:31:38.506Z") })')
+    self.assertEqual(result, { 'date': date })
 
 EvaluationSpec()

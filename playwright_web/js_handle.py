@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
+
+from datetime import datetime
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
 from playwright_web.helper import ConsoleMessageLocation, Error, is_function_body
 from typing import Any, Dict, List, Optional
@@ -49,7 +52,7 @@ class JSHandle(ChannelOwner):
     return None
 
   async def dispose(self) -> None:
-    await self._channel.send('dismiss')
+    await self._channel.send('dispose')
 
   async def jsonValue(self) -> Any:
     return parse_result(await self._channel.send('jsonValue'))
@@ -70,12 +73,19 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     raise Error('Maximum argument depth exceeded')
   if value == None:
     return dict(v='undefined')
-  if value == float('inf'):
-    return dict(v='Infinity')
-  if value == float('-inf'):
-    return dict(v='-Infinity')
-  if value == float('-0'):
-    return dict(v='-0')
+  if isinstance(value, float):
+    if value == float('inf'):
+      return dict(v='Infinity')
+    if value == float('-inf'):
+      return dict(v='-Infinity')
+    if value == float('-0'):
+      return dict(v='-0')
+    if value == float('-0'):
+      return dict(v='-0')
+    if math.isnan(value):
+      return dict(v='NaN')
+  if isinstance(value, datetime):
+    return dict(d=value.isoformat() + 'Z')
   if is_primitive_value(value):
     return value
 
@@ -107,12 +117,17 @@ def parse_value(value: Any) -> Any:
         return float('-inf')
       if v == '-0':
         return float('-0')
+      if v == 'NaN':
+        return float('nan')
       if v == 'undefined':
         return None
       return v
 
     if 'a' in value:
       return list(map(lambda e: parse_value(e), value['a']))
+
+    if 'd' in value:
+      return datetime.fromisoformat(value['d'][:-1])
 
     if 'o' in value:
       o = value['o']
