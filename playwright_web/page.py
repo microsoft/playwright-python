@@ -24,7 +24,7 @@ from playwright_web.file_chooser import FileChooser
 from playwright_web.input import Keyboard, Mouse
 from playwright_web.js_handle import JSHandle
 from playwright_web.frame import Frame
-from playwright_web.helper import parse_error, serialize_error, Error, FilePayload, FrameMatch, FunctionWithSource, Optional, PendingWaitEvent, RouteHandler, RouteHandlerEntry, SelectOption, TimeoutSettings, URLMatch, URLMatcher
+from playwright_web.helper import is_function_body, parse_error, serialize_error, Error, FilePayload, FrameMatch, FunctionWithSource, Optional, PendingWaitEvent, RouteHandler, RouteHandlerEntry, SelectOption, TimeoutSettings, URLMatch, URLMatcher
 from playwright_web.network import Request, Response, Route
 from playwright_web.worker import Worker
 from types import SimpleNamespace
@@ -195,17 +195,17 @@ class Page(ChannelOwner):
   async def dispatchEvent(self, selector: str, type: str, eventInit, Dict = None, options: Dict = dict()) -> None:
     return await self._main_frame.dispatchEvent(selector, type, eventInit, options)
 
-  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return await self._main_frame.evaluate(expression, is_function, arg)
+  async def evaluate(self, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    return await self._main_frame.evaluate(expression, arg, force_expr=force_expr)
 
-  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> JSHandle:
-    return await self._main_frame.evaluateHandle(expression, is_function, arg)
+  async def evaluateHandle(self, expression: str, arg: Any = None, force_expr: bool = False) -> JSHandle:
+    return await self._main_frame.evaluateHandle(expression, arg, force_expr=force_expr)
 
-  async def evalOnSelector(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return await self._main_frame.evalOnSelector(selector, expression, is_function, arg)
+  async def evalOnSelector(self, selector: str, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    return await self._main_frame.evalOnSelector(selector, expression, arg, force_expr=force_expr)
 
-  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return await self._main_frame.evalOnSelectorAll(selector, expression, is_function, arg)
+  async def evalOnSelectorAll(self, selector: str, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    return await self._main_frame.evalOnSelectorAll(selector, expression, arg, force_expr=force_expr)
 
   async def addScriptTag(self, options: Dict = dict()) -> ElementHandle:
     return await self._main_frame.addScriptTag(options)
@@ -365,8 +365,10 @@ class Page(ChannelOwner):
   async def waitForTimeout(self, timeout: int):
     await self._main_frame.waitForTimeout(timeout)
 
-  async def waitForFunction(self, expression: str, is_function: bool = False, arg: Any = None, options: Dict = dict()) -> JSHandle:
-    return await self._main_frame.waitForFunction(expression, is_function, arg, options)
+  async def waitForFunction(self, expression: str, arg: Any = None, force_expr: bool = False, options: Dict = dict()) -> JSHandle:
+    if not is_function_body(expression):
+      force_expr = True
+    return await self._main_frame.waitForFunction(expression, arg, options, force_expr=force_expr)
  
   def workers(self) -> List[Worker]:
     return self._workers.copy()

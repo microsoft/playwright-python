@@ -79,8 +79,8 @@ class ConnectionScope:
       self._parent._objects.pop(self._guid)
       self._parent._children.remove(self)
 
-  async def send_message_to_server(self,guid: str, method: str, params: Dict) -> Any:
-    return await self._connection._send_message_to_server(dict(guid=guid, method=method, params=params))
+  async def send_message_to_server(self, guid: str, method: str, params: Dict) -> Any:
+    return await self._connection._send_message_to_server(guid, method, params)
 
   def create_remote_object(self, type: str, guid: str, initializer: Dict) -> Any:
     result: ChannelOwner
@@ -113,11 +113,11 @@ class Connection:
     self._waiting_for_object[guid] = callback
     return await callback
 
-  async def _send_message_to_server(self, message: Dict) -> Any:
+  async def _send_message_to_server(self, guid: str, method: str, params: Dict) -> Any:
     self._last_id += 1
     id = self._last_id
-    converted = { **message, 'id': id }
-    self._transport.send(converted)
+    message = dict(id=id, guid=guid, method=method, params=self._replace_channels_with_guids(params))
+    self._transport.send(message)
     callback = self._loop.create_future()
     self._callbacks[id] = callback
     return await callback
@@ -149,8 +149,8 @@ class Connection:
       return payload
     if isinstance(payload, list):
       return list(map(lambda p: self._replace_channels_with_guids(p), payload))
-    if isinstance(payload, ChannelOwner):
-      return dict(guid=payload._object.guid)
+    if isinstance(payload, Channel):
+      return dict(guid=payload._guid)
     if isinstance(payload, dict):
       result = dict()
       for key in payload:

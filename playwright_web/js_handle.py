@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright_web.helper import ConsoleMessageLocation, Error
+from playwright_web.helper import ConsoleMessageLocation, Error, is_function_body
 from typing import Any, Dict, List, Optional
 
 class JSHandle(ChannelOwner):
@@ -26,11 +26,15 @@ class JSHandle(ChannelOwner):
   def _on_preview_updated(self, preview: str) -> None:
     self._preview = preview
 
-  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return parseResult(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
+  async def evaluate(self, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    if not is_function_body(expression):
+      force_expr = True
+    return parse_result(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
 
-  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> 'JSHandle':
-    return from_channel(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
+  async def evaluateHandle(self, expression: str, arg: Any = None, force_expr: bool = False) -> 'JSHandle':
+    if not is_function_body(expression):
+      force_expr = True
+    return from_channel(await self._channel.send('evaluateExpressionHandle', dict(expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
 
   async def getProperty(self, name: str) -> 'JSHandle':
     return from_channel(await self._channel.send('getProperty', dict(name=name)))
@@ -48,7 +52,7 @@ class JSHandle(ChannelOwner):
     await self._channel.send('dismiss')
 
   async def jsonValue(self) -> Any:
-    return parseResult(await self._channel.send('jsonValue'))
+    return parse_result(await self._channel.send('jsonValue'))
 
   def toString(self) -> str:
     return self._preview
@@ -57,10 +61,10 @@ class JSHandle(ChannelOwner):
 def is_primitive_value(value: Any):
   return isinstance(value, bool) or isinstance(value, int) or isinstance(value, float) or isinstance(value, str)
 
-def serializeValue(value: Any, handles: List[JSHandle], depth: int) -> Any:
+def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
   if isinstance(value, JSHandle):
     h = len(handles)
-    handles.add(value)
+    handles.append(value._channel)
     return dict(h=h)
   if depth > 100:
     raise Error('Maximum argument depth exceeded')
@@ -76,22 +80,22 @@ def serializeValue(value: Any, handles: List[JSHandle], depth: int) -> Any:
     return value
 
   if isinstance(value, list):
-    result = list(map(lambda a: serializeValue(a, handles, depth + 1), value))
+    result = list(map(lambda a: serialize_value(a, handles, depth + 1), value))
     return dict(a=result)
 
   if isinstance(value, dict):
     result = dict()
     for name in value:
-      result[name] = serializeValue(value[name], handles, depth + 1)
+      result[name] = serialize_value(value[name], handles, depth + 1)
     return dict(o=result)
   return dict(v='undefined')
 
-def serializeArgument(arg: Any) -> Any:
+def serialize_argument(arg: Any) -> Any:
   guids = list()
-  value = serializeValue(arg, guids, 0)
+  value = serialize_value(arg, guids, 0)
   return dict(value=value, guids=guids)
 
-def parseValue(value: Any) -> Any:
+def parse_value(value: Any) -> Any:
   if value == None:
     return None
   if isinstance(value, dict):
@@ -108,15 +112,15 @@ def parseValue(value: Any) -> Any:
       return v
 
     if 'a' in value:
-      return list(map(lambda e: parseValue(e), value['a']))
+      return list(map(lambda e: parse_value(e), value['a']))
 
     if 'o' in value:
       o = value['o']
       result = dict()
       for name in o:
-        result[name] = parseValue(o[name])
+        result[name] = parse_value(o[name])
       return result
   return value
 
-def parseResult(result: Any) -> Any:
-  return parseValue(result)
+def parse_result(result: Any) -> Any:
+  return parse_value(result)

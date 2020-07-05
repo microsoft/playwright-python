@@ -37,7 +37,7 @@ async def run():
     print('Page1 main frame url: %s' % page1.mainFrame.url)
     print('Page1 tile: %s' % await page1.title())
     print('Frames in page1: %d' % len(page1.frames))
-    # await page1.screenshot(dict(path='example.png'))
+    await page1.screenshot(dict(path='example.png'))
 
     print('\nCreating page2...')
     page2 = await context.newPage()

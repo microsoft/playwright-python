@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright_web.js_handle import JSHandle, parseResult, serializeArgument
+from playwright_web.js_handle import JSHandle, parse_result, serialize_argument
 from typing import Any, Dict
 
 class Worker(ChannelOwner):
@@ -25,8 +25,8 @@ class Worker(ChannelOwner):
   def url(self) -> str:
     return self._initializer['url']
 
-  async def evaluate(self, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return parseResult(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
+  async def evaluate(self, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    return parse_result(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
 
-  async def evaluateHandle(self, expression: str, is_function: bool = False, arg: Any = None) -> JSHandle:
-    return from_channel(await self._channel.send('evaluateExpressionHandle', dict(expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
+  async def evaluateHandle(self, expression: str, arg: Any = None, force_expr: bool = False) -> JSHandle:
+    return from_channel(await self._channel.send('evaluateExpressionHandle', dict(expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))

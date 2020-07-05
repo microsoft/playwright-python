@@ -15,7 +15,7 @@
 import base64
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel
 from playwright_web.helper import ConsoleMessageLocation, FilePayload, SelectOption
-from playwright_web.js_handle import parseResult, serializeArgument, JSHandle
+from playwright_web.js_handle import parse_result, serialize_argument, JSHandle
 from typing import Any, Dict, List, Optional, Union
 
 class ElementHandle(JSHandle):
@@ -99,11 +99,11 @@ class ElementHandle(JSHandle):
   async def querySelectorAll(self, selector: str) -> List['ElementHandle']:
     return list(map(from_nullable_channel, await self._channel.send('querySelectorAll', dict(selector=selector))))
 
-  async def evalOnSelector(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return parseResult(await self._channel.send('evalOnSelector', dict(selector=selector, expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
+  async def evalOnSelector(self, selector: str, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    return parse_result(await self._channel.send('evalOnSelector', dict(selector=selector, expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
 
-  async def evalOnSelectorAll(self, selector: str, expression: str, is_function: bool = False, arg: Any = None) -> Any:
-    return parseResult(await self._channel.send('evalOnSelectorAll', dict(selector=selector, expression=expression, isFunction=is_function, arg=serializeArgument(arg))))
+  async def evalOnSelectorAll(self, selector: str, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
+    return parse_result(await self._channel.send('evalOnSelectorAll', dict(selector=selector, expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
 
 
 ValuesToSelect = Union[str, ElementHandle, SelectOption, List[str], List[ElementHandle], List[SelectOption], None]

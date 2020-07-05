@@ -65,3 +65,7 @@ def serialize_error(ex: BaseException) -> ErrorPayload:
 
 def parse_error(error: ErrorPayload):
   return Error('%s\n%s' % (error['message'], error['stack']))
+
+def is_function_body(expression: str) -> bool:
+  expression = expression.strip()
+  return expression.startswith('function') or expression.startswith('async ') or '=>' in expression
