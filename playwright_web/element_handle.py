@@ -23,7 +23,7 @@ class ElementHandle(JSHandle):
   def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
     super().__init__(scope, guid, initializer)
 
-  async def asElement(self) -> Optional['ElementHandle']:
+  def asElement(self) -> Optional['ElementHandle']:
     return self
 
   async def ownerFrame(self) -> Optional['Frame']:

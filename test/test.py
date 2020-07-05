@@ -20,7 +20,22 @@ import unittest
 
 from playwright_web import chromium
 
-class TestSpec(unittest.TestCase):
+class ActualValue:
+    def __init__(self, test_case: unittest.TestCase, value):
+      self.test_case = test_case
+      self.value = value
+
+    def toBe(self, value):
+      self.test_case.assertEqual(self.value, value)
+
+    def toContain(self, value):
+      self.test_case.assertIn(value, self.value)
+
+    def toBeTruthy(self):
+      if not self.value:
+        self.test_case.assertTrue(False)
+
+class TestCase(unittest.TestCase):
   def __init__(self, methodName='runTest'):
     super().__init__(methodName)
     tests = list()
@@ -53,7 +68,10 @@ class TestSpec(unittest.TestCase):
     test_method.__name__ = 'test_' + name
     setattr(type(self), 'test_' + name, test_method)
 
-class PageTestSpec(TestSpec):
+  def expect(self, value: any) -> ActualValue:
+    return ActualValue(self, value)
+
+class PageTestCase(TestCase):
 
   @classmethod
   def setUpClass(cls):
@@ -73,7 +91,7 @@ class PageTestSpec(TestSpec):
 
   async def before_each(self):
     self.context = await self.browser.newContext()
-    self.page = await self.browser.newPage()
+    self.page = await self.context.newPage()
 
   async def after_each(self):
     await self.context.close()

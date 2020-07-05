@@ -107,7 +107,12 @@ class BrowserContext(ChannelOwner):
   async def setOffline(self, offline: bool) -> None:
     await self._channel.send('setOffline', dict(offline=offline))
 
-  async def addInitScript(self, source: str) -> None:
+  async def addInitScript(self, source: str = None, path: str = None) -> None:
+    if path:
+      with open(path, 'r') as file:
+        source = file.read()
+    if not isinstance(source, str):
+      raise Error('Either path or source parameter must be specified')
     await self._channel.send('addInitScript', dict(source=source))
 
   async def exposeBinding(self, name: str, binding: FunctionWithSource) -> None:

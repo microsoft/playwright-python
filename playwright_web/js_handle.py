@@ -48,7 +48,7 @@ class JSHandle(ChannelOwner):
       map[property['name']] = from_channel(property['value'])
     return map
 
-  async def asElement(self) -> Optional['ElementHandle']:
+  def asElement(self) -> Optional['ElementHandle']:
     return None
 
   async def dispose(self) -> None:

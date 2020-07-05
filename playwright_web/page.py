@@ -289,7 +289,12 @@ class Page(ChannelOwner):
   def viewportSize(self) -> Optional[Dict]:
     return self._viewport_size
 
-  async def addInitScript(self, source: str) -> None:
+  async def addInitScript(self, source: str = None, path: str = None) -> None:
+    if path:
+      with open(path, 'r') as file:
+        source = file.read()
+    if not isinstance(source, str):
+      raise Error('Either path or source parameter must be specified')
     await self._channel.send('addInitScript', dict(source=source))
 
   async def route(self, match: URLMatch, handler: RouteHandler) -> None:
