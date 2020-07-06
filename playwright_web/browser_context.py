@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel, from_nullable_channel
 from playwright_web.helper import Cookie, Error, FunctionWithSource, PendingWaitEvent, RouteHandler, RouteHandlerEntry, TimeoutSettings, URLMatch, URLMatcher
 from playwright_web.network import Request, Response, Route
@@ -55,7 +56,7 @@ class BrowserContext(ChannelOwner):
       if handler_entry.matcher.matches(request.url()):
         handler_entry.handler(route, request)
         return
-    route.continueRequest()
+    asyncio.ensure_future(route.continue_())
 
   def _on_binding(self, binding_call: BindingCall) -> None:
     func = self._bindings.get(binding_call._initializer['name'])

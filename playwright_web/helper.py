@@ -30,22 +30,22 @@ RouteHandlerEntry = Dict # TypedDict('RouteHandlerEntry', matcher=URLMatcher, ha
 SelectOption = Dict # TypedDict('SelectOption', value=Optional[str], label=Optional[str], index=Optional[str])
 ConsoleMessageLocation = Dict #TypedDict('ConsoleMessageLocation', url=Optional[str], lineNumber=Optional[int], columnNumber=Optional[int])
 FunctionWithSource = Callable[[Dict], Any]
-ContinueRequest = Dict # TypedDict('ContinueRequest', method=string, headers=Dict[str,str], postData=bytes)
-FulfillResponse = Dict # TypedDict('FulfillResponse', status=int, headers=Dict[str,str], body=str, isBase64=bool])
 ErrorPayload = Dict  # TypedDict('ErrorPayload', message=str, name=str, stack=str, value=Any)
 
 class URLMatcher:
   def __init__(self, match: URLMatch):
+    self._callback = None
+    self._regex_obj = None
     if isinstance(match, str):
-      regex = fnmatch.translate(match)
+      regex = '(?:http://|https://)' + fnmatch.translate(match)
       self._regex_obj = re.compile(regex)
     else:
-      self._reges_callback = match
+      self._callback = match
     self.match = match
 
   def matches(self, url: str) -> bool:
-    if self._reges_callback:
-      return self._reges_callback(url)
+    if self._callback:
+      return self._callback(url)
     return self._regex_obj.match(url)
 
 

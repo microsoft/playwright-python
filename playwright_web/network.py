@@ -15,7 +15,7 @@
 import base64
 import json
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel, from_channel
-from playwright_web.helper import ContinueRequest, Error, FulfillResponse
+from playwright_web.helper import Error
 from typing import Awaitable, Dict, List, Optional, Union
 
 class Request(ChannelOwner):
@@ -78,16 +78,33 @@ class Route(ChannelOwner):
   def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
     super().__init__(scope, guid, initializer)
 
+  @property
   def request(self) -> Request:
     return from_channel(self._initializer['request'])
 
   async def abort(self, error_code: str = 'failed') -> None:
     await self._channel.send('abort', dict(errorCode=error_code))
 
-  async def fulfill(self, response: FulfillResponse) -> None:
+  async def fulfill(self, status: int = 200, headers: Dict[str,str] = dict(), body: Union[str, bytes] = None) -> None:
+    response = dict(status=status, headers=headers)
+    if isinstance(body, str):
+      response['body'] = body
+      response['isBase64'] = False
+    elif isinstance(body, bytes):
+      response['body'] = base64.b64encode(body)
+      response['isBase64'] = True
     await self._channel.send('fulfill', dict(response=response))
 
-  async def continueRequest(self, overrides: ContinueRequest) -> None:
+  async def continue_(self, method: str = None, headers: Dict[str,str] = None, postData: Union[str, bytes] = None) -> None:
+    overrides = dict()
+    if method:
+      overrides['method'] = method
+    if headers:
+      overrides['headers'] = headers
+    if isinstance(postData, str):
+      overrides['postData'] = base64.b64decode(bytes(msg, 'utf-8'))
+    elif isinstance(postData, bytes):
+      overrides['postData'] = base64.b64decode(postData)
     await self._channel.send('continue', dict(overrides=overrides))
 
 

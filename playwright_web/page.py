@@ -121,8 +121,8 @@ class Page(ChannelOwner):
 
   def _on_route(self, route: Route, request: Request) -> None:
     for handler_entry in self._routes:
-      if handler_entry.matcher.matches(request.url()):
-        handler_entry.handler(route, request)
+      if handler_entry['matcher'].matches(request.url):
+        handler_entry['handler'](route, request)
         return
     self._browser_context._on_route(route, request)
 
@@ -169,7 +169,12 @@ class Page(ChannelOwner):
 
   def frame(self, name: str = None, url: FrameMatch = None) -> Optional[Frame]:
     matcher = URLMatcher(url) if url else None
-    return next(filter(lambda f: f.name() == name if name else matcher.matches(f.url()), self._frames))
+    for frame in self._frames:
+      if name and frame.name == name:
+        return frame
+      if url and matcher.matches(frame.url):
+        return frame
+    return None
 
   @property
   def frames(self) -> List[Frame]:
@@ -193,7 +198,7 @@ class Page(ChannelOwner):
       timeout: int = None,
       state: str = None, # Literal['attached', 'detached', 'visible', 'hidden'] = None
     ) -> Optional[ElementHandle]:
-    return await self._main_frame.waitForSelector(selector, **locals_to_params(locals()))
+    return await self._main_frame.waitForSelector(**locals_to_params(locals()))
 
   async def dispatchEvent(self,
       selector: str,
@@ -270,7 +275,7 @@ class Page(ChannelOwner):
   async def waitForLoadState(self,
       state: str = 'load',
       timeout: int = None) -> None:
-    return await self._main_frame.waitForLoadState(state, **locals_to_params(locals()))
+    return await self._main_frame.waitForLoadState(**locals_to_params(locals()))
 
   async def waitForNavigation(self,
       timeout: int = None,
@@ -383,7 +388,7 @@ class Page(ChannelOwner):
       timeout: int = None,
       force: bool = None,
       noWaitAfter: bool = None) -> None:
-    return await self._main_frame.click(selector, **locals_to_params(locals()))
+    return await self._main_frame.click(**locals_to_params(locals()))
 
   async def dblclick(self,
       selector: str,
