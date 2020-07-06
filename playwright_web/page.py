@@ -189,10 +189,10 @@ class Page(ChannelOwner):
   async def querySelectorAll(self, selector: str) -> List[ElementHandle]:
     return await self._main_frame.querySelectorAll(selector)
 
-  async def waitForSelector(self, selector: str, options: Dict = dict()) -> Optional[ElementHandle]:
+  async def waitForSelector(self, selector: str, **options) -> Optional[ElementHandle]:
     return await self._main_frame.waitForSelector(selector, options)
 
-  async def dispatchEvent(self, selector: str, type: str, eventInit, Dict = None, options: Dict = dict()) -> None:
+  async def dispatchEvent(self, selector: str, type: str, eventInit, Dict = None, **options) -> None:
     return await self._main_frame.dispatchEvent(selector, type, eventInit, options)
 
   async def evaluate(self, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
@@ -207,10 +207,10 @@ class Page(ChannelOwner):
   async def evalOnSelectorAll(self, selector: str, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
     return await self._main_frame.evalOnSelectorAll(selector, expression, arg, force_expr=force_expr)
 
-  async def addScriptTag(self, options: Dict = dict()) -> ElementHandle:
+  async def addScriptTag(self, **options) -> ElementHandle:
     return await self._main_frame.addScriptTag(options)
 
-  async def addStyleTag(self, options: Dict = dict()) -> ElementHandle:
+  async def addStyleTag(self, **options) -> ElementHandle:
     return await self._main_frame.addStyleTag(options)
 
   async def exposeFunction(self, name: str, binding: Callable[..., Any]) -> None:
@@ -234,38 +234,38 @@ class Page(ChannelOwner):
   async def content(self) -> str:
     return await self._main_frame.content()
 
-  async def setContent(self, html: str, options: Dict = dict()) -> None:
-    return await self._main_frame.setContent(html, options)
+  async def setContent(self, html: str, **options) -> None:
+    return await self._main_frame.setContent(html, **options)
 
-  async def goto(self, url: str, options: Dict = dict()) -> Optional[Response]:
-    return await self._main_frame.goto(url, options)
+  async def goto(self, url: str, **options) -> Optional[Response]:
+    return await self._main_frame.goto(url, **options)
 
-  async def reload(self, options: Dict = dict()) -> Optional[Response]:
-    return from_nullable_channel(await self._channel.send('reload', dict(options=options)))
+  async def reload(self, **options) -> Optional[Response]:
+    return from_nullable_channel(await self._channel.send('reload', options))
 
-  async def waitForLoadState(self, state: str = 'load', options: Dict = dict()) -> None:
-    return await self._main_frame.waitForLoadState(state, options)
+  async def waitForLoadState(self, state: str = 'load', **options) -> None:
+    return await self._main_frame.waitForLoadState(state, **options)
 
-  async def waitForNavigation(self, options: Dict = dict()) -> Optional[Response]:
-    return await self._main_frame.waitForNavigation(options)
+  async def waitForNavigation(self, **options) -> Optional[Response]:
+    return await self._main_frame.waitForNavigation(**options)
 
-  async def waitForRequest(self, urlOrPredicate: Union[str, Callable[[Request], bool]], options: Dict = dict()) -> Optional[Request]:
+  async def waitForRequest(self, urlOrPredicate: Union[str, Callable[[Request], bool]], **options) -> Optional[Request]:
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
     def predicate(request: Request):
       if matcher:
         return matcher.matches(request.url())
       return urlOrPredicate(request)
-    return self.waitForEvent(Page.Events.Request, dict(predicate=predicate, timeout=options.timeout))
+    return self.waitForEvent(Page.Events.Request, **options, predicate=predicate)
 
-  async def waitForResponse(self, urlOrPredicate: Union[str, Callable[[Request], bool]], options: Dict = dict()) -> Optional[Response]:
+  async def waitForResponse(self, urlOrPredicate: Union[str, Callable[[Request], bool]], **options) -> Optional[Response]:
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
     def predicate(request: Request):    
       if matcher:
         return matcher.matches(request.url())
       return urlOrPredicate(request)
-    return await self.waitForEvent(Page.Events.Response, dict(predicate=predicate, timeout=options.timeout))
+    return await self.waitForEvent(Page.Events.Response, **options, predicate=predicate)
 
-  async def waitForEvent(self, event: str, options: Dict = dict()) -> Any:
+  async def waitForEvent(self, event: str, **options) -> Any:
     future = self._scope._loop.create_future()
     pending_event = PendingWaitEvent(event, future)
     self._pending_wait_for_events.append(pending_event)
@@ -273,14 +273,14 @@ class Page(ChannelOwner):
     self._pending_wait_for_events.remove(pending_event)
     return result
 
-  async def goBack(self, options: Dict = dict()) -> Optional[Response]:
-    return from_nullable_channel(await self._channel.send('goBack', dict(options=options)))
+  async def goBack(self, **options) -> Optional[Response]:
+    return from_nullable_channel(await self._channel.send('goBack', options))
 
-  async def goForward(self, options: Dict = dict()) -> Optional[Response]:
-    return from_nullable_channel(await self._channel.send('goForward', dict(options=options)))
+  async def goForward(self, **options) -> Optional[Response]:
+    return from_nullable_channel(await self._channel.send('goForward', options))
 
-  async def emulateMedia(self, options: Dict = dict()) -> None:
-    await self._channel.send('emulateMedia', dict(options=options))
+  async def emulateMedia(self, **options) -> None:
+    await self._channel.send('emulateMedia', options)
 
   async def setViewportSize(self, viewport_size: Dict) -> None:
     self._viewport_size = viewport_size
@@ -307,73 +307,73 @@ class Page(ChannelOwner):
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 
-  async def screenshot(self, options: Dict = dict()) -> bytes:
-    binary = await self._channel.send('screenshot', dict(options=options))
+  async def screenshot(self, **options) -> bytes:
+    binary = await self._channel.send('screenshot', options)
     return base64.b64decode(binary)
 
   async def title(self) -> str:
     return await self._main_frame.title()
 
-  async def close(self, options: Dict = dict()) -> None:
-    await self._channel.send('close', dict(options=options))
+  async def close(self, **options) -> None:
+    await self._channel.send('close', options)
     if self._owned_context:
       await self._owned_context.close()
 
   def isClosed(self) -> bool:
     return self._is_closed
 
-  async def click(self, selector: str, options: Dict = dict()) -> None:
-    return await self._main_frame.click(selector, options)
+  async def click(self, selector: str, **options) -> None:
+    return await self._main_frame.click(selector, **options)
 
-  async def dblclick(self, selector: str, options: Dict = dict()) -> None:
-    return await self._main_frame.dblclick(selector, options)
+  async def dblclick(self, selector: str, **options) -> None:
+    return await self._main_frame.dblclick(selector, **options)
 
-  async def fill(self, selector: str, value: str, options: Dict = dict()) -> None:
-    return await self._main_frame.fill(selector, value, options)
+  async def fill(self, selector: str, value: str, **options) -> None:
+    return await self._main_frame.fill(selector, value, **options)
 
-  async def focus(self, selector: str, options: Dict = dict()) -> None:
-    return await self._main_frame.focus(selector, options)
+  async def focus(self, selector: str, **options) -> None:
+    return await self._main_frame.focus(selector, **options)
 
-  async def textContent(self, selector: str, options: Dict = dict()) -> str:
-    return await self._main_frame.textContent(selector, options)
+  async def textContent(self, selector: str, **options) -> str:
+    return await self._main_frame.textContent(selector, **options)
 
-  async def innerText(self, selector: str, options: Dict = dict()) -> str:
-    return await self._main_frame.innerText(selector, options)
+  async def innerText(self, selector: str, **options) -> str:
+    return await self._main_frame.innerText(selector, **options)
 
-  async def innerHTML(self, selector: str, options: Dict = dict()) -> str:
-    return await self._main_frame.innerHTML(selector, options)
+  async def innerHTML(self, selector: str, **options) -> str:
+    return await self._main_frame.innerHTML(selector, **options)
 
-  async def getAttribute(self, selector: str, name: str, options: Dict = dict()) -> str:
-    return await self._main_frame.getAttribute(selector, name, options)
+  async def getAttribute(self, selector: str, name: str, **options) -> str:
+    return await self._main_frame.getAttribute(selector, name, **options)
 
-  async def hover(self, selector: str, options: Dict = dict()) -> None:
-    return await self._main_frame.hover(selector, options)
+  async def hover(self, selector: str, **options) -> None:
+    return await self._main_frame.hover(selector, **options)
 
-  async def selectOption(self, selector: str, values: ValuesToSelect, options: Dict = dict()) -> None:
-    return await self._main_frame.selectOption(selector, values, options)
+  async def selectOption(self, selector: str, values: ValuesToSelect, **options) -> None:
+    return await self._main_frame.selectOption(selector, values, **options)
 
-  async def setInputFiles(self, selector: str, files: Union[str, FilePayload, List[str], List[FilePayload]], options: Dict = dict()) -> None:
-    return await self._main_frame.setInputFiles(selector, files, options)
+  async def setInputFiles(self, selector: str, files: Union[str, FilePayload, List[str], List[FilePayload]], **options) -> None:
+    return await self._main_frame.setInputFiles(selector, files, **options)
 
-  async def type(self, selector: str, text: str, options: Dict = dict()) -> None:
-    return await self._main_frame.type(selector, text, options)
+  async def type(self, selector: str, text: str, **options) -> None:
+    return await self._main_frame.type(selector, text, **options)
 
-  async def press(self, selector: str, key: str, options: Dict = dict()) -> None:
-    return await self._main_frame.press(selector, key, options)
+  async def press(self, selector: str, key: str, **options) -> None:
+    return await self._main_frame.press(selector, key, **options)
 
-  async def check(self, selector: str, options: Dict = dict()) -> None:
-    return await self._main_frame.check(selector, options)
+  async def check(self, selector: str, **options) -> None:
+    return await self._main_frame.check(selector, **options)
 
-  async def uncheck(self, selector: str, options: Dict = dict()) -> None:
-    return await self._main_frame.uncheck(selector, options)
+  async def uncheck(self, selector: str, **options) -> None:
+    return await self._main_frame.uncheck(selector, **options)
 
   async def waitForTimeout(self, timeout: int):
     await self._main_frame.waitForTimeout(timeout)
 
-  async def waitForFunction(self, expression: str, arg: Any = None, force_expr: bool = False, options: Dict = dict()) -> JSHandle:
+  async def waitForFunction(self, expression: str, arg: Any = None, force_expr: bool = False, **options) -> JSHandle:
     if not is_function_body(expression):
       force_expr = True
-    return await self._main_frame.waitForFunction(expression, arg, options, force_expr=force_expr)
+    return await self._main_frame.waitForFunction(expression, arg, force_expr=force_expr, **options)
  
   def workers(self) -> List[Worker]:
     return self._workers.copy()
@@ -394,8 +394,8 @@ class Page(ChannelOwner):
   #   return self;
   # }
 
-  async def pdf(self, options: Dict = dict()) -> bytes:
-    binary = await self._channel.send('pdf', dict(options=options))
+  async def pdf(self, **options) -> bytes:
+    binary = await self._channel.send('pdf', options)
     return base64.b64decode(binary)
 
 class BindingCall(ChannelOwner):

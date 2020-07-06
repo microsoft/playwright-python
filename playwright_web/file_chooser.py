@@ -34,5 +34,5 @@ class FileChooser():
   def isMultiple(self) -> bool:
     return self._is_multiple
 
-  async def setFiles(self, files: Union[str, FilePayload, List[str], List[FilePayload]], options: Dict = dict()) -> None:
+  async def setFiles(self, files: Union[str, FilePayload, List[str], List[FilePayload]], **options) -> None:
     await self._element_handle.setInputFiles(files, options)

@@ -92,8 +92,8 @@ class BrowserContext(ChannelOwner):
   async def clearCookies(self) -> None:
     await self._channel.send('clearCookies')
 
-  async def grantPermissions(self, permissions: List[str], options: Optional[Dict]) -> None:
-    await self._channel.send('grantPermissions', dict(permissions=permissions, options=options))
+  async def grantPermissions(self, permissions: List[str], origin: str = None) -> None:
+    await self._channel.send('grantPermissions', dict(permissions=permissions, origin=origin))
 
   async def clearPermissions(self) -> None:
     await self._channel.send('clearPermissions')
@@ -137,7 +137,8 @@ class BrowserContext(ChannelOwner):
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 
-  async def waitForEvent(self, event: str, options: Dict = dict()) -> None:
+  async def waitForEvent(self, event: str, **options) -> None:
+    # TODO: implement timeout race
     future = self._scope._loop.create_future()
     pending_event = PendingWaitEvent(event, future)
     self._pending_wait_for_events.append(pending_event)

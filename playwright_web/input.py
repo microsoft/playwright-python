@@ -28,29 +28,29 @@ class Keyboard:
   async def insertText(self, text: str) -> None:
     await self._channel.send('keyboardInsertText', dict(text=text))
 
-  async def type(self, text: str, options: Dict = dict()) -> None:
-    await self._channel.send('keyboardType', dict(text=text, options=options))
+  async def type(self, text: str, **options) -> None:
+    await self._channel.send('keyboardType', dict(text=text, **options))
 
-  async def press(self, key: str, options: Dict = dict()) -> None:
-    await self._channel.send('keyboardPress', dict(key=key, options=options))
+  async def press(self, key: str, **options) -> None:
+    await self._channel.send('keyboardPress', dict(key=key, **options))
 
 class Mouse:
   def __init__(self, channel: Channel) -> None:
     self._channel = channel
 
-  async def move(self, x: float, y: float, options: Dict = dict()) -> None:
-    await self._channel.send('mouseMove', dict(x=x, y=y, options=options))
+  async def move(self, x: float, y: float, **options) -> None:
+    await self._channel.send('mouseMove', dict(x=x, y=y, **options))
 
-  async def down(self, options: Dict = dict()) -> None:
-    await self._channel.send('mouseDown', dict(options=options))
+  async def down(self, **options) -> None:
+    await self._channel.send('mouseDown', options)
 
-  async def up(self, options: Dict = dict()) -> None:
-    await self._channel.send('mouseUp', dict(options=options))
+  async def up(self, **options) -> None:
+    await self._channel.send('mouseUp', options)
 
-  async def click(self, x: float, y: float, options: Dict = dict()) -> None:
-    await self._channel.send('mouseClick', dict(x=x, y=y, options=options))
+  async def click(self, x: float, y: float, **options) -> None:
+    await self._channel.send('mouseClick', dict(x=x, y=y, **options))
 
-  async def dblclick(self, x: float, y: float, options: Dict = dict()) -> None:
+  async def dblclick(self, x: float, y: float, **options) -> None:
     if not options:
       options = dict()
-    await self.click(x, y, { **options, 'clickCount': 2 })
+    await self.click(x, y, **options, clickCount=2)

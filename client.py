@@ -18,10 +18,10 @@ from playwright_web import webkit
 
 async def run():
     print('Launching browser...')
-    browser = await webkit.launch(dict(headless=False))
+    browser = await webkit.launch(headless=False)
     print('Contexts in browser: %d' % len(browser.contexts))
     print('Creating context...')
-    context = await browser.newContext(dict(viewport=None))
+    context = await browser.newContext(viewport=None)
     print('Contexts in browser: %d' % len(browser.contexts))
     print('Pages in context: %d' % len(context.pages))
 
@@ -37,7 +37,7 @@ async def run():
     print('Page1 main frame url: %s' % page1.mainFrame.url)
     print('Page1 tile: %s' % await page1.title())
     print('Frames in page1: %d' % len(page1.frames))
-    await page1.screenshot(dict(path='example.png'))
+    await page1.screenshot(path='example.png')
 
     print('\nCreating page2...')
     page2 = await context.newPage()

@@ -47,50 +47,50 @@ class ElementHandle(JSHandle):
   async def dispatchEvent(self, type: str, eventInit: Dict = None) -> None:
     await self._channel.send('dispatchEvent', dict(type=type, eventInit=eventInit))
 
-  async def scrollIntoViewIfNeeded(self, options: Dict = dict()) -> None:
-    await self._channel.send('scrollIntoViewIfNeeded', dict(options=options))
+  async def scrollIntoViewIfNeeded(self, **options) -> None:
+    await self._channel.send('scrollIntoViewIfNeeded', options)
 
-  async def hover(self, options: Dict = dict()) -> None:
-    await self._channel.send('hover', dict(options=options))
+  async def hover(self, **options) -> None:
+    await self._channel.send('hover', options)
 
-  async def click(self, options: Dict = dict()) -> None:
-    await self._channel.send('click', dict(options=options))
+  async def click(self, **options) -> None:
+    await self._channel.send('click', options)
 
-  async def dblclick(self, options: Dict = dict()) -> None:
-    await self._channel.send('dblclick', dict(options=options))
+  async def dblclick(self, **options) -> None:
+    await self._channel.send('dblclick', options)
 
-  async def selectOption(self, values: 'ValuesToSelect', options: Dict = dict()) -> None:
-    await self._channel.send('selectOption', dict(values=convertSelectOptionValues(values), options=options))
+  async def selectOption(self, values: 'ValuesToSelect', **options) -> None:
+    await self._channel.send('selectOption', dict(values=convertSelectOptionValues(values), **options))
 
-  async def fill(self, value: str, options: Dict = dict()) -> None:
-    await self._channel.send('dblclick', dict(value=value, options=options))
+  async def fill(self, value: str, **options) -> None:
+    await self._channel.send('dblclick', dict(value=value, **options))
 
-  async def selectText(self, options: Dict = dict()) -> None:
-    await self._channel.send('selectText', dict(options=options))
+  async def selectText(self, **options) -> None:
+    await self._channel.send('selectText', options)
 
-  async def setInputFiles(self, files: Union[str, FilePayload, List[str], List[FilePayload]], options: Dict = dict()) -> None:
-    await self._channel.send('setInputFiles', dict(files=files, options=options))
+  async def setInputFiles(self, files: Union[str, FilePayload, List[str], List[FilePayload]], **options) -> None:
+    await self._channel.send('setInputFiles', dict(files=files, **options))
 
   async def focus(self) -> None:
     await self._channel.send('focus')
 
-  async def type(self, text: str, options: Dict = dict()) -> None:
-    await self._channel.send('text', dict(text=text, options=options))
+  async def type(self, text: str, **options) -> None:
+    await self._channel.send('text', dict(text=text, **options))
 
-  async def press(self, key: str, options: Dict = dict()) -> None:
-    await self._channel.send('press', dict(key=key, options=options))
+  async def press(self, key: str, **options) -> None:
+    await self._channel.send('press', dict(key=key, **options))
 
-  async def check(self, options: Dict = dict()) -> None:
-    await self._channel.send('check', dict(options=options))
+  async def check(self, **options) -> None:
+    await self._channel.send('check', options)
 
-  async def uncheck(self, options: Dict = dict()) -> None:
-    await self._channel.send('uncheck', dict(options=options))
+  async def uncheck(self, **options) -> None:
+    await self._channel.send('uncheck', options)
 
   async def boundingBox(self) -> Dict[str, float]:
     return await self._channel.send('boundingBox')
 
-  async def screenshot(self, options: Dict = dict()) -> bytes:
-    binary = await self._channel.send('screenshot', dict(options=options))
+  async def screenshot(self, **options) -> bytes:
+    binary = await self._channel.send('screenshot', options)
     return base64.b64decode(binary)
 
   async def querySelector(self, selector: str) -> Optional['ElementHandle']:

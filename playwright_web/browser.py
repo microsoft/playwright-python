@@ -46,15 +46,15 @@ class Browser(ChannelOwner):
   def isConnected(self) -> bool:
     return self._is_connected
 
-  async def newContext(self, options: Dict = dict()) -> BrowserContext:
-    channel = await self._channel.send('newContext', dict(options=options))
+  async def newContext(self, **options) -> BrowserContext:
+    channel = await self._channel.send('newContext', options)
     context = from_channel(channel)
     self._contexts.append(context)
     context._browser = self
     return context
 
-  async def newPage(self, options: Dict = dict()) -> Page:
-    context = await self.newContext(options)
+  async def newPage(self, **options) -> Page:
+    context = await self.newContext(**options)
     page = await context.newPage()
     page._owned_context = context
     context._owner_page = page

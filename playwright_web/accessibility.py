@@ -20,6 +20,6 @@ class Accessibility:
   def __init__(self, channel: Channel) -> None:
     self._channel = channel
 
-  async def snapshot(self, options: Dict = dict()) -> Dict:
+  async def snapshot(self, **options) -> Dict:
     root = options['root']._channel if 'root' in options else None
-    return await self._channel.send('snapshot', dict(options=options, root=root))
+    return await self._channel.send('snapshot', dict(root=root, **options))

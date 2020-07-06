@@ -30,14 +30,14 @@ class BrowserType(ChannelOwner):
   def executablePath(self) -> str:
     return self._initializer['executablePath']
 
-  async def launch(self, options: Dict = dict()) -> Browser:
-    return from_channel(await self._channel.send('launch', dict(options=options)))
+  async def launch(self, **options) -> Browser:
+    return from_channel(await self._channel.send('launch', options))
 
-  async def launchServer(self, options: Dict = dict()) -> Browser:
-    return from_channel(await self._channel.send('launchServer', dict(options=options)))
+  async def launchServer(self, **options) -> Browser:
+    return from_channel(await self._channel.send('launchServer', options))
 
-  async def launchPersistentContext(self, user_data_dir: str, options: Dict = dict()) -> BrowserContext:
-    return from_channel(await self._channel.send('launchPersistentContext', dict(userDataDir=user_data_dir, options=options)))
+  async def launchPersistentContext(self, user_data_dir: str, **options) -> BrowserContext:
+    return from_channel(await self._channel.send('launchPersistentContext', dict(userDataDir=user_data_dir, **options)))
 
-  async def connect(self, options: Dict = dict()) -> Browser:
-    return from_channel(await self._channel.send('connect', dict(options=options)))
+  async def connect(self, **options) -> Browser:
+    return from_channel(await self._channel.send('connect', options))
