@@ -40,9 +40,9 @@ class Playwright:
     elif platform == 'win32':
       driver_name = 'driver-win.exe'
     driver_executable = os.path.join(package_path, driver_name)
+    archive_name = os.path.join(package_path, 'drivers', driver_name + '.gz')
 
-    if not os.path.exists(driver_executable):
-      archive_name = os.path.join(package_path, 'drivers', driver_name + '.gz')
+    if not os.path.exists(driver_executable) or os.path.getmtime(driver_executable) < os.path.getmtime(archive_name):
       with gzip.open(archive_name, 'rb') as f_in, open(driver_executable, 'wb') as f_out:
         shutil.copyfileobj(f_in, f_out)
 
