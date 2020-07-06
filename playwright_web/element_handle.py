@@ -14,7 +14,7 @@
 
 import base64
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel
-from playwright_web.helper import ConsoleMessageLocation, FilePayload, SelectOption
+from playwright_web.helper import ConsoleMessageLocation, FilePayload, SelectOption, locals_to_params
 from playwright_web.js_handle import parse_result, serialize_argument, JSHandle
 from typing import Any, Dict, List, Optional, Union
 
@@ -47,50 +47,99 @@ class ElementHandle(JSHandle):
   async def dispatchEvent(self, type: str, eventInit: Dict = None) -> None:
     await self._channel.send('dispatchEvent', dict(type=type, eventInit=eventInit))
 
-  async def scrollIntoViewIfNeeded(self, **options) -> None:
-    await self._channel.send('scrollIntoViewIfNeeded', options)
+  async def scrollIntoViewIfNeeded(self, timeout: int = None) -> None:
+    await self._channel.send('scrollIntoViewIfNeeded', locals_to_params(locals()))
 
-  async def hover(self, **options) -> None:
-    await self._channel.send('hover', options)
+  async def hover(self,
+      modifiers: List[str] = None, # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+      position: Dict = None,
+      timeout: int = None,
+      force: bool = None) -> None:
+    await self._channel.send('hover', locals_to_params(locals()))
 
-  async def click(self, **options) -> None:
-    await self._channel.send('click', options)
+  async def click(self,
+      modifiers: List[str] = None, # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+      position: Dict = None,
+      delay: int = None,
+      button: str = None, # Literal['left', 'right', 'middle'] = None,
+      clickCount: int = None,
+      timeout: int = None,
+      force: bool = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('click', locals_to_params(locals()))
 
-  async def dblclick(self, **options) -> None:
-    await self._channel.send('dblclick', options)
+  async def dblclick(self,
+      modifiers: List[str] = None, # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+      position: Dict = None,
+      delay: int = None,
+      button: str = None, # Literal['left', 'right', 'middle'] = None,
+      timeout: int = None,
+      force: bool = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('dblclick', locals_to_params(locals()))
 
-  async def selectOption(self, values: 'ValuesToSelect', **options) -> None:
-    await self._channel.send('selectOption', dict(values=convertSelectOptionValues(values), **options))
+  async def selectOption(self,
+      values: 'ValuesToSelect',
+      timeout: int = None,
+      noWaitAfter: bool = None) -> None:
+    params = locals_to_params(locals())
+    params['values'] = convertSelectOptionValues(values)
+    await self._channel.send('selectOption', params)
 
-  async def fill(self, value: str, **options) -> None:
-    await self._channel.send('dblclick', dict(value=value, **options))
+  async def fill(self,
+      value: str,
+      timeout: int = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('dblclick', locals_to_params(locals()))
 
-  async def selectText(self, **options) -> None:
-    await self._channel.send('selectText', options)
+  async def selectText(self, timeout: int = None) -> None:
+    await self._channel.send('selectText', locals_to_params(locals()))
 
-  async def setInputFiles(self, files: Union[str, FilePayload, List[str], List[FilePayload]], **options) -> None:
-    await self._channel.send('setInputFiles', dict(files=files, **options))
+  async def setInputFiles(self,
+      files: Union[str, FilePayload, List[str], List[FilePayload]],
+      timeout: int = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('setInputFiles', locals_to_params(locals()))
 
   async def focus(self) -> None:
     await self._channel.send('focus')
 
-  async def type(self, text: str, **options) -> None:
-    await self._channel.send('text', dict(text=text, **options))
+  async def type(self,
+      text: str,
+      delay: int = None,
+      timeout: int = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('text', locals_to_params(locals()))
 
-  async def press(self, key: str, **options) -> None:
-    await self._channel.send('press', dict(key=key, **options))
+  async def press(self,
+      key: str,
+      delay: int = None,
+      timeout: int = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('press', locals_to_params(locals()))
 
-  async def check(self, **options) -> None:
-    await self._channel.send('check', options)
+  async def check(self,
+      timeout: int = None,
+      force: bool = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('check', locals_to_params(locals()))
 
-  async def uncheck(self, **options) -> None:
-    await self._channel.send('uncheck', options)
+  async def uncheck(self,
+      timeout: int = None,
+      force: bool = None,
+      noWaitAfter: bool = None) -> None:
+    await self._channel.send('uncheck', locals_to_params(locals()))
 
   async def boundingBox(self) -> Dict[str, float]:
     return await self._channel.send('boundingBox')
 
-  async def screenshot(self, **options) -> bytes:
-    binary = await self._channel.send('screenshot', options)
+  async def screenshot(self,
+      timeout: int = None,
+      type: str = None, # Literal['png', 'jpeg'] = None,
+      path: str = None,
+      quality: int = None,
+      omitBackground: bool = None) -> bytes:
+    binary = await self._channel.send('screenshot', locals_to_params(locals()))
     return base64.b64decode(binary)
 
   async def querySelector(self, selector: str) -> Optional['ElementHandle']:

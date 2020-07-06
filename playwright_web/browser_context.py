@@ -137,7 +137,7 @@ class BrowserContext(ChannelOwner):
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 
-  async def waitForEvent(self, event: str, **options) -> None:
+  async def waitForEvent(self, event: str) -> None:
     # TODO: implement timeout race
     future = self._scope._loop.create_future()
     pending_event = PendingWaitEvent(event, future)

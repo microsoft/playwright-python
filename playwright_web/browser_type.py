@@ -15,7 +15,8 @@
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
 from playwright_web.browser import Browser
 from playwright_web.browser_context import BrowserContext
-from typing import Awaitable, Dict
+from playwright_web.helper import locals_to_params
+from typing import Awaitable, Dict, List
 
 class BrowserType(ChannelOwner):
 
@@ -30,14 +31,75 @@ class BrowserType(ChannelOwner):
   def executablePath(self) -> str:
     return self._initializer['executablePath']
 
-  async def launch(self, **options) -> Browser:
-    return from_channel(await self._channel.send('launch', options))
+  async def launch(self,
+      executablePath: str = None,
+      args: List[str] = None,
+      ignoreDefaultArgs: List[str] = None,
+      handleSIGINT: bool = None,
+      handleSIGTERM: bool = None,
+      handleSIGHUP: bool = None,
+      timeout: int = None,
+      env: Dict = None,
+      headless: bool = None,
+      devtools: bool = None,
+      proxy: Dict = None,
+      downloadsPath: str = None,
+      slowMo: int = None) -> Browser:
+    return from_channel(await self._channel.send('launch', locals_to_params(locals())))
 
-  async def launchServer(self, **options) -> Browser:
-    return from_channel(await self._channel.send('launchServer', options))
+  async def launchServer(self,
+      executablePath: str = None,
+      args: List[str] = None,
+      ignoreDefaultArgs: List[str] = None,
+      handleSIGINT: bool = None,
+      handleSIGTERM: bool = None,
+      handleSIGHUP: bool = None,
+      timeout: int = None,
+      env: Dict = None,
+      headless: bool = None,
+      devtools: bool = None,
+      proxy: Dict = None,
+      downloadsPath: str = None,
+      port: int = None) -> Browser:
+    return from_channel(await self._channel.send('launchServer', locals_to_params(locals())))
 
-  async def launchPersistentContext(self, user_data_dir: str, **options) -> BrowserContext:
-    return from_channel(await self._channel.send('launchPersistentContext', dict(userDataDir=user_data_dir, **options)))
+  async def launchPersistentContext(self,
+      userDataDir: str,
+      executablePath: str = None,
+      args: List[str] = None,
+      ignoreDefaultArgs: List[str] = None,
+      handleSIGINT: bool = None,
+      handleSIGTERM: bool = None,
+      handleSIGHUP: bool = None,
+      timeout: int = None,
+      env: Dict = None,
+      headless: bool = None,
+      devtools: bool = None,
+      proxy: Dict = None,
+      downloadsPath: str = None,
+      slowMo: int = None,
+      viewport: Dict = None,
+      ignoreHTTPSErrors: bool = None,
+      javaScriptEnabled: bool = None,
+      bypassCSP: bool = None,
+      userAgent: str = None,
+      locale: str = None,
+      timezoneId: str = None,
+      geolocation: Dict = None,
+      permissions: List[str] = None,
+      extraHTTPHeaders: Dict[str, str] = None,
+      offline: bool = None,
+      httpCredentials: Dict = None,
+      deviceScaleFactor: int = None,
+      isMobile: bool = None,
+      hasTouch: bool = None,
+      colorScheme: str = None, #Literal['dark', 'light', 'no-preference'] = None,
+      acceptDownloads: bool = None) -> BrowserContext:
+    return from_channel(await self._channel.send('launchPersistentContext', locals_to_params(locals())))
 
-  async def connect(self, **options) -> Browser:
-    return from_channel(await self._channel.send('connect', options))
+  async def connect(
+      self,
+      wsEndpoint: str = None,
+      slowMo: int = None,
+      timeout: int = None) -> Browser:
+    return from_channel(await self._channel.send('connect', locals_to_params(locals())))

@@ -14,6 +14,7 @@
 
 from playwright_web.browser_context import BrowserContext
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
+from playwright_web.helper import locals_to_params
 from playwright_web.page import Page
 from types import SimpleNamespace
 from typing import Dict, List, Optional
@@ -46,15 +47,51 @@ class Browser(ChannelOwner):
   def isConnected(self) -> bool:
     return self._is_connected
 
-  async def newContext(self, **options) -> BrowserContext:
-    channel = await self._channel.send('newContext', options)
+  async def newContext(self,
+      viewport: Dict = None,
+      ignoreHTTPSErrors: bool = None,
+      javaScriptEnabled: bool = None,
+      bypassCSP: bool = None,
+      userAgent: str = None,
+      locale: str = None,
+      timezoneId: str = None,
+      geolocation: Dict = None,
+      permissions: List[str] = None,
+      extraHTTPHeaders: Dict[str, str] = None,
+      offline: bool = None,
+      httpCredentials: Dict = None,
+      deviceScaleFactor: int = None,
+      isMobile: bool = None,
+      hasTouch: bool = None,
+      colorScheme: str = None, # Literal['dark', 'light', 'no-preference'] = None,
+      acceptDownloads: bool = None) -> BrowserContext:
+    params = locals_to_params(locals())
+    channel = await self._channel.send('newContext', params)
     context = from_channel(channel)
     self._contexts.append(context)
     context._browser = self
     return context
 
-  async def newPage(self, **options) -> Page:
-    context = await self.newContext(**options)
+  async def newPage(self,
+      viewport: Dict = None,
+      ignoreHTTPSErrors: bool = None,
+      javaScriptEnabled: bool = None,
+      bypassCSP: bool = None,
+      userAgent: str = None,
+      locale: str = None,
+      timezoneId: str = None,
+      geolocation: Dict = None,
+      permissions: List[str] = None,
+      extraHTTPHeaders: Dict[str, str] = None,
+      offline: bool = None,
+      httpCredentials: Dict = None,
+      deviceScaleFactor: int = None,
+      isMobile: bool = None,
+      hasTouch: bool = None,
+      colorScheme: str = None, # Literal['dark', 'light', 'no-preference'] = None,
+      acceptDownloads: bool = None) -> Page:
+    params = locals_to_params(locals())
+    context = await self.newContext(**params)
     page = await context.newPage()
     page._owned_context = context
     context._owner_page = page

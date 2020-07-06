@@ -69,3 +69,12 @@ def parse_error(error: ErrorPayload):
 def is_function_body(expression: str) -> bool:
   expression = expression.strip()
   return expression.startswith('function') or expression.startswith('async ') or '=>' in expression
+
+def locals_to_params(args: Dict) -> Dict:
+  copy = dict()
+  for key in args:
+    if key == 'self':
+      continue
+    if args[key] != None:
+      copy[key] = args[key]
+  return copy
