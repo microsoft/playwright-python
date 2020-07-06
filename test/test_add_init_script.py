@@ -16,7 +16,7 @@ import math
 import unittest
 from datetime import datetime
 from playwright_web.helper import Error
-from .test import PageTestCase
+from .test import PageTestCase, make_async
 from os import path
 
 class AddInitScriptTestCase(PageTestCase):
@@ -69,4 +69,4 @@ class AddInitScriptTestCase(PageTestCase):
     self.expect(await self.page.evaluate('window.script1')).toBe(1)
     self.expect(await self.page.evaluate('window.script2')).toBe(2)
 
-AddInitScriptTestCase()
+make_async(AddInitScriptTestCase)

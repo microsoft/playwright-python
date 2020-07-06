@@ -17,7 +17,7 @@ import math
 import unittest
 from datetime import datetime
 from playwright_web.helper import Error
-from .test import PageTestCase
+from .test import PageTestCase, make_async
 
 class JSHandleEvaluateTestCase(PageTestCase):
   async def it_should_work(self):
@@ -187,8 +187,8 @@ class JSHandleToStringTestCase(PageTestCase):
     b_handle = await handle.getProperty('b')
     self.expect(b_handle.toString()).toBe('JSHandle@promise')
 
-JSHandleEvaluateTestCase()
-JSHandlePropertiesTestCase()
-JSHandleJsonValueTestCase()
-JSHandleAsElementTestCase()
-JSHandleToStringTestCase()
+make_async(JSHandleEvaluateTestCase)
+make_async(JSHandlePropertiesTestCase)
+make_async(JSHandleJsonValueTestCase)
+make_async(JSHandleAsElementTestCase)
+make_async(JSHandleToStringTestCase)

@@ -36,19 +36,6 @@ class ActualValue:
         self.test_case.assertTrue(False)
 
 class TestCase(unittest.TestCase):
-  def __init__(self, methodName='runTest'):
-    super().__init__(methodName)
-    tests = list()
-    for name in dir(self):
-      if name.startswith('fit_'):
-        tests.append(name)
-    if not len(tests):
-      for name in dir(self):
-        if name.startswith('it_'):
-          tests.append(name)
-    for name in tests:
-      self._add_test(name)
-
   def setUp(self):
     asyncio.get_event_loop().run_until_complete(self.before_each())
 
@@ -60,13 +47,6 @@ class TestCase(unittest.TestCase):
 
   async def after_each(self):
     return None
-
-  def _add_test(self, name):
-    def do_test_expected(self):
-      asyncio.get_event_loop().run_until_complete(type(self).__dict__[name](self))
-    test_method = do_test_expected
-    test_method.__name__ = 'test_' + name
-    setattr(type(self), 'test_' + name, test_method)
 
   def expect(self, value: any) -> ActualValue:
     return ActualValue(self, value)
@@ -97,3 +77,23 @@ class PageTestCase(TestCase):
     await self.context.close()
     self.context = None
     self.page = None
+
+
+def make_async(cls):
+  def add_test(name):
+    def do_test_expected(self):
+      asyncio.get_event_loop().run_until_complete(cls.__dict__[name](self))
+    test_method = do_test_expected
+    test_method.__name__ = 'test_' + name
+    setattr(cls, 'test_' + name, test_method)
+
+  tests = list()
+  for name in cls.__dict__:
+    if name.startswith('fit_'):
+      tests.append(name)
+    if not len(tests):
+      for name in cls.__dict__:
+        if name.startswith('it_'):
+          tests.append(name)
+  for name in tests:
+    add_test(name)

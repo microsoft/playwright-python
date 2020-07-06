@@ -16,7 +16,7 @@ import math
 import unittest
 from datetime import datetime
 from playwright_web.helper import Error
-from .test import PageTestCase
+from .test import PageTestCase, make_async
 
 class EvaluateTestCase(PageTestCase):
   async def it_should_work(self):
@@ -166,4 +166,4 @@ class EvaluateTestCase(PageTestCase):
     result = await self.page.evaluate('() => ({ date: new Date("2020-05-27T01:31:38.506Z") })')
     self.expect(result).toBe({ 'date': date })
 
-EvaluateTestCase()
+make_async(EvaluateTestCase)
