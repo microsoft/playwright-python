@@ -66,6 +66,8 @@ class Browser(ChannelOwner):
       colorScheme: str = None, # Literal['dark', 'light', 'no-preference'] = None,
       acceptDownloads: bool = None) -> BrowserContext:
     params = locals_to_params(locals())
+    if 'viewport' in locals():
+      params['viewport'] = None
     channel = await self._channel.send('newContext', params)
     context = from_channel(channel)
     self._contexts.append(context)
