@@ -17,9 +17,8 @@ import asyncio
 from playwright_web import webkit
 
 async def run():
-    browser = await webkit.launch(dict(headless=False))
-    browser = await playwright.webkit.launch(dict(headless=False))
-    context = await browser.newContext(dict(viewport=None))
+    browser = await webkit.launch(headless=False)
+    context = await browser.newContext(viewport=None)
     page = await context.newPage()
 
     page.on('framenavigated', lambda frame: print(f'Frame navigated to {frame.url}'))
