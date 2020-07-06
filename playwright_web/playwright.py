@@ -23,6 +23,7 @@ import subprocess
 from playwright_web.connection import Connection
 from playwright_web.object_factory import create_remote_object
 from playwright_web.browser_type import BrowserType
+from typing import Dict
 
 class Playwright:
   def __init__(self) -> None:
@@ -61,8 +62,9 @@ class Playwright:
       self._connection.wait_for_object_with_known_name('chromium'),
       self._connection.wait_for_object_with_known_name('firefox'),
       self._connection.wait_for_object_with_known_name('webkit'))
-    self.chromium = chromium
-    self.firefox = firefox
-    self.webkit = webkit
+    self.chromium: BrowserType = chromium
+    self.firefox: BrowserType = firefox
+    self.webkit: BrowserType = webkit
+    self.browser_types: Dict[str, BrowserType] = dict(chromium=self.chromium, firefox=self.firefox, webkit=self.webkit)
 
 playwright = Playwright()

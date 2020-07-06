@@ -28,6 +28,9 @@ setuptools.setup(
   url='https://github.com/Microsoft/playwright-python',
   packages=setuptools.find_packages(),
   include_package_data=True,
+  install_requires=[
+    'pyee',
+  ],
   classifiers=[
     'Programming Language :: Python :: 3',
     'License :: OSI Approved :: Apache Software License',

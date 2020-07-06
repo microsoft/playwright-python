@@ -17,9 +17,11 @@ from playwright_web.playwright import playwright
 chromium = playwright.chromium
 firefox = playwright.firefox
 webkit = playwright.webkit
+browser_types = playwright.browser_types
 
 __all__ = [
   'chromium',
   'firefox',
-  'webkit'
+  'webkit',
+  'browser_types'
 ]

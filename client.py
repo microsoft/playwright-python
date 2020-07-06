@@ -14,11 +14,11 @@
 
 import asyncio
 
-from playwright_web import webkit
+from playwright_web import browser_types
 
 async def run():
     print('Launching browser...')
-    browser = await webkit.launch(headless=False)
+    browser = await browser_types['webkit'].launch(headless=False)
     print('Contexts in browser: %d' % len(browser.contexts))
     print('Creating context...')
     context = await browser.newContext(viewport=None)
