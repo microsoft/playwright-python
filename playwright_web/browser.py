@@ -17,7 +17,7 @@ from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, fr
 from playwright_web.helper import locals_to_params
 from playwright_web.page import Page
 from types import SimpleNamespace
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 class Browser(ChannelOwner):
 
@@ -48,7 +48,7 @@ class Browser(ChannelOwner):
     return self._is_connected
 
   async def newContext(self,
-      viewport: Dict = None,
+      viewport: Union[Dict, int] = None, # Union[Dict, Literal[0]]
       ignoreHTTPSErrors: bool = None,
       javaScriptEnabled: bool = None,
       bypassCSP: bool = None,
@@ -66,7 +66,7 @@ class Browser(ChannelOwner):
       colorScheme: str = None, # Literal['dark', 'light', 'no-preference'] = None,
       acceptDownloads: bool = None) -> BrowserContext:
     params = locals_to_params(locals())
-    if 'viewport' in locals():
+    if viewport == 0:
       params['viewport'] = None
     channel = await self._channel.send('newContext', params)
     context = from_channel(channel)
