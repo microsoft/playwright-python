@@ -12,61 +12,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import math
-import unittest
-from datetime import datetime
 from playwright_web.helper import Error
-from .test import PageTestCase, make_async
 from os import path
 
-class AddInitScriptTestCase(PageTestCase):
-  async def it_should_evaluate_before_anything_else_on_the_page(self):
-    await self.page.addInitScript('window.injected = 123')
-    await self.page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await self.page.evaluate('window.result') == 123
+async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
+  await page.addInitScript('window.injected = 123')
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.result') == 123
 
-  async def it_should_work_with_a_path(self):
-    await self.page.addInitScript(path=path.join(path.dirname(path.abspath(__file__)), 'assets/injectedfile.js'))
-    await self.page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await self.page.evaluate('window.result') == 123
+async def test_add_init_script_work_with_a_path(page):
+  await page.addInitScript(path=path.join(path.dirname(path.abspath(__file__)), 'assets/injectedfile.js'))
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.result') == 123
 
-  async def it_should_work_with_content(self):
-    await self.page.addInitScript('window.injected = 123')
-    await self.page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await self.page.evaluate('window.result') == 123
+async def test_add_init_script_work_with_content(page):
+  await page.addInitScript('window.injected = 123')
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.result') == 123
 
-  async def it_should_throw_without_path_and_content(self):
-    error = None
-    try:
-      await self.page.addInitScript({ 'foo': 'bar' })
-    except Error as e:
-      error = e
-    assert error.message == 'Either path or source parameter must be specified'
+async def test_add_init_script_throw_without_path_and_content(page):
+  error = None
+  try:
+    await page.addInitScript({ 'foo': 'bar' })
+  except Error as e:
+    error = e
+  assert error.message == 'Either path or source parameter must be specified'
 
-  async def it_should_work_with_browser_context_scripts(self):
-    await self.context.addInitScript('window.temp = 123')
-    page = await self.context.newPage()
-    await page.addInitScript('window.injected = window.temp')
-    await page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await page.evaluate('window.result') == 123
+async def test_add_init_script_work_with_browser_context_scripts(page, context):
+  await context.addInitScript('window.temp = 123')
+  page = await context.newPage()
+  await page.addInitScript('window.injected = window.temp')
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.result') == 123
 
-  async def it_should_work_with_browser_context_scripts_with_a_path(self):
-    await self.context.addInitScript(path=path.join(path.dirname(path.abspath(__file__)), 'assets/injectedfile.js'))
-    page = await self.context.newPage()
-    await page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await page.evaluate('window.result') == 123
+async def test_add_init_script_work_with_browser_context_scripts_with_a_path(page, context):
+  await context.addInitScript(path=path.join(path.dirname(path.abspath(__file__)), 'assets/injectedfile.js'))
+  page = await context.newPage()
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.result') == 123
 
-  async def it_should_work_with_browser_context_scripts_for_already_created_pages(self):
-    await self.context.addInitScript('window.temp = 123')
-    await self.page.addInitScript('window.injected = window.temp')
-    await self.page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await self.page.evaluate('window.result') == 123
+async def test_add_init_script_work_with_browser_context_scripts_for_already_created_pages(page, context):
+  await context.addInitScript('window.temp = 123')
+  await page.addInitScript('window.injected = window.temp')
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.result') == 123
 
-  async def it_should_support_multiple_scripts(self):
-    await self.page.addInitScript('window.script1 = 1')
-    await self.page.addInitScript('window.script2 = 2')
-    await self.page.goto('data:text/html,<script>window.result = window.injected</script>')
-    assert await self.page.evaluate('window.script1') == 1
-    assert await self.page.evaluate('window.script2') == 2
+async def test_add_init_script_support_multiple_scripts(page):
+  await page.addInitScript('window.script1 = 1')
+  await page.addInitScript('window.script2 = 2')
+  await page.goto('data:text/html,<script>window.result = window.injected</script>')
+  assert await page.evaluate('window.script1') == 1
+  assert await page.evaluate('window.script2') == 2
 
-make_async(AddInitScriptTestCase)

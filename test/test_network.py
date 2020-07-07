@@ -13,43 +13,37 @@
 # limitations under the License.
 
 import asyncio
-import unittest
-from playwright_web.helper import Error
 from .server import EMPTY_PAGE
-from .test import PageTestCase, make_async
 
-class NetworkTestCase(PageTestCase):
+async def test_request_fulfill(page):
+  async def handle_request(route, request):
+    assert route.request == request
+    assert 'empty.html' in request.url
+    assert request.headers['user-agent']
+    assert request.method == 'GET'
+    assert request.postData is None
+    assert request.isNavigationRequest
+    assert request.resourceType == 'document'
+    assert request.frame == page.mainFrame
+    assert request.frame.url == 'about:blank'
+    await route.fulfill(body='Text')
 
-  async def it_should_fulfill(self):
-    async def handle_request(route, request):
-      assert route.request == request
-      assert 'empty.html' in request.url
-      assert request.headers['user-agent']
-      assert request.method == 'GET'
-      assert request.postData is None
-      assert request.isNavigationRequest
-      assert request.resourceType == 'document'
-      assert request.frame == self.page.mainFrame
-      assert request.frame.url == 'about:blank'
-      await route.fulfill(body='Text')
+  await page.route('**/empty.html', lambda route, request: asyncio.ensure_future(handle_request(route, request)))
 
-    await self.page.route('**/empty.html', lambda route, request: asyncio.ensure_future(handle_request(route, request)))
+  response = await page.goto('http://www.non-existent.com/empty.html')
+  assert response.ok
+  assert await response.text() == 'Text'
 
-    response = await self.page.goto('http://www.non-existent.com/empty.html')
-    assert response.ok
-    assert await response.text() == 'Text'
+async def test_request_continue(page):
+  async def handle_request(route, request, intercepted):
+    intercepted.append(True)
+    await route.continue_()
 
-  async def it_should_continue(self):
-    async def handle_request(route, request, intercepted):
-      intercepted.append(True)
-      await route.continue_()
+  intercepted = list()
+  await page.route('**/*', lambda route, request: asyncio.ensure_future(handle_request(route, request, intercepted)))
 
-    intercepted = list()
-    await self.page.route('**/*', lambda route, request: asyncio.ensure_future(handle_request(route, request, intercepted)))
+  response = await page.goto(EMPTY_PAGE)
+  assert response.ok
+  assert intercepted == [True]
+  assert await page.title() == ''
 
-    response = await self.page.goto(EMPTY_PAGE)
-    assert response.ok
-    assert intercepted == [True]
-    assert await self.page.title() == ''
-
-make_async(NetworkTestCase)

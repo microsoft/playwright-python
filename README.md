@@ -47,13 +47,13 @@ python ./build_driver.py
 
 Run tests:
 ```sh
-python -m unittest
+pytest
 ```
 
 Run tests with coverage:
 ```
 pip install coverage
-coverage run -m unittest
+coverage run -m pytest
 coverage html
 open htmlcov/index.html
 ```

@@ -14,7 +14,13 @@
 
 import playwright_web
 import pytest
+from .server import start_server
+import _thread
 
+# Will mark all the tests as async
+def pytest_collection_modifyitems(items):
+    for item in items:
+        item.add_marker(pytest.mark.asyncio)
 
 @pytest.fixture(scope='session')
 def event_loop():
@@ -41,3 +47,7 @@ async def page(context):
     page = await context.newPage()
     yield page
     await page.close()
+
+@pytest.fixture(autouse=True)
+def start_http_server():
+    _thread.start_new_thread(start_server, ())

@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 from playwright_web.helper import Error
 from .server import PREFIX
 
-pytestmark = pytest.mark.asyncio
 
 async def test_click_the_button(page):
   await page.goto(f'{PREFIX}/button.html')

@@ -12,44 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-from playwright_web.helper import Error
-from .test import PageTestCase, make_async
 from .server import PREFIX
 
-class KeyboardTestCase(PageTestCase):
-  async def it_should_type_into_a_textarea(self):
-    await self.page.evaluate('''
-      const textarea = document.createElement('textarea');
-      document.body.appendChild(textarea);
-      textarea.focus();
-    ''')
-    text = 'Hello world. I am the text that was typed!'
-    await self.page.keyboard.type(text)
-    assert await self.page.evaluate('document.querySelector("textarea").value') == text
+async def test_keyboard_type_into_a_textarea(page):
+  await page.evaluate('''
+    const textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+    textarea.focus();
+  ''')
+  text = 'Hello world. I am the text that was typed!'
+  await page.keyboard.type(text)
+  assert await page.evaluate('document.querySelector("textarea").value') == text
 
-  async def it_should_move_with_the_arrow_keys(self):
-    await self.page.goto(f'{PREFIX}/textarea.html')
-    await self.page.type('textarea', 'Hello World!')
-    assert await self.page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
-    for _ in 'World!':
-      await self.page.keyboard.press('ArrowLeft')
-    await self.page.keyboard.type('inserted ')
-    assert await self.page.evaluate("document.querySelector('textarea').value")  == 'Hello inserted World!'
-    await self.page.keyboard.down('Shift')
-    for _ in 'inserted ':
-      await self.page.keyboard.press('ArrowLeft')
-    await self.page.keyboard.up('Shift')
-    await self.page.keyboard.press('Backspace')
-    assert await self.page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
+async def test_keyboard_move_with_the_arrow_keys(page):
+  await page.goto(f'{PREFIX}/textarea.html')
+  await page.type('textarea', 'Hello World!')
+  assert await page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
+  for _ in 'World!':
+    await page.keyboard.press('ArrowLeft')
+  await page.keyboard.type('inserted ')
+  assert await page.evaluate("document.querySelector('textarea').value")  == 'Hello inserted World!'
+  await page.keyboard.down('Shift')
+  for _ in 'inserted ':
+    await page.keyboard.press('ArrowLeft')
+  await page.keyboard.up('Shift')
+  await page.keyboard.press('Backspace')
+  assert await page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
 
-  async def it_should_send_a_character_with_elementhandle_press(self):
-    await self.page.goto(f'{PREFIX}/textarea.html')
-    textarea = await self.page.querySelector('textarea')
-    await textarea.press('a')
-    assert await self.page.evaluate("document.querySelector('textarea').value") == 'a'
-    await self.page.evaluate("() => window.addEventListener('keydown', e => e.preventDefault(), true)")
-    await textarea.press('b')
-    assert await self.page.evaluate("document.querySelector('textarea').value") == 'a'
+async def test_keyboard_send_a_character_with_elementhandle_press(page):
+  await page.goto(f'{PREFIX}/textarea.html')
+  textarea = await page.querySelector('textarea')
+  await textarea.press('a')
+  assert await page.evaluate("document.querySelector('textarea').value") == 'a'
+  await page.evaluate("() => window.addEventListener('keydown', e => e.preventDefault(), true)")
+  await textarea.press('b')
+  assert await page.evaluate("document.querySelector('textarea').value") == 'a'
 
-make_async(KeyboardTestCase)

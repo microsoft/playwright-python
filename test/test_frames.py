@@ -12,23 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-from playwright_web.helper import Error
-from .test import PageTestCase, make_async
-from .server import EMPTY_PAGE, PORT
+from .server import EMPTY_PAGE
 
-class FramesTestCase(PageTestCase):
+async def test_frames_respect_name(page):
+  await page.setContent('<iframe name=target></iframe>')
+  assert page.frame(name='bogus') is None
+  frame = page.frame(name='target')
+  assert frame
+  assert frame == (page.mainFrame.childFrames[0])
 
-  async def it_should_respect_name(self):
-    await self.page.setContent('<iframe name=target></iframe>')
-    assert self.page.frame(name='bogus') == None
-    frame = self.page.frame(name='target')
-    assert frame
-    assert frame == (self.page.mainFrame.childFrames[0])
-
-  async def it_should_respect_url(self):
-    await self.page.setContent(f'<iframe src="{EMPTY_PAGE}"></iframe>')
-    assert self.page.frame(url='bogus') == None
-    assert self.page.frame(url=f'**/empty.html').url == ('http://localhost:8907/empty.html')
-
-make_async(FramesTestCase)
+async def test_frames_respect_url(page):
+  await page.setContent(f'<iframe src="{EMPTY_PAGE}"></iframe>')
+  assert page.frame(url='bogus') is None
+  assert page.frame(url=f'**/empty.html').url == ('http://localhost:8907/empty.html')
