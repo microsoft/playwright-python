@@ -14,4 +14,4 @@
 
 import subprocess
 
-subprocess.run(['python3', '-m', 'twine', 'upload', 'dist/*'])
+subprocess.run('python -m twine upload dist/*', shell=True)
