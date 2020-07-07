@@ -20,7 +20,7 @@ from .test import PageTestCase, make_async
 
 class NetworkTestCase(PageTestCase):
 
-  async def xit_should_fulfill(self):
+  async def it_should_fulfill(self):
     async def handle_request(route, request):
       self.expect(route.request).toBe(request)
       self.expect(request.url).toContain('empty.html')
