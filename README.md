@@ -50,6 +50,14 @@ Run tests:
 python -m unittest
 ```
 
+Run tests with coverage:
+```
+pip install coverage
+coverage run -m unittest
+coverage html
+open htmlcov/index.html
+```
+
 Deploy:
 ```sh
 python ./build_package.py

@@ -9,3 +9,5 @@ build/
 dist/
 **/*.pyc
 env/
+htmlcov/
+.coverage
