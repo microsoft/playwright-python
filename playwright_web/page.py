@@ -29,7 +29,10 @@ from playwright_web.helper import is_function_body, parse_error, serialize_error
 from playwright_web.network import Request, Response, Route
 from playwright_web.worker import Worker
 from types import SimpleNamespace
-from typing import Any, Awaitable, Callable, Dict, List, Union
+from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from playwright_web.browser_context import BrowserContext
 
 class Page(ChannelOwner):
 
@@ -296,7 +299,7 @@ class Page(ChannelOwner):
 
   async def waitForResponse(self, urlOrPredicate: Union[str, Callable[[Request], bool]]) -> Optional[Response]:
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
-    def predicate(request: Request):    
+    def predicate(request: Request):
       if matcher:
         return matcher.matches(request.url())
       return urlOrPredicate(request)
@@ -498,7 +501,7 @@ class Page(ChannelOwner):
     if not is_function_body(expression):
       force_expr = True
     return await self._main_frame.waitForFunction(**locals_to_params(locals()))
- 
+
   def workers(self) -> List[Worker]:
     return self._workers.copy()
 

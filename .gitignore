@@ -10,3 +10,4 @@ dist/
 env/
 htmlcov/
 .coverage
+.DS_Store

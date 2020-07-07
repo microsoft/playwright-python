@@ -18,7 +18,10 @@ from playwright_web.element_handle import ElementHandle, convertSelectOptionValu
 from playwright_web.helper import ConsoleMessageLocation, FilePayload, SelectOption, is_function_body, locals_to_params
 from playwright_web.js_handle import JSHandle, parse_result, serialize_argument
 from playwright_web.network import Request, Response, Route
-from typing import Any, Awaitable, Dict, List, Optional, Union
+from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from playwright_web.page import Page
 
 class Frame(ChannelOwner):
 

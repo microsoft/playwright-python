@@ -17,20 +17,50 @@ import collections
 import fnmatch
 import re
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-# from typing import TypedDict
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict  # pylint: disable=no-name-in-module
+else:
+    from typing_extensions import TypedDict
+
+
+if TYPE_CHECKING:
+  from playwright_web.network import Route, Request
 
 Cookie = List[Dict[str, Union[str, int, bool]]]
 URLMatch = Union[str, Callable[[str], bool]]
-FilePayload = Dict # TypedDict('FilePayload', name=str, mimeType=str, buffer=bytes)
-FrameMatch = Dict # TypedDict('FrameMatch', url=URLMatch, name=str)
-PendingWaitEvent = Dict # TypedDict('PendingWaitEvent', event=str, future=asyncio.Future)
 RouteHandler = Callable[['Route', 'Request'], None]
-RouteHandlerEntry = Dict # TypedDict('RouteHandlerEntry', matcher=URLMatcher, handler=RouteHandler)
-SelectOption = Dict # TypedDict('SelectOption', value=Optional[str], label=Optional[str], index=Optional[str])
-ConsoleMessageLocation = Dict #TypedDict('ConsoleMessageLocation', url=Optional[str], lineNumber=Optional[int], columnNumber=Optional[int])
 FunctionWithSource = Callable[[Dict], Any]
-ErrorPayload = Dict  # TypedDict('ErrorPayload', message=str, name=str, stack=str, value=Any)
+class FilePayload(TypedDict):
+ name: str
+ mimeType: str
+ buffer: bytes
+class FrameMatch(TypedDict):
+  url: URLMatch
+  name: str
+class PendingWaitEvent(TypedDict):
+  event: str
+  future: asyncio.Future
+
+class RouteHandlerEntry(TypedDict):
+  matcher: "URLMatcher"
+  handler: RouteHandler
+class SelectOption(TypedDict):
+  value: Optional[str]
+  label: Optional[str]
+  index: Optional[str]
+class ConsoleMessageLocation(TypedDict):
+  url: Optional[str]
+  lineNumber: Optional[int]
+  columnNumber: Optional[int]
+class ErrorPayload(TypedDict):
+  message: str
+  name: str
+  stack: str
+  value: Any
 
 class URLMatcher:
   def __init__(self, match: URLMatch):

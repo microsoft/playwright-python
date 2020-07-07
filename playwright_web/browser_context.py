@@ -18,7 +18,10 @@ from playwright_web.helper import Cookie, Error, FunctionWithSource, PendingWait
 from playwright_web.network import Request, Response, Route
 from playwright_web.page import BindingCall, Page
 from types import SimpleNamespace
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from playwright_web.browser import Browser
 
 class BrowserContext(ChannelOwner):
 
@@ -83,8 +86,6 @@ class BrowserContext(ChannelOwner):
   async def cookies(self, urls: Union[str, List[str]]) -> List[Cookie]:
     if urls == None:
       urls = list()
-    if urls and isinstance(urls, list):
-      urls = [ urls ]
     return await self._channel.send('cookies', dict(urls=urls))
 
   async def addCookies(self, cookies: List[Cookie]) -> None:

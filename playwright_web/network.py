@@ -16,7 +16,10 @@ import base64
 import json
 from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel, from_channel
 from playwright_web.helper import Error
-from typing import Awaitable, Dict, List, Optional, Union
+from typing import Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from playwright_web.frame import Frame
 
 class Request(ChannelOwner):
 
@@ -69,7 +72,7 @@ class Request(ChannelOwner):
     return self._redirected_to
 
   @property
-  def failure(self) -> Optional[str]:    
+  def failure(self) -> Optional[str]:
     return self._failure_text
 
 
