@@ -15,7 +15,7 @@
 import unittest
 from playwright_web.helper import Error
 from .test import PageTestCase, make_async
-from .assets.html import button_html, textarea_html
+from .server import PREFIX
 
 class KeyboardTestCase(PageTestCase):
   async def it_should_type_into_a_textarea(self):
@@ -29,7 +29,7 @@ class KeyboardTestCase(PageTestCase):
     self.expect(await self.page.evaluate('document.querySelector("textarea").value')).toBe(text)
 
   async def it_should_move_with_the_arrow_keys(self):
-    await self.page.setContent(textarea_html)
+    await self.page.goto(f'{PREFIX}/textarea.html')
     await self.page.type('textarea', 'Hello World!')
     self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('Hello World!')
     for _ in 'World!':
@@ -44,7 +44,7 @@ class KeyboardTestCase(PageTestCase):
     self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('Hello World!')
 
   async def it_should_send_a_character_with_elementhandle_press(self):
-    await self.page.setContent(textarea_html)
+    await self.page.goto(f'{PREFIX}/textarea.html')
     textarea = await self.page.querySelector('textarea')
     await textarea.press('a')
     self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('a')

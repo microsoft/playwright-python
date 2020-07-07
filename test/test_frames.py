@@ -15,7 +15,7 @@
 import unittest
 from playwright_web.helper import Error
 from .test import PageTestCase, make_async
-from .assets.html import button_html, textarea_html
+from .server import EMPTY_PAGE, PORT
 
 class FramesTestCase(PageTestCase):
 
@@ -27,8 +27,8 @@ class FramesTestCase(PageTestCase):
     self.expect(frame).toBe(self.page.mainFrame.childFrames[0])
 
   async def it_should_respect_url(self):
-    await self.page.setContent('<iframe src="http://example.com"></iframe>')
+    await self.page.setContent(f'<iframe src="{EMPTY_PAGE}"></iframe>')
     self.expect(self.page.frame(url='bogus')).toBe(None)
-    self.expect(self.page.frame(url='example.com/**').url).toBe('http://example.com/')
+    self.expect(self.page.frame(url=f'**/empty.html').url).toBe('http://localhost:8907/empty.html')
 
 make_async(FramesTestCase)

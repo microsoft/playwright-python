@@ -15,16 +15,16 @@
 import unittest
 from playwright_web.helper import Error
 from .test import PageTestCase, make_async
-from .assets.html import button_html, textarea_html
+from .server import PREFIX
 
 class ClickTestCase(PageTestCase):
   async def it_should_click_the_button(self):
-    await self.page.setContent(button_html)
+    await self.page.goto(f'{PREFIX}/button.html')
     await self.page.click('button')
     self.expect(await self.page.evaluate('result')).toBe('Clicked')
 
   async def it_should_select_the_text_by_triple_clicking(self):
-    await self.page.setContent(textarea_html)
+    await self.page.goto(f'{PREFIX}/textarea.html')
     text = 'This is the text that we are going to try to select. Let\'s see how it goes.'
     await self.page.fill('textarea', text)
     await self.page.click('textarea', clickCount=3)
@@ -34,7 +34,7 @@ class ClickTestCase(PageTestCase):
     }''')).toBe(text)
 
   async def it_should_not_wait_with_force(self):
-    await self.page.setContent(button_html)
+    await self.page.goto(f'{PREFIX}/button.html')
     await self.page.evalOnSelector('button', 'b => b.style.display = "none"')
     error = None
     try:
@@ -45,7 +45,7 @@ class ClickTestCase(PageTestCase):
     self.expect(await self.page.evaluate('result')).toBe('Was not clicked')
 
   async def it_should_click_the_button_with_px_border_with_offset(self):
-    await self.page.setContent(button_html)
+    await self.page.goto(f'{PREFIX}/button.html')
     await self.page.evalOnSelector('button', 'button => button.style.borderWidth = "8px"')
     await self.page.click('button', position=dict(x=20, y=10))
     self.expect(await self.page.evaluate('result')).toBe('Clicked')

@@ -15,17 +15,17 @@
 import unittest
 from playwright_web.helper import Error
 from .test import PageTestCase, make_async
-from .assets.html import button_html, textarea_html
+from .server import PREFIX
 
 class FillTestCase(PageTestCase):
 
   async def it_should_fill_textarea(self):
-    await self.page.setContent(textarea_html)
+    await self.page.goto(f'{PREFIX}/textarea.html')
     await self.page.fill('textarea', 'some value')
     self.expect(await self.page.evaluate('result')).toBe('some value')
 
   async def it_should_fill_input(self):
-    await self.page.setContent(textarea_html)
+    await self.page.goto(f'{PREFIX}/textarea.html')
     await self.page.fill('input', 'some value')
     self.expect(await self.page.evaluate('result')).toBe('some value')
 

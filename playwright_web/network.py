@@ -102,9 +102,9 @@ class Route(ChannelOwner):
     if headers:
       overrides['headers'] = headers
     if isinstance(postData, str):
-      overrides['postData'] = base64.b64decode(bytes(msg, 'utf-8'))
+      overrides['postData'] = base64.b64encode(bytes(postData, 'utf-8'))
     elif isinstance(postData, bytes):
-      overrides['postData'] = base64.b64decode(postData)
+      overrides['postData'] = base64.b64encode(postData)
     await self._channel.send('continue', dict(overrides=overrides))
 
 

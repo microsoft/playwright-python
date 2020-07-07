@@ -15,8 +15,8 @@
 import asyncio
 import unittest
 from playwright_web.helper import Error
+from .server import EMPTY_PAGE
 from .test import PageTestCase, make_async
-from .assets.html import button_html, textarea_html
 
 class NetworkTestCase(PageTestCase):
 
@@ -47,9 +47,9 @@ class NetworkTestCase(PageTestCase):
     intercepted = list()
     await self.page.route('**/*', lambda route, request: asyncio.ensure_future(handle_request(route, request, intercepted)))
 
-    response = await self.page.goto('http://www.example.com')
+    response = await self.page.goto(EMPTY_PAGE)
     self.expect(response.ok).toBeTruthy()
     self.expect(intercepted).toBe([True])
-    self.expect(await self.page.title()).toBe('Example Domain')
+    self.expect(await self.page.title()).toBe('')
 
 make_async(NetworkTestCase)

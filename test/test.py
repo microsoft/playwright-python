@@ -14,26 +14,37 @@
 
 import asyncio
 import os
+import socketserver
 import sys
-
+import _thread
 import unittest
 
 from playwright_web import chromium
+from .server import start_server
+
+browser = None
+
+async def launch_browser():
+  global browser
+  browser = await chromium.launch()
+
+asyncio.get_event_loop().run_until_complete(launch_browser())
+_thread.start_new_thread(start_server, ())
 
 class ActualValue:
-    def __init__(self, test_case: unittest.TestCase, value):
-      self.test_case = test_case
-      self.value = value
+  def __init__(self, test_case: unittest.TestCase, value):
+    self.test_case = test_case
+    self.value = value
 
-    def toBe(self, value):
-      self.test_case.assertEqual(self.value, value)
+  def toBe(self, value):
+    self.test_case.assertEqual(self.value, value)
 
-    def toContain(self, value):
-      self.test_case.assertIn(value, self.value)
+  def toContain(self, value):
+    self.test_case.assertIn(value, self.value)
 
-    def toBeTruthy(self):
-      if not self.value:
-        self.test_case.assertTrue(False)
+  def toBeTruthy(self):
+    if not self.value:
+      self.test_case.assertTrue(False)
 
 class TestCase(unittest.TestCase):
   def setUp(self):
@@ -53,24 +64,9 @@ class TestCase(unittest.TestCase):
 
 class PageTestCase(TestCase):
 
-  @classmethod
-  def setUpClass(cls):
-    asyncio.get_event_loop().run_until_complete(cls.before_all())
-
-  @classmethod
-  def tearDownClass(cls):
-    asyncio.get_event_loop().run_until_complete(cls.after_all())
-
-  @classmethod
-  async def before_all(cls):
-    cls.browser = await chromium.launch()
-
-  @classmethod
-  async def after_all(cls):
-    await cls.browser.close()
-
   async def before_each(self):
-    self.context = await self.browser.newContext()
+    global browser
+    self.context = await browser.newContext()
     self.page = await self.context.newPage()
 
   async def after_each(self):
