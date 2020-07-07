@@ -22,22 +22,22 @@ class NetworkTestCase(PageTestCase):
 
   async def it_should_fulfill(self):
     async def handle_request(route, request):
-      self.expect(route.request).toBe(request)
-      self.expect(request.url).toContain('empty.html')
-      self.expect(request.headers['user-agent']).toBeTruthy()
-      self.expect(request.method).toBe('GET')
-      self.expect(request.postData).toBe(None)
-      self.expect(request.isNavigationRequest).toBeTruthy()
-      self.expect(request.resourceType).toBe('document')
-      self.expect(request.frame).toBe(self.page.mainFrame)
-      self.expect(request.frame.url).toBe('about:blank')
+      assert route.request == request
+      assert 'empty.html' in request.url
+      assert request.headers['user-agent']
+      assert request.method == 'GET'
+      assert request.postData is None
+      assert request.isNavigationRequest
+      assert request.resourceType == 'document'
+      assert request.frame == self.page.mainFrame
+      assert request.frame.url == 'about:blank'
       await route.fulfill(body='Text')
 
     await self.page.route('**/empty.html', lambda route, request: asyncio.ensure_future(handle_request(route, request)))
 
     response = await self.page.goto('http://www.non-existent.com/empty.html')
-    self.expect(response.ok).toBeTruthy()
-    self.expect(await response.text()).toBe('Text')
+    assert response.ok
+    assert await response.text() == 'Text'
 
   async def it_should_continue(self):
     async def handle_request(route, request, intercepted):
@@ -48,8 +48,8 @@ class NetworkTestCase(PageTestCase):
     await self.page.route('**/*', lambda route, request: asyncio.ensure_future(handle_request(route, request, intercepted)))
 
     response = await self.page.goto(EMPTY_PAGE)
-    self.expect(response.ok).toBeTruthy()
-    self.expect(intercepted).toBe([True])
-    self.expect(await self.page.title()).toBe('')
+    assert response.ok
+    assert intercepted == [True]
+    assert await self.page.title() == ''
 
 make_async(NetworkTestCase)

@@ -22,11 +22,11 @@ class FillTestCase(PageTestCase):
   async def it_should_fill_textarea(self):
     await self.page.goto(f'{PREFIX}/textarea.html')
     await self.page.fill('textarea', 'some value')
-    self.expect(await self.page.evaluate('result')).toBe('some value')
+    assert await self.page.evaluate('result') == 'some value'
 
   async def it_should_fill_input(self):
     await self.page.goto(f'{PREFIX}/textarea.html')
     await self.page.fill('input', 'some value')
-    self.expect(await self.page.evaluate('result')).toBe('some value')
+    assert await self.page.evaluate('result') == 'some value'
 
 make_async(FillTestCase)

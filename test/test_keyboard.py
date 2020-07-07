@@ -26,30 +26,30 @@ class KeyboardTestCase(PageTestCase):
     ''')
     text = 'Hello world. I am the text that was typed!'
     await self.page.keyboard.type(text)
-    self.expect(await self.page.evaluate('document.querySelector("textarea").value')).toBe(text)
+    assert await self.page.evaluate('document.querySelector("textarea").value') == text
 
   async def it_should_move_with_the_arrow_keys(self):
     await self.page.goto(f'{PREFIX}/textarea.html')
     await self.page.type('textarea', 'Hello World!')
-    self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('Hello World!')
+    assert await self.page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
     for _ in 'World!':
       await self.page.keyboard.press('ArrowLeft')
     await self.page.keyboard.type('inserted ')
-    self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('Hello inserted World!')
+    assert await self.page.evaluate("document.querySelector('textarea').value")  == 'Hello inserted World!'
     await self.page.keyboard.down('Shift')
     for _ in 'inserted ':
       await self.page.keyboard.press('ArrowLeft')
     await self.page.keyboard.up('Shift')
     await self.page.keyboard.press('Backspace')
-    self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('Hello World!')
+    assert await self.page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
 
   async def it_should_send_a_character_with_elementhandle_press(self):
     await self.page.goto(f'{PREFIX}/textarea.html')
     textarea = await self.page.querySelector('textarea')
     await textarea.press('a')
-    self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('a')
+    assert await self.page.evaluate("document.querySelector('textarea').value") == 'a'
     await self.page.evaluate("() => window.addEventListener('keydown', e => e.preventDefault(), true)")
     await textarea.press('b')
-    self.expect(await self.page.evaluate("document.querySelector('textarea').value")).toBe('a')
+    assert await self.page.evaluate("document.querySelector('textarea').value") == 'a'
 
 make_async(KeyboardTestCase)

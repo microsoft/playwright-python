@@ -21,14 +21,14 @@ class FramesTestCase(PageTestCase):
 
   async def it_should_respect_name(self):
     await self.page.setContent('<iframe name=target></iframe>')
-    self.expect(self.page.frame(name='bogus')).toBe(None)
+    assert self.page.frame(name='bogus') == None
     frame = self.page.frame(name='target')
-    self.expect(frame).toBeTruthy()
-    self.expect(frame).toBe(self.page.mainFrame.childFrames[0])
+    assert frame
+    assert frame == (self.page.mainFrame.childFrames[0])
 
   async def it_should_respect_url(self):
     await self.page.setContent(f'<iframe src="{EMPTY_PAGE}"></iframe>')
-    self.expect(self.page.frame(url='bogus')).toBe(None)
-    self.expect(self.page.frame(url=f'**/empty.html').url).toBe('http://localhost:8907/empty.html')
+    assert self.page.frame(url='bogus') == None
+    assert self.page.frame(url=f'**/empty.html').url == ('http://localhost:8907/empty.html')
 
 make_async(FramesTestCase)

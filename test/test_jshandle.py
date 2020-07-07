@@ -22,27 +22,27 @@ from .test import PageTestCase, make_async
 class JSHandleEvaluateTestCase(PageTestCase):
   async def it_should_work(self):
     window_handle = await self.page.evaluateHandle('window')
-    self.expect(window_handle).toBeTruthy()
+    assert window_handle
 
   async def it_should_accept_object_handle_as_argument(self):
     navigator_handle = await self.page.evaluateHandle('navigator')
     text = await self.page.evaluate('e => e.userAgent', navigator_handle)
-    self.expect(text).toContain('Mozilla')
+    assert 'Mozilla' in text
 
   async def it_should_accept_handle_to_primitive_types(self):
     handle = await self.page.evaluateHandle('5')
     is_five = await self.page.evaluate('e => Object.is(e, 5)', handle)
-    self.expect(is_five).toBeTruthy()
+    assert is_five
 
   async def it_should_accept_nested_handle(self):
     foo = await self.page.evaluateHandle('({ x: 1, y: "foo" })')
     result = await self.page.evaluate('({ foo }) => foo', { 'foo': foo })
-    self.expect(result).toBe({ 'x': 1, 'y': 'foo' })
+    assert result == { 'x': 1, 'y': 'foo' }
 
   async def it_should_accept_nested_window_handle(self):
     foo = await self.page.evaluateHandle('window')
     result = await self.page.evaluate('({ foo }) => foo === window', { 'foo': foo })
-    self.expect(result).toBeTruthy()
+    assert result
 
   async def it_should_accept_multiple_nested_handles(self):
     foo = await self.page.evaluateHandle('({ x: 1, y: "foo" })')
@@ -52,10 +52,10 @@ class JSHandleEvaluateTestCase(PageTestCase):
       'a1': { 'foo': foo },
       'a2': { 'bar': bar, 'arr': [{ 'baz': baz }] }
     })
-    self.expect(json.loads(result)).toBe({
+    assert json.loads(result) == {
       'a1': { 'foo': { 'x': 1, 'y': 'foo' } },
       'a2': { 'bar': 5, 'arr': [{ 'baz': ['baz'] }] }
-    })
+    }
 
   async def it_should_throw_for_circular_objects(self):
     a = { 'x': 1 }
@@ -65,16 +65,16 @@ class JSHandleEvaluateTestCase(PageTestCase):
       await self.page.evaluate('x => x', a)
     except Error as e:
       error = e
-    self.expect(error.message).toContain('Maximum argument depth exceeded')
+    assert 'Maximum argument depth exceeded' in error.message
 
   async def it_should_accept_same_nested_object_multiple_times(self):
     foo = { 'x': 1 }
-    self.expect(await self.page.evaluate('x => x', { 'foo': foo, 'bar': [foo], 'baz': { 'foo' : foo } })).toBe(
-      { 'foo': { 'x': 1 }, 'bar': [{ 'x' : 1 }], 'baz': { 'foo': { 'x' : 1 } } })
+    assert await self.page.evaluate('x => x', { 'foo': foo, 'bar': [foo], 'baz': { 'foo' : foo } }) == {
+      'foo': { 'x': 1 }, 'bar': [{ 'x' : 1 }], 'baz': { 'foo': { 'x' : 1 } } }
 
   async def it_should_accept_object_handle_to_unserializable_value(self):
     handle = await self.page.evaluateHandle('() => Infinity')
-    self.expect(await self.page.evaluate('e => Object.is(e, Infinity)', handle)).toBeTruthy()
+    assert await self.page.evaluate('e => Object.is(e, Infinity)', handle)
 
   async def it_should_pass_configurable_args(self):
     result = await self.page.evaluate('''arg => {
@@ -88,7 +88,7 @@ class JSHandleEvaluateTestCase(PageTestCase):
         throw new Error('Still 17');
       return arg;
     }''', { 'foo': 42 })
-    self.expect(result).toBe({})
+    assert result == {}
 
 class JSHandlePropertiesTestCase(PageTestCase):
   async def it_should_get_property(self):
@@ -98,7 +98,7 @@ class JSHandlePropertiesTestCase(PageTestCase):
       three: 3
     })''')
     handle2 = await handle1.getProperty('two')
-    self.expect(await handle2.jsonValue()).toBe(2)
+    assert await handle2.jsonValue() == 2
 
   async def it_should_work_with_undefined_null_and_empty(self):
     handle = await self.page.evaluateHandle('''() => ({
@@ -106,11 +106,11 @@ class JSHandlePropertiesTestCase(PageTestCase):
       null: null,
     })''')
     undefined_handle = await handle.getProperty('undefined')
-    self.expect(await undefined_handle.jsonValue()).toBe(None)
+    assert await undefined_handle.jsonValue() == None
     null_handle = await handle.getProperty('null')
-    self.expect(await null_handle.jsonValue()).toBe(None)
+    assert await null_handle.jsonValue() == None
     empty_handle = await handle.getProperty('empty')
-    self.expect(await empty_handle.jsonValue()).toBe(None)
+    assert await empty_handle.jsonValue() == None
 
   async def it_should_work_with_unserializable_values(self):
     handle = await self.page.evaluateHandle('''() => ({
@@ -120,36 +120,36 @@ class JSHandlePropertiesTestCase(PageTestCase):
       negZero: -0
     })''')
     infinity_handle = await handle.getProperty('infinity')
-    self.expect(await infinity_handle.jsonValue()).toBe(float('inf'))
+    assert await infinity_handle.jsonValue() == float('inf')
     neg_infinity_handle = await handle.getProperty('negInfinity')
-    self.expect(await neg_infinity_handle.jsonValue()).toBe(float('-inf'))
+    assert await neg_infinity_handle.jsonValue() == float('-inf')
     nan_handle = await handle.getProperty('nan')
     self.assertTrue(math.isnan(await nan_handle.jsonValue()))
     neg_zero_handle = await handle.getProperty('negZero')
-    self.expect(await neg_zero_handle.jsonValue()).toBe(float('-0'))
+    assert await neg_zero_handle.jsonValue() == float('-0')
 
   async def it_should_get_properties(self):
     handle = await self.page.evaluateHandle('() => ({ foo: "bar" })')
     properties = await handle.getProperties()
-    self.expect(properties).toContain('foo')
+    assert 'foo' in properties
     foo = properties['foo']
-    self.expect(await foo.jsonValue()).toBe('bar')
+    assert await foo.jsonValue() == 'bar'
 
   async def it_should_return_empty_map_for_non_objects(self):
     handle = await self.page.evaluateHandle('123')
     properties = await handle.getProperties()
-    self.expect(properties).toBe({})
+    assert properties == {}
 
 class JSHandleJsonValueTestCase(PageTestCase):
   async def it_should_work(self):
     handle = await self.page.evaluateHandle('() => ({foo: "bar"})')
     json = await handle.jsonValue()
-    self.expect(json).toBe({'foo': 'bar'})
+    assert json == {'foo': 'bar'}
 
   async def it_should_work_with_dates(self):
     handle = await self.page.evaluateHandle('() => new Date("2020-05-27T01:31:38.506Z")')
     json = await handle.jsonValue()
-    self.expect(json).toBe(datetime.fromisoformat('2020-05-27T01:31:38.506'))
+    assert json == datetime.fromisoformat('2020-05-27T01:31:38.506')
 
   async def it_should_throw_for_circular_object(self):
     handle = await self.page.evaluateHandle('window')
@@ -158,7 +158,7 @@ class JSHandleJsonValueTestCase(PageTestCase):
       await handle.jsonValue()
     except Error as e:
       error = e
-    self.expect(error.message).toContain('Argument is a circular structure')
+    assert 'Argument is a circular structure' in error.message
 
 class JSHandleAsElementTestCase(PageTestCase):
   async def it_should_work(self):
@@ -174,18 +174,18 @@ class JSHandleAsElementTestCase(PageTestCase):
 class JSHandleToStringTestCase(PageTestCase):
   async def it_should_work_for_primitives(self):
     number_handle = await self.page.evaluateHandle('2')
-    self.expect(number_handle.toString()).toBe('JSHandle@2')
+    assert number_handle.toString() == 'JSHandle@2'
     string_handle = await self.page.evaluateHandle('"a"')
-    self.expect(string_handle.toString()).toBe('JSHandle@a')
+    assert string_handle.toString() == 'JSHandle@a'
 
   async def it_should_work_for_complicated_objects(self):
     handle = await self.page.evaluateHandle('window')
-    self.expect(handle.toString()).toBe('JSHandle@object')
+    assert handle.toString() == 'JSHandle@object'
 
   async def it_should_work_for_promises(self):
     handle = await self.page.evaluateHandle('({b: Promise.resolve(123)})')
     b_handle = await handle.getProperty('b')
-    self.expect(b_handle.toString()).toBe('JSHandle@promise')
+    assert b_handle.toString() == 'JSHandle@promise'
 
 make_async(JSHandleEvaluateTestCase)
 make_async(JSHandlePropertiesTestCase)

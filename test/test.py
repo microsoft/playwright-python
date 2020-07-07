@@ -31,21 +31,6 @@ async def launch_browser():
 asyncio.get_event_loop().run_until_complete(launch_browser())
 _thread.start_new_thread(start_server, ())
 
-class ActualValue:
-  def __init__(self, test_case: unittest.TestCase, value):
-    self.test_case = test_case
-    self.value = value
-
-  def toBe(self, value):
-    self.test_case.assertEqual(self.value, value)
-
-  def toContain(self, value):
-    self.test_case.assertIn(value, self.value)
-
-  def toBeTruthy(self):
-    if not self.value:
-      self.test_case.assertTrue(False)
-
 class TestCase(unittest.TestCase):
   def setUp(self):
     asyncio.get_event_loop().run_until_complete(self.before_each())
@@ -58,9 +43,6 @@ class TestCase(unittest.TestCase):
 
   async def after_each(self):
     return None
-
-  def expect(self, value: any) -> ActualValue:
-    return ActualValue(self, value)
 
 class PageTestCase(TestCase):
 
