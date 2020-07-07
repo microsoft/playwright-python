@@ -181,7 +181,7 @@ class Frame(ChannelOwner):
       selector: str,
       name: str,
       timeout: int = None) -> str:
-    await self._channel.send('getAttribute', locals_to_params(locals()))
+    return await self._channel.send('getAttribute', locals_to_params(locals()))
 
   async def hover(self,
       selector: str,
