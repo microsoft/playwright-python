@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import playwright_web
-import pytest
+import http.server
+import threading
 
+import pytest
+import playwright_web
+from .server import PORT, HTTPRequestHandler
+
+# Will mark all the tests as async
+def pytest_collection_modifyitems(items):
+    for item in items:
+        item.add_marker(pytest.mark.asyncio)
 
 @pytest.fixture(scope='session')
 def event_loop():
@@ -41,3 +49,10 @@ async def page(context):
     page = await context.newPage()
     yield page
     await page.close()
+
+@pytest.fixture(autouse=True, scope='session')
+async def start_http_server():
+    httpd = http.server.HTTPServer(('', PORT), HTTPRequestHandler)
+    threading.Thread(target=httpd.serve_forever).start()
+    yield
+    httpd.shutdown()

@@ -12,21 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-from playwright_web.helper import Error
-from .test import PageTestCase, make_async
 from .server import PREFIX
 
-class FillTestCase(PageTestCase):
+async def test_fill_textarea(page):
+  await page.goto(f'{PREFIX}/textarea.html')
+  await page.fill('textarea', 'some value')
+  assert await page.evaluate('result') == 'some value'
 
-  async def it_should_fill_textarea(self):
-    await self.page.goto(f'{PREFIX}/textarea.html')
-    await self.page.fill('textarea', 'some value')
-    self.expect(await self.page.evaluate('result')).toBe('some value')
+async def test_fill_input(page):
+  await page.goto(f'{PREFIX}/textarea.html')
+  await page.fill('input', 'some value')
+  assert await page.evaluate('result') == 'some value'
 
-  async def it_should_fill_input(self):
-    await self.page.goto(f'{PREFIX}/textarea.html')
-    await self.page.fill('input', 'some value')
-    self.expect(await self.page.evaluate('result')).toBe('some value')
-
-make_async(FillTestCase)

@@ -19,7 +19,7 @@ PORT = 8907
 EMPTY_PAGE = f'http://localhost:{PORT}/empty.html'
 PREFIX = f'http://localhost:{PORT}'
 
-class Handler(http.server.SimpleHTTPRequestHandler):
+class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), 'assets'), **kwargs)
 
@@ -28,7 +28,3 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
   def log_error(self, *args):
     return
-
-def start_server():
-  with http.server.HTTPServer(("", PORT), Handler) as httpd:
-    httpd.serve_forever()

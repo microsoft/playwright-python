@@ -7,7 +7,7 @@ This is a Python 3 version of the [https://github.com/microsoft/playwright](http
 # Install
 
 ```sh
-pip install playwright_web
+pip install playwright-web
 ```
 
 # Run
@@ -47,14 +47,12 @@ python ./build_driver.py
 
 Run tests:
 ```sh
-python -m unittest
+pytest
 ```
 
 Run tests with coverage:
-```
-pip install coverage
-coverage run -m unittest
-coverage html
+```sh
+pytest --cov=playwright_web --cov-report html
 open htmlcov/index.html
 ```
 
