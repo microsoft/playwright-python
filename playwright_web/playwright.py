@@ -50,7 +50,7 @@ class Playwright:
     if st.st_mode & stat.S_IEXEC == 0:
       os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
 
-    subprocess.run([driver_executable, 'install'])
+    subprocess.run(f"{driver_executable} install", shell=True)
 
     self._proc = await asyncio.create_subprocess_exec(driver_executable,
       stdin=asyncio.subprocess.PIPE,

@@ -2,7 +2,7 @@
 
 ⚠️ **EXPERIMENTAL** ⚠️
 
-This is a Python3 version of the [https://github.com/microsoft/playwright](https://github.com/microsoft/playwright) project. In only contains initial stub implementation with **NO** tests. It can not be used in production yet.
+This is a Python 3 version of the [https://github.com/microsoft/playwright](https://github.com/microsoft/playwright) project. In only contains initial stub implementation with **NO** tests. It can not be used in production yet.
 
 # Install
 
@@ -42,19 +42,27 @@ asyncio.get_event_loop().run_until_complete(run())
 
 Build driver:
 ```sh
-python3 ./build_driver.py
+python ./build_driver.py
 ```
 
 Run tests:
 ```sh
-python3 -m unittest
+python -m unittest
+```
+
+Run tests with coverage:
+```
+pip install coverage
+coverage run -m unittest
+coverage html
+open htmlcov/index.html
 ```
 
 Deploy:
 ```sh
-python3 ./build_package.py
+python ./build_package.py
 ... check
-python3 ./upload_package.py
+python ./upload_package.py
 ```
 
 # Contributing

@@ -8,3 +8,6 @@ playwright_web.egg-info/
 build/
 dist/
 **/*.pyc
+env/
+htmlcov/
+.coverage

@@ -31,8 +31,8 @@ if os.path.exists(os.path.join(driver_path, 'node_modules')):
 if os.path.exists(os.path.join(driver_path, 'out')):
   shutil.rmtree(os.path.join(driver_path, 'out'))
 
-subprocess.run(['npm', 'i'], cwd=driver_path)
-subprocess.run(['npm', 'run', 'bake'], cwd=driver_path)
+subprocess.run('npm i', cwd=driver_path, shell=True)
+subprocess.run('npm run bake', cwd=driver_path, shell=True)
 
 for driver in ['driver-linux', 'driver-macos', 'driver-win.exe']:
   if os.path.exists(os.path.join(package_path, driver)):
