@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import playwright_web
+import http.server
+import threading
+
 import pytest
-from .server import start_server
-import _thread
+import playwright_web
+from .server import PORT, HTTPRequestHandler
 
 # Will mark all the tests as async
 def pytest_collection_modifyitems(items):
@@ -48,6 +50,9 @@ async def page(context):
     yield page
     await page.close()
 
-@pytest.fixture(autouse=True)
-def start_http_server():
-    _thread.start_new_thread(start_server, ())
+@pytest.fixture(autouse=True, scope='session')
+async def start_http_server():
+    httpd = http.server.HTTPServer(('', PORT), HTTPRequestHandler)
+    threading.Thread(target=httpd.serve_forever).start()
+    yield
+    httpd.shutdown()
