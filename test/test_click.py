@@ -12,44 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
+import pytest
 from playwright_web.helper import Error
-from .test import PageTestCase, make_async
 from .server import PREFIX
 
-class ClickTestCase(PageTestCase):
-  async def it_should_click_the_button(self):
-    await self.page.goto(f'{PREFIX}/button.html')
-    await self.page.click('button')
-    self.expect(await self.page.evaluate('result')).toBe('Clicked')
+pytestmark = pytest.mark.asyncio
 
-  async def it_should_select_the_text_by_triple_clicking(self):
-    await self.page.goto(f'{PREFIX}/textarea.html')
-    text = 'This is the text that we are going to try to select. Let\'s see how it goes.'
-    await self.page.fill('textarea', text)
-    await self.page.click('textarea', clickCount=3)
-    self.expect(await self.page.evaluate('''() => {
-      const textarea = document.querySelector('textarea');
-      return textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
-    }''')).toBe(text)
+async def test_click_the_button(page):
+  await page.goto(f'{PREFIX}/button.html')
+  await page.click('button')
+  assert await page.evaluate('result') == 'Clicked'
 
-  async def it_should_not_wait_with_force(self):
-    await self.page.goto(f'{PREFIX}/button.html')
-    await self.page.evalOnSelector('button', 'b => b.style.display = "none"')
-    error = None
-    try:
-      await self.page.click('button', force=True)
-    except Error as e:
-      error = e
-    self.expect(error.message).toContain('Element is not visible')
-    self.expect(await self.page.evaluate('result')).toBe('Was not clicked')
+async def test_select_the_text_by_triple_clicking(page):
+  await page.goto(f'{PREFIX}/textarea.html')
+  text = 'This is the text that we are going to try to select. Let\'s see how it goes.'
+  await page.fill('textarea', text)
+  await page.click('textarea', clickCount=3)
+  assert await page.evaluate('''() => {
+    const textarea = document.querySelector('textarea');
+    return textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+  }''') == text
 
-  async def it_should_click_the_button_with_px_border_with_offset(self):
-    await self.page.goto(f'{PREFIX}/button.html')
-    await self.page.evalOnSelector('button', 'button => button.style.borderWidth = "8px"')
-    await self.page.click('button', position=dict(x=20, y=10))
-    self.expect(await self.page.evaluate('result')).toBe('Clicked')
-    self.expect(await self.page.evaluate('offsetX')).toBe(20)
-    self.expect(await self.page.evaluate('offsetY')).toBe(10)
+async def test_not_wait_with_force(page):
+  await page.goto(f'{PREFIX}/button.html')
+  await page.evalOnSelector('button', 'b => b.style.display = "none"')
+  error = None
+  try:
+    await page.click('button', force=True)
+  except Error as e:
+    error = e
+  assert 'Element is not visible' in error.message
+  assert await page.evaluate('result') == 'Was not clicked'
 
-make_async(ClickTestCase)
+async def test_click_the_button_with_px_border_with_offset(page):
+  await page.goto(f'{PREFIX}/button.html')
+  await page.evalOnSelector('button', 'button => button.style.borderWidth = "8px"')
+  await page.click('button', position=dict(x=20, y=10))
+  assert await page.evaluate('result') == 'Clicked'
+  assert await page.evaluate('offsetX') == 20
+  assert await page.evaluate('offsetY') == 10

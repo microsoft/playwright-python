@@ -7,7 +7,7 @@ This is a Python 3 version of the [https://github.com/microsoft/playwright](http
 # Install
 
 ```sh
-pip3 install playwright_web
+pip install playwright_web
 ```
 
 # Run
