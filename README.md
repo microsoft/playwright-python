@@ -18,7 +18,7 @@ from playwright_web import webkit
 
 async def run():
     browser = await webkit.launch(headless=False)
-    context = await browser.newContext(viewport=None)
+    context = await browser.newContext(viewport=0) # 0 stands for no viewport
     page = await context.newPage()
 
     page.on('framenavigated', lambda frame: print(f'Frame navigated to {frame.url}'))
