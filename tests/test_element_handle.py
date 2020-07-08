@@ -373,23 +373,23 @@ async def test_fill_input_when_Node_is_removed(page, server):
   await handle.fill('some value')
   assert await page.evaluate('result') == 'some value'
 
-async def test_select_textarea(page, server):
+async def test_select_textarea(page, server, browser_name):
   await page.goto(server.PREFIX + '/input/textarea.html')
   textarea = await page.querySelector('textarea')
   await textarea.evaluate('textarea => textarea.value = "some value"')
   await textarea.selectText()
-  if False: # FFOX
+  if browser_name == "firefox":
     assert await textarea.evaluate('el => el.selectionStart') == 0
     assert await textarea.evaluate('el => el.selectionEnd') == 10
   else:
     assert await page.evaluate('() => window.getSelection().toString()') == 'some value'
 
-async def test_select_input(page, server):
+async def test_select_input(page, server, browser_name):
   await page.goto(server.PREFIX + '/input/textarea.html')
   input = await page.querySelector('input')
   await input.evaluate('input => input.value = "some value"')
   await input.selectText()
-  if False: # FFOX
+  if browser_name == "firefox":
     assert await input.evaluate('el => el.selectionStart') == 0
     assert await input.evaluate('el => el.selectionEnd') == 10
   else:
