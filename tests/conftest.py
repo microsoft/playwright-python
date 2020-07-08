@@ -25,6 +25,11 @@ def pytest_collection_modifyitems(items):
     for item in items:
         item.add_marker(pytest.mark.asyncio)
 
+def pytest_generate_tests(metafunc):
+    if 'browser_name' in metafunc.fixturenames:
+        browsers = metafunc.config.option.browser or ['chromium', 'firefox', 'webkit']
+        metafunc.parametrize("browser_name", browsers, scope='session')
+
 @pytest.fixture(scope='session')
 def event_loop():
     loop = playwright.playwright.loop
@@ -92,9 +97,9 @@ def pytest_addoption(parser):
     group = parser.getgroup('playwright', 'Playwright')
     group.addoption(
         '--browser',
-        choices=['chromium', 'firefox', 'webkit'],
-        default='chromium',
-        help='Browser engine which should be used',
+        action='append',
+        default=[],
+        help='Browsers which should be used. By default on all the browsers.',
     )
 
 

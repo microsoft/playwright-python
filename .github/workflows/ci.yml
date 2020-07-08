@@ -43,9 +43,5 @@ jobs:
         PKG_CACHE_PATH: ${{ steps.node-pkg-cache.outputs.dir }}
     - name: Build package
       run: python build_package.py
-    - name: Test Chromium
+    - name: Test
       run: pytest
-    - name: Test Firefox
-      run: pytest --browser firefox
-    - name: Test Webkit
-      run: pytest --browser webkit
