@@ -1,1 +1,1 @@
-recursive-include playwright_web/drivers *
+recursive-include playwright/drivers *

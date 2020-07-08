@@ -18,8 +18,8 @@ with open('README.md', 'r', encoding='utf-8') as fh:
   long_description = fh.read()
 
 setuptools.setup(
-  name='playwright-web',
-  version='0.0.10',
+  name='playwright',
+  version='0.0.1',
   author='Microsoft Corporation',
   author_email='',
   description='A high-level API to automate web browsers',

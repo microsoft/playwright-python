@@ -14,25 +14,25 @@
 
 import asyncio
 import base64
-from playwright_web.accessibility import Accessibility
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel, from_nullable_channel
-from playwright_web.console_message import ConsoleMessage
-from playwright_web.dialog import Dialog
-from playwright_web.download import Download
-from playwright_web.element_handle import ElementHandle, ValuesToSelect
-from playwright_web.file_chooser import FileChooser
-from playwright_web.helper import locals_to_params
-from playwright_web.input import Keyboard, Mouse
-from playwright_web.js_handle import JSHandle
-from playwright_web.frame import Frame
-from playwright_web.helper import is_function_body, parse_error, serialize_error, Error, FilePayload, FrameMatch, FunctionWithSource, Optional, PendingWaitEvent, RouteHandler, RouteHandlerEntry, SelectOption, TimeoutSettings, URLMatch, URLMatcher
-from playwright_web.network import Request, Response, Route
-from playwright_web.worker import Worker
+from playwright.accessibility import Accessibility
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel, from_nullable_channel
+from playwright.console_message import ConsoleMessage
+from playwright.dialog import Dialog
+from playwright.download import Download
+from playwright.element_handle import ElementHandle, ValuesToSelect
+from playwright.file_chooser import FileChooser
+from playwright.helper import locals_to_params
+from playwright.input import Keyboard, Mouse
+from playwright.js_handle import JSHandle
+from playwright.frame import Frame
+from playwright.helper import is_function_body, parse_error, serialize_error, Error, FilePayload, FrameMatch, FunctionWithSource, Optional, PendingWaitEvent, RouteHandler, RouteHandlerEntry, SelectOption, TimeoutSettings, URLMatch, URLMatcher
+from playwright.network import Request, Response, Route
+from playwright.worker import Worker
 from types import SimpleNamespace
 from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright_web.browser_context import BrowserContext
+  from playwright.browser_context import BrowserContext
 
 class Page(ChannelOwner):
 

@@ -28,7 +28,7 @@ else:
 
 
 if TYPE_CHECKING:
-  from playwright_web.network import Route, Request
+  from playwright.network import Route, Request
 
 Cookie = List[Dict[str, Union[str, int, bool]]]
 URLMatch = Union[str, Callable[[str], bool]]

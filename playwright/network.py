@@ -14,12 +14,12 @@
 
 import base64
 import json
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel, from_channel
-from playwright_web.helper import Error
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel, from_channel
+from playwright.helper import Error
 from typing import Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright_web.frame import Frame
+  from playwright.frame import Frame
 
 class Request(ChannelOwner):
 

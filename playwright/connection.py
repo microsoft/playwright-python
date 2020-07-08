@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import asyncio
-from playwright_web.helper import parse_error
-from playwright_web.transport import Transport
+from playwright.helper import parse_error
+from playwright.transport import Transport
 from pyee import BaseEventEmitter
 from typing import Any, Awaitable, Dict, List, Optional
 

@@ -15,12 +15,12 @@
 import math
 
 from datetime import datetime
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright_web.helper import ConsoleMessageLocation, Error, is_function_body
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
+from playwright.helper import ConsoleMessageLocation, Error, is_function_body
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright_web.element_handle import ElementHandle
+  from playwright.element_handle import ElementHandle
 
 class JSHandle(ChannelOwner):
 

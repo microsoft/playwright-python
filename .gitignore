@@ -1,9 +1,9 @@
-playwright_web/__pycache__/
-playwright_web/drivers/
-playwright_web/driver*
+playwright/__pycache__/
+playwright/drivers/
+playwright/driver*
 driver/node_modules/
 driver/out/
-playwright_web.egg-info/
+playwright.egg-info/
 build/
 dist/
 **/*.pyc

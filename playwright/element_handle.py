@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import base64
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel
-from playwright_web.helper import ConsoleMessageLocation, FilePayload, SelectOption, locals_to_params
-from playwright_web.js_handle import parse_result, serialize_argument, JSHandle
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel
+from playwright.helper import ConsoleMessageLocation, FilePayload, SelectOption, locals_to_params
+from playwright.js_handle import parse_result, serialize_argument, JSHandle
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright_web.frame import Frame
+  from playwright.frame import Frame
 
 class ElementHandle(JSHandle):
 

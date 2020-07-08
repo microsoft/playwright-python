@@ -21,7 +21,7 @@ if os.path.exists(os.path.join(folder, 'build')):
   shutil.rmtree(os.path.join(folder, 'build'))
 if os.path.exists(os.path.join(folder, 'dist')):
   shutil.rmtree(os.path.join(folder, 'dist'))
-if os.path.exists(os.path.join(folder, 'playwright_web.egg-info')):
-  shutil.rmtree(os.path.join(folder, 'playwright_web.egg-info'))
+if os.path.exists(os.path.join(folder, 'playwright.egg-info')):
+  shutil.rmtree(os.path.join(folder, 'playwright.egg-info'))
 
 subprocess.run('python setup.py sdist bdist_wheel', shell=True)

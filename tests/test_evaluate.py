@@ -14,7 +14,7 @@
 
 import math
 from datetime import datetime
-from playwright_web.helper import Error
+from playwright.helper import Error
 
 async def test_evaluate_work(page):
   result = await page.evaluate('7 * 3')

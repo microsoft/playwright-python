@@ -12,30 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope
-from types import SimpleNamespace
+from playwright.connection import Channel, ChannelOwner, ConnectionScope
 from typing import Dict
 
-class BrowserServer(ChannelOwner):
-
-  Events = SimpleNamespace(
-    Close='close',
-  )
+class Dialog(ChannelOwner):
 
   def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
     super().__init__(scope, guid, initializer)
-    self._channel.on('close', lambda _: self.emit(BrowserServer.Events.Close))
 
   @property
-  def pid(self) -> str:
-    return self._initializer['pid']
+  def type(self) -> str:
+    return self._initializer['type']
 
   @property
-  def wsEndpoint(self) -> str:
-    return self._initializer['wsEndpoint']
+  def message(self) -> str:
+    return self._initializer['message']
 
-  async def kill(self) -> None:
-    await self._channel.send('kill')
+  @property
+  def defaultValue(self) -> str:
+    return self._initializer['defaultValue']
 
-  async def close(self) -> None:
-    await self._channel.send('close')
+  async def accept(self, prompt_text: str = None) -> None:
+    await self._channel.send('accept', dict(promptText=prompt_text))
+
+  async def dismiss(self) -> None:
+    await self._channel.send('dismiss')
