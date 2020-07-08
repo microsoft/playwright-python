@@ -14,7 +14,7 @@
 
 import asyncio
 
-from playwright_web import browser_types
+from playwright import browser_types
 
 async def run():
     print('Launching browser...')

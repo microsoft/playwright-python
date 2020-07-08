@@ -16,7 +16,7 @@ import http.server
 import threading
 
 import pytest
-import playwright_web
+import playwright
 from .server import PORT, HTTPRequestHandler
 
 # Will mark all the tests as async
@@ -26,14 +26,14 @@ def pytest_collection_modifyitems(items):
 
 @pytest.fixture(scope='session')
 def event_loop():
-    loop = playwright_web.playwright.loop
+    loop = playwright.playwright.loop
     yield loop
     loop.close()
 
 
 @pytest.fixture(scope='session')
 async def browser():
-    browser = await playwright_web.chromium.launch()
+    browser = await playwright.chromium.launch()
     yield browser
     await browser.close()
 

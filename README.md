@@ -7,14 +7,14 @@ This is a Python 3 version of the [https://github.com/microsoft/playwright](http
 # Install
 
 ```sh
-pip install playwright-web
+pip install playwright
 ```
 
 # Run
 
 ```py
 import asyncio
-from playwright_web import webkit
+from playwright import webkit
 
 async def run():
     browser = await webkit.launch(headless=False)
@@ -52,7 +52,7 @@ pytest
 
 Run tests with coverage:
 ```sh
-pytest --cov=playwright_web --cov-report html
+pytest --cov=playwright --cov-report html
 open htmlcov/index.html
 ```
 
@@ -65,7 +65,7 @@ python ./upload_package.py
 
 Checking for typing errors
 ```sh
-mypy playwright_web
+mypy playwright
 ```
 
 # Contributing

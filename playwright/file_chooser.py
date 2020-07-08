@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.helper import FilePayload
+from playwright.helper import FilePayload
 
 from typing import Dict, List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright_web.page import Page
-  from playwright_web.element_handle import ElementHandle
+  from playwright.page import Page
+  from playwright.element_handle import ElementHandle
 
 class FileChooser():
 

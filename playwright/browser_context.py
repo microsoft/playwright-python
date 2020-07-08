@@ -13,15 +13,15 @@
 # limitations under the License.
 
 import asyncio
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel, from_nullable_channel
-from playwright_web.helper import Cookie, Error, FunctionWithSource, PendingWaitEvent, RouteHandler, RouteHandlerEntry, TimeoutSettings, URLMatch, URLMatcher
-from playwright_web.network import Request, Response, Route
-from playwright_web.page import BindingCall, Page
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel, from_nullable_channel
+from playwright.helper import Cookie, Error, FunctionWithSource, PendingWaitEvent, RouteHandler, RouteHandlerEntry, TimeoutSettings, URLMatch, URLMatcher
+from playwright.network import Request, Response, Route
+from playwright.page import BindingCall, Page
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright_web.browser import Browser
+  from playwright.browser import Browser
 
 class BrowserContext(ChannelOwner):
 

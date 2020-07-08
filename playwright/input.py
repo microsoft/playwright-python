@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.connection import Channel
-from playwright_web.helper import locals_to_params
+from playwright.connection import Channel
+from playwright.helper import locals_to_params
 from typing import Awaitable, Dict
 
 class Keyboard:

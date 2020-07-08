@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright_web.browser import Browser
-from playwright_web.browser_context import BrowserContext
-from playwright_web.helper import locals_to_params
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
+from playwright.browser import Browser
+from playwright.browser_context import BrowserContext
+from playwright.helper import locals_to_params
 from typing import Awaitable, Dict, List
 
 class BrowserType(ChannelOwner):

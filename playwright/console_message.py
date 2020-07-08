@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope
-from typing import Dict
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
+from playwright.helper import ConsoleMessageLocation
+from playwright.js_handle import JSHandle
+from typing import Dict, List
 
-class Dialog(ChannelOwner):
+class ConsoleMessage(ChannelOwner):
 
   def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
     super().__init__(scope, guid, initializer)
@@ -25,12 +27,20 @@ class Dialog(ChannelOwner):
     return self._initializer['type']
 
   @property
-  def message(self) -> str:
-    return self._initializer['message']
+  def text(self) -> str:
+    return self._initializer['text']
 
   @property
   def defaultValue(self) -> str:
     return self._initializer['defaultValue']
+
+  @property
+  def args(self) -> List[JSHandle]:
+    return list(map(from_channel, self._initializer['args']))
+
+  @property
+  def location(self) -> ConsoleMessageLocation:
+    return self._initializer['location']
 
   async def accept(self, prompt_text: str = None) -> None:
     await self._channel.send('accept', dict(promptText=prompt_text))

@@ -18,7 +18,7 @@ import shutil
 import subprocess
 
 driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'driver')
-package_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playwright_web')
+package_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playwright')
 drivers_path = os.path.join(package_path, 'drivers')
 
 

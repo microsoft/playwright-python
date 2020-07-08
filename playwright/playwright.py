@@ -20,9 +20,9 @@ import stat
 import sys
 import subprocess
 
-from playwright_web.connection import Connection
-from playwright_web.object_factory import create_remote_object
-from playwright_web.browser_type import BrowserType
+from playwright.connection import Connection
+from playwright.object_factory import create_remote_object
+from playwright.browser_type import BrowserType
 from typing import Dict
 
 class Playwright:

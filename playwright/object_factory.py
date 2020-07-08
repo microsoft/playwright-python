@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.connection import ConnectionScope
-from playwright_web.browser import Browser
-from playwright_web.browser_context import BrowserContext
-from playwright_web.browser_server import BrowserServer
-from playwright_web.browser_type import BrowserType
-from playwright_web.console_message import ConsoleMessage
-from playwright_web.dialog import Dialog
-from playwright_web.download import Download
-from playwright_web.element_handle import ElementHandle
-from playwright_web.frame import Frame
-from playwright_web.js_handle import JSHandle
-from playwright_web.network import Request, Response, Route
-from playwright_web.page import BindingCall, Page
-from playwright_web.worker import Worker
+from playwright.connection import ConnectionScope
+from playwright.browser import Browser
+from playwright.browser_context import BrowserContext
+from playwright.browser_server import BrowserServer
+from playwright.browser_type import BrowserType
+from playwright.console_message import ConsoleMessage
+from playwright.dialog import Dialog
+from playwright.download import Download
+from playwright.element_handle import ElementHandle
+from playwright.frame import Frame
+from playwright.js_handle import JSHandle
+from playwright.network import Request, Response, Route
+from playwright.page import BindingCall, Page
+from playwright.worker import Worker
 from typing import Any, Awaitable, Dict, List
 
 def create_remote_object(scope: ConnectionScope, type: str, guid: str, initializer: Dict) -> Any:

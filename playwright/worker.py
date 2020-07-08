@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright_web.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright_web.js_handle import JSHandle, parse_result, serialize_argument
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
+from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from typing import Any, Dict
 
 class Worker(ChannelOwner):
