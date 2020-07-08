@@ -42,11 +42,10 @@ async def test_not_wait_with_force(page, server):
   assert 'Element is not visible' in error.message
   assert await page.evaluate('result') == 'Was not clicked'
 
-@pytest.mark.skip_browser('webkit')
-async def test_click_the_button_with_px_border_with_offset(page, server):
+async def test_click_the_button_with_px_border_with_offset(page, server, is_webkit):
   await page.goto(f'{server.PREFIX}/input/button.html')
   await page.evalOnSelector('button', 'button => button.style.borderWidth = "8px"')
   await page.click('button', position=dict(x=20, y=10))
   assert await page.evaluate('result') == 'Clicked'
-  assert await page.evaluate('offsetX') == 20
-  assert await page.evaluate('offsetY') == 10
+  assert await page.evaluate('offsetX') == (20 + 8 if is_webkit else 20)
+  assert await page.evaluate('offsetY') == (10 + 8 if is_webkit else 10)

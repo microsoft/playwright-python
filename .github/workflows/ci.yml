@@ -10,6 +10,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.7, 3.8]
+        browser: [chromium, firefox, webkit]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -44,4 +45,4 @@ jobs:
     - name: Build package
       run: python build_package.py
     - name: Test
-      run: pytest
+      run: pytest --browser=${{ matrix.browser }}

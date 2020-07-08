@@ -27,6 +27,7 @@ from typing import Dict
 
 class Playwright:
   def __init__(self) -> None:
+    # Use ProactorEventLoop in 3.7, which is default in 3.8
     if sys.platform == 'win32':
       loop = asyncio.ProactorEventLoop()
       asyncio.set_event_loop(loop)

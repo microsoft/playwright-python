@@ -5,4 +5,5 @@ pytest-sugar==0.9.4
 pytest-xdist==1.32.0
 mypy==0.782
 setuptools==49.1.0
+twisted==20.3.0
 wheel==0.34.2
