@@ -33,8 +33,7 @@ def event_loop():
 
 
 @pytest.fixture(scope='session')
-async def browser(pytestconfig):
-    browser_name = pytestconfig.getoption("browser")
+async def browser(browser_name):
     browser = await playwright.browser_types[browser_name].launch()
     yield browser
     await browser.close()
@@ -67,9 +66,27 @@ async def start_http_server():
     yield
     httpd.shutdown()
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def browser_name(pytestconfig):
     return pytestconfig.getoption('browser')
+
+@pytest.fixture(scope="session")
+def is_webkit(browser_name):
+    return browser_name == "webkit"
+
+@pytest.fixture(scope="session")
+def is_firefox(browser_name):
+    return browser_name == "firefox"
+
+@pytest.fixture(scope="session")
+def is_chromium(browser_name):
+    return browser_name == "chromium"
+
+@pytest.fixture(autouse=True)
+def skip_by_browser(request, browser_name):
+    if request.node.get_closest_marker('skip_browser'):
+        if request.node.get_closest_marker('skip_browser').args[0] == browser_name:
+            pytest.skip('skipped on this platform: {}'.format(browser_name))
 
 def pytest_addoption(parser):
     group = parser.getgroup('playwright', 'Playwright')

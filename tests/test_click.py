@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from playwright.helper import Error
 
 
@@ -41,6 +42,7 @@ async def test_not_wait_with_force(page, server):
   assert 'Element is not visible' in error.message
   assert await page.evaluate('result') == 'Was not clicked'
 
+@pytest.mark.skip_browser('webkit')
 async def test_click_the_button_with_px_border_with_offset(page, server):
   await page.goto(f'{server.PREFIX}/input/button.html')
   await page.evalOnSelector('button', 'button => button.style.borderWidth = "8px"')
