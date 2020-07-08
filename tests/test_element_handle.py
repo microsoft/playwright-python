@@ -290,20 +290,144 @@ async def test_hover_when_node_is_removed(page, server):
   await button.hover()
   assert await page.evaluate('document.querySelector("button:hover").id') == 'button-6'
 
-async def test_should_fill_input(page, server):
+async def test_scroll(page, server):
+  await page.goto(server.PREFIX + '/offscreenbuttons.html')
+  for i in range(11):
+    button = await page.querySelector(f'#btn{i}')
+    before = await button.evaluate('''button => {
+      return button.getBoundingClientRect().right - window.innerWidth
+    }''')
+
+    assert before == 10 * i
+    await button.scrollIntoViewIfNeeded()
+    after = await button.evaluate('''button => {
+      return button.getBoundingClientRect().right - window.innerWidth
+    }''')
+
+    assert after <= 0
+    await page.evaluate('() => window.scrollTo(0, 0)')
+
+async def test_scroll_should_throw_for_detached_element(page, server):
+  await page.setContent('<div>Hello</div>')
+  div = await page.querySelector('div')
+  await div.evaluate('div => div.remove()')
+  try:
+    await div.scrollIntoViewIfNeeded()
+  except Error as e:
+    error = e
+  assert 'Element is not attached to the DOM' in error.message
+
+async def waiting_helper(page, after):
+  div = await page.querySelector('div')
+  done = list()
+  async def scroll():
+    done.append(False)
+    await div.scrollIntoViewIfNeeded()
+    done.append(True)
+  promise = asyncio.ensure_future(scroll())
+  await page.evaluate('() => new Promise(f => setTimeout(f, 1000))')
+  assert done == [False]
+  await div.evaluate(after)
+  await promise
+  assert done == [False, True]
+
+async def test_should_wait_for_display_none_to_become_visible(page):
+  await page.setContent('<div style="display:none">Hello</div>')
+  await waiting_helper(page, 'div => div.style.display = "block"')
+
+async def test_should_wait_for_display_contents_to_become_visible(page):
+  await page.setContent('<div style="display:contents">Hello</div>')
+  await waiting_helper(page, 'div => div.style.display = "block"')
+
+async def test_should_wait_for_visibility_hidden_to_become_visible(page):
+  await page.setContent('<div style="visibility:hidden">Hello</div>')
+  await waiting_helper(page, 'div => div.style.visibility = "visible"')
+
+async def test_should_wait_for_zero_sized_element_to_become_visible(page):
+  await page.setContent('<div style="height:0">Hello</div>')
+  await waiting_helper(page, 'div => div.style.height = "100px"')
+
+async def test_should_wait_for_nested_display_none_to_become_visible(page):
+  await page.setContent('<span style="display:none"><div>Hello</div></span>')
+  await waiting_helper(page, 'div => div.parentElement.style.display = "block"')
+
+async def test_should_timeout_waiting_for_visible(page):
+  await page.setContent('<div style="display:none">Hello</div>')
+  div = await page.querySelector('div')
+  try:
+    error = await div.scrollIntoViewIfNeeded(timeout=3000)
+  except Error as e:
+    error = e
+  assert 'element is not visible' in error.message
+
+async def test_fill_input(page, server):
   await page.goto(server.PREFIX + '/input/textarea.html')
   handle = await page.querySelector('input')
   await handle.fill('some value')
   assert await page.evaluate('result') == 'some value'
 
-async def test_should_fill_input_when_Node_is_removed(page, server):
+async def test_fill_input_when_Node_is_removed(page, server):
   await page.goto(server.PREFIX + '/input/textarea.html')
   await page.evaluate('delete window["Node"]')
   handle = await page.querySelector('input')
   await handle.fill('some value')
   assert await page.evaluate('result') == 'some value'
 
-async def test_should_have_a_nice_preview(page, server):
+async def test_select_textarea(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  textarea = await page.querySelector('textarea')
+  await textarea.evaluate('textarea => textarea.value = "some value"')
+  await textarea.selectText()
+  if False: # FFOX
+    assert await textarea.evaluate('el => el.selectionStart') == 0
+    assert await textarea.evaluate('el => el.selectionEnd') == 10
+  else:
+    assert await page.evaluate('() => window.getSelection().toString()') == 'some value'
+
+async def test_select_input(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  input = await page.querySelector('input')
+  await input.evaluate('input => input.value = "some value"')
+  await input.selectText()
+  if False: # FFOX
+    assert await input.evaluate('el => el.selectionStart') == 0
+    assert await input.evaluate('el => el.selectionEnd') == 10
+  else:
+    assert await page.evaluate('() => window.getSelection().toString()') == 'some value'
+
+async def test_select_text_select_plain_div(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  div = await page.querySelector('div.plain')
+  await div.selectText()
+  assert await page.evaluate('() => window.getSelection().toString()') == 'Plain div'
+
+async def test_select_text_timeout_waiting_for_invisible_element(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  textarea = await page.querySelector('textarea')
+  await textarea.evaluate('e => e.style.display = "none"')
+  try:
+    await textarea.selectText(timeout=3000)
+  except Error as e:
+    error = e
+  assert 'element is not visible' in error.message
+
+async def test_select_text_wait_for_visible(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  textarea = await page.querySelector('textarea')
+  await textarea.evaluate('textarea => textarea.value = "some value"')
+  await textarea.evaluate('e => e.style.display = "none"')
+  done = list()
+  async def select_text():
+    done.append(False)
+    await textarea.selectText(timeout=3000)
+    done.append(True)
+  promise = asyncio.ensure_future(select_text())
+  await page.evaluate('() => new Promise(f => setTimeout(f, 1000))')
+  await textarea.evaluate('e => e.style.display = "block"')
+  await promise
+  assert done == [False, True]
+
+async def test_a_nice_preview(page, server):
   await page.goto(f'{server.PREFIX}/dom.html')
   outer = await page.querySelector('#outer')
   inner = await page.querySelector('#inner')
@@ -355,26 +479,26 @@ async def test_text_content(page, server):
   assert await handle.textContent() == 'Text,\nmore text'
   assert await page.textContent('#inner') == 'Text,\nmore text'
 
-async def test_should_check_the_box(page):
+async def test_check_the_box(page):
   await page.setContent('<input id="checkbox" type="checkbox"></input>')
   input = await page.querySelector('input')
   await input.check()
   assert await page.evaluate('checkbox.checked')
 
-async def test_should_uncheck_the_box(page):
+async def test_uncheck_the_box(page):
   await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
   input = await page.querySelector('input')
   await input.uncheck()
   assert await page.evaluate('checkbox.checked') == False
 
-async def test_should_select_single_option(page, server):
+async def test_select_single_option(page, server):
   await page.goto(server.PREFIX + '/input/select.html')
   select = await page.querySelector('select')
   await select.selectOption('blue')
   assert await page.evaluate('result.onInput') == ['blue']
   assert await page.evaluate('result.onChange') == ['blue']
 
-async def test_should_focus_a_button(page, server):
+async def test_focus_a_button(page, server):
   await page.goto(server.PREFIX + '/input/button.html')
   button = await page.querySelector('button')
   assert await button.evaluate('button => document.activeElement === button') == False

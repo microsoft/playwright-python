@@ -22,4 +22,4 @@ async def test_frames_respect_name(page):
 async def test_frames_respect_url(page, server):
   await page.setContent(f'<iframe src="{server.EMPTY_PAGE}"></iframe>')
   assert page.frame(url='bogus') is None
-  assert page.frame(url=f'**/empty.html').url == ('http://localhost:8907/empty.html')
+  assert page.frame(url=f'**/empty.html').url == (f'http://localhost:{server.PORT}/empty.html')
