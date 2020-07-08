@@ -33,7 +33,12 @@ setuptools.setup(
     'typing-extensions',
   ],
   classifiers=[
+    'Topic :: Software Development :: Testing',
+    'Topic :: Internet :: WWW/HTTP :: Browsers',
+    'Intended Audience :: Developers',
     'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: OS Independent',
   ],
