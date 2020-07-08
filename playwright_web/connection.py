@@ -16,7 +16,6 @@ import asyncio
 from playwright_web.helper import parse_error
 from playwright_web.transport import Transport
 from pyee import BaseEventEmitter
-from types import SimpleNamespace
 from typing import Any, Awaitable, Dict, List, Optional
 
 

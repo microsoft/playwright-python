@@ -22,9 +22,9 @@ from typing import Awaitable, Dict
 class Transport:
   def __init__(self, input: asyncio.StreamReader, output: asyncio.StreamWriter, loop: asyncio.AbstractEventLoop) -> None:
     super().__init__()
-    self._input = input
-    self._output = output
-    self.loop = loop
+    self._input: asyncio.StreamReader = input
+    self._output: asyncio.StreamWriter = output
+    self.loop: asyncio.AbstractEventLoop = loop
     self.on_message = lambda _: None
     loop.create_task(self._run())
 
@@ -50,11 +50,11 @@ class Transport:
         if 'DEBUG' in os.environ:
           print('\x1b[33mRECV>\x1b[0m', obj.get('method'))
         self.on_message(obj)
-      except asyncio.streams.IncompleteReadError:
+      except asyncio.IncompleteReadError:
         break
       await asyncio.sleep(0)
 
-  def send(self, message: Dict) -> Awaitable:
+  def send(self, message: Dict) -> None:
     msg = json.dumps(message)
     if 'DEBUGP' in os.environ:
       print('\x1b[32mSEND>\x1b[0m', json.dumps(message, indent=2))

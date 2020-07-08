@@ -63,6 +63,11 @@ python ./build_package.py
 python ./upload_package.py
 ```
 
+Checking for typing errors
+```sh
+mypy playwright_web
+```
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

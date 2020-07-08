@@ -35,4 +35,4 @@ class Download(ChannelOwner):
     return await self._channel.send('failure')
 
   async def path(self) -> Optional[str]:
-    await self._channel.send('path')
+    return await self._channel.send('path')

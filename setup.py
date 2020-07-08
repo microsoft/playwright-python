@@ -30,6 +30,7 @@ setuptools.setup(
   include_package_data=True,
   install_requires=[
     'pyee',
+    'typing-extensions',
   ],
   classifiers=[
     'Programming Language :: Python :: 3',
