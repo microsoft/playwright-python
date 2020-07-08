@@ -66,7 +66,7 @@ This code snippet navigates to example.com in Firefox, and executes a script in 
 
 ```py
 import asyncio
-from playwright import firefox, devices
+from playwright import firefox
 
 async def run():
   browser = await firefox.launch()
@@ -102,7 +102,7 @@ async def run():
     await route.continue_()
 
   # Log and continue all network requests
-  page.route('**', asyncio.ensure_future(log_and_continue_request(route, request)))
+  await page.route('**', lambda route, request: asyncio.ensure_future(log_and_continue_request(route, request)))
 
   await page.goto('http://todomvc.com')
   await browser.close()
