@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .server import PREFIX
-
 async def test_keyboard_type_into_a_textarea(page):
   await page.evaluate('''
     const textarea = document.createElement('textarea');
@@ -24,8 +22,8 @@ async def test_keyboard_type_into_a_textarea(page):
   await page.keyboard.type(text)
   assert await page.evaluate('document.querySelector("textarea").value') == text
 
-async def test_keyboard_move_with_the_arrow_keys(page):
-  await page.goto(f'{PREFIX}/textarea.html')
+async def test_keyboard_move_with_the_arrow_keys(page, server):
+  await page.goto(f'{server.PREFIX}/input/textarea.html')
   await page.type('textarea', 'Hello World!')
   assert await page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
   for _ in 'World!':
@@ -39,8 +37,8 @@ async def test_keyboard_move_with_the_arrow_keys(page):
   await page.keyboard.press('Backspace')
   assert await page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
 
-async def test_keyboard_send_a_character_with_elementhandle_press(page):
-  await page.goto(f'{PREFIX}/textarea.html')
+async def test_keyboard_send_a_character_with_elementhandle_press(page, server):
+  await page.goto(f'{server.PREFIX}/input/textarea.html')
   textarea = await page.querySelector('textarea')
   await textarea.press('a')
   assert await page.evaluate("document.querySelector('textarea').value") == 'a'

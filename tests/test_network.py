@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-from .server import EMPTY_PAGE
 
 async def test_request_fulfill(page):
   async def handle_request(route, request):
@@ -34,7 +33,7 @@ async def test_request_fulfill(page):
   assert response.ok
   assert await response.text() == 'Text'
 
-async def test_request_continue(page):
+async def test_request_continue(page, server):
   async def handle_request(route, request, intercepted):
     intercepted.append(True)
     await route.continue_()
@@ -42,7 +41,7 @@ async def test_request_continue(page):
   intercepted = list()
   await page.route('**/*', lambda route, request: asyncio.ensure_future(handle_request(route, request, intercepted)))
 
-  response = await page.goto(EMPTY_PAGE)
+  response = await page.goto(server.EMPTY_PAGE)
   assert response.ok
   assert intercepted == [True]
   assert await page.title() == ''

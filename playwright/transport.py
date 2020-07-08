@@ -47,8 +47,6 @@ class Transport:
 
         if 'DEBUGP' in os.environ:
           print('\x1b[33mRECV>\x1b[0m', json.dumps(obj, indent=2))
-        if 'DEBUG' in os.environ:
-          print('\x1b[33mRECV>\x1b[0m', obj.get('method'))
         self.on_message(obj)
       except asyncio.IncompleteReadError:
         break
@@ -58,8 +56,6 @@ class Transport:
     msg = json.dumps(message)
     if 'DEBUGP' in os.environ:
       print('\x1b[32mSEND>\x1b[0m', json.dumps(message, indent=2))
-    if 'DEBUG' in os.environ:
-      print('\x1b[32mSEND>\x1b[0m', message.get('method'))
     data = bytes(msg, 'utf-8')
     self._output.write(len(data).to_bytes(4, byteorder='little', signed=False))
     self._output.write(data)

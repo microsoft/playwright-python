@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .server import EMPTY_PAGE
-
 async def test_frames_respect_name(page):
   await page.setContent('<iframe name=target></iframe>')
   assert page.frame(name='bogus') is None
@@ -21,7 +19,7 @@ async def test_frames_respect_name(page):
   assert frame
   assert frame == (page.mainFrame.childFrames[0])
 
-async def test_frames_respect_url(page):
-  await page.setContent(f'<iframe src="{EMPTY_PAGE}"></iframe>')
+async def test_frames_respect_url(page, server):
+  await page.setContent(f'<iframe src="{server.EMPTY_PAGE}"></iframe>')
   assert page.frame(url='bogus') is None
   assert page.frame(url=f'**/empty.html').url == ('http://localhost:8907/empty.html')

@@ -17,7 +17,8 @@ import threading
 
 import pytest
 import playwright
-from .server import PORT, HTTPRequestHandler
+from .server import server as server_object, HTTPRequestHandler
+from .utils import utils as utils_object
 
 # Will mark all the tests as async
 def pytest_collection_modifyitems(items):
@@ -50,9 +51,17 @@ async def page(context):
     yield page
     await page.close()
 
+@pytest.fixture
+def server():
+    yield server_object
+
+@pytest.fixture
+def utils():
+    yield utils_object
+
 @pytest.fixture(autouse=True, scope='session')
 async def start_http_server():
-    httpd = http.server.HTTPServer(('', PORT), HTTPRequestHandler)
+    httpd = http.server.HTTPServer(('', server_object.PORT), HTTPRequestHandler)
     threading.Thread(target=httpd.serve_forever).start()
     yield
     httpd.shutdown()

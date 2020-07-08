@@ -124,8 +124,8 @@ class Page(ChannelOwner):
 
   def _on_route(self, route: Route, request: Request) -> None:
     for handler_entry in self._routes:
-      if handler_entry['matcher'].matches(request.url):
-        handler_entry['handler'](route, request)
+      if handler_entry.matcher.matches(request.url):
+        handler_entry.handler(route, request)
         return
     self._browser_context._on_route(route, request)
 
@@ -310,6 +310,7 @@ class Page(ChannelOwner):
   async def waitForEvent(self, event: str) -> Any:
     # TODO: support timeout
     future = self._scope._loop.create_future()
+    self.once(event, lambda e: future.set_result(e))
     pending_event = PendingWaitEvent(event, future)
     self._pending_wait_for_events.append(pending_event)
     result = await future
@@ -350,12 +351,12 @@ class Page(ChannelOwner):
     await self._channel.send('addInitScript', dict(source=source))
 
   async def route(self, match: URLMatch, handler: RouteHandler) -> None:
-    self._routes.append(dict(matcher=URLMatcher(match), handler=handler))
+    self._routes.append(RouteHandlerEntry(URLMatcher(match), handler))
     if len(self._routes) == 1:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=True))
 
   async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
-    self._routes = filter(lambda r: r['matcher'].match != match or (handler and r['handler'] != handler), self._routes)
+    self._routes = filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes)
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 
