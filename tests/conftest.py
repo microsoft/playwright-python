@@ -33,8 +33,9 @@ def event_loop():
 
 
 @pytest.fixture(scope='session')
-async def browser():
-    browser = await playwright.chromium.launch()
+async def browser(pytestconfig):
+    browser_name = pytestconfig.getoption("browser")
+    browser = await playwright.browser_types[browser_name].launch()
     yield browser
     await browser.close()
 
@@ -65,3 +66,18 @@ async def start_http_server():
     threading.Thread(target=httpd.serve_forever).start()
     yield
     httpd.shutdown()
+
+@pytest.fixture
+def browser_name(pytestconfig):
+    return pytestconfig.getoption('browser')
+
+def pytest_addoption(parser):
+    group = parser.getgroup('playwright', 'Playwright')
+    group.addoption(
+        '--browser',
+        choices=['chromium', 'firefox', 'webkit'],
+        default='chromium',
+        help='Browser engine which should be used',
+    )
+
+
