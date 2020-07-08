@@ -19,7 +19,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setuptools.setup(
   name='playwright',
-  version='0.0.1',
+  version='0.0.2',
   author='Microsoft Corporation',
   author_email='',
   description='A high-level API to automate web browsers',
