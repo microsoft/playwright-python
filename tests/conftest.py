@@ -25,6 +25,11 @@ def pytest_collection_modifyitems(items):
     for item in items:
         item.add_marker(pytest.mark.asyncio)
 
+def pytest_generate_tests(metafunc):
+    if 'browser_name' in metafunc.fixturenames:
+        browsers = metafunc.config.option.browser or ['chromium', 'firefox', 'webkit']
+        metafunc.parametrize("browser_name", browsers, scope='session')
+
 @pytest.fixture(scope='session')
 def event_loop():
     loop = playwright.playwright.loop
@@ -33,8 +38,7 @@ def event_loop():
 
 
 @pytest.fixture(scope='session')
-async def browser(pytestconfig):
-    browser_name = pytestconfig.getoption("browser")
+async def browser(browser_name):
     browser = await playwright.browser_types[browser_name].launch()
     yield browser
     await browser.close()
@@ -67,17 +71,35 @@ async def start_http_server():
     yield
     httpd.shutdown()
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def browser_name(pytestconfig):
     return pytestconfig.getoption('browser')
+
+@pytest.fixture(scope="session")
+def is_webkit(browser_name):
+    return browser_name == "webkit"
+
+@pytest.fixture(scope="session")
+def is_firefox(browser_name):
+    return browser_name == "firefox"
+
+@pytest.fixture(scope="session")
+def is_chromium(browser_name):
+    return browser_name == "chromium"
+
+@pytest.fixture(autouse=True)
+def skip_by_browser(request, browser_name):
+    if request.node.get_closest_marker('skip_browser'):
+        if request.node.get_closest_marker('skip_browser').args[0] == browser_name:
+            pytest.skip('skipped on this platform: {}'.format(browser_name))
 
 def pytest_addoption(parser):
     group = parser.getgroup('playwright', 'Playwright')
     group.addoption(
         '--browser',
-        choices=['chromium', 'firefox', 'webkit'],
-        default='chromium',
-        help='Browser engine which should be used',
+        action='append',
+        default=[],
+        help='Browsers which should be used. By default on all the browsers.',
     )
 
 
