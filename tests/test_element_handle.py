@@ -154,14 +154,14 @@ async def test_owner_frame_for_iframe_elements(page, server, utils):
   await page.goto(server.EMPTY_PAGE)
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   frame = page.mainFrame
-  element_handle = await frame.evaluateHandle('() => document.querySelector("#frame1")')
+  element_handle = await frame.evaluateHandle('document.querySelector("#frame1")')
   assert await element_handle.ownerFrame() == frame
 
 async def test_owner_frame_for_cross_frame_evaluations(page, server, utils):
   await page.goto(server.EMPTY_PAGE)
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   frame = page.mainFrame
-  element_handle = await frame.evaluateHandle('() => document.querySelector("#frame1").contentWindow.document.body')
+  element_handle = await frame.evaluateHandle('document.querySelector("#frame1").contentWindow.document.body')
   assert await element_handle.ownerFrame() == frame.childFrames[0]
 
 async def test_owner_frame_for_detached_elements(page, server):
@@ -289,3 +289,94 @@ async def test_hover_when_node_is_removed(page, server):
   button = await page.querySelector('#button-6')
   await button.hover()
   assert await page.evaluate('document.querySelector("button:hover").id') == 'button-6'
+
+async def test_should_fill_input(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  handle = await page.querySelector('input')
+  await handle.fill('some value')
+  assert await page.evaluate('result') == 'some value'
+
+async def test_should_fill_input_when_Node_is_removed(page, server):
+  await page.goto(server.PREFIX + '/input/textarea.html')
+  await page.evaluate('delete window["Node"]')
+  handle = await page.querySelector('input')
+  await handle.fill('some value')
+  assert await page.evaluate('result') == 'some value'
+
+async def test_should_have_a_nice_preview(page, server):
+  await page.goto(f'{server.PREFIX}/dom.html')
+  outer = await page.querySelector('#outer')
+  inner = await page.querySelector('#inner')
+  check = await page.querySelector('#check')
+  text = await inner.evaluateHandle('e => e.firstChild')
+  await page.evaluate('1') # Give them a chance to calculate the preview.
+  assert outer.toString() == 'JSHandle@<div id="outer" name="value">…</div>'
+  assert inner.toString() == 'JSHandle@<div id="inner">Text,↵more text</div>'
+  assert text.toString() == 'JSHandle@#text=Text,↵more text'
+  assert check.toString() == 'JSHandle@<input checked id="check" foo="bar"" type="checkbox"/>'
+
+async def test_get_attribute(page, server):
+  await page.goto(f'{server.PREFIX}/dom.html')
+  handle = await page.querySelector('#outer')
+  assert await handle.getAttribute('name') == 'value'
+  assert await page.getAttribute('#outer', 'name') == 'value'
+
+async def test_inner_html(page, server):
+  await page.goto(f'{server.PREFIX}/dom.html')
+  handle = await page.querySelector('#outer')
+  assert await handle.innerHTML() == '<div id="inner">Text,\nmore text</div>'
+  assert await page.innerHTML('#outer') == '<div id="inner">Text,\nmore text</div>'
+
+async def test_inner_text(page, server):
+  await page.goto(f'{server.PREFIX}/dom.html')
+  handle = await page.querySelector('#inner')
+  assert await handle.innerText() == 'Text, more text'
+  assert await page.innerText('#inner') == 'Text, more text'
+
+async def test_inner_text_should_throw(page, server):
+  await page.setContent('<svg>text</svg>')
+  error1 = None
+  try:
+    await page.innerText('svg')
+  except Error as e:
+    error1 = e
+  assert 'Not an HTMLElement' in error1.message
+  handle = await page.querySelector('svg')
+  error2 = None
+  try:
+    await handle.innerText()
+  except Error as e:
+    error2 = e
+  assert 'Not an HTMLElement' in error2.message
+
+async def test_text_content(page, server):
+  await page.goto(f'{server.PREFIX}/dom.html')
+  handle = await page.querySelector('#inner')
+  assert await handle.textContent() == 'Text,\nmore text'
+  assert await page.textContent('#inner') == 'Text,\nmore text'
+
+async def test_should_check_the_box(page):
+  await page.setContent('<input id="checkbox" type="checkbox"></input>')
+  input = await page.querySelector('input')
+  await input.check()
+  assert await page.evaluate('checkbox.checked')
+
+async def test_should_uncheck_the_box(page):
+  await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
+  input = await page.querySelector('input')
+  await input.uncheck()
+  assert await page.evaluate('checkbox.checked') == False
+
+async def test_should_select_single_option(page, server):
+  await page.goto(server.PREFIX + '/input/select.html')
+  select = await page.querySelector('select')
+  await select.selectOption('blue')
+  assert await page.evaluate('result.onInput') == ['blue']
+  assert await page.evaluate('result.onChange') == ['blue']
+
+async def test_should_focus_a_button(page, server):
+  await page.goto(server.PREFIX + '/input/button.html')
+  button = await page.querySelector('button')
+  assert await button.evaluate('button => document.activeElement === button') == False
+  await button.focus()
+  assert await button.evaluate('button => document.activeElement === button')

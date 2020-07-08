@@ -93,7 +93,7 @@ class ElementHandle(JSHandle):
       value: str,
       timeout: int = None,
       noWaitAfter: bool = None) -> None:
-    await self._channel.send('dblclick', locals_to_params(locals()))
+    await self._channel.send('fill', locals_to_params(locals()))
 
   async def selectText(self, timeout: int = None) -> None:
     await self._channel.send('selectText', locals_to_params(locals()))
