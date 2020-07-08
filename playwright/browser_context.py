@@ -130,18 +130,19 @@ class BrowserContext(ChannelOwner):
     await self.exposeBinding(name, lambda source, *args: binding(*args))
 
   async def route(self, match: URLMatch, handler: RouteHandler) -> None:
-    self._routes.append(dict(matcher=URLMatcher(match), handler=handler))
+    self._routes.append(RouteHandlerEntry(URLMatcher(match), handler))
     if len(self._routes) == 1:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=True))
 
   async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
-    self._routes = filter(lambda r: r['matcher'].match != match or (handler and r['handler'] != handler), self._routes)
+    self._routes = filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes)
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 
   async def waitForEvent(self, event: str) -> None:
     # TODO: implement timeout race
     future = self._scope._loop.create_future()
+    self.once(event, lambda e: future.set_result(e))
     pending_event = PendingWaitEvent(event, future)
     self._pending_wait_for_events.append(pending_event)
     result = await future

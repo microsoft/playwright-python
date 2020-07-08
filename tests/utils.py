@@ -12,24 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import http.server
-import os
+class Utils:
+  async def attach_frame(self, page, frameId, url):
+    handle = await page.evaluateHandle('''async ({ frameId, url }) => {
+      const frame = document.createElement('iframe');
+      frame.src = url;
+      frame.id = frameId;
+      document.body.appendChild(frame);
+      await new Promise(x => frame.onload = x);
+      return frame;
+    }''', { 'frameId': frameId, 'url': url })
+    return await handle.asElement().contentFrame()
 
-class Server:
-  def __init__(self):
-    self.PORT = 8907
-    self.EMPTY_PAGE = f'http://localhost:{self.PORT}/empty.html'
-    self.PREFIX = f'http://localhost:{self.PORT}'
-    self.CROSS_PROCESS_PREFIX = f'http://127.0.0.1:{self.PORT}'
-
-server = Server()
-
-class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), 'assets'), **kwargs)
-
-  def log_message(self, *args):
-    return
-
-  def log_error(self, *args):
-    return
+utils = Utils()

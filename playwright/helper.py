@@ -41,13 +41,6 @@ class FilePayload(TypedDict):
 class FrameMatch(TypedDict):
   url: URLMatch
   name: str
-class PendingWaitEvent(TypedDict):
-  event: str
-  future: asyncio.Future
-
-class RouteHandlerEntry(TypedDict):
-  matcher: "URLMatcher"
-  handler: RouteHandler
 class SelectOption(TypedDict):
   value: Optional[str]
   label: Optional[str]
@@ -108,3 +101,13 @@ def locals_to_params(args: Dict) -> Dict:
     if args[key] != None:
       copy[key] = args[key]
   return copy
+
+class PendingWaitEvent:
+  def __init__(self, event: str, future: asyncio.Future):
+    self.event = event
+    self.future = future
+
+class RouteHandlerEntry:
+  def __init__(self, matcher: URLMatcher, handler: RouteHandler):
+    self.matcher = matcher
+    self.handler = handler

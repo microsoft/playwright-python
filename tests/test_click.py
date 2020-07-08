@@ -13,16 +13,15 @@
 # limitations under the License.
 
 from playwright.helper import Error
-from .server import PREFIX
 
 
-async def test_click_the_button(page):
-  await page.goto(f'{PREFIX}/button.html')
+async def test_click_the_button(page, server):
+  await page.goto(f'{server.PREFIX}/input/button.html')
   await page.click('button')
   assert await page.evaluate('result') == 'Clicked'
 
-async def test_select_the_text_by_triple_clicking(page):
-  await page.goto(f'{PREFIX}/textarea.html')
+async def test_select_the_text_by_triple_clicking(page, server):
+  await page.goto(f'{server.PREFIX}/input/textarea.html')
   text = 'This is the text that we are going to try to select. Let\'s see how it goes.'
   await page.fill('textarea', text)
   await page.click('textarea', clickCount=3)
@@ -31,8 +30,8 @@ async def test_select_the_text_by_triple_clicking(page):
     return textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
   }''') == text
 
-async def test_not_wait_with_force(page):
-  await page.goto(f'{PREFIX}/button.html')
+async def test_not_wait_with_force(page, server):
+  await page.goto(f'{server.PREFIX}/input/button.html')
   await page.evalOnSelector('button', 'b => b.style.display = "none"')
   error = None
   try:
@@ -42,8 +41,8 @@ async def test_not_wait_with_force(page):
   assert 'Element is not visible' in error.message
   assert await page.evaluate('result') == 'Was not clicked'
 
-async def test_click_the_button_with_px_border_with_offset(page):
-  await page.goto(f'{PREFIX}/button.html')
+async def test_click_the_button_with_px_border_with_offset(page, server):
+  await page.goto(f'{server.PREFIX}/input/button.html')
   await page.evalOnSelector('button', 'button => button.style.borderWidth = "8px"')
   await page.click('button', position=dict(x=20, y=10))
   assert await page.evaluate('result') == 'Clicked'
