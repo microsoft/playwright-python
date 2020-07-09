@@ -80,14 +80,15 @@ class TimeoutSettings:
     self.timeout = timeout
 
 class Error(BaseException):
-  def __init__(self, message: str) -> None:
+  def __init__(self, message: str, stack: str = None) -> None:
     self.message = message
+    self.stack = stack
 
 def serialize_error(ex: BaseException) -> ErrorPayload:
   return dict(message=str(ex))
 
 def parse_error(error: ErrorPayload):
-  return Error('%s\n%s' % (error['message'], error['stack']))
+  return Error(error['message'], error['stack'])
 
 def is_function_body(expression: str) -> bool:
   expression = expression.strip()
