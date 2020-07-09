@@ -96,7 +96,7 @@ class Route(ChannelOwner):
     elif isinstance(body, bytes):
       response['body'] = base64.b64encode(body)
       response['isBase64'] = True
-    await self._channel.send('fulfill', dict(response=response))
+    await self._channel.send('fulfill', response)
 
   async def continue_(self, method: str = None, headers: Dict[str,str] = None, postData: Union[str, bytes] = None) -> None:
     overrides = dict()
@@ -108,7 +108,7 @@ class Route(ChannelOwner):
       overrides['postData'] = base64.b64encode(bytes(postData, 'utf-8'))
     elif isinstance(postData, bytes):
       overrides['postData'] = base64.b64encode(postData)
-    await self._channel.send('continue', dict(overrides=overrides))
+    await self._channel.send('continue', overrides)
 
 
 class Response(ChannelOwner):

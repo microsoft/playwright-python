@@ -12,63 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
-import gzip
-import os
-import shutil
-import stat
-import sys
-import subprocess
-
-from playwright.connection import Connection
-from playwright.object_factory import create_remote_object
+from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
 from playwright.browser_type import BrowserType
 from typing import Dict
 
-class Playwright:
-  def __init__(self) -> None:
-    # Use ProactorEventLoop in 3.7, which is default in 3.8
-    if sys.platform == 'win32':
-      loop = asyncio.ProactorEventLoop()
-      asyncio.set_event_loop(loop)
-    self.loop = asyncio.get_event_loop()
-    self.loop.run_until_complete(self._sync_init())
+class Playwright(ChannelOwner):
 
-  async def _sync_init(self):
-    package_path = os.path.dirname(os.path.abspath(__file__))
-    platform = sys.platform
-    if platform == 'darwin':
-      driver_name = 'driver-macos'
-    elif platform == 'linux':
-      driver_name = 'driver-linux'
-    elif platform == 'win32':
-      driver_name = 'driver-win.exe'
-    driver_executable = os.path.join(package_path, driver_name)
-    archive_name = os.path.join(package_path, 'drivers', driver_name + '.gz')
+  def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
+    super().__init__(scope, guid, initializer)
+    self.chromium: BrowserType = from_channel(initializer['chromium'])
+    self.firefox: BrowserType = from_channel(initializer['firefox'])
+    self.webkit: BrowserType = from_channel(initializer['webkit'])
+    self.devices = initializer['deviceDescriptors']
+    self.browser_types: Dict[str, BrowserType] = dict(chromium=self.chromium, webkit=self.webkit, firefox=self.firefox)
 
-    if not os.path.exists(driver_executable) or os.path.getmtime(driver_executable) < os.path.getmtime(archive_name):
-      with gzip.open(archive_name, 'rb') as f_in, open(driver_executable, 'wb') as f_out:
-        shutil.copyfileobj(f_in, f_out)
-
-    st = os.stat(driver_executable)
-    if st.st_mode & stat.S_IEXEC == 0:
-      os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
-
-    subprocess.run(f"{driver_executable} install", shell=True)
-
-    self._proc = await asyncio.create_subprocess_exec(driver_executable,
-      stdin=asyncio.subprocess.PIPE,
-      stdout=asyncio.subprocess.PIPE,
-      stderr=asyncio.subprocess.PIPE,
-      limit=32768)
-    self._connection = Connection(self._proc.stdout, self._proc.stdin, create_remote_object, self.loop)
-    chromium, firefox, webkit = await asyncio.gather(
-      self._connection.wait_for_object_with_known_name('chromium'),
-      self._connection.wait_for_object_with_known_name('firefox'),
-      self._connection.wait_for_object_with_known_name('webkit'))
-    self.chromium: BrowserType = chromium
-    self.firefox: BrowserType = firefox
-    self.webkit: BrowserType = webkit
-    self.browser_types: Dict[str, BrowserType] = dict(chromium=self.chromium, firefox=self.firefox, webkit=self.webkit)
-
-playwright = Playwright()

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import os
 import pytest
 import playwright
@@ -37,7 +38,7 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture(scope='session')
 def event_loop():
-    loop = playwright.playwright.loop
+    loop = asyncio.get_event_loop()
     yield loop
     loop.close()
 

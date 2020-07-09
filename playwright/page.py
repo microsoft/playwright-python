@@ -285,32 +285,34 @@ class Page(ChannelOwner):
 
   async def waitForRequest(self, urlOrPredicate: Union[str, Callable[[Request], bool]]) -> Optional[Request]:
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
-    def predicate(request: Request):
+    def predicate(request: Request) -> bool:
       if matcher:
         return matcher.matches(request.url())
       return urlOrPredicate(request)
-    params = locals_to_params(locals())
-    params['predicate'] = predicate
-    return self.waitForEvent(Page.Events.Request, **params)
+    return self.waitForEvent(Page.Events.Request, predicate=predicate)
 
-  async def waitForResponse(self, urlOrPredicate: Union[str, Callable[[Request], bool]]) -> Optional[Response]:
+  async def waitForResponse(self, urlOrPredicate: Union[str, Callable[[Response], bool]]) -> Optional[Response]:
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
-    def predicate(request: Request):
+    def predicate(response: Response) -> bool:
       if matcher:
-        return matcher.matches(request.url())
-      return urlOrPredicate(request)
-    params = locals_to_params(locals())
-    params['predicate'] = predicate
-    return await self.waitForEvent(Page.Events.Response, **params)
+        return matcher.matches(response.url())
+      return urlOrPredicate(response)
+    return self.waitForEvent(Page.Events.Response, predicate=predicate)
 
-  async def waitForEvent(self, event: str) -> Any:
+  async def waitForEvent(self, event: str, predicate: Callable[[Any], bool] = None) -> Any:
     # TODO: support timeout
+
     future = self._scope._loop.create_future()
-    self.once(event, lambda e: future.set_result(e))
+    def listener(e: Any):
+      if not predicate or predicate(e):
+        future.set_result(e)
+
+    self.on(event, listener)
     pending_event = PendingWaitEvent(event, future)
     self._pending_wait_for_events.append(pending_event)
     result = await future
     self._pending_wait_for_events.remove(pending_event)
+    self.remove_listener(event, listener)
     return result
 
   async def goBack(self,
