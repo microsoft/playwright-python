@@ -17,10 +17,8 @@
 const path = require('path');
 
 (async() => {
-
   if (process.argv.includes('install')) {
-    const packageDir = path.join(__dirname, 'node_modules', 'playwright');
-    await require('playwright/lib/install/installer').installBrowsersWithProgressBar(packageDir);
+    await require('playwright/lib/install/installer').installBrowsersWithProgressBar(path.dirname(process.argv[0]));
     return;
   }
 
