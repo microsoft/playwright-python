@@ -167,15 +167,15 @@ async def test_jshandle_as_element_return_none_for_non_elements(page):
 
 async def test_jshandle_to_string_work_for_primitives(page):
   number_handle = await page.evaluateHandle('2')
-  assert number_handle.toString() == 'JSHandle@2'
+  assert str(number_handle) == 'JSHandle@2'
   string_handle = await page.evaluateHandle('"a"')
-  assert string_handle.toString() == 'JSHandle@a'
+  assert str(string_handle) == 'JSHandle@a'
 
 async def test_jshandle_to_string_work_for_complicated_objects(page):
   handle = await page.evaluateHandle('window')
-  assert handle.toString() == 'JSHandle@object'
+  assert str(handle) == 'JSHandle@object'
 
 async def test_jshandle_to_string_work_for_promises(page):
   handle = await page.evaluateHandle('({b: Promise.resolve(123)})')
   b_handle = await handle.getProperty('b')
-  assert b_handle.toString() == 'JSHandle@promise'
+  assert str(b_handle) == 'JSHandle@promise'

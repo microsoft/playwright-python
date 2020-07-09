@@ -56,14 +56,14 @@ class BrowserContext(ChannelOwner):
 
   def _on_route(self, route: Route, request: Request) -> None:
     for handler_entry in self._routes:
-      if handler_entry.matcher.matches(request.url()):
+      if handler_entry.matcher.matches(request.url):
         handler_entry.handler(route, request)
         return
     asyncio.ensure_future(route.continue_())
 
   def _on_binding(self, binding_call: BindingCall) -> None:
     func = self._bindings.get(binding_call._initializer['name'])
-    if func == None:
+    if func is None:
       return
     binding_call.call(func)
 
@@ -84,7 +84,7 @@ class BrowserContext(ChannelOwner):
     return from_channel(await self._channel.send('newPage'))
 
   async def cookies(self, urls: Union[str, List[str]]) -> List[Cookie]:
-    if urls == None:
+    if urls is None:
       urls = list()
     return await self._channel.send('cookies', dict(urls=urls))
 
@@ -135,7 +135,7 @@ class BrowserContext(ChannelOwner):
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=True))
 
   async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
-    self._routes = filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes)
+    self._routes = list(filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes))
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 

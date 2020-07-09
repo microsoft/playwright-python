@@ -171,7 +171,7 @@ class Page(ChannelOwner):
     for frame in self._frames:
       if name and frame.name == name:
         return frame
-      if url and matcher.matches(frame.url):
+      if url and matcher and matcher.matches(frame.url):
         return frame
     return None
 
@@ -287,7 +287,7 @@ class Page(ChannelOwner):
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
     def predicate(request: Request) -> bool:
       if matcher:
-        return matcher.matches(request.url())
+        return matcher.matches(request.url)
       return urlOrPredicate(request)
     return self.waitForEvent(Page.Events.Request, predicate=predicate)
 
@@ -295,7 +295,7 @@ class Page(ChannelOwner):
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
     def predicate(response: Response) -> bool:
       if matcher:
-        return matcher.matches(response.url())
+        return matcher.matches(response.url)
       return urlOrPredicate(response)
     return self.waitForEvent(Page.Events.Response, predicate=predicate)
 
@@ -354,7 +354,7 @@ class Page(ChannelOwner):
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=True))
 
   async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
-    self._routes = filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes)
+    self._routes = list(filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes))
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 
@@ -488,7 +488,7 @@ class Page(ChannelOwner):
     return await self._main_frame.uncheck(**locals_to_params(locals()))
 
   async def waitForTimeout(self, timeout: int) -> Awaitable[None]:
-    return self._main_frame.waitForTimeout(timeout)
+    return await self._main_frame.waitForTimeout(timeout)
 
   async def waitForFunction(self,
       expression: str,
@@ -548,5 +548,5 @@ class BindingCall(ChannelOwner):
       source = dict(context=frame._page.context, page=frame._page, frame=frame)
       result = func(source, *self._initializer['args'])
       asyncio.ensure_future(self._channel.send('resolve', dict(result=result)))
-    except BaseException as e:
+    except Exception as e:
       asyncio.ensure_future(self._channel.send('reject', dict(error=serialize_error(e))))

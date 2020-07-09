@@ -29,6 +29,9 @@ class JSHandle(ChannelOwner):
     self._preview = self._initializer['preview']
     self._channel.on('previewUpdated', lambda preview: self._on_preview_updated(preview))
 
+  def __str__(self) -> str:
+    return self._preview
+
   def _on_preview_updated(self, preview: str) -> None:
     self._preview = preview
 
@@ -60,9 +63,6 @@ class JSHandle(ChannelOwner):
   async def jsonValue(self) -> Any:
     return parse_result(await self._channel.send('jsonValue'))
 
-  def toString(self) -> str:
-    return self._preview
-
 
 def is_primitive_value(value: Any):
   return isinstance(value, bool) or isinstance(value, int) or isinstance(value, float) or isinstance(value, str)
@@ -74,7 +74,7 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     return dict(h=h)
   if depth > 100:
     raise Error('Maximum argument depth exceeded')
-  if value == None:
+  if value is None:
     return dict(v='undefined')
   if isinstance(value, float):
     if value == float('inf'):
@@ -97,19 +97,19 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     return dict(a=result)
 
   if isinstance(value, dict):
-    result = dict()
+    result: Dict[str, Any] = dict() # type: ignore
     for name in value:
       result[name] = serialize_value(value[name], handles, depth + 1)
     return dict(o=result)
   return dict(v='undefined')
 
 def serialize_argument(arg: Any) -> Any:
-  guids = list()
+  guids: List[JSHandle] = list()
   value = serialize_value(arg, guids, 0)
   return dict(value=value, guids=guids)
 
 def parse_value(value: Any) -> Any:
-  if value == None:
+  if value is None:
     return None
   if isinstance(value, dict):
     if 'v' in value:
