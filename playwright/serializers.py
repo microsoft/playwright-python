@@ -5,8 +5,8 @@ from os import path
 import mimetypes
 import base64
 
-def normalize_file_payloads(files: Union[str, FilePayload, List[str], List[FilePayload]]) -> List[FilePayload]:
-  ff: List[Union[str, FilePayload]] = None
+def normalize_file_payloads(files: Union[str, FilePayload, List[Union[str, FilePayload]]]) -> List[FilePayload]:
+  ff: List[Union[str, FilePayload]] = []
   if (not isinstance(files, list)):
     ff = [files]
   else:

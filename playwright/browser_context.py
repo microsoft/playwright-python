@@ -135,7 +135,7 @@ class BrowserContext(ChannelOwner):
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=True))
 
   async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
-    self._routes = filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes)
+    self._routes = list(filter(lambda r: r.matcher.match != match or (handler and r.handler != handler), self._routes))
     if len(self._routes) == 0:
       await self._channel.send('setNetworkInterceptionEnabled', dict(enabled=False))
 

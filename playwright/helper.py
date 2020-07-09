@@ -17,7 +17,7 @@ import collections
 import fnmatch
 import re
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, TYPE_CHECKING, Pattern, cast
 
 import sys
 
@@ -37,7 +37,7 @@ FunctionWithSource = Callable[[Dict], Any]
 class FilePayload(TypedDict):
  name: str
  mimeType: str
- buffer: bytes
+ buffer: Union[bytes, str]
 class FrameMatch(TypedDict):
   url: URLMatch
   name: str
@@ -49,16 +49,21 @@ class ConsoleMessageLocation(TypedDict):
   url: Optional[str]
   lineNumber: Optional[int]
   columnNumber: Optional[int]
-class ErrorPayload(TypedDict):
+class ErrorPayload(TypedDict, total=False):
   message: str
   name: str
   stack: str
   value: Any
 
+class ContinueParameters(TypedDict, total=False):
+  method: str
+  headers: Dict[str, str]
+  postData: str
+
 class URLMatcher:
   def __init__(self, match: URLMatch):
-    self._callback = None
-    self._regex_obj = None
+    self._callback: Optional[Callable[[str], bool]] = None
+    self._regex_obj: Optional[Pattern] = None
     if isinstance(match, str):
       regex = '(?:http://|https://)' + fnmatch.translate(match)
       self._regex_obj = re.compile(regex)
@@ -69,7 +74,9 @@ class URLMatcher:
   def matches(self, url: str) -> bool:
     if self._callback:
       return self._callback(url)
-    return self._regex_obj.match(url)
+    if self._regex_obj:
+      return cast(bool, self._regex_obj.match(url))
+    return False
 
 
 class TimeoutSettings:
@@ -79,7 +86,7 @@ class TimeoutSettings:
   def set_default_timeout(self, timeout):
     self.timeout = timeout
 
-class Error(BaseException):
+class Error(Exception):
   def __init__(self, message: str, stack: str = None) -> None:
     self.message = message
     self.stack = stack
@@ -87,7 +94,7 @@ class Error(BaseException):
 class TimeoutError(Error):
   pass
 
-def serialize_error(ex: BaseException) -> ErrorPayload:
+def serialize_error(ex: Exception) -> ErrorPayload:
   return dict(message=str(ex))
 
 def parse_error(error: ErrorPayload):
