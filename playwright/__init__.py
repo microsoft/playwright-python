@@ -13,15 +13,17 @@
 # limitations under the License.
 
 from playwright.playwright import playwright
+import playwright.helper as helper
 
 chromium = playwright.chromium
 firefox = playwright.firefox
 webkit = playwright.webkit
 browser_types = playwright.browser_types
+TimeoutError = helper.TimeoutError
 
 __all__ = [
   'chromium',
   'firefox',
   'webkit',
-  'browser_types'
+  'browser_types',
 ]

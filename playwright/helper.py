@@ -84,11 +84,17 @@ class Error(BaseException):
     self.message = message
     self.stack = stack
 
+class TimeoutError(Error):
+  pass
+
 def serialize_error(ex: BaseException) -> ErrorPayload:
   return dict(message=str(ex))
 
 def parse_error(error: ErrorPayload):
-  return Error(error['message'], error['stack'])
+  base_error_class = Error
+  if error.get("name") == "TimeoutError":
+    base_error_class = TimeoutError
+  return base_error_class(error['message'], error['stack'])
 
 def is_function_body(expression: str) -> bool:
   expression = expression.strip()
