@@ -21,9 +21,6 @@ driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'driver')
 package_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playwright')
 drivers_path = os.path.join(package_path, 'drivers')
 
-
-if not os.path.exists(drivers_path):
-  os.makedirs(drivers_path)
 if os.path.exists(os.path.join(driver_path, 'package-lock.json')):
   os.remove(os.path.join(driver_path, 'package-lock.json'))
 if os.path.exists(os.path.join(driver_path, 'node_modules')):
@@ -43,4 +40,4 @@ for driver in ['driver-linux', 'driver-macos', 'driver-win.exe']:
   with open(in_path, 'rb') as f_in, gzip.open(out_path, 'wb') as f_out:
     shutil.copyfileobj(f_in, f_out)
 
-shutil.copyfile(os.path.join(driver_path, 'node_modules', 'playwright', 'browsers.json'), os.path.join(package_path, 'browsers.json'))
+shutil.copyfile(os.path.join(driver_path, 'node_modules', 'playwright', 'browsers.json'), os.path.join(drivers_path, 'browsers.json'))
