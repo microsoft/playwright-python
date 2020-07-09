@@ -204,7 +204,7 @@ class Frame(ChannelOwner):
 
   async def setInputFiles(self,
       selector: str,
-      files: Union[str, FilePayload, List[str], List[FilePayload]],
+      files:Union[str, FilePayload, List[Union[str, FilePayload]]],
       timeout: int = None,
       noWaitAfter: bool = None) -> None:
     file_payloads = normalize_file_payloads(files)

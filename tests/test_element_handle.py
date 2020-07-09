@@ -33,7 +33,7 @@ async def test_bounding_box_handle_nested_frames(page, server):
 async def test_bounding_box_return_null_for_invisible_elements(page, server):
   await page.setContent('<div style="display:none">hi</div>')
   element = await page.querySelector('div')
-  assert await element.boundingBox() == None
+  assert await element.boundingBox() is None
 
 async def test_bounding_box_force_a_layout(page, server):
   await page.setViewportSize({'width':500,'height':500})
@@ -120,14 +120,14 @@ async def test_content_frame_for_non_iframes(page, server, utils):
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   frame = page.frames[1]
   element_handle = await frame.evaluateHandle('document.body')
-  assert await element_handle.contentFrame() == None
+  assert await element_handle.contentFrame() is None
 
 async def test_content_frame_for_document_element(page, server, utils):
   await page.goto(server.EMPTY_PAGE)
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   frame = page.frames[1]
   element_handle = await frame.evaluateHandle('document.documentElement')
-  assert await element_handle.contentFrame() == None
+  assert await element_handle.contentFrame() is None
 
 async def test_owner_frame(page, server, utils):
   await page.goto(server.EMPTY_PAGE)

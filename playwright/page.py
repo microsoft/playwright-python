@@ -171,7 +171,7 @@ class Page(ChannelOwner):
     for frame in self._frames:
       if name and frame.name == name:
         return frame
-      if url and matcher.matches(frame.url):
+      if url and matcher and matcher.matches(frame.url):
         return frame
     return None
 
@@ -486,7 +486,7 @@ class Page(ChannelOwner):
     return await self._main_frame.uncheck(**locals_to_params(locals()))
 
   async def waitForTimeout(self, timeout: int) -> Awaitable[None]:
-    return self._main_frame.waitForTimeout(timeout)
+    return await self._main_frame.waitForTimeout(timeout)
 
   async def waitForFunction(self,
       expression: str,

@@ -63,7 +63,7 @@ class BrowserContext(ChannelOwner):
 
   def _on_binding(self, binding_call: BindingCall) -> None:
     func = self._bindings.get(binding_call._initializer['name'])
-    if func == None:
+    if func is None:
       return
     binding_call.call(func)
 
@@ -84,7 +84,7 @@ class BrowserContext(ChannelOwner):
     return from_channel(await self._channel.send('newPage'))
 
   async def cookies(self, urls: Union[str, List[str]]) -> List[Cookie]:
-    if urls == None:
+    if urls is None:
       urls = list()
     return await self._channel.send('cookies', dict(urls=urls))
 

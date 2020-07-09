@@ -60,6 +60,20 @@ class ContinueParameters(TypedDict, total=False):
   headers: Dict[str, str]
   postData: str
 
+class ParsedMessageParams(TypedDict):
+  type: str
+  guid: str
+  initializer: Dict
+
+class ParsedMessagePayload(TypedDict):
+  id: int
+  guid: str
+  method: str
+  params: ParsedMessageParams
+  result: Any
+  error: ErrorPayload
+
+
 class URLMatcher:
   def __init__(self, match: URLMatch):
     self._callback: Optional[Callable[[str], bool]] = None

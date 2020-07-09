@@ -206,7 +206,7 @@ async def test_frame_name(page, server, utils):
 async def test_frame_parent(page, server, utils):
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   await utils.attach_frame(page, 'frame2', server.EMPTY_PAGE)
-  assert page.frames[0].parentFrame == None
+  assert page.frames[0].parentFrame is None
   assert page.frames[1].parentFrame == page.mainFrame
   assert page.frames[2].parentFrame == page.mainFrame
 
