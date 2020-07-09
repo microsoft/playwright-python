@@ -42,3 +42,5 @@ for driver in ['driver-linux', 'driver-macos', 'driver-win.exe']:
   out_path = os.path.join(drivers_path, driver + '.gz')
   with open(in_path, 'rb') as f_in, gzip.open(out_path, 'wb') as f_out:
     shutil.copyfileobj(f_in, f_out)
+
+shutil.copyfile(os.path.join(driver_path, 'node_modules', 'playwright', 'browsers.json'), os.path.join(package_path, 'browsers.json'))
