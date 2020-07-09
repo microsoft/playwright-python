@@ -79,7 +79,7 @@ async def start_http_server():
     resource = File(static_path)
     site = web_server.Site(resource)
     reactor.listenTCP(server_object.PORT, site)
-    t = threading.Thread(target=reactor.run)
+    t = threading.Thread(target=lambda: reactor.run(installSignalHandlers=0))
     t.start()
     yield
     reactor.stop()

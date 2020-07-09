@@ -106,15 +106,11 @@ class Page(ChannelOwner):
   def _on_frame_attached(self, frame: Frame) -> None:
     frame._page = self
     self._frames.append(frame)
-    if frame._parent_frame:
-      frame._parent_frame._child_frames.append(frame)
     self.emit(Page.Events.FrameAttached, frame)
 
   def _on_frame_detached(self, frame: Frame) -> None:
     self._frames.remove(frame)
     frame._detached = True
-    if frame._parent_frame:
-      frame._parent_frame._child_frames.remove(frame)
     self.emit(Page.Events.FrameDetached, frame)
 
   def _on_frame_navigated(self, frame: Frame, url: str, name: str) -> None:

@@ -12,16 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+from typing import List
+
+from playwright.frame import Frame
+from playwright.page import Page
+
 class Utils:
-  async def attach_frame(self, page, frameId, url):
-    handle = await page.evaluateHandle('''async ({ frameId, url }) => {
+  async def attach_frame(self, page: Page, frame_id: str, url: str):
+    handle = await page.evaluateHandle('''async ({ frame_id, url }) => {
       const frame = document.createElement('iframe');
       frame.src = url;
-      frame.id = frameId;
+      frame.id = frame_id;
       document.body.appendChild(frame);
       await new Promise(x => frame.onload = x);
       return frame;
-    }''', { 'frameId': frameId, 'url': url })
+    }''', { 'frame_id': frame_id, 'url': url })
     return await handle.asElement().contentFrame()
+
+  async def detach_frame(self, page: Page, frame_id: str):
+    await page.evaluate('frame_id => document.getElementById(frame_id).remove()', frame_id)
+
+  def dump_frames(self, frame: Frame, indentation: str = '') -> List[str]:
+    indentation = indentation or ''
+    description = re.sub(r':\d+/', ':<PORT>/', frame.url)
+    if frame.name:
+      description += ' (' + frame.name + ')'
+    result = [indentation + description]
+    sorted_frames = sorted(frame.childFrames, key=lambda frame: frame.url + frame.name)
+    for child in sorted_frames:
+      result = result + utils.dump_frames(child, '    ' + indentation)
+    return result
 
 utils = Utils()
