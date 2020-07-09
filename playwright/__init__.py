@@ -22,11 +22,4 @@ devices = playwright_object.devices
 browser_types = playwright_object.browser_types
 TimeoutError = helper.TimeoutError
 
-__all__ = [
-  'browser_types',
-  'chromium',
-  'firefox',
-  'webkit',
-  'devices',
-  'TimeoutError'
-]
+__all__ = ["browser_types", "chromium", "firefox", "webkit", "devices", "TimeoutError"]

@@ -17,30 +17,34 @@ from playwright.helper import FilePayload
 from typing import Dict, List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from playwright.page import Page
-  from playwright.element_handle import ElementHandle
+    from playwright.page import Page
+    from playwright.element_handle import ElementHandle
 
-class FileChooser():
 
-  def __init__(self, page: 'Page', element_handle: 'ElementHandle', is_multiple: bool) -> None:
-    self._page = page
-    self._element_handle = element_handle
-    self._is_multiple = is_multiple
+class FileChooser:
+    def __init__(
+        self, page: "Page", element_handle: "ElementHandle", is_multiple: bool
+    ) -> None:
+        self._page = page
+        self._element_handle = element_handle
+        self._is_multiple = is_multiple
 
-  @property
-  def page(self) -> 'Page':
-    return self._page
+    @property
+    def page(self) -> "Page":
+        return self._page
 
-  @property
-  def element(self) -> 'ElementHandle':
-    return self._element_handle
+    @property
+    def element(self) -> "ElementHandle":
+        return self._element_handle
 
-  @property
-  def isMultiple(self) -> bool:
-    return self._is_multiple
+    @property
+    def isMultiple(self) -> bool:
+        return self._is_multiple
 
-  async def setFiles(self,
-      files: Union[str, FilePayload, List[str], List[FilePayload]],
-      timeout: int = None,
-      noWaitAfter: bool = None) -> None:
-    await self._element_handle.setInputFiles(files, timeout, noWaitAfter)
+    async def setFiles(
+        self,
+        files: Union[str, FilePayload, List[str], List[FilePayload]],
+        timeout: int = None,
+        noWaitAfter: bool = None,
+    ) -> None:
+        await self._element_handle.setInputFiles(files, timeout, noWaitAfter)

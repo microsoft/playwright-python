@@ -16,17 +16,39 @@ from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_c
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from typing import Any, Dict
 
+
 class Worker(ChannelOwner):
+    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
+        super().__init__(scope, guid, initializer)
 
-  def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-    super().__init__(scope, guid, initializer)
+    @property
+    def url(self) -> str:
+        return self._initializer["url"]
 
-  @property
-  def url(self) -> str:
-    return self._initializer['url']
+    async def evaluate(
+        self, expression: str, arg: Any = None, force_expr: bool = False
+    ) -> Any:
+        return parse_result(
+            await self._channel.send(
+                "evaluateExpression",
+                dict(
+                    expression=expression,
+                    isFunction=not (force_expr),
+                    arg=serialize_argument(arg),
+                ),
+            )
+        )
 
-  async def evaluate(self, expression: str, arg: Any = None, force_expr: bool = False) -> Any:
-    return parse_result(await self._channel.send('evaluateExpression', dict(expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
-
-  async def evaluateHandle(self, expression: str, arg: Any = None, force_expr: bool = False) -> JSHandle:
-    return from_channel(await self._channel.send('evaluateExpressionHandle', dict(expression=expression, isFunction=not(force_expr), arg=serialize_argument(arg))))
+    async def evaluateHandle(
+        self, expression: str, arg: Any = None, force_expr: bool = False
+    ) -> JSHandle:
+        return from_channel(
+            await self._channel.send(
+                "evaluateExpressionHandle",
+                dict(
+                    expression=expression,
+                    isFunction=not (force_expr),
+                    arg=serialize_argument(arg),
+                ),
+            )
+        )

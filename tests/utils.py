@@ -18,30 +18,39 @@ from typing import List
 from playwright.frame import Frame
 from playwright.page import Page
 
+
 class Utils:
-  async def attach_frame(self, page: Page, frame_id: str, url: str):
-    handle = await page.evaluateHandle('''async ({ frame_id, url }) => {
+    async def attach_frame(self, page: Page, frame_id: str, url: str):
+        handle = await page.evaluateHandle(
+            """async ({ frame_id, url }) => {
       const frame = document.createElement('iframe');
       frame.src = url;
       frame.id = frame_id;
       document.body.appendChild(frame);
       await new Promise(x => frame.onload = x);
       return frame;
-    }''', { 'frame_id': frame_id, 'url': url })
-    return await handle.asElement().contentFrame()
+    }""",
+            {"frame_id": frame_id, "url": url},
+        )
+        return await handle.asElement().contentFrame()
 
-  async def detach_frame(self, page: Page, frame_id: str):
-    await page.evaluate('frame_id => document.getElementById(frame_id).remove()', frame_id)
+    async def detach_frame(self, page: Page, frame_id: str):
+        await page.evaluate(
+            "frame_id => document.getElementById(frame_id).remove()", frame_id
+        )
 
-  def dump_frames(self, frame: Frame, indentation: str = '') -> List[str]:
-    indentation = indentation or ''
-    description = re.sub(r':\d+/', ':<PORT>/', frame.url)
-    if frame.name:
-      description += ' (' + frame.name + ')'
-    result = [indentation + description]
-    sorted_frames = sorted(frame.childFrames, key=lambda frame: frame.url + frame.name)
-    for child in sorted_frames:
-      result = result + utils.dump_frames(child, '    ' + indentation)
-    return result
+    def dump_frames(self, frame: Frame, indentation: str = "") -> List[str]:
+        indentation = indentation or ""
+        description = re.sub(r":\d+/", ":<PORT>/", frame.url)
+        if frame.name:
+            description += " (" + frame.name + ")"
+        result = [indentation + description]
+        sorted_frames = sorted(
+            frame.childFrames, key=lambda frame: frame.url + frame.name
+        )
+        for child in sorted_frames:
+            result = result + utils.dump_frames(child, "    " + indentation)
+        return result
+
 
 utils = Utils()

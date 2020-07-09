@@ -17,11 +17,11 @@ import shutil
 import subprocess
 
 folder = os.path.dirname(os.path.abspath(__file__))
-if os.path.exists(os.path.join(folder, 'build')):
-  shutil.rmtree(os.path.join(folder, 'build'))
-if os.path.exists(os.path.join(folder, 'dist')):
-  shutil.rmtree(os.path.join(folder, 'dist'))
-if os.path.exists(os.path.join(folder, 'playwright.egg-info')):
-  shutil.rmtree(os.path.join(folder, 'playwright.egg-info'))
+if os.path.exists(os.path.join(folder, "build")):
+    shutil.rmtree(os.path.join(folder, "build"))
+if os.path.exists(os.path.join(folder, "dist")):
+    shutil.rmtree(os.path.join(folder, "dist"))
+if os.path.exists(os.path.join(folder, "playwright.egg-info")):
+    shutil.rmtree(os.path.join(folder, "playwright.egg-info"))
 
-subprocess.run('python setup.py sdist bdist_wheel', shell=True)
+subprocess.run("python setup.py sdist bdist_wheel", shell=True)

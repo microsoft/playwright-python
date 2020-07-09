@@ -17,14 +17,15 @@ from playwright.helper import locals_to_params
 from playwright.element_handle import ElementHandle
 from typing import Dict
 
+
 class Accessibility:
+    def __init__(self, channel: Channel) -> None:
+        self._channel = channel
 
-  def __init__(self, channel: Channel) -> None:
-    self._channel = channel
-
-  async def snapshot(self,
-      interestingOnly: bool = None,
-      root: ElementHandle = None
+    async def snapshot(
+        self, interestingOnly: bool = None, root: ElementHandle = None
     ) -> Dict:
-    root = root._channel if root else None
-    return await self._channel.send('snapshot', dict(root=root, interestingOnly=interestingOnly))
+        root = root._channel if root else None
+        return await self._channel.send(
+            "snapshot", dict(root=root, interestingOnly=interestingOnly)
+        )

@@ -17,36 +17,36 @@ from playwright.helper import ConsoleMessageLocation
 from playwright.js_handle import JSHandle
 from typing import Dict, List
 
+
 class ConsoleMessage(ChannelOwner):
+    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
+        super().__init__(scope, guid, initializer)
 
-  def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-    super().__init__(scope, guid, initializer)
+    def __str__(self) -> str:
+        return self.text
 
-  def __str__(self) -> str:
-    return self.text
+    @property
+    def type(self) -> str:
+        return self._initializer["type"]
 
-  @property
-  def type(self) -> str:
-    return self._initializer['type']
+    @property
+    def text(self) -> str:
+        return self._initializer["text"]
 
-  @property
-  def text(self) -> str:
-    return self._initializer['text']
+    @property
+    def defaultValue(self) -> str:
+        return self._initializer["defaultValue"]
 
-  @property
-  def defaultValue(self) -> str:
-    return self._initializer['defaultValue']
+    @property
+    def args(self) -> List[JSHandle]:
+        return list(map(from_channel, self._initializer["args"]))
 
-  @property
-  def args(self) -> List[JSHandle]:
-    return list(map(from_channel, self._initializer['args']))
+    @property
+    def location(self) -> ConsoleMessageLocation:
+        return self._initializer["location"]
 
-  @property
-  def location(self) -> ConsoleMessageLocation:
-    return self._initializer['location']
+    async def accept(self, prompt_text: str = None) -> None:
+        await self._channel.send("accept", dict(promptText=prompt_text))
 
-  async def accept(self, prompt_text: str = None) -> None:
-    await self._channel.send('accept', dict(promptText=prompt_text))
-
-  async def dismiss(self) -> None:
-    await self._channel.send('dismiss')
+    async def dismiss(self) -> None:
+        await self._channel.send("dismiss")

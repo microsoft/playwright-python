@@ -16,26 +16,25 @@ from playwright.connection import Channel, ChannelOwner, ConnectionScope
 from types import SimpleNamespace
 from typing import Dict
 
+
 class BrowserServer(ChannelOwner):
 
-  Events = SimpleNamespace(
-    Close='close',
-  )
+    Events = SimpleNamespace(Close="close",)
 
-  def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-    super().__init__(scope, guid, initializer)
-    self._channel.on('close', lambda _: self.emit(BrowserServer.Events.Close))
+    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
+        super().__init__(scope, guid, initializer)
+        self._channel.on("close", lambda _: self.emit(BrowserServer.Events.Close))
 
-  @property
-  def pid(self) -> str:
-    return self._initializer['pid']
+    @property
+    def pid(self) -> str:
+        return self._initializer["pid"]
 
-  @property
-  def wsEndpoint(self) -> str:
-    return self._initializer['wsEndpoint']
+    @property
+    def wsEndpoint(self) -> str:
+        return self._initializer["wsEndpoint"]
 
-  async def kill(self) -> None:
-    await self._channel.send('kill')
+    async def kill(self) -> None:
+        await self._channel.send("kill")
 
-  async def close(self) -> None:
-    await self._channel.send('close')
+    async def close(self) -> None:
+        await self._channel.send("close")

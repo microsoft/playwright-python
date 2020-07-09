@@ -15,25 +15,25 @@
 from playwright.connection import Channel, ChannelOwner, ConnectionScope
 from typing import Dict
 
+
 class Dialog(ChannelOwner):
+    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
+        super().__init__(scope, guid, initializer)
 
-  def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-    super().__init__(scope, guid, initializer)
+    @property
+    def type(self) -> str:
+        return self._initializer["type"]
 
-  @property
-  def type(self) -> str:
-    return self._initializer['type']
+    @property
+    def message(self) -> str:
+        return self._initializer["message"]
 
-  @property
-  def message(self) -> str:
-    return self._initializer['message']
+    @property
+    def defaultValue(self) -> str:
+        return self._initializer["defaultValue"]
 
-  @property
-  def defaultValue(self) -> str:
-    return self._initializer['defaultValue']
+    async def accept(self, prompt_text: str = None) -> None:
+        await self._channel.send("accept", dict(promptText=prompt_text))
 
-  async def accept(self, prompt_text: str = None) -> None:
-    await self._channel.send('accept', dict(promptText=prompt_text))
-
-  async def dismiss(self) -> None:
-    await self._channel.send('dismiss')
+    async def dismiss(self) -> None:
+        await self._channel.send("dismiss")
