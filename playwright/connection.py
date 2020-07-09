@@ -122,7 +122,6 @@ class Connection:
     return await callback
 
   def _dispatch(self, msg: ParsedMessagePayload):
-    guid = msg['guid']
 
     id = msg.get('id')
     if id:
@@ -135,6 +134,7 @@ class Connection:
         callback.set_result(result)
       return
 
+    guid = msg['guid']
     method = msg.get('method')
     params = msg['params']
     if method == '__create__':

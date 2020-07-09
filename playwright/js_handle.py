@@ -29,6 +29,9 @@ class JSHandle(ChannelOwner):
     self._preview = self._initializer['preview']
     self._channel.on('previewUpdated', lambda preview: self._on_preview_updated(preview))
 
+  def __str__(self) -> str:
+    return self._preview
+
   def _on_preview_updated(self, preview: str) -> None:
     self._preview = preview
 
@@ -59,9 +62,6 @@ class JSHandle(ChannelOwner):
 
   async def jsonValue(self) -> Any:
     return parse_result(await self._channel.send('jsonValue'))
-
-  def toString(self) -> str:
-    return self._preview
 
 
 def is_primitive_value(value: Any):

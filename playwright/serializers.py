@@ -20,7 +20,7 @@ def normalize_file_payloads(files: Union[str, FilePayload, List[Union[str, FileP
             "mimeType": mimetypes.guess_type(item)[0] or 'application/octet-stream',
             "buffer": base64.b64encode(fd.read()).decode()
         }
-      file_payloads.append(file)
+        file_payloads.append(file)
     else:
       if isinstance(item["buffer"], bytes):
         item["buffer"] = base64.b64encode(item["buffer"]).decode()

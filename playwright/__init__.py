@@ -26,4 +26,5 @@ __all__ = [
   'firefox',
   'webkit',
   'browser_types',
+  'TimeoutError'
 ]

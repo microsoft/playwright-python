@@ -207,13 +207,9 @@ class Frame(ChannelOwner):
       files:Union[str, FilePayload, List[Union[str, FilePayload]]],
       timeout: int = None,
       noWaitAfter: bool = None) -> None:
-    file_payloads = normalize_file_payloads(files)
-    await self._channel.send('setInputFiles', dict(
-      selector=selector,
-      files=file_payloads,
-      timeout=timeout,
-      noWaitAfter=noWaitAfter
-    ))
+    params = locals_to_params(locals())
+    params['files'] = normalize_file_payloads(files)
+    await self._channel.send('setInputFiles', params)
 
   async def type(self,
       selector: str,

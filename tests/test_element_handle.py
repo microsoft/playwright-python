@@ -434,10 +434,10 @@ async def test_a_nice_preview(page, server):
   check = await page.querySelector('#check')
   text = await inner.evaluateHandle('e => e.firstChild')
   await page.evaluate('1') # Give them a chance to calculate the preview.
-  assert outer.toString() == 'JSHandle@<div id="outer" name="value">…</div>'
-  assert inner.toString() == 'JSHandle@<div id="inner">Text,↵more text</div>'
-  assert text.toString() == 'JSHandle@#text=Text,↵more text'
-  assert check.toString() == 'JSHandle@<input checked id="check" foo="bar"" type="checkbox"/>'
+  assert str(outer) == 'JSHandle@<div id="outer" name="value">…</div>'
+  assert str(inner) == 'JSHandle@<div id="inner">Text,↵more text</div>'
+  assert str(text) == 'JSHandle@#text=Text,↵more text'
+  assert str(check) == 'JSHandle@<input checked id="check" foo="bar"" type="checkbox"/>'
 
 async def test_get_attribute(page, server):
   await page.goto(f'{server.PREFIX}/dom.html')

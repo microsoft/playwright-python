@@ -65,7 +65,7 @@ class ParsedMessageParams(TypedDict):
   guid: str
   initializer: Dict
 
-class ParsedMessagePayload(TypedDict):
+class ParsedMessagePayload(TypedDict, total=False):
   id: int
   guid: str
   method: str
