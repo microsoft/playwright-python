@@ -31,19 +31,21 @@ def pytest_collection_modifyitems(items):
     for item in items:
         item.add_marker(pytest.mark.asyncio)
 
-def pytest_generate_tests(metafunc):
-    if 'browser_name' in metafunc.fixturenames:
-        browsers = metafunc.config.option.browser or ['chromium', 'firefox', 'webkit']
-        metafunc.parametrize("browser_name", browsers, scope='session')
 
-@pytest.fixture(scope='session')
+def pytest_generate_tests(metafunc):
+    if "browser_name" in metafunc.fixturenames:
+        browsers = metafunc.config.option.browser or ["chromium", "firefox", "webkit"]
+        metafunc.parametrize("browser_name", browsers, scope="session")
+
+
+@pytest.fixture(scope="session")
 def event_loop():
     loop = asyncio.get_event_loop()
     yield loop
     loop.close()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 async def browser(browser_name):
     browser = await playwright.browser_types[browser_name].launch()
     yield browser
@@ -74,9 +76,9 @@ def utils():
     yield utils_object
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 async def start_http_server():
-    static_path=os.path.join(os.path.dirname(__file__), 'assets')
+    static_path = os.path.join(os.path.dirname(__file__), "assets")
     resource = File(static_path)
     site = web_server.Site(resource)
     reactor.listenTCP(server_object.PORT, site)
@@ -89,7 +91,7 @@ async def start_http_server():
 
 @pytest.fixture(scope="session")
 def browser_name(pytestconfig):
-    return pytestconfig.getoption('browser')
+    return pytestconfig.getoption("browser")
 
 
 @pytest.fixture(scope="session")
@@ -109,16 +111,16 @@ def is_chromium(browser_name):
 
 @pytest.fixture(autouse=True)
 def skip_by_browser(request, browser_name):
-    if request.node.get_closest_marker('skip_browser'):
-        if request.node.get_closest_marker('skip_browser').args[0] == browser_name:
-            pytest.skip('skipped on this platform: {}'.format(browser_name))
+    if request.node.get_closest_marker("skip_browser"):
+        if request.node.get_closest_marker("skip_browser").args[0] == browser_name:
+            pytest.skip("skipped on this platform: {}".format(browser_name))
 
 
 def pytest_addoption(parser):
-    group = parser.getgroup('playwright', 'Playwright')
+    group = parser.getgroup("playwright", "Playwright")
     group.addoption(
-        '--browser',
-        action='append',
+        "--browser",
+        action="append",
         default=[],
-        help='Browsers which should be used. By default on all the browsers.',
+        help="Browsers which should be used. By default on all the browsers.",
     )

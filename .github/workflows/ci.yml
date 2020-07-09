@@ -39,6 +39,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install .
+    - name: Lint
+      run: black --check .
     - name: Build driver
       run: python build_driver.py
       env:

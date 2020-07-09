@@ -29,38 +29,41 @@ from playwright.playwright import Playwright
 from playwright.worker import Worker
 from typing import Any, Awaitable, Dict, List
 
-def create_remote_object(scope: ConnectionScope, type: str, guid: str, initializer: Dict) -> Any:
-  if type == 'bindingCall':
-    return BindingCall(scope, guid, initializer)
-  if type == 'browser':
-    return Browser(scope, guid, initializer)
-  if type == 'browserServer':
-    return BrowserServer(scope, guid, initializer)
-  if type == 'browserType':
-    return BrowserType(scope, guid, initializer)
-  if type == 'context':
-    return BrowserContext(scope, guid, initializer)
-  if type == 'consoleMessage':
-    return ConsoleMessage(scope, guid, initializer)
-  if type == 'dialog':
-    return Dialog(scope, guid, initializer)
-  if type == 'download':
-    return Download(scope, guid, initializer)
-  if type == 'elementHandle':
-    return ElementHandle(scope, guid, initializer)
-  if type == 'frame':
-    return Frame(scope, guid, initializer)
-  if type == 'jsHandle':
-    return JSHandle(scope, guid, initializer)
-  if type == 'page':
-    return Page(scope, guid, initializer)
-  if type == 'playwright':
-    return Playwright(scope, guid, initializer)
-  if type == 'request':
-    return Request(scope, guid, initializer)
-  if type == 'response':
-    return Response(scope, guid, initializer)
-  if type == 'route':
-    return Route(scope, guid, initializer)
-  if type == 'worker':
-    return Worker(scope, guid, initializer)
+
+def create_remote_object(
+    scope: ConnectionScope, type: str, guid: str, initializer: Dict
+) -> Any:
+    if type == "bindingCall":
+        return BindingCall(scope, guid, initializer)
+    if type == "browser":
+        return Browser(scope, guid, initializer)
+    if type == "browserServer":
+        return BrowserServer(scope, guid, initializer)
+    if type == "browserType":
+        return BrowserType(scope, guid, initializer)
+    if type == "context":
+        return BrowserContext(scope, guid, initializer)
+    if type == "consoleMessage":
+        return ConsoleMessage(scope, guid, initializer)
+    if type == "dialog":
+        return Dialog(scope, guid, initializer)
+    if type == "download":
+        return Download(scope, guid, initializer)
+    if type == "elementHandle":
+        return ElementHandle(scope, guid, initializer)
+    if type == "frame":
+        return Frame(scope, guid, initializer)
+    if type == "jsHandle":
+        return JSHandle(scope, guid, initializer)
+    if type == "page":
+        return Page(scope, guid, initializer)
+    if type == "playwright":
+        return Playwright(scope, guid, initializer)
+    if type == "request":
+        return Request(scope, guid, initializer)
+    if type == "response":
+        return Response(scope, guid, initializer)
+    if type == "route":
+        return Route(scope, guid, initializer)
+    if type == "worker":
+        return Worker(scope, guid, initializer)

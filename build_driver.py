@@ -17,27 +17,30 @@ import os
 import shutil
 import subprocess
 
-driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'driver')
-package_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playwright')
-drivers_path = os.path.join(package_path, 'drivers')
+driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "driver")
+package_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "playwright")
+drivers_path = os.path.join(package_path, "drivers")
 
-if os.path.exists(os.path.join(driver_path, 'package-lock.json')):
-  os.remove(os.path.join(driver_path, 'package-lock.json'))
-if os.path.exists(os.path.join(driver_path, 'node_modules')):
-  shutil.rmtree(os.path.join(driver_path, 'node_modules'))
-if os.path.exists(os.path.join(driver_path, 'out')):
-  shutil.rmtree(os.path.join(driver_path, 'out'))
+if os.path.exists(os.path.join(driver_path, "package-lock.json")):
+    os.remove(os.path.join(driver_path, "package-lock.json"))
+if os.path.exists(os.path.join(driver_path, "node_modules")):
+    shutil.rmtree(os.path.join(driver_path, "node_modules"))
+if os.path.exists(os.path.join(driver_path, "out")):
+    shutil.rmtree(os.path.join(driver_path, "out"))
 
-subprocess.run('npm i', cwd=driver_path, shell=True)
-subprocess.run('npm run bake', cwd=driver_path, shell=True)
+subprocess.run("npm i", cwd=driver_path, shell=True)
+subprocess.run("npm run bake", cwd=driver_path, shell=True)
 
-for driver in ['driver-linux', 'driver-macos', 'driver-win.exe']:
-  if os.path.exists(os.path.join(package_path, driver)):
-    os.remove(os.path.join(package_path, driver))
+for driver in ["driver-linux", "driver-macos", "driver-win.exe"]:
+    if os.path.exists(os.path.join(package_path, driver)):
+        os.remove(os.path.join(package_path, driver))
 
-  in_path = os.path.join(driver_path, 'out', driver)
-  out_path = os.path.join(drivers_path, driver + '.gz')
-  with open(in_path, 'rb') as f_in, gzip.open(out_path, 'wb') as f_out:
-    shutil.copyfileobj(f_in, f_out)
+    in_path = os.path.join(driver_path, "out", driver)
+    out_path = os.path.join(drivers_path, driver + ".gz")
+    with open(in_path, "rb") as f_in, gzip.open(out_path, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
 
-shutil.copyfile(os.path.join(driver_path, 'node_modules', 'playwright', 'browsers.json'), os.path.join(drivers_path, 'browsers.json'))
+shutil.copyfile(
+    os.path.join(driver_path, "node_modules", "playwright", "browsers.json"),
+    os.path.join(drivers_path, "browsers.json"),
+)

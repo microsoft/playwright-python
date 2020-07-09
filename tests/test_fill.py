@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 async def test_fill_textarea(page, server):
-  await page.goto(f'{server.PREFIX}/input/textarea.html')
-  await page.fill('textarea', 'some value')
-  assert await page.evaluate('result') == 'some value'
+    await page.goto(f"{server.PREFIX}/input/textarea.html")
+    await page.fill("textarea", "some value")
+    assert await page.evaluate("result") == "some value"
+
 
 async def test_fill_input(page, server):
-  await page.goto(f'{server.PREFIX}/input/textarea.html')
-  await page.fill('input', 'some value')
-  assert await page.evaluate('result') == 'some value'
-
+    await page.goto(f"{server.PREFIX}/input/textarea.html")
+    await page.fill("input", "some value")
+    assert await page.evaluate("result") == "some value"

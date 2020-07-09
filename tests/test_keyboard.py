@@ -12,37 +12,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 async def test_keyboard_type_into_a_textarea(page):
-  await page.evaluate('''
+    await page.evaluate(
+        """
     const textarea = document.createElement('textarea');
     document.body.appendChild(textarea);
     textarea.focus();
-  ''')
-  text = 'Hello world. I am the text that was typed!'
-  await page.keyboard.type(text)
-  assert await page.evaluate('document.querySelector("textarea").value') == text
+  """
+    )
+    text = "Hello world. I am the text that was typed!"
+    await page.keyboard.type(text)
+    assert await page.evaluate('document.querySelector("textarea").value') == text
+
 
 async def test_keyboard_move_with_the_arrow_keys(page, server):
-  await page.goto(f'{server.PREFIX}/input/textarea.html')
-  await page.type('textarea', 'Hello World!')
-  assert await page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
-  for _ in 'World!':
-    await page.keyboard.press('ArrowLeft')
-  await page.keyboard.type('inserted ')
-  assert await page.evaluate("document.querySelector('textarea').value")  == 'Hello inserted World!'
-  await page.keyboard.down('Shift')
-  for _ in 'inserted ':
-    await page.keyboard.press('ArrowLeft')
-  await page.keyboard.up('Shift')
-  await page.keyboard.press('Backspace')
-  assert await page.evaluate("document.querySelector('textarea').value") == 'Hello World!'
+    await page.goto(f"{server.PREFIX}/input/textarea.html")
+    await page.type("textarea", "Hello World!")
+    assert (
+        await page.evaluate("document.querySelector('textarea').value")
+        == "Hello World!"
+    )
+    for _ in "World!":
+        await page.keyboard.press("ArrowLeft")
+    await page.keyboard.type("inserted ")
+    assert (
+        await page.evaluate("document.querySelector('textarea').value")
+        == "Hello inserted World!"
+    )
+    await page.keyboard.down("Shift")
+    for _ in "inserted ":
+        await page.keyboard.press("ArrowLeft")
+    await page.keyboard.up("Shift")
+    await page.keyboard.press("Backspace")
+    assert (
+        await page.evaluate("document.querySelector('textarea').value")
+        == "Hello World!"
+    )
+
 
 async def test_keyboard_send_a_character_with_elementhandle_press(page, server):
-  await page.goto(f'{server.PREFIX}/input/textarea.html')
-  textarea = await page.querySelector('textarea')
-  await textarea.press('a')
-  assert await page.evaluate("document.querySelector('textarea').value") == 'a'
-  await page.evaluate("() => window.addEventListener('keydown', e => e.preventDefault(), true)")
-  await textarea.press('b')
-  assert await page.evaluate("document.querySelector('textarea').value") == 'a'
-
+    await page.goto(f"{server.PREFIX}/input/textarea.html")
+    textarea = await page.querySelector("textarea")
+    await textarea.press("a")
+    assert await page.evaluate("document.querySelector('textarea').value") == "a"
+    await page.evaluate(
+        "() => window.addEventListener('keydown', e => e.preventDefault(), true)"
+    )
+    await textarea.press("b")
+    assert await page.evaluate("document.querySelector('textarea').value") == "a"

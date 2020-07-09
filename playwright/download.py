@@ -15,24 +15,24 @@
 from playwright.connection import Channel, ChannelOwner, ConnectionScope
 from typing import Dict, Optional
 
+
 class Download(ChannelOwner):
+    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
+        super().__init__(scope, guid, initializer)
 
-  def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-    super().__init__(scope, guid, initializer)
+    @property
+    def url(self) -> str:
+        return self._initializer["url"]
 
-  @property
-  def url(self) -> str:
-    return self._initializer['url']
+    @property
+    def suggestedFilename(self) -> str:
+        return self._initializer["suggestedFilename"]
 
-  @property
-  def suggestedFilename(self) -> str:
-    return self._initializer['suggestedFilename']
+    async def delete(self) -> None:
+        await self._channel.send("delete")
 
-  async def delete(self) -> None:
-    await self._channel.send('delete')
+    async def failure(self) -> Optional[str]:
+        return await self._channel.send("failure")
 
-  async def failure(self) -> Optional[str]:
-    return await self._channel.send('failure')
-
-  async def path(self) -> Optional[str]:
-    return await self._channel.send('path')
+    async def path(self) -> Optional[str]:
+        return await self._channel.send("path")

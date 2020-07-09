@@ -17,17 +17,20 @@ from contextlib import closing
 import os
 import socket
 
+
 def find_free_port():
-  with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-    s.bind(('', 0))
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    return s.getsockname()[1]
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(("", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
 
 class Server:
-  def __init__(self):
-    self.PORT = find_free_port()
-    self.EMPTY_PAGE = f'http://localhost:{self.PORT}/empty.html'
-    self.PREFIX = f'http://localhost:{self.PORT}'
-    self.CROSS_PROCESS_PREFIX = f'http://127.0.0.1:{self.PORT}'
+    def __init__(self):
+        self.PORT = find_free_port()
+        self.EMPTY_PAGE = f"http://localhost:{self.PORT}/empty.html"
+        self.PREFIX = f"http://localhost:{self.PORT}"
+        self.CROSS_PROCESS_PREFIX = f"http://127.0.0.1:{self.PORT}"
+
 
 server = Server()
