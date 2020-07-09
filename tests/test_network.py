@@ -45,4 +45,3 @@ async def test_request_continue(page, server):
   assert response.ok
   assert intercepted == [True]
   assert await page.title() == ''
-

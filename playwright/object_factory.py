@@ -25,6 +25,7 @@ from playwright.frame import Frame
 from playwright.js_handle import JSHandle
 from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page
+from playwright.playwright import Playwright
 from playwright.worker import Worker
 from typing import Any, Awaitable, Dict, List
 
@@ -53,6 +54,8 @@ def create_remote_object(scope: ConnectionScope, type: str, guid: str, initializ
     return JSHandle(scope, guid, initializer)
   if type == 'page':
     return Page(scope, guid, initializer)
+  if type == 'playwright':
+    return Playwright(scope, guid, initializer)
   if type == 'request':
     return Request(scope, guid, initializer)
   if type == 'response':
