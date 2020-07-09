@@ -22,6 +22,9 @@ class ConsoleMessage(ChannelOwner):
   def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
     super().__init__(scope, guid, initializer)
 
+  def __str__(self) -> str:
+    return self.text
+
   @property
   def type(self) -> str:
     return self._initializer['type']

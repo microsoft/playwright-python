@@ -18,6 +18,7 @@ from playwright.element_handle import ElementHandle, convertSelectOptionValues, 
 from playwright.helper import ConsoleMessageLocation, FilePayload, SelectOption, is_function_body, locals_to_params
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Request, Response, Route
+from playwright.serializers import normalize_file_payloads
 from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -203,10 +204,12 @@ class Frame(ChannelOwner):
 
   async def setInputFiles(self,
       selector: str,
-      files: Union[str, FilePayload, List[str], List[FilePayload]],
+      files:Union[str, FilePayload, List[Union[str, FilePayload]]],
       timeout: int = None,
       noWaitAfter: bool = None) -> None:
-    await self._channel.send('setInputFiles', locals_to_params(locals()))
+    params = locals_to_params(locals())
+    params['files'] = normalize_file_payloads(files)
+    await self._channel.send('setInputFiles', params)
 
   async def type(self,
       selector: str,

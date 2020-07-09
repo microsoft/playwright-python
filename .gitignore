@@ -1,6 +1,6 @@
 playwright/__pycache__/
-playwright/drivers/
-playwright/driver*
+playwright/drivers/driver*
+playwright/driver-*
 driver/node_modules/
 driver/out/
 playwright.egg-info/

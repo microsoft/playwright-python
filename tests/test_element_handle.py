@@ -33,7 +33,7 @@ async def test_bounding_box_handle_nested_frames(page, server):
 async def test_bounding_box_return_null_for_invisible_elements(page, server):
   await page.setContent('<div style="display:none">hi</div>')
   element = await page.querySelector('div')
-  assert await element.boundingBox() == None
+  assert await element.boundingBox() is None
 
 async def test_bounding_box_force_a_layout(page, server):
   await page.setViewportSize({'width':500,'height':500})
@@ -120,14 +120,14 @@ async def test_content_frame_for_non_iframes(page, server, utils):
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   frame = page.frames[1]
   element_handle = await frame.evaluateHandle('document.body')
-  assert await element_handle.contentFrame() == None
+  assert await element_handle.contentFrame() is None
 
 async def test_content_frame_for_document_element(page, server, utils):
   await page.goto(server.EMPTY_PAGE)
   await utils.attach_frame(page, 'frame1', server.EMPTY_PAGE)
   frame = page.frames[1]
   element_handle = await frame.evaluateHandle('document.documentElement')
-  assert await element_handle.contentFrame() == None
+  assert await element_handle.contentFrame() is None
 
 async def test_owner_frame(page, server, utils):
   await page.goto(server.EMPTY_PAGE)
@@ -434,10 +434,10 @@ async def test_a_nice_preview(page, server):
   check = await page.querySelector('#check')
   text = await inner.evaluateHandle('e => e.firstChild')
   await page.evaluate('1') # Give them a chance to calculate the preview.
-  assert outer.toString() == 'JSHandle@<div id="outer" name="value">…</div>'
-  assert inner.toString() == 'JSHandle@<div id="inner">Text,↵more text</div>'
-  assert text.toString() == 'JSHandle@#text=Text,↵more text'
-  assert check.toString() == 'JSHandle@<input checked id="check" foo="bar"" type="checkbox"/>'
+  assert str(outer) == 'JSHandle@<div id="outer" name="value">…</div>'
+  assert str(inner) == 'JSHandle@<div id="inner">Text,↵more text</div>'
+  assert str(text) == 'JSHandle@#text=Text,↵more text'
+  assert str(check) == 'JSHandle@<input checked id="check" foo="bar"" type="checkbox"/>'
 
 async def test_get_attribute(page, server):
   await page.goto(f'{server.PREFIX}/dom.html')

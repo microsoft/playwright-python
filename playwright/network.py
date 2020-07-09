@@ -15,7 +15,7 @@
 import base64
 import json
 from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_nullable_channel, from_channel
-from playwright.helper import Error
+from playwright.helper import Error, ContinueParameters
 from typing import Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -99,15 +99,15 @@ class Route(ChannelOwner):
     await self._channel.send('fulfill', response)
 
   async def continue_(self, method: str = None, headers: Dict[str,str] = None, postData: Union[str, bytes] = None) -> None:
-    overrides = dict()
+    overrides: ContinueParameters = dict()
     if method:
       overrides['method'] = method
     if headers:
       overrides['headers'] = headers
     if isinstance(postData, str):
-      overrides['postData'] = base64.b64encode(bytes(postData, 'utf-8'))
+      overrides['postData'] = base64.b64encode(bytes(postData, 'utf-8')).decode()
     elif isinstance(postData, bytes):
-      overrides['postData'] = base64.b64encode(postData)
+      overrides['postData'] = base64.b64encode(postData).decode()
     await self._channel.send('continue', overrides)
 
 

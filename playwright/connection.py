@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from playwright.helper import parse_error
+from playwright.helper import parse_error, ParsedMessagePayload
 from playwright.transport import Transport
 from pyee import BaseEventEmitter
 from typing import Any, Awaitable, Dict, List, Optional
@@ -22,12 +22,12 @@ from typing import Any, Awaitable, Dict, List, Optional
 class Channel(BaseEventEmitter):
   def __init__(self, scope: 'ConnectionScope', guid: str) -> None:
     super().__init__()
-    self._scope = scope
+    self._scope: ConnectionScope = scope
     self._guid = guid
-    self._object = None
+    self._object: Optional[ChannelOwner] = None
 
   async def send(self, method: str, params: dict = None) -> Any:
-    if params == None:
+    if params is None:
       params = dict()
     return await self._scope.send_message_to_server(self._guid, method, params)
 
@@ -121,20 +121,22 @@ class Connection:
     self._callbacks[id] = callback
     return await callback
 
-  def _dispatch(self, msg: Dict):
-    guid = msg.get('guid')
+  def _dispatch(self, msg: ParsedMessagePayload):
 
-    if msg.get('id'):
-      callback = self._callbacks.pop(msg.get('id'))
-      if msg.get('error'):
-        callback.set_exception(parse_error(msg.get('error')))
+    id = msg.get('id')
+    if id:
+      callback = self._callbacks.pop(id)
+      error = msg.get('error')
+      if error:
+        callback.set_exception(parse_error(error))
       else:
         result = self._replace_guids_with_channels(msg.get('result'))
         callback.set_result(result)
       return
 
+    guid = msg['guid']
     method = msg.get('method')
-    params = msg.get('params')
+    params = msg['params']
     if method == '__create__':
       scope = self._scopes[guid]
       scope.create_remote_object(params['type'], params['guid'], params['initializer'])
@@ -144,7 +146,7 @@ class Connection:
     object._channel.emit(method, self._replace_guids_with_channels(params))
 
   def _replace_channels_with_guids(self, payload: Any) -> Any:
-    if payload == None:
+    if payload is None:
       return payload
     if isinstance(payload, list):
       return list(map(lambda p: self._replace_channels_with_guids(p), payload))
@@ -158,13 +160,13 @@ class Connection:
     return payload
 
   def _replace_guids_with_channels(self, payload: Any) -> Any:
-    if payload == None:
+    if payload is None:
       return payload
     if isinstance(payload, list):
       return list(map(lambda p: self._replace_guids_with_channels(p), payload))
     if isinstance(payload, dict):
       if payload.get('guid') in self._objects:
-        return self._objects[payload.get('guid')]._channel
+        return self._objects[payload['guid']]._channel
       result = dict()
       for key in payload:
         result[key] = self._replace_guids_with_channels(payload[key])
