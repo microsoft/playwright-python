@@ -56,7 +56,7 @@ class BrowserContext(ChannelOwner):
 
   def _on_route(self, route: Route, request: Request) -> None:
     for handler_entry in self._routes:
-      if handler_entry.matcher.matches(request.url()):
+      if handler_entry.matcher.matches(request.url):
         handler_entry.handler(route, request)
         return
     asyncio.ensure_future(route.continue_())

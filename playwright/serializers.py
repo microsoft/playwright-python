@@ -6,14 +6,14 @@ import mimetypes
 import base64
 
 def normalize_file_payloads(files: Union[str, FilePayload, List[str], List[FilePayload]]) -> List[FilePayload]:
-  ff = None
-  if (type(files) != list):
+  ff: List[Union[str, FilePayload]] = None
+  if (not isinstance(files, list)):
     ff = [files]
   else:
     ff = files
   file_payloads: List[FilePayload] = []
   for item in ff:
-    if type(item) == str:
+    if isinstance(item, str):
       with open(item, mode='rb') as fd:
         file: FilePayload = {
             "name": path.basename(item),
@@ -22,7 +22,7 @@ def normalize_file_payloads(files: Union[str, FilePayload, List[str], List[FileP
         }
       file_payloads.append(file)
     else:
-      if type(item["buffer"]) == bytes:
+      if isinstance(item["buffer"], bytes):
         item["buffer"] = base64.b64encode(item["buffer"]).decode()
       file_payloads.append(item)
 

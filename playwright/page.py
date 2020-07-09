@@ -287,7 +287,7 @@ class Page(ChannelOwner):
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
     def predicate(request: Request):
       if matcher:
-        return matcher.matches(request.url())
+        return matcher.matches(request.url)
       return urlOrPredicate(request)
     params = locals_to_params(locals())
     params['predicate'] = predicate
@@ -297,7 +297,7 @@ class Page(ChannelOwner):
     matcher = URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
     def predicate(request: Request):
       if matcher:
-        return matcher.matches(request.url())
+        return matcher.matches(request.url)
       return urlOrPredicate(request)
     params = locals_to_params(locals())
     params['predicate'] = predicate
