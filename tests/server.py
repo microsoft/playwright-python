@@ -14,7 +14,6 @@
 
 from contextlib import closing
 
-import http.server
 import os
 import socket
 
@@ -32,13 +31,3 @@ class Server:
     self.CROSS_PROCESS_PREFIX = f'http://127.0.0.1:{self.PORT}'
 
 server = Server()
-
-class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), 'assets'), **kwargs)
-
-  def log_message(self, *args):
-    return
-
-  def log_error(self, *args):
-    return

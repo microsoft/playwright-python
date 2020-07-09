@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import http.server
-import threading
-
+import os
 import pytest
 import playwright
-from .server import server as server_object, HTTPRequestHandler
+import threading
+import time
+
+from twisted.internet import reactor
+from twisted.web.static import File
+from twisted.web import server as web_server, resource
+
+from .server import server as server_object
 from .utils import utils as utils_object
 
 # Will mark all the tests as async
@@ -50,48 +55,63 @@ async def context(browser):
     yield context
     await context.close()
 
+
 @pytest.fixture
 async def page(context):
     page = await context.newPage()
     yield page
     await page.close()
 
+
 @pytest.fixture
 def server():
     yield server_object
+
 
 @pytest.fixture
 def utils():
     yield utils_object
 
+
 @pytest.fixture(autouse=True, scope='session')
 async def start_http_server():
-    httpd = http.server.HTTPServer(('', server_object.PORT), HTTPRequestHandler)
-    threading.Thread(target=httpd.serve_forever).start()
+    static_path=os.path.join(os.path.dirname(__file__), 'assets')
+    resource = File(static_path)
+    site = web_server.Site(resource)
+    reactor.listenTCP(server_object.PORT, site)
+    t = threading.Thread(target=reactor.run)
+    t.start()
     yield
-    httpd.shutdown()
+    reactor.stop()
+    t.join()
+
 
 @pytest.fixture(scope="session")
 def browser_name(pytestconfig):
     return pytestconfig.getoption('browser')
 
+
 @pytest.fixture(scope="session")
 def is_webkit(browser_name):
     return browser_name == "webkit"
+
 
 @pytest.fixture(scope="session")
 def is_firefox(browser_name):
     return browser_name == "firefox"
 
+
 @pytest.fixture(scope="session")
 def is_chromium(browser_name):
     return browser_name == "chromium"
+
 
 @pytest.fixture(autouse=True)
 def skip_by_browser(request, browser_name):
     if request.node.get_closest_marker('skip_browser'):
         if request.node.get_closest_marker('skip_browser').args[0] == browser_name:
             pytest.skip('skipped on this platform: {}'.format(browser_name))
+
 
 def pytest_addoption(parser):
     group = parser.getgroup('playwright', 'Playwright')
@@ -101,5 +121,3 @@ def pytest_addoption(parser):
         default=[],
         help='Browsers which should be used. By default on all the browsers.',
     )
-
-
