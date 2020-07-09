@@ -59,6 +59,35 @@ async def run():
 asyncio.get_event_loop().run_until_complete(run())
 ```
 
+#### Mobile and geolocation
+
+This snippet emulates Mobile Safari on a device at a given geolocation, navigates to maps.google.com, performs action and takes a screenshot.
+
+```py
+import asyncio
+from playwright import webkit, devices
+
+iphone_11 = devices['iPhone 11 Pro']
+print(iphone_11)
+
+async def run():
+  browser = await webkit.launch(headless=False)
+  context = await browser.newContext(
+    **iphone_11,
+    locale='en-US',
+    geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
+    permissions=['geolocation']
+  )
+  page = await context.newPage()
+  await page.goto('https://maps.google.com')
+  await page.click('text="Your location"')
+  await page.waitForRequest('*preview/pwa')
+  await page.screenshot(path='colosseum-iphone.png')
+  await browser.close()
+
+asyncio.get_event_loop().run_until_complete(run())
+```
+
 #### Evaluate in browser context
 
 This code snippet navigates to example.com in Firefox, and executes a script in the page context.
