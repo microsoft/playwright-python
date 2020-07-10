@@ -194,7 +194,7 @@ async def test_should_use_viewport_size_from_window_features(browser: Browser, s
         ),
         page.waitForEvent("popup"),
     )
-    await popup.setViewportSize({"width": 500, "height": 400})
+    await popup.setViewportSize(width=500, height=400)
     await popup.waitForLoadState()
     resized = await popup.evaluate(
         "() => ({ width: window.innerWidth, height: window.innerHeight })"
