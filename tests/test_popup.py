@@ -35,10 +35,10 @@ async def test_link_navigation_inherit_user_agent_from_browser_context(
         Page, (await asyncio.gather(context.waitForEvent("page"), page.click("a"),))[0]
     )
     await popup.waitForLoadState("domcontentloaded")
-    userAgent = await popup.evaluate("() => window.initialUserAgent")
+    user_agent = await popup.evaluate("() => window.initialUserAgent")
     request = await request_waitable
     await context.close()
-    assert userAgent == "hey"
+    assert user_agent == "hey"
     assert request.requestHeaders.getRawHeaders("user-agent") == ["hey"]
 
 
@@ -76,7 +76,7 @@ async def test_window_open_inherit_user_agent_from_browser_context(
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     request_promise = asyncio.ensure_future(server.wait_for_request("/dummy.html"))
-    userAgent = await page.evaluate(
+    user_agent = await page.evaluate(
         """url => {
       win = window.open(url)
       return win.navigator.userAgent
@@ -85,7 +85,7 @@ async def test_window_open_inherit_user_agent_from_browser_context(
     )
     request = await request_promise
     await context.close()
-    assert userAgent == "hey"
+    assert user_agent == "hey"
     assert request.requestHeaders.getRawHeaders("user-agent") == ["hey"]
 
 
@@ -152,7 +152,7 @@ async def test_should_inherit_touch_support_from_browser_context(
 
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
-    hasTouch = await page.evaluate(
+    has_touch = await page.evaluate(
         """() => {
       win = window.open('')
       return 'ontouchstart' in win
@@ -160,7 +160,7 @@ async def test_should_inherit_touch_support_from_browser_context(
     )
 
     await context.close()
-    assert hasTouch
+    assert has_touch
 
 
 async def test_should_inherit_viewport_size_from_browser_context(
