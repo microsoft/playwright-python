@@ -38,3 +38,9 @@ mypy playwright
 ```sh
 black .
 ```
+
+## Installing the Git hooks (auto format etc. on commit)
+
+```sh
+pre-commit install
+```

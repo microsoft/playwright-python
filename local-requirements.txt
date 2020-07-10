@@ -8,3 +8,4 @@ setuptools==49.1.0
 twisted==20.3.0
 wheel==0.34.2
 black==19.10b0
+pre-commit==2.6.0
