@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import re
-from typing import List
+from typing import List, cast
 
+from playwright.element_handle import ElementHandle
 from playwright.frame import Frame
 from playwright.page import Page
 
@@ -23,16 +24,16 @@ class Utils:
     async def attach_frame(self, page: Page, frame_id: str, url: str):
         handle = await page.evaluateHandle(
             """async ({ frame_id, url }) => {
-      const frame = document.createElement('iframe');
-      frame.src = url;
-      frame.id = frame_id;
-      document.body.appendChild(frame);
-      await new Promise(x => frame.onload = x);
-      return frame;
-    }""",
+                const frame = document.createElement('iframe');
+                frame.src = url;
+                frame.id = frame_id;
+                document.body.appendChild(frame);
+                await new Promise(x => frame.onload = x);
+                return frame;
+            }""",
             {"frame_id": frame_id, "url": url},
         )
-        return await handle.asElement().contentFrame()
+        return await cast(ElementHandle, handle.asElement()).contentFrame()
 
     async def detach_frame(self, page: Page, frame_id: str):
         await page.evaluate(

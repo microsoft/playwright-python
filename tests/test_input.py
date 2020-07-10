@@ -72,7 +72,7 @@ async def test_should_set_from_memory(page):
 
 async def test_should_emit_event(page: Page, server):
     await page.setContent("<input type=file>")
-    fc_done = asyncio.Future()
+    fc_done: asyncio.Future = asyncio.Future()
     page.once("filechooser", lambda file_chooser: fc_done.set_result(file_chooser)),
     await page.click("input")
     file_chooser = await fc_done
@@ -135,13 +135,13 @@ async def test_should_be_able_to_read_selected_file(page: Page, server):
     content = await page.evalOnSelector(
         "input",
         """async picker => {
-        picker.click();
-        await new Promise(x => picker.oninput = x);
-        const reader = new FileReader();
-        const promise = new Promise(fulfill => reader.onload = fulfill);
-        reader.readAsText(picker.files[0]);
-        return promise.then(() => reader.result);
-      }""",
+            picker.click();
+            await new Promise(x => picker.oninput = x);
+            const reader = new FileReader();
+            const promise = new Promise(fulfill => reader.onload = fulfill);
+            reader.readAsText(picker.files[0]);
+            return promise.then(() => reader.result);
+        }""",
     )
     assert content == "contents of the file"
 
@@ -162,10 +162,10 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
             page.evalOnSelector(
                 "input",
                 """async picker => {
-        picker.click();
-        await new Promise(x => picker.oninput = x);
-        return picker.files.length;
-      }""",
+                    picker.click();
+                    await new Promise(x => picker.oninput = x);
+                    return picker.files.length;
+                }""",
             ),
         )
     )[1]
@@ -181,10 +181,10 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
             page.evalOnSelector(
                 "input",
                 """async picker => {
-        picker.click()
-        await new Promise(x => picker.oninput = x)
-        return picker.files.length
-      }""",
+                    picker.click()
+                    await new Promise(x => picker.oninput = x)
+                    return picker.files.length
+                }""",
             ),
         )
     )[1]
@@ -214,11 +214,12 @@ async def test_should_emit_input_and_change_events(page, server):
     await page.exposeFunction("eventHandled", lambda e: events.append(e))
     await page.setContent(
         """
-    <input id=input type=file></input>
-    <script>
-      input.addEventListener('input', e => eventHandled({ type: e.type }))
-      input.addEventListener('change', e => eventHandled({ type: e.type }))
-    </script>"""
+            <input id=input type=file></input>
+            <script>
+            input.addEventListener('input', e => eventHandled({ type: e.type }))
+            input.addEventListener('change', e => eventHandled({ type: e.type }))
+            </script>
+        """
     )
     await (await page.querySelector("input")).setInputFiles(FILE_TO_UPLOAD)
     assert len(events) == 2
