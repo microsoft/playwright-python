@@ -87,16 +87,16 @@ async def test_jshandle_evaluate_accept_object_handle_to_unserializable_value(pa
 async def test_jshandle_evaluate_pass_configurable_args(page):
     result = await page.evaluate(
         """arg => {
-    if (arg.foo !== 42)
-      throw new Error('Not a 42');
-    arg.foo = 17;
-    if (arg.foo !== 17)
-      throw new Error('Not 17');
-    delete arg.foo;
-    if (arg.foo === 17)
-      throw new Error('Still 17');
-    return arg;
-  }""",
+            if (arg.foo !== 42)
+            throw new Error('Not a 42');
+            arg.foo = 17;
+            if (arg.foo !== 17)
+            throw new Error('Not 17');
+            delete arg.foo;
+            if (arg.foo === 17)
+            throw new Error('Still 17');
+            return arg;
+        }""",
         {"foo": 42},
     )
     assert result == {}
@@ -105,10 +105,10 @@ async def test_jshandle_evaluate_pass_configurable_args(page):
 async def test_jshandle_properties_get_property(page):
     handle1 = await page.evaluateHandle(
         """() => ({
-    one: 1,
-    two: 2,
-    three: 3
-  })"""
+            one: 1,
+            two: 2,
+            three: 3
+        })"""
     )
     handle2 = await handle1.getProperty("two")
     assert await handle2.jsonValue() == 2
@@ -117,9 +117,9 @@ async def test_jshandle_properties_get_property(page):
 async def test_jshandle_properties_work_with_undefined_null_and_empty(page):
     handle = await page.evaluateHandle(
         """() => ({
-    undefined: undefined,
-    null: null,
-  })"""
+            undefined: undefined,
+            null: null,
+        })"""
     )
     undefined_handle = await handle.getProperty("undefined")
     assert await undefined_handle.jsonValue() is None
@@ -132,11 +132,11 @@ async def test_jshandle_properties_work_with_undefined_null_and_empty(page):
 async def test_jshandle_properties_work_with_unserializable_values(page):
     handle = await page.evaluateHandle(
         """() => ({
-    infinity: Infinity,
-    negInfinity: -Infinity,
-    nan: NaN,
-    negZero: -0
-  })"""
+            infinity: Infinity,
+            negInfinity: -Infinity,
+            nan: NaN,
+            negZero: -0
+        })"""
     )
     infinity_handle = await handle.getProperty("infinity")
     assert await infinity_handle.jsonValue() == float("inf")

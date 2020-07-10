@@ -460,9 +460,11 @@ class Page(ChannelOwner):
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
-    async def setViewportSize(self, viewport_size: Dict) -> None:
-        self._viewport_size = viewport_size
-        await self._channel.send("setViewportSize", dict(viewportSize=viewport_size))
+    async def setViewportSize(self, width: int, height: int) -> None:
+        self._viewport_size = dict(width=width, height=height)
+        await self._channel.send(
+            "setViewportSize", dict(viewportSize=locals_to_params(locals()))
+        )
 
     def viewportSize(self) -> Optional[Dict]:
         return self._viewport_size
