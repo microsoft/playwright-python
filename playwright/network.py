@@ -22,7 +22,7 @@ from playwright.connection import (
     from_channel,
 )
 from playwright.helper import Error, ContinueParameters
-from typing import Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from playwright.frame import Frame
@@ -124,7 +124,7 @@ class Route(ChannelOwner):
             overrides["postData"] = base64.b64encode(bytes(postData, "utf-8")).decode()
         elif isinstance(postData, bytes):
             overrides["postData"] = base64.b64encode(postData).decode()
-        await self._channel.send("continue", overrides)
+        await self._channel.send("continue", cast(Any, overrides))
 
 
 class Response(ChannelOwner):

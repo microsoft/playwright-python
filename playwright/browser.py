@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 from playwright.browser_context import BrowserContext
 from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright.helper import locals_to_params, Literal
+from playwright.helper import locals_to_params, ColorScheme
 from playwright.page import Page
 from types import SimpleNamespace
 from typing import Dict, List, Optional, Union
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 
 class Browser(ChannelOwner):
@@ -65,7 +71,7 @@ class Browser(ChannelOwner):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
+        colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
@@ -94,7 +100,7 @@ class Browser(ChannelOwner):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
+        colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
     ) -> Page:
         params = locals_to_params(locals())

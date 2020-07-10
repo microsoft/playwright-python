@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import base64
+import sys
 from playwright.connection import (
     Channel,
     ChannelOwner,
@@ -24,10 +25,25 @@ from playwright.helper import (
     FilePayload,
     SelectOption,
     locals_to_params,
-    Literal,
+    KeyboardModifier,
+    MouseButton,
 )
 from playwright.js_handle import parse_result, serialize_argument, JSHandle
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+    TYPE_CHECKING,
+    cast,
+)
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 if TYPE_CHECKING:
     from playwright.frame import Frame
@@ -66,7 +82,7 @@ class ElementHandle(JSHandle):
 
     async def hover(
         self,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         timeout: int = None,
         force: bool = None,
@@ -75,10 +91,10 @@ class ElementHandle(JSHandle):
 
     async def click(
         self,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -88,10 +104,10 @@ class ElementHandle(JSHandle):
 
     async def dblclick(
         self,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -170,7 +186,7 @@ class ElementHandle(JSHandle):
     async def querySelectorAll(self, selector: str) -> List["ElementHandle"]:
         return list(
             map(
-                from_nullable_channel,
+                cast(Callable[[Any], Any], from_nullable_channel),
                 await self._channel.send("querySelectorAll", dict(selector=selector)),
             )
         )

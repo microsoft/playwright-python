@@ -33,14 +33,10 @@ from typing import (
 import sys
 
 if sys.version_info >= (3, 8):
-    from typing import (
-        Literal as LiteralType,
-        TypedDict,
-    )  # pylint: disable=no-name-in-module
+    from typing import Literal, TypedDict
 else:
-    from typing_extensions import Literal as LiteralType, TypedDict
+    from typing_extensions import Literal, TypedDict
 
-Literal = LiteralType
 
 if TYPE_CHECKING:
     from playwright.network import Route, Request
@@ -50,16 +46,16 @@ URLMatch = Union[str, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], None]
 FunctionWithSource = Callable[[Dict], Any]
 
+ColorScheme = Literal["dark", "light", "no-preference"]
+DocumentLoadState = Literal["load", "domcontentloaded", "networkidle"]
+KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
+MouseButton = Literal["left", "right", "middle"]
+
 
 class FilePayload(TypedDict):
     name: str
     mimeType: str
     buffer: Union[bytes, str]
-
-
-class FrameMatch(TypedDict):
-    url: URLMatch
-    name: str
 
 
 class SelectOption(TypedDict):

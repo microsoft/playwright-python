@@ -14,6 +14,7 @@
 
 import asyncio
 import base64
+import sys
 from playwright.accessibility import Accessibility
 from playwright.connection import (
     Channel,
@@ -37,7 +38,6 @@ from playwright.helper import (
     serialize_error,
     Error,
     FilePayload,
-    FrameMatch,
     FunctionWithSource,
     Optional,
     PendingWaitEvent,
@@ -47,12 +47,20 @@ from playwright.helper import (
     TimeoutSettings,
     URLMatch,
     URLMatcher,
-    Literal,
+    MouseButton,
+    KeyboardModifier,
+    DocumentLoadState,
+    ColorScheme,
 )
 from playwright.network import Request, Response, Route
 from playwright.worker import Worker
 from types import SimpleNamespace
-from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING
+from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING, cast
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 if TYPE_CHECKING:
     from playwright.browser_context import BrowserContext
@@ -250,7 +258,7 @@ class Page(ChannelOwner):
     def mainFrame(self) -> Frame:
         return self._main_frame
 
-    def frame(self, name: str = None, url: FrameMatch = None) -> Optional[Frame]:
+    def frame(self, name: str = None, url: URLMatch = None) -> Optional[Frame]:
         matcher = URLMatcher(url) if url else None
         for frame in self._frames:
             if name and frame.name == name:
@@ -349,10 +357,7 @@ class Page(ChannelOwner):
         return await self._main_frame.content()
 
     async def setContent(
-        self,
-        html: str,
-        timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        self, html: str, timeout: int = None, waitUntil: DocumentLoadState = None,
     ) -> None:
         return await self._main_frame.setContent(**locals_to_params(locals()))
 
@@ -360,15 +365,13 @@ class Page(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
         return await self._main_frame.goto(**locals_to_params(locals()))
 
     async def reload(
-        self,
-        timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        self, timeout: int = None, waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("reload", locals_to_params(locals()))
@@ -380,38 +383,44 @@ class Page(ChannelOwner):
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: DocumentLoadState = None,
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
-        return await self._main_frame.waitForNavigation(locals_to_params(locals()))
+        return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
 
     async def waitForRequest(
-        self, urlOrPredicate: Union[str, Callable[[Request], bool]]
+        self, url: URLMatch = None, predicate: Callable[[Request], bool] = None
     ) -> Optional[Request]:
-        matcher = (
-            URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
-        )
+        matcher = URLMatcher(url) if url else None
 
-        def predicate(request: Request) -> bool:
+        def my_predicate(request: Request) -> bool:
             if matcher:
                 return matcher.matches(request.url)
-            return urlOrPredicate(request)
+            if predicate:
+                return predicate(request)
+            return True
 
-        return self.waitForEvent(Page.Events.Request, predicate=predicate)
-
-    async def waitForResponse(
-        self, urlOrPredicate: Union[str, Callable[[Response], bool]]
-    ) -> Optional[Response]:
-        matcher = (
-            URLMatcher(urlOrPredicate) if isinstance(urlOrPredicate, str) else None
+        return cast(
+            Optional[Request],
+            self.waitForEvent(Page.Events.Request, predicate=my_predicate),
         )
 
-        def predicate(response: Response) -> bool:
+    async def waitForResponse(
+        self, url: URLMatch = None, predicate: Callable[[Response], bool] = None
+    ) -> Optional[Response]:
+        matcher = URLMatcher(url) if url else None
+
+        def my_predicate(response: Response) -> bool:
             if matcher:
                 return matcher.matches(response.url)
-            return urlOrPredicate(response)
+            if predicate:
+                return predicate(response)
+            return True
 
-        return self.waitForEvent(Page.Events.Response, predicate=predicate)
+        return cast(
+            Optional[Response],
+            self.waitForEvent(Page.Events.Response, predicate=my_predicate),
+        )
 
     async def waitForEvent(
         self, event: str, predicate: Callable[[Any], bool] = None
@@ -433,27 +442,21 @@ class Page(ChannelOwner):
         return result
 
     async def goBack(
-        self,
-        timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        self, timeout: int = None, waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("goBack", locals_to_params(locals()))
         )
 
     async def goForward(
-        self,
-        timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        self, timeout: int = None, waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("goForward", locals_to_params(locals()))
         )
 
     async def emulateMedia(
-        self,
-        media: Literal["screen", "print"] = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
+        self, media: Literal["screen", "print"] = None, colorScheme: ColorScheme = None,
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
@@ -519,10 +522,10 @@ class Page(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: Literal["Alt", "Control", "Meta", "Shift"] = None,
+        modifiers: KeyboardModifier = None,
         position: Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -533,10 +536,10 @@ class Page(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -565,7 +568,7 @@ class Page(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         timeout: int = None,
         force: bool = None,
