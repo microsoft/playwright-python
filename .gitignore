@@ -11,3 +11,4 @@ env/
 htmlcov/
 .coverage
 .DS_Store
+.vscode/

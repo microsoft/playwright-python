@@ -47,6 +47,7 @@ from playwright.helper import (
     TimeoutSettings,
     URLMatch,
     URLMatcher,
+    Literal,
 )
 from playwright.network import Request, Response, Route
 from playwright.worker import Worker
@@ -279,7 +280,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         timeout: int = None,
-        state: str = None,  # Literal['attached', 'detached', 'visible', 'hidden'] = None
+        state: Literal["attached", "detached", "visible", "hidden"] = None,
     ) -> Optional[ElementHandle]:
         return await self._main_frame.waitForSelector(**locals_to_params(locals()))
 
@@ -351,7 +352,7 @@ class Page(ChannelOwner):
         self,
         html: str,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> None:
         return await self._main_frame.setContent(**locals_to_params(locals()))
 
@@ -359,7 +360,7 @@ class Page(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
         referer: str = None,
     ) -> Optional[Response]:
         return await self._main_frame.goto(**locals_to_params(locals()))
@@ -367,7 +368,7 @@ class Page(ChannelOwner):
     async def reload(
         self,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("reload", locals_to_params(locals()))
@@ -379,7 +380,7 @@ class Page(ChannelOwner):
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
         return await self._main_frame.waitForNavigation(locals_to_params(locals()))
@@ -434,7 +435,7 @@ class Page(ChannelOwner):
     async def goBack(
         self,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle']
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("goBack", locals_to_params(locals()))
@@ -443,7 +444,7 @@ class Page(ChannelOwner):
     async def goForward(
         self,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("goForward", locals_to_params(locals()))
@@ -451,8 +452,8 @@ class Page(ChannelOwner):
 
     async def emulateMedia(
         self,
-        media: str = None,  # Literal['screen', 'print']
-        colorScheme: str = None,  # Literal['dark', 'light', 'no-preference']
+        media: Literal["screen", "print"] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
@@ -494,7 +495,7 @@ class Page(ChannelOwner):
     async def screenshot(
         self,
         timeout: int = None,
-        type: str = None,  # Literal['png', 'jpeg'] = None,
+        type: Literal["png", "jpeg"] = None,
         path: str = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -518,12 +519,10 @@ class Page(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: Literal["Alt", "Control", "Meta", "Shift"] = None,
         position: Dict = None,
         delay: int = None,
-        button: str = None,  # Literal['left', 'right', 'middle'] = None,
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -534,12 +533,10 @@ class Page(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         delay: int = None,
-        button: str = None,  # Literal['left', 'right', 'middle'] = None,
+        button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -568,9 +565,7 @@ class Page(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         timeout: int = None,
         force: bool = None,
@@ -642,7 +637,7 @@ class Page(ChannelOwner):
         arg: Any = None,
         force_expr: bool = False,
         timeout: int = None,
-        polling: Union[int, str] = None,  # Union[int, Literal["raf"]]
+        polling: Union[int, Literal["raf"]] = None,
     ) -> JSHandle:
         if not is_function_body(expression):
             force_expr = True

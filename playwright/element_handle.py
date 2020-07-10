@@ -24,6 +24,7 @@ from playwright.helper import (
     FilePayload,
     SelectOption,
     locals_to_params,
+    Literal,
 )
 from playwright.js_handle import parse_result, serialize_argument, JSHandle
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
@@ -65,9 +66,7 @@ class ElementHandle(JSHandle):
 
     async def hover(
         self,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         timeout: int = None,
         force: bool = None,
@@ -76,12 +75,10 @@ class ElementHandle(JSHandle):
 
     async def click(
         self,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         delay: int = None,
-        button: str = None,  # Literal['left', 'right', 'middle'] = None,
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -91,12 +88,10 @@ class ElementHandle(JSHandle):
 
     async def dblclick(
         self,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         delay: int = None,
-        button: str = None,  # Literal['left', 'right', 'middle'] = None,
+        button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -159,7 +154,7 @@ class ElementHandle(JSHandle):
     async def screenshot(
         self,
         timeout: int = None,
-        type: str = None,  # Literal['png', 'jpeg'] = None,
+        type: Literal["png", "jpeg"] = None,
         path: str = None,
         quality: int = None,
         omitBackground: bool = None,
