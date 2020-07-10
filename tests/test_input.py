@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import asyncio
+from asyncio.futures import Future
 import os
 
 from playwright.page import Page
+from playwright.file_chooser import FileChooser
 
 FILE_TO_UPLOAD = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "assets/file-to-upload.txt"
@@ -72,7 +74,7 @@ async def test_should_set_from_memory(page):
 
 async def test_should_emit_event(page: Page, server):
     await page.setContent("<input type=file>")
-    fc_done = asyncio.Future()
+    fc_done: Future[FileChooser] = asyncio.Future()
     page.once("filechooser", lambda file_chooser: fc_done.set_result(file_chooser)),
     await page.click("input")
     file_chooser = await fc_done
