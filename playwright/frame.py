@@ -31,6 +31,7 @@ from playwright.helper import (
     SelectOption,
     is_function_body,
     locals_to_params,
+    Literal,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Request, Response, Route
@@ -57,7 +58,7 @@ class Frame(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
         referer: str = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
@@ -67,7 +68,7 @@ class Frame(ChannelOwner):
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
         return from_nullable_channel(
@@ -121,7 +122,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         timeout: int = None,
-        state: str = None,  # Literal['attached', 'detached', 'visible', 'hidden'] = None
+        state: Literal["attached", "detached", "visible", "hidden"] = None,
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
             await self._channel.send("waitForSelector", locals_to_params(locals()))
@@ -171,7 +172,7 @@ class Frame(ChannelOwner):
         self,
         html: str,
         timeout: int = None,
-        waitUntil: str = None,  # Literal['load', 'domcontentloaded', 'networkidle'] = None
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> None:
         await self._channel.send("setContent", locals_to_params(locals()))
 
@@ -211,12 +212,10 @@ class Frame(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         delay: int = None,
-        button: str = None,  # Literal['left', 'right', 'middle'] = None,
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -227,12 +226,10 @@ class Frame(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         delay: int = None,
-        button: str = None,  # Literal['left', 'right', 'middle'] = None,
+        button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -261,9 +258,7 @@ class Frame(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: List[
-            str
-        ] = None,  # Literal['Alt', 'Control', 'Meta', 'Shift']] = None,
+        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
         position: Dict = None,
         timeout: int = None,
         force: bool = None,
@@ -345,7 +340,7 @@ class Frame(ChannelOwner):
         arg: Any = None,
         force_expr: bool = False,
         timeout: int = None,
-        polling: Union[int, str] = None,  # Union[int, Literal["raf"]]
+        polling: Union[int, Literal["raf"]] = None,
     ) -> JSHandle:
         if not is_function_body(expression):
             force_expr = True

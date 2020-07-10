@@ -14,7 +14,7 @@
 
 from playwright.browser_context import BrowserContext
 from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
-from playwright.helper import locals_to_params
+from playwright.helper import locals_to_params, Literal
 from playwright.page import Page
 from types import SimpleNamespace
 from typing import Dict, List, Optional, Union
@@ -50,7 +50,7 @@ class Browser(ChannelOwner):
 
     async def newContext(
         self,
-        viewport: Union[Dict, int] = None,  # Union[Dict, Literal[0]]
+        viewport: Union[Dict, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -65,7 +65,7 @@ class Browser(ChannelOwner):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: str = None,  # Literal['dark', 'light', 'no-preference'] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
@@ -94,7 +94,7 @@ class Browser(ChannelOwner):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: str = None,  # Literal['dark', 'light', 'no-preference'] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> Page:
         params = locals_to_params(locals())
