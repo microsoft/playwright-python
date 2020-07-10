@@ -78,6 +78,12 @@ async def start_http_server():
     server_object.stop()
 
 
+@pytest.fixture(autouse=True)
+async def after_each_hook():
+    yield
+    server_object.reset()
+
+
 @pytest.fixture(scope="session")
 def browser_name(pytestconfig):
     return pytestconfig.getoption("browser")

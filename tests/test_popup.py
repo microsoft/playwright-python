@@ -229,33 +229,43 @@ async def test_should_respect_routes_from_browser_context(browser, server):
     await context.close()
 
 
-# async def test_browser_context_add_init_script_should_apply_to_an_in_process_popup(browser:Browser, server):
-#     context = await browser.newContext()
-#     await context.addInitScript('() => window.injected = 123')
-#     page = await context.newPage()
-#     await page.goto(server.EMPTY_PAGE)
-#     breakpoint()
-#     injected = await page.evaluate('''() => {
-#       const win = window.open('about:blank');
-#       return win.injected;
-#     }''')
+async def test_browser_context_add_init_script_should_apply_to_an_in_process_popup(
+    browser: Browser, server
+):
+    context = await browser.newContext()
+    await context.addInitScript("window.injected = 123")
+    page = await context.newPage()
+    await page.goto(server.EMPTY_PAGE)
+    injected = await page.evaluate(
+        """() => {
+      const win = window.open('about:blank');
+      return win.injected;
+    }"""
+    )
 
-#     await context.close()
-#     assert injected == 123
+    await context.close()
+    assert injected == 123
 
-# async def test_browser_context_add_init_script_should_apply_to_a_cross_process_popup(browser:Browser, server):
-#     context = await browser.newContext()
-#     await context.addInitScript('() => window.injected = 123')
-#     page = await context.newPage()
-#     await page.goto(server.EMPTY_PAGE)
-#     popup = (await asyncio.gather(
-#       page.waitForEvent('popup'),
-#       page.evaluate('url => window.open(url)', server.CROSS_PROCESS_PREFIX + '/title.html'),
-#     ))[0]
-#     assert await popup.evaluate('"injected"') == 123
-#     await popup.reload()
-#     assert await popup.evaluate('"injected"') == 123
-#     await context.close()
+
+async def test_browser_context_add_init_script_should_apply_to_a_cross_process_popup(
+    browser: Browser, server
+):
+    context = await browser.newContext()
+    await context.addInitScript("window.injected = 123")
+    page = await context.newPage()
+    await page.goto(server.EMPTY_PAGE)
+    popup = (
+        await asyncio.gather(
+            page.waitForEvent("popup"),
+            page.evaluate(
+                "url => window.open(url)", server.CROSS_PROCESS_PREFIX + "/title.html"
+            ),
+        )
+    )[0]
+    assert await popup.evaluate("injected") == 123
+    await popup.reload()
+    assert await popup.evaluate("injected") == 123
+    await context.close()
 
 
 async def test_should_expose_function_from_browser_context(browser: Browser, server):

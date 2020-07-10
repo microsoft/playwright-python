@@ -59,6 +59,7 @@ class Server:
                 uri_path = request.uri.decode()
                 if request_subscribers.get(uri_path):
                     request_subscribers[uri_path].set_result(request)
+                    request_subscribers.pop(uri_path)
 
                 if auth.get(uri_path):
                     authorization_header = request.requestHeaders.getRawHeaders(
@@ -99,6 +100,10 @@ class Server:
 
     def set_auth(self, path: str, username: str, password: str):
         self.auth[path] = (username, password)
+
+    def reset(self):
+        self.request_subscribers.clear()
+        self.auth.clear()
 
 
 server = Server()
