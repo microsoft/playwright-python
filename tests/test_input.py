@@ -13,12 +13,11 @@
 # limitations under the License.
 
 import asyncio
-from os import path
 import os
 
 from playwright.page import Page
 
-FILE_TO_UPLOAD = path.join(
+FILE_TO_UPLOAD = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "assets/file-to-upload.txt"
 )
 
@@ -27,7 +26,7 @@ __dirname = os.path.dirname(os.path.realpath(__file__))
 
 async def test_should_upload_the_file(page, server):
     await page.goto(server.PREFIX + "/input/fileupload.html")
-    file_path = path.relpath(FILE_TO_UPLOAD, os.getcwd())
+    file_path = os.path.relpath(FILE_TO_UPLOAD, os.getcwd())
     input = await page.querySelector("input")
     await input.setInputFiles(file_path)
     assert await page.evaluate("e => e.files[0].name", input) == "file-to-upload.txt"
@@ -47,7 +46,9 @@ async def test_should_upload_the_file(page, server):
 
 async def test_should_work(page):
     await page.setContent("<input type=file>")
-    await page.setInputFiles("input", path.join(__dirname, "assets/file-to-upload.txt"))
+    await page.setInputFiles(
+        "input", os.path.join(__dirname, "assets/file-to-upload.txt")
+    )
     assert await page.evalOnSelector("input", "input => input.files.length") == 1
     assert (
         await page.evalOnSelector("input", "input => input.files[0].name")
@@ -199,8 +200,8 @@ async def test_should_not_accept_multiple_files_for_single_file_input(page, serv
     try:
         await file_chooser.setFiles(
             [
-                path.relative(__dirname + "assets/file-to-upload.txt"),
-                path.relative(__dirname + "assets/pptr.png"),
+                os.path.realpath(os.path.join(__dirname, "assets/file-to-upload.txt")),
+                os.path.realpath(os.path.join(__dirname, "assets/pptr.png")),
             ]
         )
     except Exception as exc:
