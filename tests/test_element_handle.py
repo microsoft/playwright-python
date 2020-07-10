@@ -17,7 +17,7 @@ from playwright.helper import Error
 
 
 async def test_bounding_box(page, server):
-    await page.setViewportSize({"width": 500, "height": 500})
+    await page.setViewportSize(width=500, height=500)
     await page.goto(server.PREFIX + "/grid.html")
     element_handle = await page.querySelector(".box:nth-of-type(13)")
     box = await element_handle.boundingBox()
@@ -25,7 +25,7 @@ async def test_bounding_box(page, server):
 
 
 async def test_bounding_box_handle_nested_frames(page, server):
-    await page.setViewportSize({"width": 500, "height": 500})
+    await page.setViewportSize(width=500, height=500)
     await page.goto(server.PREFIX + "/frames/nested-frames.html")
     nested_frame = page.frame(name="dos")
     element_handle = await nested_frame.querySelector("div")
@@ -40,7 +40,7 @@ async def test_bounding_box_return_null_for_invisible_elements(page, server):
 
 
 async def test_bounding_box_force_a_layout(page, server):
-    await page.setViewportSize({"width": 500, "height": 500})
+    await page.setViewportSize(width=500, height=500)
     await page.setContent('<div style="width: 100px; height: 100px">hello</div>')
     element_handle = await page.querySelector("div")
     await page.evaluate('element => element.style.height = "200px"', element_handle)
@@ -50,19 +50,17 @@ async def test_bounding_box_force_a_layout(page, server):
 
 async def test_bounding_box_with_SVG_nodes(page, server):
     await page.setContent(
-        """
-    <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
-      <rect id="theRect" x="30" y="50" width="200" height="300"></rect>
-    </svg>
-  """
+        """<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+             <rect id="theRect" x="30" y="50" width="200" height="300"></rect>
+           </svg>"""
     )
     element = await page.querySelector("#therect")
     pwBounding_box = await element.boundingBox()
     web_bounding_box = await page.evaluate(
         """e => {
-    rect = e.getBoundingClientRect()
-    return {x: rect.x, y: rect.y, width: rect.width, height: rect.height}
-  }""",
+            rect = e.getBoundingClientRect()
+            return {x: rect.x, y: rect.y, width: rect.width, height: rect.height}
+        }""",
         element,
     )
     assert pwBounding_box == web_bounding_box
@@ -77,13 +75,13 @@ async def test_bounding_box_with_page_scale(browser, server):
     button = await page.querySelector("button")
     await button.evaluate(
         """button => {
-    document.body.style.margin = '0'
-    button.style.borderWidth = '0'
-    button.style.width = '200px'
-    button.style.height = '20px'
-    button.style.marginLeft = '17px'
-    button.style.marginTop = '23px'
-  }"""
+            document.body.style.margin = '0'
+            button.style.borderWidth = '0'
+            button.style.width = '200px'
+            button.style.height = '20px'
+            button.style.marginLeft = '17px'
+            button.style.marginTop = '23px'
+        }"""
     )
 
     box = await button.boundingBox()
@@ -97,26 +95,26 @@ async def test_bounding_box_with_page_scale(browser, server):
 async def test_bounding_box_when_inline_box_child_is_outside_of_viewport(page, server):
     await page.setContent(
         """
-    <style>
-    i {
-      position: absolute
-      top: -1000px
-    }
-    body {
-      margin: 0
-      font-size: 12px
-    }
-    </style>
-    <span><i>woof</i><b>doggo</b></span>
-  """
+            <style>
+            i {
+            position: absolute
+            top: -1000px
+            }
+            body {
+            margin: 0
+            font-size: 12px
+            }
+            </style>
+            <span><i>woof</i><b>doggo</b></span>
+        """
     )
     handle = await page.querySelector("span")
     box = await handle.boundingBox()
     web_bounding_box = await handle.evaluate(
         """e => {
-    rect = e.getBoundingClientRect();
-    return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
-  }"""
+            rect = e.getBoundingClientRect();
+            return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
+        }"""
     )
 
     roundbox = lambda b: {
@@ -201,18 +199,18 @@ async def test_owner_frame_for_detached_elements(page, server):
     await page.goto(server.EMPTY_PAGE)
     div_handle = await page.evaluateHandle(
         """() => {
-    div = document.createElement('div');
-    document.body.appendChild(div);
-    return div;
-  }"""
+            div = document.createElement('div');
+            document.body.appendChild(div);
+            return div;
+        }"""
     )
 
     assert await div_handle.ownerFrame() == page.mainFrame
     await page.evaluate(
         """() => {
-    div = document.querySelector('div')
-    document.body.removeChild(div)
-  }"""
+            div = document.querySelector('div')
+            document.body.removeChild(div)
+        }"""
     )
     assert await div_handle.ownerFrame() == page.mainFrame
 
@@ -225,18 +223,18 @@ async def test_owner_frame_for_adopted_elements(page, server):
     )
     div_handle = await page.evaluateHandle(
         """() => {
-    div = document.createElement('div');
-    document.body.appendChild(div);
-    return div;
-  }"""
+            div = document.createElement('div');
+            document.body.appendChild(div);
+            return div;
+        }"""
     )
     assert await div_handle.ownerFrame() == page.mainFrame
     await popup.waitForLoadState("domcontentloaded")
     await page.evaluate(
         """() => {
-    div = document.querySelector('div');
-    window.__popup.document.body.appendChild(div);
-  }"""
+            div = document.querySelector('div');
+            window.__popup.document.body.appendChild(div);
+        }"""
     )
     assert await div_handle.ownerFrame() == popup.mainFrame
 
@@ -320,12 +318,12 @@ async def test_double_click_the_button(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate(
         """() => {
-    window.double = false;
-    button = document.querySelector('button');
-    button.addEventListener('dblclick', event => {
-      window.double = true;
-    });
-  }"""
+            window.double = false;
+            button = document.querySelector('button');
+            button.addEventListener('dblclick', event => {
+            window.double = true;
+            });
+        }"""
     )
     button = await page.querySelector("button")
     await button.dblclick()
@@ -358,16 +356,16 @@ async def test_scroll(page, server):
         button = await page.querySelector(f"#btn{i}")
         before = await button.evaluate(
             """button => {
-      return button.getBoundingClientRect().right - window.innerWidth
-    }"""
+                return button.getBoundingClientRect().right - window.innerWidth
+            }"""
         )
 
         assert before == 10 * i
         await button.scrollIntoViewIfNeeded()
         after = await button.evaluate(
             """button => {
-      return button.getBoundingClientRect().right - window.innerWidth
-    }"""
+                return button.getBoundingClientRect().right - window.innerWidth
+            }"""
         )
 
         assert after <= 0

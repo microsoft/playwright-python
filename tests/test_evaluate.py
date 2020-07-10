@@ -67,18 +67,18 @@ async def test_evaluate_return_undefined_for_objects_with_symbols(page):
     assert (
         await page.evaluate(
             """() => {
-    const a = { };
-    a[Symbol('foo4')] = 42;
-    return a;
-  }"""
+                const a = { };
+                a[Symbol('foo4')] = 42;
+                return a;
+            }"""
         )
         == {}
     )
     assert (
         await page.evaluate(
             """() => {
-    return { foo: [{ a: Symbol('foo4') }] };
-  }"""
+                return { foo: [{ a: Symbol('foo4') }] };
+            }"""
         )
         == {"foo": [{"a": None}]}
     )
@@ -155,11 +155,11 @@ async def test_evaluate_fail_for_circular_object(page):
     assert (
         await page.evaluate(
             """() => {
-    const a = {};
-    const b = {a};
-    a.b = b;
-    return a;
-  }"""
+                const a = {};
+                const b = {a};
+                a.b = b;
+                return a;
+            }"""
         )
         is None
     )

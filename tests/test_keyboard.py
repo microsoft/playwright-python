@@ -16,10 +16,10 @@
 async def test_keyboard_type_into_a_textarea(page):
     await page.evaluate(
         """
-    const textarea = document.createElement('textarea');
-    document.body.appendChild(textarea);
-    textarea.focus();
-  """
+            const textarea = document.createElement('textarea');
+            document.body.appendChild(textarea);
+            textarea.focus();
+        """
     )
     text = "Hello world. I am the text that was typed!"
     await page.keyboard.type(text)

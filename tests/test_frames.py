@@ -112,10 +112,10 @@ async def test_should_send_events_when_frames_are_manipulated_dynamically(
     page.on("framenavigated", lambda frame: navigated_frames.append(frame))
     await page.evaluate(
         """() => {
-    frame = document.getElementById('frame1')
-    frame.src = './empty.html'
-    return new Promise(x => frame.onload = x)
-  }"""
+            frame = document.getElementById('frame1')
+            frame.src = './empty.html'
+            return new Promise(x => frame.onload = x)
+        }"""
     )
 
     assert len(navigated_frames) == 1
@@ -198,11 +198,11 @@ async def test_frame_from_inside_shadow_dom(page, server):
     await page.goto(server.PREFIX + "/shadow.html")
     await page.evaluate(
         """async url => {
-    frame = document.createElement('iframe');
-    frame.src = url;
-    document.body.shadowRoot.appendChild(frame);
-    await new Promise(x => frame.onload = x);
-  }""",
+            frame = document.createElement('iframe');
+            frame.src = url;
+            document.body.shadowRoot.appendChild(frame);
+            await new Promise(x => frame.onload = x);
+        }""",
         server.EMPTY_PAGE,
     )
     assert len(page.frames) == 2
@@ -213,12 +213,12 @@ async def test_frame_name(page, server, utils):
     await utils.attach_frame(page, "theFrameId", server.EMPTY_PAGE)
     await page.evaluate(
         """url => {
-    frame = document.createElement('iframe');
-    frame.name = 'theFrameName';
-    frame.src = url;
-    document.body.appendChild(frame);
-    return new Promise(x => frame.onload = x);
-  }""",
+            frame = document.createElement('iframe');
+            frame.name = 'theFrameName';
+            frame.src = url;
+            document.body.appendChild(frame);
+            return new Promise(x => frame.onload = x);
+        }""",
         server.EMPTY_PAGE,
     )
     assert page.frames[0].name == ""
@@ -240,9 +240,9 @@ async def test_should_report_different_frame_instance_when_frame_re_attaches(
     frame1 = await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     await page.evaluate(
         """() => {
-    window.frame = document.querySelector('#frame1')
-    window.frame.remove()
-  }"""
+            window.frame = document.querySelector('#frame1')
+            window.frame.remove()
+        }"""
     )
 
     assert frame1.isDetached()
