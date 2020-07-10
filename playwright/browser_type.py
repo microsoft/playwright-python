@@ -15,7 +15,7 @@
 from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
-from playwright.helper import locals_to_params, Literal
+from playwright.helper import locals_to_params, ColorScheme
 from typing import Awaitable, Dict, List
 
 
@@ -102,7 +102,7 @@ class BrowserType(ChannelOwner):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
+        colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
     ) -> BrowserContext:
         return from_channel(

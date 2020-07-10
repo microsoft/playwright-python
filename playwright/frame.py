@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import sys
 from playwright.connection import (
     Channel,
     ChannelOwner,
@@ -31,12 +32,19 @@ from playwright.helper import (
     SelectOption,
     is_function_body,
     locals_to_params,
-    Literal,
+    KeyboardModifier,
+    MouseButton,
+    DocumentLoadState,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Request, Response, Route
 from playwright.serializers import normalize_file_payloads
-from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 if TYPE_CHECKING:
     from playwright.page import Page
@@ -58,21 +66,29 @@ class Frame(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
-        return from_nullable_channel(
-            await self._channel.send("goto", locals_to_params(locals()))
+        return cast(
+            Optional[Response],
+            from_nullable_channel(
+                await self._channel.send("goto", locals_to_params(locals()))
+            ),
         )
 
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: DocumentLoadState = None,
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
-        return from_nullable_channel(
-            await self._channel.send("waitForNavigation", locals_to_params(locals()))
+        return cast(
+            Optional[Response],
+            from_nullable_channel(
+                await self._channel.send(
+                    "waitForNavigation", locals_to_params(locals())
+                )
+            ),
         )
 
     async def waitForLoadState(self, state: str = "load", timeout: int = None) -> None:
@@ -169,10 +185,7 @@ class Frame(ChannelOwner):
         return await self._channel.send("content")
 
     async def setContent(
-        self,
-        html: str,
-        timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        self, html: str, timeout: int = None, waitUntil: DocumentLoadState = None,
     ) -> None:
         await self._channel.send("setContent", locals_to_params(locals()))
 
@@ -212,10 +225,10 @@ class Frame(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -226,10 +239,10 @@ class Frame(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -258,7 +271,7 @@ class Frame(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: List[Literal["Alt", "Control", "Meta", "Shift"]] = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         timeout: int = None,
         force: bool = None,

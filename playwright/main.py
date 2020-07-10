@@ -25,7 +25,7 @@ from playwright.object_factory import create_remote_object
 from playwright.playwright import Playwright
 from typing import Dict
 
-playwright_object: Playwright = None
+playwright_object: Playwright
 
 
 async def async_init():

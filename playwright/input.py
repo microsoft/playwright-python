@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from playwright.connection import Channel
-from playwright.helper import locals_to_params, Literal
+from playwright.helper import locals_to_params, MouseButton
 from typing import Awaitable, Dict
 
 
@@ -44,14 +44,10 @@ class Mouse:
     async def move(self, x: float, y: float, steps: int = None) -> None:
         await self._channel.send("mouseMove", locals_to_params(locals()))
 
-    async def down(
-        self, button: Literal["left", "right", "middle"] = None, clickCount: int = None,
-    ) -> None:
+    async def down(self, button: MouseButton = None, clickCount: int = None,) -> None:
         await self._channel.send("mouseDown", locals_to_params(locals()))
 
-    async def up(
-        self, button: Literal["left", "right", "middle"] = None, clickCount: int = None,
-    ) -> None:
+    async def up(self, button: MouseButton = None, clickCount: int = None,) -> None:
         await self._channel.send("mouseUp", locals_to_params(locals()))
 
     async def click(
@@ -59,16 +55,12 @@ class Mouse:
         x: float,
         y: float,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: MouseButton = None,
         clickCount: int = None,
     ) -> None:
         await self._channel.send("mouseClick", locals_to_params(locals()))
 
     async def dblclick(
-        self,
-        x: float,
-        y: float,
-        delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        self, x: float, y: float, delay: int = None, button: MouseButton = None,
     ) -> None:
         await self.click(x, y, delay=delay, button=button, clickCount=2)
