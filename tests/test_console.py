@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import asyncio
+import pytest
+
 from playwright.console_message import ConsoleMessage
 from typing import List
 
