@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import asyncio
+from asyncio.futures import Future
 import os
 
 from playwright.page import Page
+from playwright.file_chooser import FileChooser
 
 FILE_TO_UPLOAD = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "assets/file-to-upload.txt"

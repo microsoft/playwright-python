@@ -13,15 +13,8 @@
 # limitations under the License.
 
 import asyncio
-import os
 import pytest
 import playwright
-import threading
-import time
-
-from twisted.internet import reactor
-from twisted.web.static import File
-from twisted.web import server as web_server, resource
 
 from .server import server as server_object
 from .utils import utils as utils_object
@@ -46,8 +39,10 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def browser(browser_name):
-    browser = await playwright.browser_types[browser_name].launch()
+async def browser(browser_name, pytestconfig):
+    browser = await playwright.browser_types[browser_name].launch(
+        headless=not pytestconfig.getoption("--headful")
+    )
     yield browser
     await browser.close()
 
@@ -78,15 +73,15 @@ def utils():
 
 @pytest.fixture(autouse=True, scope="session")
 async def start_http_server():
-    static_path = os.path.join(os.path.dirname(__file__), "assets")
-    resource = File(static_path)
-    site = web_server.Site(resource)
-    reactor.listenTCP(server_object.PORT, site)
-    t = threading.Thread(target=lambda: reactor.run(installSignalHandlers=0))
-    t.start()
+    server_object.start()
     yield
-    reactor.stop()
-    t.join()
+    server_object.stop()
+
+
+@pytest.fixture(autouse=True)
+async def after_each_hook():
+    yield
+    server_object.reset()
 
 
 @pytest.fixture(scope="session")
@@ -135,4 +130,10 @@ def pytest_addoption(parser):
         action="append",
         default=[],
         help="Browsers which should be used. By default on all the browsers.",
+    )
+    parser.addoption(
+        "--headful",
+        action="store_true",
+        default=False,
+        help="Run tests in headful mode.",
     )
