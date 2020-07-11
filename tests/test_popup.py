@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import pytest
 from playwright.network import Request, Route
 from playwright.browser import Browser, Page
 from typing import List, cast
@@ -37,15 +38,12 @@ async def test_link_navigation_inherit_user_agent_from_browser_context(
     await popup.waitForLoadState("domcontentloaded")
     user_agent = await popup.evaluate("window.initialUserAgent")
     request = await request_waitable
-    await context.close()
     assert user_agent == "hey"
     assert request.requestHeaders.getRawHeaders("user-agent") == ["hey"]
+    await context.close()
 
 
-async def test_link_navigation_respect_routes_from_browser_context(
-    browser: Browser, server
-):
-    context = await browser.newContext()
+async def test_link_navigation_respect_routes_from_browser_context(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel=noopener href="empty.html">link</a>')
@@ -62,7 +60,6 @@ async def test_link_navigation_respect_routes_from_browser_context(
     await asyncio.gather(
         context.waitForEvent("page"), page.click("a"),
     )
-    await context.close()
     assert intercepted == [True]
 
 
@@ -82,9 +79,9 @@ async def test_window_open_inherit_user_agent_from_browser_context(
         server.PREFIX + "/dummy.html",
     )
     request = await request_promise
-    await context.close()
     assert user_agent == "hey"
     assert request.requestHeaders.getRawHeaders("user-agent") == ["hey"]
+    await context.close()
 
 
 async def test_should_inherit_extra_headers_from_browser_context(
@@ -99,12 +96,11 @@ async def test_should_inherit_extra_headers_from_browser_context(
         "url => window._popup = window.open(url)", server.PREFIX + "/dummy.html"
     )
     request = await request_promise
-    await context.close()
     assert request.requestHeaders.getRawHeaders("foo") == ["bar"]
+    await context.close()
 
 
-async def test_should_inherit_offline_from_browser_context(browser: Browser, server):
-    context = await browser.newContext()
+async def test_should_inherit_offline_from_browser_context(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await context.setOffline(True)
@@ -115,7 +111,6 @@ async def test_should_inherit_offline_from_browser_context(browser: Browser, ser
         }""",
         server.PREFIX + "/dummy.html",
     )
-    await context.close()
     assert online == False
 
 
@@ -157,8 +152,8 @@ async def test_should_inherit_touch_support_from_browser_context(
         }"""
     )
 
-    await context.close()
     assert has_touch
+    await context.close()
 
 
 async def test_should_inherit_viewport_size_from_browser_context(
@@ -175,8 +170,8 @@ async def test_should_inherit_viewport_size_from_browser_context(
         }"""
     )
 
-    await context.close()
     assert size == {"width": 400, "height": 500}
+    await context.close()
 
 
 async def test_should_use_viewport_size_from_window_features(browser: Browser, server):
@@ -202,8 +197,7 @@ async def test_should_use_viewport_size_from_window_features(browser: Browser, s
     assert resized == {"width": 500, "height": 400}
 
 
-async def test_should_respect_routes_from_browser_context(browser, server):
-    context = await browser.newContext()
+async def test_should_respect_routes_from_browser_context(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
 
@@ -222,13 +216,11 @@ async def test_should_respect_routes_from_browser_context(browser, server):
         page.evaluate("url => window.__popup = window.open(url)", server.EMPTY_PAGE),
     )
     assert len(intercepted) == 1
-    await context.close()
 
 
 async def test_browser_context_add_init_script_should_apply_to_an_in_process_popup(
-    browser: Browser, server
+    context, server
 ):
-    context = await browser.newContext()
     await context.addInitScript("window.injected = 123")
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
@@ -239,14 +231,12 @@ async def test_browser_context_add_init_script_should_apply_to_an_in_process_pop
         }"""
     )
 
-    await context.close()
     assert injected == 123
 
 
 async def test_browser_context_add_init_script_should_apply_to_a_cross_process_popup(
-    browser: Browser, server
+    context, server
 ):
-    context = await browser.newContext()
     await context.addInitScript("window.injected = 123")
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
@@ -261,11 +251,10 @@ async def test_browser_context_add_init_script_should_apply_to_a_cross_process_p
     assert await popup.evaluate("injected") == 123
     await popup.reload()
     assert await popup.evaluate("injected") == 123
-    await context.close()
 
 
-async def test_should_expose_function_from_browser_context(browser: Browser, server):
-    context = await browser.newContext()
+@pytest.mark.skip_browser("firefox")  # a fix is pending upstream
+async def test_should_expose_function_from_browser_context(context, server):
     await context.exposeFunction("add", lambda a, b: a + b)
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
@@ -276,12 +265,10 @@ async def test_should_expose_function_from_browser_context(browser: Browser, ser
         }"""
     )
 
-    await context.close()
     assert added == 13
 
 
-async def test_should_work(browser: Browser):
-    context = await browser.newContext()
+async def test_should_work(context):
     page = await context.newPage()
     popup = (
         await asyncio.gather(
@@ -291,11 +278,9 @@ async def test_should_work(browser: Browser):
     )[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener")
-    await context.close()
 
 
-async def test_should_work_with_window_features(browser: Browser, server):
-    context = await browser.newContext()
+async def test_should_work_with_window_features(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     popup = (
@@ -308,11 +293,9 @@ async def test_should_work_with_window_features(browser: Browser, server):
     )[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener")
-    await context.close()
 
 
-async def test_window_open_emit_for_immediately_closed_popups(browser: Browser):
-    context = await browser.newContext()
+async def test_window_open_emit_for_immediately_closed_popups(context):
     page = await context.newPage()
     popup = (
         await asyncio.gather(
@@ -326,11 +309,9 @@ async def test_window_open_emit_for_immediately_closed_popups(browser: Browser):
         )
     )[0]
     assert popup
-    await context.close()
 
 
-async def test_should_emit_for_immediately_closed_popups(browser: Browser, server):
-    context = await browser.newContext()
+async def test_should_emit_for_immediately_closed_popups(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     popup = (
@@ -338,25 +319,23 @@ async def test_should_emit_for_immediately_closed_popups(browser: Browser, serve
             page.waitForEvent("popup"),
             page.evaluate(
                 """() => {
-        win = window.open(window.location.href)
-        win.close()
-      }"""
+                    win = window.open(window.location.href)
+                    win.close()
+                }"""
             ),
         )
     )[0]
     assert popup
-    await context.close()
 
 
-async def test_should_be_able_to_capture_alert(browser):
-    context = await browser.newContext()
+async def test_should_be_able_to_capture_alert(context):
     page = await context.newPage()
     evaluate_promise = asyncio.ensure_future(
         page.evaluate(
             """() => {
-      const win = window.open('')
-      win.alert('hello')
-    }"""
+                const win = window.open('')
+                win.alert('hello')
+            }"""
         )
     )
 
@@ -365,11 +344,9 @@ async def test_should_be_able_to_capture_alert(browser):
     assert dialog.message == "hello"
     await dialog.dismiss()
     await evaluate_promise
-    await context.close()
 
 
-async def test_should_work_with_empty_url(browser: Browser):
-    context = await browser.newContext()
+async def test_should_work_with_empty_url(context):
     page = await context.newPage()
     popup = (
         await asyncio.gather(
@@ -379,11 +356,9 @@ async def test_should_work_with_empty_url(browser: Browser):
     )[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener")
-    await context.close()
 
 
-async def test_should_work_with_noopener_and_no_url(browser: Browser):
-    context = await browser.newContext()
+async def test_should_work_with_noopener_and_no_url(context):
     page = await context.newPage()
     popup = (
         await asyncio.gather(
@@ -397,11 +372,9 @@ async def test_should_work_with_noopener_and_no_url(browser: Browser):
     assert popup.url.split("#")[0] == "about:blank"
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener") == False
-    await context.close()
 
 
-async def test_should_work_with_noopener_and_about_blank(browser):
-    context = await browser.newContext()
+async def test_should_work_with_noopener_and_about_blank(context):
     page = await context.newPage()
     popup = (
         await asyncio.gather(
@@ -413,11 +386,9 @@ async def test_should_work_with_noopener_and_about_blank(browser):
     )[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener") == False
-    await context.close()
 
 
-async def test_should_work_with_noopener_and_url(browser: Browser, server):
-    context = await browser.newContext()
+async def test_should_work_with_noopener_and_url(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     popup = (
@@ -431,24 +402,20 @@ async def test_should_work_with_noopener_and_url(browser: Browser, server):
     )[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener") == False
-    await context.close()
 
 
-async def test_should_work_with_clicking_target__blank(browser: Browser, server):
-    context = await browser.newContext()
+async def test_should_work_with_clicking_target__blank(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel="opener" href="/one-style.html">yo</a>')
     popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener")
-    await context.close()
 
 
 async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(
-    browser: Browser, server
+    context, server
 ):
-    context = await browser.newContext()
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
@@ -459,38 +426,29 @@ async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(
     )[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener") == False
-    await context.close()
 
 
 async def test_should_work_with_clicking_target__blank_and_rel_noopener(
-    browser: Browser, server
+    context, server
 ):
-    context = await browser.newContext()
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
     popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
     assert await page.evaluate("!!window.opener") == False
     assert await popup.evaluate("!!window.opener") == False
-    await context.close()
 
 
-async def test_should_not_treat_navigations_as_new_popups(browser, server):
-    context = await browser.newContext()
+async def test_should_not_treat_navigations_as_new_popups(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
-    popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
-
-    async def handle_popup(popup, handled_popups):
-        handled_popups.append(True)
+    popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a")))[0]
 
     handled_popups = []
     page.on(
-        "popup",
-        lambda popup: asyncio.ensure_future(handle_popup(popup, handled_popups)),
+        "popup", lambda popup: handled_popups.append(True),
     )
 
     await popup.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
-    await context.close()
     assert len(handled_popups) == 0
