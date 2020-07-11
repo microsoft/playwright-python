@@ -1,8 +1,9 @@
 from typing import List, Union
-from playwright.helper import FilePayload
-from os import path
+import os
 import mimetypes
 import base64
+
+from playwright.helper import FilePayload
 
 
 def normalize_file_payloads(
@@ -18,7 +19,7 @@ def normalize_file_payloads(
         if isinstance(item, str):
             with open(item, mode="rb") as fd:
                 file: FilePayload = {
-                    "name": path.basename(item),
+                    "name": os.path.basename(item),
                     "mimeType": mimetypes.guess_type(item)[0]
                     or "application/octet-stream",
                     "buffer": base64.b64encode(fd.read()).decode(),

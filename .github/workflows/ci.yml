@@ -51,4 +51,4 @@ jobs:
     - name: Build package
       run: python build_package.py
     - name: Test
-      run: pytest --browser=${{ matrix.browser }}
+      run: pytest --browser=${{ matrix.browser }} -n auto

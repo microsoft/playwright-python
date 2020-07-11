@@ -14,8 +14,9 @@
 
 import asyncio
 import pytest
-import playwright
+import sys
 
+import playwright
 from .server import server as server_object
 from .utils import utils as utils_object
 
@@ -60,6 +61,7 @@ async def context(browser):
     context = await browser.newContext()
     yield context
     await context.close()
+    assert len(browser.contexts) == 0
 
 
 @pytest.fixture
@@ -110,6 +112,21 @@ def is_firefox(browser_name):
 @pytest.fixture(scope="session")
 def is_chromium(browser_name):
     return browser_name == "chromium"
+
+
+@pytest.fixture(scope="session")
+def is_win(browser_name):
+    return sys.platform == "win32"
+
+
+@pytest.fixture(scope="session")
+def is_linux(browser_name):
+    return sys.platform == "linux"
+
+
+@pytest.fixture(scope="session")
+def is_mac(browser_name):
+    return sys.platform == "darwin"
 
 
 @pytest.fixture(autouse=True)
