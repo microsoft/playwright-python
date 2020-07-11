@@ -14,7 +14,7 @@
 
 from playwright.helper import FilePayload
 
-from typing import Dict, List, Union, TYPE_CHECKING
+from typing import List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from playwright.page import Page

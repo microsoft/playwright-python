@@ -27,7 +27,7 @@ from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page
 from playwright.playwright import Playwright
 from playwright.worker import Worker
-from typing import Any, Awaitable, Dict, List
+from typing import Any, Dict
 
 
 def create_remote_object(

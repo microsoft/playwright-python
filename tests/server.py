@@ -18,7 +18,6 @@ from contextlib import closing
 import os
 import socket
 import threading
-import os
 import binascii
 
 from twisted.internet import reactor
@@ -32,6 +31,12 @@ def find_free_port():
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
+
+class NoResponseResource:
+    @staticmethod
+    def render(request):
+        return b""
 
 
 class UnauthorizedResource(resource.ErrorPage):
@@ -51,8 +56,10 @@ class Server:
     def start(self):
         request_subscribers = {}
         auth = {}
+        routes = {}
         self.request_subscribers = request_subscribers
         self.auth = auth
+        self.routes = routes
 
         class CustomFileServer(File):
             def getChild(self, path, request):
@@ -76,6 +83,9 @@ class Server:
                             b"www-authenticate", b'Basic realm="Secure Area"'
                         )
                         return UnauthorizedResource()
+                if routes.get(uri_path):
+                    routes[uri_path](request)
+                    return NoResponseResource()
 
                 return super().getChild(path, request)
 
@@ -104,6 +114,9 @@ class Server:
     def reset(self):
         self.request_subscribers.clear()
         self.auth.clear()
+
+    def set_route(self, path, callback):
+        self.routes[path] = callback
 
 
 server = Server()

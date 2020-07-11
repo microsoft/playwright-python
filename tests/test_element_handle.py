@@ -117,12 +117,13 @@ async def test_bounding_box_when_inline_box_child_is_outside_of_viewport(page, s
         }"""
     )
 
-    roundbox = lambda b: {
-        "x": round(b["x"] * 100),
-        "y": round(b["y"] * 100),
-        "width": round(b["width"] * 100),
-        "height": round(b["height"] * 100),
-    }
+    def roundbox(b):
+        return {
+            "x": round(b["x"] * 100),
+            "y": round(b["y"] * 100),
+            "width": round(b["width"] * 100),
+            "height": round(b["height"] * 100),
+        }
 
     assert roundbox(box) == roundbox(web_bounding_box)
 
@@ -588,7 +589,7 @@ async def test_uncheck_the_box(page):
     await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
     input = await page.querySelector("input")
     await input.uncheck()
-    assert await page.evaluate("checkbox.checked") == False
+    assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_select_single_option(page, server):
@@ -602,6 +603,6 @@ async def test_select_single_option(page, server):
 async def test_focus_a_button(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.querySelector("button")
-    assert await button.evaluate("button => document.activeElement === button") == False
+    assert await button.evaluate("button => document.activeElement === button") is False
     await button.focus()
     assert await button.evaluate("button => document.activeElement === button")

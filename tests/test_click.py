@@ -72,7 +72,7 @@ async def test_click_not_throw_when_page_closes(browser, server):
         await asyncio.gather(
             page.close(), page.mouse.click(1, 2),
         )
-    except Error as e:
+    except Error:
         pass
     await context.close()
 
@@ -265,7 +265,7 @@ async def test_click_wrapped_links(page, server):
 
 async def test_click_on_checkbox_input_and_toggle(page, server):
     await page.goto(server.PREFIX + "/input/checkbox.html")
-    assert await page.evaluate("() => result.check") == None
+    assert await page.evaluate("() => result.check") is None
     await page.click("input#agree")
     assert await page.evaluate("result.check")
     assert await page.evaluate("result.events") == [
@@ -279,12 +279,12 @@ async def test_click_on_checkbox_input_and_toggle(page, server):
         "change",
     ]
     await page.click("input#agree")
-    assert await page.evaluate("result.check") == False
+    assert await page.evaluate("result.check") is False
 
 
 async def test_click_on_checkbox_label_and_toggle(page, server):
     await page.goto(server.PREFIX + "/input/checkbox.html")
-    assert await page.evaluate("result.check") == None
+    assert await page.evaluate("result.check") is None
     await page.click('label[for="agree"]')
     assert await page.evaluate("result.check")
     assert await page.evaluate("result.events") == [
@@ -293,7 +293,7 @@ async def test_click_on_checkbox_label_and_toggle(page, server):
         "change",
     ]
     await page.click('label[for="agree"]')
-    assert await page.evaluate("result.check") == False
+    assert await page.evaluate("result.check") is False
 
 
 async def test_not_hang_with_touch_enabled_viewports(server, browser):
@@ -759,16 +759,16 @@ async def test_update_modifiers_correctly(page, server):
     await page.click("button", modifiers=["Shift"])
     assert await page.evaluate("shiftKey")
     await page.click("button", modifiers=[])
-    assert await page.evaluate("shiftKey") == False
+    assert await page.evaluate("shiftKey") is False
 
     await page.keyboard.down("Shift")
     await page.click("button", modifiers=[])
-    assert await page.evaluate("shiftKey") == False
+    assert await page.evaluate("shiftKey") is False
     await page.click("button")
     assert await page.evaluate("shiftKey")
     await page.keyboard.up("Shift")
     await page.click("button")
-    assert await page.evaluate("shiftKey") == False
+    assert await page.evaluate("shiftKey") is False
 
 
 async def test_click_an_offscreen_element_when_scroll_behavior_is_smooth(page):
@@ -970,13 +970,13 @@ async def test_not_check_the_checked_box(page):
 async def test_uncheck_the_box(page):
     await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
     await page.uncheck("input")
-    assert await page.evaluate("checkbox.checked") == False
+    assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_not_uncheck_the_unchecked_box(page):
     await page.setContent('<input id="checkbox" type="checkbox"></input>')
     await page.uncheck("input")
-    assert await page.evaluate("checkbox.checked") == False
+    assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_check_the_box_by_label(page):

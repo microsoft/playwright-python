@@ -39,10 +39,18 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def browser(browser_name, pytestconfig):
-    browser = await playwright.browser_types[browser_name].launch(
-        headless=not pytestconfig.getoption("--headful")
-    )
+async def browser_factory(browser_name, pytestconfig):
+    async def launch(**kwargs):
+        return await playwright.browser_types[browser_name].launch(
+            headless=not pytestconfig.getoption("--headful"), **kwargs
+        )
+
+    return launch
+
+
+@pytest.fixture(scope="session")
+async def browser(browser_factory):
+    browser = await browser_factory()
     yield browser
     await browser.close()
 
@@ -79,7 +87,7 @@ async def start_http_server():
 
 
 @pytest.fixture(autouse=True)
-async def after_each_hook():
+def after_each_hook():
     yield
     server_object.reset()
 

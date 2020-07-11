@@ -111,7 +111,7 @@ async def test_should_inherit_offline_from_browser_context(context, server):
         }""",
         server.PREFIX + "/dummy.html",
     )
-    assert online == False
+    assert online is False
 
 
 async def test_should_inherit_http_credentials_from_browser_context(
@@ -276,7 +276,7 @@ async def test_should_work(context):
             page.evaluate('window.__popup = window.open("about:blank")'),
         )
     )[0]
-    assert await page.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener")
 
 
@@ -291,7 +291,7 @@ async def test_should_work_with_window_features(context, server):
             ),
         )
     )[0]
-    assert await page.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener")
 
 
@@ -354,7 +354,7 @@ async def test_should_work_with_empty_url(context):
             page.evaluate('() => window.__popup = window.open("")'),
         )
     )[0]
-    assert await page.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener")
 
 
@@ -370,8 +370,8 @@ async def test_should_work_with_noopener_and_no_url(context):
     )[0]
     # Chromium reports 'about:blank#blocked' here.
     assert popup.url.split("#")[0] == "about:blank"
-    assert await page.evaluate("!!window.opener") == False
-    assert await popup.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
+    assert await popup.evaluate("!!window.opener") is False
 
 
 async def test_should_work_with_noopener_and_about_blank(context):
@@ -384,8 +384,8 @@ async def test_should_work_with_noopener_and_about_blank(context):
             ),
         )
     )[0]
-    assert await page.evaluate("!!window.opener") == False
-    assert await popup.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
+    assert await popup.evaluate("!!window.opener") is False
 
 
 async def test_should_work_with_noopener_and_url(context, server):
@@ -400,8 +400,8 @@ async def test_should_work_with_noopener_and_url(context, server):
             ),
         )
     )[0]
-    assert await page.evaluate("!!window.opener") == False
-    assert await popup.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
+    assert await popup.evaluate("!!window.opener") is False
 
 
 async def test_should_work_with_clicking_target__blank(context, server):
@@ -409,7 +409,7 @@ async def test_should_work_with_clicking_target__blank(context, server):
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel="opener" href="/one-style.html">yo</a>')
     popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
-    assert await page.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener")
 
 
@@ -424,8 +424,8 @@ async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(
             page.waitForEvent("popup"), page.evalOnSelector("a", "a => a.click()"),
         )
     )[0]
-    assert await page.evaluate("!!window.opener") == False
-    assert await popup.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
+    assert await popup.evaluate("!!window.opener") is False
 
 
 async def test_should_work_with_clicking_target__blank_and_rel_noopener(
@@ -435,8 +435,8 @@ async def test_should_work_with_clicking_target__blank_and_rel_noopener(
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
     popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
-    assert await page.evaluate("!!window.opener") == False
-    assert await popup.evaluate("!!window.opener") == False
+    assert await page.evaluate("!!window.opener") is False
+    assert await popup.evaluate("!!window.opener") is False
 
 
 async def test_should_not_treat_navigations_as_new_popups(context, server):

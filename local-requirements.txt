@@ -9,3 +9,4 @@ twisted==20.3.0
 wheel==0.34.2
 black==19.10b0
 pre-commit==2.6.0
+flake8==3.8.3

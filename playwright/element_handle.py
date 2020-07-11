@@ -15,13 +15,10 @@
 import base64
 import sys
 from playwright.connection import (
-    Channel,
-    ChannelOwner,
     ConnectionScope,
     from_nullable_channel,
 )
 from playwright.helper import (
-    ConsoleMessageLocation,
     FilePayload,
     SelectOption,
     locals_to_params,

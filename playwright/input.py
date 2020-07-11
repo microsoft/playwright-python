@@ -14,7 +14,6 @@
 
 from playwright.connection import Channel
 from playwright.helper import locals_to_params, MouseButton
-from typing import Awaitable, Dict
 
 
 class Keyboard:
