@@ -111,9 +111,21 @@ def is_chromium(browser_name):
 
 @pytest.fixture(autouse=True)
 def skip_by_browser(request, browser_name):
-    if request.node.get_closest_marker("skip_browser"):
-        if request.node.get_closest_marker("skip_browser").args[0] == browser_name:
-            pytest.skip("skipped on this platform: {}".format(browser_name))
+    skip_browsers_names = []
+
+    # Allowlist
+    only_browser_marker = request.node.get_closest_marker("only_browser")
+    if only_browser_marker:
+        skip_browsers_names = ["chromium", "firefox", "webkit"]
+        skip_browsers_names.remove(only_browser_marker.args[0])
+
+    # Denylist
+    skip_browser_marker = request.node.get_closest_marker("skip_browser")
+    if skip_browser_marker:
+        skip_browsers_names.append(skip_browser_marker.args[0])
+
+    if browser_name in skip_browsers_names:
+        pytest.skip("skipped on this platform: {}".format(browser_name))
 
 
 def pytest_addoption(parser):
