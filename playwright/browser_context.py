@@ -14,11 +14,9 @@
 
 import asyncio
 from playwright.connection import (
-    Channel,
     ChannelOwner,
     ConnectionScope,
     from_channel,
-    from_nullable_channel,
 )
 from playwright.helper import (
     Cookie,
@@ -31,7 +29,7 @@ from playwright.helper import (
     URLMatch,
     URLMatcher,
 )
-from playwright.network import Request, Response, Route
+from playwright.network import Request, Route
 from playwright.page import BindingCall, Page
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING

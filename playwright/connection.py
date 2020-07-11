@@ -16,7 +16,7 @@ import asyncio
 from playwright.helper import parse_error, ParsedMessagePayload
 from playwright.transport import Transport
 from pyee import BaseEventEmitter
-from typing import Any, Awaitable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class Channel(BaseEventEmitter):

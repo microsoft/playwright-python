@@ -17,15 +17,11 @@ import base64
 import sys
 from playwright.accessibility import Accessibility
 from playwright.connection import (
-    Channel,
     ChannelOwner,
     ConnectionScope,
     from_channel,
     from_nullable_channel,
 )
-from playwright.console_message import ConsoleMessage
-from playwright.dialog import Dialog
-from playwright.download import Download
 from playwright.element_handle import ElementHandle, ValuesToSelect
 from playwright.file_chooser import FileChooser
 from playwright.helper import locals_to_params
@@ -43,7 +39,6 @@ from playwright.helper import (
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
-    SelectOption,
     TimeoutSettings,
     URLMatch,
     URLMatcher,

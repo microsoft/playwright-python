@@ -15,7 +15,6 @@
 import asyncio
 import sys
 from playwright.connection import (
-    Channel,
     ChannelOwner,
     ConnectionScope,
     from_channel,
@@ -27,9 +26,7 @@ from playwright.element_handle import (
     ValuesToSelect,
 )
 from playwright.helper import (
-    ConsoleMessageLocation,
     FilePayload,
-    SelectOption,
     is_function_body,
     locals_to_params,
     KeyboardModifier,
@@ -37,7 +34,7 @@ from playwright.helper import (
     DocumentLoadState,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
-from playwright.network import Request, Response, Route
+from playwright.network import Response
 from playwright.serializers import normalize_file_payloads
 from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
 

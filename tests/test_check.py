@@ -28,13 +28,13 @@ async def test_not_check_the_checked_box(page):
 async def test_uncheck_the_box(page):
     await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
     await page.uncheck("input")
-    assert await page.evaluate("checkbox.checked") == False
+    assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_not_uncheck_the_unchecked_box(page):
     await page.setContent('<input id="checkbox" type="checkbox"></input>')
     await page.uncheck("input")
-    assert await page.evaluate("checkbox.checked") == False
+    assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_check_the_box_by_label(page):

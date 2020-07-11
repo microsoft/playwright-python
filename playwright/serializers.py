@@ -1,11 +1,5 @@
-from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING
-from playwright.helper import (
-    ConsoleMessageLocation,
-    FilePayload,
-    SelectOption,
-    is_function_body,
-    locals_to_params,
-)
+from typing import List, Union
+from playwright.helper import FilePayload
 from os import path
 import mimetypes
 import base64

@@ -34,7 +34,7 @@ async def test_frame_element(page, server, utils):
     frame3handle2 = await frame3.frameElement()
     assert await frame1handle1.evaluate("(a, b) => a === b", frame1handle2)
     assert await frame3handle1.evaluate("(a, b) => a === b", frame3handle2)
-    assert await frame1handle1.evaluate("(a, b) => a === b", frame3handle1) == False
+    assert await frame1handle1.evaluate("(a, b) => a === b", frame3handle1) is False
 
 
 async def test_frame_element_with_content_frame(page, server, utils):
@@ -250,5 +250,5 @@ async def test_should_report_different_frame_instance_when_frame_re_attaches(
         page.waitForEvent("frameattached"),
         page.evaluate("() => document.body.appendChild(window.frame)"),
     )
-    assert frame2.isDetached() == False
+    assert frame2.isDetached() is False
     assert frame1 != frame2

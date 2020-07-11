@@ -23,7 +23,6 @@ import subprocess
 from playwright.connection import Connection
 from playwright.object_factory import create_remote_object
 from playwright.playwright import Playwright
-from typing import Dict
 
 playwright_object: Playwright
 

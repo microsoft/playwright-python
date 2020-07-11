@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.connection import Channel, ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
 from playwright.helper import locals_to_params, ColorScheme
-from typing import Awaitable, Dict, List
+from typing import Dict, List
 
 
 class BrowserType(ChannelOwner):

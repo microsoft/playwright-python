@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from playwright.connection import Channel
-from playwright.helper import locals_to_params
 from playwright.element_handle import ElementHandle
 from typing import Dict
 

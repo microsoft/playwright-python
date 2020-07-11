@@ -13,11 +13,9 @@
 # limitations under the License.
 
 import asyncio
-from asyncio.futures import Future
 import os
 
 from playwright.page import Page
-from playwright.file_chooser import FileChooser
 
 FILE_TO_UPLOAD = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "assets/file-to-upload.txt"
@@ -208,7 +206,7 @@ async def test_should_not_accept_multiple_files_for_single_file_input(page, serv
         )
     except Exception as exc:
         error = exc
-    assert error != None
+    assert error is not None
 
 
 async def test_should_emit_input_and_change_events(page, server):
@@ -234,7 +232,7 @@ async def test_should_work_for_single_file_pick(page, server):
     file_chooser = (
         await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
     )[0]
-    assert file_chooser.isMultiple == False
+    assert file_chooser.isMultiple is False
 
 
 async def test_should_work_for_multiple(page, server):

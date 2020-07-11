@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import collections
 import fnmatch
 import re
 
@@ -23,7 +22,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Tuple,
     Union,
     TYPE_CHECKING,
     Pattern,
@@ -160,7 +158,7 @@ def locals_to_params(args: Dict) -> Dict:
     for key in args:
         if key == "self":
             continue
-        if args[key] != None:
+        if args[key] is not None:
             copy[key] = args[key]
     return copy
 

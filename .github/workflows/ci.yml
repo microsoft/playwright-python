@@ -40,7 +40,10 @@ jobs:
         pip install -r local-requirements.txt
         pip install .
     - name: Lint
-      run: black --check .
+      run: |
+        black --check .
+        mypy .
+        flake8  playwright tests
     - name: Build driver
       run: python build_driver.py
       env:

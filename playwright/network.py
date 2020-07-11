@@ -15,14 +15,13 @@
 import base64
 import json
 from playwright.connection import (
-    Channel,
     ChannelOwner,
     ConnectionScope,
     from_nullable_channel,
     from_channel,
 )
 from playwright.helper import Error, ContinueParameters
-from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from playwright.frame import Frame
