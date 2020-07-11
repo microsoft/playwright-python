@@ -33,7 +33,7 @@ def find_free_port():
         return s.getsockname()[1]
 
 
-class NoResponseClass:
+class NoResponseResource:
     @staticmethod
     def render(request):
         return b""
@@ -85,7 +85,7 @@ class Server:
                         return UnauthorizedResource()
                 if routes.get(uri_path):
                     routes[uri_path](request)
-                    return NoResponseClass()
+                    return NoResponseResource()
 
                 return super().getChild(path, request)
 
