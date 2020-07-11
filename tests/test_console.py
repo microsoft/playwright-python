@@ -142,6 +142,7 @@ async def test_should_have_location_for_console_API_calls(page, server):
 
 
 # @see https://github.com/GoogleChrome/puppeteer/issues/3865
+@pytest.mark.skip_browser("firefox") # a fix just landed upstream, will roll later
 async def test_should_not_throw_when_there_are_console_messages_in_detached_iframes(
     page, server
 ):
