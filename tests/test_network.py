@@ -96,8 +96,8 @@ async def test_page_events_request_should_report_requests_and_responses_handled_
 ):
     await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
     await page.evaluate("() => window.activationPromise")
-    [sw_response, request] = await asyncio.gather(
-        page.evaluate('() => fetchDummy("foo")'), page.waitForEvent("request"),
+    [request, sw_response] = await asyncio.gather(
+        page.waitForEvent("request"), page.evaluate('() => fetchDummy("foo")')
     )
     assert sw_response == "responseFromServiceWorker:foo"
     assert request.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
