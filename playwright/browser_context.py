@@ -30,7 +30,7 @@ from playwright.helper import (
     URLMatcher,
 )
 from playwright.network import Request, Route
-from playwright.page import BindingCall, Page
+from playwright.page import BindingCall, Page, wait_for_event
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
@@ -85,14 +85,21 @@ class BrowserContext(ChannelOwner):
         func = self._bindings.get(binding_call._initializer["name"])
         if func is None:
             return
-        binding_call.call(func)
+        asyncio.ensure_future(binding_call.call(func))
 
     def setDefaultNavigationTimeout(self, timeout: int) -> None:
-        self._channel.send("setDefaultNavigationTimeoutNoReply", dict(timeout=timeout))
+        self._timeout_settings.set_navigation_timeout(timeout)
+        asyncio.ensure_future(
+            self._channel.send(
+                "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
+            )
+        )
 
     def setDefaultTimeout(self, timeout: int) -> None:
-        self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send("setDefaultTimeoutNoReply", dict(timeout=timeout))
+        self._timeout_settings.set_timeout(timeout)
+        asyncio.ensure_future(
+            self._channel.send("setDefaultTimeoutNoReply", dict(timeout=timeout))
+        )
 
     @property
     def pages(self) -> List[Page]:
@@ -175,15 +182,12 @@ class BrowserContext(ChannelOwner):
                 "setNetworkInterceptionEnabled", dict(enabled=False)
             )
 
-    async def waitForEvent(self, event: str) -> None:
-        # TODO: implement timeout race
-        future = self._scope._loop.create_future()
-        self.once(event, lambda e: future.set_result(e))
-        pending_event = PendingWaitEvent(event, future)
-        self._pending_wait_for_events.append(pending_event)
-        result = await future
-        self._pending_wait_for_events.remove(pending_event)
-        return result
+    async def waitForEvent(
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
+    ) -> Any:
+        return await wait_for_event(
+            self, self._timeout_settings, event, predicate=predicate, timeout=timeout
+        )
 
     def _on_close(self):
         if self._browser:
@@ -192,9 +196,8 @@ class BrowserContext(ChannelOwner):
         for pending_event in self._pending_wait_for_events:
             if pending_event.event == BrowserContext.Events.Close:
                 continue
-            pending_event.future.set_exception(Error("Context closed"))
+            pending_event.reject(False, "Context")
 
-        self._pending_wait_for_events.clear()
         self.emit(BrowserContext.Events.Close)
         self._scope.dispose()
 

@@ -14,7 +14,7 @@
 
 import asyncio
 import pytest
-from playwright.helper import Error
+from playwright import Error
 from playwright import TimeoutError, devices
 
 

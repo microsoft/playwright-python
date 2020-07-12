@@ -15,6 +15,7 @@
 import asyncio
 import fnmatch
 import re
+import traceback
 
 from typing import (
     Any,
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
     from playwright.network import Route, Request
 
 Cookie = List[Dict[str, Union[str, int, bool]]]
-URLMatch = Union[str, Callable[[str], bool]]
+URLMatch = Union[str, Pattern, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], None]
 FunctionWithSource = Callable[[Dict], Any]
 
@@ -101,8 +102,10 @@ class URLMatcher:
         self._callback: Optional[Callable[[str], bool]] = None
         self._regex_obj: Optional[Pattern] = None
         if isinstance(match, str):
-            regex = "(?:http://|https://)" + fnmatch.translate(match)
+            regex = fnmatch.translate(match)
             self._regex_obj = re.compile(regex)
+        elif isinstance(match, Pattern):
+            self._regex_obj = match
         else:
             self._callback = match
         self.match = match
@@ -111,16 +114,35 @@ class URLMatcher:
         if self._callback:
             return self._callback(url)
         if self._regex_obj:
-            return cast(bool, self._regex_obj.match(url))
+            return cast(bool, self._regex_obj.search(url))
         return False
 
 
 class TimeoutSettings:
     def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
         self._parent = parent
+        self._timeout = 30000
+        self._navigation_timeout = 30000
 
-    def set_default_timeout(self, timeout):
-        self.timeout = timeout
+    def set_timeout(self, timeout: int):
+        self._timeout = timeout
+
+    def timeout(self) -> int:
+        if self._timeout is not None:
+            return self._timeout
+        if self._parent:
+            return self._parent.timeout()
+        return 30000
+
+    def set_navigation_timeout(self, navigation_timeout: int):
+        self._navigation_timeout = navigation_timeout
+
+    def navigation_timeout(self) -> int:
+        if self._navigation_timeout is not None:
+            return self._navigation_timeout
+        if self._parent:
+            return self._parent.navigation_timeout()
+        return 30000
 
 
 class Error(Exception):
@@ -133,11 +155,11 @@ class TimeoutError(Error):
     pass
 
 
-def serialize_error(ex: Exception) -> ErrorPayload:
-    return dict(message=str(ex))
+def serialize_error(ex: Exception, tb) -> ErrorPayload:
+    return dict(message=str(ex), stack="".join(traceback.format_tb(tb)))
 
 
-def parse_error(error: ErrorPayload):
+def parse_error(error: ErrorPayload) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
@@ -164,9 +186,22 @@ def locals_to_params(args: Dict) -> Dict:
 
 
 class PendingWaitEvent:
-    def __init__(self, event: str, future: asyncio.Future):
+    def __init__(
+        self, event: str, future: asyncio.Future, timeout_future: asyncio.Future
+    ):
         self.event = event
         self.future = future
+        self.timeout_future = timeout_future
+
+    def reject(self, is_crash: bool, target: str):
+        self.timeout_future.cancel()
+        if self.event == "close" and not is_crash:
+            return
+        if self.event == "crash" and is_crash:
+            return
+        self.future.set_exception(
+            Error(f"{target} crashed" if is_crash else f"{target} closed")
+        )
 
 
 class RouteHandlerEntry:

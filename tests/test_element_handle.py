@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from playwright.helper import Error
+from playwright import Error
 
 
 async def test_bounding_box(page, server):
