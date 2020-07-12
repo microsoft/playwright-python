@@ -14,8 +14,9 @@
 
 import asyncio
 import pytest
-import playwright
+import sys
 
+import playwright
 from .server import server as server_object
 from .utils import utils as utils_object
 
@@ -60,6 +61,7 @@ async def context(browser):
     context = await browser.newContext()
     yield context
     await context.close()
+    assert len(browser.contexts) == 0
 
 
 @pytest.fixture
@@ -112,23 +114,55 @@ def is_chromium(browser_name):
     return browser_name == "chromium"
 
 
-@pytest.fixture(autouse=True)
-def skip_by_browser(request, browser_name):
-    skip_browsers_names = []
+@pytest.fixture(scope="session")
+def is_win(browser_name):
+    return sys.platform == "win32"
 
+
+@pytest.fixture(scope="session")
+def is_linux(browser_name):
+    return sys.platform == "linux"
+
+
+@pytest.fixture(scope="session")
+def is_mac(browser_name):
+    return sys.platform == "darwin"
+
+
+def _get_skiplist(request, values, value_name):
+    skipped_values = []
     # Allowlist
-    only_browser_marker = request.node.get_closest_marker("only_browser")
-    if only_browser_marker:
-        skip_browsers_names = ["chromium", "firefox", "webkit"]
-        skip_browsers_names.remove(only_browser_marker.args[0])
+    only_marker = request.node.get_closest_marker(f"only_{value_name}")
+    if only_marker:
+        skipped_values = values
+        skipped_values.remove(only_marker.args[0])
 
     # Denylist
-    skip_browser_marker = request.node.get_closest_marker("skip_browser")
-    if skip_browser_marker:
-        skip_browsers_names.append(skip_browser_marker.args[0])
+    skip_marker = request.node.get_closest_marker(f"skip_{value_name}")
+    if skip_marker:
+        skipped_values.append(skip_marker.args[0])
+
+    return skipped_values
+
+
+@pytest.fixture(autouse=True)
+def skip_by_browser(request, browser_name):
+    skip_browsers_names = _get_skiplist(
+        request, ["chromium", "firefox", "webkit"], "browser"
+    )
 
     if browser_name in skip_browsers_names:
-        pytest.skip("skipped on this platform: {}".format(browser_name))
+        pytest.skip("skipped for this browser: {}".format(browser_name))
+
+
+@pytest.fixture(autouse=True)
+def skip_by_platform(request):
+    skip_platform_names = _get_skiplist(
+        request, ["win32", "linux", "darwin"], "platform"
+    )
+
+    if sys.platform in skip_platform_names:
+        pytest.skip("skipped on this platform: {}".format(sys.platform))
 
 
 def pytest_addoption(parser):

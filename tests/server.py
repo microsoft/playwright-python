@@ -14,16 +14,15 @@
 
 import asyncio
 from contextlib import closing
-
+from http import HTTPStatus
 import os
 import socket
 import threading
-import binascii
+import gzip
+import mimetypes
 
 from twisted.internet import reactor
-from twisted.web.static import File
-from twisted.web import server as web_server, resource
-from twisted.web._responses import UNAUTHORIZED
+from twisted.web import http
 
 
 def find_free_port():
@@ -33,19 +32,6 @@ def find_free_port():
         return s.getsockname()[1]
 
 
-class NoResponseResource:
-    @staticmethod
-    def render(request):
-        return b""
-
-
-class UnauthorizedResource(resource.ErrorPage):
-    def __init__(self, message="Sorry, resource is unauthorized."):
-        resource.ErrorPage.__init__(
-            self, UNAUTHORIZED, "Unauthorized Resource", message
-        )
-
-
 class Server:
     def __init__(self):
         self.PORT = find_free_port()
@@ -53,16 +39,23 @@ class Server:
         self.PREFIX = f"http://localhost:{self.PORT}"
         self.CROSS_PROCESS_PREFIX = f"http://127.0.0.1:{self.PORT}"
 
+    def __repr__(self) -> str:
+        return self.PREFIX
+
     def start(self):
         request_subscribers = {}
         auth = {}
         routes = {}
+        gzip_routes = set()
         self.request_subscribers = request_subscribers
         self.auth = auth
         self.routes = routes
+        self.gzip_routes = gzip_routes
+        static_path = os.path.join(os.path.dirname(__file__), "assets")
 
-        class CustomFileServer(File):
-            def getChild(self, path, request):
+        class TestServerHTTPHandler(http.Request):
+            def process(self):
+                request = self
                 uri_path = request.uri.decode()
                 if request_subscribers.get(uri_path):
                     request_subscribers[uri_path].set_result(request)
@@ -74,25 +67,44 @@ class Server:
                     )
                     creds_correct = False
                     if authorization_header:
-                        creds = binascii.a2b_base64(
-                            authorization_header[0].split(" ")[1].encode() + b"==="
-                        ).decode()
-                        creds_correct = ":".join(auth.get(uri_path)) == creds
-                    if not (authorization_header or creds_correct):
-                        request.responseHeaders.addRawHeader(
-                            b"www-authenticate", b'Basic realm="Secure Area"'
+                        creds_correct = auth.get(uri_path) == (
+                            request.getUser(),
+                            request.getPassword(),
                         )
-                        return UnauthorizedResource()
+                    if not (authorization_header or creds_correct):
+                        request.setHeader(
+                            b"www-authenticate", 'Basic realm="Secure Area"'
+                        )
+                        request.setResponseCode(HTTPStatus.UNAUTHORIZED)
+                        request.finish()
+                        return
                 if routes.get(uri_path):
                     routes[uri_path](request)
-                    return NoResponseResource()
+                    return
+                file_content = None
+                try:
+                    file_content = open(
+                        os.path.join(static_path, uri_path[1:]), "rb"
+                    ).read()
+                except (FileNotFoundError, IsADirectoryError):
+                    request.setResponseCode(HTTPStatus.NOT_FOUND)
+                if file_content:
+                    request.setHeader("Content-Type", mimetypes.guess_type(uri_path)[0])
+                    if uri_path in gzip_routes:
+                        request.setHeader("Content-Encoding", "gzip")
+                        request.write(gzip.compress(file_content))
+                    else:
+                        request.write(file_content)
+                    self.setResponseCode(HTTPStatus.OK)
+                self.finish()
 
-                return super().getChild(path, request)
+        class MyHttp(http.HTTPChannel):
+            requestFactory = TestServerHTTPHandler
 
-        static_path = os.path.join(os.path.dirname(__file__), "assets")
-        resource = CustomFileServer(static_path)
-        site = web_server.Site(resource)
-        reactor.listenTCP(self.PORT, site)
+        class MyHttpFactory(http.HTTPFactory):
+            protocol = MyHttp
+
+        reactor.listenTCP(self.PORT, MyHttpFactory())
         self.thread = threading.Thread(
             target=lambda: reactor.run(installSignalHandlers=0)
         )
@@ -114,9 +126,22 @@ class Server:
     def reset(self):
         self.request_subscribers.clear()
         self.auth.clear()
+        self.gzip_routes.clear()
+        self.routes.clear()
 
     def set_route(self, path, callback):
         self.routes[path] = callback
+
+    def enable_gzip(self, path):
+        self.gzip_routes.add(path)
+
+    def set_redirect(self, from_, to):
+        def handle_redirect(request):
+            request.setResponseCode(HTTPStatus.FOUND)
+            request.setHeader("location", to)
+            request.finish()
+
+        self.set_route(from_, handle_redirect)
 
 
 server = Server()

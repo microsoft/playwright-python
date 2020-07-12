@@ -29,14 +29,16 @@ def assert_file_content(path, content):
 @pytest.fixture(autouse=True)
 def after_each_hook(server):
     def handle_download(request):
-        request.setHeader(b"Content-Type", "application/octet-stream")
-        request.setHeader(b"Content-Disposition", "attachment")
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment")
         request.write(b"Hello world")
+        request.finish()
 
     def handle_download_with_file_name(request):
-        request.setHeader(b"Content-Type", "application/octet-stream")
-        request.setHeader(b"Content-Disposition", "attachment; filename=file.txt")
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment; filename=file.txt")
         request.write(b"Hello world")
+        request.finish()
 
     server.set_route("/download", handle_download)
     server.set_route("/downloadWithFilename", handle_download_with_file_name)
@@ -73,8 +75,9 @@ async def test_should_report_downloads_with_acceptDownloads_true(browser, server
 async def test_should_report_non_navigation_downloads(browser, server):
     # Mac WebKit embedder does not download in this case, although Safari does.
     def handle_download(request):
-        request.setHeader(b"Content-Type", "application/octet-stream")
+        request.setHeader("Content-Type", "application/octet-stream")
         request.write(b"Hello world")
+        request.finish()
 
     server.set_route("/download", handle_download)
 
@@ -135,8 +138,9 @@ async def test_should_report_alt_click_downloads(browser, server):
     # Firefox does not download on alt-click by default.
     # Our WebKit embedder does not download on alt-click, although Safari does.
     def handle_download(request):
-        request.setHeader(b"Content-Type", "application/octet-stream")
+        request.setHeader("Content-Type", "application/octet-stream")
         request.write(b"Hello world")
+        request.finish()
 
     server.set_route("/download", handle_download)
 

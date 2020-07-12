@@ -6,6 +6,7 @@ on:
     branches: [ master ]
 jobs:
   build:
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -51,4 +52,4 @@ jobs:
     - name: Build package
       run: python build_package.py
     - name: Test
-      run: pytest --browser=${{ matrix.browser }}
+      run: pytest -vv --browser=${{ matrix.browser }}

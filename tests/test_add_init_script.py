@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 from playwright import Error
-from os import path
 
 
 async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
@@ -24,7 +25,9 @@ async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
 
 async def test_add_init_script_work_with_a_path(page):
     await page.addInitScript(
-        path=path.join(path.dirname(path.abspath(__file__)), "assets/injectedfile.js")
+        path=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "assets/injectedfile.js"
+        )
     )
     await page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert await page.evaluate("window.result") == 123
@@ -57,7 +60,9 @@ async def test_add_init_script_work_with_browser_context_scripts_with_a_path(
     page, context
 ):
     await context.addInitScript(
-        path=path.join(path.dirname(path.abspath(__file__)), "assets/injectedfile.js")
+        path=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "assets/injectedfile.js"
+        )
     )
     page = await context.newPage()
     await page.goto("data:text/html,<script>window.result = window.injected</script>")
