@@ -206,7 +206,7 @@ class Frame(ChannelOwner):
         return self._detached
 
     async def addScriptTag(
-        self, url: str = None, path: str = None, content: str = None
+        self, url: str = None, path: str = None, content: str = None, type: str = None,
     ) -> ElementHandle:
         return from_channel(
             await self._channel.send("addScriptTag", locals_to_params(locals()))
@@ -282,7 +282,7 @@ class Frame(ChannelOwner):
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send(
+        return await self._channel.send(
             "selectOption",
             dict(
                 selector=selector,
