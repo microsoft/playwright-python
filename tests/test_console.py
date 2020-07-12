@@ -65,7 +65,7 @@ async def test_should_use_text_for__str__(page):
     assert str(messages[0]) == "Hello world"
 
 
-async def test_should_work_for_different_console_API_calls(page, server):
+async def test_should_work_for_different_console_api_calls(page, server):
     async def handle_message(m, messages):
         messages.append(m)
 
@@ -128,7 +128,7 @@ async def test_should_trigger_correct_Log(page, server):
     assert message.type == "error"
 
 
-async def test_should_have_location_for_console_API_calls(page, server):
+async def test_should_have_location_for_console_api_calls(page, server):
     await page.goto(server.EMPTY_PAGE)
     message = (
         await asyncio.gather(

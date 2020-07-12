@@ -40,6 +40,7 @@ from playwright.helper import (
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
+    TimeoutError,
     URLMatch,
     URLMatcher,
     MouseButton,
@@ -213,7 +214,7 @@ class Page(ChannelOwner):
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func:
-            binding_call.call(func)
+            asyncio.ensure_future(binding_call.call(func))
         self._browser_context._on_binding(binding_call)
 
     def _on_worker(self, worker: Worker) -> None:
@@ -233,14 +234,7 @@ class Page(ChannelOwner):
 
     def _reject_pending_operations(self, is_crash: bool) -> None:
         for pending_event in self._pending_wait_for_events:
-            if pending_event.event == Page.Events.Close and not is_crash:
-                continue
-            if pending_event.event == Page.Events.Crash and is_crash:
-                continue
-            pending_event.future.set_exception(
-                Error("Page crashed" if is_crash else "Page closed")
-            )
-        self._pending_wait_for_events.clear()
+            pending_event.reject(is_crash, "Page")
 
     @property
     def context(self) -> "BrowserContext":
@@ -267,11 +261,18 @@ class Page(ChannelOwner):
         return self._frames.copy()
 
     def setDefaultNavigationTimeout(self, timeout: int) -> None:
-        self._channel.send("setDefaultNavigationTimeoutNoReply", dict(timeout=timeout))
+        self._timeout_settings.set_navigation_timeout(timeout)
+        asyncio.ensure_future(
+            self._channel.send(
+                "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
+            )
+        )
 
     def setDefaultTimeout(self, timeout: int) -> None:
-        self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send("setDefaultTimeoutNoReply", dict(timeout=timeout))
+        self._timeout_settings.set_timeout(timeout)
+        asyncio.ensure_future(
+            self._channel.send("setDefaultTimeoutNoReply", dict(timeout=timeout))
+        )
 
     async def querySelector(self, selector: str) -> Optional[ElementHandle]:
         return await self._main_frame.querySelector(selector)
@@ -384,7 +385,10 @@ class Page(ChannelOwner):
         return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
 
     async def waitForRequest(
-        self, url: URLMatch = None, predicate: Callable[[Request], bool] = None
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Request], bool] = None,
+        timeout: int = None,
     ) -> Optional[Request]:
         matcher = URLMatcher(url) if url else None
 
@@ -397,11 +401,16 @@ class Page(ChannelOwner):
 
         return cast(
             Optional[Request],
-            self.waitForEvent(Page.Events.Request, predicate=my_predicate),
+            await self.waitForEvent(
+                Page.Events.Request, predicate=my_predicate, timeout=timeout
+            ),
         )
 
     async def waitForResponse(
-        self, url: URLMatch = None, predicate: Callable[[Response], bool] = None
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Response], bool] = None,
+        timeout: int = None,
     ) -> Optional[Response]:
         matcher = URLMatcher(url) if url else None
 
@@ -414,27 +423,17 @@ class Page(ChannelOwner):
 
         return cast(
             Optional[Response],
-            self.waitForEvent(Page.Events.Response, predicate=my_predicate),
+            await self.waitForEvent(
+                Page.Events.Response, predicate=my_predicate, timeout=timeout
+            ),
         )
 
     async def waitForEvent(
-        self, event: str, predicate: Callable[[Any], bool] = None
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
     ) -> Any:
-        # TODO: support timeout
-
-        future = self._scope._loop.create_future()
-
-        def listener(e: Any):
-            if not predicate or predicate(e):
-                future.set_result(e)
-
-        self.on(event, listener)
-        pending_event = PendingWaitEvent(event, future)
-        self._pending_wait_for_events.append(pending_event)
-        result = await future
-        self._pending_wait_for_events.remove(pending_event)
-        self.remove_listener(event, listener)
-        return result
+        return await wait_for_event(
+            self, self._timeout_settings, event, predicate=predicate, timeout=timeout
+        )
 
     async def goBack(
         self, timeout: int = None, waitUntil: DocumentLoadState = None,
@@ -479,7 +478,9 @@ class Page(ChannelOwner):
                 "setNetworkInterceptionEnabled", dict(enabled=True)
             )
 
-    async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
+    async def unroute(
+        self, match: URLMatch, handler: Optional[RouteHandler] = None
+    ) -> None:
         self._routes = list(
             filter(
                 lambda r: r.matcher.match != match
@@ -686,13 +687,52 @@ class BindingCall(ChannelOwner):
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer)
 
-    def call(self, func: FunctionWithSource) -> None:
+    async def call(self, func: FunctionWithSource) -> None:
         try:
             frame = from_channel(self._initializer["frame"])
             source = dict(context=frame._page.context, page=frame._page, frame=frame)
             result = func(source, *self._initializer["args"])
-            asyncio.ensure_future(self._channel.send("resolve", dict(result=result)))
+            if isinstance(result, asyncio.Future):
+                result = await result
+            await self._channel.send("resolve", dict(result=result))
         except Exception as e:
+            tb = sys.exc_info()[2]
             asyncio.ensure_future(
-                self._channel.send("reject", dict(error=serialize_error(e)))
+                self._channel.send("reject", dict(error=serialize_error(e, tb)))
             )
+
+
+async def wait_for_event(
+    target: Union[Page, "BrowserContext"],
+    timeout_settings: TimeoutSettings,
+    event: str,
+    predicate: Callable[[Any], bool] = None,
+    timeout: int = None,
+) -> Any:
+    if timeout is None:
+        timeout = timeout_settings.timeout()
+    if timeout == 0:
+        timeout = 3600 * 24 * 7 * 30 * 365
+    timeout_future: asyncio.Future = asyncio.ensure_future(
+        asyncio.sleep(timeout / 1000)
+    )
+
+    future = target._scope._loop.create_future()
+
+    def listener(e: Any = None):
+        if not predicate or predicate(e):
+            future.set_result(e)
+
+    target.on(event, listener)
+
+    pending_event = PendingWaitEvent(event, future, timeout_future)
+    target._pending_wait_for_events.append(pending_event)
+    done, _ = await asyncio.wait(
+        {timeout_future, future}, return_when=asyncio.FIRST_COMPLETED
+    )
+    target.remove_listener(event, listener)
+    target._pending_wait_for_events.remove(pending_event)
+    if future in done:
+        timeout_future.cancel()
+        return future.result()
+    raise TimeoutError("Timeout exceeded")

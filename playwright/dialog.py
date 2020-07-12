@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from playwright.connection import ChannelOwner, ConnectionScope
+from playwright.helper import locals_to_params
 from typing import Dict
 
 
@@ -33,7 +34,7 @@ class Dialog(ChannelOwner):
         return self._initializer["defaultValue"]
 
     async def accept(self, prompt_text: str = None) -> None:
-        await self._channel.send("accept", dict(promptText=prompt_text))
+        await self._channel.send("accept", locals_to_params(locals()))
 
     async def dismiss(self) -> None:
         await self._channel.send("dismiss")
