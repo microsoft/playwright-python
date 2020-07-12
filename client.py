@@ -17,7 +17,7 @@ import asyncio
 from playwright import browser_types
 
 
-async def run():
+async def run() -> None:
     print("Launching browser...")
     browser = await browser_types["webkit"].launch(headless=False)
     print("Contexts in browser: %d" % len(browser.contexts))
@@ -59,6 +59,7 @@ async def run():
 
     print("\nQuerying body...")
     body1 = await page1.querySelector("body")
+    assert body1
     print("Body text %s" % await body1.textContent())
 
     print("Closing page1...")

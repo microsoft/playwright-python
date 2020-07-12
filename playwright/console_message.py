@@ -34,19 +34,9 @@ class ConsoleMessage(ChannelOwner):
         return self._initializer["text"]
 
     @property
-    def defaultValue(self) -> str:
-        return self._initializer["defaultValue"]
-
-    @property
     def args(self) -> List[JSHandle]:
         return list(map(from_channel, self._initializer["args"]))
 
     @property
     def location(self) -> ConsoleMessageLocation:
         return self._initializer["location"]
-
-    async def accept(self, prompt_text: str = None) -> None:
-        await self._channel.send("accept", dict(promptText=prompt_text))
-
-    async def dismiss(self) -> None:
-        await self._channel.send("dismiss")

@@ -23,7 +23,7 @@ from playwright.connection import (
 from playwright.helper import Error, ContinueParameters
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING, cast
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright.frame import Frame
 
 
@@ -104,7 +104,7 @@ class Route(ChannelOwner):
             response["body"] = body
             response["isBase64"] = False
         elif isinstance(body, bytes):
-            response["body"] = base64.b64encode(body)
+            response["body"] = base64.b64encode(body).decode()
             response["isBase64"] = True
         await self._channel.send("fulfill", response)
 

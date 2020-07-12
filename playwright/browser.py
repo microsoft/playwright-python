@@ -20,9 +20,9 @@ from playwright.page import Page
 from types import SimpleNamespace
 from typing import Dict, List, Union
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
-else:
+else:  # pragma: no cover
     from typing_extensions import Literal
 
 

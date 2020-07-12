@@ -19,7 +19,7 @@ from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import Error, is_function_body
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright.element_handle import ElementHandle
 
 
@@ -88,7 +88,7 @@ class JSHandle(ChannelOwner):
         return parse_result(await self._channel.send("jsonValue"))
 
 
-def is_primitive_value(value: Any):
+def is_primitive_value(value: Any) -> bool:
     return (
         isinstance(value, bool)
         or isinstance(value, int)

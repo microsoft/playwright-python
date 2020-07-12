@@ -38,12 +38,12 @@ from playwright.network import Response
 from playwright.serializers import normalize_file_payloads
 from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
-else:
+else:  # pragma: no cover
     from typing_extensions import Literal
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright.page import Page
 
 
