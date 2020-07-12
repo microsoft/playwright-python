@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import pytest
 import re
 from playwright import Error, TimeoutError
 
@@ -395,3 +396,142 @@ async def test_expose_function_should_work_with_complex_objects(page, server):
     await page.exposeFunction("complexObject", lambda a, b: dict(x=a["x"] + b["x"]))
     result = await page.evaluate("complexObject({x: 5}, {x: 2})")
     assert result["x"] == 7
+
+
+async def test_page_error_should_fire(page, server, is_webkit):
+    [error, _] = await asyncio.gather(
+        page.waitForEvent("pageerror"), page.goto(server.PREFIX + "/error.html"),
+    )
+    assert error.message == "Fancy error!"
+    stack = await page.evaluate("window.e.stack")
+    # Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
+    if is_webkit:
+        stack = stack.replace("14:25", "15:19")
+    assert error.stack == stack
+
+
+async def test_page_error_should_handle_odd_values(page, is_firefox):
+    cases = [["null", "null"], ["undefined", "undefined"], ["0", "0"], ['""', ""]]
+    for [value, message] in cases:
+        [error, _] = await asyncio.gather(
+            page.waitForEvent("pageerror"),
+            page.evaluate(f"() => setTimeout(() => {{ throw {value}; }}, 0)"),
+        )
+        assert (
+            error.message == ("uncaught exception: " + message) if is_firefox else value
+        )
+
+
+@pytest.mark.skip_browser("firefox")
+async def test_page_error_should_handle_object(page, is_chromium):
+    # Firefox just does not report this error.
+    [error, _] = await asyncio.gather(
+        page.waitForEvent("pageerror"),
+        page.evaluate("() => setTimeout(() => { throw {}; }, 0)"),
+    )
+    assert error.message == "Object" if is_chromium else "[object Object]"
+
+
+@pytest.mark.skip_browser("firefox")
+async def test_page_error_should_handle_window(page, is_chromium):
+    # Firefox just does not report this error.
+    [error, _] = await asyncio.gather(
+        page.waitForEvent("pageerror"),
+        page.evaluate("() => setTimeout(() => { throw window; }, 0)"),
+    )
+    assert error.message == "Window" if is_chromium else "[object Window]"
+
+
+expected_output = "<html><head></head><body><div>hello</div></body></html>"
+
+
+async def test_set_content_should_work(page, server):
+    await page.setContent("<div>hello</div>")
+    result = await page.content()
+    assert result == expected_output
+
+
+async def test_set_content_should_work_with_domcontentloaded(page, server):
+    await page.setContent("<div>hello</div>", waitUntil="domcontentloaded")
+    result = await page.content()
+    assert result == expected_output
+
+
+async def test_set_content_should_work_with_doctype(page, server):
+    doctype = "<!DOCTYPE html>"
+    await page.setContent(f"{doctype}<div>hello</div>")
+    result = await page.content()
+    assert result == f"{doctype}{expected_output}"
+
+
+async def test_set_content_should_work_with_HTML_4_doctype(page, server):
+    doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'
+    await page.setContent(f"{doctype}<div>hello</div>")
+    result = await page.content()
+    assert result == f"{doctype}{expected_output}"
+
+
+async def test_set_content_should_respect_timeout(page, server):
+    img_path = "/img.png"
+    # stall for image
+    server.set_route(img_path, lambda request: None)
+    error = None
+    try:
+        await page.setContent(
+            '<img src="${server.PREFIX + img_path}"></img>', timeout=1
+        )
+    except Error as e:
+        error = e
+    assert isinstance(error, TimeoutError)
+
+
+async def test_set_content_should_respect_default_navigation_timeout(page, server):
+    page.setDefaultNavigationTimeout(1)
+    img_path = "/img.png"
+    # stall for image
+    await page.route(img_path, lambda route, request: None)
+
+    error = None
+    try:
+        await page.setContent(f'<img src="{server.PREFIX + img_path}"></img>')
+    except Error as e:
+        error = e
+    assert "Timeout 1ms exceeded during" in error.message
+    assert isinstance(error, TimeoutError)
+
+
+async def test_set_content_should_await_resources_to_load(page, server):
+    img_path = "/img.png"
+    img_route = page._scope._loop.create_future()
+    await page.route(img_path, lambda route, request: img_route.set_result(route))
+    loaded = []
+
+    async def load():
+        await page.setContent(f'<img src="{server.PREFIX + img_path}"></img>')
+        loaded.append(True)
+
+    content_promise = asyncio.ensure_future(load())
+    route = await img_route
+    assert loaded == []
+    asyncio.ensure_future(route.continue_())
+    await content_promise
+
+
+async def test_set_content_should_work_with_tricky_content(page):
+    await page.setContent("<div>hello world</div>" + "\x7F")
+    assert await page.evalOnSelector("div", "div => div.textContent") == "hello world"
+
+
+async def test_set_content_should_work_with_accents(page):
+    await page.setContent("<div>aberración</div>")
+    assert await page.evalOnSelector("div", "div => div.textContent") == "aberración"
+
+
+async def test_set_content_should_work_with_emojis(page):
+    await page.setContent("<div>🐥</div>")
+    assert await page.evalOnSelector("div", "div => div.textContent") == "🐥"
+
+
+async def test_set_content_should_work_with_newline(page):
+    await page.setContent("<div>\n</div>")
+    assert await page.evalOnSelector("div", "div => div.textContent") == "\n"
