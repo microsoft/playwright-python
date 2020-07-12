@@ -127,6 +127,7 @@ class Server:
         self.request_subscribers.clear()
         self.auth.clear()
         self.gzip_routes.clear()
+        self.routes.clear()
 
     def set_route(self, path, callback):
         self.routes[path] = callback
