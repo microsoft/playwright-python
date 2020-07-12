@@ -11,20 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: microsoft/playwright-github-action@v1
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
-    - name: Get Node PKG Cache dir
-      id: node-pkg-cache
-      run: |
-        node -e "const path = require('path'); const fs = require('fs'); const cachePath = path.join(os.tmpdir(), 'pkg-cache'); fs.mkdirSync(cachePath); console.log('::set-output name=dir::' + cachePath)"
-    - name: Cache driver
-      id: cache-primes
-      uses: actions/cache@v2
-      with:
-        path: ${{ steps.node-pkg-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -39,12 +25,6 @@ jobs:
         black --check .
         mypy .
         flake8 playwright tests
-    - name: Build driver
-      run: python build_driver.py
-      env:
-        PKG_CACHE_PATH: ${{ steps.node-pkg-cache.outputs.dir }}
-    - name: Build package
-      run: python build_package.py
   build:
     timeout-minutes: 30
     strategy:
@@ -87,4 +67,10 @@ jobs:
     - name: Build package
       run: python build_package.py
     - name: Test
+      if: ${{ matrix.os == 'windows-latest' }}
+      # pytest-xdist does not exit on Windows
+      # https://github.com/pytest-dev/pytest-xdist/issues/60
+      run: pytest -vv --browser=${{ matrix.browser }}
+    - name: Test
+      if: ${{ matrix.os != 'windows-latest' }}
       run: pytest -vv --browser=${{ matrix.browser }} -n auto
