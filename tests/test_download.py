@@ -13,13 +13,12 @@
 # limitations under the License.
 from asyncio.futures import Future
 from typing import Optional
+from playwright.browser import Browser
+from playwright.page import Page
+from playwright import Error as PlaywrightError
 import pytest
 import asyncio
 import os
-
-from playwright.browser import Browser
-from playwright.page import Page
-from playwright.helper import Error as PlaywrightError
 
 
 def assert_file_content(path, content):

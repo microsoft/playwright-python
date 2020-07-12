@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import traceback
 from playwright.helper import parse_error, ParsedMessagePayload
 from playwright.transport import Transport
 from pyee import BaseEventEmitter
@@ -96,6 +97,12 @@ class ConnectionScope:
         return result
 
 
+class ProtocolCallback:
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        self.stack_trace = "".join(traceback.format_stack()[-10:])
+        self.future = loop.create_future()
+
+
 class Connection:
     def __init__(
         self,
@@ -111,7 +118,7 @@ class Connection:
         self._loop = loop
         self._objects: Dict[str, ChannelOwner] = dict()
         self._scopes: Dict[str, ConnectionScope] = dict()
-        self._callbacks: Dict[int, asyncio.Future] = dict()
+        self._callbacks: Dict[int, ProtocolCallback] = dict()
         self._root_scope = self.create_scope("", None)
         self._object_factory = object_factory
 
@@ -134,9 +141,9 @@ class Connection:
             params=self._replace_channels_with_guids(params),
         )
         self._transport.send(message)
-        callback = self._loop.create_future()
+        callback = ProtocolCallback(self._loop)
         self._callbacks[id] = callback
-        return await callback
+        return await callback.future
 
     def _dispatch(self, msg: ParsedMessagePayload):
 
@@ -145,10 +152,12 @@ class Connection:
             callback = self._callbacks.pop(id)
             error = msg.get("error")
             if error:
-                callback.set_exception(parse_error(error))
+                parsed_error = parse_error(error)
+                parsed_error.stack = callback.stack_trace
+                callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
-                callback.set_result(result)
+                callback.future.set_result(result)
             return
 
         guid = msg["guid"]

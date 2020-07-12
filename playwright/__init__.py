@@ -20,6 +20,15 @@ firefox = playwright_object.firefox
 webkit = playwright_object.webkit
 devices = playwright_object.devices
 browser_types = playwright_object.browser_types
+Error = helper.Error
 TimeoutError = helper.TimeoutError
 
-__all__ = ["browser_types", "chromium", "firefox", "webkit", "devices", "TimeoutError"]
+__all__ = [
+    "browser_types",
+    "chromium",
+    "firefox",
+    "webkit",
+    "devices",
+    "Error",
+    "TimeoutError",
+]

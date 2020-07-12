@@ -14,7 +14,7 @@
 
 import os
 
-from playwright.helper import Error
+from playwright import Error
 
 
 async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):

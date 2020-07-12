@@ -14,7 +14,7 @@
 
 import math
 from datetime import datetime
-from playwright.helper import Error
+from playwright import Error
 
 
 async def test_evaluate_work(page):
