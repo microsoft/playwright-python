@@ -502,7 +502,7 @@ async def test_set_content_should_respect_default_navigation_timeout(page, serve
 
 async def test_set_content_should_await_resources_to_load(page, server):
     img_path = "/img.png"
-    img_route = page._scope._loop.create_future()
+    img_route = asyncio.Future()
     await page.route(img_path, lambda route, request: img_route.set_result(route))
     loaded = []
 
