@@ -1,0 +1,18 @@
+<script>
+console.error('Not a JS error');
+a();
+
+function a() {
+    b();
+}
+
+function b() {
+    c();
+}
+
+function c() {
+    window.e = new Error('Fancy error!');
+    throw window.e;
+}
+//# sourceURL=myscript.js
+</script>
