@@ -6,6 +6,7 @@ on:
     branches: [ master ]
 jobs:
   build:
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
