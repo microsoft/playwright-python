@@ -580,7 +580,10 @@ class Page(ChannelOwner):
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:
-        return await self._main_frame.selectOption(**locals_to_params(locals()))
+        params = locals_to_params(locals())
+        if "values" not in params:
+            params["values"] = None
+        return await self._main_frame.selectOption(**params)
 
     async def setInputFiles(
         self,

@@ -231,6 +231,8 @@ ValuesToSelect = Union[
 
 
 def convertSelectOptionValues(arg: ValuesToSelect) -> Any:
+    if arg is None:
+        return []
     if isinstance(arg, ElementHandle):
         return arg._channel
     if isinstance(arg, list) and len(arg) and isinstance(arg[0], ElementHandle):

@@ -13,21 +13,21 @@
 # limitations under the License.
 
 import asyncio
+import os
 import pytest
 import re
 from playwright import Error, TimeoutError
 
+__dirname = os.path.dirname(os.path.realpath(__file__))
+
 
 async def test_close_should_reject_all_promises(context):
     new_page = await context.newPage()
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await asyncio.gather(
             new_page.evaluate("() => new Promise(r => {})"), new_page.close()
         )
-    except Error as e:
-        error = e
-    assert "Protocol error" in error.message
+    assert "Protocol error" in exc_info.value.message
 
 
 async def test_closed_should_not_visible_in_context_pages(context):
@@ -120,13 +120,9 @@ async def test_async_stacks_should_work(page, server):
     await page.route(
         "**/empty.html", lambda route, response: asyncio.ensure_future(route.abort())
     )
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE)
-    except Error as e:
-        error = e
-    assert error
-    assert __file__ in error.stack
+    assert __file__ in exc_info.value.stack
 
 
 # TODO: bring in page.crash events
@@ -161,10 +157,10 @@ async def test_wait_for_request(page, server):
         page.waitForRequest(server.PREFIX + "/digits/2.png"),
         page.evaluate(
             """() => {
-        fetch('/digits/1.png')
-        fetch('/digits/2.png')
-        fetch('/digits/3.png')
-      }"""
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }"""
         ),
     )
     assert request.url == server.PREFIX + "/digits/2.png"
@@ -178,32 +174,26 @@ async def test_wait_for_request_should_work_with_predicate(page, server):
         ),
         page.evaluate(
             """() => {
-            fetch('/digits/1.png')
-            fetch('/digits/2.png')
-            fetch('/digits/3.png')
-        }"""
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }"""
         ),
     )
     assert request.url == server.PREFIX + "/digits/2.png"
 
 
 async def test_wait_for_request_should_timeout(page, server):
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.waitForEvent("request", timeout=1)
-    except Error as e:
-        error = e
-    assert isinstance(error, TimeoutError)
+    assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_request_should_respect_default_timeout(page, server):
-    error = None
     page.setDefaultTimeout(1)
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.waitForEvent("request", lambda _: False)
-    except Error as e:
-        error = e
-    assert isinstance(error, TimeoutError)
+    assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_request_should_work_with_no_timeout(page, server):
@@ -212,10 +202,10 @@ async def test_wait_for_request_should_work_with_no_timeout(page, server):
         page.waitForRequest(server.PREFIX + "/digits/2.png", timeout=0),
         page.evaluate(
             """() => setTimeout(() => {
-        fetch('/digits/1.png')
-        fetch('/digits/2.png')
-        fetch('/digits/3.png')
-      }, 50)"""
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }, 50)"""
         ),
     )
     assert request.url == server.PREFIX + "/digits/2.png"
@@ -233,12 +223,9 @@ async def test_wait_for_request_should_work_with_url_match(page, server):
 async def test_wait_for_event_should_fail_with_error_upon_disconnect(page, server):
     future = asyncio.ensure_future(page.waitForEvent("download"))
     await page.close()
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await future
-    except Error as e:
-        error = e
-    assert "Page closed" in error.message
+    assert "Page closed" in exc_info.value.message
 
 
 async def test_wait_for_response_should_work(page, server):
@@ -247,32 +234,26 @@ async def test_wait_for_response_should_work(page, server):
         page.waitForResponse(server.PREFIX + "/digits/2.png"),
         page.evaluate(
             """() => {
-        fetch('/digits/1.png')
-        fetch('/digits/2.png')
-        fetch('/digits/3.png')
-      }"""
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }"""
         ),
     )
     assert response.url == server.PREFIX + "/digits/2.png"
 
 
 async def test_wait_for_response_should_respect_timeout(page, server):
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.waitForEvent("response", timeout=1)
-    except Error as e:
-        error = e
-    assert isinstance(error, TimeoutError)
+    assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_response_should_respect_default_timeout(page, server):
-    error = None
     page.setDefaultTimeout(1)
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.waitForEvent("response", lambda _: False)
-    except Error as e:
-        error = e
-    assert isinstance(error, TimeoutError)
+    assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_response_should_work_with_predicate(page, server):
@@ -283,10 +264,10 @@ async def test_wait_for_response_should_work_with_predicate(page, server):
         ),
         page.evaluate(
             """() => {
-            fetch('/digits/1.png')
-            fetch('/digits/2.png')
-            fetch('/digits/3.png')
-        }"""
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }"""
         ),
     )
     assert response.url == server.PREFIX + "/digits/2.png"
@@ -298,10 +279,10 @@ async def test_wait_for_response_should_work_with_no_timeout(page, server):
         page.waitForResponse(server.PREFIX + "/digits/2.png", timeout=0),
         page.evaluate(
             """() => setTimeout(() => {
-        fetch('/digits/1.png')
-        fetch('/digits/2.png')
-        fetch('/digits/3.png')
-      }, 50)"""
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }, 50)"""
         ),
     )
     assert response.url == server.PREFIX + "/digits/2.png"
@@ -337,12 +318,12 @@ async def test_expose_function_should_throw_exception_in_page_context(page, serv
     await page.exposeFunction("woof", lambda: throw())
     result = await page.evaluate(
         """async() => {
-      try {
-        await woof()
-      } catch (e) {
-        return {message: e.message, stack: e.stack}
-      }
-    }"""
+            try {
+                await woof()
+            } catch (e) {
+                return {message: e.message, stack: e.stack}
+            }
+        }"""
     )
     assert result["message"] == "WOOF WOOF"
     assert __file__ in result["stack"]
@@ -475,14 +456,11 @@ async def test_set_content_should_respect_timeout(page, server):
     img_path = "/img.png"
     # stall for image
     server.set_route(img_path, lambda request: None)
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.setContent(
             '<img src="${server.PREFIX + img_path}"></img>', timeout=1
         )
-    except Error as e:
-        error = e
-    assert isinstance(error, TimeoutError)
+    assert exc_info.type is TimeoutError
 
 
 async def test_set_content_should_respect_default_navigation_timeout(page, server):
@@ -491,13 +469,10 @@ async def test_set_content_should_respect_default_navigation_timeout(page, serve
     # stall for image
     await page.route(img_path, lambda route, request: None)
 
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await page.setContent(f'<img src="{server.PREFIX + img_path}"></img>')
-    except Error as e:
-        error = e
-    assert "Timeout 1ms exceeded during" in error.message
-    assert isinstance(error, TimeoutError)
+    assert "Timeout 1ms exceeded during" in exc_info.value.message
+    assert exc_info.type is TimeoutError
 
 
 async def test_set_content_should_await_resources_to_load(page, server):
@@ -535,3 +510,401 @@ async def test_set_content_should_work_with_emojis(page):
 async def test_set_content_should_work_with_newline(page):
     await page.setContent("<div>\n</div>")
     assert await page.evalOnSelector("div", "div => div.textContent") == "\n"
+
+
+async def test_add_script_tag_should_work_with_a_url(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    script_handle = await page.addScriptTag(url="/injectedfile.js")
+    assert script_handle.asElement()
+    assert await page.evaluate("__injected") == 42
+
+
+async def test_add_script_tag_should_work_with_a_url_and_type_module(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.addScriptTag(url="/es6/es6import.js", type="module")
+    assert await page.evaluate("__es6injected") == 42
+
+
+async def test_add_script_tag_should_work_with_a_path_and_type_module(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.addScriptTag(
+        path=os.path.join(__dirname, "assets", "es6", "es6pathimport.js"), type="module"
+    )
+    await page.waitForFunction("window.__es6injected")
+    assert await page.evaluate("__es6injected") == 42
+
+
+async def test_add_script_tag_should_work_with_a_content_and_type_module(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.addScriptTag(
+        content="import num from '/es6/es6module.js';window.__es6injected = num;",
+        type="module",
+    )
+    await page.waitForFunction("window.__es6injected")
+    assert await page.evaluate("__es6injected") == 42
+
+
+async def test_add_script_tag_should_throw_an_error_if_loading_from_url_fail(
+    page, server
+):
+    await page.goto(server.EMPTY_PAGE)
+    with pytest.raises(Error) as exc_info:
+        await page.addScriptTag(url="/nonexistfile.js")
+    assert exc_info.value
+
+
+async def test_add_script_tag_should_work_with_a_path(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    script_handle = await page.addScriptTag(
+        path=os.path.join(__dirname, "assets", "injectedfile.js")
+    )
+    assert script_handle.asElement()
+    assert await page.evaluate("__injected") == 42
+
+
+@pytest.mark.skip_browser("webkit")
+async def test_add_script_tag_should_include_source_url_when_path_is_provided(
+    page, server
+):
+    # Lacking sourceURL support in WebKit
+    await page.goto(server.EMPTY_PAGE)
+    await page.addScriptTag(path=os.path.join(__dirname, "assets", "injectedfile.js"))
+    result = await page.evaluate("__injectedError.stack")
+    assert os.path.join("assets", "injectedfile.js") in result
+
+
+async def test_add_script_tag_should_work_with_content(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    script_handle = await page.addScriptTag(content="window.__injected = 35;")
+    assert script_handle.asElement()
+    assert await page.evaluate("__injected") == 35
+
+
+@pytest.mark.skip_browser("firefox")
+async def test_add_script_tag_should_throw_when_added_with_content_to_the_csp_page(
+    page, server
+):
+    # Firefox fires onload for blocked script before it issues the CSP console error.
+    await page.goto(server.PREFIX + "/csp.html")
+    with pytest.raises(Error) as exc_info:
+        await page.addScriptTag(content="window.__injected = 35;")
+    assert exc_info.value
+
+
+async def test_add_script_tag_should_throw_when_added_with_URL_to_the_csp_page(
+    page, server
+):
+    await page.goto(server.PREFIX + "/csp.html")
+    with pytest.raises(Error) as exc_info:
+        await page.addScriptTag(url=server.CROSS_PROCESS_PREFIX + "/injectedfile.js")
+    assert exc_info.value
+
+
+async def test_add_script_tag_should_throw_a_nice_error_when_the_request_fails(
+    page, server
+):
+    await page.goto(server.EMPTY_PAGE)
+    url = server.PREFIX + "/this_does_not_exist.js"
+    with pytest.raises(Error) as exc_info:
+        await page.addScriptTag(url=url)
+    assert url in exc_info.value.message
+
+
+async def test_add_style_tag_should_work_with_a_url(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    style_handle = await page.addStyleTag(url="/injectedstyle.css")
+    assert style_handle.asElement()
+    assert (
+        await page.evaluate(
+            "window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')"
+        )
+        == "rgb(255, 0, 0)"
+    )
+
+
+async def test_add_style_tag_should_throw_an_error_if_loading_from_url_fail(
+    page, server
+):
+    await page.goto(server.EMPTY_PAGE)
+    with pytest.raises(Error) as exc_info:
+        await page.addStyleTag(url="/nonexistfile.js")
+    assert exc_info.value
+
+
+async def test_add_style_tag_should_work_with_a_path(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    style_handle = await page.addStyleTag(
+        path=os.path.join(__dirname, "assets", "injectedstyle.css")
+    )
+    assert style_handle.asElement()
+    assert (
+        await page.evaluate(
+            "window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')"
+        )
+        == "rgb(255, 0, 0)"
+    )
+
+
+async def test_add_style_tag_should_include_sourceURL_when_path_is_provided(
+    page, server
+):
+    await page.goto(server.EMPTY_PAGE)
+    await page.addStyleTag(path=os.path.join(__dirname, "assets", "injectedstyle.css"))
+    style_handle = await page.querySelector("style")
+    style_content = await page.evaluate("style => style.innerHTML", style_handle)
+    assert os.path.join("assets", "injectedstyle.css") in style_content
+
+
+async def test_add_style_tag_should_work_with_content(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    style_handle = await page.addStyleTag(content="body { background-color: green; }")
+    assert style_handle.asElement()
+    assert (
+        await page.evaluate(
+            "window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')"
+        )
+        == "rgb(0, 128, 0)"
+    )
+
+
+async def test_add_style_tag_should_throw_when_added_with_content_to_the_CSP_page(
+    page, server
+):
+    await page.goto(server.PREFIX + "/csp.html")
+    with pytest.raises(Error) as exc_info:
+        await page.addStyleTag(content="body { background-color: green; }")
+    assert exc_info.value
+
+
+async def test_add_style_tag_should_throw_when_added_with_URL_to_the_CSP_page(
+    page, server
+):
+    await page.goto(server.PREFIX + "/csp.html")
+    with pytest.raises(Error) as exc_info:
+        await page.addStyleTag(url=server.CROSS_PROCESS_PREFIX + "/injectedstyle.css")
+    assert exc_info.value
+
+
+async def test_url_should_work(page, server):
+    assert page.url == "about:blank"
+    await page.goto(server.EMPTY_PAGE)
+    assert page.url == server.EMPTY_PAGE
+
+
+async def test_url_should_include_hashes(page, server):
+    await page.goto(server.EMPTY_PAGE + "#hash")
+    assert page.url == server.EMPTY_PAGE + "#hash"
+    await page.evaluate("window.location.hash = 'dynamic'")
+    assert page.url == server.EMPTY_PAGE + "#dynamic"
+
+
+async def test_title_should_return_the_page_title(page, server):
+    await page.goto(server.PREFIX + "/title.html")
+    assert await page.title() == "Woof-Woof"
+
+
+async def test_select_option_should_select_single_option(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", "blue")
+    assert await page.evaluate("result.onInput") == ["blue"]
+    assert await page.evaluate("result.onChange") == ["blue"]
+
+
+async def test_select_option_should_select_single_option_by_value(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", {"value": "blue"})
+    assert await page.evaluate("result.onInput") == ["blue"]
+    assert await page.evaluate("result.onChange") == ["blue"]
+
+
+async def test_select_option_should_select_single_option_by_label(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", {"label": "Indigo"})
+    assert await page.evaluate("result.onInput") == ["indigo"]
+    assert await page.evaluate("result.onChange") == ["indigo"]
+
+
+async def test_select_option_should_select_single_option_by_handle(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", await page.querySelector("[id=whiteOption]"))
+    assert await page.evaluate("result.onInput") == ["white"]
+    assert await page.evaluate("result.onChange") == ["white"]
+
+
+async def test_select_option_should_select_single_option_by_index(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", {"index": 2})
+    assert await page.evaluate("result.onInput") == ["brown"]
+    assert await page.evaluate("result.onChange") == ["brown"]
+
+
+async def test_select_option_should_select_single_option_by_multiple_attributes(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", {"value": "green", "label": "Green"})
+    assert await page.evaluate("result.onInput") == ["green"]
+    assert await page.evaluate("result.onChange") == ["green"]
+
+
+async def test_select_option_should_not_select_single_option_when_some_attributes_do_not_match(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", {"value": "green", "label": "Brown"})
+    assert await page.evaluate("document.querySelector('select').value") == ""
+
+
+async def test_select_option_should_select_only_first_option(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", "blue", "green", "red")
+    assert await page.evaluate("result.onInput") == ["blue"]
+    assert await page.evaluate("result.onChange") == ["blue"]
+
+
+async def test_select_option_should_not_throw_when_select_causes_navigation(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evalOnSelector(
+        "select",
+        "select => select.addEventListener('input', () => window.location = '/empty.html')",
+    )
+    await asyncio.gather(
+        page.selectOption("select", "blue"), page.waitForNavigation(),
+    )
+    assert "empty.html" in page.url
+
+
+async def test_select_option_should_select_multiple_options(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    await page.selectOption("select", ["blue", "green", "red"])
+    assert await page.evaluate("result.onInput") == ["blue", "green", "red"]
+    assert await page.evaluate("result.onChange") == ["blue", "green", "red"]
+
+
+async def test_select_option_should_select_multiple_options_with_attributes(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    await page.selectOption("select", ["blue", {"label": "Green"}, {"index": 4}])
+    assert await page.evaluate("result.onInput") == ["blue", "gray", "green"]
+    assert await page.evaluate("result.onChange") == ["blue", "gray", "green"]
+
+
+async def test_select_option_should_respect_event_bubbling(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", "blue")
+    assert await page.evaluate("result.onBubblingInput") == ["blue"]
+    assert await page.evaluate("result.onBubblingChange") == ["blue"]
+
+
+async def test_select_option_should_throw_when_element_is_not_a__select_(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    with pytest.raises(Error) as exc_info:
+        await page.selectOption("body", "")
+    assert "Element is not a <select> element." in exc_info.value.message
+
+
+async def test_select_option_should_return_on_no_matched_values(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    result = await page.selectOption("select", ["42", "abc"])
+    assert result == []
+
+
+async def test_select_option_should_return_an_array_of_matched_values(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    result = await page.selectOption("select", ["blue", "black", "magenta"])
+    assert result == ["black", "blue", "magenta"]
+
+
+async def test_select_option_should_return_an_array_of_one_element_when_multiple_is_not_set(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    result = await page.selectOption("select", ["42", "blue", "black", "magenta"])
+    assert len(result) == 1
+
+
+async def test_select_option_should_return_on_no_values(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    result = await page.selectOption("select", [])
+    assert result == []
+
+
+async def test_select_option_should_not_allow_null_items(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    with pytest.raises(Error) as exc_info:
+        await page.selectOption("select", ["blue", None, "black", "magenta"])
+    assert "Value items must not be null" in exc_info.value.message
+
+
+async def test_select_option_should_unselect_with_null(page, server):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    result = await page.selectOption("select", ["blue", "black", "magenta"])
+    assert result == ["black", "blue", "magenta"]
+    await page.selectOption("select", None)
+    assert await page.evalOnSelector(
+        "select",
+        "select => Array.from(select.options).every(option => !option.selected)",
+    )
+
+
+async def test_select_option_should_deselect_all_options_when_passed_no_values_for_a_multiple_select(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    await page.selectOption("select", ["blue", "black", "magenta"])
+    await page.selectOption("select", [])
+    assert await page.evalOnSelector(
+        "select",
+        "select => Array.from(select.options).every(option => !option.selected)",
+    )
+
+
+async def test_select_option_should_deselect_all_options_when_passed_no_values_for_a_select_without_multiple(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.selectOption("select", ["blue", "black", "magenta"])
+    await page.selectOption("select", [])
+    assert await page.evalOnSelector(
+        "select",
+        "select => Array.from(select.options).every(option => !option.selected)",
+    )
+
+
+async def test_select_option_should_throw_if_passed_wrong_types(page, server):
+    await page.setContent('<select><option value="12"/></select>')
+
+    with pytest.raises(Error) as exc_info:
+        await page.selectOption("select", 12)
+    assert "Values must be strings" in exc_info.value.message
+
+    with pytest.raises(Error) as exc_info:
+        await page.selectOption("select", {"value": 12})
+    assert "Values must be strings" in exc_info.value.message
+
+    with pytest.raises(Error) as exc_info:
+        await page.selectOption("select", {"label": 12})
+    assert "Labels must be strings" in exc_info.value.message
+
+    with pytest.raises(Error) as exc_info:
+        await page.selectOption("select", {"index": "12"})
+    assert "Indices must be numbers" in exc_info.value.message
+
+
+async def test_select_option_should_work_when_re_defining_top_level_event_class(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("window.Event = null")
+    await page.selectOption("select", "blue")
+    assert await page.evaluate("result.onInput") == ["blue"]
+    assert await page.evaluate("result.onChange") == ["blue"]

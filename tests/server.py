@@ -38,6 +38,12 @@ class Server:
         self.EMPTY_PAGE = f"http://localhost:{self.PORT}/empty.html"
         self.PREFIX = f"http://localhost:{self.PORT}"
         self.CROSS_PROCESS_PREFIX = f"http://127.0.0.1:{self.PORT}"
+        # On Windows, this list can be empty, reporting text/plain for scripts.
+        mimetypes.add_type("text/html", ".html")
+        mimetypes.add_type("text/css", ".css")
+        mimetypes.add_type("application/javascript", ".js")
+        mimetypes.add_type("image/png", ".png")
+        mimetypes.add_type("font/woff2", ".woff2")
 
     def __repr__(self) -> str:
         return self.PREFIX
