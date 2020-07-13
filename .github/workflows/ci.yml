@@ -70,10 +70,10 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       # pytest-xdist does not exit on Windows
       # https://github.com/pytest-dev/pytest-xdist/issues/60
-      run: pytest -vv --browser=${{ matrix.browser }} --doctest-modules --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml
+      run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml
     - name: Test
       if: ${{ matrix.os != 'windows-latest' }}
-      run: pytest -vv --browser=${{ matrix.browser }} -n auto --doctest-modules --junitxml=junit/test-results-${{ matrix.python-os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml
+      run: pytest -vv --browser=${{ matrix.browser }} -n auto --junitxml=junit/test-results-${{ matrix.python-os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml
     - name: Upload pytest test results
       uses: actions/upload-artifact@v1
       with:
