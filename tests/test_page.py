@@ -908,3 +908,319 @@ async def test_select_option_should_work_when_re_defining_top_level_event_class(
     await page.selectOption("select", "blue")
     assert await page.evaluate("result.onInput") == ["blue"]
     assert await page.evaluate("result.onChange") == ["blue"]
+
+
+async def give_it_a_chance_to_fill(page):
+    for i in range(5):
+        await page.evaluate(
+            "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+        )
+
+
+async def test_fill_should_fill_textarea(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.fill("textarea", "some value")
+    assert await page.evaluate("result") == "some value"
+
+
+@pytest.mark.skip_browser("webkit")
+async def test_fill_should_fill_input(page, server):
+    # Disabled as in upstream, we should validate time in the Playwright lib
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.fill("input", "some value")
+    assert await page.evaluate("result") == "some value"
+
+
+async def test_fill_should_throw_on_unsupported_inputs(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    for type in ["color", "file"]:
+        await page.evalOnSelector(
+            "input", "(input, type) => input.setAttribute('type', type)", type
+        )
+        with pytest.raises(Error) as exc_info:
+            await page.fill("input", "")
+        assert f'input of type "{type}" cannot be filled' in exc_info.value.message
+
+
+async def test_fill_should_fill_different_input_types(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    for type in ["password", "search", "tel", "text", "url"]:
+        await page.evalOnSelector(
+            "input", "(input, type) => input.setAttribute('type', type)", type
+        )
+        await page.fill("input", "text " + type)
+        assert await page.evaluate("result") == "text " + type
+
+
+async def test_fill_should_fill_date_input_after_clicking(page, server):
+    await page.setContent("<input type=date>")
+    await page.click("input")
+    await page.fill("input", "2020-03-02")
+    assert await page.evalOnSelector("input", "input => input.value") == "2020-03-02"
+
+
+@pytest.mark.skip_browser("webkit")
+async def test_fill_should_throw_on_incorrect_date(page, server):
+    # Disabled as in upstream, we should validate time in the Playwright lib
+    await page.setContent("<input type=date>")
+    with pytest.raises(Error) as exc_info:
+        await page.fill("input", "2020-13-05")
+    assert "Malformed value" in exc_info.value.message
+
+
+async def test_fill_should_fill_time_input(page, server):
+    await page.setContent("<input type=time>")
+    await page.fill("input", "13:15")
+    assert await page.evalOnSelector("input", "input => input.value") == "13:15"
+
+
+@pytest.mark.skip_browser("webkit")
+async def test_fill_should_throw_on_incorrect_time(page, server):
+    # Disabled as in upstream, we should validate time in the Playwright lib
+    await page.setContent("<input type=time>")
+    with pytest.raises(Error) as exc_info:
+        await page.fill("input", "25:05")
+    assert "Malformed value" in exc_info.value.message
+
+
+async def test_fill_should_fill_datetime_local_input(page, server):
+    await page.setContent("<input type=datetime-local>")
+    await page.fill("input", "2020-03-02T05:15")
+    assert (
+        await page.evalOnSelector("input", "input => input.value") == "2020-03-02T05:15"
+    )
+
+
+@pytest.mark.only_browser("chromium")
+async def test_fill_should_throw_on_incorrect_datetime_local(page):
+    await page.setContent("<input type=datetime-local>")
+    with pytest.raises(Error) as exc_info:
+        await page.fill("input", "abc")
+    assert "Malformed value" in exc_info.value.message
+
+
+async def test_fill_should_fill_contenteditable(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.fill("div[contenteditable]", "some value")
+    assert (
+        await page.evalOnSelector("div[contenteditable]", "div => div.textContent")
+        == "some value"
+    )
+
+
+async def test_fill_should_fill_elements_with_existing_value_and_selection(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+
+    await page.evalOnSelector("input", "input => input.value = 'value one'")
+    await page.fill("input", "another value")
+    assert await page.evaluate("result") == "another value"
+
+    await page.evalOnSelector(
+        "input",
+        """input => {
+        input.selectionStart = 1
+        input.selectionEnd = 2
+    }""",
+    )
+
+    await page.fill("input", "maybe this one")
+    assert await page.evaluate("result") == "maybe this one"
+
+    await page.evalOnSelector(
+        "div[contenteditable]",
+        """div => {
+        div.innerHTML = 'some text <span>some more text<span> and even more text'
+        range = document.createRange()
+        range.selectNodeContents(div.querySelector('span'))
+        selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+    }""",
+    )
+
+    await page.fill("div[contenteditable]", "replace with this")
+    assert (
+        await page.evalOnSelector("div[contenteditable]", "div => div.textContent")
+        == "replace with this"
+    )
+
+
+async def test_fill_should_throw_when_element_is_not_an_input_textarea_or_contenteditable(
+    page, server
+):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    with pytest.raises(Error) as exc_info:
+        await page.fill("body", "")
+    assert "Element is not an <input>" in exc_info.value.message
+
+
+async def test_fill_should_throw_if_passed_a_non_string_value(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    with pytest.raises(Error) as exc_info:
+        await page.fill("textarea", 123)
+    assert "Value must be string." in exc_info.value.message
+
+
+async def test_fill_should_retry_on_disabled_element(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.evalOnSelector("input", "i => i.disabled = true")
+    done = []
+
+    async def fill():
+        await page.fill("input", "some value")
+        done.append(True)
+
+    promise = asyncio.ensure_future(fill())
+    await give_it_a_chance_to_fill(page)
+    assert done == []
+    assert await page.evaluate("result") == ""
+
+    await page.evalOnSelector("input", "i => i.disabled = false")
+    await promise
+    assert await page.evaluate("result") == "some value"
+
+
+async def test_fill_should_retry_on_readonly_element(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.evalOnSelector("textarea", "i => i.readOnly = true")
+    done = []
+
+    async def fill():
+        await page.fill("textarea", "some value")
+        done.append(True)
+
+    promise = asyncio.ensure_future(fill())
+    await give_it_a_chance_to_fill(page)
+    assert done == []
+    assert await page.evaluate("result") == ""
+
+    await page.evalOnSelector("textarea", "i => i.readOnly = false")
+    await promise
+    assert await page.evaluate("result") == "some value"
+
+
+async def test_fill_should_retry_on_invisible_element(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.evalOnSelector("input", "i => i.style.display = 'none'")
+    done = []
+
+    async def fill():
+        await page.fill("input", "some value")
+        done.append(True)
+
+    promise = asyncio.ensure_future(fill())
+    await give_it_a_chance_to_fill(page)
+    assert done == []
+    assert await page.evaluate("result") == ""
+
+    await page.evalOnSelector("input", "i => i.style.display = 'inline'")
+    await promise
+    assert await page.evaluate("result") == "some value"
+
+
+async def test_fill_should_be_able_to_fill_the_body(page):
+    await page.setContent('<body contentEditable="true"></body>')
+    await page.fill("body", "some value")
+    assert await page.evaluate("document.body.textContent") == "some value"
+
+
+async def test_fill_should_fill_fixed_position_input(page):
+    await page.setContent('<input style="position: fixed;" />')
+    await page.fill("input", "some value")
+    assert await page.evaluate("document.querySelector('input').value") == "some value"
+
+
+async def test_fill_should_be_able_to_fill_when_focus_is_in_the_wrong_frame(page):
+    await page.setContent(
+        """
+      <div contentEditable="true"></div>
+      <iframe></iframe>
+    """
+    )
+    await page.focus("iframe")
+    await page.fill("div", "some value")
+    assert await page.evalOnSelector("div", "d => d.textContent") == "some value"
+
+
+async def test_fill_should_be_able_to_fill_the_input_type_number_(page):
+    await page.setContent('<input id="input" type="number"></input>')
+    await page.fill("input", "42")
+    assert await page.evaluate("input.value") == "42"
+
+
+async def test_fill_should_be_able_to_fill_exponent_into_the_input_type_number_(page):
+    await page.setContent('<input id="input" type="number"></input>')
+    await page.fill("input", "-10e5")
+    assert await page.evaluate("input.value") == "-10e5"
+
+
+async def test_fill_should_be_able_to_fill_input_type_number__with_empty_string(page):
+    await page.setContent('<input id="input" type="number" value="123"></input>')
+    await page.fill("input", "")
+    assert await page.evaluate("input.value") == ""
+
+
+async def test_fill_should_not_be_able_to_fill_text_into_the_input_type_number_(page):
+    await page.setContent('<input id="input" type="number"></input>')
+    with pytest.raises(Error) as exc_info:
+        await page.fill("input", "abc")
+    assert "Cannot type text into input[type=number]" in exc_info.value.message
+
+
+async def test_fill_should_be_able_to_clear(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.fill("input", "some value")
+    assert await page.evaluate("result") == "some value"
+    await page.fill("input", "")
+    assert await page.evaluate("result") == ""
+
+
+async def test_close_event_should_work_with_window_close(page, server):
+    promise = asyncio.ensure_future(page.waitForEvent("popup"))
+    await page.evaluate("window['newPage'] = window.open('about:blank')")
+    popup = await promise
+    close_promise = asyncio.ensure_future(popup.waitForEvent("close"))
+    await page.evaluate("window['newPage'].close()")
+    await close_promise
+
+
+async def test_close_event_should_work_with_page_close(context, server):
+    page = await context.newPage()
+    close_promise = asyncio.ensure_future(page.waitForEvent("close"))
+    await page.close()
+    await close_promise
+
+
+async def test_page_context_should_return_the_correct_browser_instance(page, context):
+    assert page.context == context
+
+
+async def test_frame_should_respect_name(page, server):
+    await page.setContent("<iframe name=target></iframe>")
+    assert page.frame(name="bogus") is None
+    frame = page.frame(name="target")
+    assert frame
+    assert frame == page.mainFrame.childFrames[0]
+
+
+async def test_frame_should_respect_url(page, server):
+    await page.setContent(f'<iframe src="{server.EMPTY_PAGE}"></iframe>')
+    assert page.frame(url=re.compile(r"bogus")) is None
+    assert page.frame(url=re.compile(r"empty")).url == server.EMPTY_PAGE
+
+
+async def test_press_should_work(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.press("textarea", "a")
+    assert await page.evaluate("document.querySelector('textarea').value") == "a"
+
+
+async def test_frame_press_should_work(page, server):
+    await page.setContent(
+        f'<iframe name=inner src="{server.PREFIX}/input/textarea.html"></iframe>'
+    )
+    frame = page.frame("inner")
+    await frame.press("textarea", "a")
+    assert await frame.evaluate("document.querySelector('textarea').value") == "a"
