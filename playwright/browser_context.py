@@ -34,7 +34,7 @@ from playwright.page import BindingCall, Page, wait_for_event
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright.browser import Browser
 
 
@@ -189,7 +189,7 @@ class BrowserContext(ChannelOwner):
             self, self._timeout_settings, event, predicate=predicate, timeout=timeout
         )
 
-    def _on_close(self):
+    def _on_close(self) -> None:
         if self._browser:
             self._browser._contexts.remove(self)
 

@@ -21,12 +21,9 @@ from typing import List
 from playwright.page import Page
 
 
-async def test_should_work(page: Page, server):
-    async def handle_message(m, messages):
-        messages.append(m)
-
+async def test_console_should_work(page: Page, server):
     messages: List[ConsoleMessage] = []
-    page.once("console", lambda m: asyncio.ensure_future(handle_message(m, messages)))
+    page.once("console", lambda m: messages.append(m))
     await asyncio.gather(
         page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
         page.waitForEvent("console"),
@@ -34,43 +31,31 @@ async def test_should_work(page: Page, server):
     assert len(messages) == 1
     message = messages[0]
     assert message.text == "hello 5 JSHandle@object"
+    assert str(message) == "hello 5 JSHandle@object"
     assert message.type == "log"
     assert await message.args[0].jsonValue() == "hello"
     assert await message.args[1].jsonValue() == 5
     assert await message.args[2].jsonValue() == {"foo": "bar"}
 
 
-async def test_should_emit_same_log_twice(page, server):
-    async def handle_message(m, messages):
-        messages.append(m)
-
+async def test_console_should_emit_same_log_twice(page, server):
     messages = []
-    page.on(
-        "console", lambda m: asyncio.ensure_future(handle_message(m.text, messages))
-    )
+    page.on("console", lambda m: messages.append(m.text))
     await page.evaluate('() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } ')
     assert messages == ["hello", "hello"]
 
 
-async def test_should_use_text_for__str__(page):
-    async def handle_message(m, messages):
-        messages.append(m)
-
+async def test_console_should_use_text_for__str__(page):
     messages = []
-    page.on(
-        "console", lambda m: asyncio.ensure_future(handle_message(m.text, messages))
-    )
+    page.on("console", lambda m: messages.append(m))
     await page.evaluate('() => console.log("Hello world")')
     assert len(messages) == 1
     assert str(messages[0]) == "Hello world"
 
 
-async def test_should_work_for_different_console_api_calls(page, server):
-    async def handle_message(m, messages):
-        messages.append(m)
-
+async def test_console_should_work_for_different_console_api_calls(page, server):
     messages = []
-    page.on("console", lambda m: asyncio.ensure_future(handle_message(m, messages)))
+    page.on("console", lambda m: messages.append(m))
     # All console events will be reported before 'page.evaluate' is finished.
     await page.evaluate(
         """() => {
@@ -103,12 +88,9 @@ async def test_should_work_for_different_console_api_calls(page, server):
     ]
 
 
-async def test_should_not_fail_for_window_object(page, server):
-    async def handle_message(m, messages):
-        messages.append(m)
-
+async def test_console_should_not_fail_for_window_object(page, server):
     messages = []
-    page.once("console", lambda m: asyncio.ensure_future(handle_message(m, messages)))
+    page.once("console", lambda m: messages.append(m))
     await asyncio.gather(
         page.evaluate("() => console.error(window)"), page.waitForEvent("console")
     )
@@ -116,7 +98,7 @@ async def test_should_not_fail_for_window_object(page, server):
     assert messages[0].text == "JSHandle@object"
 
 
-async def test_should_trigger_correct_Log(page, server):
+async def test_console_should_trigger_correct_Log(page, server):
     await page.goto("about:blank")
     message = (
         await asyncio.gather(
@@ -128,7 +110,7 @@ async def test_should_trigger_correct_Log(page, server):
     assert message.type == "error"
 
 
-async def test_should_have_location_for_console_api_calls(page, server):
+async def test_console_should_have_location_for_console_api_calls(page, server):
     await page.goto(server.EMPTY_PAGE)
     message = (
         await asyncio.gather(
@@ -144,7 +126,7 @@ async def test_should_have_location_for_console_api_calls(page, server):
 
 
 @pytest.mark.skip_browser("firefox")  # a fix just landed upstream, will roll later
-async def test_should_not_throw_when_there_are_console_messages_in_detached_iframes(
+async def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(
     page, server
 ):
     await page.goto(server.EMPTY_PAGE)

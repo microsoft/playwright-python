@@ -53,12 +53,12 @@ from playwright.worker import Worker
 from types import SimpleNamespace
 from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING, cast
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
-else:
+else:  # pragma: no cover
     from typing_extensions import Literal
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright.browser_context import BrowserContext
 
 
@@ -722,7 +722,7 @@ async def wait_for_event(
 
     future = target._scope._loop.create_future()
 
-    def listener(e: Any = None):
+    def listener(e: Any = None) -> None:
         if not predicate or predicate(e):
             future.set_result(e)
 

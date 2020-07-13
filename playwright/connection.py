@@ -32,13 +32,14 @@ class Channel(BaseEventEmitter):
             params = dict()
         return await self._scope.send_message_to_server(self._guid, method, params)
 
-    def _on_message(self, method: str, params: Dict):
-        self.emit(method, params)
-
 
 class ChannelOwner(BaseEventEmitter):
     def __init__(
-        self, scope: "ConnectionScope", guid: str, initializer: Dict, is_scope=False
+        self,
+        scope: "ConnectionScope",
+        guid: str,
+        initializer: Dict,
+        is_scope: bool = False,
     ) -> None:
         super().__init__()
         self._guid = guid
@@ -64,7 +65,7 @@ class ConnectionScope:
         self._children.append(scope)
         return scope
 
-    def dispose(self):
+    def dispose(self) -> None:
         # Take care of hierarchy.
         for child in self._children:
             child.dispose()
@@ -98,7 +99,7 @@ class ConnectionScope:
 
 
 class ProtocolCallback:
-    def __init__(self, loop: asyncio.AbstractEventLoop):
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.stack_trace = "".join(traceback.format_stack()[-10:])
         self.future = loop.create_future()
 
@@ -145,7 +146,7 @@ class Connection:
         self._callbacks[id] = callback
         return await callback.future
 
-    def _dispatch(self, msg: ParsedMessagePayload):
+    def _dispatch(self, msg: ParsedMessagePayload) -> None:
 
         id = msg.get("id")
         if id:

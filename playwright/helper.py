@@ -16,6 +16,7 @@ import asyncio
 import fnmatch
 import re
 import traceback
+from types import TracebackType
 
 from typing import (
     Any,
@@ -31,13 +32,13 @@ from typing import (
 
 import sys
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
-else:
+else:  # pragma: no cover
     from typing_extensions import Literal, TypedDict
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright.network import Route, Request
 
 Cookie = List[Dict[str, Union[str, int, bool]]]
@@ -98,7 +99,7 @@ class ParsedMessagePayload(TypedDict, total=False):
 
 
 class URLMatcher:
-    def __init__(self, match: URLMatch):
+    def __init__(self, match: URLMatch) -> None:
         self._callback: Optional[Callable[[str], bool]] = None
         self._regex_obj: Optional[Pattern] = None
         if isinstance(match, str):
@@ -124,7 +125,7 @@ class TimeoutSettings:
         self._timeout = 30000
         self._navigation_timeout = 30000
 
-    def set_timeout(self, timeout: int):
+    def set_timeout(self, timeout: int) -> None:
         self._timeout = timeout
 
     def timeout(self) -> int:
@@ -134,7 +135,7 @@ class TimeoutSettings:
             return self._parent.timeout()
         return 30000
 
-    def set_navigation_timeout(self, navigation_timeout: int):
+    def set_navigation_timeout(self, navigation_timeout: int) -> None:
         self._navigation_timeout = navigation_timeout
 
     def navigation_timeout(self) -> int:
@@ -155,7 +156,7 @@ class TimeoutError(Error):
     pass
 
 
-def serialize_error(ex: Exception, tb) -> ErrorPayload:
+def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
     return dict(message=str(ex), stack="".join(traceback.format_tb(tb)))
 
 
@@ -193,7 +194,7 @@ class PendingWaitEvent:
         self.future = future
         self.timeout_future = timeout_future
 
-    def reject(self, is_crash: bool, target: str):
+    def reject(self, is_crash: bool, target: str) -> None:
         self.timeout_future.cancel()
         if self.event == "close" and not is_crash:
             return

@@ -27,7 +27,7 @@ from playwright.playwright import Playwright
 playwright_object: Playwright
 
 
-async def async_init():
+async def async_init() -> None:
     global playwright_object
     package_path = os.path.dirname(os.path.abspath(__file__))
     platform = sys.platform
@@ -61,6 +61,8 @@ async def async_init():
         stderr=asyncio.subprocess.PIPE,
         limit=32768,
     )
+    assert proc.stdout
+    assert proc.stdin
     connection = Connection(
         proc.stdout, proc.stdin, create_remote_object, asyncio.get_event_loop()
     )
