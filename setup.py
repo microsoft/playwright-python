@@ -19,15 +19,16 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="playwright",
+    version="0.0.3",
     author="Microsoft Corporation",
     author_email="",
     description="A high-level API to automate web browsers",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Microsoft/playwright-python",
-    packages=["playwright"],
+    packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=["pyee", "typing-extensions"],
+    install_requires=["pyee", "typing-extensions",],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
@@ -39,10 +40,4 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    use_scm_version={
-        "version_scheme": "post-release",
-        "write_to": "playwright/_repo_version.py",
-        "write_to_template": 'version = "{version}"\n',
-    },
-    setup_requires=["setuptools_scm"],
 )
