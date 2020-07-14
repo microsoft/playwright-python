@@ -40,11 +40,19 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def browser_factory(browser_name, pytestconfig):
+def browser_type(browser_name: str):
+    return playwright.browser_types[browser_name]
+
+
+@pytest.fixture(scope="session")
+def launch_arguments(pytestconfig):
+    return {"headless": not pytestconfig.getoption("--headful")}
+
+
+@pytest.fixture(scope="session")
+async def browser_factory(launch_arguments, browser_type):
     async def launch(**kwargs):
-        return await playwright.browser_types[browser_name].launch(
-            headless=not pytestconfig.getoption("--headful"), **kwargs
-        )
+        return await browser_type.launch(**launch_arguments, **kwargs)
 
     return launch
 
@@ -115,17 +123,17 @@ def is_chromium(browser_name):
 
 
 @pytest.fixture(scope="session")
-def is_win(browser_name):
+def is_win():
     return sys.platform == "win32"
 
 
 @pytest.fixture(scope="session")
-def is_linux(browser_name):
+def is_linux():
     return sys.platform == "linux"
 
 
 @pytest.fixture(scope="session")
-def is_mac(browser_name):
+def is_mac():
     return sys.platform == "darwin"
 
 
