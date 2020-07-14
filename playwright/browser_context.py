@@ -51,6 +51,7 @@ class BrowserContext(ChannelOwner):
         self._timeout_settings = TimeoutSettings(None)
         self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
+        self._is_closed_or_closing = False
 
         for channel in initializer["pages"]:
             page = from_channel(channel)
@@ -190,6 +191,7 @@ class BrowserContext(ChannelOwner):
         )
 
     def _on_close(self) -> None:
+        self._is_closed_or_closing = True
         if self._browser:
             self._browser._contexts.remove(self)
 
@@ -202,4 +204,7 @@ class BrowserContext(ChannelOwner):
         self._scope.dispose()
 
     async def close(self) -> None:
+        if self._is_closed_or_closing:
+            return
+        self._is_closed_or_closing = True
         await self._channel.send("close")

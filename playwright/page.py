@@ -47,6 +47,7 @@ from playwright.helper import (
     KeyboardModifier,
     DocumentLoadState,
     ColorScheme,
+    Viewport,
 )
 from playwright.network import Request, Response, Route
 from playwright.worker import Worker
@@ -460,7 +461,7 @@ class Page(ChannelOwner):
             "setViewportSize", dict(viewportSize=locals_to_params(locals()))
         )
 
-    def viewportSize(self) -> Optional[Dict]:
+    def viewportSize(self) -> Optional[Viewport]:
         return self._viewport_size
 
     async def addInitScript(self, source: str = None, path: str = None) -> None:
