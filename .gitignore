@@ -14,3 +14,5 @@ htmlcov/
 .vscode/
 .eggs
 _repo_version.py
+coverage.xml
+junit/
