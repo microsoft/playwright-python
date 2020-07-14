@@ -17,6 +17,7 @@ from typing import List, cast
 
 from playwright.element_handle import ElementHandle
 from playwright.frame import Frame
+from playwright.helper import Viewport
 from playwright.page import Page
 
 
@@ -52,6 +53,12 @@ class Utils:
         for child in sorted_frames:
             result = result + utils.dump_frames(child, "    " + indentation)
         return result
+
+    async def verify_viewport(self, page: Page, width: int, height: int):
+        assert cast(Viewport, page.viewportSize())["width"] == width
+        assert cast(Viewport, page.viewportSize())["height"] == height
+        assert await page.evaluate("window.innerWidth") == width
+        assert await page.evaluate("window.innerHeight") == height
 
 
 utils = Utils()

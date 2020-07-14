@@ -89,6 +89,11 @@ class ParsedMessageParams(TypedDict):
     initializer: Dict
 
 
+class Viewport(TypedDict):
+    width: int
+    height: int
+
+
 class ParsedMessagePayload(TypedDict, total=False):
     id: int
     guid: str
