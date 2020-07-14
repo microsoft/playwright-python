@@ -3,6 +3,7 @@
 ## Build driver:
 
 ```sh
+pip install -e .
 python ./build_driver.py
 ```
 

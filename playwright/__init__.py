@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from playwright._repo_version import version as __version__  # noqa:F401
 from playwright.main import playwright_object
 import playwright.helper as helper
 
