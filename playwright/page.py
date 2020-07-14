@@ -648,6 +648,7 @@ class Page(ChannelOwner):
             force_expr = True
         return await self._main_frame.waitForFunction(**locals_to_params(locals()))
 
+    @property
     def workers(self) -> List[Worker]:
         return self._workers.copy()
 

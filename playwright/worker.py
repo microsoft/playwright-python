@@ -12,14 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any, Dict
+
+from types import SimpleNamespace
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
-from typing import Any, Dict
+from playwright.helper import is_function_body
 
 
 class Worker(ChannelOwner):
+    Events = SimpleNamespace(Close="close")
+
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer)
+        self._channel.on("close", lambda _: self._on_close())
+
+    def _on_close(self) -> None:
+        if self._page:
+            self._page._workers.remove(self)
+        self.emit(Worker.Events.Close, self)
 
     @property
     def url(self) -> str:
@@ -28,6 +39,8 @@ class Worker(ChannelOwner):
     async def evaluate(
         self, expression: str, arg: Any = None, force_expr: bool = False
     ) -> Any:
+        if not is_function_body(expression):
+            force_expr = True
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
