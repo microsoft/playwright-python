@@ -12,5 +12,3 @@ htmlcov/
 .coverage
 .DS_Store
 .vscode/
-.eggs
-_repo_version.py
