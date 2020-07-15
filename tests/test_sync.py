@@ -18,8 +18,8 @@ from playwright import Error
 from playwright.sync import browser_types, SyncPage
 
 
-def test_sync_query_selector(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_query_selector(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     context = browser.newContext()
     page = context.newPage()
     page.setContent(
@@ -33,8 +33,8 @@ def test_sync_query_selector(browser_name):
     browser.close()
 
 
-def test_sync_click(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_click(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     page = browser.newPage()
     page.setContent(
         """
@@ -46,8 +46,8 @@ def test_sync_click(browser_name):
     browser.close()
 
 
-def test_sync_nested_query_selector(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_nested_query_selector(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     page = browser.newPage()
     page.setContent(
         """
@@ -67,8 +67,8 @@ def test_sync_nested_query_selector(browser_name):
     browser.close()
 
 
-def test_sync_handle_multiple_pages(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_handle_multiple_pages(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     context = browser.newContext()
     page1 = context.newPage()
     page2 = context.newPage()
@@ -87,16 +87,16 @@ def test_sync_handle_multiple_pages(browser_name):
     browser.close()
 
 
-def test_sync_wait_for_selector(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_wait_for_selector(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     page = browser.newPage()
     page.evaluate("() => setTimeout(() => document.write('<h1>foo</foo>'), 3 * 1000)")
     page.waitForSelector("h1", timeout=5000)
     browser.close()
 
 
-def test_sync_wait_for_selector_raise(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_wait_for_selector_raise(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     page = browser.newPage()
     page.evaluate("() => setTimeout(() => document.write('<h1>foo</foo>'), 3 * 1000)")
     with pytest.raises(Error) as exc:
@@ -105,13 +105,13 @@ def test_sync_wait_for_selector_raise(browser_name):
     browser.close()
 
 
-def test_sync_wait_for_event(browser_name):
-    browser = browser_types[browser_name].launch()
+def test_sync_wait_for_event(browser_name, launch_arguments):
+    browser = browser_types[browser_name].launch(**launch_arguments)
     page = browser.newPage()
     page.evaluate(
         "() => setTimeout(() => window.open('https://example.com'), 3 * 1000)"
     )
-    page.waitForEvent("popup", timeout=5000)
+    page.waitForEvent("popup", timeout=10000)
     browser.close()
 
 
@@ -120,3 +120,30 @@ def test_sync_make_existing_page_sync(page):
     assert page.evaluate("() => ({'playwright': true})") == {"playwright": True}
     page.setContent("<h1>myElement</h1>")
     page.waitForSelector("text=myElement")
+
+
+def test_sync_network_events(page, server):
+    server.set_route(
+        "/hello-world",
+        lambda request: (
+            request.setHeader("Content-Type", "text/plain"),
+            request.write(b"Hello world"),
+            request.finish(),
+        ),
+    )
+    page = SyncPage(page)
+    page.goto(server.EMPTY_PAGE)
+    messages = []
+    page.on(
+        "request", lambda request: messages.append(f">>{request.method}{request.url}")
+    )
+    page.on(
+        "response",
+        lambda response: messages.append(f"<<{response.status}{response.url}"),
+    )
+    response = page.evaluate("""async ()=> (await fetch("/hello-world")).text()""")
+    assert response == "Hello world"
+    assert messages == [
+        f">>GET{server.PREFIX}/hello-world",
+        f"<<200{server.PREFIX}/hello-world",
+    ]

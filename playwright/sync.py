@@ -35,7 +35,9 @@ class AsyncToSync:
         if isinstance(attribute_value, types.MethodType):
 
             def wrap(*args: Any, **kwargs: Any) -> Any:
-                value = loop.run_until_complete(attribute_value(*args, **kwargs))
+                value = attribute_value(*args, **kwargs)
+                if asyncio.isfuture(value) or asyncio.iscoroutine(value):
+                    value = loop.run_until_complete(value)
                 wrapper_methods = self.factories if hasattr(self, "factories") else {}
                 if name in wrapper_methods:
                     return wrapper_methods[name](value)
