@@ -13,9 +13,17 @@
 # limitations under the License.
 
 import pytest
+import os
 
 from playwright import Error
-from playwright.sync import browser_types, SyncPage
+from playwright.sync import (
+    SyncBrowser,
+    SyncConsoleMessage,
+    SyncDownload,
+    SyncWorker,
+    browser_types,
+    SyncPage,
+)
 
 
 def test_sync_query_selector(browser_name, launch_arguments):
@@ -147,3 +155,67 @@ def test_sync_network_events(page, server):
         f">>GET{server.PREFIX}/hello-world",
         f"<<200{server.PREFIX}/hello-world",
     ]
+
+
+def test_console_should_work(page):
+    page = SyncPage(page)
+    messages = []
+    page.once("console", lambda m: messages.append(SyncConsoleMessage(m)))
+    page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
+    assert len(messages) == 1
+    message = messages[0]
+    assert message.text == "hello 5 JSHandle@object"
+    assert str(message) == "hello 5 JSHandle@object"
+    assert message.type == "log"
+    assert message.args[0].jsonValue() == "hello"
+    assert message.args[1].jsonValue() == 5
+    assert message.args[2].jsonValue() == {"foo": "bar"}
+
+
+def test_sync_download(browser, server):
+    server.set_route(
+        "/downloadWithFilename",
+        lambda request: (
+            request.setHeader("Content-Type", "application/octet-stream"),
+            request.setHeader("Content-Disposition", "attachment; filename=file.txt"),
+            request.write(b"Hello world"),
+            request.finish(),
+        ),
+    )
+    browser = SyncBrowser(browser)
+    page = browser.newPage(acceptDownloads=True)
+    page.setContent(f'<a href="{server.PREFIX}/downloadWithFilename">download</a>')
+    downloads = []
+
+    page.on(
+        "download", lambda download: downloads.append(SyncDownload(download)),
+    )
+    page.click("a")
+    if len("download") == 0:
+        page.waitForEvent("download")
+    assert len(downloads) == 1
+    download = downloads[0]
+    assert download.suggestedFilename == "file.txt"
+    path = download.path()
+    assert os.path.isfile(path)
+    with open(path, "r") as fd:
+        assert fd.read() == "Hello world"
+    page.close()
+
+
+def test_sync_workers_page_workers(page, server):
+    page = SyncPage(page)
+    workers = []
+    page.on(
+        "worker", lambda worker: workers.append(SyncWorker(worker)),
+    )
+    page.goto(server.PREFIX + "/worker/worker.html")
+    page.waitForEvent("worker")
+    assert len(workers) == 1
+    worker = page.workers[0]
+    assert "worker.js" in worker.url
+
+    assert worker.evaluate('() => self["workerFunction"]()') == "worker function result"
+
+    page.goto(server.EMPTY_PAGE)
+    assert len(page.workers) == 0

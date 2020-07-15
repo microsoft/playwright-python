@@ -28,6 +28,9 @@ class AsyncToSync:
     def __init__(self, obj: Any) -> None:
         self.obj = obj
 
+    def __str__(self) -> str:
+        return self.obj.__str__()
+
     def __getattribute__(self, name: str) -> Any:
         if name.startswith("__") or name in ["obj", "factories", "gather"]:
             return super().__getattribute__(name)
@@ -38,14 +41,41 @@ class AsyncToSync:
                 value = attribute_value(*args, **kwargs)
                 if asyncio.isfuture(value) or asyncio.iscoroutine(value):
                     value = loop.run_until_complete(value)
-                wrapper_methods = self.factories if hasattr(self, "factories") else {}
-                if name in wrapper_methods:
-                    return wrapper_methods[name](value)
+                if name in self.factories:
+                    return self.factories[name](value)
                 return value
 
             return wrap
+        elif isinstance(attribute_value, list):
+            if name in self.factories:
+                return self.factories[name](attribute_value)
+            return attribute_value
         else:
             return attribute_value
+
+
+class SyncDownload(AsyncToSync):
+    pass
+
+
+class SyncDialog(AsyncToSync):
+    pass
+
+
+class SyncJSHandle(AsyncToSync):
+    pass
+
+
+class SyncConsoleMessage(AsyncToSync):
+    factories = {
+        "args": lambda items: list(map(SyncJSHandle, items)),
+    }
+
+    pass
+
+
+class SyncWorker(AsyncToSync):
+    pass
 
 
 class SyncElementHandle(AsyncToSync):
@@ -63,7 +93,10 @@ SyncElementHandle.factories = {**SyncElementHandle.factories, **SyncFrame.factor
 
 
 class SyncPage(AsyncToSync):
-    factories = SyncFrame.factories
+    factories: Dict[str, Any] = {
+        **SyncFrame.factories,
+        "workers": lambda items: list(map(SyncWorker, items)),
+    }
 
 
 class SyncContext(AsyncToSync):
