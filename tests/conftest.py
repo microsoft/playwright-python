@@ -103,11 +103,6 @@ def after_each_hook():
 
 
 @pytest.fixture(scope="session")
-def browser_name(pytestconfig):
-    return pytestconfig.getoption("browser")
-
-
-@pytest.fixture(scope="session")
 def is_webkit(browser_name):
     return browser_name == "webkit"
 
