@@ -120,10 +120,17 @@ def test_sync_wait_for_selector_raise(sync_page):
 
 
 def test_sync_wait_for_event(sync_page):
-    sync_page.evaluate(
-        "() => setTimeout(() => window.open('https://example.com'), 3 * 1000)"
-    )
-    sync_page.waitForEvent("popup", timeout=10000)
+    with sync_page.withWaitForEvent("popup", timeout=10000) as popup:
+        sync_page.evaluate("() => window.open('https://example.com')")
+        assert popup.value is None
+    assert popup.value
+
+
+def test_sync_wait_for_event_raise(sync_page):
+    with pytest.raises(Error):
+        with sync_page.withWaitForEvent("popup", timeout=500) as popup:
+            assert False
+        assert popup.value is None
 
 
 def test_sync_make_existing_page_sync(page):
@@ -218,3 +225,23 @@ def test_sync_workers_page_workers(sync_page, server):
 
     sync_page.goto(server.EMPTY_PAGE)
     assert len(sync_page.workers) == 0
+
+
+# def test_dialog_should_work(page):
+#     page = SyncPage(page)
+#     dialog_events = []
+
+#     def handle_dialog(dialog):
+#         breakpoint()
+#         dialog_events.append(dialog)
+#         dialog.dismiss()
+
+#     page.on(
+#         "dialog", lambda dialog: handle_dialog(SyncDialog(dialog)),
+#     )
+#     page.setContent('<div onclick="window.alert(123)">Click me</div>')
+#     print("ok1")
+#     page.click("text=Click me")
+#     print("nok")
+#     assert len(dialog_events) == 1
+#     breakpoint()

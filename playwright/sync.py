@@ -12,14 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from asyncio.futures import Future
 import types
 import asyncio
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 import playwright
 
 
 loop = asyncio.get_event_loop()
+
+
+class GetWrapper:
+    def __init__(self, cb: Callable[..., Any]) -> None:
+        self.cb = cb
+
+    @property
+    def value(self) -> Any:
+        return self.cb()
+
+
+class SyncWaitContextManager:
+    def __init__(self, future: Future) -> None:
+        self.result = None
+        self.async_wrapper = asyncio.ensure_future(future)
+        self.async_wrapper.add_done_callback(self._handle_done)
+
+    def _handle_done(self, value: Any) -> None:
+        self.result = value.result()
+
+    def __enter__(self) -> GetWrapper:
+        return GetWrapper(lambda: self.result)
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if not self.async_wrapper.done():
+            loop.run_until_complete(self.async_wrapper)
 
 
 class AsyncToSync:
@@ -32,7 +59,7 @@ class AsyncToSync:
         return self.obj.__str__()
 
     def __getattribute__(self, name: str) -> Any:
-        if name.startswith("__") or name in ["obj", "factories", "gather"]:
+        if name.startswith("__") or name in ["obj", "factories", "withWaitForEvent"]:
             return super().__getattribute__(name)
         attribute_value = getattr(self.obj, name)
         if isinstance(attribute_value, types.MethodType):
@@ -97,6 +124,9 @@ class SyncPage(AsyncToSync):
         **SyncFrame.factories,
         "workers": lambda items: list(map(SyncWorker, items)),
     }
+
+    def withWaitForEvent(self, *args: Any, **kwargs: Any) -> SyncWaitContextManager:
+        return SyncWaitContextManager(self.obj.waitForEvent(*args, **kwargs))
 
 
 class SyncContext(AsyncToSync):
