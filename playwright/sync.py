@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from asyncio.futures import Future
+from playwright.download import Download
 import types
 import asyncio
 from typing import Any, Callable, Dict
@@ -34,12 +35,16 @@ class GetWrapper:
 
 class SyncWaitContextManager:
     def __init__(self, future: Future) -> None:
-        self.result = None
+        self.result: Any = None
         self.async_wrapper = asyncio.ensure_future(future)
         self.async_wrapper.add_done_callback(self._handle_done)
 
     def _handle_done(self, value: Any) -> None:
-        self.result = value.result()
+        result = value.result()
+        if isinstance(result, Download):
+            self.result = SyncDownload(result)
+        else:
+            self.result = result
 
     def __enter__(self) -> GetWrapper:
         return GetWrapper(lambda: self.result)
@@ -59,7 +64,12 @@ class AsyncToSync:
         return self.obj.__str__()
 
     def __getattribute__(self, name: str) -> Any:
-        if name.startswith("__") or name in ["obj", "factories", "withWaitForEvent"]:
+        if name.startswith("__") or name in [
+            "obj",
+            "factories",
+            "withWaitForEvent",
+            "withWaitForSelector",
+        ]:
             return super().__getattribute__(name)
         attribute_value = getattr(self.obj, name)
         if isinstance(attribute_value, types.MethodType):
@@ -127,6 +137,9 @@ class SyncPage(AsyncToSync):
 
     def withWaitForEvent(self, *args: Any, **kwargs: Any) -> SyncWaitContextManager:
         return SyncWaitContextManager(self.obj.waitForEvent(*args, **kwargs))
+
+    def withWaitForSelector(self, *args: Any, **kwargs: Any) -> SyncWaitContextManager:
+        return SyncWaitContextManager(self.obj.waitForSelector(*args, **kwargs))
 
 
 class SyncContext(AsyncToSync):

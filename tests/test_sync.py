@@ -18,8 +18,6 @@ import os
 from playwright import Error
 from playwright.sync import (
     SyncConsoleMessage,
-    SyncDownload,
-    SyncWorker,
     browser_types,
     SyncPage,
 )
@@ -104,18 +102,14 @@ def test_sync_handle_multiple_pages(sync_context):
 
 
 def test_sync_wait_for_selector(sync_page):
-    sync_page.evaluate(
-        "() => setTimeout(() => document.write('<h1>foo</foo>'), 3 * 1000)"
-    )
-    sync_page.waitForSelector("h1", timeout=5000)
+    with sync_page.withWaitForSelector("h1", timeout=5000):
+        sync_page.evaluate("() => document.write('<h1>foo</foo>')")
 
 
 def test_sync_wait_for_selector_raise(sync_page):
-    sync_page.evaluate(
-        "() => setTimeout(() => document.write('<h1>foo</foo>'), 3 * 1000)"
-    )
     with pytest.raises(Error) as exc:
-        sync_page.waitForSelector("h1", timeout=2000)
+        with sync_page.withWaitForSelector("h1", timeout=2000):
+            pass
     assert "Timeout 2000ms exceeded during" in exc.value.message
 
 
@@ -192,18 +186,12 @@ def test_sync_download(sync_browser, server):
     )
     page = sync_browser.newPage(acceptDownloads=True)
     page.setContent(f'<a href="{server.PREFIX}/downloadWithFilename">download</a>')
-    downloads = []
 
-    page.on(
-        "download", lambda download: downloads.append(SyncDownload(download)),
-    )
-    page.click("a")
-    if len("download") == 0:
-        page.waitForEvent("download")
-    assert len(downloads) == 1
-    download = downloads[0]
-    assert download.suggestedFilename == "file.txt"
-    path = download.path()
+    with page.withWaitForEvent("download") as download:
+        page.click("a")
+    assert download.value
+    assert download.value.suggestedFilename == "file.txt"
+    path = download.value.path()
     assert os.path.isfile(path)
     with open(path, "r") as fd:
         assert fd.read() == "Hello world"
@@ -211,13 +199,9 @@ def test_sync_download(sync_browser, server):
 
 
 def test_sync_workers_page_workers(sync_page, server):
-    workers = []
-    sync_page.on(
-        "worker", lambda worker: workers.append(SyncWorker(worker)),
-    )
-    sync_page.goto(server.PREFIX + "/worker/worker.html")
-    sync_page.waitForEvent("worker")
-    assert len(workers) == 1
+    with sync_page.withWaitForEvent("worker") as worker:
+        sync_page.goto(server.PREFIX + "/worker/worker.html")
+    assert worker.value
     worker = sync_page.workers[0]
     assert "worker.js" in worker.url
 
@@ -225,23 +209,3 @@ def test_sync_workers_page_workers(sync_page, server):
 
     sync_page.goto(server.EMPTY_PAGE)
     assert len(sync_page.workers) == 0
-
-
-# def test_dialog_should_work(page):
-#     page = SyncPage(page)
-#     dialog_events = []
-
-#     def handle_dialog(dialog):
-#         breakpoint()
-#         dialog_events.append(dialog)
-#         dialog.dismiss()
-
-#     page.on(
-#         "dialog", lambda dialog: handle_dialog(SyncDialog(dialog)),
-#     )
-#     page.setContent('<div onclick="window.alert(123)">Click me</div>')
-#     print("ok1")
-#     page.click("text=Click me")
-#     print("nok")
-#     assert len(dialog_events) == 1
-#     breakpoint()
