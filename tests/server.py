@@ -51,10 +51,12 @@ class Server:
     def start(self):
         request_subscribers = {}
         auth = {}
+        csp = {}
         routes = {}
         gzip_routes = set()
         self.request_subscribers = request_subscribers
         self.auth = auth
+        self.csp = csp
         self.routes = routes
         self.gzip_routes = gzip_routes
         static_path = os.path.join(os.path.dirname(__file__), "assets")
@@ -77,13 +79,15 @@ class Server:
                             request.getUser(),
                             request.getPassword(),
                         )
-                    if not (authorization_header or creds_correct):
+                    if not creds_correct:
                         request.setHeader(
                             b"www-authenticate", 'Basic realm="Secure Area"'
                         )
                         request.setResponseCode(HTTPStatus.UNAUTHORIZED)
                         request.finish()
                         return
+                if csp.get(uri_path):
+                    request.setHeader(b"Content-Security-Policy", csp[uri_path])
                 if routes.get(uri_path):
                     routes[uri_path](request)
                     return
@@ -123,15 +127,18 @@ class Server:
     async def wait_for_request(self, path):
         future = asyncio.Future()
         self.request_subscribers[path] = future
-        future.add_done_callback(lambda f: self.request_subscribers.pop(path, None))
         return await future
 
     def set_auth(self, path: str, username: str, password: str):
         self.auth[path] = (username, password)
 
+    def set_csp(self, path: str, value: str):
+        self.csp[path] = value
+
     def reset(self):
         self.request_subscribers.clear()
         self.auth.clear()
+        self.csp.clear()
         self.gzip_routes.clear()
         self.routes.clear()
 

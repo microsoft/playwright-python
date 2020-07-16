@@ -170,7 +170,9 @@ class BrowserContext(ChannelOwner):
                 "setNetworkInterceptionEnabled", dict(enabled=True)
             )
 
-    async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
+    async def unroute(
+        self, match: URLMatch, handler: Optional[RouteHandler] = None
+    ) -> None:
         self._routes = list(
             filter(
                 lambda r: r.matcher.match != match

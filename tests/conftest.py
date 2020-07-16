@@ -69,7 +69,10 @@ async def context(browser):
     context = await browser.newContext()
     yield context
     await context.close()
-    assert len(browser.contexts) == 0
+    if len(browser.contexts):
+        for context in browser.contexts:
+            await context.close()
+        assert False
 
 
 @pytest.fixture
