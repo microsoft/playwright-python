@@ -21,10 +21,7 @@ jobs:
         pip install -r local-requirements.txt
         pip install .
     - name: Lint
-      run: |
-        black --check .
-        mypy .
-        flake8 playwright tests
+      run: pre-commit run --all-files
   build:
     timeout-minutes: 30
     strategy:

@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import asyncio
-from contextlib import closing
-from http import HTTPStatus
+import gzip
+import mimetypes
 import os
 import socket
 import threading
-import gzip
-import mimetypes
+from contextlib import closing
+from http import HTTPStatus
 
 from twisted.internet import reactor
 from twisted.web import http

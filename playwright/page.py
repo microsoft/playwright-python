@@ -15,6 +15,9 @@
 import asyncio
 import base64
 import sys
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Union, cast
+
 from playwright.accessibility import Accessibility
 from playwright.connection import (
     ChannelOwner,
@@ -24,35 +27,33 @@ from playwright.connection import (
 )
 from playwright.element_handle import ElementHandle, ValuesToSelect
 from playwright.file_chooser import FileChooser
-from playwright.helper import locals_to_params
-from playwright.input import Keyboard, Mouse
-from playwright.js_handle import JSHandle, serialize_argument
 from playwright.frame import Frame
 from playwright.helper import (
-    is_function_body,
-    parse_error,
-    serialize_error,
+    ColorScheme,
+    DocumentLoadState,
     Error,
     FilePayload,
     FunctionWithSource,
+    KeyboardModifier,
+    MouseButton,
     Optional,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
-    TimeoutSettings,
     TimeoutError,
+    TimeoutSettings,
     URLMatch,
     URLMatcher,
-    MouseButton,
-    KeyboardModifier,
-    DocumentLoadState,
-    ColorScheme,
     Viewport,
+    is_function_body,
+    locals_to_params,
+    parse_error,
+    serialize_error,
 )
+from playwright.input import Keyboard, Mouse
+from playwright.js_handle import JSHandle, serialize_argument
 from playwright.network import Request, Response, Route, serialize_headers
 from playwright.worker import Worker
-from types import SimpleNamespace
-from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING, cast
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

@@ -40,7 +40,7 @@ async def test_should_upload_the_file(page, server):
     }""",
             input,
         )
-        == "contents of the file"
+        == "contents of the file\n"
     )
 
 
@@ -143,7 +143,7 @@ async def test_should_be_able_to_read_selected_file(page: Page, server):
             return promise.then(() => reader.result);
         }""",
     )
-    assert content == "contents of the file"
+    assert content == "contents of the file\n"
 
 
 async def test_should_be_able_to_reset_selected_files_with_empty_file_list(

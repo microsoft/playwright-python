@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import asyncio
-from playwright.connection import (
-    ChannelOwner,
-    ConnectionScope,
-    from_channel,
-)
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+
+from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import (
     Cookie,
     Error,
@@ -31,8 +30,6 @@ from playwright.helper import (
 )
 from playwright.network import Request, Route, serialize_headers
 from playwright.page import BindingCall, Page, wait_for_event
-from types import SimpleNamespace
-from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.browser import Browser

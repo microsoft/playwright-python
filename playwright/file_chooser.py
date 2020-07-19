@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING, List, Union
+
 from playwright.helper import FilePayload
 
-from typing import List, Union, TYPE_CHECKING
-
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.page import Page
     from playwright.element_handle import ElementHandle
+    from playwright.page import Page
 
 
 class FileChooser:

@@ -20,3 +20,7 @@ repos:
     rev: 'a7be77f761a4c29121d6bb6f61c11902281f9105'
     hooks:
     -   id: flake8
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.1.3
+    hooks:
+    -   id: isort

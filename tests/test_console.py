@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import asyncio
-from playwright.console_message import ConsoleMessage
 from typing import List
 
+from playwright.console_message import ConsoleMessage
 from playwright.page import Page
 
 

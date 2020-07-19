@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from asyncio.futures import Future
-import json
 import asyncio
-import pytest
+import json
 import os
+from asyncio.futures import Future
 from typing import Dict, List
 
+import pytest
+
+from playwright.helper import Error
 from playwright.network import Request
 from playwright.page import Page
-from playwright.helper import Error
 
 
 async def test_request_fulfill(page):

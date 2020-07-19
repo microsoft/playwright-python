@@ -15,22 +15,20 @@
 import asyncio
 import fnmatch
 import re
+import sys
 import traceback
 from types import TracebackType
-
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     List,
     Optional,
-    Union,
-    TYPE_CHECKING,
     Pattern,
+    Union,
     cast,
 )
-
-import sys
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -39,7 +37,7 @@ else:  # pragma: no cover
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.network import Route, Request
+    from playwright.network import Request, Route
 
 Cookie = List[Dict[str, Union[str, int, bool]]]
 URLMatch = Union[str, Pattern, Callable[[str], bool]]

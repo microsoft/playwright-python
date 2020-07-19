@@ -15,10 +15,12 @@
 import asyncio
 import sys
 import traceback
-from playwright.helper import parse_error, ParsedMessagePayload
-from playwright.transport import Transport
-from pyee import BaseEventEmitter
 from typing import Any, Dict, List, Optional
+
+from pyee import BaseEventEmitter
+
+from playwright.helper import ParsedMessagePayload, parse_error
+from playwright.transport import Transport
 
 
 class Channel(BaseEventEmitter):

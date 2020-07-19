@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict, List
+
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import ConsoleMessageLocation
 from playwright.js_handle import JSHandle
-from typing import Dict, List
 
 
 class ConsoleMessage(ChannelOwner):

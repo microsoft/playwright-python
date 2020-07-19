@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import math
-
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import Error, is_function_body
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.element_handle import ElementHandle

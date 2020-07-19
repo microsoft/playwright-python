@@ -13,9 +13,10 @@
 # limitations under the License.
 
 import asyncio
-from playwright.network import Request, Route
-from playwright.browser import Browser, Page
 from typing import List, cast
+
+from playwright.browser import Browser, Page
+from playwright.network import Request, Route
 
 
 async def test_link_navigation_inherit_user_agent_from_browser_context(
