@@ -40,7 +40,6 @@ from playwright.helper import (
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
-    TimeoutError,
     TimeoutSettings,
     URLMatch,
     URLMatcher,
@@ -53,6 +52,7 @@ from playwright.helper import (
 from playwright.input import Keyboard, Mouse
 from playwright.js_handle import JSHandle, serialize_argument
 from playwright.network import Request, Response, Route, serialize_headers
+from playwright.wait_helper import WaitHelper
 from playwright.worker import Worker
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -103,6 +103,7 @@ class Page(ChannelOwner):
         self._pending_wait_for_events: List[PendingWaitEvent] = list()
         self._routes: List[RouteHandlerEntry] = list()
         self._owned_context: Optional["BrowserContext"] = None
+        self._timeout_settings = TimeoutSettings(None)
 
         self._channel.on(
             "bindingCall",
@@ -370,25 +371,27 @@ class Page(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = "load",
         referer: str = None,
     ) -> Optional[Response]:
         return await self._main_frame.goto(**locals_to_params(locals()))
 
     async def reload(
-        self, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self, timeout: int = None, waitUntil: DocumentLoadState = "load",
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("reload", locals_to_params(locals()))
         )
 
-    async def waitForLoadState(self, state: str = "load", timeout: int = None) -> None:
+    async def waitForLoadState(
+        self, state: DocumentLoadState = "load", timeout: int = None
+    ) -> None:
         return await self._main_frame.waitForLoadState(**locals_to_params(locals()))
 
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = "load",
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
         return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
@@ -440,9 +443,17 @@ class Page(ChannelOwner):
     async def waitForEvent(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
     ) -> Any:
-        return await wait_for_event(
-            self, self._timeout_settings, event, predicate=predicate, timeout=timeout
+        if timeout is None:
+            timeout = self._timeout_settings.timeout()
+        wait_helper = WaitHelper()
+        wait_helper.reject_on_timeout(
+            timeout, f'Timeout while waiting for event "${event}"'
         )
+        if event != Page.Events.Crash:
+            wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
+        if event != Page.Events.Close:
+            wait_helper.reject_on_event(self, Page.Events.Close, Error("Page closed"))
+        return await wait_helper.wait_for_event(self, event, predicate)
 
     async def goBack(
         self, timeout: int = None, waitUntil: DocumentLoadState = None,
@@ -480,20 +491,19 @@ class Page(ChannelOwner):
             raise Error("Either path or source parameter must be specified")
         await self._channel.send("addInitScript", dict(source=source))
 
-    async def route(self, match: URLMatch, handler: RouteHandler) -> None:
-        self._routes.append(RouteHandlerEntry(URLMatcher(match), handler))
+    async def route(self, url: URLMatch, handler: RouteHandler) -> None:
+        self._routes.append(RouteHandlerEntry(URLMatcher(url), handler))
         if len(self._routes) == 1:
             await self._channel.send(
                 "setNetworkInterceptionEnabled", dict(enabled=True)
             )
 
     async def unroute(
-        self, match: URLMatch, handler: Optional[RouteHandler] = None
+        self, url: URLMatch, handler: Optional[RouteHandler] = None
     ) -> None:
         self._routes = list(
             filter(
-                lambda r: r.matcher.match != match
-                or (handler and r.handler != handler),
+                lambda r: r.matcher.match != url or (handler and r.handler != handler),
                 self._routes,
             )
         )
@@ -713,39 +723,3 @@ class BindingCall(ChannelOwner):
             asyncio.ensure_future(
                 self._channel.send("reject", dict(error=serialize_error(e, tb)))
             )
-
-
-async def wait_for_event(
-    target: Union[Page, "BrowserContext"],
-    timeout_settings: TimeoutSettings,
-    event: str,
-    predicate: Callable[[Any], bool] = None,
-    timeout: int = None,
-) -> Any:
-    if timeout is None:
-        timeout = timeout_settings.timeout()
-    if timeout == 0:
-        timeout = 3600 * 24 * 7 * 30 * 365
-    timeout_future: asyncio.Future = asyncio.ensure_future(
-        asyncio.sleep(timeout / 1000)
-    )
-
-    future = target._scope._loop.create_future()
-
-    def listener(e: Any = None) -> None:
-        if not predicate or predicate(e):
-            future.set_result(e)
-
-    target.on(event, listener)
-
-    pending_event = PendingWaitEvent(event, future, timeout_future)
-    target._pending_wait_for_events.append(pending_event)
-    done, _ = await asyncio.wait(
-        {timeout_future, future}, return_when=asyncio.FIRST_COMPLETED
-    )
-    target.remove_listener(event, listener)
-    target._pending_wait_for_events.remove(pending_event)
-    if future in done:
-        timeout_future.cancel()
-        return future.result()
-    raise TimeoutError("Timeout exceeded")

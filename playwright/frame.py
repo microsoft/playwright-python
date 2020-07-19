@@ -32,14 +32,19 @@ from playwright.element_handle import (
 )
 from playwright.helper import (
     DocumentLoadState,
+    Error,
     FilePayload,
+    FrameNavigatedEvent,
     KeyboardModifier,
     MouseButton,
+    URLMatch,
+    URLMatcher,
     is_function_body,
     locals_to_params,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Response
+from playwright.wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -68,27 +73,30 @@ class Frame(ChannelOwner):
             lambda params: self._on_load_state(params.get("add"), params.get("remove")),
         )
         self._channel.on(
-            "navigated",
-            lambda params: self._on_frame_navigated(params["url"], params["name"]),
+            "navigated", lambda params: self._on_frame_navigated(params),
         )
 
-    def _on_load_state(self, add: str = None, remove: str = None) -> None:
+    def _on_load_state(
+        self, add: DocumentLoadState = None, remove: DocumentLoadState = None
+    ) -> None:
         if add:
             self._load_states.add(add)
             self._event_emitter.emit("loadstate", add)
         elif remove and remove in self._load_states:
             self._load_states.remove(remove)
 
-    def _on_frame_navigated(self, url: str, name: str) -> None:
-        self._url = url
-        self._name = name
-        self._page.emit("framenavigated", self)
+    def _on_frame_navigated(self, event: FrameNavigatedEvent) -> None:
+        self._url = event["url"]
+        self._name = event["name"]
+        self._event_emitter.emit("navigated", event)
+        if "error" not in event and self._page:
+            self._page.emit("framenavigated", self)
 
     async def goto(
         self,
         url: str,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = "load",
         referer: str = None,
     ) -> Optional[Response]:
         return cast(
@@ -98,33 +106,54 @@ class Frame(ChannelOwner):
             ),
         )
 
+    def _setup_navigation_wait_helper(self, timeout: int = None) -> WaitHelper:
+        wait_helper = WaitHelper()
+        wait_helper.reject_on_event(
+            self._page, "close", Error("Navigation failed because page was closed!")
+        )
+        wait_helper.reject_on_event(
+            self._page, "crash", Error("Navigation failed because page crashed!")
+        )
+        wait_helper.reject_on_event(
+            self._page,
+            "framedetached",
+            Error("Navigating frame was detached!"),
+            lambda frame: frame == self,
+        )
+        if timeout is None:
+            timeout = self._page._timeout_settings.navigation_timeout()
+        wait_helper.reject_on_timeout(timeout, f"Timeout {timeout}ms exceeded.")
+        return wait_helper
+
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
-        url: str = None,  # TODO: add url, callback
+        waitUntil: DocumentLoadState = "load",
+        url: URLMatch = None,
     ) -> Optional[Response]:
-        return cast(
-            Optional[Response],
-            from_nullable_channel(
-                await self._channel.send(
-                    "waitForNavigation", locals_to_params(locals())
-                )
-            ),
+        wait_helper = self._setup_navigation_wait_helper(timeout)
+        matcher = URLMatcher(url) if url else None
+        event = await wait_helper.wait_for_event(
+            self._event_emitter,
+            "navigated",
+            lambda event: not matcher or matcher.matches(event["url"]),
         )
+        if "newDocument" in event and "request" in event["newDocument"]:
+            request = from_channel(event["newDocument"]["request"])
+            return await request.response()
+        if "error" in event:
+            raise Error(event["error"])
+        return None
 
-    async def waitForLoadState(self, state: str = "load", timeout: int = None) -> None:
+    async def waitForLoadState(
+        self, state: DocumentLoadState = "load", timeout: int = None
+    ) -> None:
         if state in self._load_states:
             return
-        future = self._scope._loop.create_future()
-
-        def loadstate(s: str) -> None:
-            if state == s:
-                future.set_result(None)
-                self._event_emitter.remove_listener("loadstate", loadstate)
-
-        self._event_emitter.on("loadstate", loadstate)
-        await future
+        wait_helper = self._setup_navigation_wait_helper(timeout)
+        await wait_helper.wait_for_event(
+            self._event_emitter, "loadstate", lambda s: s == state
+        )
 
     async def frameElement(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))

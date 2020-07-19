@@ -106,6 +106,17 @@ class ParsedMessagePayload(TypedDict, total=False):
     error: ErrorPayload
 
 
+class Document(TypedDict):
+    request: Optional[Any]
+
+
+class FrameNavigatedEvent(TypedDict):
+    url: str
+    name: str
+    newDocument: Optional[Document]
+    error: Optional[str]
+
+
 class URLMatcher:
     def __init__(self, match: URLMatch) -> None:
         self._callback: Optional[Callable[[str], bool]] = None

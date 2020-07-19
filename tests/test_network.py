@@ -103,7 +103,7 @@ async def test_page_events_request_should_report_requests_and_responses_handled_
     )
     assert sw_response == "responseFromServiceWorker:foo"
     assert request.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
-    response = await request.response
+    response = await request.response()
     assert response.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
     assert await response.text() == "responseFromServiceWorker:foo"
 
@@ -229,7 +229,7 @@ async def test_response_text_should_throw_when_requesting_body_of_redirected_res
     response = await page.goto(server.PREFIX + "/foo.html")
     redirectedFrom = response.request.redirectedFrom
     assert redirectedFrom
-    redirected = await redirectedFrom.response
+    redirected = await redirectedFrom.response()
     assert redirected.status == 302
     error = None
     try:
@@ -312,7 +312,7 @@ async def test_network_events_request(page, server):
     assert requests[0].url == server.EMPTY_PAGE
     assert requests[0].resourceType == "document"
     assert requests[0].method == "GET"
-    assert await requests[0].response
+    assert await requests[0].response()
     assert requests[0].frame == page.mainFrame
     assert requests[0].frame.url == server.EMPTY_PAGE
 
@@ -342,7 +342,7 @@ async def test_network_events_request_failed(
     await page.goto(server.PREFIX + "/one-style.html")
     assert len(failed_requests) == 1
     assert "one-style.css" in failed_requests[0].url
-    assert await failed_requests[0].response is None
+    assert await failed_requests[0].response() is None
     assert failed_requests[0].resourceType == "stylesheet"
     if is_chromium:
         assert failed_requests[0].failure == "net::ERR_EMPTY_RESPONSE"
@@ -369,7 +369,7 @@ async def test_network_events_request_finished(page, server):
     )[0]
     request = response.request
     assert request.url == server.EMPTY_PAGE
-    assert await request.response
+    assert await request.response()
     assert request.frame == page.mainFrame
     assert request.frame.url == server.EMPTY_PAGE
 

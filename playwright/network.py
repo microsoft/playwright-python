@@ -59,7 +59,6 @@ class Request(ChannelOwner):
     def headers(self) -> Dict[str, str]:
         return parse_headers(self._initializer["headers"])
 
-    @property
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
 

@@ -29,7 +29,8 @@ from playwright.helper import (
     URLMatcher,
 )
 from playwright.network import Request, Route, serialize_headers
-from playwright.page import BindingCall, Page, wait_for_event
+from playwright.page import BindingCall, Page
+from playwright.wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.browser import Browser
@@ -185,9 +186,17 @@ class BrowserContext(ChannelOwner):
     async def waitForEvent(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
     ) -> Any:
-        return await wait_for_event(
-            self, self._timeout_settings, event, predicate=predicate, timeout=timeout
+        if timeout is None:
+            timeout = self._timeout_settings.timeout()
+        wait_helper = WaitHelper()
+        wait_helper.reject_on_timeout(
+            timeout, f'Timeout while waiting for event "${event}"'
         )
+        if event != BrowserContext.Events.Close:
+            wait_helper.reject_on_event(
+                self, BrowserContext.Events.Close, Error("Context closed")
+            )
+        return await wait_helper.wait_for_event(self, event, predicate)
 
     def _on_close(self) -> None:
         self._is_closed_or_closing = True
