@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 from playwright.connection import Channel
 from playwright.element_handle import ElementHandle
-from typing import Dict
 
 
 class Accessibility:

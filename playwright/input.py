@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from playwright.connection import Channel
-from playwright.helper import locals_to_params, MouseButton
+from playwright.helper import MouseButton, locals_to_params
 
 
 class Keyboard:

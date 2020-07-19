@@ -14,10 +14,11 @@
 
 import asyncio
 import os
+
 import pytest
 
-from playwright.helper import Error
 from playwright.browser_type import BrowserType
+from playwright.helper import Error
 
 __dirname = os.path.dirname(os.path.abspath(__file__))
 

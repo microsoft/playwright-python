@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.connection import ChannelOwner, ConnectionScope
 from types import SimpleNamespace
 from typing import Dict
+
+from playwright.connection import ChannelOwner, ConnectionScope
 
 
 class BrowserServer(ChannelOwner):

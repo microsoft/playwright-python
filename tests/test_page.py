@@ -14,8 +14,10 @@
 
 import asyncio
 import os
-import pytest
 import re
+
+import pytest
+
 from playwright import Error, TimeoutError
 
 __dirname = os.path.dirname(os.path.realpath(__file__))

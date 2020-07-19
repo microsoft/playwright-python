@@ -16,10 +16,9 @@ import base64
 import mimetypes
 import os
 import sys
-from playwright.connection import (
-    ConnectionScope,
-    from_nullable_channel,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+
+from playwright.connection import ConnectionScope, from_nullable_channel
 from playwright.helper import (
     FilePayload,
     KeyboardModifier,
@@ -27,18 +26,7 @@ from playwright.helper import (
     SelectOption,
     locals_to_params,
 )
-from playwright.js_handle import parse_result, serialize_argument, JSHandle
-
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Union,
-    TYPE_CHECKING,
-    cast,
-)
+from playwright.js_handle import JSHandle, parse_result, serialize_argument
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

@@ -17,8 +17,8 @@ import gzip
 import os
 import shutil
 import stat
-import sys
 import subprocess
+import sys
 
 from playwright.connection import Connection
 from playwright.object_factory import create_remote_object

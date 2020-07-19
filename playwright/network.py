@@ -14,14 +14,15 @@
 
 import base64
 import json
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+
 from playwright.connection import (
     ChannelOwner,
     ConnectionScope,
-    from_nullable_channel,
     from_channel,
+    from_nullable_channel,
 )
-from playwright.helper import Error, ContinueParameters, Header
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING, cast
+from playwright.helper import ContinueParameters, Error, Header
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.frame import Frame

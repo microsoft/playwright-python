@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any, Dict
+
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
 from playwright.browser_server import BrowserServer
@@ -27,7 +29,6 @@ from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page
 from playwright.playwright import Playwright
 from playwright.worker import Worker
-from typing import Any, Dict
 
 
 class DummyObject(ChannelOwner):

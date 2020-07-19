@@ -13,8 +13,11 @@
 # limitations under the License.
 
 import asyncio
-from pyee import BaseEventEmitter
 import sys
+from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Optional, Set, Union, cast
+
+from pyee import BaseEventEmitter
+
 from playwright.connection import (
     ChannelOwner,
     ConnectionScope,
@@ -28,16 +31,15 @@ from playwright.element_handle import (
     normalize_file_payloads,
 )
 from playwright.helper import (
+    DocumentLoadState,
     FilePayload,
-    is_function_body,
-    locals_to_params,
     KeyboardModifier,
     MouseButton,
-    DocumentLoadState,
+    is_function_body,
+    locals_to_params,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Response
-from typing import Any, Awaitable, Dict, List, Optional, Set, Union, TYPE_CHECKING, cast
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

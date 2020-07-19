@@ -13,9 +13,10 @@
 # limitations under the License.
 
 import asyncio
+
 import pytest
-from playwright import Error
-from playwright import TimeoutError, devices
+
+from playwright import Error, TimeoutError, devices
 
 
 async def give_it_a_chance_to_click(page):

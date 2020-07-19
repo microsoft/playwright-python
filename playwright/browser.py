@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import sys
-from playwright.browser_context import BrowserContext
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
-from playwright.helper import locals_to_params, ColorScheme
-from playwright.network import serialize_headers
-from playwright.page import Page
 from types import SimpleNamespace
 from typing import Dict, List, Union
+
+from playwright.browser_context import BrowserContext
+from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.helper import ColorScheme, locals_to_params
+from playwright.network import serialize_headers
+from playwright.page import Page
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
