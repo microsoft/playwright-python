@@ -222,7 +222,7 @@ async def test_timeout_waiting_for_display_none_to_be_gone(page, server):
         await page.click("button", timeout=5000)
     except Error as e:
         error = e
-    assert "Timeout 5000ms exceeded during" in error.message
+    assert "Timeout 5000ms exceeded" in error.message
     assert "waiting for element to be visible, enabled and not moving" in error.message
     assert "element is not visible - waiting" in error.message
 
@@ -234,7 +234,7 @@ async def test_timeout_waiting_for_visbility_hidden_to_be_gone(page, server):
         await page.click("button", timeout=5000)
     except Error as e:
         error = e
-    assert "Timeout 5000ms exceeded during" in error.message
+    assert "Timeout 5000ms exceeded" in error.message
     assert "waiting for element to be visible, enabled and not moving" in error.message
     assert "element is not visible - waiting" in error.message
 
@@ -527,7 +527,7 @@ async def test_timeout_waiting_for_stable_position(page, server):
         await button.click(timeout=5000)
     except Error as e:
         error = e
-    assert "Timeout 5000ms exceeded during elementHandle.click." in error.message
+    assert "Timeout 5000ms exceeded." in error.message
     assert "waiting for element to be visible, enabled and not moving" in error.message
     assert "element is moving - waiting" in error.message
 
@@ -593,9 +593,8 @@ async def test_timeout_waiting_for_hit_target(page, server):
         await button.click(timeout=5000)
     except TimeoutError as e:
         error = e
-    assert "Timeout 5000ms exceeded during elementHandle.click." in error.message
+    assert "Timeout 5000ms exceeded." in error.message
     assert "element does not receive pointer events" in error.message
-    assert "retrying elementHandle.click action" in error.message
 
 
 async def test_fail_when_obscured_and_not_waiting_for_hit_target(page, server):
@@ -647,7 +646,7 @@ async def test_timeout_waiting_for_button_to_be_enabled(page, server):
     except TimeoutError as e:
         error = e
     assert await page.evaluate("window.__CLICKED") is None
-    assert "Timeout 3000ms exceeded during" in error.message
+    assert "Timeout 3000ms exceeded" in error.message
     assert "element is disabled - waiting" in error.message
 
 
@@ -950,7 +949,7 @@ async def test_timeout_when_click_opens_alert(page, server):
         await page.click("div", timeout=3000)
     except TimeoutError as e:
         error = e
-    assert "Timeout 3000ms exceeded during" in error.message
+    assert "Timeout 3000ms exceeded" in error.message
     dialog = await dialog_promise
     await dialog.dismiss()
 

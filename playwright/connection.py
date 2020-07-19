@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import sys
 import traceback
 from playwright.helper import parse_error, ParsedMessagePayload
 from playwright.transport import Transport
@@ -30,7 +31,13 @@ class Channel(BaseEventEmitter):
     async def send(self, method: str, params: dict = None) -> Any:
         if params is None:
             params = dict()
-        return await self._scope.send_message_to_server(self._guid, method, params)
+        result = await self._scope.send_message_to_server(self._guid, method, params)
+        # Protocol now has named return values, assume result is one level deeper unless
+        # there is explicit ambiguity.
+        if isinstance(result, dict) and len(result) == 1:
+            key = next(iter(result))
+            return result[key]
+        return result
 
 
 class ChannelOwner(BaseEventEmitter):
@@ -172,7 +179,13 @@ class Connection:
             return
 
         object = self._objects[guid]
-        object._channel.emit(method, self._replace_guids_with_channels(params))
+        try:
+            object._channel.emit(method, self._replace_guids_with_channels(params))
+        except Exception:
+            print(
+                "Error dispatching the event",
+                "".join(traceback.format_exception(*sys.exc_info())),
+            )
 
     def _replace_channels_with_guids(self, payload: Any) -> Any:
         if payload is None:

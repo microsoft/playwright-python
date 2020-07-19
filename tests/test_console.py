@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import pytest
-
 from playwright.console_message import ConsoleMessage
 from typing import List
 
@@ -125,7 +123,6 @@ async def test_console_should_have_location_for_console_api_calls(page, server):
     assert location == {"url": server.PREFIX + "/consolelog.html", "lineNumber": 7}
 
 
-@pytest.mark.skip_browser("firefox")  # a fix just landed upstream, will roll later
 async def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(
     page, server
 ):
@@ -135,19 +132,19 @@ async def test_console_should_not_throw_when_there_are_console_messages_in_detac
             page.waitForEvent("popup"),
             page.evaluate(
                 """async() => {
-        // 1. Create a popup that Playwright is not connected to.
-        const win = window.open('');
-        window._popup = win;
-        if (window.document.readyState !== 'complete')
-          await new Promise(f => window.addEventListener('load', f));
-        // 2. In this popup, create an iframe that console.logs a message.
-        win.document.body.innerHTML = `<iframe src='/consolelog.html'></iframe>`;
-        const frame = win.document.querySelector('iframe');
-        if (!frame.contentDocument || frame.contentDocument.readyState !== 'complete')
-          await new Promise(f => frame.addEventListener('load', f));
-        // 3. After that, remove the iframe.
-        frame.remove();
-      }"""
+                    // 1. Create a popup that Playwright is not connected to.
+                    const win = window.open('');
+                    window._popup = win;
+                    if (window.document.readyState !== 'complete')
+                    await new Promise(f => window.addEventListener('load', f));
+                    // 2. In this popup, create an iframe that console.logs a message.
+                    win.document.body.innerHTML = `<iframe src='/consolelog.html'></iframe>`;
+                    const frame = win.document.querySelector('iframe');
+                    if (!frame.contentDocument || frame.contentDocument.readyState !== 'complete')
+                    await new Promise(f => frame.addEventListener('load', f));
+                    // 3. After that, remove the iframe.
+                    frame.remove();
+                }"""
             ),
         )
     )[0]

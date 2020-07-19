@@ -21,7 +21,7 @@ from typing import Dict, List
 
 class BrowserType(ChannelOwner):
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+        super().__init__(scope, guid, initializer, True)
 
     @property
     def name(self) -> str:
