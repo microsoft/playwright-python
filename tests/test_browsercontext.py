@@ -134,7 +134,7 @@ async def test_close_should_work_for_empty_context(browser):
     await context.close()
 
 
-async def test_close_should_abort_waitForEvent(browser):
+async def test_close_should_abort_wait_for_event(browser):
     context = await browser.newContext()
     promise = asyncio.ensure_future(context.waitForEvent("page"))
     await context.close()
