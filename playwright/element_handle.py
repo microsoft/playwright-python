@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import base64
+import mimetypes
+import os
 import sys
 from playwright.connection import (
     ConnectionScope,
@@ -20,12 +22,13 @@ from playwright.connection import (
 )
 from playwright.helper import (
     FilePayload,
-    SelectOption,
-    locals_to_params,
     KeyboardModifier,
     MouseButton,
+    SelectOption,
+    locals_to_params,
 )
 from playwright.js_handle import parse_result, serialize_argument, JSHandle
+
 from typing import (
     Any,
     Callable,
@@ -113,10 +116,12 @@ class ElementHandle(JSHandle):
 
     async def selectOption(
         self, values: "ValuesToSelect", timeout: int = None, noWaitAfter: bool = None
-    ) -> None:
+    ) -> List[str]:
         params = locals_to_params(locals())
-        params["values"] = convertSelectOptionValues(values)
-        await self._channel.send("selectOption", params)
+        if "values" in params:
+            values = params.pop("values")
+            params = {**params, **convert_select_option_values(values)}
+        return await self._channel.send("selectOption", params)
 
     async def fill(
         self, value: str, timeout: int = None, noWaitAfter: bool = None
@@ -132,7 +137,9 @@ class ElementHandle(JSHandle):
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send("setInputFiles", locals_to_params(locals()))
+        params = locals_to_params(locals())
+        params["files"] = normalize_file_payloads(files)
+        await self._channel.send("setInputFiles", params)
 
     async def focus(self) -> None:
         await self._channel.send("focus")
@@ -230,11 +237,38 @@ ValuesToSelect = Union[
 ]
 
 
-def convertSelectOptionValues(arg: ValuesToSelect) -> Any:
+def convert_select_option_values(arg: ValuesToSelect) -> Any:
     if arg is None:
-        return []
-    if isinstance(arg, ElementHandle):
-        return arg._channel
-    if isinstance(arg, list) and len(arg) and isinstance(arg[0], ElementHandle):
-        return list(map(lambda e: e._channel, arg))
-    return arg
+        return dict()
+    arg_list = arg if isinstance(arg, list) else [arg]
+    if not len(arg_list):
+        return dict()
+    if isinstance(arg_list[0], ElementHandle):
+        element_list = cast(List[ElementHandle], arg_list)
+        return dict(elements=list(map(lambda e: e._channel, element_list)))
+    if isinstance(arg_list[0], str):
+        return dict(options=list(map(lambda e: dict(value=e), arg_list)))
+    return dict(options=arg_list)
+
+
+def normalize_file_payloads(
+    files: Union[str, FilePayload, List[str], List[FilePayload]]
+) -> List[FilePayload]:
+    file_list = files if isinstance(files, list) else [files]
+    file_payloads: List[FilePayload] = []
+    for item in file_list:
+        if isinstance(item, str):
+            with open(item, mode="rb") as fd:
+                file: FilePayload = {
+                    "name": os.path.basename(item),
+                    "mimeType": mimetypes.guess_type(item)[0]
+                    or "application/octet-stream",
+                    "buffer": base64.b64encode(fd.read()).decode(),
+                }
+                file_payloads.append(file)
+        else:
+            if isinstance(item["buffer"], bytes):
+                item["buffer"] = base64.b64encode(item["buffer"]).decode()
+            file_payloads.append(item)
+
+    return file_payloads

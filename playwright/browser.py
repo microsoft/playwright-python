@@ -16,6 +16,7 @@ import sys
 from playwright.browser_context import BrowserContext
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import locals_to_params, ColorScheme
+from playwright.network import serialize_headers
 from playwright.page import Page
 from types import SimpleNamespace
 from typing import Dict, List, Union
@@ -37,9 +38,6 @@ class Browser(ChannelOwner):
 
         self._contexts: List[BrowserContext] = list()
         self._channel.on("close", lambda _: self._on_close())
-        self._channel.on(
-            "contextClosed", lambda context: self._contexts.remove(context)
-        )
 
     def _on_close(self) -> None:
         self._is_connected = False
@@ -77,6 +75,8 @@ class Browser(ChannelOwner):
         params = locals_to_params(locals())
         if viewport == 0:
             params["viewport"] = None
+        if extraHTTPHeaders:
+            params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
         channel = await self._channel.send("newContext", params)
         context = from_channel(channel)
         self._contexts.append(context)

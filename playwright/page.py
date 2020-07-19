@@ -26,7 +26,7 @@ from playwright.element_handle import ElementHandle, ValuesToSelect
 from playwright.file_chooser import FileChooser
 from playwright.helper import locals_to_params
 from playwright.input import Keyboard, Mouse
-from playwright.js_handle import JSHandle
+from playwright.js_handle import JSHandle, serialize_argument
 from playwright.frame import Frame
 from playwright.helper import (
     is_function_body,
@@ -49,7 +49,7 @@ from playwright.helper import (
     ColorScheme,
     Viewport,
 )
-from playwright.network import Request, Response, Route
+from playwright.network import Request, Response, Route, serialize_headers
 from playwright.worker import Worker
 from types import SimpleNamespace
 from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING, cast
@@ -105,23 +105,30 @@ class Page(ChannelOwner):
 
         self._channel.on(
             "bindingCall",
-            lambda binding_call: self._on_binding(from_channel(binding_call)),
+            lambda params: self._on_binding(from_channel(params["binding"])),
         )
         self._channel.on("close", lambda _: self._on_close())
         self._channel.on(
             "console",
-            lambda message: self.emit(Page.Events.Console, from_channel(message)),
+            lambda params: self.emit(
+                Page.Events.Console, from_channel(params["message"])
+            ),
         )
         self._channel.on("crash", lambda _: self._on_crash())
         self._channel.on(
-            "dialog", lambda dialog: self.emit(Page.Events.Dialog, from_channel(dialog))
+            "dialog",
+            lambda params: self.emit(
+                Page.Events.Dialog, from_channel(params["dialog"])
+            ),
         )
         self._channel.on(
             "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded)
         )
         self._channel.on(
             "download",
-            lambda download: self.emit(Page.Events.Download, from_channel(download)),
+            lambda params: self.emit(
+                Page.Events.Download, from_channel(params["download"])
+            ),
         )
         self._channel.on(
             "fileChooser",
@@ -133,16 +140,12 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on(
-            "frameAttached", lambda frame: self._on_frame_attached(from_channel(frame))
+            "frameAttached",
+            lambda params: self._on_frame_attached(from_channel(params["frame"])),
         )
         self._channel.on(
-            "frameDetached", lambda frame: self._on_frame_detached(from_channel(frame))
-        )
-        self._channel.on(
-            "frameNavigated",
-            lambda params: self._on_frame_navigated(
-                from_channel(params["frame"]), params["url"], params["name"]
-            ),
+            "frameDetached",
+            lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
         self._channel.on("load", lambda _: self.emit(Page.Events.Load))
         self._channel.on(
@@ -152,11 +155,14 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on(
-            "popup", lambda popup: self.emit(Page.Events.Popup, from_channel(popup))
+            "popup",
+            lambda params: self.emit(Page.Events.Popup, from_channel(params["page"])),
         )
         self._channel.on(
             "request",
-            lambda request: self.emit(Page.Events.Request, from_channel(request)),
+            lambda params: self.emit(
+                Page.Events.Request, from_channel(params["request"])
+            ),
         )
         self._channel.on(
             "requestFailed",
@@ -166,13 +172,15 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "requestFinished",
-            lambda request: self.emit(
-                Page.Events.RequestFinished, from_channel(request)
+            lambda params: self.emit(
+                Page.Events.RequestFinished, from_channel(params["request"])
             ),
         )
         self._channel.on(
             "response",
-            lambda response: self.emit(Page.Events.Response, from_channel(response)),
+            lambda params: self.emit(
+                Page.Events.Response, from_channel(params["response"])
+            ),
         )
         self._channel.on(
             "route",
@@ -180,7 +188,9 @@ class Page(ChannelOwner):
                 from_channel(params["route"]), from_channel(params["request"])
             ),
         )
-        self._channel.on("worker", lambda worker: self._on_worker(from_channel(worker)))
+        self._channel.on(
+            "worker", lambda params: self._on_worker(from_channel(params["worker"]))
+        )
 
     def _set_browser_context(self, context: "BrowserContext") -> None:
         self._browser_context = context
@@ -199,11 +209,6 @@ class Page(ChannelOwner):
         self._frames.remove(frame)
         frame._detached = True
         self.emit(Page.Events.FrameDetached, frame)
-
-    def _on_frame_navigated(self, frame: Frame, url: str, name: str) -> None:
-        frame._url = url
-        frame._name = name
-        self.emit(Page.Events.FrameNavigated, frame)
 
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
@@ -344,7 +349,9 @@ class Page(ChannelOwner):
         await self._channel.send("exposeBinding", dict(name=name))
 
     async def setExtraHTTPHeaders(self, headers: Dict) -> None:
-        await self._channel.send("setExtraHTTPHeaders", dict(headers=headers))
+        await self._channel.send(
+            "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
+        )
 
     @property
     def url(self) -> str:
@@ -580,7 +587,7 @@ class Page(ChannelOwner):
         values: ValuesToSelect,
         timeout: int = None,
         noWaitAfter: bool = None,
-    ) -> None:
+    ) -> List[str]:
         params = locals_to_params(locals())
         if "values" not in params:
             params["values"] = None
@@ -699,7 +706,7 @@ class BindingCall(ChannelOwner):
             result = func(source, *self._initializer["args"])
             if isinstance(result, asyncio.Future):
                 result = await result
-            await self._channel.send("resolve", dict(result=result))
+            await self._channel.send("resolve", dict(result=serialize_argument(result)))
         except Exception as e:
             tb = sys.exc_info()[2]
             asyncio.ensure_future(

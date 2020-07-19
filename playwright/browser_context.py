@@ -29,7 +29,7 @@ from playwright.helper import (
     URLMatch,
     URLMatcher,
 )
-from playwright.network import Request, Route
+from playwright.network import Request, Route, serialize_headers
 from playwright.page import BindingCall, Page, wait_for_event
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
@@ -53,20 +53,18 @@ class BrowserContext(ChannelOwner):
         self._owner_page: Optional[Page] = None
         self._is_closed_or_closing = False
 
-        for channel in initializer["pages"]:
-            page = from_channel(channel)
-            self._pages.append(page)
-            page._set_browser_context(self)
         self._channel.on(
             "bindingCall",
-            lambda binding_call: self._on_binding(from_channel(binding_call)),
+            lambda params: self._on_binding(from_channel(params["binding"])),
         )
         self._channel.on("close", lambda _: self._on_close())
-        self._channel.on("page", lambda page: self._on_page(from_channel(page)))
+        self._channel.on(
+            "page", lambda params: self._on_page(from_channel(params["page"]))
+        )
         self._channel.on(
             "route",
-            lambda event: self._on_route(
-                from_channel(event.get("route")), from_channel(event.get("request"))
+            lambda params: self._on_route(
+                from_channel(params.get("route")), from_channel(params.get("request"))
             ),
         )
 
@@ -136,7 +134,9 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("setGeolocation", dict(geolocation=geolocation))
 
     async def setExtraHTTPHeaders(self, headers: Dict) -> None:
-        await self._channel.send("setExtraHTTPHeaders", dict(headers=headers))
+        await self._channel.send(
+            "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
+        )
 
     async def setOffline(self, offline: bool) -> None:
         await self._channel.send("setOffline", dict(offline=offline))

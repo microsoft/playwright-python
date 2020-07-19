@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+from pyee import BaseEventEmitter
 import sys
 from playwright.connection import (
     ChannelOwner,
@@ -22,8 +23,9 @@ from playwright.connection import (
 )
 from playwright.element_handle import (
     ElementHandle,
-    convertSelectOptionValues,
     ValuesToSelect,
+    convert_select_option_values,
+    normalize_file_payloads,
 )
 from playwright.helper import (
     FilePayload,
@@ -35,8 +37,7 @@ from playwright.helper import (
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Response
-from playwright.serializers import normalize_file_payloads
-from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
+from typing import Any, Awaitable, Dict, List, Optional, Set, Union, TYPE_CHECKING, cast
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -57,7 +58,29 @@ class Frame(ChannelOwner):
         self._url = initializer["url"]
         self._detached = False
         self._child_frames: List[Frame] = list()
-        self._page: Optional["Page"]
+        self._page: "Page"
+        self._load_states: Set[str] = set()
+        self._event_emitter = BaseEventEmitter()
+        self._channel.on(
+            "loadstate",
+            lambda params: self._on_load_state(params.get("add"), params.get("remove")),
+        )
+        self._channel.on(
+            "navigated",
+            lambda params: self._on_frame_navigated(params["url"], params["name"]),
+        )
+
+    def _on_load_state(self, add: str = None, remove: str = None) -> None:
+        if add:
+            self._load_states.add(add)
+            self._event_emitter.emit("loadstate", add)
+        elif remove and remove in self._load_states:
+            self._load_states.remove(remove)
+
+    def _on_frame_navigated(self, url: str, name: str) -> None:
+        self._url = url
+        self._name = name
+        self._page.emit("framenavigated", self)
 
     async def goto(
         self,
@@ -89,7 +112,17 @@ class Frame(ChannelOwner):
         )
 
     async def waitForLoadState(self, state: str = "load", timeout: int = None) -> None:
-        await self._channel.send("waitForLoadState", locals_to_params(locals()))
+        if state in self._load_states:
+            return
+        future = self._scope._loop.create_future()
+
+        def loadstate(s: str) -> None:
+            if state == s:
+                future.set_result(None)
+                self._event_emitter.remove_listener("loadstate", loadstate)
+
+        self._event_emitter.on("loadstate", loadstate)
+        await future
 
     async def frameElement(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))
@@ -216,16 +249,22 @@ class Frame(ChannelOwner):
     async def addScriptTag(
         self, url: str = None, path: str = None, content: str = None, type: str = None,
     ) -> ElementHandle:
-        return from_channel(
-            await self._channel.send("addScriptTag", locals_to_params(locals()))
-        )
+        params = locals_to_params(locals())
+        if path:
+            with open(path, "r") as file:
+                params["content"] = file.read() + "\n//# sourceURL=" + path
+                del params["path"]
+        return from_channel(await self._channel.send("addScriptTag", params))
 
     async def addStyleTag(
         self, url: str = None, path: str = None, content: str = None
     ) -> ElementHandle:
-        return from_channel(
-            await self._channel.send("addStyleTag", locals_to_params(locals()))
-        )
+        params = locals_to_params(locals())
+        if path:
+            with open(path, "r") as file:
+                params["content"] = file.read() + "\n/*# sourceURL=" + path + "*/"
+                del params["path"]
+        return from_channel(await self._channel.send("addStyleTag", params))
 
     async def click(
         self,
@@ -289,21 +328,17 @@ class Frame(ChannelOwner):
         values: ValuesToSelect,
         timeout: int = None,
         noWaitAfter: bool = None,
-    ) -> None:
-        return await self._channel.send(
-            "selectOption",
-            dict(
-                selector=selector,
-                values=convertSelectOptionValues(values),
-                timeout=timeout,
-                noWaitAfter=noWaitAfter,
-            ),
-        )
+    ) -> List[str]:
+        params = locals_to_params(locals())
+        if "values" in params:
+            values = params.pop("values")
+            params = dict(**params, **convert_select_option_values(values))
+        return await self._channel.send("selectOption", params)
 
     async def setInputFiles(
         self,
         selector: str,
-        files: Union[str, FilePayload, List[Union[str, FilePayload]]],
+        files: Union[str, FilePayload, List[str], List[FilePayload]],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:

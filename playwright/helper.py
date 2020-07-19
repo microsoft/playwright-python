@@ -77,9 +77,14 @@ class ErrorPayload(TypedDict, total=False):
     value: Any
 
 
+class Header(TypedDict):
+    name: str
+    value: str
+
+
 class ContinueParameters(TypedDict, total=False):
     method: str
-    headers: Dict[str, str]
+    headers: List[Header]
     postData: str
 
 

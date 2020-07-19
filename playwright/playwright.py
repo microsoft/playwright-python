@@ -23,7 +23,9 @@ class Playwright(ChannelOwner):
         self.chromium: BrowserType = from_channel(initializer["chromium"])
         self.firefox: BrowserType = from_channel(initializer["firefox"])
         self.webkit: BrowserType = from_channel(initializer["webkit"])
-        self.devices = initializer["deviceDescriptors"]
+        self.devices = dict()
+        for device in initializer["deviceDescriptors"]:
+            self.devices[device["name"]] = device["descriptor"]
         self.browser_types: Dict[str, BrowserType] = dict(
             chromium=self.chromium, webkit=self.webkit, firefox=self.firefox
         )
