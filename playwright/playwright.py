@@ -16,6 +16,7 @@ from typing import Dict
 
 from playwright.browser_type import BrowserType
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.selectors import Selectors
 
 
 class Playwright(ChannelOwner):
@@ -24,9 +25,11 @@ class Playwright(ChannelOwner):
         self.chromium: BrowserType = from_channel(initializer["chromium"])
         self.firefox: BrowserType = from_channel(initializer["firefox"])
         self.webkit: BrowserType = from_channel(initializer["webkit"])
-        self.devices = dict()
-        for device in initializer["deviceDescriptors"]:
-            self.devices[device["name"]] = device["descriptor"]
+        self.selectors: Selectors = from_channel(initializer["selectors"])
+        self.devices = {
+            device["name"]: device["descriptor"]
+            for device in initializer["deviceDescriptors"]
+        }
         self.browser_types: Dict[str, BrowserType] = dict(
             chromium=self.chromium, webkit=self.webkit, firefox=self.firefox
         )

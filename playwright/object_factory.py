@@ -28,6 +28,7 @@ from playwright.js_handle import JSHandle
 from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page
 from playwright.playwright import Playwright
+from playwright.selectors import Selectors
 from playwright.worker import Worker
 
 
@@ -73,4 +74,6 @@ def create_remote_object(
         return Route(scope, guid, initializer)
     if type == "worker":
         return Worker(scope, guid, initializer)
+    if type == "selectors":
+        return Selectors(scope, guid, initializer)
     return DummyObject(scope, guid, initializer)

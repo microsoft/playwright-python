@@ -43,6 +43,11 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
+def selectors():
+    return playwright.selectors
+
+
+@pytest.fixture(scope="session")
 def browser_type(browser_name: str):
     return playwright.browser_types[browser_name]
 
