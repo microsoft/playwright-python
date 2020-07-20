@@ -14,14 +14,15 @@
 
 import base64
 import json
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+
 from playwright.connection import (
     ChannelOwner,
     ConnectionScope,
-    from_nullable_channel,
     from_channel,
+    from_nullable_channel,
 )
-from playwright.helper import Error, ContinueParameters
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING, cast
+from playwright.helper import ContinueParameters, Error, Header
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.frame import Frame
@@ -56,9 +57,8 @@ class Request(ChannelOwner):
 
     @property
     def headers(self) -> Dict[str, str]:
-        return {**self._initializer["headers"]}
+        return parse_headers(self._initializer["headers"])
 
-    @property
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
 
@@ -99,7 +99,7 @@ class Route(ChannelOwner):
         headers: Dict[str, str] = dict(),
         body: Union[str, bytes] = None,
     ) -> None:
-        response = dict(status=status, headers=headers)
+        response = dict(status=status, headers=serialize_headers(headers))
         if isinstance(body, str):
             response["body"] = body
             response["isBase64"] = False
@@ -118,7 +118,7 @@ class Route(ChannelOwner):
         if method:
             overrides["method"] = method
         if headers:
-            overrides["headers"] = headers
+            overrides["headers"] = serialize_headers(headers)
         if isinstance(postData, str):
             overrides["postData"] = base64.b64encode(bytes(postData, "utf-8")).decode()
         elif isinstance(postData, bytes):
@@ -150,7 +150,7 @@ class Response(ChannelOwner):
 
     @property
     def headers(self) -> Dict[str, str]:
-        return self._initializer["headers"]
+        return parse_headers(self._initializer["headers"])
 
     async def finished(self) -> Optional[Error]:
         return await self._channel.send("finished")
@@ -173,3 +173,11 @@ class Response(ChannelOwner):
     @property
     def frame(self) -> "Frame":
         return self.request.frame
+
+
+def serialize_headers(headers: Dict[str, str]) -> List[Header]:
+    return [{"name": name, "value": value} for name, value in headers.items()]
+
+
+def parse_headers(headers: List[Header]) -> Dict[str, str]:
+    return {header["name"]: header["value"] for header in headers}

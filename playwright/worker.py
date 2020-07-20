@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from types import SimpleNamespace
 from typing import Any, Dict
 
-from types import SimpleNamespace
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
-from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.helper import is_function_body
+from playwright.js_handle import JSHandle, parse_result, serialize_argument
 
 
 class Worker(ChannelOwner):

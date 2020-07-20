@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.connection import ChannelOwner, ConnectionScope
 from typing import Dict, Optional
+
+from playwright.connection import ChannelOwner, ConnectionScope
 
 
 class Download(ChannelOwner):

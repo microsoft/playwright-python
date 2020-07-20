@@ -14,6 +14,10 @@
 
 import asyncio
 import sys
+from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Optional, Set, Union, cast
+
+from pyee import BaseEventEmitter
+
 from playwright.connection import (
     ChannelOwner,
     ConnectionScope,
@@ -22,21 +26,25 @@ from playwright.connection import (
 )
 from playwright.element_handle import (
     ElementHandle,
-    convertSelectOptionValues,
     ValuesToSelect,
+    convert_select_option_values,
+    normalize_file_payloads,
 )
 from playwright.helper import (
+    DocumentLoadState,
+    Error,
     FilePayload,
-    is_function_body,
-    locals_to_params,
+    FrameNavigatedEvent,
     KeyboardModifier,
     MouseButton,
-    DocumentLoadState,
+    URLMatch,
+    URLMatcher,
+    is_function_body,
+    locals_to_params,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Response
-from playwright.serializers import normalize_file_payloads
-from typing import Any, Awaitable, Dict, List, Optional, Union, TYPE_CHECKING, cast
+from playwright.wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -57,13 +65,38 @@ class Frame(ChannelOwner):
         self._url = initializer["url"]
         self._detached = False
         self._child_frames: List[Frame] = list()
-        self._page: Optional["Page"]
+        self._page: "Page"
+        self._load_states: Set[str] = set()
+        self._event_emitter = BaseEventEmitter()
+        self._channel.on(
+            "loadstate",
+            lambda params: self._on_load_state(params.get("add"), params.get("remove")),
+        )
+        self._channel.on(
+            "navigated", lambda params: self._on_frame_navigated(params),
+        )
+
+    def _on_load_state(
+        self, add: DocumentLoadState = None, remove: DocumentLoadState = None
+    ) -> None:
+        if add:
+            self._load_states.add(add)
+            self._event_emitter.emit("loadstate", add)
+        elif remove and remove in self._load_states:
+            self._load_states.remove(remove)
+
+    def _on_frame_navigated(self, event: FrameNavigatedEvent) -> None:
+        self._url = event["url"]
+        self._name = event["name"]
+        self._event_emitter.emit("navigated", event)
+        if "error" not in event and self._page:
+            self._page.emit("framenavigated", self)
 
     async def goto(
         self,
         url: str,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = "load",
         referer: str = None,
     ) -> Optional[Response]:
         return cast(
@@ -73,23 +106,54 @@ class Frame(ChannelOwner):
             ),
         )
 
+    def _setup_navigation_wait_helper(self, timeout: int = None) -> WaitHelper:
+        wait_helper = WaitHelper()
+        wait_helper.reject_on_event(
+            self._page, "close", Error("Navigation failed because page was closed!")
+        )
+        wait_helper.reject_on_event(
+            self._page, "crash", Error("Navigation failed because page crashed!")
+        )
+        wait_helper.reject_on_event(
+            self._page,
+            "framedetached",
+            Error("Navigating frame was detached!"),
+            lambda frame: frame == self,
+        )
+        if timeout is None:
+            timeout = self._page._timeout_settings.navigation_timeout()
+        wait_helper.reject_on_timeout(timeout, f"Timeout {timeout}ms exceeded.")
+        return wait_helper
+
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
-        url: str = None,  # TODO: add url, callback
+        waitUntil: DocumentLoadState = "load",
+        url: URLMatch = None,
     ) -> Optional[Response]:
-        return cast(
-            Optional[Response],
-            from_nullable_channel(
-                await self._channel.send(
-                    "waitForNavigation", locals_to_params(locals())
-                )
-            ),
+        wait_helper = self._setup_navigation_wait_helper(timeout)
+        matcher = URLMatcher(url) if url else None
+        event = await wait_helper.wait_for_event(
+            self._event_emitter,
+            "navigated",
+            lambda event: not matcher or matcher.matches(event["url"]),
         )
+        if "newDocument" in event and "request" in event["newDocument"]:
+            request = from_channel(event["newDocument"]["request"])
+            return await request.response()
+        if "error" in event:
+            raise Error(event["error"])
+        return None
 
-    async def waitForLoadState(self, state: str = "load", timeout: int = None) -> None:
-        await self._channel.send("waitForLoadState", locals_to_params(locals()))
+    async def waitForLoadState(
+        self, state: DocumentLoadState = "load", timeout: int = None
+    ) -> None:
+        if state in self._load_states:
+            return
+        wait_helper = self._setup_navigation_wait_helper(timeout)
+        await wait_helper.wait_for_event(
+            self._event_emitter, "loadstate", lambda s: s == state
+        )
 
     async def frameElement(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))
@@ -216,16 +280,22 @@ class Frame(ChannelOwner):
     async def addScriptTag(
         self, url: str = None, path: str = None, content: str = None, type: str = None,
     ) -> ElementHandle:
-        return from_channel(
-            await self._channel.send("addScriptTag", locals_to_params(locals()))
-        )
+        params = locals_to_params(locals())
+        if path:
+            with open(path, "r") as file:
+                params["content"] = file.read() + "\n//# sourceURL=" + path
+                del params["path"]
+        return from_channel(await self._channel.send("addScriptTag", params))
 
     async def addStyleTag(
         self, url: str = None, path: str = None, content: str = None
     ) -> ElementHandle:
-        return from_channel(
-            await self._channel.send("addStyleTag", locals_to_params(locals()))
-        )
+        params = locals_to_params(locals())
+        if path:
+            with open(path, "r") as file:
+                params["content"] = file.read() + "\n/*# sourceURL=" + path + "*/"
+                del params["path"]
+        return from_channel(await self._channel.send("addStyleTag", params))
 
     async def click(
         self,
@@ -289,21 +359,17 @@ class Frame(ChannelOwner):
         values: ValuesToSelect,
         timeout: int = None,
         noWaitAfter: bool = None,
-    ) -> None:
-        return await self._channel.send(
-            "selectOption",
-            dict(
-                selector=selector,
-                values=convertSelectOptionValues(values),
-                timeout=timeout,
-                noWaitAfter=noWaitAfter,
-            ),
-        )
+    ) -> List[str]:
+        params = locals_to_params(locals())
+        if "values" in params:
+            values = params.pop("values")
+            params = dict(**params, **convert_select_option_values(values))
+        return await self._channel.send("selectOption", params)
 
     async def setInputFiles(
         self,
         selector: str,
-        files: Union[str, FilePayload, List[Union[str, FilePayload]]],
+        files: Union[str, FilePayload, List[str], List[FilePayload]],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:

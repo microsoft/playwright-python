@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 from playwright.connection import Channel
 from playwright.element_handle import ElementHandle
-from typing import Dict
 
 
 class Accessibility:
@@ -22,9 +23,9 @@ class Accessibility:
         self._channel = channel
 
     async def snapshot(
-        self, interestingOnly: bool = None, root: ElementHandle = None
+        self, interestingOnly: bool = True, root: ElementHandle = None
     ) -> Dict:
         root = root._channel if root else None
         return await self._channel.send(
-            "snapshot", dict(root=root, interestingOnly=interestingOnly)
+            "accessibilitySnapshot", dict(root=root, interestingOnly=interestingOnly)
         )

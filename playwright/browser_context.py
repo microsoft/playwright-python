@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import asyncio
-from playwright.connection import (
-    ChannelOwner,
-    ConnectionScope,
-    from_channel,
-)
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+
+from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import (
     Cookie,
     Error,
@@ -29,10 +28,9 @@ from playwright.helper import (
     URLMatch,
     URLMatcher,
 )
-from playwright.network import Request, Route
-from playwright.page import BindingCall, Page, wait_for_event
-from types import SimpleNamespace
-from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+from playwright.network import Request, Route, serialize_headers
+from playwright.page import BindingCall, Page
+from playwright.wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.browser import Browser
@@ -53,20 +51,18 @@ class BrowserContext(ChannelOwner):
         self._owner_page: Optional[Page] = None
         self._is_closed_or_closing = False
 
-        for channel in initializer["pages"]:
-            page = from_channel(channel)
-            self._pages.append(page)
-            page._set_browser_context(self)
         self._channel.on(
             "bindingCall",
-            lambda binding_call: self._on_binding(from_channel(binding_call)),
+            lambda params: self._on_binding(from_channel(params["binding"])),
         )
         self._channel.on("close", lambda _: self._on_close())
-        self._channel.on("page", lambda page: self._on_page(from_channel(page)))
+        self._channel.on(
+            "page", lambda params: self._on_page(from_channel(params["page"]))
+        )
         self._channel.on(
             "route",
-            lambda event: self._on_route(
-                from_channel(event.get("route")), from_channel(event.get("request"))
+            lambda params: self._on_route(
+                from_channel(params.get("route")), from_channel(params.get("request"))
             ),
         )
 
@@ -136,7 +132,9 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("setGeolocation", dict(geolocation=geolocation))
 
     async def setExtraHTTPHeaders(self, headers: Dict) -> None:
-        await self._channel.send("setExtraHTTPHeaders", dict(headers=headers))
+        await self._channel.send(
+            "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
+        )
 
     async def setOffline(self, offline: bool) -> None:
         await self._channel.send("setOffline", dict(offline=offline))
@@ -170,7 +168,9 @@ class BrowserContext(ChannelOwner):
                 "setNetworkInterceptionEnabled", dict(enabled=True)
             )
 
-    async def unroute(self, match: URLMatch, handler: Optional[RouteHandler]) -> None:
+    async def unroute(
+        self, match: URLMatch, handler: Optional[RouteHandler] = None
+    ) -> None:
         self._routes = list(
             filter(
                 lambda r: r.matcher.match != match
@@ -186,9 +186,17 @@ class BrowserContext(ChannelOwner):
     async def waitForEvent(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
     ) -> Any:
-        return await wait_for_event(
-            self, self._timeout_settings, event, predicate=predicate, timeout=timeout
+        if timeout is None:
+            timeout = self._timeout_settings.timeout()
+        wait_helper = WaitHelper()
+        wait_helper.reject_on_timeout(
+            timeout, f'Timeout while waiting for event "${event}"'
         )
+        if event != BrowserContext.Events.Close:
+            wait_helper.reject_on_event(
+                self, BrowserContext.Events.Close, Error("Context closed")
+            )
+        return await wait_helper.wait_for_event(self, event, predicate)
 
     def _on_close(self) -> None:
         self._is_closed_or_closing = True

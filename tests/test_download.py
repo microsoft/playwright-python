@@ -11,14 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from asyncio.futures import Future
-from typing import Optional
-from playwright.browser import Browser
-from playwright.page import Page
-from playwright import Error as PlaywrightError
-import pytest
 import asyncio
 import os
+from asyncio.futures import Future
+from typing import Optional
+
+import pytest
+
+from playwright import Error as PlaywrightError
+from playwright.browser import Browser
+from playwright.page import Page
 
 
 def assert_file_content(path, content):

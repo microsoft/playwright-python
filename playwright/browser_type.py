@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from typing import Dict, List
+
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
-from playwright.helper import locals_to_params, ColorScheme
-from typing import Dict, List
+from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.helper import ColorScheme, locals_to_params
 
 
 class BrowserType(ChannelOwner):
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+        super().__init__(scope, guid, initializer, True)
 
     @property
     def name(self) -> str:

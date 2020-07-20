@@ -15,6 +15,9 @@
 import asyncio
 import base64
 import sys
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Union, cast
+
 from playwright.accessibility import Accessibility
 from playwright.connection import (
     ChannelOwner,
@@ -24,35 +27,33 @@ from playwright.connection import (
 )
 from playwright.element_handle import ElementHandle, ValuesToSelect
 from playwright.file_chooser import FileChooser
-from playwright.helper import locals_to_params
-from playwright.input import Keyboard, Mouse
-from playwright.js_handle import JSHandle
 from playwright.frame import Frame
 from playwright.helper import (
-    is_function_body,
-    parse_error,
-    serialize_error,
+    ColorScheme,
+    DocumentLoadState,
     Error,
     FilePayload,
     FunctionWithSource,
+    KeyboardModifier,
+    MouseButton,
     Optional,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
-    TimeoutError,
     URLMatch,
     URLMatcher,
-    MouseButton,
-    KeyboardModifier,
-    DocumentLoadState,
-    ColorScheme,
     Viewport,
+    is_function_body,
+    locals_to_params,
+    parse_error,
+    serialize_error,
 )
-from playwright.network import Request, Response, Route
+from playwright.input import Keyboard, Mouse
+from playwright.js_handle import JSHandle, serialize_argument
+from playwright.network import Request, Response, Route, serialize_headers
+from playwright.wait_helper import WaitHelper
 from playwright.worker import Worker
-from types import SimpleNamespace
-from typing import Any, Awaitable, Callable, Dict, List, Union, TYPE_CHECKING, cast
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -102,26 +103,34 @@ class Page(ChannelOwner):
         self._pending_wait_for_events: List[PendingWaitEvent] = list()
         self._routes: List[RouteHandlerEntry] = list()
         self._owned_context: Optional["BrowserContext"] = None
+        self._timeout_settings = TimeoutSettings(None)
 
         self._channel.on(
             "bindingCall",
-            lambda binding_call: self._on_binding(from_channel(binding_call)),
+            lambda params: self._on_binding(from_channel(params["binding"])),
         )
         self._channel.on("close", lambda _: self._on_close())
         self._channel.on(
             "console",
-            lambda message: self.emit(Page.Events.Console, from_channel(message)),
+            lambda params: self.emit(
+                Page.Events.Console, from_channel(params["message"])
+            ),
         )
         self._channel.on("crash", lambda _: self._on_crash())
         self._channel.on(
-            "dialog", lambda dialog: self.emit(Page.Events.Dialog, from_channel(dialog))
+            "dialog",
+            lambda params: self.emit(
+                Page.Events.Dialog, from_channel(params["dialog"])
+            ),
         )
         self._channel.on(
             "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded)
         )
         self._channel.on(
             "download",
-            lambda download: self.emit(Page.Events.Download, from_channel(download)),
+            lambda params: self.emit(
+                Page.Events.Download, from_channel(params["download"])
+            ),
         )
         self._channel.on(
             "fileChooser",
@@ -133,16 +142,12 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on(
-            "frameAttached", lambda frame: self._on_frame_attached(from_channel(frame))
+            "frameAttached",
+            lambda params: self._on_frame_attached(from_channel(params["frame"])),
         )
         self._channel.on(
-            "frameDetached", lambda frame: self._on_frame_detached(from_channel(frame))
-        )
-        self._channel.on(
-            "frameNavigated",
-            lambda params: self._on_frame_navigated(
-                from_channel(params["frame"]), params["url"], params["name"]
-            ),
+            "frameDetached",
+            lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
         self._channel.on("load", lambda _: self.emit(Page.Events.Load))
         self._channel.on(
@@ -152,11 +157,14 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on(
-            "popup", lambda popup: self.emit(Page.Events.Popup, from_channel(popup))
+            "popup",
+            lambda params: self.emit(Page.Events.Popup, from_channel(params["page"])),
         )
         self._channel.on(
             "request",
-            lambda request: self.emit(Page.Events.Request, from_channel(request)),
+            lambda params: self.emit(
+                Page.Events.Request, from_channel(params["request"])
+            ),
         )
         self._channel.on(
             "requestFailed",
@@ -166,13 +174,15 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "requestFinished",
-            lambda request: self.emit(
-                Page.Events.RequestFinished, from_channel(request)
+            lambda params: self.emit(
+                Page.Events.RequestFinished, from_channel(params["request"])
             ),
         )
         self._channel.on(
             "response",
-            lambda response: self.emit(Page.Events.Response, from_channel(response)),
+            lambda params: self.emit(
+                Page.Events.Response, from_channel(params["response"])
+            ),
         )
         self._channel.on(
             "route",
@@ -180,7 +190,9 @@ class Page(ChannelOwner):
                 from_channel(params["route"]), from_channel(params["request"])
             ),
         )
-        self._channel.on("worker", lambda worker: self._on_worker(from_channel(worker)))
+        self._channel.on(
+            "worker", lambda params: self._on_worker(from_channel(params["worker"]))
+        )
 
     def _set_browser_context(self, context: "BrowserContext") -> None:
         self._browser_context = context
@@ -199,11 +211,6 @@ class Page(ChannelOwner):
         self._frames.remove(frame)
         frame._detached = True
         self.emit(Page.Events.FrameDetached, frame)
-
-    def _on_frame_navigated(self, frame: Frame, url: str, name: str) -> None:
-        frame._url = url
-        frame._name = name
-        self.emit(Page.Events.FrameNavigated, frame)
 
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
@@ -344,7 +351,9 @@ class Page(ChannelOwner):
         await self._channel.send("exposeBinding", dict(name=name))
 
     async def setExtraHTTPHeaders(self, headers: Dict) -> None:
-        await self._channel.send("setExtraHTTPHeaders", dict(headers=headers))
+        await self._channel.send(
+            "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
+        )
 
     @property
     def url(self) -> str:
@@ -362,25 +371,27 @@ class Page(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = "load",
         referer: str = None,
     ) -> Optional[Response]:
         return await self._main_frame.goto(**locals_to_params(locals()))
 
     async def reload(
-        self, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self, timeout: int = None, waitUntil: DocumentLoadState = "load",
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("reload", locals_to_params(locals()))
         )
 
-    async def waitForLoadState(self, state: str = "load", timeout: int = None) -> None:
+    async def waitForLoadState(
+        self, state: DocumentLoadState = "load", timeout: int = None
+    ) -> None:
         return await self._main_frame.waitForLoadState(**locals_to_params(locals()))
 
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = "load",
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
         return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
@@ -432,9 +443,17 @@ class Page(ChannelOwner):
     async def waitForEvent(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
     ) -> Any:
-        return await wait_for_event(
-            self, self._timeout_settings, event, predicate=predicate, timeout=timeout
+        if timeout is None:
+            timeout = self._timeout_settings.timeout()
+        wait_helper = WaitHelper()
+        wait_helper.reject_on_timeout(
+            timeout, f'Timeout while waiting for event "${event}"'
         )
+        if event != Page.Events.Crash:
+            wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
+        if event != Page.Events.Close:
+            wait_helper.reject_on_event(self, Page.Events.Close, Error("Page closed"))
+        return await wait_helper.wait_for_event(self, event, predicate)
 
     async def goBack(
         self, timeout: int = None, waitUntil: DocumentLoadState = None,
@@ -472,20 +491,19 @@ class Page(ChannelOwner):
             raise Error("Either path or source parameter must be specified")
         await self._channel.send("addInitScript", dict(source=source))
 
-    async def route(self, match: URLMatch, handler: RouteHandler) -> None:
-        self._routes.append(RouteHandlerEntry(URLMatcher(match), handler))
+    async def route(self, url: URLMatch, handler: RouteHandler) -> None:
+        self._routes.append(RouteHandlerEntry(URLMatcher(url), handler))
         if len(self._routes) == 1:
             await self._channel.send(
                 "setNetworkInterceptionEnabled", dict(enabled=True)
             )
 
     async def unroute(
-        self, match: URLMatch, handler: Optional[RouteHandler] = None
+        self, url: URLMatch, handler: Optional[RouteHandler] = None
     ) -> None:
         self._routes = list(
             filter(
-                lambda r: r.matcher.match != match
-                or (handler and r.handler != handler),
+                lambda r: r.matcher.match != url or (handler and r.handler != handler),
                 self._routes,
             )
         )
@@ -580,7 +598,7 @@ class Page(ChannelOwner):
         values: ValuesToSelect,
         timeout: int = None,
         noWaitAfter: bool = None,
-    ) -> None:
+    ) -> List[str]:
         params = locals_to_params(locals())
         if "values" not in params:
             params["values"] = None
@@ -699,45 +717,9 @@ class BindingCall(ChannelOwner):
             result = func(source, *self._initializer["args"])
             if isinstance(result, asyncio.Future):
                 result = await result
-            await self._channel.send("resolve", dict(result=result))
+            await self._channel.send("resolve", dict(result=serialize_argument(result)))
         except Exception as e:
             tb = sys.exc_info()[2]
             asyncio.ensure_future(
                 self._channel.send("reject", dict(error=serialize_error(e, tb)))
             )
-
-
-async def wait_for_event(
-    target: Union[Page, "BrowserContext"],
-    timeout_settings: TimeoutSettings,
-    event: str,
-    predicate: Callable[[Any], bool] = None,
-    timeout: int = None,
-) -> Any:
-    if timeout is None:
-        timeout = timeout_settings.timeout()
-    if timeout == 0:
-        timeout = 3600 * 24 * 7 * 30 * 365
-    timeout_future: asyncio.Future = asyncio.ensure_future(
-        asyncio.sleep(timeout / 1000)
-    )
-
-    future = target._scope._loop.create_future()
-
-    def listener(e: Any = None) -> None:
-        if not predicate or predicate(e):
-            future.set_result(e)
-
-    target.on(event, listener)
-
-    pending_event = PendingWaitEvent(event, future, timeout_future)
-    target._pending_wait_for_events.append(pending_event)
-    done, _ = await asyncio.wait(
-        {timeout_future, future}, return_when=asyncio.FIRST_COMPLETED
-    )
-    target.remove_listener(event, listener)
-    target._pending_wait_for_events.remove(pending_event)
-    if future in done:
-        timeout_future.cancel()
-        return future.result()
-    raise TimeoutError("Timeout exceeded")

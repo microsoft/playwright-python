@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import math
-
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
 from playwright.helper import Error, is_function_body
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.element_handle import ElementHandle
@@ -28,7 +28,7 @@ class JSHandle(ChannelOwner):
         super().__init__(scope, guid, initializer)
         self._preview = self._initializer["preview"]
         self._channel.on(
-            "previewUpdated", lambda preview: self._on_preview_updated(preview)
+            "previewUpdated", lambda params: self._on_preview_updated(params["preview"])
         )
 
     def __str__(self) -> str:
@@ -135,9 +135,9 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
 
 
 def serialize_argument(arg: Any) -> Any:
-    guids: List[JSHandle] = list()
-    value = serialize_value(arg, guids, 0)
-    return dict(value=value, guids=guids)
+    handles: List[JSHandle] = list()
+    value = serialize_value(arg, handles, 0)
+    return dict(value=value, handles=handles)
 
 
 def parse_value(value: Any) -> Any:
@@ -155,6 +155,8 @@ def parse_value(value: Any) -> Any:
             if v == "NaN":
                 return float("nan")
             if v == "undefined":
+                return None
+            if v == "null":
                 return None
             return v
 

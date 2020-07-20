@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import asyncio
-import pytest
-from playwright.network import Request, Route
-from playwright.browser import Browser, Page
 from typing import List, cast
+
+from playwright.browser import Browser, Page
+from playwright.network import Request, Route
 
 
 async def test_link_navigation_inherit_user_agent_from_browser_context(
@@ -117,7 +117,7 @@ async def test_should_inherit_offline_from_browser_context(context, server):
 async def test_should_inherit_http_credentials_from_browser_context(
     browser: Browser, server
 ):
-    server.set_auth("/title.html", "user", "pass")
+    server.set_auth("/title.html", b"user", b"pass")
     context = await browser.newContext(
         httpCredentials={"username": "user", "password": "pass"}
     )
@@ -253,7 +253,6 @@ async def test_browser_context_add_init_script_should_apply_to_a_cross_process_p
     assert await popup.evaluate("injected") == 123
 
 
-@pytest.mark.skip_browser("firefox")  # a fix is pending upstream
 async def test_should_expose_function_from_browser_context(context, server):
     await context.exposeFunction("add", lambda a, b: a + b)
     page = await context.newPage()

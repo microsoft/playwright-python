@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 from playwright.connection import ChannelOwner, ConnectionScope
 from playwright.helper import locals_to_params
-from typing import Dict
 
 
 class Dialog(ChannelOwner):

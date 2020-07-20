@@ -14,10 +14,12 @@
 
 import asyncio
 from asyncio.futures import Future
-from playwright.worker import Worker
+
 import pytest
+
 from playwright import Error
 from playwright.page import Page
+from playwright.worker import Worker
 
 
 async def test_workers_page_workers(page, server):
@@ -111,7 +113,7 @@ async def test_workers_should_clear_upon_navigation(server, page):
     destroyed = []
     worker.once("close", lambda _: destroyed.append(True))
     await page.goto(server.PREFIX + "/one-style.html")
-    assert destroyed
+    assert destroyed == [True]
     assert len(page.workers) == 0
 
 
@@ -126,7 +128,7 @@ async def test_workers_should_clear_upon_cross_process_navigation(server, page):
     destroyed = []
     worker.once("close", lambda _: destroyed.append(True))
     await page.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
-    assert destroyed
+    assert destroyed == [True]
     assert len(page.workers) == 0
 
 

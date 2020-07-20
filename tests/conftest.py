@@ -13,12 +13,15 @@
 # limitations under the License.
 
 import asyncio
-import pytest
 import sys
 
+import pytest
+
 import playwright
+
 from .server import server as server_object
 from .utils import utils as utils_object
+
 
 # Will mark all the tests as async
 def pytest_collection_modifyitems(items):
@@ -69,7 +72,10 @@ async def context(browser):
     context = await browser.newContext()
     yield context
     await context.close()
-    assert len(browser.contexts) == 0
+    if len(browser.contexts):
+        for context in browser.contexts:
+            await context.close()
+        assert False
 
 
 @pytest.fixture
