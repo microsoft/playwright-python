@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import os
 
+import pytest
+
 from playwright import Error
-from playwright.sync import (
-    SyncConsoleMessage,
-    browser_types,
-    SyncPage,
-)
+from playwright.sync import SyncConsoleMessage, SyncPage, browser_types
 
 
 @pytest.fixture(scope="session")
@@ -110,7 +107,7 @@ def test_sync_wait_for_selector_raise(sync_page):
     with pytest.raises(Error) as exc:
         with sync_page.withWaitForSelector("h1", timeout=2000):
             pass
-    assert "Timeout 2000ms exceeded during" in exc.value.message
+    assert "Timeout 2000ms exceeded." in exc.value.message
 
 
 def test_sync_wait_for_event(sync_page):
