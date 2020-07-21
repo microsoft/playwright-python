@@ -64,6 +64,8 @@ class Server:
         class TestServerHTTPHandler(http.Request):
             def process(self):
                 request = self
+                self.post_body = request.content.read().decode()
+                request.content.seek(0, 0)
                 uri_path = request.uri.decode()
                 if request_subscribers.get(uri_path):
                     request_subscribers[uri_path].set_result(request)
@@ -125,6 +127,8 @@ class Server:
         self.thread.join()
 
     async def wait_for_request(self, path):
+        if path in self.request_subscribers:
+            return await self.request_subscribers[path]
         future = asyncio.Future()
         self.request_subscribers[path] = future
         return await future
