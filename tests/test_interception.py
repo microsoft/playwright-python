@@ -502,11 +502,13 @@ async def test_page_route_should_not_throw_Invalid_Interception_Id_if_the_reques
     await page.setContent("<iframe></iframe>")
     route_future = asyncio.Future()
     await page.route("**/*", lambda r, _: route_future.set_result(r))
-    await page.evalOnSelector(
-        "iframe", """(frame, url) => frame.src = url""", server.EMPTY_PAGE
+
+    await asyncio.gather(
+        page.waitForEvent("request"),  # Wait for request interception.
+        page.evalOnSelector(
+            "iframe", """(frame, url) => frame.src = url""", server.EMPTY_PAGE
+        ),
     )
-    # Wait for request interception.
-    await page.waitForEvent("request")
     # Delete frame to cause request to be canceled.
     await page.evalOnSelector("iframe", "frame => frame.remove()")
     route = await route_future
