@@ -12,30 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from asyncio.futures import Future
-from playwright.download import Download
-import types
 import asyncio
-from typing import Any, Callable, Dict
+import types
+from asyncio.futures import Future
+from typing import Any, Callable, Dict, Generic, List, TypeVar
 
 import playwright
-
+from playwright.download import Download
+from playwright.page import Page
 
 loop = asyncio.get_event_loop()
 
+T = TypeVar("T")
 
-class GetWrapper:
-    def __init__(self, cb: Callable[..., Any]) -> None:
+
+class SyncContextManagerValue(Generic[T]):
+    def __init__(self, cb: Callable[..., T]) -> None:
         self.cb = cb
 
     @property
-    def value(self) -> Any:
+    def value(self) -> T:
         return self.cb()
 
 
-class SyncWaitContextManager:
+class SyncWaitContextManager(Generic[T]):
     def __init__(self, future: Future) -> None:
-        self.result: Any = None
+        self.result: T = None
         self.async_wrapper = asyncio.ensure_future(future)
         self.async_wrapper.add_done_callback(self._handle_done)
 
@@ -46,8 +48,8 @@ class SyncWaitContextManager:
         else:
             self.result = result
 
-    def __enter__(self) -> GetWrapper:
-        return GetWrapper(lambda: self.result)
+    def __enter__(self) -> SyncContextManagerValue[T]:
+        return SyncContextManagerValue(lambda: self.result)
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         if not self.async_wrapper.done():
@@ -63,21 +65,25 @@ class AsyncToSync:
     def __str__(self) -> str:
         return self.obj.__str__()
 
+    def _rs(self, future):
+        if asyncio.isfuture(future) or asyncio.iscoroutine(future):
+            return loop.run_until_complete(future)
+        return future
+
     def __getattribute__(self, name: str) -> Any:
         if name.startswith("__") or name in [
             "obj",
             "factories",
             "withWaitForEvent",
             "withWaitForSelector",
+            "_rs",
         ]:
             return super().__getattribute__(name)
         attribute_value = getattr(self.obj, name)
         if isinstance(attribute_value, types.MethodType):
 
             def wrap(*args: Any, **kwargs: Any) -> Any:
-                value = attribute_value(*args, **kwargs)
-                if asyncio.isfuture(value) or asyncio.iscoroutine(value):
-                    value = loop.run_until_complete(value)
+                value = self._rs(attribute_value(*args, **kwargs))
                 if name in self.factories:
                     return self.factories[name](value)
                 return value
@@ -135,8 +141,8 @@ class SyncPage(AsyncToSync):
         "workers": lambda items: list(map(SyncWorker, items)),
     }
 
-    def withWaitForEvent(self, *args: Any, **kwargs: Any) -> SyncWaitContextManager:
-        return SyncWaitContextManager(self.obj.waitForEvent(*args, **kwargs))
+    def withWaitForPopup(self, *args: Any, **kwargs: Any) -> SyncWaitContextManager:
+        return SyncWaitContextManager[Page](self.obj.waitForEvent(*args, **kwargs))
 
     def withWaitForSelector(self, *args: Any, **kwargs: Any) -> SyncWaitContextManager:
         return SyncWaitContextManager(self.obj.waitForSelector(*args, **kwargs))
@@ -152,7 +158,6 @@ class SyncBrowser(AsyncToSync):
 
 class SyncBrowserType(AsyncToSync):
     factories = {"launch": SyncBrowser}
-
 
 chromium = SyncBrowserType(playwright.chromium)
 firefox = SyncBrowserType(playwright.firefox)
