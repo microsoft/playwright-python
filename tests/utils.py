@@ -17,8 +17,9 @@ from typing import List, cast
 
 from playwright.element_handle import ElementHandle
 from playwright.frame import Frame
-from playwright.helper import Viewport
+from playwright.helper import Error, Viewport
 from playwright.page import Page
+from playwright.selectors import Selectors
 
 
 class Utils:
@@ -59,6 +60,15 @@ class Utils:
         assert cast(Viewport, page.viewportSize())["height"] == height
         assert await page.evaluate("window.innerWidth") == width
         assert await page.evaluate("window.innerHeight") == height
+
+    async def register_selector_engine(
+        self, selectors: Selectors, *args, **kwargs
+    ) -> None:
+        try:
+            await selectors.register(*args, **kwargs)
+        except Error as exc:
+            if "has been already registered" not in exc.message:
+                raise exc
 
 
 utils = Utils()

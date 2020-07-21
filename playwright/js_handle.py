@@ -73,10 +73,10 @@ class JSHandle(ChannelOwner):
         return from_channel(await self._channel.send("getProperty", dict(name=name)))
 
     async def getProperties(self) -> Dict[str, "JSHandle"]:
-        map = dict()
-        for property in await self._channel.send("getPropertyList"):
-            map[property["name"]] = from_channel(property["value"])
-        return map
+        return {
+            prop["name"]: from_channel(prop["value"])
+            for prop in await self._channel.send("getPropertyList")
+        }
 
     def asElement(self) -> Optional["ElementHandle"]:
         return None
