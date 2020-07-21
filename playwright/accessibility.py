@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
+from typing import Any, Dict
 
 from playwright.connection import Channel
 from playwright.element_handle import ElementHandle
@@ -21,6 +21,7 @@ from playwright.element_handle import ElementHandle
 class Accessibility:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
+        self._sync_owner: Any = None
 
     async def snapshot(
         self, interestingOnly: bool = True, root: ElementHandle = None

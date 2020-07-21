@@ -81,7 +81,6 @@ def wait_for_event_future(
     def listener(event_data: Any = None) -> None:
         if not predicate or predicate(event_data):
             future.set_result(event_data)
-            emitter.remove_listener(event, listener)
 
     emitter.on(event, listener)
 

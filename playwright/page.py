@@ -86,6 +86,9 @@ class Page(ChannelOwner):
         Popup="popup",
         Worker="worker",
     )
+    accessibility: Accessibility
+    keyboard: Keyboard
+    mouse: Mouse
 
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer)
@@ -539,7 +542,7 @@ class Page(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: KeyboardModifier = None,
+        modifiers: List[KeyboardModifier] = None,
         position: Dict = None,
         delay: int = None,
         button: MouseButton = None,

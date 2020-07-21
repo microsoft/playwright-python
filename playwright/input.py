@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any
+
 from playwright.connection import Channel
 from playwright.helper import MouseButton, locals_to_params
 
@@ -19,6 +21,7 @@ from playwright.helper import MouseButton, locals_to_params
 class Keyboard:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
+        self._sync_owner: Any = None
 
     async def down(self, key: str) -> None:
         await self._channel.send("keyboardDown", locals_to_params(locals()))
@@ -39,6 +42,7 @@ class Keyboard:
 class Mouse:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
+        self._sync_owner: Any = None
 
     async def move(self, x: float, y: float, steps: int = None) -> None:
         await self._channel.send("mouseMove", locals_to_params(locals()))
