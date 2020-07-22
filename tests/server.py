@@ -64,18 +64,20 @@ class Server:
         class TestServerHTTPHandler(http.Request):
             def process(self):
                 request = self
-                uri_path = request.uri.decode()
-                if request_subscribers.get(uri_path):
-                    request_subscribers[uri_path].set_result(request)
-                    request_subscribers.pop(uri_path)
+                self.post_body = request.content.read().decode()
+                request.content.seek(0, 0)
+                uri = request.uri.decode()
+                if request_subscribers.get(uri):
+                    request_subscribers[uri].set_result(request)
+                    request_subscribers.pop(uri)
 
-                if auth.get(uri_path):
+                if auth.get(uri):
                     authorization_header = request.requestHeaders.getRawHeaders(
                         "authorization"
                     )
                     creds_correct = False
                     if authorization_header:
-                        creds_correct = auth.get(uri_path) == (
+                        creds_correct = auth.get(uri) == (
                             request.getUser(),
                             request.getPassword(),
                         )
@@ -86,21 +88,21 @@ class Server:
                         request.setResponseCode(HTTPStatus.UNAUTHORIZED)
                         request.finish()
                         return
-                if csp.get(uri_path):
-                    request.setHeader(b"Content-Security-Policy", csp[uri_path])
-                if routes.get(uri_path):
-                    routes[uri_path](request)
+                if csp.get(uri):
+                    request.setHeader(b"Content-Security-Policy", csp[uri])
+                if routes.get(uri):
+                    routes[uri](request)
                     return
                 file_content = None
                 try:
                     file_content = open(
-                        os.path.join(static_path, uri_path[1:]), "rb"
+                        os.path.join(static_path, request.path.decode()[1:]), "rb"
                     ).read()
                 except (FileNotFoundError, IsADirectoryError):
                     request.setResponseCode(HTTPStatus.NOT_FOUND)
                 if file_content:
-                    request.setHeader("Content-Type", mimetypes.guess_type(uri_path)[0])
-                    if uri_path in gzip_routes:
+                    request.setHeader("Content-Type", mimetypes.guess_type(uri)[0])
+                    if uri in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")
                         request.write(gzip.compress(file_content))
                     else:
@@ -125,6 +127,8 @@ class Server:
         self.thread.join()
 
     async def wait_for_request(self, path):
+        if path in self.request_subscribers:
+            return await self.request_subscribers[path]
         future = asyncio.Future()
         self.request_subscribers[path] = future
         return await future

@@ -98,7 +98,10 @@ class Route(ChannelOwner):
         status: int = 200,
         headers: Dict[str, str] = dict(),
         body: Union[str, bytes] = None,
+        contentType: str = None,
     ) -> None:
+        if contentType:
+            headers["Content-Type"] = contentType
         response = dict(status=status, headers=serialize_headers(headers))
         if isinstance(body, str):
             response["body"] = body

@@ -41,7 +41,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 Cookie = List[Dict[str, Union[str, int, bool]]]
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
-RouteHandler = Callable[["Route", "Request"], None]
+RouteHandler = Callable[["Route", "Request"], Any]
 FunctionWithSource = Callable[[Dict], Any]
 
 ColorScheme = Literal["dark", "light", "no-preference"]
