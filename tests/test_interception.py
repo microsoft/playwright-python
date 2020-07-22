@@ -250,18 +250,18 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
         "**/*",
         lambda route, _: asyncio.ensure_future(route.abort("internetdisconnected")),
     )
-    failedRequests = []
-    page.on("requestfailed", lambda request: failedRequests.append(request))
+    failed_requests = []
+    page.on("requestfailed", lambda request: failed_requests.append(request))
     with pytest.raises(Error):
         await page.goto(server.EMPTY_PAGE)
-    assert len(failedRequests) == 1
-    failedRequest = failedRequests[0]
+    assert len(failed_requests) == 1
+    failed_request = failed_requests[0]
     if is_webkit:
-        assert failedRequest.failure == "Request intercepted"
+        assert failed_request.failure == "Request intercepted"
     elif is_firefox:
-        assert failedRequest.failure == "NS_ERROR_OFFLINE"
+        assert failed_request.failure == "NS_ERROR_OFFLINE"
     else:
-        assert failedRequest.failure == "net::ERR_INTERNET_DISCONNECTED"
+        assert failed_request.failure == "net::ERR_INTERNET_DISCONNECTED"
 
 
 async def test_page_route_should_send_referer(page, server):
@@ -417,8 +417,8 @@ async def test_page_route_should_navigate_to_dataURL_and_not_fire_dataURL_reques
         ),
     )
 
-    dataURL = "data:text/html,<div>yo</div>"
-    response = await page.goto(dataURL)
+    data_URL = "data:text/html,<div>yo</div>"
+    response = await page.goto(data_URL)
     assert response is None
     assert len(requests) == 0
 
@@ -436,8 +436,8 @@ async def test_page_route_should_be_able_to_fetch_dataURL_and_not_fire_dataURL_r
         ),
     )
 
-    dataURL = "data:text/html,<div>yo</div>"
-    text = await page.evaluate("url => fetch(url).then(r => r.text())", dataURL)
+    data_URL = "data:text/html,<div>yo</div>"
+    text = await page.evaluate("url => fetch(url).then(r => r.text())", data_URL)
     assert text == "<div>yo</div>"
     assert len(requests) == 0
 
@@ -692,7 +692,7 @@ async def test_request_continue_should_amend_HTTP_headers(page, server):
 
 
 async def test_request_continue_should_amend_method(page, server):
-    sRequest = asyncio.ensure_future(server.wait_for_request("/sleep.zzz"))
+    server_request = asyncio.ensure_future(server.wait_for_request("/sleep.zzz"))
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*", lambda route, _: asyncio.ensure_future(route.continue_(method="POST"))
@@ -702,7 +702,7 @@ async def test_request_continue_should_amend_method(page, server):
         page.evaluate('() => fetch("/sleep.zzz")'),
     )
     assert request.method.decode() == "POST"
-    assert (await sRequest).method.decode() == "POST"
+    assert (await server_request).method.decode() == "POST"
 
 
 async def test_request_continue_should_amend_method_on_main_request(page, server):
