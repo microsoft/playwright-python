@@ -19,7 +19,7 @@ import pytest
 
 import playwright
 
-from .server import server as server_object
+from .server import test_server
 from .utils import utils as utils_object
 
 
@@ -92,7 +92,12 @@ async def page(context):
 
 @pytest.fixture
 def server():
-    yield server_object
+    yield test_server.server
+
+
+@pytest.fixture
+def https_server():
+    yield test_server.https_server
 
 
 @pytest.fixture
@@ -101,16 +106,16 @@ def utils():
 
 
 @pytest.fixture(autouse=True, scope="session")
-async def start_http_server():
-    server_object.start()
+async def start_server():
+    test_server.start()
     yield
-    server_object.stop()
+    test_server.stop()
 
 
 @pytest.fixture(autouse=True)
 def after_each_hook():
     yield
-    server_object.reset()
+    test_server.reset()
 
 
 @pytest.fixture(scope="session")

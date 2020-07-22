@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import abc
 import asyncio
 import gzip
 import mimetypes
@@ -20,12 +21,16 @@ import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
+from pathlib import Path
 
-from twisted.internet import reactor
+from OpenSSL import crypto
+from twisted.internet import reactor, ssl
 from twisted.web import http
 
+_dirname = Path(os.path.join(os.path.dirname(__file__)))
 
-def find_free_port():
+
+def _find_free_port():
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -33,11 +38,13 @@ def find_free_port():
 
 
 class Server:
+    protocol = "http"
+
     def __init__(self):
-        self.PORT = find_free_port()
-        self.EMPTY_PAGE = f"http://localhost:{self.PORT}/empty.html"
-        self.PREFIX = f"http://localhost:{self.PORT}"
-        self.CROSS_PROCESS_PREFIX = f"http://127.0.0.1:{self.PORT}"
+        self.PORT = _find_free_port()
+        self.EMPTY_PAGE = f"{self.protocol}://localhost:{self.PORT}/empty.html"
+        self.PREFIX = f"{self.protocol}://localhost:{self.PORT}"
+        self.CROSS_PROCESS_PREFIX = f"{self.protocol}://127.0.0.1:{self.PORT}"
         # On Windows, this list can be empty, reporting text/plain for scripts.
         mimetypes.add_type("text/html", ".html")
         mimetypes.add_type("text/css", ".css")
@@ -47,6 +54,10 @@ class Server:
 
     def __repr__(self) -> str:
         return self.PREFIX
+
+    @abc.abstractmethod
+    def listen(self, factory):
+        pass
 
     def start(self):
         request_subscribers = {}
@@ -59,7 +70,7 @@ class Server:
         self.csp = csp
         self.routes = routes
         self.gzip_routes = gzip_routes
-        static_path = os.path.join(os.path.dirname(__file__), "assets")
+        static_path = _dirname / "assets"
 
         class TestServerHTTPHandler(http.Request):
             def process(self):
@@ -116,15 +127,7 @@ class Server:
         class MyHttpFactory(http.HTTPFactory):
             protocol = MyHttp
 
-        reactor.listenTCP(self.PORT, MyHttpFactory())
-        self.thread = threading.Thread(
-            target=lambda: reactor.run(installSignalHandlers=0)
-        )
-        self.thread.start()
-
-    def stop(self):
-        reactor.stop()
-        self.thread.join()
+        self.listen(MyHttpFactory())
 
     async def wait_for_request(self, path):
         if path in self.request_subscribers:
@@ -161,4 +164,47 @@ class Server:
         self.set_route(from_, handle_redirect)
 
 
-server = Server()
+class HTTPServer(Server):
+    def listen(self, factory):
+        reactor.listenTCP(self.PORT, factory)
+
+
+class HTTPSServer(Server):
+    protocol = "https"
+
+    def listen(self, factory):
+        cert = ssl.PrivateCertificate.fromCertificateAndKeyPair(
+            ssl.Certificate.loadPEM(
+                (_dirname / "testserver" / "cert.pem").read_bytes()
+            ),
+            ssl.KeyPair.load(
+                (_dirname / "testserver" / "key.pem").read_bytes(), crypto.FILETYPE_PEM
+            ),
+        )
+        contextFactory = cert.options()
+        reactor.listenSSL(self.PORT, factory, contextFactory)
+
+
+class TestServer:
+    def __init__(self) -> None:
+        self.server = HTTPServer()
+        self.https_server = HTTPSServer()
+
+    def start(self) -> None:
+        self.server.start()
+        self.https_server.start()
+        self.thread = threading.Thread(
+            target=lambda: reactor.run(installSignalHandlers=0)
+        )
+        self.thread.start()
+
+    def stop(self) -> None:
+        reactor.stop()
+        self.thread.join()
+
+    def reset(self) -> None:
+        self.server.reset()
+        self.https_server.reset()
+
+
+test_server = TestServer()
