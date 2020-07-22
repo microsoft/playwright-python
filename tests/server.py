@@ -66,7 +66,7 @@ class Server:
                 request = self
                 self.post_body = request.content.read().decode()
                 request.content.seek(0, 0)
-                uri_path = request.uri.decode()
+                uri_path = request.path.decode()
                 if request_subscribers.get(uri_path):
                     request_subscribers[uri_path].set_result(request)
                     request_subscribers.pop(uri_path)
