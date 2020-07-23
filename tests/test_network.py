@@ -40,7 +40,7 @@ async def test_request_fulfill(page):
 
     await page.route(
         "**/empty.html",
-        lambda route, request: asyncio.ensure_future(handle_request(route, request)),
+        lambda route, request: asyncio.create_task(handle_request(route, request)),
     )
 
     response = await page.goto("http://www.non-existent.com/empty.html")
@@ -56,7 +56,7 @@ async def test_request_continue(page, server):
     intercepted = list()
     await page.route(
         "**/*",
-        lambda route, request: asyncio.ensure_future(
+        lambda route, request: asyncio.create_task(
             handle_request(route, request, intercepted)
         ),
     )
@@ -170,7 +170,7 @@ async def test_request_headers_should_get_the_same_headers_as_the_server(
 
     server.set_route("/something", handle_something)
 
-    requestPromise = asyncio.ensure_future(page.waitForEvent("request"))
+    requestPromise = asyncio.create_task(page.waitForEvent("request"))
     text = await page.evaluate(
         """async url => {
       const data = await fetch(url);

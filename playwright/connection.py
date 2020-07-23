@@ -43,6 +43,11 @@ class Channel(BaseEventEmitter):
             return result[key]
         return result
 
+    def send_no_reply(self, method: str, params: dict = None) -> None:
+        if params is None:
+            params = dict()
+        self._scope.send_message_to_server_no_reply(self._guid, method, params)
+
 
 class ChannelOwner(BaseEventEmitter):
     def __init__(
@@ -97,7 +102,13 @@ class ConnectionScope:
             self._parent._children.remove(self)
 
     async def send_message_to_server(self, guid: str, method: str, params: Dict) -> Any:
-        return await self._connection._send_message_to_server(guid, method, params)
+        callback = self._connection._send_message_to_server(guid, method, params)
+        return await callback.future
+
+    def send_message_to_server_no_reply(
+        self, guid: str, method: str, params: Dict
+    ) -> Any:
+        self._connection._send_message_to_server(guid, method, params)
 
     def create_remote_object(self, type: str, guid: str, initializer: Dict) -> Any:
         result: ChannelOwner
@@ -142,9 +153,9 @@ class Connection:
         self._waiting_for_object[guid] = callback
         return await callback
 
-    async def _send_message_to_server(
+    def _send_message_to_server(
         self, guid: str, method: str, params: Dict
-    ) -> Any:
+    ) -> ProtocolCallback:
         self._last_id += 1
         id = self._last_id
         message = dict(
@@ -156,7 +167,7 @@ class Connection:
         self._transport.send(message)
         callback = ProtocolCallback(self._loop)
         self._callbacks[id] = callback
-        return await callback.future
+        return callback
 
     def _dispatch(self, msg: ParsedMessagePayload) -> None:
 

@@ -136,7 +136,7 @@ async def test_close_should_work_for_empty_context(browser):
 
 async def test_close_should_abort_wait_for_event(browser):
     context = await browser.newContext()
-    promise = asyncio.ensure_future(context.waitForEvent("page"))
+    promise = asyncio.create_task(context.waitForEvent("page"))
     await context.close()
     with pytest.raises(Error) as exc_info:
         await promise
@@ -425,7 +425,7 @@ async def test_route_should_intercept(context, server):
         assert request.resourceType == "document"
         assert request.frame == page.mainFrame
         assert request.frame.url == "about:blank"
-        asyncio.ensure_future(route.continue_())
+        asyncio.create_task(route.continue_())
 
     await context.route("**/empty.html", lambda route, request: handle(route, request))
     page = await context.newPage()
@@ -442,7 +442,7 @@ async def test_route_should_unroute(context, server):
 
     def handler(route, request, ordinal):
         intercepted.append(ordinal)
-        asyncio.ensure_future(route.continue_())
+        asyncio.create_task(route.continue_())
 
     def handler1(route, request):
         handler(route, request, 1)
@@ -473,7 +473,7 @@ async def test_route_should_unroute(context, server):
 async def test_route_should_yield_to_page_route(context, server):
     await context.route(
         "**/empty.html",
-        lambda route, request: asyncio.ensure_future(
+        lambda route, request: asyncio.create_task(
             route.fulfill(status=200, body="context")
         ),
     )
@@ -481,7 +481,7 @@ async def test_route_should_yield_to_page_route(context, server):
     page = await context.newPage()
     await page.route(
         "**/empty.html",
-        lambda route, request: asyncio.ensure_future(
+        lambda route, request: asyncio.create_task(
             route.fulfill(status=200, body="page")
         ),
     )
@@ -494,7 +494,7 @@ async def test_route_should_yield_to_page_route(context, server):
 async def test_route_should_fall_back_to_context_route(context, server):
     await context.route(
         "**/empty.html",
-        lambda route, request: asyncio.ensure_future(
+        lambda route, request: asyncio.create_task(
             route.fulfill(status=200, body="context")
         ),
     )
@@ -502,7 +502,7 @@ async def test_route_should_fall_back_to_context_route(context, server):
     page = await context.newPage()
     await page.route(
         "**/non-empty.html",
-        lambda route, request: asyncio.ensure_future(
+        lambda route, request: asyncio.create_task(
             route.fulfill(status=200, body="page")
         ),
     )
@@ -647,16 +647,16 @@ async def test_page_event_should_report_when_a_new_page_is_created_and_closed(
 
 
 async def test_page_event_should_report_initialized_pages(context, server):
-    page_promise = asyncio.ensure_future(context.waitForEvent("page"))
-    asyncio.ensure_future(context.newPage())
-    newPage = await page_promise
+    page_event_promise = asyncio.create_task(context.waitForEvent("page"))
+    asyncio.create_task(context.newPage())
+    newPage = await page_event_promise
     assert newPage.url == "about:blank"
 
-    popup_promise = asyncio.ensure_future(context.waitForEvent("page"))
-    evaluate_promise = asyncio.ensure_future(
+    popup_event_promise = asyncio.create_task(context.waitForEvent("page"))
+    evaluate_promise = asyncio.create_task(
         newPage.evaluate("window.open('about:blank')")
     )
-    popup = await popup_promise
+    popup = await popup_event_promise
     assert popup.url == "about:blank"
     await evaluate_promise
 

@@ -47,7 +47,7 @@ async def test_close_should_run_beforeunload_if_asked_for(
     # We have to interact with a page so that 'beforeunload' handlers
     # fire.
     await page.click("body")
-    page_closing_future = asyncio.ensure_future(page.close(runBeforeUnload=True))
+    page_closing_future = asyncio.create_task(page.close(runBeforeUnload=True))
     dialog = await page.waitForEvent("dialog")
     assert dialog.type == "beforeunload"
     assert dialog.defaultValue == ""
@@ -120,7 +120,7 @@ async def test_load_should_fire_when_expected(page):
 
 async def test_async_stacks_should_work(page, server):
     await page.route(
-        "**/empty.html", lambda route, response: asyncio.ensure_future(route.abort())
+        "**/empty.html", lambda route, response: asyncio.create_task(route.abort())
     )
     with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE)
@@ -148,7 +148,7 @@ async def test_opener_should_return_null_if_parent_page_has_been_closed(page):
 
 
 async def test_domcontentloaded_should_fire_when_expected(page, server):
-    future = asyncio.ensure_future(page.goto("about:blank"))
+    future = asyncio.create_task(page.goto("about:blank"))
     await page.waitForEvent("domcontentloaded")
     await future
 
@@ -223,7 +223,8 @@ async def test_wait_for_request_should_work_with_url_match(page, server):
 
 
 async def test_wait_for_event_should_fail_with_error_upon_disconnect(page, server):
-    future = asyncio.ensure_future(page.waitForEvent("download"))
+    future = asyncio.create_task(page.waitForEvent("download"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.close()
     with pytest.raises(Error) as exc_info:
         await future
@@ -350,7 +351,7 @@ async def test_expose_function_should_await_returned_promise(page):
     async def mul(a, b):
         return a * b
 
-    await page.exposeFunction("compute", lambda a, b: asyncio.ensure_future(mul(a, b)))
+    await page.exposeFunction("compute", lambda a, b: asyncio.create_task(mul(a, b)))
     assert await page.evaluate("compute(3, 5)") == 15
 
 
@@ -487,10 +488,11 @@ async def test_set_content_should_await_resources_to_load(page, server):
         await page.setContent(f'<img src="{server.PREFIX + img_path}"></img>')
         loaded.append(True)
 
-    content_promise = asyncio.ensure_future(load())
+    content_promise = asyncio.create_task(load())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     route = await img_route
     assert loaded == []
-    asyncio.ensure_future(route.continue_())
+    asyncio.create_task(route.continue_())
     await content_promise
 
 
@@ -1077,7 +1079,7 @@ async def test_fill_should_retry_on_disabled_element(page, server):
         await page.fill("input", "some value")
         done.append(True)
 
-    promise = asyncio.ensure_future(fill())
+    promise = asyncio.create_task(fill())
     await give_it_a_chance_to_fill(page)
     assert done == []
     assert await page.evaluate("result") == ""
@@ -1096,7 +1098,7 @@ async def test_fill_should_retry_on_readonly_element(page, server):
         await page.fill("textarea", "some value")
         done.append(True)
 
-    promise = asyncio.ensure_future(fill())
+    promise = asyncio.create_task(fill())
     await give_it_a_chance_to_fill(page)
     assert done == []
     assert await page.evaluate("result") == ""
@@ -1115,7 +1117,7 @@ async def test_fill_should_retry_on_invisible_element(page, server):
         await page.fill("input", "some value")
         done.append(True)
 
-    promise = asyncio.ensure_future(fill())
+    promise = asyncio.create_task(fill())
     await give_it_a_chance_to_fill(page)
     assert done == []
     assert await page.evaluate("result") == ""
@@ -1183,17 +1185,20 @@ async def test_fill_should_be_able_to_clear(page, server):
 
 
 async def test_close_event_should_work_with_window_close(page, server):
-    promise = asyncio.ensure_future(page.waitForEvent("popup"))
+    promise = asyncio.create_task(page.waitForEvent("popup"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("window['newPage'] = window.open('about:blank')")
     popup = await promise
-    close_promise = asyncio.ensure_future(popup.waitForEvent("close"))
+    close_promise = asyncio.create_task(popup.waitForEvent("close"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("window['newPage'].close()")
     await close_promise
 
 
 async def test_close_event_should_work_with_page_close(context, server):
     page = await context.newPage()
-    close_promise = asyncio.ensure_future(page.waitForEvent("close"))
+    close_promise = asyncio.create_task(page.waitForEvent("close"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.close()
     await close_promise
 

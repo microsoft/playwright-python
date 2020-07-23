@@ -28,7 +28,7 @@ async def test_browser_type_launch_should_reject_all_promises_when_browser_is_cl
 ):
     browser = await browser_type.launch(**launch_arguments)
     page = await (await browser.newContext()).newPage()
-    never_resolves = asyncio.ensure_future(page.evaluate("() => new Promise(r => {})"))
+    never_resolves = asyncio.create_task(page.evaluate("() => new Promise(r => {})"))
     await page.close()
     with pytest.raises(Error) as exc:
         await never_resolves
@@ -146,7 +146,7 @@ async def test_browser_disconnect_should_reject_navigation_when_browser_closes(
         except Error as exc:
             goto_future.set_result(exc)
 
-    asyncio.ensure_future(handle_goto())
+    asyncio.create_task(handle_goto())
     await server.wait_for_request("/one-style.css")
     await remote.close()
     error = await goto_future
@@ -170,7 +170,8 @@ async def test_browser_disconnect_should_reject_waitForSelector_when_browser_clo
             wait_for_selector_future.set_result(exc)
 
     # Make sure the previous waitForSelector has time to make it to the browser before we disconnect.
-    asyncio.ensure_future(handle_wait_for_selector())
+    asyncio.create_task(handle_wait_for_selector())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.waitForSelector("body", state="attached")
 
     await remote.close()
@@ -229,8 +230,9 @@ async def test_browser_close_should_terminate_network_waiters(
         except Error as exc:
             wait_for_response_future.set_result(exc)
 
-    asyncio.ensure_future(handle_waitForRequest())
-    asyncio.ensure_future(handle_waitForResponse())
+    asyncio.create_task(handle_waitForRequest())
+    asyncio.create_task(handle_waitForResponse())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     results = await asyncio.gather(
         wait_for_request_future, wait_for_response_future, browser_server.close(),
     )
