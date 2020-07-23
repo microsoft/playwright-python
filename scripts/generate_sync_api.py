@@ -200,6 +200,7 @@ def generate(t: Any) -> None:
             prefix = "        return " + prefix + f"self._sync(self._async_obj.{name}("
             suffix = "))" + suffix
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
+    print(f"mapping.register({short_name(t)}Async, {short_name(t)})")
 
 
 def main() -> None:
@@ -222,7 +223,7 @@ def main() -> None:
 
 import typing
 import sys
-from playwright.sync_base import SyncBase
+from playwright.sync_base import SyncBase, mapping
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

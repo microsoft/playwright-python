@@ -23,6 +23,7 @@ from playwright.helper import Error, TimeoutError
 class WaitHelper:
     def __init__(self) -> None:
         self._failures: List[asyncio.Future] = []
+        self._loop = asyncio.get_event_loop()
 
     def reject_on_event(
         self,
@@ -37,7 +38,7 @@ class WaitHelper:
         if timeout == 0:
             return
         self.reject_on(
-            asyncio.create_task(asyncio.sleep(timeout / 1000)), TimeoutError(message)
+            self._loop.create_task(asyncio.sleep(timeout / 1000)), TimeoutError(message)
         )
 
     def reject_on(self, future: asyncio.Future, error: Error) -> None:
@@ -45,7 +46,7 @@ class WaitHelper:
             await future
             return error
 
-        result = asyncio.create_task(future_wrapper())
+        result = self._loop.create_task(future_wrapper())
         result.add_done_callback(lambda f: future.cancel())
         self._failures.append(result)
 
