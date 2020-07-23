@@ -187,7 +187,7 @@ async def test_wait_for_display_none_to_be_gone(page, server):
         await page.click("button", timeout=0)
         done.append(True)
 
-    clicked = asyncio.ensure_future(click())
+    clicked = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert await page.evaluate("result") == "Was not clicked"
     assert done == []
@@ -206,7 +206,7 @@ async def test_wait_for_visibility_hidden_to_be_gone(page, server):
         await page.click("button", timeout=0)
         done.append(True)
 
-    clicked = asyncio.ensure_future(click())
+    clicked = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert await page.evaluate("result") == "Was not clicked"
     assert done == []
@@ -249,7 +249,7 @@ async def test_waitFor_visible_when_parent_is_hidden(page, server):
         await page.click("button", timeout=0)
         done.append(True)
 
-    clicked = asyncio.ensure_future(click())
+    clicked = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert done == []
     await page.evalOnSelector("button", "b => b.parentElement.style.display = 'block'")
@@ -561,7 +561,7 @@ async def test_wait_for_becoming_hit_target(page, server):
         await page.click("button")
         clicked.append(True)
 
-    click_promise = asyncio.ensure_future(click())
+    click_promise = asyncio.create_task(click())
     assert clicked == [False]
 
     await page.evalOnSelector(".flyover", "flyOver => flyOver.style.left = '0'")
@@ -628,7 +628,7 @@ async def test_wait_for_button_to_be_enabled(page, server):
         await page.click("text=Click target")
         done.append(True)
 
-    click_promise = asyncio.ensure_future(click())
+    click_promise = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert await page.evaluate("() => window.__CLICKED") is None
     assert done == []
@@ -661,7 +661,7 @@ async def test_wait_for_input_to_be_enabled(page, server):
         await page.click("input")
         done.append(True)
 
-    click_promise = asyncio.ensure_future(click())
+    click_promise = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert await page.evaluate("window.__CLICKED") is None
     assert done == []
@@ -680,7 +680,7 @@ async def test_wait_for_select_to_be_enabled(page, server):
         await page.click("select")
         done.append(True)
 
-    click_promise = asyncio.ensure_future(click())
+    click_promise = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert await page.evaluate("window.__CLICKED") is None
     assert done == []
@@ -725,7 +725,7 @@ async def test_wait_for_BUTTON_to_be_clickable_when_it_has_pointer_events_none(
         await page.click("text=Click target")
         done.append(True)
 
-    click_promise = asyncio.ensure_future(click())
+    click_promise = asyncio.create_task(click())
     await give_it_a_chance_to_click(page)
     assert await page.evaluate("window.__CLICKED") is None
     assert done == []
@@ -742,7 +742,7 @@ async def test_wait_for_LABEL_to_be_clickable_when_it_has_pointer_events_none(
     await page.setContent(
         '<label onclick="javascript:window.__CLICKED=true;" style="pointer-events:none"><span>Click target</span></label>'
     )
-    click_promise = asyncio.ensure_future(page.click("text=Click target"))
+    click_promise = asyncio.create_task(page.click("text=Click target"))
     #  Do a few roundtrips to the page.
     for _ in range(5):
         assert await page.evaluate("window.__CLICKED") is None
@@ -803,7 +803,8 @@ async def test_fail_when_element_detaches_after_animation(page, server):
     await page.goto(server.PREFIX + "/input/animating-button.html")
     await page.evaluate("addButton()")
     handle = await page.querySelector("button")
-    promise = asyncio.ensure_future(handle.click())
+    promise = asyncio.create_task(handle.click())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("stopButton(true)")
     error = None
     try:
@@ -823,7 +824,8 @@ async def test_retry_when_element_detaches_after_animation(page, server):
         await page.click("button")
         clicked.append(True)
 
-    promise = asyncio.ensure_future(click())
+    promise = asyncio.create_task(click())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     assert clicked == []
     assert await page.evaluate("window.clicked") is None
     await page.evaluate("stopButton(true)")
@@ -864,7 +866,8 @@ async def test_retry_when_element_is_animating_from_outside_the_viewport(page, s
         """
     )
     handle = await page.querySelector("button")
-    promise = asyncio.ensure_future(handle.click())
+    promise = asyncio.create_task(handle.click())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await handle.evaluate("button => button.className = 'animated'")
     await promise
     assert await page.evaluate("window.clicked")
@@ -896,7 +899,8 @@ async def test_fail_when_element_is_animating_from_outside_the_viewport_with_for
         """
     )
     handle = await page.querySelector("button")
-    promise = asyncio.ensure_future(handle.click(force=True))
+    promise = asyncio.create_task(handle.click(force=True))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await handle.evaluate("button => button.className = 'animated'")
     error = None
     try:
@@ -943,7 +947,8 @@ async def test_click_the_button_when_window_inner_width_is_corrupted(page, serve
 
 
 async def test_timeout_when_click_opens_alert(page, server):
-    dialog_promise = asyncio.ensure_future(page.waitForEvent("dialog"))
+    dialog_promise = asyncio.create_task(page.waitForEvent("dialog"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.setContent('<div onclick="window.alert(123)">Click me</div>')
     error = None
     try:

@@ -225,7 +225,7 @@ class Page(ChannelOwner):
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func:
-            asyncio.ensure_future(binding_call.call(func))
+            asyncio.create_task(binding_call.call(func))
         self._browser_context._on_binding(binding_call)
 
     def _on_worker(self, worker: Worker) -> None:
@@ -273,17 +273,13 @@ class Page(ChannelOwner):
 
     def setDefaultNavigationTimeout(self, timeout: int) -> None:
         self._timeout_settings.set_navigation_timeout(timeout)
-        asyncio.ensure_future(
-            self._channel.send(
-                "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
-            )
+        self._channel.send_no_reply(
+            "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
         )
 
     def setDefaultTimeout(self, timeout: int) -> None:
         self._timeout_settings.set_timeout(timeout)
-        asyncio.ensure_future(
-            self._channel.send("setDefaultTimeoutNoReply", dict(timeout=timeout))
-        )
+        self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     async def querySelector(self, selector: str) -> Optional[ElementHandle]:
         return await self._main_frame.querySelector(selector)
@@ -723,6 +719,6 @@ class BindingCall(ChannelOwner):
             await self._channel.send("resolve", dict(result=serialize_argument(result)))
         except Exception as e:
             tb = sys.exc_info()[2]
-            asyncio.ensure_future(
+            asyncio.create_task(
                 self._channel.send("reject", dict(error=serialize_error(e, tb)))
             )

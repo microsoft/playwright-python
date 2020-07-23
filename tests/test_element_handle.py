@@ -394,7 +394,8 @@ async def waiting_helper(page, after):
         await div.scrollIntoViewIfNeeded()
         done.append(True)
 
-    promise = asyncio.ensure_future(scroll())
+    promise = asyncio.create_task(scroll())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("() => new Promise(f => setTimeout(f, 1000))")
     assert done == [False]
     await div.evaluate(after)
@@ -512,7 +513,8 @@ async def test_select_text_wait_for_visible(page, server):
         await textarea.selectText(timeout=3000)
         done.append(True)
 
-    promise = asyncio.ensure_future(select_text())
+    promise = asyncio.create_task(select_text())
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("() => new Promise(f => setTimeout(f, 1000))")
     await textarea.evaluate('e => e.style.display = "block"')
     await promise

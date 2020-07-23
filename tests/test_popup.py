@@ -29,9 +29,8 @@ async def test_link_navigation_inherit_user_agent_from_browser_context(
     await page.setContent(
         '<a target=_blank rel=noopener href="/popup/popup.html">link</a>'
     )
-    request_waitable = asyncio.ensure_future(
-        server.wait_for_request("/popup/popup.html")
-    )
+    request_waitable = asyncio.create_task(server.wait_for_request("/popup/popup.html"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     popup = cast(
         Page, (await asyncio.gather(context.waitForEvent("page"), page.click("a"),))[0]
     )
@@ -49,7 +48,7 @@ async def test_link_navigation_respect_routes_from_browser_context(context, serv
     await page.setContent('<a target=_blank rel=noopener href="empty.html">link</a>')
 
     def handle_request(route: Route, request: Request, intercepted) -> None:
-        asyncio.ensure_future(route.continue_())
+        asyncio.create_task(route.continue_())
         intercepted.append(True)
 
     intercepted: List[bool] = []
@@ -70,7 +69,8 @@ async def test_window_open_inherit_user_agent_from_browser_context(
 
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
-    request_promise = asyncio.ensure_future(server.wait_for_request("/dummy.html"))
+    request_promise = asyncio.create_task(server.wait_for_request("/dummy.html"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     user_agent = await page.evaluate(
         """url => {
             win = window.open(url)
@@ -91,7 +91,8 @@ async def test_should_inherit_extra_headers_from_browser_context(
 
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
-    request_promise = asyncio.ensure_future(server.wait_for_request("/dummy.html"))
+    request_promise = asyncio.create_task(server.wait_for_request("/dummy.html"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate(
         "url => window._popup = window.open(url)", server.PREFIX + "/dummy.html"
     )
@@ -202,7 +203,7 @@ async def test_should_respect_routes_from_browser_context(context, server):
     await page.goto(server.EMPTY_PAGE)
 
     def handle_request(route, request, intercepted):
-        asyncio.ensure_future(route.continue_())
+        asyncio.create_task(route.continue_())
         intercepted.append(True)
 
     intercepted = []
@@ -329,7 +330,7 @@ async def test_should_emit_for_immediately_closed_popups(context, server):
 
 async def test_should_be_able_to_capture_alert(context):
     page = await context.newPage()
-    evaluate_promise = asyncio.ensure_future(
+    evaluate_promise = asyncio.create_task(
         page.evaluate(
             """() => {
                 const win = window.open('')

@@ -34,7 +34,7 @@ class Event:
         wait_helper.reject_on_timeout(
             timeout or 30000, f'Timeout while waiting for event "${event}"'
         )
-        self._future = asyncio.ensure_future(
+        self._future = asyncio.create_task(
             wait_helper.wait_for_event(sync_base._async_obj, event, predicate)
         )
 

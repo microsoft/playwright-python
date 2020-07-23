@@ -76,27 +76,23 @@ class BrowserContext(ChannelOwner):
             if handler_entry.matcher.matches(request.url):
                 handler_entry.handler(route, request)
                 return
-        asyncio.ensure_future(route.continue_())
+        asyncio.create_task(route.continue_())
 
     def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func is None:
             return
-        asyncio.ensure_future(binding_call.call(func))
+        asyncio.create_task(binding_call.call(func))
 
     def setDefaultNavigationTimeout(self, timeout: int) -> None:
         self._timeout_settings.set_navigation_timeout(timeout)
-        asyncio.ensure_future(
-            self._channel.send(
-                "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
-            )
+        self._channel.send_no_reply(
+            "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
         )
 
     def setDefaultTimeout(self, timeout: int) -> None:
         self._timeout_settings.set_timeout(timeout)
-        asyncio.ensure_future(
-            self._channel.send("setDefaultTimeoutNoReply", dict(timeout=timeout))
-        )
+        self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     @property
     def pages(self) -> List[Page]:
