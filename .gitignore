@@ -3,6 +3,7 @@ playwright/drivers/driver*
 playwright/driver-*
 driver/node_modules/
 driver/out/
+driver/package-lock.json
 playwright.egg-info/
 build/
 dist/
