@@ -51,13 +51,11 @@ def process_type(value: Any, param: bool = False) -> str:
     value = re.sub(r"playwright\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
-        value = re.sub(r"typing.Union\[([^,]+), NoneType\]", r"\1 = None", value)
+        value = re.sub(r"typing.Union\[([^,]+), NoneType\]", r"\1", value)
         if "Union[Literal" in value:
             value = re.sub(r"typing.Union\[(.*), NoneType\]", r"\1", value)
         else:
-            value = re.sub(
-                r"typing.Union\[(.*), NoneType\]", r"typing.Union[\1] = None", value
-            )
+            value = re.sub(r"typing.Optional\[(.*)\]", r"typing.Union[\1]", value)
     return value
 
 
@@ -70,7 +68,7 @@ def signature(func: FunctionType, indent: int) -> str:
     for [name, value] in hints.items():
         if name == "return":
             continue
-        processed = process_type(value, False)
+        processed = process_type(value, True)
         default_value = func_signature.parameters[name].default
         if default_value is not func_signature.parameters[name].empty:
             if isinstance(default_value, str):
