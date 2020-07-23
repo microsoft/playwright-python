@@ -128,12 +128,12 @@ async def run():
   browser = await chromium.launch()
   page = await browser.newPage()
 
-  async def log_and_continue_request(route, request):
+  def log_and_continue_request(route, request):
     print(request.url)
-    await route.continue_()
+    await asyncio.create_task(route.continue_())
 
   # Log and continue all network requests
-  await page.route('**', lambda route, request: asyncio.ensure_future(log_and_continue_request(route, request)))
+  await page.route('**', lambda route, request: log_and_continue_request(route, request))
 
   await page.goto('http://todomvc.com')
   await browser.close()

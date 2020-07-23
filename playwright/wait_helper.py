@@ -37,7 +37,7 @@ class WaitHelper:
         if timeout == 0:
             return
         self.reject_on(
-            asyncio.ensure_future(asyncio.sleep(timeout / 1000)), TimeoutError(message)
+            asyncio.create_task(asyncio.sleep(timeout / 1000)), TimeoutError(message)
         )
 
     def reject_on(self, future: asyncio.Future, error: Error) -> None:
@@ -45,7 +45,7 @@ class WaitHelper:
             await future
             return error
 
-        result = asyncio.ensure_future(future_wrapper())
+        result = asyncio.create_task(future_wrapper())
         result.add_done_callback(lambda f: future.cancel())
         self._failures.append(result)
 

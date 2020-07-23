@@ -81,7 +81,8 @@ async def test_should_emit_event(page: Page, server):
 
 async def test_should_work_when_file_input_is_attached_to_DOM(page: Page, server):
     await page.setContent("<input type=file>")
-    file_chooser = asyncio.ensure_future(page.waitForEvent("filechooser"))
+    file_chooser = asyncio.create_task(page.waitForEvent("filechooser"))
+    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.click("input")
     assert await file_chooser
 
@@ -127,9 +128,7 @@ async def test_should_accept_single_file(page: Page, server):
 async def test_should_be_able_to_read_selected_file(page: Page, server):
     page.once(
         "filechooser",
-        lambda file_chooser: asyncio.ensure_future(
-            file_chooser.setFiles(FILE_TO_UPLOAD)
-        ),
+        lambda file_chooser: asyncio.create_task(file_chooser.setFiles(FILE_TO_UPLOAD)),
     )
     await page.setContent("<input type=file>")
     content = await page.evalOnSelector(
@@ -152,9 +151,7 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
     await page.setContent("<input type=file>")
     page.once(
         "filechooser",
-        lambda file_chooser: asyncio.ensure_future(
-            file_chooser.setFiles(FILE_TO_UPLOAD)
-        ),
+        lambda file_chooser: asyncio.create_task(file_chooser.setFiles(FILE_TO_UPLOAD)),
     )
     file_length_1 = (
         await asyncio.gather(
@@ -173,7 +170,7 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
 
     page.once(
         "filechooser",
-        lambda file_chooser: asyncio.ensure_future(file_chooser.setFiles([])),
+        lambda file_chooser: asyncio.create_task(file_chooser.setFiles([])),
     )
     file_length_2 = (
         await asyncio.gather(
