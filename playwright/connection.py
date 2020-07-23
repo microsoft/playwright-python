@@ -51,6 +51,7 @@ class ChannelOwner(BaseEventEmitter):
         is_scope: bool = False,
     ) -> None:
         super().__init__()
+        self._sync_owner: Any = None
         self._guid = guid
         self._scope = scope.create_child(guid) if is_scope else scope
         self._channel = Channel(self._scope, guid)

@@ -44,12 +44,17 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 def selectors():
-    return playwright.selectors
+    return playwright.selectors.as_async()
 
 
 @pytest.fixture(scope="session")
 def browser_type(browser_name: str):
-    return playwright.browser_types[browser_name]
+    if browser_name == "chromium":
+        return playwright.chromium.as_async()
+    if browser_name == "firefox":
+        return playwright.firefox.as_async()
+    if browser_name == "webkit":
+        return playwright.webkit.as_async()
 
 
 @pytest.fixture(scope="session")

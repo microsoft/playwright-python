@@ -12,22 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
-
-from playwright import browser_types
+from playwright import chromium
 
 
-async def run() -> None:
-    print("Launching browser...")
-    browser = await browser_types["webkit"].launch(headless=False)
+def main() -> None:
+    browser = chromium.launch(headless=False)
+    page = browser.newPage(viewport=0)
+    page.setContent(
+        "<button id=button onclick=\"window.open('http://webkit.org', '_blank')\">Click me</input>"
+    )
+
+    with page.expect_event("popup") as popup:
+        page.click("#button")
+    print(popup.value)
+
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Creating context...")
-    context = await browser.newContext(viewport=None)
+    context = browser.newContext(viewport=0)
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Pages in context: %d" % len(context.pages))
 
     print("\nCreating page1...")
-    page1 = await context.newPage()
+    page1 = context.newPage()
     print("Pages in context: %d" % len(context.pages))
     page1.on("framenavigated", lambda frame: print("Frame navigated to %s" % frame.url))
     page1.on("request", lambda request: print("Request %s" % request.url))
@@ -42,42 +48,43 @@ async def run() -> None:
         ),
     )
     print("Navigating page1 to https://example.com...")
-    await page1.goto("https://example.com")
+    page1.goto("https://example.com")
     print("Page1 main frame url: %s" % page1.mainFrame.url)
-    print("Page1 tile: %s" % await page1.title())
+    print("Page1 tile: %s" % page1.title())
     print("Frames in page1: %d" % len(page1.frames))
-    await page1.screenshot(path="example.png")
+    page1.screenshot(path="example.png")
 
     print("\nCreating page2...")
-    page2 = await context.newPage()
+    page2 = context.newPage()
     page2.on("framenavigated", lambda frame: print("Frame navigated to %s" % frame.url))
 
     print("Navigating page2 to https://webkit.org...")
-    await page2.goto("https://webkit.org")
-    print("Page2 tile: %s" % await page2.title())
+    page2.goto("https://webkit.org")
+    print("Page2 tile: %s" % page2.title())
     print("Pages in context: %d" % len(context.pages))
 
     print("\nQuerying body...")
-    body1 = await page1.querySelector("body")
+    body1 = page1.querySelector("body")
     assert body1
-    print("Body text %s" % await body1.textContent())
+    print("Body text %s" % body1.textContent())
 
     print("Closing page1...")
-    await page1.close()
+    page1.close()
     print("Pages in context: %d" % len(context.pages))
 
     print("Navigating page2 to https://cnn.com...")
-    await page2.goto("https://cnn.com")
+    page2.goto("https://cnn.com")
     print("Page2 main frame url: %s" % page2.mainFrame.url)
-    print("Page2 tile: %s" % await page2.title())
+    print("Page2 tile: %s" % page2.title())
     print("Frames in page2: %d" % len(page2.frames))
     print("Pages in context: %d" % len(context.pages))
 
     print("Closing context...")
-    await context.close()
+    context.close()
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Closing browser")
-    await browser.close()
+    browser.close()
 
 
-asyncio.get_event_loop().run_until_complete(run())
+if __name__ == "__main__":
+    main()

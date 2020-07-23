@@ -86,7 +86,7 @@ class Browser(ChannelOwner):
 
     async def newPage(
         self,
-        viewport: Dict = None,
+        viewport: Union[Dict, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,

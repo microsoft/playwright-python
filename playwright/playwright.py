@@ -20,16 +20,19 @@ from playwright.selectors import Selectors
 
 
 class Playwright(ChannelOwner):
+    chromium: BrowserType
+    firefox: BrowserType
+    webkit: BrowserType
+    selectors: Selectors
+    devices: Dict
+
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer)
-        self.chromium: BrowserType = from_channel(initializer["chromium"])
-        self.firefox: BrowserType = from_channel(initializer["firefox"])
-        self.webkit: BrowserType = from_channel(initializer["webkit"])
-        self.selectors: Selectors = from_channel(initializer["selectors"])
+        self.chromium = from_channel(initializer["chromium"])
+        self.firefox = from_channel(initializer["firefox"])
+        self.webkit = from_channel(initializer["webkit"])
+        self.selectors = from_channel(initializer["selectors"])
         self.devices = {
             device["name"]: device["descriptor"]
             for device in initializer["deviceDescriptors"]
         }
-        self.browser_types: Dict[str, BrowserType] = dict(
-            chromium=self.chromium, webkit=self.webkit, firefox=self.firefox
-        )

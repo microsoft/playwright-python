@@ -44,7 +44,7 @@ URLMatch = Union[str, Pattern, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], Any]
 FunctionWithSource = Callable[[Dict], Any]
 
-ColorScheme = Literal["dark", "light", "no-preference"]
+ColorScheme = Literal["light", "dark", "no-preference"]
 DocumentLoadState = Literal["load", "domcontentloaded", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "right", "middle"]
