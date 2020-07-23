@@ -156,7 +156,7 @@ class Page(ChannelOwner):
         self._channel.on(
             "pageError",
             lambda params: self.emit(
-                Page.Events.PageError, parse_error(params["error"])
+                Page.Events.PageError, parse_error(params["error"]["error"])
             ),
         )
         self._channel.on(
