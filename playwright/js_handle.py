@@ -88,15 +88,6 @@ class JSHandle(ChannelOwner):
         return parse_result(await self._channel.send("jsonValue"))
 
 
-def is_primitive_value(value: Any) -> bool:
-    return (
-        isinstance(value, bool)
-        or isinstance(value, int)
-        or isinstance(value, float)
-        or isinstance(value, str)
-    )
-
-
 def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     if isinstance(value, JSHandle):
         h = len(handles)
@@ -119,17 +110,25 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
             return dict(v="NaN")
     if isinstance(value, datetime):
         return dict(d=value.isoformat() + "Z")
-    if is_primitive_value(value):
-        return value
+    if isinstance(value, bool):
+        return {"b": value}
+    if isinstance(value, int):
+        return {"n": value}
+    if isinstance(value, float):
+        return {"f": value}
+    if isinstance(value, str):
+        return {"s": value}
 
     if isinstance(value, list):
         result = list(map(lambda a: serialize_value(a, handles, depth + 1), value))
         return dict(a=result)
 
     if isinstance(value, dict):
-        result: Dict[str, Any] = dict()  # type: ignore
+        result = []  # type: ignore
         for name in value:
-            result[name] = serialize_value(value[name], handles, depth + 1)
+            result.append(
+                {"k": name, "v": serialize_value(value[name], handles, depth + 1)}
+            )
         return dict(o=result)
     return dict(v="undefined")
 
@@ -168,10 +167,16 @@ def parse_value(value: Any) -> Any:
 
         if "o" in value:
             o = value["o"]
-            result = dict()
-            for name in o:
-                result[name] = parse_value(o[name])
-            return result
+            return {e["k"]: parse_value(e["v"]) for e in o}
+
+        if "n" in value:
+            return value["n"]
+
+        if "s" in value:
+            return value["s"]
+
+        if "b" in value:
+            return value["b"]
     return value
 
 

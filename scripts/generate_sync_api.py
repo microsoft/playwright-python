@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import re
 from types import FunctionType
 from typing import (  # type: ignore
@@ -50,12 +51,12 @@ def process_type(value: Any, param: bool = False) -> str:
     value = re.sub(r"playwright\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
-        value = re.sub(r"typing.Union\[([^,]+), NoneType\]", r"\1 = None", value)
+        value = re.sub(r"typing.Union\[([^,]+), NoneType\]", r"\1", value)
         if "Union[Literal" in value:
             value = re.sub(r"typing.Union\[(.*), NoneType\]", r"\1", value)
         else:
             value = re.sub(
-                r"typing.Union\[(.*), NoneType\]", r"typing.Union[\1] = None", value
+                r"typing.Union\[(.*), NoneType\]", r"typing.Union[\1]", value
             )
     return value
 
@@ -64,20 +65,21 @@ def signature(func: FunctionType, indent: int) -> str:
     hints = get_type_hints(func, globals())
     tokens = ["self"]
     split = ",\n" + " " * indent
+
+    func_signature = inspect.signature(func)
     for [name, value] in hints.items():
         if name == "return":
             continue
         processed = process_type(value, True)
-        if (
-            "Literal" in str(value)
-            and "typing.List" not in processed
-            and "Union" not in processed
-        ):
-            default_value = re.search(r"Literal\[('[^']+').*\]", str(value))
-            if default_value:
-                tokens.append(f"{name}: {processed} = {default_value.group(1)}")
+        default_value = func_signature.parameters[name].default
+        if default_value is not func_signature.parameters[name].empty:
+            if isinstance(default_value, str):
+                default_value = '"' + default_value + '"'
+            elif isinstance(default_value, object):
+                default_value = str(default_value)
             else:
-                tokens.append(f"{name}: {processed}")
+                raise ValueError(f"value {default_value} not recognized")
+            tokens.append(f"{name}: {processed} = {default_value}")
         elif name == "contentScript":
             tokens.append(f"{name}: {processed} = False")
         elif name == "arg":

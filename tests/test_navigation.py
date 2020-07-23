@@ -234,7 +234,10 @@ async def test_goto_should_not_throw_if_networkidle0_is_passed_as_an_option(
 async def test_goto_should_throw_if_networkidle2_is_passed_as_an_option(page, server):
     with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE, waitUntil="networkidle2")
-    assert "Unsupported waitUntil option" in exc_info.value.message
+    assert (
+        "waitUntil: expected one of (load|domcontentloaded|networkidle)"
+        in exc_info.value.message
+    )
 
 
 async def test_goto_should_fail_when_main_resources_failed_to_load(

@@ -58,7 +58,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Frame(ChannelOwner):
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer)
-        self._parent_frame = from_nullable_channel(initializer["parentFrame"])
+        self._parent_frame = from_nullable_channel(initializer.get("parentFrame"))
         if self._parent_frame:
             self._parent_frame._child_frames.append(self)
         self._name = initializer["name"]

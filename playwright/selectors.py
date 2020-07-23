@@ -29,8 +29,7 @@ class Selectors(ChannelOwner):
             with open(path, "r") as file:
                 source = file.read()
         await self._channel.send(
-            "register",
-            dict(name=name, source=source, options={"contentScript": contentScript}),
+            "register", dict(name=name, source=source, contentScript=contentScript),
         )
 
     async def _createSelector(self, name: str, handle: ElementHandle) -> Optional[str]:

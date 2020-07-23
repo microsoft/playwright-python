@@ -50,7 +50,7 @@ from playwright.helper import (
     serialize_error,
 )
 from playwright.input import Keyboard, Mouse
-from playwright.js_handle import JSHandle, serialize_argument
+from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Request, Response, Route, serialize_headers
 from playwright.wait_helper import WaitHelper
 from playwright.worker import Worker
@@ -156,7 +156,7 @@ class Page(ChannelOwner):
         self._channel.on(
             "pageError",
             lambda params: self.emit(
-                Page.Events.PageError, parse_error(params["error"])
+                Page.Events.PageError, parse_error(params["error"]["error"])
             ),
         )
         self._channel.on(
@@ -713,8 +713,9 @@ class BindingCall(ChannelOwner):
         try:
             frame = from_channel(self._initializer["frame"])
             source = dict(context=frame._page.context, page=frame._page, frame=frame)
-            result = func(source, *self._initializer["args"])
-            if isinstance(result, asyncio.Future):
+            func_args = list(map(parse_result, self._initializer["args"]))
+            result = func(source, *func_args)
+            if asyncio.isfuture(result):
                 result = await result
             await self._channel.send("resolve", dict(result=serialize_argument(result)))
         except Exception as e:

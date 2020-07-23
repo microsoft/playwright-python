@@ -40,40 +40,40 @@ class DummyObject(ChannelOwner):
 def create_remote_object(
     scope: ConnectionScope, type: str, guid: str, initializer: Dict
 ) -> Any:
-    if type == "bindingCall":
+    if type == "BindingCall":
         return BindingCall(scope, guid, initializer)
-    if type == "browser":
+    if type == "Browser":
         return Browser(scope, guid, initializer)
-    if type == "browserServer":
+    if type == "BrowserServer":
         return BrowserServer(scope, guid, initializer)
-    if type == "browserType":
+    if type == "BrowserType":
         return BrowserType(scope, guid, initializer)
-    if type == "context":
+    if type == "BrowserContext":
         return BrowserContext(scope, guid, initializer)
-    if type == "consoleMessage":
+    if type == "ConsoleMessage":
         return ConsoleMessage(scope, guid, initializer)
-    if type == "dialog":
+    if type == "Dialog":
         return Dialog(scope, guid, initializer)
-    if type == "download":
+    if type == "Download":
         return Download(scope, guid, initializer)
-    if type == "elementHandle":
+    if type == "ElementHandle":
         return ElementHandle(scope, guid, initializer)
-    if type == "frame":
+    if type == "Frame":
         return Frame(scope, guid, initializer)
-    if type == "jsHandle":
+    if type == "JSHandle":
         return JSHandle(scope, guid, initializer)
-    if type == "page":
+    if type == "Page":
         return Page(scope, guid, initializer)
-    if type == "playwright":
+    if type == "Playwright":
         return Playwright(scope, guid, initializer)
-    if type == "request":
+    if type == "Request":
         return Request(scope, guid, initializer)
-    if type == "response":
+    if type == "Response":
         return Response(scope, guid, initializer)
-    if type == "route":
+    if type == "Route":
         return Route(scope, guid, initializer)
-    if type == "worker":
+    if type == "Worker":
         return Worker(scope, guid, initializer)
-    if type == "selectors":
+    if type == "Selectors":
         return Selectors(scope, guid, initializer)
     return DummyObject(scope, guid, initializer)

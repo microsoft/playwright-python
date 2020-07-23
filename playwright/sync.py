@@ -231,17 +231,20 @@ class Route(SyncBase):
     def request(self) -> "Request":
         return Request._from_async(self._async_obj.request)
 
-    def abort(self, error_code: str) -> NoneType:
+    def abort(self, error_code: str = "failed") -> NoneType:
         return self._sync(self._async_obj.abort(error_code=error_code))
 
     def fulfill(
         self,
-        status: int,
-        headers: typing.Dict[str, str],
+        status: int = 200,
+        headers: typing.Dict[str, str] = {},
         body: typing.Union[str, bytes] = None,
+        contentType: str = None,
     ) -> NoneType:
         return self._sync(
-            self._async_obj.fulfill(status=status, headers=headers, body=body)
+            self._async_obj.fulfill(
+                status=status, headers=headers, body=body, contentType=contentType
+            )
         )
 
     def continue_(
@@ -333,16 +336,12 @@ class Mouse(SyncBase):
         return self._sync(self._async_obj.move(x=x, y=y, steps=steps))
 
     def down(
-        self,
-        button: Literal["left", "right", "middle"] = "left",
-        clickCount: int = None,
+        self, button: Literal["left", "right", "middle"] = None, clickCount: int = None
     ) -> NoneType:
         return self._sync(self._async_obj.down(button=button, clickCount=clickCount))
 
     def up(
-        self,
-        button: Literal["left", "right", "middle"] = "left",
-        clickCount: int = None,
+        self, button: Literal["left", "right", "middle"] = None, clickCount: int = None
     ) -> NoneType:
         return self._sync(self._async_obj.up(button=button, clickCount=clickCount))
 
@@ -351,7 +350,7 @@ class Mouse(SyncBase):
         x: float,
         y: float,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
     ) -> NoneType:
         return self._sync(
@@ -365,7 +364,7 @@ class Mouse(SyncBase):
         x: float,
         y: float,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
     ) -> NoneType:
         return self._sync(
             self._async_obj.dblclick(x=x, y=y, delay=delay, button=button)
@@ -404,7 +403,7 @@ class JSHandle(SyncBase):
         return {name: JSHandle._from_async(value) for name, value in map.items()}
 
     def evaluate(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evaluate(
@@ -413,7 +412,7 @@ class JSHandle(SyncBase):
         )
 
     def evaluateHandle(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         return JSHandle._from_async(
             self._sync(
@@ -523,7 +522,7 @@ class ElementHandle(SyncBase):
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -549,7 +548,7 @@ class ElementHandle(SyncBase):
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -575,7 +574,7 @@ class ElementHandle(SyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-        ] = None,
+        ],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> typing.List[str]:
@@ -656,7 +655,7 @@ class ElementHandle(SyncBase):
     def screenshot(
         self,
         timeout: int = None,
-        type: Literal["png", "jpeg"] = "png",
+        type: Literal["png", "jpeg"] = None,
         path: str = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -682,7 +681,11 @@ class ElementHandle(SyncBase):
         )
 
     def evalOnSelector(
-        self, selector: str, expression: str, arg: typing.Any, force_expr: bool
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        force_expr: bool = False,
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evalOnSelector(
@@ -691,7 +694,11 @@ class ElementHandle(SyncBase):
         )
 
     def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: typing.Any, force_expr: bool
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        force_expr: bool = False,
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evalOnSelectorAll(
@@ -732,8 +739,8 @@ class Accessibility(SyncBase):
         return {name: Accessibility._from_async(value) for name, value in map.items()}
 
     def snapshot(
-        self, interestingOnly: bool, root: "ElementHandle" = None
-    ) -> typing.Dict:
+        self, interestingOnly: bool = True, root: "ElementHandle" = None
+    ) -> typing.Union[typing.Dict[str, typing.Any], NoneType]:
         return self._sync(
             self._async_obj.snapshot(interestingOnly=interestingOnly, root=root)
         )
@@ -824,7 +831,7 @@ class Frame(SyncBase):
         return ElementHandle._from_async(self._sync(self._async_obj.frameElement()))
 
     def evaluate(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evaluate(
@@ -833,7 +840,7 @@ class Frame(SyncBase):
         )
 
     def evaluateHandle(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         return JSHandle._from_async(
             self._sync(
@@ -857,7 +864,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         timeout: int = None,
-        state: Literal["attached", "detached", "visible", "hidden"] = "attached",
+        state: Literal["attached", "detached", "visible", "hidden"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
         return ElementHandle._from_async_nullable(
             self._sync(
@@ -881,7 +888,11 @@ class Frame(SyncBase):
         )
 
     def evalOnSelector(
-        self, selector: str, expression: str, arg: typing.Any, force_expr: bool
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        force_expr: bool = False,
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evalOnSelector(
@@ -890,7 +901,11 @@ class Frame(SyncBase):
         )
 
     def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: typing.Any, force_expr: bool
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        force_expr: bool = False,
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evalOnSelectorAll(
@@ -905,7 +920,7 @@ class Frame(SyncBase):
         self,
         html: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> NoneType:
         return self._sync(
             self._async_obj.setContent(html=html, timeout=timeout, waitUntil=waitUntil)
@@ -940,7 +955,7 @@ class Frame(SyncBase):
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -968,7 +983,7 @@ class Frame(SyncBase):
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -1042,7 +1057,7 @@ class Frame(SyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-        ] = None,
+        ],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> typing.List[str]:
@@ -1138,8 +1153,8 @@ class Frame(SyncBase):
     def waitForFunction(
         self,
         expression: str,
-        arg: typing.Any,
-        force_expr: bool,
+        arg: typing.Any = None,
+        force_expr: bool = False,
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
@@ -1191,7 +1206,7 @@ class Worker(SyncBase):
         return self._async_obj.url
 
     def evaluate(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evaluate(
@@ -1200,7 +1215,7 @@ class Worker(SyncBase):
         )
 
     def evaluateHandle(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         return JSHandle._from_async(
             self._sync(
@@ -1243,7 +1258,7 @@ class Selectors(SyncBase):
         return {name: Selectors._from_async(value) for name, value in map.items()}
 
     def register(
-        self, name: str, source: str, path: str = None, contentScript: bool = False
+        self, name: str, source: str = "", path: str = None, contentScript: bool = False
     ) -> NoneType:
         return self._sync(
             self._async_obj.register(
@@ -1521,7 +1536,7 @@ class Page(SyncBase):
         self,
         selector: str,
         timeout: int = None,
-        state: Literal["attached", "detached", "visible", "hidden"] = "attached",
+        state: Literal["attached", "detached", "visible", "hidden"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
         return ElementHandle._from_async_nullable(
             self._sync(
@@ -1545,7 +1560,7 @@ class Page(SyncBase):
         )
 
     def evaluate(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evaluate(
@@ -1554,7 +1569,7 @@ class Page(SyncBase):
         )
 
     def evaluateHandle(
-        self, expression: str, arg: typing.Any, force_expr: bool
+        self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         return JSHandle._from_async(
             self._sync(
@@ -1565,7 +1580,11 @@ class Page(SyncBase):
         )
 
     def evalOnSelector(
-        self, selector: str, expression: str, arg: typing.Any, force_expr: bool
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        force_expr: bool = False,
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evalOnSelector(
@@ -1574,7 +1593,11 @@ class Page(SyncBase):
         )
 
     def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: typing.Any, force_expr: bool
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        force_expr: bool = False,
     ) -> typing.Any:
         return self._sync(
             self._async_obj.evalOnSelectorAll(
@@ -1620,7 +1643,7 @@ class Page(SyncBase):
         self,
         html: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> NoneType:
         return self._sync(
             self._async_obj.setContent(html=html, timeout=timeout, waitUntil=waitUntil)
@@ -1716,7 +1739,7 @@ class Page(SyncBase):
     def goBack(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         return Response._from_async_nullable(
             self._sync(self._async_obj.goBack(timeout=timeout, waitUntil=waitUntil))
@@ -1725,7 +1748,7 @@ class Page(SyncBase):
     def goForward(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         return Response._from_async_nullable(
             self._sync(self._async_obj.goForward(timeout=timeout, waitUntil=waitUntil))
@@ -1733,8 +1756,8 @@ class Page(SyncBase):
 
     def emulateMedia(
         self,
-        media: Literal["screen", "print"] = "screen",
-        colorScheme: Literal["light", "dark", "no-preference"] = "light",
+        media: Literal["screen", "print"] = None,
+        colorScheme: Literal["light", "dark", "no-preference"] = None,
     ) -> NoneType:
         return self._sync(
             self._async_obj.emulateMedia(media=media, colorScheme=colorScheme)
@@ -1752,21 +1775,21 @@ class Page(SyncBase):
     def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[["Route", "Request"], NoneType],
+        handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
         return self._sync(self._async_obj.route(url=url, handler=handler))
 
     def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[["Route", "Request"], NoneType]] = None,
+        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         return self._sync(self._async_obj.unroute(url=url, handler=handler))
 
     def screenshot(
         self,
         timeout: int = None,
-        type: Literal["png", "jpeg"] = "png",
+        type: Literal["png", "jpeg"] = None,
         path: str = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -1802,7 +1825,7 @@ class Page(SyncBase):
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -1830,7 +1853,7 @@ class Page(SyncBase):
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = "left",
+        button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -1904,7 +1927,7 @@ class Page(SyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-        ] = None,
+        ],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> typing.List[str]:
@@ -2000,8 +2023,8 @@ class Page(SyncBase):
     def waitForFunction(
         self,
         expression: str,
-        arg: typing.Any,
-        force_expr: bool,
+        arg: typing.Any = None,
+        force_expr: bool = False,
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
@@ -2122,7 +2145,7 @@ class BrowserContext(SyncBase):
     def clearPermissions(self) -> NoneType:
         return self._sync(self._async_obj.clearPermissions())
 
-    def setGeolocation(self, geolocation: typing.Dict = None) -> NoneType:
+    def setGeolocation(self, geolocation: typing.Dict) -> NoneType:
         return self._sync(self._async_obj.setGeolocation(geolocation=geolocation))
 
     def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
@@ -2147,14 +2170,14 @@ class BrowserContext(SyncBase):
     def route(
         self,
         match: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[["Route", "Request"], NoneType],
+        handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
         return self._sync(self._async_obj.route(match=match, handler=handler))
 
     def unroute(
         self,
         match: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[["Route", "Request"], NoneType]] = None,
+        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         return self._sync(self._async_obj.unroute(match=match, handler=handler))
 
@@ -2229,7 +2252,7 @@ class Browser(SyncBase):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = "light",
+        colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "BrowserContext":
         return BrowserContext._from_async(
@@ -2273,7 +2296,7 @@ class Browser(SyncBase):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = "light",
+        colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "Page":
         return Page._from_async(
@@ -2492,7 +2515,7 @@ class BrowserType(SyncBase):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = "light",
+        colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "BrowserContext":
         return BrowserContext._from_async(

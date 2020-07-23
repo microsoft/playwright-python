@@ -314,6 +314,7 @@ async def test_expose_function(page, server):
     assert result == 36
 
 
+@pytest.mark.skip("todo mxschmitt")
 async def test_expose_function_should_throw_exception_in_page_context(page, server):
     def throw():
         raise Exception("WOOF WOOF")
@@ -847,7 +848,7 @@ async def test_select_option_should_not_allow_null_items(page, server):
     await page.evaluate("makeMultiple()")
     with pytest.raises(Error) as exc_info:
         await page.selectOption("select", ["blue", None, "black", "magenta"])
-    assert 'Values must be strings. Found value "null"' in exc_info.value.message
+    assert "expected string, got object" in exc_info.value.message
 
 
 async def test_select_option_should_unselect_with_null(page, server):
@@ -892,19 +893,19 @@ async def test_select_option_should_throw_if_passed_wrong_types(page, server):
 
     with pytest.raises(Error) as exc_info:
         await page.selectOption("select", 12)
-    assert "Values must be strings" in exc_info.value.message
+    assert "expected object, got number" in exc_info.value.message
 
     with pytest.raises(Error) as exc_info:
         await page.selectOption("select", {"value": 12})
-    assert "Values must be strings" in exc_info.value.message
+    assert "expected string, got number" in exc_info.value.message
 
     with pytest.raises(Error) as exc_info:
         await page.selectOption("select", {"label": 12})
-    assert "Labels must be strings" in exc_info.value.message
+    assert "expected string, got number" in exc_info.value.message
 
     with pytest.raises(Error) as exc_info:
         await page.selectOption("select", {"index": "12"})
-    assert "Indices must be numbers" in exc_info.value.message
+    assert "expected number, got string" in exc_info.value.message
 
 
 async def test_select_option_should_work_when_re_defining_top_level_event_class(
@@ -1067,7 +1068,7 @@ async def test_fill_should_throw_if_passed_a_non_string_value(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     with pytest.raises(Error) as exc_info:
         await page.fill("textarea", 123)
-    assert "Value must be string." in exc_info.value.message
+    assert "expected string, got number" in exc_info.value.message
 
 
 async def test_fill_should_retry_on_disabled_element(page, server):
