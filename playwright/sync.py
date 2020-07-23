@@ -238,7 +238,7 @@ class Route(SyncBase):
         self,
         status: int = 200,
         headers: typing.Dict[str, str] = {},
-        body: typing.Union[str, bytes, NoneType] = None,
+        body: typing.Union[str, bytes] = None,
         contentType: str = None,
     ) -> NoneType:
         return self._sync(
@@ -250,8 +250,8 @@ class Route(SyncBase):
     def continue_(
         self,
         method: str = None,
-        headers: typing.Union[typing.Dict[str, str], NoneType] = None,
-        postData: typing.Union[str, bytes, NoneType] = None,
+        headers: typing.Union[typing.Dict[str, str]] = None,
+        postData: typing.Union[str, bytes] = None,
     ) -> NoneType:
         return self._sync(
             self._async_obj.continue_(method=method, headers=headers, postData=postData)
@@ -503,7 +503,7 @@ class ElementHandle(SyncBase):
     def hover(
         self,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         timeout: int = None,
@@ -518,7 +518,7 @@ class ElementHandle(SyncBase):
     def click(
         self,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
@@ -544,7 +544,7 @@ class ElementHandle(SyncBase):
     def dblclick(
         self,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
@@ -574,7 +574,6 @@ class ElementHandle(SyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-            NoneType,
         ],
         timeout: int = None,
         noWaitAfter: bool = None,
@@ -809,9 +808,7 @@ class Frame(SyncBase):
         self,
         timeout: int = None,
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
-        url: typing.Union[
-            str, typing.Pattern, typing.Callable[[str], bool], NoneType
-        ] = None,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Response", NoneType]:
         return Response._from_async_nullable(
             self._sync(
@@ -954,7 +951,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
@@ -982,7 +979,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
@@ -1034,7 +1031,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         timeout: int = None,
@@ -1060,7 +1057,6 @@ class Frame(SyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-            NoneType,
         ],
         timeout: int = None,
         noWaitAfter: bool = None,
@@ -1160,7 +1156,7 @@ class Frame(SyncBase):
         arg: typing.Any = None,
         force_expr: bool = False,
         timeout: int = None,
-        polling: typing.Union[int, Literal["raf"], NoneType] = None,
+        polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
         return JSHandle._from_async(
             self._sync(
@@ -1514,9 +1510,7 @@ class Page(SyncBase):
     def frame(
         self,
         name: str = None,
-        url: typing.Union[
-            str, typing.Pattern, typing.Callable[[str], bool], NoneType
-        ] = None,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Frame", NoneType]:
         return Frame._from_async_nullable(
             self._sync(self._async_obj.frame(name=name, url=url))
@@ -1704,10 +1698,8 @@ class Page(SyncBase):
 
     def waitForRequest(
         self,
-        url: typing.Union[
-            str, typing.Pattern, typing.Callable[[str], bool], NoneType
-        ] = None,
-        predicate: typing.Union[typing.Callable[["Request"], bool], NoneType] = None,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
         timeout: int = None,
     ) -> typing.Union["Request", NoneType]:
         return Request._from_async_nullable(
@@ -1720,10 +1712,8 @@ class Page(SyncBase):
 
     def waitForResponse(
         self,
-        url: typing.Union[
-            str, typing.Pattern, typing.Callable[[str], bool], NoneType
-        ] = None,
-        predicate: typing.Union[typing.Callable[["Response"], bool], NoneType] = None,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        predicate: typing.Union[typing.Callable[["Response"], bool]] = None,
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         return Response._from_async_nullable(
@@ -1737,7 +1727,7 @@ class Page(SyncBase):
     def waitForEvent(
         self,
         event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool], NoneType] = None,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -> typing.Any:
         return self._sync(
@@ -1792,9 +1782,7 @@ class Page(SyncBase):
     def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[
-            typing.Callable[["Route", "Request"], typing.Any], NoneType
-        ] = None,
+        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         return self._sync(self._async_obj.unroute(url=url, handler=handler))
 
@@ -1833,7 +1821,7 @@ class Page(SyncBase):
         self,
         selector: str,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
@@ -1861,7 +1849,7 @@ class Page(SyncBase):
         self,
         selector: str,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         delay: int = None,
@@ -1913,7 +1901,7 @@ class Page(SyncBase):
         self,
         selector: str,
         modifiers: typing.Union[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]], NoneType
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Dict = None,
         timeout: int = None,
@@ -1939,7 +1927,6 @@ class Page(SyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-            NoneType,
         ],
         timeout: int = None,
         noWaitAfter: bool = None,
@@ -2039,7 +2026,7 @@ class Page(SyncBase):
         arg: typing.Any = None,
         force_expr: bool = False,
         timeout: int = None,
-        polling: typing.Union[int, Literal["raf"], NoneType] = None,
+        polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
         return JSHandle._from_async(
             self._sync(
@@ -2063,8 +2050,8 @@ class Page(SyncBase):
         landscape: bool = None,
         pageRanges: str = None,
         format: str = None,
-        width: typing.Union[str, float, NoneType] = None,
-        height: typing.Union[str, float, NoneType] = None,
+        width: typing.Union[str, float] = None,
+        height: typing.Union[str, float] = None,
         preferCSSPageSize: bool = None,
         margin: typing.Dict = None,
         path: str = None,
@@ -2190,16 +2177,14 @@ class BrowserContext(SyncBase):
     def unroute(
         self,
         match: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[
-            typing.Callable[["Route", "Request"], typing.Any], NoneType
-        ] = None,
+        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         return self._sync(self._async_obj.unroute(match=match, handler=handler))
 
     def waitForEvent(
         self,
         event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool], NoneType] = None,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -> typing.Any:
         return self._sync(
@@ -2252,7 +2237,7 @@ class Browser(SyncBase):
 
     def newContext(
         self,
-        viewport: typing.Union[typing.Dict, Literal[0], NoneType] = None,
+        viewport: typing.Union[typing.Dict, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -2261,7 +2246,7 @@ class Browser(SyncBase):
         timezoneId: str = None,
         geolocation: typing.Dict = None,
         permissions: typing.List[str] = None,
-        extraHTTPHeaders: typing.Union[typing.Dict[str, str], NoneType] = None,
+        extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
         httpCredentials: typing.Dict = None,
         deviceScaleFactor: int = None,
@@ -2296,7 +2281,7 @@ class Browser(SyncBase):
 
     def newPage(
         self,
-        viewport: typing.Union[typing.Dict, Literal[0], NoneType] = None,
+        viewport: typing.Union[typing.Dict, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -2305,7 +2290,7 @@ class Browser(SyncBase):
         timezoneId: str = None,
         geolocation: typing.Dict = None,
         permissions: typing.List[str] = None,
-        extraHTTPHeaders: typing.Union[typing.Dict[str, str], NoneType] = None,
+        extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
         httpCredentials: typing.Dict = None,
         deviceScaleFactor: int = None,
@@ -2524,7 +2509,7 @@ class BrowserType(SyncBase):
         timezoneId: str = None,
         geolocation: typing.Dict = None,
         permissions: typing.List[str] = None,
-        extraHTTPHeaders: typing.Union[typing.Dict[str, str], NoneType] = None,
+        extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
         httpCredentials: typing.Dict = None,
         deviceScaleFactor: int = None,

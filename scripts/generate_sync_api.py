@@ -55,7 +55,9 @@ def process_type(value: Any, param: bool = False) -> str:
         if "Union[Literal" in value:
             value = re.sub(r"typing.Union\[(.*), NoneType\]", r"\1", value)
         else:
-            value = re.sub(r"typing.Optional\[(.*)\]", r"typing.Union[\1]", value)
+            value = re.sub(
+                r"typing.Union\[(.*), NoneType\]", r"typing.Union[\1]", value
+            )
     return value
 
 
