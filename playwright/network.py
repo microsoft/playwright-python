@@ -32,7 +32,7 @@ class Request(ChannelOwner):
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer)
         self._redirected_from: Optional["Request"] = from_nullable_channel(
-            initializer["redirectedFrom"]
+            initializer.get("redirectedFrom")
         )
         self._redirected_to: Optional["Request"] = None
         if self._redirected_from:
@@ -53,7 +53,10 @@ class Request(ChannelOwner):
 
     @property
     def postData(self) -> Optional[str]:
-        return self._initializer["postData"]
+        b64_content = self._initializer.get("postData")
+        if not b64_content:
+            return None
+        return base64.b64decode(bytes(b64_content, "utf-8")).decode()
 
     @property
     def headers(self) -> Dict[str, str]:

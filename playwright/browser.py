@@ -76,6 +76,7 @@ class Browser(ChannelOwner):
         params = locals_to_params(locals())
         if viewport == 0:
             params["viewport"] = None
+            params["noDefaultViewport"] = True
         if extraHTTPHeaders:
             params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
         channel = await self._channel.send("newContext", params)

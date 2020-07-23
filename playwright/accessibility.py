@@ -12,10 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from playwright.connection import Channel
 from playwright.element_handle import ElementHandle
+
+
+def _ax_node_from_protocol(axNode: Dict[str, Any]) -> Dict[str, Any]:
+    result = {**axNode}
+    if "valueNumber" in axNode:
+        result["value"] = axNode["valueNumber"]
+    elif "valueString" in axNode:
+        result["value"] = axNode["valueString"]
+
+    if "checked" in axNode:
+        result["checked"] = (
+            True
+            if axNode.get("checked") == "checked"
+            else (
+                False if axNode.get("checked") == "unchecked" else axNode.get("checked")
+            )
+        )
+
+    if "pressed" in axNode:
+        result["pressed"] = (
+            True
+            if axNode.get("pressed") == "pressed"
+            else (
+                False if axNode.get("pressed") == "released" else axNode.get("pressed")
+            )
+        )
+
+    if axNode.get("children"):
+        result["children"] = list(map(_ax_node_from_protocol, axNode["children"]))
+    if "valueNumber" in result:
+        del result["valueNumber"]
+    if "valueString" in result:
+        del result["valueString"]
+    return result
 
 
 class Accessibility:
@@ -25,8 +59,15 @@ class Accessibility:
 
     async def snapshot(
         self, interestingOnly: bool = True, root: ElementHandle = None
-    ) -> Dict:
+    ) -> Optional[Dict[str, Any]]:
         root = root._channel if root else None
-        return await self._channel.send(
-            "accessibilitySnapshot", dict(root=root, interestingOnly=interestingOnly)
+        result = await self._channel.send(
+            "accessibilitySnapshot",
+            dict(root=root, interestingOnly=interestingOnly),
+            unpack_first_key=False,
+        )
+        return (
+            _ax_node_from_protocol(result["rootAXNode"])
+            if result.get("rootAXNode")
+            else None
         )

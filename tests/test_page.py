@@ -1065,7 +1065,7 @@ async def test_fill_should_throw_if_passed_a_non_string_value(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     with pytest.raises(Error) as exc_info:
         await page.fill("textarea", 123)
-    assert "Value must be string." in exc_info.value.message
+    assert "expected string, got number" in exc_info.value.message
 
 
 async def test_fill_should_retry_on_disabled_element(page, server):

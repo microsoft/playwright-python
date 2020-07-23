@@ -66,7 +66,7 @@ async def async_init() -> None:
     connection = Connection(
         proc.stdout, proc.stdin, create_remote_object, asyncio.get_event_loop()
     )
-    playwright_async = await connection.wait_for_object_with_known_name("playwright")
+    playwright_async = await connection.wait_for_object_with_known_name("Playwright")
 
 
 if sys.platform == "win32":
