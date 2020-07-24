@@ -30,21 +30,20 @@ class Channel(BaseEventEmitter):
         self._guid = guid
         self._object: Optional[ChannelOwner] = None
 
-    async def send(
-        self, method: str, params: dict = None, unpack_first_key: bool = True
-    ) -> Any:
+    async def send(self, method: str, params: dict = None) -> Any:
         if params is None:
             params = dict()
         result = await self._scope.send_message_to_server(self._guid, method, params)
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
-        if unpack_first_key and isinstance(result, dict) and len(result) <= 1:
-            if len(result) == 1:
-                key = next(iter(result))
-                return result[key]
-            else:
-                return None
-        return result
+        if not result:
+            return None
+        assert isinstance(result, dict)
+        if len(result) == 0:
+            return None
+        assert len(result) == 1
+        key = next(iter(result))
+        return result[key]
 
     def send_no_reply(self, method: str, params: dict = None) -> None:
         if params is None:

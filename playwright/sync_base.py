@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Generic, List, Optional, Tuple, TypeVar, cast
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, cast
 
 from playwright.wait_helper import WaitHelper
 
@@ -21,19 +21,39 @@ loop = asyncio.get_event_loop()
 
 
 class AsyncToSyncMapping:
-    mapping: List[Tuple[type, type]] = []
+    mapping: Dict[type, type] = {}
 
     def register(self, async_class: type, sync_class: type) -> None:
-        self.mapping.append((async_class, sync_class))
+        self.mapping[async_class] = sync_class
 
-    def get_sync_class(self, input_async_inst: object) -> Any:
-        for (async_class, sync_class) in self.mapping:
-            if isinstance(input_async_inst, async_class):
-                return sync_class
-        raise ValueError("should never happen")
+    def from_maybe_async(self, obj: Any) -> Any:
+        if not obj:
+            return None
+        if not obj._sync_owner:
+            sync_class = self.mapping[type(obj)]
+            if not sync_class:
+                return None
+            obj._sync_owner = sync_class(obj)
+        return obj._sync_owner
+
+    def from_async(self, obj: Any) -> Any:
+        assert obj
+        result = self.from_maybe_async(obj)
+        assert result
+        return result
+
+    def from_async_nullable(self, obj: Any = None) -> Optional[Any]:
+        return self.from_async(obj) if obj else None
+
+    def from_async_list(self, items: List[Any]) -> List[Any]:
+        return list(map(lambda a: self.from_async(a), items))
+
+    def from_async_dict(self, map: Dict[str, Any]) -> Dict[str, Any]:
+        return {name: self.from_async(value) for name, value in map.items()}
 
 
 mapping = AsyncToSyncMapping()
+
 
 T = TypeVar("T")
 
@@ -60,7 +80,7 @@ class EventInfo(Generic[T]):
     def value(self) -> T:
         if not self._value:
             value = loop.run_until_complete(self._future)
-            self._value = mapping.get_sync_class(value)._from_async(value)
+            self._value = mapping.from_async(value)
         return cast(T, self._value)
 
 
@@ -91,14 +111,21 @@ class SyncBase:
     def _sync(self, future: asyncio.Future) -> Any:
         return loop.run_until_complete(future)
 
-    def _map_event(self, handler: Callable[[Any], None]) -> Callable[[Any], None]:
-        return lambda event: handler(mapping.get_sync_class(event)._from_async(event))
+    def _wrap_handler_1(self, handler: Callable[[Any], None]) -> Callable[[Any], None]:
+        return lambda arg: handler(mapping.from_maybe_async(arg))
+
+    def _wrap_handler_2(
+        self, handler: Callable[[Any, Any], None]
+    ) -> Callable[[Any, Any], None]:
+        return lambda arg1, arg2: handler(
+            mapping.from_maybe_async(arg1), mapping.from_maybe_async(arg2)
+        )
 
     def on(self, event_name: str, handler: Any) -> None:
-        self._async_obj.on(event_name, self._map_event(handler))
+        self._async_obj.on(event_name, self._wrap_handler_1(handler))
 
     def once(self, event_name: str, handler: Any) -> None:
-        self._async_obj.once(event_name, self._map_event(handler))
+        self._async_obj.once(event_name, self._wrap_handler_1(handler))
 
     def remove_listener(self, event_name: str, handler: Any) -> None:
         self._async_obj.remove_listener(event_name, handler)
