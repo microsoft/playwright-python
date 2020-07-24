@@ -22,9 +22,9 @@ def main() -> None:
         "<button id=button onclick=\"window.open('http://webkit.org', '_blank')\">Click me</input>"
     )
 
-    with page.expect_event("popup") as popup:
+    with page.expect_popup() as popup_info:
         page.click("#button")
-    print(popup.value)
+    print(popup_info.value)
 
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Creating context...")

@@ -15,7 +15,7 @@
 import sys
 import typing
 
-from playwright.sync_base import SyncBase, mapping
+from playwright.sync_base import EventContextManager, SyncBase, mapping
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -31,6 +31,7 @@ from playwright.console_message import ConsoleMessage as ConsoleMessageAsync
 from playwright.dialog import Dialog as DialogAsync
 from playwright.download import Download as DownloadAsync
 from playwright.element_handle import ElementHandle as ElementHandleAsync
+from playwright.file_chooser import FileChooser as FileChooserAsync
 from playwright.frame import Frame as FrameAsync
 from playwright.helper import (
     ConsoleMessageLocation,
@@ -768,6 +769,67 @@ class Accessibility(SyncBase):
 
 
 mapping.register(AccessibilityAsync, Accessibility)
+
+
+class FileChooser(SyncBase):
+    def __init__(self, obj: FileChooserAsync):
+        super().__init__(obj)
+
+    def as_async(self) -> FileChooserAsync:
+        return self._async_obj
+
+    @classmethod
+    def _from_async(cls, obj: FileChooserAsync) -> "FileChooser":
+        if not obj._sync_owner:
+            obj._sync_owner = cls(obj)
+        return obj._sync_owner
+
+    @classmethod
+    def _from_async_nullable(
+        cls, obj: FileChooserAsync = None
+    ) -> typing.Optional["FileChooser"]:
+        return FileChooser._from_async(obj) if obj else None
+
+    @classmethod
+    def _from_async_list(
+        cls, items: typing.List[FileChooserAsync]
+    ) -> typing.List["FileChooser"]:
+        return list(map(lambda a: FileChooser._from_async(a), items))
+
+    @classmethod
+    def _from_async_dict(
+        cls, map: typing.Dict[str, FileChooserAsync]
+    ) -> typing.Dict[str, "FileChooser"]:
+        return {name: FileChooser._from_async(value) for name, value in map.items()}
+
+    @property
+    def page(self) -> "Page":
+        return Page._from_async(self._async_obj.page)
+
+    @property
+    def element(self) -> "ElementHandle":
+        return ElementHandle._from_async(self._async_obj.element)
+
+    @property
+    def isMultiple(self) -> bool:
+        return self._async_obj.isMultiple
+
+    def setFiles(
+        self,
+        files: typing.Union[
+            str, FilePayload, typing.List[str], typing.List[FilePayload]
+        ],
+        timeout: int = None,
+        noWaitAfter: bool = None,
+    ) -> NoneType:
+        return self._sync(
+            self._async_obj.setFiles(
+                files=files, timeout=timeout, noWaitAfter=noWaitAfter
+            )
+        )
+
+
+mapping.register(FileChooserAsync, FileChooser)
 
 
 class Frame(SyncBase):
@@ -2119,6 +2181,62 @@ class Page(SyncBase):
             )
         )
 
+    def expect_console_message(
+        self,
+        predicate: typing.Union[typing.Callable[["ConsoleMessage"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["ConsoleMessage"]:
+        return EventContextManager(self, "console", predicate, timeout)
+
+    def expect_dialog(
+        self,
+        predicate: typing.Union[typing.Callable[["Dialog"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Dialog"]:
+        return EventContextManager(self, "dialog", predicate, timeout)
+
+    def expect_download(
+        self,
+        predicate: typing.Union[typing.Callable[["Download"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Download"]:
+        return EventContextManager(self, "download", predicate, timeout)
+
+    def expect_file_chooser(
+        self,
+        predicate: typing.Union[typing.Callable[["FileChooser"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["FileChooser"]:
+        return EventContextManager(self, "filechooser", predicate, timeout)
+
+    def expect_request(
+        self,
+        predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Request"]:
+        return EventContextManager(self, "request", predicate, timeout)
+
+    def expect_response(
+        self,
+        predicate: typing.Union[typing.Callable[["Response"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Response"]:
+        return EventContextManager(self, "response", predicate, timeout)
+
+    def expect_popup(
+        self,
+        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Page"]:
+        return EventContextManager(self, "popup", predicate, timeout)
+
+    def expect_worker(
+        self,
+        predicate: typing.Union[typing.Callable[["Worker"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Worker"]:
+        return EventContextManager(self, "worker", predicate, timeout)
+
 
 mapping.register(PageAsync, Page)
 
@@ -2243,6 +2361,13 @@ class BrowserContext(SyncBase):
 
     def close(self) -> NoneType:
         return self._sync(self._async_obj.close())
+
+    def expect_page(
+        self,
+        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Page"]:
+        return EventContextManager(self, "page", predicate, timeout)
 
 
 mapping.register(BrowserContextAsync, BrowserContext)

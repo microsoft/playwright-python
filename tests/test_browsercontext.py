@@ -577,19 +577,17 @@ async def test_offline_should_emulate_navigator_online(context, server):
 
 async def test_page_event_should_have_url(context, server):
     page = await context.newPage()
-    [other_page, _] = await asyncio.gather(
-        context.waitForEvent("page"),
-        page.evaluate("url => window.open(url)", server.EMPTY_PAGE),
-    )
+    async with context.expect_page() as other_page_info:
+        await page.evaluate("url => window.open(url)", server.EMPTY_PAGE)
+    other_page = await other_page_info.value
     assert other_page.url == server.EMPTY_PAGE
 
 
 async def test_page_event_should_have_url_after_domcontentloaded(context, server):
     page = await context.newPage()
-    [other_page, _] = await asyncio.gather(
-        context.waitForEvent("page"),
-        page.evaluate("url => window.open(url)", server.EMPTY_PAGE),
-    )
+    async with context.expect_page() as other_page_info:
+        await page.evaluate("url => window.open(url)", server.EMPTY_PAGE)
+    other_page = await other_page_info.value
     await other_page.waitForLoadState("domcontentloaded")
     assert other_page.url == server.EMPTY_PAGE
 
@@ -598,10 +596,9 @@ async def test_page_event_should_have_about_blank_url_with_domcontentloaded(
     context, server
 ):
     page = await context.newPage()
-    [other_page, _] = await asyncio.gather(
-        context.waitForEvent("page"),
-        page.evaluate("url => window.open(url)", "about:blank"),
-    )
+    async with context.expect_page() as other_page_info:
+        await page.evaluate("url => window.open(url)", "about:blank")
+    other_page = await other_page_info.value
     await other_page.waitForLoadState("domcontentloaded")
     assert other_page.url == "about:blank"
 
@@ -610,9 +607,9 @@ async def test_page_event_should_have_about_blank_for_empty_url_with_domcontentl
     context, server
 ):
     page = await context.newPage()
-    [other_page, _] = await asyncio.gather(
-        context.waitForEvent("page"), page.evaluate("window.open()")
-    )
+    async with context.expect_page() as other_page_info:
+        await page.evaluate("window.open()")
+    other_page = await other_page_info.value
     await other_page.waitForLoadState("domcontentloaded")
     assert other_page.url == "about:blank"
 

@@ -33,6 +33,7 @@ from playwright.console_message import ConsoleMessage
 from playwright.dialog import Dialog
 from playwright.download import Download
 from playwright.element_handle import ElementHandle, ValuesToSelect
+from playwright.file_chooser import FileChooser
 from playwright.frame import Frame
 from playwright.input import Keyboard, Mouse
 from playwright.js_handle import JSHandle
@@ -191,7 +192,11 @@ def generate(t: Any) -> None:
             prefix = "        return " + prefix + f"self._async_obj.{name}"
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
     for [name, value] in t.__dict__.items():
-        if not name.startswith("_") and isinstance(value, FunctionType):
+        if (
+            not name.startswith("_")
+            and isinstance(value, FunctionType)
+            and "expect_" not in name
+        ):
             print("")
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
@@ -200,6 +205,21 @@ def generate(t: Any) -> None:
             prefix = "        return " + prefix + f"self._sync(self._async_obj.{name}("
             suffix = "))" + suffix
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
+        if "expect_" in name and "expect_event" not in name:
+            print("")
+            return_type_value = return_type(value)
+            return_type_value = re.sub(r"\"Async([^\"]+)\"", r"\1", return_type_value)
+            event_name = re.sub(r"expect_(.*)", r"\1", name)
+            event_name = re.sub(r"_", "", event_name)
+            event_name = re.sub(r"consolemessage", "console", event_name)
+            print(
+                f"    def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
+            )
+            print(
+                f'        return EventContextManager(self, "{event_name}", predicate, timeout)'
+            )
+
+    print("")
     print(f"mapping.register({short_name(t)}Async, {short_name(t)})")
 
 
@@ -223,7 +243,7 @@ def main() -> None:
 
 import typing
 import sys
-from playwright.sync_base import SyncBase, mapping
+from playwright.sync_base import EventContextManager, SyncBase, mapping
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -239,6 +259,7 @@ from playwright.console_message import ConsoleMessage as ConsoleMessageAsync
 from playwright.dialog import Dialog as DialogAsync
 from playwright.download import Download as DownloadAsync
 from playwright.element_handle import ElementHandle as ElementHandleAsync
+from playwright.file_chooser import FileChooser as FileChooserAsync
 from playwright.frame import Frame as FrameAsync
 from playwright.helper import ConsoleMessageLocation, Error, FilePayload, SelectOption, Viewport
 from playwright.input import Keyboard as KeyboardAsync, Mouse as MouseAsync
@@ -261,6 +282,7 @@ NoneType = type(None)
         JSHandle,
         ElementHandle,
         Accessibility,
+        FileChooser,
         Frame,
         Worker,
         Selectors,

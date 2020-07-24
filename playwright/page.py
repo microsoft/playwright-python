@@ -25,7 +25,11 @@ from playwright.connection import (
     from_channel,
     from_nullable_channel,
 )
+from playwright.console_message import ConsoleMessage
+from playwright.dialog import Dialog
+from playwright.download import Download
 from playwright.element_handle import ElementHandle, ValuesToSelect
+from playwright.event_context_manager import AsyncEventContextManager
 from playwright.file_chooser import FileChooser
 from playwright.frame import Frame
 from playwright.helper import (
@@ -99,7 +103,7 @@ class Page(ChannelOwner):
         self._main_frame: Frame = from_channel(initializer["mainFrame"])
         self._main_frame._page = self
         self._frames = [self._main_frame]
-        self._viewport_size = initializer["viewportSize"]
+        self._viewport_size = initializer.get("viewportSize")
         self._is_closed = False
         self._workers: List[Worker] = list()
         self._bindings: Dict[str, Any] = dict()
@@ -703,6 +707,51 @@ class Page(ChannelOwner):
     ) -> bytes:
         binary = await self._channel.send("pdf", locals_to_params(locals()))
         return base64.b64decode(binary)
+
+    def expect_event(
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager:
+        return AsyncEventContextManager(self, event, predicate, timeout)
+
+    def expect_console_message(
+        self, predicate: Callable[[ConsoleMessage], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[ConsoleMessage]:
+        return AsyncEventContextManager(self, "console", predicate, timeout)
+
+    def expect_dialog(
+        self, predicate: Callable[[Dialog], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[Dialog]:
+        return AsyncEventContextManager(self, "dialog", predicate, timeout)
+
+    def expect_download(
+        self, predicate: Callable[[Download], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[Download]:
+        return AsyncEventContextManager(self, "download", predicate, timeout)
+
+    def expect_file_chooser(
+        self, predicate: Callable[[FileChooser], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[FileChooser]:
+        return AsyncEventContextManager(self, "filechooser", predicate, timeout)
+
+    def expect_request(
+        self, predicate: Callable[[Request], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[Request]:
+        return AsyncEventContextManager(self, "request", predicate, timeout)
+
+    def expect_response(
+        self, predicate: Callable[[Response], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[Response]:
+        return AsyncEventContextManager(self, "response", predicate, timeout)
+
+    def expect_popup(
+        self, predicate: Callable[["Page"], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager["Page"]:
+        return AsyncEventContextManager(self, "popup", predicate, timeout)
+
+    def expect_worker(
+        self, predicate: Callable[[Worker], bool] = None, timeout: int = None,
+    ) -> AsyncEventContextManager[Worker]:
+        return AsyncEventContextManager(self, "worker", predicate, timeout)
 
 
 class BindingCall(ChannelOwner):
