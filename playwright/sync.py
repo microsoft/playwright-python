@@ -15,7 +15,7 @@
 import sys
 import typing
 
-from playwright.sync_base import SyncBase
+from playwright.sync_base import SyncBase, mapping
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -128,6 +128,9 @@ class Request(SyncBase):
         return self._sync(self._async_obj.isNavigationRequest())
 
 
+mapping.register(RequestAsync, Request)
+
+
 class Response(SyncBase):
     def __init__(self, obj: ResponseAsync):
         super().__init__(obj)
@@ -200,6 +203,9 @@ class Response(SyncBase):
         return self._sync(self._async_obj.json())
 
 
+mapping.register(ResponseAsync, Response)
+
+
 class Route(SyncBase):
     def __init__(self, obj: RouteAsync):
         super().__init__(obj)
@@ -258,6 +264,9 @@ class Route(SyncBase):
         )
 
 
+mapping.register(RouteAsync, Route)
+
+
 class Keyboard(SyncBase):
     def __init__(self, obj: KeyboardAsync):
         super().__init__(obj)
@@ -303,6 +312,9 @@ class Keyboard(SyncBase):
 
     def press(self, key: str, delay: int = None) -> NoneType:
         return self._sync(self._async_obj.press(key=key, delay=delay))
+
+
+mapping.register(KeyboardAsync, Keyboard)
 
 
 class Mouse(SyncBase):
@@ -369,6 +381,9 @@ class Mouse(SyncBase):
         return self._sync(
             self._async_obj.dblclick(x=x, y=y, delay=delay, button=button)
         )
+
+
+mapping.register(MouseAsync, Mouse)
 
 
 class JSHandle(SyncBase):
@@ -438,6 +453,9 @@ class JSHandle(SyncBase):
 
     def jsonValue(self) -> typing.Any:
         return self._sync(self._async_obj.jsonValue())
+
+
+mapping.register(JSHandleAsync, JSHandle)
 
 
 class ElementHandle(SyncBase):
@@ -707,6 +725,9 @@ class ElementHandle(SyncBase):
         )
 
 
+mapping.register(ElementHandleAsync, ElementHandle)
+
+
 class Accessibility(SyncBase):
     def __init__(self, obj: AccessibilityAsync):
         super().__init__(obj)
@@ -744,6 +765,9 @@ class Accessibility(SyncBase):
         return self._sync(
             self._async_obj.snapshot(interestingOnly=interestingOnly, root=root)
         )
+
+
+mapping.register(AccessibilityAsync, Accessibility)
 
 
 class Frame(SyncBase):
@@ -1174,6 +1198,9 @@ class Frame(SyncBase):
         return self._sync(self._async_obj.title())
 
 
+mapping.register(FrameAsync, Frame)
+
+
 class Worker(SyncBase):
     def __init__(self, obj: WorkerAsync):
         super().__init__(obj)
@@ -1226,6 +1253,9 @@ class Worker(SyncBase):
         )
 
 
+mapping.register(WorkerAsync, Worker)
+
+
 class Selectors(SyncBase):
     def __init__(self, obj: SelectorsAsync):
         super().__init__(obj)
@@ -1265,6 +1295,9 @@ class Selectors(SyncBase):
                 name=name, source=source, path=path, contentScript=contentScript
             )
         )
+
+
+mapping.register(SelectorsAsync, Selectors)
 
 
 class ConsoleMessage(SyncBase):
@@ -1315,6 +1348,9 @@ class ConsoleMessage(SyncBase):
         return self._async_obj.location
 
 
+mapping.register(ConsoleMessageAsync, ConsoleMessage)
+
+
 class Dialog(SyncBase):
     def __init__(self, obj: DialogAsync):
         super().__init__(obj)
@@ -1359,6 +1395,9 @@ class Dialog(SyncBase):
 
     def dismiss(self) -> NoneType:
         return self._sync(self._async_obj.dismiss())
+
+
+mapping.register(DialogAsync, Dialog)
 
 
 class Download(SyncBase):
@@ -1410,6 +1449,9 @@ class Download(SyncBase):
         return self._sync(self._async_obj.path())
 
 
+mapping.register(DownloadAsync, Download)
+
+
 class BindingCall(SyncBase):
     def __init__(self, obj: BindingCallAsync):
         super().__init__(obj)
@@ -1443,6 +1485,9 @@ class BindingCall(SyncBase):
 
     def call(self, func: typing.Callable[[typing.Dict], typing.Any]) -> NoneType:
         return self._sync(self._async_obj.call(func=func))
+
+
+mapping.register(BindingCallAsync, BindingCall)
 
 
 class Page(SyncBase):
@@ -2075,6 +2120,9 @@ class Page(SyncBase):
         )
 
 
+mapping.register(PageAsync, Page)
+
+
 class BrowserContext(SyncBase):
     def __init__(self, obj: BrowserContextAsync):
         super().__init__(obj)
@@ -2195,6 +2243,9 @@ class BrowserContext(SyncBase):
 
     def close(self) -> NoneType:
         return self._sync(self._async_obj.close())
+
+
+mapping.register(BrowserContextAsync, BrowserContext)
 
 
 class Browser(SyncBase):
@@ -2327,6 +2378,9 @@ class Browser(SyncBase):
         return self._sync(self._async_obj.close())
 
 
+mapping.register(BrowserAsync, Browser)
+
+
 class BrowserServer(SyncBase):
     def __init__(self, obj: BrowserServerAsync):
         super().__init__(obj)
@@ -2371,6 +2425,9 @@ class BrowserServer(SyncBase):
 
     def close(self) -> NoneType:
         return self._sync(self._async_obj.close())
+
+
+mapping.register(BrowserServerAsync, BrowserServer)
 
 
 class BrowserType(SyncBase):
@@ -2568,6 +2625,9 @@ class BrowserType(SyncBase):
         )
 
 
+mapping.register(BrowserTypeAsync, BrowserType)
+
+
 class Playwright(SyncBase):
     def __init__(self, obj: PlaywrightAsync):
         super().__init__(obj)
@@ -2618,3 +2678,6 @@ class Playwright(SyncBase):
     @property
     def devices(self) -> typing.Dict:
         return self._async_obj.devices
+
+
+mapping.register(PlaywrightAsync, Playwright)

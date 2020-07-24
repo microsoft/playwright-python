@@ -13,11 +13,27 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Union
+from typing import Any, Callable, List, Tuple, Union
 
 from playwright.wait_helper import WaitHelper
 
 loop = asyncio.get_event_loop()
+
+
+class AsyncToSyncMapping:
+    mapping: List[Tuple[type, type]] = []
+
+    def register(self, async_class: type, sync_class: type) -> None:
+        self.mapping.append((async_class, sync_class))
+
+    def get_sync_class(self, input_async_inst: object) -> Any:
+        for (async_class, sync_class) in self.mapping:
+            if isinstance(input_async_inst, async_class):
+                return sync_class
+        raise ValueError("should never happen")
+
+
+mapping = AsyncToSyncMapping()
 
 
 class Event:
@@ -34,14 +50,15 @@ class Event:
         wait_helper.reject_on_timeout(
             timeout or 30000, f'Timeout while waiting for event "${event}"'
         )
-        self._future = asyncio.create_task(
+        self._future = loop.create_task(
             wait_helper.wait_for_event(sync_base._async_obj, event, predicate)
         )
 
     @property
     def value(self) -> Any:
         if not self._value:
-            self._value = loop.run_until_complete(self._future)
+            value = loop.run_until_complete(self._future)
+            self._value = mapping.get_sync_class(value)._from_async(value)
         return self._value
 
 
@@ -66,11 +83,20 @@ class SyncBase:
     def __init__(self, async_obj: Any) -> None:
         self._async_obj = async_obj
 
+    def __str__(self) -> str:
+        return self._async_obj.__str__()
+
     def _sync(self, future: asyncio.Future) -> Any:
         return loop.run_until_complete(future)
 
+    def _map_event(self, handler: Callable[[Any], None]) -> Callable[[Any], None]:
+        return lambda event: handler(mapping.get_sync_class(event)._from_async(event))
+
     def on(self, event_name: str, handler: Any) -> None:
-        self._async_obj.on(event_name, handler)
+        self._async_obj.on(event_name, self._map_event(handler))
+
+    def once(self, event_name: str, handler: Any) -> None:
+        self._async_obj.once(event_name, self._map_event(handler))
 
     def remove_listener(self, event_name: str, handler: Any) -> None:
         self._async_obj.remove_listener(event_name, handler)
