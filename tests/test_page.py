@@ -1186,22 +1186,18 @@ async def test_fill_should_be_able_to_clear(page, server):
 
 
 async def test_close_event_should_work_with_window_close(page, server):
-    promise = asyncio.create_task(page.waitForEvent("popup"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.evaluate("window['newPage'] = window.open('about:blank')")
-    popup = await promise
-    close_promise = asyncio.create_task(popup.waitForEvent("close"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.evaluate("window['newPage'].close()")
-    await close_promise
+    async with page.expect_popup() as popup_info:
+        await page.evaluate("window['newPage'] = window.open('about:blank')")
+    popup = await popup_info.value
+
+    async with popup.expect_event("close"):
+        await page.evaluate("window['newPage'].close()")
 
 
 async def test_close_event_should_work_with_page_close(context, server):
     page = await context.newPage()
-    close_promise = asyncio.create_task(page.waitForEvent("close"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.close()
-    await close_promise
+    async with page.expect_event("close"):
+        await page.close()
 
 
 async def test_page_context_should_return_the_correct_browser_instance(page, context):

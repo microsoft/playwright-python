@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, Generic, List, Optional, Tuple, TypeVar, cast
 
 from playwright.wait_helper import WaitHelper
 
@@ -35,16 +35,18 @@ class AsyncToSyncMapping:
 
 mapping = AsyncToSyncMapping()
 
+T = TypeVar("T")
 
-class Event:
+
+class EventInfo(Generic[T]):
     def __init__(
         self,
         sync_base: "SyncBase",
         event: str,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable[[T], bool] = None,
         timeout: int = None,
     ) -> None:
-        self._value: Any = None
+        self._value: Optional[T] = None
 
         wait_helper = WaitHelper()
         wait_helper.reject_on_timeout(
@@ -55,24 +57,24 @@ class Event:
         )
 
     @property
-    def value(self) -> Any:
+    def value(self) -> T:
         if not self._value:
             value = loop.run_until_complete(self._future)
             self._value = mapping.get_sync_class(value)._from_async(value)
-        return self._value
+        return cast(T, self._value)
 
 
-class EventContextManager:
+class EventContextManager(Generic[T]):
     def __init__(
         self,
         sync_base: "SyncBase",
         event: str,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable[[T], bool] = None,
         timeout: int = None,
     ) -> None:
-        self._event = Event(sync_base, event, predicate, timeout)
+        self._event = EventInfo(sync_base, event, predicate, timeout)
 
-    def __enter__(self) -> Event:
+    def __enter__(self) -> EventInfo[T]:
         return self._event
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -102,9 +104,6 @@ class SyncBase:
         self._async_obj.remove_listener(event_name, handler)
 
     def expect_event(
-        self,
-        event: str,
-        predicate: Union[Callable[[Any], bool]] = None,
-        timeout: int = None,
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
     ) -> EventContextManager:
         return EventContextManager(self, event, predicate, timeout)
