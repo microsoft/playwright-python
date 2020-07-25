@@ -62,12 +62,6 @@ class Accessibility:
     ) -> Optional[Dict[str, Any]]:
         root = root._channel if root else None
         result = await self._channel.send(
-            "accessibilitySnapshot",
-            dict(root=root, interestingOnly=interestingOnly),
-            unpack_first_key=False,
+            "accessibilitySnapshot", dict(root=root, interestingOnly=interestingOnly),
         )
-        return (
-            _ax_node_from_protocol(result["rootAXNode"])
-            if result.get("rootAXNode")
-            else None
-        )
+        return _ax_node_from_protocol(result) if result else None

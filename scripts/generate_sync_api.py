@@ -97,7 +97,13 @@ def arguments(func: FunctionType, indent: int) -> str:
     for [name, value] in hints.items():
         if name == "return":
             continue
-        tokens.append(f"{name}={name}")
+        if "Callable" in str(get_origin(value)):
+            # oh ah Python has a bug, list is not iterable
+            args_list = get_args(value)[0]
+            size = len(str(args_list).split(","))
+            tokens.append(f"{name}=self._wrap_handler_{size}({name})")
+        else:
+            tokens.append(f"{name}={name}")
     return split.join(tokens)
 
 
@@ -121,56 +127,30 @@ def return_value(value: Any) -> List[str]:
         and len(get_args(value)) == 2
         and str(get_args(value)[1]) == "<class 'NoneType'>"
     ):
-        args = get_args(value)
-        wrap_type = short_name(str(args[0])[8:-2])
-        return [f"{wrap_type}._from_async_nullable(", ")"]
+        return ["mapping.from_async_nullable(", ")"]
     if str(get_origin(value)) == "<class 'list'>":
-        args = get_args(value)
-        wrap_type = short_name(str(args[0])[8:-2])
-        return [f"{wrap_type}._from_async_list(", ")"]
+        return ["mapping.from_async_list(", ")"]
     if str(get_origin(value)) == "<class 'dict'>":
-        args = get_args(value)
-        wrap_type = short_name(str(args[1])[8:-2])
-        return [f"{wrap_type}._from_async_dict(", ")"]
-    wrap_type = short_name(str(value)[8:-2])
-    return [f"{wrap_type}._from_async(", ")"]
+        return ["mapping.from_async_dict(", ")"]
+    return ["mapping.from_async(", ")"]
 
 
 def generate(t: Any) -> None:
     print("")
-    print(f"class {short_name(t)}(SyncBase):")
+    class_name = short_name(t)
+    base_class = t.__bases__[0].__name__
+    base_sync_class = (
+        "SyncBase"
+        if base_class == "ChannelOwner" or base_class == "object"
+        else base_class
+    )
+    print(f"class {class_name}({base_sync_class}):")
     print("")
-    print(f"    def __init__(self, obj: {short_name(t)}Async):")
+    print(f"    def __init__(self, obj: {class_name}Async):")
     print("        super().__init__(obj)")
     print("")
-    print(f"    def as_async(self) -> {short_name(t)}Async:")
+    print(f"    def as_async(self) -> {class_name}Async:")
     print("        return self._async_obj")
-    print("")
-    print("    @classmethod")
-    print(f'    def _from_async(cls, obj: {short_name(t)}Async) -> "{short_name(t)}":')
-    print("        if not obj._sync_owner:")
-    print("            obj._sync_owner = cls(obj)")
-    print("        return obj._sync_owner")
-    print("")
-    print("    @classmethod")
-    print(
-        f'    def _from_async_nullable(cls, obj: {short_name(t)}Async = None) -> typing.Optional["{short_name(t)}"]:'
-    )
-    print(f"        return {short_name(t)}._from_async(obj) if obj else None")
-    print("")
-    print("    @classmethod")
-    print(
-        f'    def _from_async_list(cls, items: typing.List[{short_name(t)}Async]) -> typing.List["{short_name(t)}"]:'
-    )
-    print(f"        return list(map(lambda a: {short_name(t)}._from_async(a), items))")
-    print("")
-    print("    @classmethod")
-    print(
-        f'    def _from_async_dict(cls, map: typing.Dict[str, {short_name(t)}Async]) -> typing.Dict[str, "{short_name(t)}"]:'
-    )
-    print(
-        f"        return {{name: {short_name(t)}._from_async(value) for name, value in map.items()}}"
-    )
     for [name, type] in get_type_hints(t, globals()).items():
         print("")
         print("    @property")
@@ -220,7 +200,7 @@ def generate(t: Any) -> None:
             )
 
     print("")
-    print(f"mapping.register({short_name(t)}Async, {short_name(t)})")
+    print(f"mapping.register({class_name}Async, {class_name})")
 
 
 def main() -> None:

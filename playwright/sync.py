@@ -63,30 +63,6 @@ class Request(SyncBase):
     def as_async(self) -> RequestAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: RequestAsync) -> "Request":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: RequestAsync = None
-    ) -> typing.Optional["Request"]:
-        return Request._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[RequestAsync]
-    ) -> typing.List["Request"]:
-        return list(map(lambda a: Request._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, RequestAsync]
-    ) -> typing.Dict[str, "Request"]:
-        return {name: Request._from_async(value) for name, value in map.items()}
-
     @property
     def url(self) -> str:
         return self._async_obj.url
@@ -109,22 +85,22 @@ class Request(SyncBase):
 
     @property
     def frame(self) -> "Frame":
-        return Frame._from_async(self._async_obj.frame)
+        return mapping.from_async(self._async_obj.frame)
 
     @property
     def redirectedFrom(self) -> typing.Union["Request", NoneType]:
-        return Request._from_async_nullable(self._async_obj.redirectedFrom)
+        return mapping.from_async_nullable(self._async_obj.redirectedFrom)
 
     @property
     def redirectedTo(self) -> typing.Union["Request", NoneType]:
-        return Request._from_async_nullable(self._async_obj.redirectedTo)
+        return mapping.from_async_nullable(self._async_obj.redirectedTo)
 
     @property
     def failure(self) -> typing.Union[str, NoneType]:
         return self._async_obj.failure
 
     def response(self) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(self._sync(self._async_obj.response()))
+        return mapping.from_async_nullable(self._sync(self._async_obj.response()))
 
     def isNavigationRequest(self) -> bool:
         return self._sync(self._async_obj.isNavigationRequest())
@@ -139,30 +115,6 @@ class Response(SyncBase):
 
     def as_async(self) -> ResponseAsync:
         return self._async_obj
-
-    @classmethod
-    def _from_async(cls, obj: ResponseAsync) -> "Response":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: ResponseAsync = None
-    ) -> typing.Optional["Response"]:
-        return Response._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[ResponseAsync]
-    ) -> typing.List["Response"]:
-        return list(map(lambda a: Response._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, ResponseAsync]
-    ) -> typing.Dict[str, "Response"]:
-        return {name: Response._from_async(value) for name, value in map.items()}
 
     @property
     def url(self) -> str:
@@ -186,11 +138,11 @@ class Response(SyncBase):
 
     @property
     def request(self) -> "Request":
-        return Request._from_async(self._async_obj.request)
+        return mapping.from_async(self._async_obj.request)
 
     @property
     def frame(self) -> "Frame":
-        return Frame._from_async(self._async_obj.frame)
+        return mapping.from_async(self._async_obj.frame)
 
     def finished(self) -> typing.Union[Error, NoneType]:
         return self._sync(self._async_obj.finished())
@@ -215,29 +167,9 @@ class Route(SyncBase):
     def as_async(self) -> RouteAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: RouteAsync) -> "Route":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(cls, obj: RouteAsync = None) -> typing.Optional["Route"]:
-        return Route._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(cls, items: typing.List[RouteAsync]) -> typing.List["Route"]:
-        return list(map(lambda a: Route._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, RouteAsync]
-    ) -> typing.Dict[str, "Route"]:
-        return {name: Route._from_async(value) for name, value in map.items()}
-
     @property
     def request(self) -> "Request":
-        return Request._from_async(self._async_obj.request)
+        return mapping.from_async(self._async_obj.request)
 
     def abort(self, error_code: str = "failed") -> NoneType:
         return self._sync(self._async_obj.abort(error_code=error_code))
@@ -276,30 +208,6 @@ class Keyboard(SyncBase):
     def as_async(self) -> KeyboardAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: KeyboardAsync) -> "Keyboard":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: KeyboardAsync = None
-    ) -> typing.Optional["Keyboard"]:
-        return Keyboard._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[KeyboardAsync]
-    ) -> typing.List["Keyboard"]:
-        return list(map(lambda a: Keyboard._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, KeyboardAsync]
-    ) -> typing.Dict[str, "Keyboard"]:
-        return {name: Keyboard._from_async(value) for name, value in map.items()}
-
     def down(self, key: str) -> NoneType:
         return self._sync(self._async_obj.down(key=key))
 
@@ -325,26 +233,6 @@ class Mouse(SyncBase):
 
     def as_async(self) -> MouseAsync:
         return self._async_obj
-
-    @classmethod
-    def _from_async(cls, obj: MouseAsync) -> "Mouse":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(cls, obj: MouseAsync = None) -> typing.Optional["Mouse"]:
-        return Mouse._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(cls, items: typing.List[MouseAsync]) -> typing.List["Mouse"]:
-        return list(map(lambda a: Mouse._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, MouseAsync]
-    ) -> typing.Dict[str, "Mouse"]:
-        return {name: Mouse._from_async(value) for name, value in map.items()}
 
     def move(self, x: float, y: float, steps: int = None) -> NoneType:
         return self._sync(self._async_obj.move(x=x, y=y, steps=steps))
@@ -395,30 +283,6 @@ class JSHandle(SyncBase):
     def as_async(self) -> JSHandleAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: JSHandleAsync) -> "JSHandle":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: JSHandleAsync = None
-    ) -> typing.Optional["JSHandle"]:
-        return JSHandle._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[JSHandleAsync]
-    ) -> typing.List["JSHandle"]:
-        return list(map(lambda a: JSHandle._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, JSHandleAsync]
-    ) -> typing.Dict[str, "JSHandle"]:
-        return {name: JSHandle._from_async(value) for name, value in map.items()}
-
     def evaluate(
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
@@ -431,7 +295,7 @@ class JSHandle(SyncBase):
     def evaluateHandle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
-        return JSHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.evaluateHandle(
                     expression=expression, arg=arg, force_expr=force_expr
@@ -440,15 +304,13 @@ class JSHandle(SyncBase):
         )
 
     def getProperty(self, name: str) -> "JSHandle":
-        return JSHandle._from_async(self._sync(self._async_obj.getProperty(name=name)))
+        return mapping.from_async(self._sync(self._async_obj.getProperty(name=name)))
 
     def getProperties(self) -> typing.Dict[str, "JSHandle"]:
-        return JSHandle._from_async_dict(self._sync(self._async_obj.getProperties()))
+        return mapping.from_async_dict(self._sync(self._async_obj.getProperties()))
 
     def asElement(self) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
-            self._sync(self._async_obj.asElement())
-        )
+        return mapping.from_async_nullable(self._sync(self._async_obj.asElement()))
 
     def dispose(self) -> NoneType:
         return self._sync(self._async_obj.dispose())
@@ -460,47 +322,21 @@ class JSHandle(SyncBase):
 mapping.register(JSHandleAsync, JSHandle)
 
 
-class ElementHandle(SyncBase):
+class ElementHandle(JSHandle):
     def __init__(self, obj: ElementHandleAsync):
         super().__init__(obj)
 
     def as_async(self) -> ElementHandleAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: ElementHandleAsync) -> "ElementHandle":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: ElementHandleAsync = None
-    ) -> typing.Optional["ElementHandle"]:
-        return ElementHandle._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[ElementHandleAsync]
-    ) -> typing.List["ElementHandle"]:
-        return list(map(lambda a: ElementHandle._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, ElementHandleAsync]
-    ) -> typing.Dict[str, "ElementHandle"]:
-        return {name: ElementHandle._from_async(value) for name, value in map.items()}
-
     def asElement(self) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
-            self._sync(self._async_obj.asElement())
-        )
+        return mapping.from_async_nullable(self._sync(self._async_obj.asElement()))
 
     def ownerFrame(self) -> typing.Union["Frame", NoneType]:
-        return Frame._from_async_nullable(self._sync(self._async_obj.ownerFrame()))
+        return mapping.from_async_nullable(self._sync(self._async_obj.ownerFrame()))
 
     def contentFrame(self) -> typing.Union["Frame", NoneType]:
-        return Frame._from_async_nullable(self._sync(self._async_obj.contentFrame()))
+        return mapping.from_async_nullable(self._sync(self._async_obj.contentFrame()))
 
     def getAttribute(self, name: str) -> str:
         return self._sync(self._async_obj.getAttribute(name=name))
@@ -691,12 +527,12 @@ class ElementHandle(SyncBase):
         )
 
     def querySelector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.querySelector(selector=selector))
         )
 
     def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
-        return ElementHandle._from_async_list(
+        return mapping.from_async_list(
             self._sync(self._async_obj.querySelectorAll(selector=selector))
         )
 
@@ -737,30 +573,6 @@ class Accessibility(SyncBase):
     def as_async(self) -> AccessibilityAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: AccessibilityAsync) -> "Accessibility":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: AccessibilityAsync = None
-    ) -> typing.Optional["Accessibility"]:
-        return Accessibility._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[AccessibilityAsync]
-    ) -> typing.List["Accessibility"]:
-        return list(map(lambda a: Accessibility._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, AccessibilityAsync]
-    ) -> typing.Dict[str, "Accessibility"]:
-        return {name: Accessibility._from_async(value) for name, value in map.items()}
-
     def snapshot(
         self, interestingOnly: bool = True, root: "ElementHandle" = None
     ) -> typing.Union[typing.Dict[str, typing.Any], NoneType]:
@@ -779,37 +591,13 @@ class FileChooser(SyncBase):
     def as_async(self) -> FileChooserAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: FileChooserAsync) -> "FileChooser":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: FileChooserAsync = None
-    ) -> typing.Optional["FileChooser"]:
-        return FileChooser._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[FileChooserAsync]
-    ) -> typing.List["FileChooser"]:
-        return list(map(lambda a: FileChooser._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, FileChooserAsync]
-    ) -> typing.Dict[str, "FileChooser"]:
-        return {name: FileChooser._from_async(value) for name, value in map.items()}
-
     @property
     def page(self) -> "Page":
-        return Page._from_async(self._async_obj.page)
+        return mapping.from_async(self._async_obj.page)
 
     @property
     def element(self) -> "ElementHandle":
-        return ElementHandle._from_async(self._async_obj.element)
+        return mapping.from_async(self._async_obj.element)
 
     @property
     def isMultiple(self) -> bool:
@@ -840,26 +628,6 @@ class Frame(SyncBase):
     def as_async(self) -> FrameAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: FrameAsync) -> "Frame":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(cls, obj: FrameAsync = None) -> typing.Optional["Frame"]:
-        return Frame._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(cls, items: typing.List[FrameAsync]) -> typing.List["Frame"]:
-        return list(map(lambda a: Frame._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, FrameAsync]
-    ) -> typing.Dict[str, "Frame"]:
-        return {name: Frame._from_async(value) for name, value in map.items()}
-
     @property
     def name(self) -> str:
         return self._async_obj.name
@@ -870,11 +638,11 @@ class Frame(SyncBase):
 
     @property
     def parentFrame(self) -> typing.Union["Frame", NoneType]:
-        return Frame._from_async_nullable(self._async_obj.parentFrame)
+        return mapping.from_async_nullable(self._async_obj.parentFrame)
 
     @property
     def childFrames(self) -> typing.List["Frame"]:
-        return Frame._from_async_list(self._async_obj.childFrames)
+        return mapping.from_async_list(self._async_obj.childFrames)
 
     def goto(
         self,
@@ -883,7 +651,7 @@ class Frame(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
         referer: str = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.goto(
                     url=url, timeout=timeout, waitUntil=waitUntil, referer=referer
@@ -897,7 +665,7 @@ class Frame(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.waitForNavigation(
                     timeout=timeout, waitUntil=waitUntil, url=url
@@ -915,7 +683,7 @@ class Frame(SyncBase):
         )
 
     def frameElement(self) -> "ElementHandle":
-        return ElementHandle._from_async(self._sync(self._async_obj.frameElement()))
+        return mapping.from_async(self._sync(self._async_obj.frameElement()))
 
     def evaluate(
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
@@ -929,7 +697,7 @@ class Frame(SyncBase):
     def evaluateHandle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
-        return JSHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.evaluateHandle(
                     expression=expression, arg=arg, force_expr=force_expr
@@ -938,12 +706,12 @@ class Frame(SyncBase):
         )
 
     def querySelector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.querySelector(selector=selector))
         )
 
     def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
-        return ElementHandle._from_async_list(
+        return mapping.from_async_list(
             self._sync(self._async_obj.querySelectorAll(selector=selector))
         )
 
@@ -953,7 +721,7 @@ class Frame(SyncBase):
         timeout: int = None,
         state: Literal["attached", "detached", "visible", "hidden"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.waitForSelector(
                     selector=selector, timeout=timeout, state=state
@@ -1019,7 +787,7 @@ class Frame(SyncBase):
     def addScriptTag(
         self, url: str = None, path: str = None, content: str = None, type: str = None
     ) -> "ElementHandle":
-        return ElementHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.addScriptTag(
                     url=url, path=path, content=content, type=type
@@ -1030,7 +798,7 @@ class Frame(SyncBase):
     def addStyleTag(
         self, url: str = None, path: str = None, content: str = None
     ) -> "ElementHandle":
-        return ElementHandle._from_async(
+        return mapping.from_async(
             self._sync(self._async_obj.addStyleTag(url=url, path=path, content=content))
         )
 
@@ -1245,7 +1013,7 @@ class Frame(SyncBase):
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
-        return JSHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.waitForFunction(
                     expression=expression,
@@ -1271,26 +1039,6 @@ class Worker(SyncBase):
     def as_async(self) -> WorkerAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: WorkerAsync) -> "Worker":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(cls, obj: WorkerAsync = None) -> typing.Optional["Worker"]:
-        return Worker._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(cls, items: typing.List[WorkerAsync]) -> typing.List["Worker"]:
-        return list(map(lambda a: Worker._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, WorkerAsync]
-    ) -> typing.Dict[str, "Worker"]:
-        return {name: Worker._from_async(value) for name, value in map.items()}
-
     @property
     def url(self) -> str:
         return self._async_obj.url
@@ -1307,7 +1055,7 @@ class Worker(SyncBase):
     def evaluateHandle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
-        return JSHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.evaluateHandle(
                     expression=expression, arg=arg, force_expr=force_expr
@@ -1325,30 +1073,6 @@ class Selectors(SyncBase):
 
     def as_async(self) -> SelectorsAsync:
         return self._async_obj
-
-    @classmethod
-    def _from_async(cls, obj: SelectorsAsync) -> "Selectors":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: SelectorsAsync = None
-    ) -> typing.Optional["Selectors"]:
-        return Selectors._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[SelectorsAsync]
-    ) -> typing.List["Selectors"]:
-        return list(map(lambda a: Selectors._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, SelectorsAsync]
-    ) -> typing.Dict[str, "Selectors"]:
-        return {name: Selectors._from_async(value) for name, value in map.items()}
 
     def register(
         self, name: str, source: str = "", path: str = None, contentScript: bool = False
@@ -1370,30 +1094,6 @@ class ConsoleMessage(SyncBase):
     def as_async(self) -> ConsoleMessageAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: ConsoleMessageAsync) -> "ConsoleMessage":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: ConsoleMessageAsync = None
-    ) -> typing.Optional["ConsoleMessage"]:
-        return ConsoleMessage._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[ConsoleMessageAsync]
-    ) -> typing.List["ConsoleMessage"]:
-        return list(map(lambda a: ConsoleMessage._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, ConsoleMessageAsync]
-    ) -> typing.Dict[str, "ConsoleMessage"]:
-        return {name: ConsoleMessage._from_async(value) for name, value in map.items()}
-
     @property
     def type(self) -> str:
         return self._async_obj.type
@@ -1404,7 +1104,7 @@ class ConsoleMessage(SyncBase):
 
     @property
     def args(self) -> typing.List["JSHandle"]:
-        return JSHandle._from_async_list(self._async_obj.args)
+        return mapping.from_async_list(self._async_obj.args)
 
     @property
     def location(self) -> ConsoleMessageLocation:
@@ -1420,26 +1120,6 @@ class Dialog(SyncBase):
 
     def as_async(self) -> DialogAsync:
         return self._async_obj
-
-    @classmethod
-    def _from_async(cls, obj: DialogAsync) -> "Dialog":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(cls, obj: DialogAsync = None) -> typing.Optional["Dialog"]:
-        return Dialog._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(cls, items: typing.List[DialogAsync]) -> typing.List["Dialog"]:
-        return list(map(lambda a: Dialog._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, DialogAsync]
-    ) -> typing.Dict[str, "Dialog"]:
-        return {name: Dialog._from_async(value) for name, value in map.items()}
 
     @property
     def type(self) -> str:
@@ -1470,30 +1150,6 @@ class Download(SyncBase):
     def as_async(self) -> DownloadAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: DownloadAsync) -> "Download":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: DownloadAsync = None
-    ) -> typing.Optional["Download"]:
-        return Download._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[DownloadAsync]
-    ) -> typing.List["Download"]:
-        return list(map(lambda a: Download._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, DownloadAsync]
-    ) -> typing.Dict[str, "Download"]:
-        return {name: Download._from_async(value) for name, value in map.items()}
-
     @property
     def url(self) -> str:
         return self._async_obj.url
@@ -1522,32 +1178,8 @@ class BindingCall(SyncBase):
     def as_async(self) -> BindingCallAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: BindingCallAsync) -> "BindingCall":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: BindingCallAsync = None
-    ) -> typing.Optional["BindingCall"]:
-        return BindingCall._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[BindingCallAsync]
-    ) -> typing.List["BindingCall"]:
-        return list(map(lambda a: BindingCall._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, BindingCallAsync]
-    ) -> typing.Dict[str, "BindingCall"]:
-        return {name: BindingCall._from_async(value) for name, value in map.items()}
-
     def call(self, func: typing.Callable[[typing.Dict], typing.Any]) -> NoneType:
-        return self._sync(self._async_obj.call(func=func))
+        return self._sync(self._async_obj.call(func=self._wrap_handler_1(func)))
 
 
 mapping.register(BindingCallAsync, BindingCall)
@@ -1560,49 +1192,29 @@ class Page(SyncBase):
     def as_async(self) -> PageAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: PageAsync) -> "Page":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(cls, obj: PageAsync = None) -> typing.Optional["Page"]:
-        return Page._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(cls, items: typing.List[PageAsync]) -> typing.List["Page"]:
-        return list(map(lambda a: Page._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, PageAsync]
-    ) -> typing.Dict[str, "Page"]:
-        return {name: Page._from_async(value) for name, value in map.items()}
-
     @property
     def accessibility(self) -> "Accessibility":
-        return Accessibility._from_async(self._async_obj.accessibility)
+        return mapping.from_async(self._async_obj.accessibility)
 
     @property
     def keyboard(self) -> "Keyboard":
-        return Keyboard._from_async(self._async_obj.keyboard)
+        return mapping.from_async(self._async_obj.keyboard)
 
     @property
     def mouse(self) -> "Mouse":
-        return Mouse._from_async(self._async_obj.mouse)
+        return mapping.from_async(self._async_obj.mouse)
 
     @property
     def context(self) -> "BrowserContext":
-        return BrowserContext._from_async(self._async_obj.context)
+        return mapping.from_async(self._async_obj.context)
 
     @property
     def mainFrame(self) -> "Frame":
-        return Frame._from_async(self._async_obj.mainFrame)
+        return mapping.from_async(self._async_obj.mainFrame)
 
     @property
     def frames(self) -> typing.List["Frame"]:
-        return Frame._from_async_list(self._async_obj.frames)
+        return mapping.from_async_list(self._async_obj.frames)
 
     @property
     def url(self) -> str:
@@ -1610,17 +1222,17 @@ class Page(SyncBase):
 
     @property
     def workers(self) -> typing.List["Worker"]:
-        return Worker._from_async_list(self._async_obj.workers)
+        return mapping.from_async_list(self._async_obj.workers)
 
     def opener(self) -> typing.Union["Page", NoneType]:
-        return Page._from_async_nullable(self._sync(self._async_obj.opener()))
+        return mapping.from_async_nullable(self._sync(self._async_obj.opener()))
 
     def frame(
         self,
         name: str = None,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Frame", NoneType]:
-        return Frame._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.frame(name=name, url=url))
         )
 
@@ -1631,12 +1243,12 @@ class Page(SyncBase):
         return self._sync(self._async_obj.setDefaultTimeout(timeout=timeout))
 
     def querySelector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.querySelector(selector=selector))
         )
 
     def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
-        return ElementHandle._from_async_list(
+        return mapping.from_async_list(
             self._sync(self._async_obj.querySelectorAll(selector=selector))
         )
 
@@ -1646,7 +1258,7 @@ class Page(SyncBase):
         timeout: int = None,
         state: Literal["attached", "detached", "visible", "hidden"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
-        return ElementHandle._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.waitForSelector(
                     selector=selector, timeout=timeout, state=state
@@ -1679,7 +1291,7 @@ class Page(SyncBase):
     def evaluateHandle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
-        return JSHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.evaluateHandle(
                     expression=expression, arg=arg, force_expr=force_expr
@@ -1716,7 +1328,7 @@ class Page(SyncBase):
     def addScriptTag(
         self, url: str = None, path: str = None, content: str = None, type: str = None
     ) -> "ElementHandle":
-        return ElementHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.addScriptTag(
                     url=url, path=path, content=content, type=type
@@ -1727,19 +1339,27 @@ class Page(SyncBase):
     def addStyleTag(
         self, url: str = None, path: str = None, content: str = None
     ) -> "ElementHandle":
-        return ElementHandle._from_async(
+        return mapping.from_async(
             self._sync(self._async_obj.addStyleTag(url=url, path=path, content=content))
         )
 
     def exposeFunction(
         self, name: str, binding: typing.Callable[..., typing.Any]
     ) -> NoneType:
-        return self._sync(self._async_obj.exposeFunction(name=name, binding=binding))
+        return self._sync(
+            self._async_obj.exposeFunction(
+                name=name, binding=self._wrap_handler_1(binding)
+            )
+        )
 
     def exposeBinding(
         self, name: str, binding: typing.Callable[[typing.Dict], typing.Any]
     ) -> NoneType:
-        return self._sync(self._async_obj.exposeBinding(name=name, binding=binding))
+        return self._sync(
+            self._async_obj.exposeBinding(
+                name=name, binding=self._wrap_handler_1(binding)
+            )
+        )
 
     def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
         return self._sync(self._async_obj.setExtraHTTPHeaders(headers=headers))
@@ -1764,7 +1384,7 @@ class Page(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
         referer: str = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.goto(
                     url=url, timeout=timeout, waitUntil=waitUntil, referer=referer
@@ -1777,7 +1397,7 @@ class Page(SyncBase):
         timeout: int = None,
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.reload(timeout=timeout, waitUntil=waitUntil))
         )
 
@@ -1796,7 +1416,7 @@ class Page(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
         url: str = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.waitForNavigation(
                     timeout=timeout, waitUntil=waitUntil, url=url
@@ -1810,7 +1430,7 @@ class Page(SyncBase):
         predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
         timeout: int = None,
     ) -> typing.Union["Request", NoneType]:
-        return Request._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.waitForRequest(
                     url=url, predicate=predicate, timeout=timeout
@@ -1824,7 +1444,7 @@ class Page(SyncBase):
         predicate: typing.Union[typing.Callable[["Response"], bool]] = None,
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(
                 self._async_obj.waitForResponse(
                     url=url, predicate=predicate, timeout=timeout
@@ -1849,7 +1469,7 @@ class Page(SyncBase):
         timeout: int = None,
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.goBack(timeout=timeout, waitUntil=waitUntil))
         )
 
@@ -1858,7 +1478,7 @@ class Page(SyncBase):
         timeout: int = None,
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
-        return Response._from_async_nullable(
+        return mapping.from_async_nullable(
             self._sync(self._async_obj.goForward(timeout=timeout, waitUntil=waitUntil))
         )
 
@@ -1885,7 +1505,9 @@ class Page(SyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
         handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
-        return self._sync(self._async_obj.route(url=url, handler=handler))
+        return self._sync(
+            self._async_obj.route(url=url, handler=self._wrap_handler_2(handler))
+        )
 
     def unroute(
         self,
@@ -2136,7 +1758,7 @@ class Page(SyncBase):
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
-        return JSHandle._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.waitForFunction(
                     expression=expression,
@@ -2249,33 +1871,9 @@ class BrowserContext(SyncBase):
     def as_async(self) -> BrowserContextAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: BrowserContextAsync) -> "BrowserContext":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: BrowserContextAsync = None
-    ) -> typing.Optional["BrowserContext"]:
-        return BrowserContext._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[BrowserContextAsync]
-    ) -> typing.List["BrowserContext"]:
-        return list(map(lambda a: BrowserContext._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, BrowserContextAsync]
-    ) -> typing.Dict[str, "BrowserContext"]:
-        return {name: BrowserContext._from_async(value) for name, value in map.items()}
-
     @property
     def pages(self) -> typing.List["Page"]:
-        return Page._from_async_list(self._async_obj.pages)
+        return mapping.from_async_list(self._async_obj.pages)
 
     def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
         return self._sync(self._async_obj.setDefaultNavigationTimeout(timeout=timeout))
@@ -2284,7 +1882,7 @@ class BrowserContext(SyncBase):
         return self._sync(self._async_obj.setDefaultTimeout(timeout=timeout))
 
     def newPage(self) -> "Page":
-        return Page._from_async(self._sync(self._async_obj.newPage()))
+        return mapping.from_async(self._sync(self._async_obj.newPage()))
 
     def cookies(
         self, urls: typing.Union[str, typing.List[str]]
@@ -2327,19 +1925,29 @@ class BrowserContext(SyncBase):
     def exposeBinding(
         self, name: str, binding: typing.Callable[[typing.Dict], typing.Any]
     ) -> NoneType:
-        return self._sync(self._async_obj.exposeBinding(name=name, binding=binding))
+        return self._sync(
+            self._async_obj.exposeBinding(
+                name=name, binding=self._wrap_handler_1(binding)
+            )
+        )
 
     def exposeFunction(
         self, name: str, binding: typing.Callable[..., typing.Any]
     ) -> NoneType:
-        return self._sync(self._async_obj.exposeFunction(name=name, binding=binding))
+        return self._sync(
+            self._async_obj.exposeFunction(
+                name=name, binding=self._wrap_handler_1(binding)
+            )
+        )
 
     def route(
         self,
         match: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
         handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
-        return self._sync(self._async_obj.route(match=match, handler=handler))
+        return self._sync(
+            self._async_obj.route(match=match, handler=self._wrap_handler_2(handler))
+        )
 
     def unroute(
         self,
@@ -2381,33 +1989,9 @@ class Browser(SyncBase):
     def as_async(self) -> BrowserAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: BrowserAsync) -> "Browser":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: BrowserAsync = None
-    ) -> typing.Optional["Browser"]:
-        return Browser._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[BrowserAsync]
-    ) -> typing.List["Browser"]:
-        return list(map(lambda a: Browser._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, BrowserAsync]
-    ) -> typing.Dict[str, "Browser"]:
-        return {name: Browser._from_async(value) for name, value in map.items()}
-
     @property
     def contexts(self) -> typing.List["BrowserContext"]:
-        return BrowserContext._from_async_list(self._async_obj.contexts)
+        return mapping.from_async_list(self._async_obj.contexts)
 
     def isConnected(self) -> bool:
         return self._sync(self._async_obj.isConnected())
@@ -2432,7 +2016,7 @@ class Browser(SyncBase):
         colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "BrowserContext":
-        return BrowserContext._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.newContext(
                     viewport=viewport,
@@ -2476,7 +2060,7 @@ class Browser(SyncBase):
         colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "Page":
-        return Page._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.newPage(
                     viewport=viewport,
@@ -2514,30 +2098,6 @@ class BrowserServer(SyncBase):
     def as_async(self) -> BrowserServerAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: BrowserServerAsync) -> "BrowserServer":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: BrowserServerAsync = None
-    ) -> typing.Optional["BrowserServer"]:
-        return BrowserServer._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[BrowserServerAsync]
-    ) -> typing.List["BrowserServer"]:
-        return list(map(lambda a: BrowserServer._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, BrowserServerAsync]
-    ) -> typing.Dict[str, "BrowserServer"]:
-        return {name: BrowserServer._from_async(value) for name, value in map.items()}
-
     @property
     def pid(self) -> str:
         return self._async_obj.pid
@@ -2562,30 +2122,6 @@ class BrowserType(SyncBase):
 
     def as_async(self) -> BrowserTypeAsync:
         return self._async_obj
-
-    @classmethod
-    def _from_async(cls, obj: BrowserTypeAsync) -> "BrowserType":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: BrowserTypeAsync = None
-    ) -> typing.Optional["BrowserType"]:
-        return BrowserType._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[BrowserTypeAsync]
-    ) -> typing.List["BrowserType"]:
-        return list(map(lambda a: BrowserType._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, BrowserTypeAsync]
-    ) -> typing.Dict[str, "BrowserType"]:
-        return {name: BrowserType._from_async(value) for name, value in map.items()}
 
     @property
     def name(self) -> str:
@@ -2612,7 +2148,7 @@ class BrowserType(SyncBase):
         slowMo: int = None,
         chromiumSandbox: bool = None,
     ) -> "Browser":
-        return Browser._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.launch(
                     executablePath=executablePath,
@@ -2650,7 +2186,7 @@ class BrowserType(SyncBase):
         port: int = None,
         chromiumSandbox: bool = None,
     ) -> "Browser":
-        return Browser._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.launchServer(
                     executablePath=executablePath,
@@ -2705,7 +2241,7 @@ class BrowserType(SyncBase):
         colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "BrowserContext":
-        return BrowserContext._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.launchPersistentContext(
                     userDataDir=userDataDir,
@@ -2746,7 +2282,7 @@ class BrowserType(SyncBase):
     def connect(
         self, wsEndpoint: str = None, slowMo: int = None, timeout: int = None
     ) -> "Browser":
-        return Browser._from_async(
+        return mapping.from_async(
             self._sync(
                 self._async_obj.connect(
                     wsEndpoint=wsEndpoint, slowMo=slowMo, timeout=timeout
@@ -2765,45 +2301,21 @@ class Playwright(SyncBase):
     def as_async(self) -> PlaywrightAsync:
         return self._async_obj
 
-    @classmethod
-    def _from_async(cls, obj: PlaywrightAsync) -> "Playwright":
-        if not obj._sync_owner:
-            obj._sync_owner = cls(obj)
-        return obj._sync_owner
-
-    @classmethod
-    def _from_async_nullable(
-        cls, obj: PlaywrightAsync = None
-    ) -> typing.Optional["Playwright"]:
-        return Playwright._from_async(obj) if obj else None
-
-    @classmethod
-    def _from_async_list(
-        cls, items: typing.List[PlaywrightAsync]
-    ) -> typing.List["Playwright"]:
-        return list(map(lambda a: Playwright._from_async(a), items))
-
-    @classmethod
-    def _from_async_dict(
-        cls, map: typing.Dict[str, PlaywrightAsync]
-    ) -> typing.Dict[str, "Playwright"]:
-        return {name: Playwright._from_async(value) for name, value in map.items()}
-
     @property
     def chromium(self) -> "BrowserType":
-        return BrowserType._from_async(self._async_obj.chromium)
+        return mapping.from_async(self._async_obj.chromium)
 
     @property
     def firefox(self) -> "BrowserType":
-        return BrowserType._from_async(self._async_obj.firefox)
+        return mapping.from_async(self._async_obj.firefox)
 
     @property
     def webkit(self) -> "BrowserType":
-        return BrowserType._from_async(self._async_obj.webkit)
+        return mapping.from_async(self._async_obj.webkit)
 
     @property
     def selectors(self) -> "Selectors":
-        return Selectors._from_async(self._async_obj.selectors)
+        return mapping.from_async(self._async_obj.selectors)
 
     @property
     def devices(self) -> typing.Dict[str, DeviceDescriptor]:
