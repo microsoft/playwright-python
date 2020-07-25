@@ -92,7 +92,6 @@ async def test_page_events_request_should_fire_for_fetches(page, server):
     assert len(requests) == 2
 
 
-@pytest.mark.skip("sometimes hanging")  # TODO: needs to be investigated
 async def test_page_events_request_should_report_requests_and_responses_handled_by_service_worker(
     page: Page, server
 ):

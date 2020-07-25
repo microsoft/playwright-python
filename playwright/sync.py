@@ -2609,6 +2609,7 @@ class BrowserType(SyncBase):
         proxy: typing.Dict = None,
         downloadsPath: str = None,
         slowMo: int = None,
+        chromiumSandbox: bool = None,
     ) -> "Browser":
         return Browser._from_async(
             self._sync(
@@ -2626,6 +2627,7 @@ class BrowserType(SyncBase):
                     proxy=proxy,
                     downloadsPath=downloadsPath,
                     slowMo=slowMo,
+                    chromiumSandbox=chromiumSandbox,
                 )
             )
         )
@@ -2645,6 +2647,7 @@ class BrowserType(SyncBase):
         proxy: typing.Dict = None,
         downloadsPath: str = None,
         port: int = None,
+        chromiumSandbox: bool = None,
     ) -> "Browser":
         return Browser._from_async(
             self._sync(
@@ -2662,6 +2665,7 @@ class BrowserType(SyncBase):
                     proxy=proxy,
                     downloadsPath=downloadsPath,
                     port=port,
+                    chromiumSandbox=chromiumSandbox,
                 )
             )
         )

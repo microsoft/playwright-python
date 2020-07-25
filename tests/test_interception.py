@@ -712,9 +712,6 @@ async def test_request_continue_should_amend_method_on_main_request(page, server
     assert (await request).method.decode() == "POST"
 
 
-@pytest.mark.skip(
-    "rpc server does not decode the base64 payload"
-)  # TODO: @pavelfeldman
 async def test_request_continue_should_amend_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
