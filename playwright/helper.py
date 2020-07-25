@@ -117,6 +117,21 @@ class FrameNavigatedEvent(TypedDict):
     error: Optional[str]
 
 
+Size = TypedDict("Size", {"width": int, "height": int})
+
+DeviceDescriptor = TypedDict(
+    "DeviceDescriptor",
+    {
+        "userAgent": str,
+        "viewport": Size,
+        "deviceScaleFactor": int,
+        "isMobile": bool,
+        "hasTouch": bool,
+    },
+)
+Devices = Dict[str, DeviceDescriptor]
+
+
 class URLMatcher:
     def __init__(self, match: URLMatch) -> None:
         self._callback: Optional[Callable[[str], bool]] = None

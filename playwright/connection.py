@@ -70,9 +70,9 @@ class ConnectionScope:
     def __init__(
         self, connection: "Connection", guid: str, parent: Optional["ConnectionScope"]
     ) -> None:
-        self._connection = connection
-        self._loop = connection._loop
-        self._guid = guid
+        self._connection: "Connection" = connection
+        self._loop: asyncio.AbstractEventLoop = connection._loop
+        self._guid: str = guid
         self._children: List["ConnectionScope"] = list()
         self._objects: Dict[str, ChannelOwner] = dict()
         self._parent = parent
