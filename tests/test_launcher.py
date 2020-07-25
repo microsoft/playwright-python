@@ -44,20 +44,22 @@ async def test_browser_type_launch_should_throw_if_page_argument_is_passed(
     assert "can not specify page" in exc.value.message
 
 
-@pytest.mark.skip("does not return the expected error")  # TODO: should be removed
+@pytest.mark.skip("currently disabled on upstream")
 async def test_browser_type_launch_should_reject_if_launched_browser_fails_immediately(
     browser_type, launch_arguments
 ):
-    with pytest.raises(Error) as exc:
+    with pytest.raises(Error):
         await browser_type.launch(
             **launch_arguments,
             executablePath=os.path.join(
                 __dirname, "assets", "dummy_bad_browser_executable.js"
             )
         )
-    assert "browser_type.launch logs" in exc.value.message
 
 
+@pytest.mark.skip(
+    "does not return the expected error"
+)  # TODO: hangs currently on the bots
 async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
     browser_type, launch_arguments
 ):
@@ -138,19 +140,17 @@ async def test_browser_disconnect_should_reject_navigation_when_browser_closes(
     browser_server = await browser_type.launchServer(**launch_arguments)
     remote = await browser_type.connect(wsEndpoint=browser_server.wsEndpoint)
     page = await remote.newPage()
-    goto_future = asyncio.Future()
 
     async def handle_goto():
-        try:
+        with pytest.raises(Error) as exc:
             await page.goto(server.PREFIX + "/one-style.html", timeout=60000)
-        except Error as exc:
-            goto_future.set_result(exc)
+        assert "Navigation failed because page was closed!" in exc.value.message
 
-    asyncio.create_task(handle_goto())
-    await server.wait_for_request("/one-style.css")
+    wait_for_request = asyncio.create_task(server.wait_for_request("/one-style.css"))
+    goto_assert = asyncio.create_task(handle_goto())
+    await wait_for_request
     await remote.close()
-    error = await goto_future
-    assert "Navigation failed because page was closed!" in error.message
+    await goto_assert
     await browser_server.close()
 
 

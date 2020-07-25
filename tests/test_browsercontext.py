@@ -208,8 +208,10 @@ async def test_page_event_should_bypass_csp_meta_tag(browser, server):
         context = await browser.newContext()
         page = await context.newPage()
         await page.goto(server.PREFIX + "/csp.html")
-        with pytest.raises(Error):
+        try:
             await page.addScriptTag(content="window.__injected = 42;")
+        except Error:
+            pass
         assert await page.evaluate("window.__injected") is None
         await context.close()
 
@@ -235,8 +237,10 @@ async def test_page_event_should_bypass_csp_header(browser, server):
         context = await browser.newContext()
         page = await context.newPage()
         await page.goto(server.EMPTY_PAGE)
-        with pytest.raises(Error):
+        try:
             await page.addScriptTag(content="window.__injected = 42;")
+        except Error:
+            pass
         assert await page.evaluate("() => window.__injected") is None
         await context.close()
 
@@ -274,8 +278,10 @@ async def test_page_event_should_bypass_csp_in_iframes_as_well(browser, server, 
         page = await context.newPage()
         await page.goto(server.EMPTY_PAGE)
         frame = await utils.attach_frame(page, "frame1", server.PREFIX + "/csp.html")
-        with pytest.raises(Error):
+        try:
             await frame.addScriptTag(content="window.__injected = 42;")
+        except Error:
+            pass
         assert await frame.evaluate("window.__injected") is None
         await context.close()
 
@@ -287,7 +293,10 @@ async def test_page_event_should_bypass_csp_in_iframes_as_well(browser, server, 
         page = await context.newPage()
         await page.goto(server.EMPTY_PAGE)
         frame = await utils.attach_frame(page, "frame1", server.PREFIX + "/csp.html")
-        await frame.addScriptTag(content="window.__injected = 42;")
+        try:
+            await frame.addScriptTag(content="window.__injected = 42;")
+        except Error:
+            pass
         assert await frame.evaluate("window.__injected") == 42
         await context.close()
 

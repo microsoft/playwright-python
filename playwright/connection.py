@@ -38,9 +38,12 @@ class Channel(BaseEventEmitter):
         result = await self._scope.send_message_to_server(self._guid, method, params)
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
-        if unpack_first_key and isinstance(result, dict) and len(result) == 1:
-            key = next(iter(result))
-            return result[key]
+        if unpack_first_key and isinstance(result, dict) and len(result) <= 1:
+            if len(result) == 1:
+                key = next(iter(result))
+                return result[key]
+            else:
+                return None
         return result
 
     def send_no_reply(self, method: str, params: dict = None) -> None:

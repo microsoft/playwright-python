@@ -47,6 +47,7 @@ class BrowserType(ChannelOwner):
         proxy: Dict = None,
         downloadsPath: str = None,
         slowMo: int = None,
+        chromiumSandbox: bool = None,
     ) -> Browser:
         return from_channel(
             await self._channel.send("launch", locals_to_params(locals()))
@@ -67,6 +68,7 @@ class BrowserType(ChannelOwner):
         proxy: Dict = None,
         downloadsPath: str = None,
         port: int = None,
+        chromiumSandbox: bool = None,
     ) -> Browser:
         return from_channel(
             await self._channel.send("launchServer", locals_to_params(locals()))

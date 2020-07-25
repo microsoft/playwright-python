@@ -89,7 +89,7 @@ class Frame(ChannelOwner):
         self._url = event["url"]
         self._name = event["name"]
         self._event_emitter.emit("navigated", event)
-        if "error" not in event and self._page:
+        if "error" not in event and hasattr(self, "_page") and self._page:
             self._page.emit("framenavigated", self)
 
     async def goto(
