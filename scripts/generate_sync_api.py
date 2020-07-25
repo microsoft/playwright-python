@@ -261,7 +261,7 @@ from playwright.download import Download as DownloadAsync
 from playwright.element_handle import ElementHandle as ElementHandleAsync
 from playwright.file_chooser import FileChooser as FileChooserAsync
 from playwright.frame import Frame as FrameAsync
-from playwright.helper import ConsoleMessageLocation, Error, FilePayload, SelectOption, Viewport
+from playwright.helper import ConsoleMessageLocation, Error, FilePayload, SelectOption, Viewport, DeviceDescriptor
 from playwright.input import Keyboard as KeyboardAsync, Mouse as MouseAsync
 from playwright.js_handle import JSHandle as JSHandleAsync
 from playwright.network import Request as RequestAsync, Response as ResponseAsync, Route as RouteAsync

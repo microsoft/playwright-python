@@ -35,6 +35,7 @@ from playwright.file_chooser import FileChooser as FileChooserAsync
 from playwright.frame import Frame as FrameAsync
 from playwright.helper import (
     ConsoleMessageLocation,
+    DeviceDescriptor,
     Error,
     FilePayload,
     SelectOption,
@@ -2801,7 +2802,7 @@ class Playwright(SyncBase):
         return Selectors._from_async(self._async_obj.selectors)
 
     @property
-    def devices(self) -> typing.Dict:
+    def devices(self) -> typing.Dict[str, DeviceDescriptor]:
         return self._async_obj.devices
 
 
