@@ -4,7 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from scripts.generate_sync_api import main
+if sys.version_info >= (3, 8):
+    from scripts.generate_sync_api import main
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
