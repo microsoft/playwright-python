@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, List, Union
 
 from playwright.helper import FilePayload
 
@@ -25,7 +25,6 @@ class FileChooser:
     def __init__(
         self, page: "Page", element_handle: "ElementHandle", is_multiple: bool
     ) -> None:
-        self._sync_owner: Any = None
         self._page = page
         self._element_handle = element_handle
         self._is_multiple = is_multiple

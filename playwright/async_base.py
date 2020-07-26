@@ -24,10 +24,10 @@ mapping = ImplToApiMapping()
 T = TypeVar("T")
 
 
-class EventInfo(Generic[T]):
+class AsyncEventInfo(Generic[T]):
     def __init__(
         self,
-        sync_base: "SyncBase",
+        sync_base: "AsyncBase",
         event: str,
         predicate: Callable[[T], bool] = None,
         timeout: int = None,
@@ -43,31 +43,30 @@ class EventInfo(Generic[T]):
         )
 
     @property
-    def value(self) -> T:
+    async def value(self) -> T:
         if not self._value:
-            value = asyncio.get_event_loop().run_until_complete(self._future)
-            self._value = mapping.from_maybe_impl(value)
+            self._value = mapping.from_maybe_impl(await self._future)
         return cast(T, self._value)
 
 
-class EventContextManager(Generic[T]):
+class AsyncEventContextManager(Generic[T]):
     def __init__(
         self,
-        sync_base: "SyncBase",
+        sync_base: "AsyncBase",
         event: str,
         predicate: Callable[[T], bool] = None,
         timeout: int = None,
     ) -> None:
-        self._event = EventInfo(sync_base, event, predicate, timeout)
+        self._event = AsyncEventInfo(sync_base, event, predicate, timeout)
 
-    def __enter__(self) -> EventInfo[T]:
+    async def __aenter__(self) -> AsyncEventInfo[T]:
         return self._event
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self._event.value
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        await self._event.value
 
 
-class SyncBase(ImplWrapper):
+class AsyncBase(ImplWrapper):
     def __init__(self, impl_obj: Any) -> None:
         super().__init__(impl_obj)
 
@@ -93,5 +92,5 @@ class SyncBase(ImplWrapper):
 
     def expect_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
-    ) -> EventContextManager:
-        return EventContextManager(self, event, predicate, timeout)
+    ) -> AsyncEventContextManager:
+        return AsyncEventContextManager(self, event, predicate, timeout)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-newfile="sync.py"
-oldfile="playwright/sync.py"
+newfile="sync_api.py"
+oldfile="playwright/sync_api.py"
 
 python scripts/generate_sync_api.py > $newfile
 
