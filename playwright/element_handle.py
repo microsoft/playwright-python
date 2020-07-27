@@ -227,10 +227,10 @@ ValuesToSelect = Union[
 
 def convert_select_option_values(arg: ValuesToSelect) -> Any:
     if arg is None:
-        return dict()
+        return {}
     arg_list = arg if isinstance(arg, list) else [arg]
     if not len(arg_list):
-        return dict()
+        return {}
     if isinstance(arg_list[0], ElementHandle):
         element_list = cast(List[ElementHandle], arg_list)
         return dict(elements=list(map(lambda e: e._channel, element_list)))

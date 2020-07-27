@@ -134,7 +134,7 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
 
 
 def serialize_argument(arg: Any) -> Any:
-    handles: List[JSHandle] = list()
+    handles: List[JSHandle] = []
     value = serialize_value(arg, handles, 0)
     return dict(value=value, handles=handles)
 

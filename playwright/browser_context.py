@@ -43,10 +43,10 @@ class BrowserContext(ChannelOwner):
 
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
         super().__init__(scope, guid, initializer, True)
-        self._pages: List[Page] = list()
-        self._routes: List[RouteHandlerEntry] = list()
-        self._bindings: Dict[str, Any] = dict()
-        self._pending_wait_for_events: List[PendingWaitEvent] = list()
+        self._pages: List[Page] = []
+        self._routes: List[RouteHandlerEntry] = []
+        self._bindings: Dict[str, Any] = {}
+        self._pending_wait_for_events: List[PendingWaitEvent] = []
         self._timeout_settings = TimeoutSettings(None)
         self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
@@ -106,7 +106,7 @@ class BrowserContext(ChannelOwner):
 
     async def cookies(self, urls: Union[str, List[str]]) -> List[Cookie]:
         if urls is None:
-            urls = list()
+            urls = []
         return await self._channel.send("cookies", dict(urls=urls))
 
     async def addCookies(self, cookies: List[Cookie]) -> None:

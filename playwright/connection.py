@@ -32,7 +32,7 @@ class Channel(BaseEventEmitter):
 
     async def send(self, method: str, params: dict = None) -> Any:
         if params is None:
-            params = dict()
+            params = {}
         result = await self._scope.send_message_to_server(self._guid, method, params)
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
@@ -47,7 +47,7 @@ class Channel(BaseEventEmitter):
 
     def send_no_reply(self, method: str, params: dict = None) -> None:
         if params is None:
-            params = dict()
+            params = {}
         self._scope.send_message_to_server_no_reply(self._guid, method, params)
 
 
@@ -74,8 +74,8 @@ class ConnectionScope:
         self._connection: "Connection" = connection
         self._loop: asyncio.AbstractEventLoop = connection._loop
         self._guid: str = guid
-        self._children: List["ConnectionScope"] = list()
-        self._objects: Dict[str, ChannelOwner] = dict()
+        self._children: List["ConnectionScope"] = []
+        self._objects: Dict[str, ChannelOwner] = {}
         self._parent = parent
 
     def create_child(self, guid: str) -> "ConnectionScope":
@@ -138,12 +138,12 @@ class Connection:
     ) -> None:
         self._transport = Transport(input, output, loop)
         self._transport.on_message = lambda msg: self._dispatch(msg)
-        self._waiting_for_object: Dict[str, Any] = dict()
+        self._waiting_for_object: Dict[str, Any] = {}
         self._last_id = 0
         self._loop = loop
-        self._objects: Dict[str, ChannelOwner] = dict()
-        self._scopes: Dict[str, ConnectionScope] = dict()
-        self._callbacks: Dict[int, ProtocolCallback] = dict()
+        self._objects: Dict[str, ChannelOwner] = {}
+        self._scopes: Dict[str, ConnectionScope] = {}
+        self._callbacks: Dict[int, ProtocolCallback] = {}
         self._root_scope = self.create_scope("", None)
         self._object_factory = object_factory
 
@@ -212,7 +212,7 @@ class Connection:
         if isinstance(payload, Channel):
             return dict(guid=payload._guid)
         if isinstance(payload, dict):
-            result = dict()
+            result = {}
             for key in payload:
                 result[key] = self._replace_channels_with_guids(payload[key])
             return result
@@ -226,7 +226,7 @@ class Connection:
         if isinstance(payload, dict):
             if payload.get("guid") in self._objects:
                 return self._objects[payload["guid"]]._channel
-            result = dict()
+            result = {}
             for key in payload:
                 result[key] = self._replace_guids_with_channels(payload[key])
             return result
