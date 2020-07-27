@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
@@ -34,7 +35,7 @@ def generate(t: Any) -> None:
     class_name = short_name(t)
     base_class = t.__bases__[0].__name__
     base_sync_class = (
-        "SyncBase"
+        "AsyncBase"
         if base_class == "ChannelOwner" or base_class == "object"
         else base_class
     )
@@ -71,15 +72,26 @@ def generate(t: Any) -> None:
             and "expect_" not in name
         ):
             print("")
-            print(
-                f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
-            )
-            [prefix, suffix] = return_value(
-                get_type_hints(value, api_globals)["return"]
-            )
-            prefix = "        return " + prefix + f"self._sync(self._impl_obj.{name}("
-            suffix = "))" + suffix
-            print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
+            if inspect.iscoroutinefunction(value):
+                print(
+                    f"    async def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                )
+                [prefix, suffix] = return_value(
+                    get_type_hints(value, api_globals)["return"]
+                )
+                prefix = "        return " + prefix + f"await self._impl_obj.{name}("
+                suffix = ")" + suffix
+                print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
+            else:
+                print(
+                    f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                )
+                [prefix, suffix] = return_value(
+                    get_type_hints(value, api_globals)["return"]
+                )
+                prefix = "        return " + prefix + f"self._impl_obj.{name}("
+                suffix = ")" + suffix
+                print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
         if "expect_" in name and "expect_event" not in name:
             print("")
             return_type_value = return_type(value)
@@ -88,10 +100,10 @@ def generate(t: Any) -> None:
             event_name = re.sub(r"_", "", event_name)
             event_name = re.sub(r"consolemessage", "console", event_name)
             print(
-                f"    def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
+                f"    def {name}({signature(value, len(name) + 9)}) -> Async{return_type_value}:"
             )
             print(
-                f'        return EventContextManager(self, "{event_name}", predicate, timeout)'
+                f'        return AsyncEventContextManager(self, "{event_name}", predicate, timeout)'
             )
 
     print("")
@@ -100,7 +112,9 @@ def generate(t: Any) -> None:
 
 def main() -> None:
     print(header)
-    print("from playwright.sync_base import EventContextManager, SyncBase, mapping")
+    print(
+        "from playwright.async_base import AsyncEventContextManager, AsyncBase, mapping"
+    )
     print("NoneType = type(None)")
 
     for t in all_types:

@@ -1,4 +1,5 @@
 import os
+from typing import Any, cast
 
 import pytest
 
@@ -24,7 +25,10 @@ async def test_selectors_register_should_work(selectors, page: Page, utils):
     )
     await page.setContent("<div><span></span></div><div></div>")
     assert (
-        await selectors._createSelector("tag", await page.querySelector("div")) == "DIV"
+        await selectors._impl_obj._createSelector(
+            "tag", cast(Any, await page.querySelector("div"))._impl_obj
+        )
+        == "DIV"
     )
     assert await page.evalOnSelector("tag=DIV", "e => e.nodeName") == "DIV"
     assert await page.evalOnSelector("tag=SPAN", "e => e.nodeName") == "SPAN"

@@ -17,7 +17,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
-from playwright.event_context_manager import AsyncEventContextManager
+from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     Cookie,
     Error,
@@ -216,10 +216,10 @@ class BrowserContext(ChannelOwner):
 
     def expect_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
-    ) -> AsyncEventContextManager:
-        return AsyncEventContextManager(self, event, predicate, timeout)
+    ) -> EventContextManagerImpl:
+        return EventContextManagerImpl(self, event, predicate, timeout)
 
     def expect_page(
         self, predicate: Callable[[Page], bool] = None, timeout: int = None,
-    ) -> AsyncEventContextManager[Page]:
-        return AsyncEventContextManager(self, "page", predicate, timeout)
+    ) -> EventContextManagerImpl[Page]:
+        return EventContextManagerImpl(self, "page", predicate, timeout)

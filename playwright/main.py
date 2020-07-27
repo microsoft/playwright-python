@@ -24,11 +24,11 @@ from playwright.connection import Connection
 from playwright.object_factory import create_remote_object
 from playwright.playwright import Playwright
 
-playwright_async: Playwright
+playwright_impl: Playwright
 
 
 async def async_init() -> None:
-    global playwright_async
+    global playwright_impl
     package_path = os.path.dirname(os.path.abspath(__file__))
     platform = sys.platform
     if platform == "darwin":
@@ -66,7 +66,7 @@ async def async_init() -> None:
     connection = Connection(
         proc.stdout, proc.stdin, create_remote_object, asyncio.get_event_loop()
     )
-    playwright_async = await connection.wait_for_object_with_known_name("Playwright")
+    playwright_impl = await connection.wait_for_object_with_known_name("Playwright")
 
 
 if sys.platform == "win32":

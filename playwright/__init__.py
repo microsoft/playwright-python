@@ -14,21 +14,23 @@
 
 import playwright.helper as helper
 from playwright._repo_version import version as __version__  # noqa:F401
-from playwright.main import playwright_async
-from playwright.sync import Playwright
+from playwright.async_api import Playwright as AsyncPlaywright
+from playwright.main import playwright_impl
+from playwright.sync_api import Playwright as SyncPlaywright
 
-playwright = Playwright(playwright_async)
-chromium = playwright.chromium
-firefox = playwright.firefox
-webkit = playwright.webkit
-devices = playwright.devices
-selectors = playwright.selectors
+playwright_sync = SyncPlaywright(playwright_impl)
+playwright_async = AsyncPlaywright(playwright_impl)
+
+chromium = playwright_async.chromium
+firefox = playwright_async.firefox
+webkit = playwright_async.webkit
+devices = playwright_async.devices
+selectors = playwright_async.selectors
 Error = helper.Error
 TimeoutError = helper.TimeoutError
 
 __all__ = [
-    "playwright",
-    "chromium",
+    "playwright_sync",
     "firefox",
     "webkit",
     "devices",

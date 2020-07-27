@@ -21,7 +21,7 @@ from playwright.wait_helper import WaitHelper
 T = TypeVar("T")
 
 
-class AsyncEventInfo(Generic[T]):
+class EventInfoImpl(Generic[T]):
     def __init__(
         self,
         channel_owner: ChannelOwner,
@@ -45,7 +45,7 @@ class AsyncEventInfo(Generic[T]):
         return cast(T, self._value)
 
 
-class AsyncEventContextManager(Generic[T]):
+class EventContextManagerImpl(Generic[T]):
     def __init__(
         self,
         channel_owner: ChannelOwner,
@@ -53,9 +53,9 @@ class AsyncEventContextManager(Generic[T]):
         predicate: Callable[[T], bool] = None,
         timeout: int = None,
     ) -> None:
-        self._event = AsyncEventInfo(channel_owner, event, predicate, timeout)
+        self._event = EventInfoImpl(channel_owner, event, predicate, timeout)
 
-    async def __aenter__(self) -> AsyncEventInfo[T]:
+    async def __aenter__(self) -> EventInfoImpl[T]:
         return self._event
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:

@@ -16,19 +16,19 @@ import os
 
 import pytest
 
-from playwright import Error, chromium, firefox, webkit
-from playwright.sync import Browser, Page
+from playwright import Error, playwright_sync
+from playwright.sync_api import Browser, Page
 
 
 @pytest.fixture(scope="session")
 def browser(browser_name, launch_arguments):
     browser_type = None
     if browser_name == "chromium":
-        browser_type = chromium
+        browser_type = playwright_sync.chromium
     elif browser_name == "firefox":
-        browser_type = firefox
+        browser_type = playwright_sync.firefox
     elif browser_name == "webkit":
-        browser_type = webkit
+        browser_type = playwright_sync.webkit
     browser = browser_type.launch(**launch_arguments)
     yield browser
     browser.close()
