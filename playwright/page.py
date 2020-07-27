@@ -105,10 +105,10 @@ class Page(ChannelOwner):
         self._frames = [self._main_frame]
         self._viewport_size = initializer.get("viewportSize")
         self._is_closed = False
-        self._workers: List[Worker] = list()
-        self._bindings: Dict[str, Any] = dict()
-        self._pending_wait_for_events: List[PendingWaitEvent] = list()
-        self._routes: List[RouteHandlerEntry] = list()
+        self._workers: List[Worker] = []
+        self._bindings: Dict[str, Any] = {}
+        self._pending_wait_for_events: List[PendingWaitEvent] = []
+        self._routes: List[RouteHandlerEntry] = []
         self._owned_context: Optional["BrowserContext"] = None
         self._timeout_settings = TimeoutSettings(None)
 

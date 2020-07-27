@@ -99,7 +99,7 @@ class Route(ChannelOwner):
     async def fulfill(
         self,
         status: int = 200,
-        headers: Dict[str, str] = dict(),
+        headers: Dict[str, str] = {},
         body: Union[str, bytes] = None,
         contentType: str = None,
     ) -> None:
@@ -120,7 +120,7 @@ class Route(ChannelOwner):
         headers: Dict[str, str] = None,
         postData: Union[str, bytes] = None,
     ) -> None:
-        overrides: ContinueParameters = dict()
+        overrides: ContinueParameters = {}
         if method:
             overrides["method"] = method
         if headers:

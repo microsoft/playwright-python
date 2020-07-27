@@ -64,7 +64,7 @@ class Frame(ChannelOwner):
         self._name = initializer["name"]
         self._url = initializer["url"]
         self._detached = False
-        self._child_frames: List[Frame] = list()
+        self._child_frames: List[Frame] = []
         self._page: "Page"
         self._load_states: Set[str] = set()
         self._event_emitter = BaseEventEmitter()

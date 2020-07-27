@@ -211,7 +211,7 @@ def is_function_body(expression: str) -> bool:
 
 
 def locals_to_params(args: Dict) -> Dict:
-    copy = dict()
+    copy = {}
     for key in args:
         if key == "self":
             continue
