@@ -17,7 +17,8 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
-from generate_api import (
+from scripts.documentation_provider import DocumentationProvider
+from scripts.generate_api import (
     all_types,
     api_globals,
     arguments,
@@ -28,6 +29,8 @@ from generate_api import (
     short_name,
     signature,
 )
+
+documentation_provider = DocumentationProvider()
 
 
 def generate(t: Any) -> None:
@@ -47,6 +50,7 @@ def generate(t: Any) -> None:
         print("")
         print("    @property")
         print(f"    def {name}(self) -> {process_type(type)}:")
+        documentation_provider.print_entry(class_name, name)
         [prefix, suffix] = return_value(type)
         prefix = "        return " + prefix + f"self._impl_obj.{name}"
         print(f"{prefix}{suffix}")
@@ -60,6 +64,7 @@ def generate(t: Any) -> None:
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
             )
+            documentation_provider.print_entry(class_name, name)
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
             )
@@ -76,6 +81,7 @@ def generate(t: Any) -> None:
                 print(
                     f"    async def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
                 )
+                documentation_provider.print_entry(class_name, name)
                 [prefix, suffix] = return_value(
                     get_type_hints(value, api_globals)["return"]
                 )
@@ -86,6 +92,7 @@ def generate(t: Any) -> None:
                 print(
                     f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
                 )
+                documentation_provider.print_entry(class_name, name)
                 [prefix, suffix] = return_value(
                     get_type_hints(value, api_globals)["return"]
                 )
