@@ -51,7 +51,7 @@ class DocumentationProvider:
         trimmed = trimmed.replace("number", "int")
         trimmed = re.sub(r"<\?\[(.*?)\]>", r"<Optional[\1]>", trimmed)
         trimmed = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", trimmed)
-        trimmed = re.sub(r"<\[(.*?)\]>", r"<\1>", trimmed)
+        trimmed = re.sub(r"<\[(\w+?)\]>", r"<\1>", trimmed)
 
         return trimmed.split("\n")
 

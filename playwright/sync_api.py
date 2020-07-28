@@ -94,7 +94,7 @@ class Request(SyncBase):
     @property
     def headers(self) -> typing.Dict[str, str]:
         """
-        - returns: <Dict]<[str], [str>> An object with HTTP headers associated with the request. All header names are lower-case.
+        - returns: <[Dict]<[str], [str]>> An object with HTTP headers associated with the request. All header names are lower-case.
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
@@ -314,9 +314,9 @@ class Route(SyncBase):
         """
         - `response` <Dict> Response that will fulfill this route's request.
           - `status` <int> Response status code, defaults to `200`.
-          - `headers` <Dict]<[str], [str>> Optional response headers. Header values will be converted to a str.
+          - `headers` <[Dict]<[str], [str]>> Optional response headers. Header values will be converted to a str.
           - `contentType` <str> If set, equals to setting `Content-Type` response header.
-          - `body` <str]|[Buffer> Optional response body.
+          - `body` <[str]|[Buffer]> Optional response body.
           - `path` <str> Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
         - returns: <Promise>
 
@@ -357,8 +357,8 @@ class Route(SyncBase):
         """
         - `overrides` <Dict> Optional request overrides, which can be one of the following:
           - `method` <str> If set changes the request method (e.g. GET or POST)
-          - `postData` <str]|[Buffer> If set changes the post data of request
-          - `headers` <Dict]<[str], [str>> If set changes the request HTTP headers. Header values will be converted to a str.
+          - `postData` <[str]|[Buffer]> If set changes the post data of request
+          - `headers` <[Dict]<[str], [str]>> If set changes the request HTTP headers. Header values will be converted to a str.
         - returns: <Promise>
 
         Continues route's request with optional overrides.
@@ -611,7 +611,7 @@ class JSHandle(SyncBase):
     ) -> typing.Any:
         """
         - `pageFunction` <[function]\\([Dict]\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         This method passes this handle as the first argument to `pageFunction`.
@@ -638,8 +638,8 @@ class JSHandle(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <function]|[str> Function to be evaluated
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
         This method passes this handle as the first argument to `pageFunction`.
@@ -671,7 +671,7 @@ class JSHandle(SyncBase):
 
     def getProperties(self) -> typing.Dict[str, "JSHandle"]:
         """
-        - returns: <Map]<[str], [JSHandle>>
+        - returns: <[Map]<[str], [JSHandle]>>
 
         The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 
@@ -1033,7 +1033,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
     ) -> NoneType:
         """
-        - `files` <str]|[List]<[str>|[Dict]|[List]<Dict>>
+        - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <Buffer> File content **required**
@@ -1249,7 +1249,7 @@ class ElementHandle(JSHandle):
         """
         - `selector` <str> A selector to query element for. See [working with selectors](#working-with-selectors) for more details.
         - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the method throws an error.
@@ -1283,8 +1283,8 @@ class ElementHandle(JSHandle):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query element for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <function]\\([List]<[Element>\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of matched elements as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details.
@@ -1332,7 +1332,7 @@ class Accessibility(SyncBase):
         - returns: <Optional[Dict]> An [AXNode] object with the following properties:
           - `role` <str> The [role](https://www.w3.org/TR/wai-aria/#usage_intro).
           - `name` <str> A human readable name for the node.
-          - `value` <str]|[int> The current value of the node, if applicable.
+          - `value` <[str]|[int]> The current value of the node, if applicable.
           - `description` <str> An additional human readable description of the node, if applicable.
           - `keyshortcuts` <str> Keyboard shortcuts associated with this node, if applicable.
           - `roledescription` <str> A human readable alternative to the role, if applicable.
@@ -1438,7 +1438,7 @@ class FileChooser(SyncBase):
         noWaitAfter: bool = None,
     ) -> NoneType:
         """
-        - `files` <str]|[List]<[str>|[Dict]|[List]<Dict>>
+        - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <Buffer> File content **required**
@@ -1549,7 +1549,7 @@ class Frame(SyncBase):
         """
         - `options` <Dict> Navigation parameters which might have the following properties:
           - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `url` <str]|[RegExp]|[Function> URL str, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+          - `url` <[str]|[RegExp]|[Function]> URL str, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
           - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -1621,8 +1621,8 @@ class Frame(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         If the function passed to the `frame.evaluate` returns a [Promise], then `frame.evaluate` would wait for the promise to resolve and return its value.
@@ -1663,8 +1663,8 @@ class Frame(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in the page context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
         The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page object (JSHandle).
@@ -1825,7 +1825,7 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector to query frame for. See [working with selectors](#working-with-selectors) for more details.
         - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         The method finds an element matching the specified selector within the frame and passes it as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the method throws an error.
@@ -1859,8 +1859,8 @@ class Frame(SyncBase):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query frame for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <function]\\([List]<[Element>\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details.
@@ -2251,7 +2251,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See [working with selectors](#working-with-selectors) for more details.
-        - `files` <str]|[List]<[str>|[Dict]|[List]<Dict>>
+        - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <Buffer> File content **required**
@@ -2434,8 +2434,8 @@ class Frame(SyncBase):
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - `options` <Dict> Optional waiting parameters
           - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
@@ -2499,8 +2499,8 @@ class Worker(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in the worker context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in the worker context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         If the function passed to the `worker.evaluate` returns a [Promise], then `worker.evaluate` would wait for the promise to resolve and return its value.
@@ -2521,8 +2521,8 @@ class Worker(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in the page context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
         The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns in-page object (JSHandle).
@@ -2552,7 +2552,7 @@ class Selectors(SyncBase):
     ) -> NoneType:
         """
         - `name` <str> Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only contain `[a-zA-Z0-9_]` characters.
-        - `script` <function]|[str]|[Dict> Script that evaluates to a selector engine instance.
+        - `script` <[function]|[str]|[Dict]> Script that evaluates to a selector engine instance.
           - `path` <str> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw script content.
         - `options` <Dict>
@@ -2842,9 +2842,9 @@ class Page(SyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Frame", NoneType]:
         """
-        - `options` <str]|[Dict> Frame name or other frame lookup options.
+        - `options` <[str]|[Dict]> Frame name or other frame lookup options.
           - `name` <str> frame name specified in the `iframe`'s `name` attribute
-          - `url` <str]|[RegExp]|[Function> A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object.
+          - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object.
         - returns: <Optional[Frame]> frame matching the criteria. Returns `null` if no frame matches.
 
         ```js
@@ -3015,8 +3015,8 @@ class Page(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in the page context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         If the function passed to the `page.evaluate` returns a [Promise], then `page.evaluate` would wait for the promise to resolve and return its value.
@@ -3061,8 +3061,8 @@ class Page(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in the page context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
         The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page object (JSHandle).
@@ -3102,7 +3102,7 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
         - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         The method finds an element matching the specified selector within the page and passes it as a first argument to `pageFunction`. If no elements match the selector, the method throws an error.
@@ -3138,8 +3138,8 @@ class Page(SyncBase):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <function]\\([List]<[Element>\\)> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as a first argument to `pageFunction`.
@@ -3330,7 +3330,7 @@ class Page(SyncBase):
 
     def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
         """
-        - `headers` <Dict]<[str], [str>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+        - `headers` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
         - returns: <Promise>
 
         The extra HTTP headers will be sent with every request the page initiates.
@@ -3477,7 +3477,7 @@ class Page(SyncBase):
         """
         - `options` <Dict> Navigation parameters which might have the following properties:
           - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `url` <str]|[RegExp]|[Function> A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+          - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
           - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3513,7 +3513,7 @@ class Page(SyncBase):
         timeout: int = None,
     ) -> typing.Union["Request", NoneType]:
         """
-        - `urlOrPredicate` <str]|[RegExp]|[Function> Request URL str, regex or predicate receiving [Request] object.
+        - `urlOrPredicate` <[str]|[RegExp]|[Function]> Request URL str, regex or predicate receiving [Request] object.
         - `options` <Dict> Optional waiting parameters
           - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
         - returns: <Request> Promise which resolves to the matched request.
@@ -3545,7 +3545,7 @@ class Page(SyncBase):
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         """
-        - `urlOrPredicate` <str]|[RegExp]|[Function> Request URL str, regex or predicate receiving [Response] object.
+        - `urlOrPredicate` <[str]|[RegExp]|[Function]> Request URL str, regex or predicate receiving [Response] object.
         - `options` <Dict> Optional waiting parameters
           - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Response> Promise which resolves to the matched response.
@@ -3574,7 +3574,7 @@ class Page(SyncBase):
     ) -> typing.Any:
         """
         - `event` <str> Event name, same one would pass into `page.on(event)`.
-        - `optionsOrPredicate` <Function]|[Dict> Either a predicate that receives an event or an options object.
+        - `optionsOrPredicate` <[Function]|[Dict]> Either a predicate that receives an event or an options object.
           - `predicate` <Function> receives the event data and resolves to truthy value when the waiting should resolve.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Dict> Promise which resolves to the event data value.
@@ -3714,7 +3714,7 @@ class Page(SyncBase):
 
     def addInitScript(self, source: str = None, path: str = None) -> NoneType:
         """
-        - `script` <function]|[str]|[Dict> Script to be evaluated in the page.
+        - `script` <[function]|[str]|[Dict]> Script to be evaluated in the page.
           - `path` <str> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw script content.
         - `arg` <Serializable> Optional argument to pass to `script` (only supported when passing a function).
@@ -3749,7 +3749,7 @@ class Page(SyncBase):
         handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
         """
-        - `url` <str]|[RegExp]|[function]\\([URL]\\):[bool> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+        - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
         - `handler` <[function]\\([Route], [Request]\\)> handler function to route the request.
         - returns: <Promise>.
 
@@ -3793,7 +3793,7 @@ class Page(SyncBase):
         handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         """
-        - `url` <str]|[RegExp]|[function]\\([URL]\\):[bool> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+        - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
         - `handler` <[function]\\([Route], [Request]\\)> Handler function to route the request.
         - returns: <Promise>
 
@@ -4186,7 +4186,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See [working with selectors](#working-with-selectors) for more details.
-        - `files` <str]|[List]<[str>|[Dict]|[List]<Dict>>
+        - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <Buffer> File content **required**
@@ -4396,8 +4396,8 @@ class Page(SyncBase):
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
         """
-        - `pageFunction` <function]|[str> Function to be evaluated in browser context
-        - `arg` <Serializable]|[JSHandle> Optional argument to pass to `pageFunction`
+        - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
+        - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - `options` <Dict> Optional waiting parameters
           - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
@@ -4470,13 +4470,13 @@ class Page(SyncBase):
           - `landscape` <bool> Paper orientation. Defaults to `false`.
           - `pageRanges` <str> Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty str, which means print all pages.
           - `format` <str> Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
-          - `width` <str]|[int> Paper width, accepts values labeled with units.
-          - `height` <str]|[int> Paper height, accepts values labeled with units.
+          - `width` <[str]|[int]> Paper width, accepts values labeled with units.
+          - `height` <[str]|[int]> Paper height, accepts values labeled with units.
           - `margin` <Dict> Paper margins, defaults to none.
-            - `top` <str]|[int> Top margin, accepts values labeled with units. Defaults to `0`.
-            - `right` <str]|[int> Right margin, accepts values labeled with units. Defaults to `0`.
-            - `bottom` <str]|[int> Bottom margin, accepts values labeled with units. Defaults to `0`.
-            - `left` <str]|[int> Left margin, accepts values labeled with units. Defaults to `0`.
+            - `top` <[str]|[int]> Top margin, accepts values labeled with units. Defaults to `0`.
+            - `right` <[str]|[int]> Right margin, accepts values labeled with units. Defaults to `0`.
+            - `bottom` <[str]|[int]> Bottom margin, accepts values labeled with units. Defaults to `0`.
+            - `left` <[str]|[int]> Left margin, accepts values labeled with units. Defaults to `0`.
           - `preferCSSPageSize` <bool> Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
         - returns: <Buffer> Promise which resolves with PDF buffer.
 
@@ -4655,7 +4655,7 @@ class BrowserContext(SyncBase):
         self, urls: typing.Union[str, typing.List[str]]
     ) -> typing.List[typing.List[typing.Dict[str, typing.Union[str, int, bool]]]]:
         """
-        - `urls` <str]|[List]<[str>>
+        - `urls` <[str]|[List]<str>>
         - returns: <List[Dict]>
           - `name` <str>
           - `value` <str>
@@ -4777,7 +4777,7 @@ class BrowserContext(SyncBase):
 
     def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
         """
-        - `headers` <Dict]<[str], [str>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+        - `headers` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
         - returns: <Promise>
 
         The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged with page-specific extra HTTP headers set with [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders). If page overrides a particular header, page-specific header value will be used instead of the browser context header value.
@@ -4799,7 +4799,7 @@ class BrowserContext(SyncBase):
 
     def addInitScript(self, source: str = None, path: str = None) -> NoneType:
         """
-        - `script` <function]|[str]|[Dict> Script to be evaluated in all pages in the browser context.
+        - `script` <[function]|[str]|[Dict]> Script to be evaluated in all pages in the browser context.
           - `path` <str> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw script content.
         - `arg` <Serializable> Optional argument to pass to `script` (only supported when passing a function).
@@ -4930,7 +4930,7 @@ class BrowserContext(SyncBase):
         handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
         """
-        - `url` <str]|[RegExp]|[function]\\([URL]\\):[bool> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+        - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
         - `handler` <[function]\\([Route], [Request]\\)> handler function to route the request.
         - returns: <Promise>
 
@@ -4975,7 +4975,7 @@ class BrowserContext(SyncBase):
         handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         """
-        - `url` <str]|[RegExp]|[function]\\([URL]\\):[bool> A glob pattern, regex pattern or predicate receiving [URL] used to register a routing with [browserContext.route(url, handler)](#browsercontextrouteurl-handler).
+        - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] used to register a routing with [browserContext.route(url, handler)](#browsercontextrouteurl-handler).
         - `handler` <[function]\\([Route], [Request]\\)> Handler function used to register a routing with [browserContext.route(url, handler)](#browsercontextrouteurl-handler).
         - returns: <Promise>
 
@@ -4997,7 +4997,7 @@ class BrowserContext(SyncBase):
     ) -> typing.Any:
         """
         - `event` <str> Event name, same one would pass into `browserContext.on(event)`.
-        - `optionsOrPredicate` <Function]|[Dict> Either a predicate that receives an event or an options object.
+        - `optionsOrPredicate` <[Function]|[Dict]> Either a predicate that receives an event or an options object.
           - `predicate` <Function> receives the event data and resolves to truthy value when the waiting should resolve.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout).
         - returns: <Dict> Promise which resolves to the event data value.
@@ -5112,7 +5112,7 @@ class Browser(SyncBase):
             - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
           - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
           - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
-          - `extraHTTPHeaders` <Dict]<[str], [str>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+          - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
           - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
           - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
             - `username` <str>
@@ -5198,7 +5198,7 @@ class Browser(SyncBase):
             - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
           - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
           - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
-          - `extraHTTPHeaders` <Dict]<[str], [str>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+          - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
           - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
           - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
             - `username` <str>
@@ -5330,7 +5330,7 @@ class BrowserType(SyncBase):
           - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
           - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
           - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
-          - `ignoreDefaultArgs` <bool]|[List]<[str>> If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+          - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
           - `proxy` <Dict> Network proxy settings.
             - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
             - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
@@ -5344,7 +5344,7 @@ class BrowserType(SyncBase):
           - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
           - `logger` <Logger> Logger sink for Playwright logging.
           - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-          - `env` <Dict]<[str], [str]|[int]|[bool>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+          - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
           - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
           - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         - returns: <Browser> Promise which resolves to browser instance.
@@ -5409,7 +5409,7 @@ class BrowserType(SyncBase):
           - `port` <int> Port to use for the web socket. Defaults to 0 that picks any available port.
           - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
           - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
-          - `ignoreDefaultArgs` <bool]|[List]<[str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+          - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
           - `proxy` <Dict> Network proxy settings.
             - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
             - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
@@ -5423,7 +5423,7 @@ class BrowserType(SyncBase):
           - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
           - `logger` <Logger> Logger sink for Playwright logging.
           - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-          - `env` <Dict]<[str], [str]|[int]|[bool>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+          - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
           - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         - returns: <BrowserServer> Promise which resolves to the browser app instance.
 
@@ -5503,7 +5503,7 @@ class BrowserType(SyncBase):
           - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
           - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
           - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
-          - `ignoreDefaultArgs` <bool]|[List]<[str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+          - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
           - `proxy` <Dict> Network proxy settings.
             - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
             - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
@@ -5517,7 +5517,7 @@ class BrowserType(SyncBase):
           - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
           - `logger` <Logger> Logger sink for Playwright logging.
           - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-          - `env` <Dict]<[str], [str]|[int]|[bool>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+          - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
           - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
           - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
           - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
@@ -5537,7 +5537,7 @@ class BrowserType(SyncBase):
             - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
           - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
           - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
-          - `extraHTTPHeaders` <Dict]<[str], [str>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+          - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
           - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
           - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
             - `username` <str>
