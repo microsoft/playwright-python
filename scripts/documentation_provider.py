@@ -61,7 +61,7 @@ class DocumentationProvider:
         trimmed = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", trimmed)
         trimmed = re.sub(r"<\[(\w+?)\]>", r"<\1>", trimmed)
 
-        return trimmed.replace("\n\n", "\n").split("\n")
+        return trimmed.replace("\n\n\n", "\n\n").split("\n")
 
     def print_entry(self, class_name: str, method_name: str) -> None:
         if class_name == "BindingCall" or method_name == "pid":
