@@ -26,13 +26,15 @@ class DocumentationProvider:
         class_name = None
         method_name = None
         for line in api_md.split("\n"):
-            if matches := re.search(r"(class: (\w+)|(Playwright) module)", line):
+            matches = re.search(r"(class: (\w+)|(Playwright) module)", line)
+            if matches:
                 class_name = matches.group(2) or matches.group(3)
                 method_name = None
             if class_name:
                 if class_name not in self.documentation:
                     self.documentation[class_name] = {}
-            if matches := re.search(r"#### \w+\.(.+?)(\(|$)", line):
+            matches = re.search(r"#### \w+\.(.+?)(\(|$)", line)
+            if matches:
                 method_name = matches.group(1)
                 # Skip heading
                 continue
