@@ -243,3 +243,17 @@ class RouteHandlerEntry:
     def __init__(self, matcher: URLMatcher, handler: RouteHandler):
         self.matcher = matcher
         self.handler = handler
+
+
+def not_installed_error(message: str) -> Exception:
+    return Exception(
+        f"""
+================================================================================
+{message}
+Please complete Playwright installation via running
+
+    "python -m playwright install"
+
+================================================================================
+"""
+    )

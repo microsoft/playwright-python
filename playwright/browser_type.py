@@ -17,7 +17,7 @@ from typing import Dict, List
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
 from playwright.connection import ChannelOwner, ConnectionScope, from_channel
-from playwright.helper import ColorScheme, locals_to_params
+from playwright.helper import ColorScheme, locals_to_params, not_installed_error
 
 
 class BrowserType(ChannelOwner):
@@ -49,9 +49,14 @@ class BrowserType(ChannelOwner):
         slowMo: int = None,
         chromiumSandbox: bool = None,
     ) -> Browser:
-        return from_channel(
-            await self._channel.send("launch", locals_to_params(locals()))
-        )
+        try:
+            return from_channel(
+                await self._channel.send("launch", locals_to_params(locals()))
+            )
+        except Exception as e:
+            if f"{self.name}-" in str(e):
+                raise not_installed_error(f'"{self.name}" browser was not found.')
+            raise e
 
     async def launchServer(
         self,
@@ -70,9 +75,14 @@ class BrowserType(ChannelOwner):
         port: int = None,
         chromiumSandbox: bool = None,
     ) -> Browser:
-        return from_channel(
-            await self._channel.send("launchServer", locals_to_params(locals()))
-        )
+        try:
+            return from_channel(
+                await self._channel.send("launchServer", locals_to_params(locals()))
+            )
+        except Exception as e:
+            if f"{self.name}-" in str(e):
+                raise not_installed_error(f'"{self.name}" browser was not found.')
+            raise e
 
     async def launchPersistentContext(
         self,
@@ -108,11 +118,16 @@ class BrowserType(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
     ) -> BrowserContext:
-        return from_channel(
-            await self._channel.send(
-                "launchPersistentContext", locals_to_params(locals())
+        try:
+            return from_channel(
+                await self._channel.send(
+                    "launchPersistentContext", locals_to_params(locals())
+                )
             )
-        )
+        except Exception as e:
+            if f"{self.name}-" in str(e):
+                raise not_installed_error(f'"{self.name}" browser was not found.')
+            raise e
 
     async def connect(
         self, wsEndpoint: str = None, slowMo: int = None, timeout: int = None
