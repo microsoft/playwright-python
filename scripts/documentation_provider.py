@@ -25,6 +25,7 @@ class DocumentationProvider:
 
         class_name = None
         method_name = None
+        in_a_code_block = False
         for line in api_md.split("\n"):
             matches = re.search(r"(class: (\w+)|(Playwright) module)", line)
             if matches:
@@ -38,7 +39,11 @@ class DocumentationProvider:
                 method_name = matches.group(1)
                 # Skip heading
                 continue
-            if method_name:
+            if "```js" in line:
+                in_a_code_block = True
+            elif "```" in line:
+                in_a_code_block = False
+            elif method_name and not in_a_code_block:
                 if method_name not in self.documentation[class_name]:  # type: ignore
                     self.documentation[class_name][method_name] = []  # type: ignore
                 self.documentation[class_name][method_name].append(line)  # type: ignore
@@ -51,11 +56,12 @@ class DocumentationProvider:
         trimmed = trimmed.replace("boolean", "bool")
         trimmed = trimmed.replace("string", "str")
         trimmed = trimmed.replace("number", "int")
+        trimmed = trimmed.replace("Buffer", "bytes")
         trimmed = re.sub(r"<\?\[(.*?)\]>", r"<Optional[\1]>", trimmed)
         trimmed = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", trimmed)
         trimmed = re.sub(r"<\[(\w+?)\]>", r"<\1>", trimmed)
 
-        return trimmed.split("\n")
+        return trimmed.replace("\n\n", "\n").split("\n")
 
     def print_entry(self, class_name: str, method_name: str) -> None:
         if class_name == "BindingCall" or method_name == "pid":

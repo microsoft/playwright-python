@@ -71,7 +71,6 @@ class Request(SyncBase):
     def resourceType(self) -> str:
         """
         - returns: <str>
-
         Contains the request's resource type as it was perceived by the rendering engine.
         ResourceType will be one of the following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`, `websocket`, `manifest`, `other`.
         """
@@ -109,20 +108,9 @@ class Request(SyncBase):
     def redirectedFrom(self) -> typing.Union["Request", NoneType]:
         """
         - returns: <Optional[Request]> Request that was redirected by the server to this one, if any.
-
         When the server responds with a redirect, Playwright creates a new [Request] object. The two requests are connected by `redirectedFrom()` and `redirectedTo()` methods. When multiple server redirects has happened, it is possible to construct the whole redirect chain by repeatedly calling `redirectedFrom()`.
-
         For example, if the website `http://example.com` redirects to `https://example.com`:
-        ```js
-        const response = await page.goto('http://example.com');
-        console.log(response.request().redirectedFrom().url()); // 'http://example.com'
-        ```
-
         If the website `https://google.com` has no redirects:
-        ```js
-        const response = await page.goto('https://google.com');
-        console.log(response.request().redirectedFrom()); // null
-        ```
         """
         return mapping.from_impl_nullable(self._impl_obj.redirectedFrom)
 
@@ -130,11 +118,7 @@ class Request(SyncBase):
     def redirectedTo(self) -> typing.Union["Request", NoneType]:
         """
         - returns: <Optional[Request]> New request issued by the browser if the server responded with redirect.
-
         This method is the opposite of [request.redirectedFrom()](#requestredirectedfrom):
-        ```js
-        console.log(request.redirectedFrom().redirectedTo() === request); // true
-        ```
         """
         return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
 
@@ -143,17 +127,9 @@ class Request(SyncBase):
         """
         - returns: <Optional[Dict]> Dict describing request failure, if any
           - `errorText` <str> Human-readable error message, e.g. `'net::ERR_FAILED'`.
-
         The method returns `null` unless this request has failed, as reported by
         `requestfailed` event.
-
         Example of logging of all the failed requests:
-
-        ```js
-        page.on('requestfailed', request => {
-          console.log(request.url() + ' ' + request.failure().errorText);
-        });
-        ```
         """
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
@@ -166,7 +142,6 @@ class Request(SyncBase):
     def isNavigationRequest(self) -> bool:
         """
         - returns: <bool>
-
         Whether this request is driving frame's navigation.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.isNavigationRequest()))
@@ -183,7 +158,6 @@ class Response(SyncBase):
     def url(self) -> str:
         """
         - returns: <str>
-
         Contains the URL of the response.
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
@@ -192,7 +166,6 @@ class Response(SyncBase):
     def ok(self) -> bool:
         """
         - returns: <bool>
-
         Contains a bool stating whether the response was successful (status in the range 200-299) or not.
         """
         return mapping.from_maybe_impl(self._impl_obj.ok)
@@ -201,7 +174,6 @@ class Response(SyncBase):
     def status(self) -> int:
         """
         - returns: <int>
-
         Contains the status code of the response (e.g., 200 for a success).
         """
         return mapping.from_maybe_impl(self._impl_obj.status)
@@ -210,7 +182,6 @@ class Response(SyncBase):
     def statusText(self) -> str:
         """
         - returns: <str>
-
         Contains the status text of the response (e.g. usually an "OK" for a success).
         """
         return mapping.from_maybe_impl(self._impl_obj.statusText)
@@ -244,7 +215,7 @@ class Response(SyncBase):
 
     def body(self) -> bytes:
         """
-        - returns: <Buffer> Promise which resolves to a buffer with response body.
+        - returns: <bytes> Promise which resolves to a buffer with response body.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.body()))
 
@@ -257,7 +228,6 @@ class Response(SyncBase):
     def json(self) -> typing.Union[typing.Dict, typing.List]:
         """
         - returns: <Dict> Promise which resolves to a JSON representation of response body.
-
         This method will throw if the response body is not parsable via `JSON.parse`.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.json()))
@@ -297,7 +267,6 @@ class Route(SyncBase):
           - `'timedout'` - An operation timed out.
           - `'failed'` - A generic failure occurred.
         - returns: <Promise>
-
         Aborts the route's request.
         """
         return mapping.from_maybe_impl(
@@ -316,29 +285,13 @@ class Route(SyncBase):
           - `status` <int> Response status code, defaults to `200`.
           - `headers` <[Dict]<[str], [str]>> Optional response headers. Header values will be converted to a str.
           - `contentType` <str> If set, equals to setting `Content-Type` response header.
-          - `body` <[str]|[Buffer]> Optional response body.
+          - `body` <[str]|[bytes]> Optional response body.
           - `path` <str> Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
         - returns: <Promise>
-
         Fulfills route's request with given response.
-
         An example of fulfilling all requests with 404 responses:
 
-        ```js
-        await page.route('**/*', route => {
-          route.fulfill({
-            status: 404,
-            contentType: 'text/plain',
-            body: 'Not Found!'
-          });
-        });
-        ```
-
         An example of serving static file:
-
-        ```js
-        await page.route('**/xhr_endpoint', route => route.fulfill({ path: 'mock_data.json' }));
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -357,22 +310,10 @@ class Route(SyncBase):
         """
         - `overrides` <Dict> Optional request overrides, which can be one of the following:
           - `method` <str> If set changes the request method (e.g. GET or POST)
-          - `postData` <[str]|[Buffer]> If set changes the post data of request
+          - `postData` <[str]|[bytes]> If set changes the post data of request
           - `headers` <[Dict]<[str], [str]>> If set changes the request HTTP headers. Header values will be converted to a str.
         - returns: <Promise>
-
         Continues route's request with optional overrides.
-
-        ```js
-        await page.route('**/*', (route, request) => {
-          // Override headers
-          const headers = Dict.assign({}, request.headers(), {
-            foo: 'bar', // set "foo" header
-            origin: undefined, // remove "origin" header
-          });
-          route.continue({headers});
-        });
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -394,23 +335,14 @@ class Keyboard(SyncBase):
         """
         - `key` <str> Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         - returns: <Promise>
-
         Dispatches a `keydown` event.
-
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
-
           `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
-
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
-
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-
         If `key` is a modifier key, `Shift`, `Meta`, `Control`, or `Alt`, subsequent key presses will be sent with that modifier active. To release the modifier key, use [`keyboard.up`](#keyboardupkey).
-
         After the key is pressed once, subsequent calls to [`keyboard.down`](#keyboarddownkey) will have [repeat](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat) set to true. To release the key, use [`keyboard.up`](#keyboardupkey).
-
         > **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.down(key=key)))
@@ -419,7 +351,6 @@ class Keyboard(SyncBase):
         """
         - `key` <str> Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         - returns: <Promise>
-
         Dispatches a `keyup` event.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.up(key=key)))
@@ -428,12 +359,7 @@ class Keyboard(SyncBase):
         """
         - `text` <str> Sets input to the specified text value.
         - returns: <Promise>
-
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
-
-        ```js
-        page.keyboard.insertText('嗨');
-        ```
 
         > **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
         """
@@ -445,15 +371,8 @@ class Keyboard(SyncBase):
         - `options` <Dict>
           - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
         - returns: <Promise>
-
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
-
         To press a special key, like `Control` or `ArrowDown`, use [`keyboard.press`](#keyboardpresskey-options).
-
-        ```js
-        await page.keyboard.type('Hello'); // Types instantly
-        await page.keyboard.type('World', {delay: 100}); // Types slower, like a user
-        ```
 
         > **NOTE** Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
         """
@@ -467,30 +386,12 @@ class Keyboard(SyncBase):
         - `options` <Dict>
           - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         - returns: <Promise>
-
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
-
           `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
-
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
-
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-
         Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
-
-        ```js
-        const page = await browser.newPage();
-        await page.goto('https://keycode.info');
-        await page.keyboard.press('A');
-        await page.screenshot({ path: 'A.png' });
-        await page.keyboard.press('ArrowLeft');
-        await page.screenshot({ path: 'ArrowLeft.png' });
-        await page.keyboard.press('Shift+O');
-        await page.screenshot({ path: 'O.png' });
-        await browser.close();
-        ```
 
         Shortcut for [`keyboard.down`](#keyboarddownkey) and [`keyboard.up`](#keyboardupkey).
         """
@@ -513,7 +414,6 @@ class Mouse(SyncBase):
         - `options` <Dict>
           - `steps` <int> defaults to 1. Sends intermediate `mousemove` events.
         - returns: <Promise>
-
         Dispatches a `mousemove` event.
         """
         return mapping.from_maybe_impl(
@@ -528,7 +428,6 @@ class Mouse(SyncBase):
           - `button` <"left"|"right"|"middle"> Defaults to `left`.
           - `clickCount` <int> defaults to 1. See [UIEvent.detail].
         - returns: <Promise>
-
         Dispatches a `mousedown` event.
         """
         return mapping.from_maybe_impl(
@@ -543,7 +442,6 @@ class Mouse(SyncBase):
           - `button` <"left"|"right"|"middle"> Defaults to `left`.
           - `clickCount` <int> defaults to 1. See [UIEvent.detail].
         - returns: <Promise>
-
         Dispatches a `mouseup` event.
         """
         return mapping.from_maybe_impl(
@@ -566,7 +464,6 @@ class Mouse(SyncBase):
           - `clickCount` <int> defaults to 1. See [UIEvent.detail].
           - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         - returns: <Promise>
-
         Shortcut for [`mouse.move`](#mousemovex-y-options), [`mouse.down`](#mousedownoptions) and [`mouse.up`](#mouseupoptions).
         """
         return mapping.from_maybe_impl(
@@ -591,7 +488,6 @@ class Mouse(SyncBase):
           - `button` <"left"|"right"|"middle"> Defaults to `left`.
           - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         - returns: <Promise>
-
         Shortcut for [`mouse.move`](#mousemovex-y-options), [`mouse.down`](#mousedownoptions), [`mouse.up`](#mouseupoptions), [`mouse.down`](#mousedownoptions) and [`mouse.up`](#mouseupoptions).
         """
         return mapping.from_maybe_impl(
@@ -613,16 +509,9 @@ class JSHandle(SyncBase):
         - `pageFunction` <[function]\\([Dict]\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         This method passes this handle as the first argument to `pageFunction`.
-
         If `pageFunction` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```js
-        const tweetHandle = await page.$('.tweet .retweets');
-        expect(await tweetHandle.evaluate((node, suffix) => node.innerText, ' retweets')).toBe('10 retweets');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -641,13 +530,9 @@ class JSHandle(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
-
         This method passes this handle as the first argument to `pageFunction`.
-
         The only difference between `jsHandle.evaluate` and `jsHandle.evaluateHandle` is that `jsHandle.evaluateHandle` returns in-page object (JSHandle).
-
         If the function passed to the `jsHandle.evaluateHandle` returns a [Promise], then `jsHandle.evaluateHandle` would wait for the promise to resolve and return its value.
-
         See [page.evaluateHandle()](#pageevaluatehandlepagefunction-arg) for more details.
         """
         return mapping.from_impl(
@@ -664,7 +549,6 @@ class JSHandle(SyncBase):
         """
         - `propertyName` <str> property to get
         - returns: <JSHandle>
-
         Fetches a single property from the referenced object.
         """
         return mapping.from_impl(self._sync(self._impl_obj.getProperty(name=name)))
@@ -672,23 +556,13 @@ class JSHandle(SyncBase):
     def getProperties(self) -> typing.Dict[str, "JSHandle"]:
         """
         - returns: <[Map]<[str], [JSHandle]>>
-
         The method returns a map with **own property names** as keys and JSHandle instances for the property values.
-
-        ```js
-        const handle = await page.evaluateHandle(() => ({window, document}));
-        const properties = await handle.getProperties();
-        const windowHandle = properties.get('window');
-        const documentHandle = properties.get('document');
-        await handle.dispose();
-        ```
         """
         return mapping.from_impl_dict(self._sync(self._impl_obj.getProperties()))
 
     def asElement(self) -> typing.Union["ElementHandle", NoneType]:
         """
         - returns: <Optional[ElementHandle]>
-
         Returns either `null` or the object handle itself, if the object handle is an instance of [ElementHandle].
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.asElement()))
@@ -696,7 +570,6 @@ class JSHandle(SyncBase):
     def dispose(self) -> NoneType:
         """
         - returns: <Promise> Promise which resolves when the object handle is successfully disposed.
-
         The `jsHandle.dispose` method stops referencing the element handle.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
@@ -704,11 +577,9 @@ class JSHandle(SyncBase):
     def jsonValue(self) -> typing.Any:
         """
         - returns: <Dict>
-
         Returns a JSON representation of the object. If the object has a
         [`toJSON`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Dicts/JSON/strify#toJSON()_behavior)
         function, it **will not be called**.
-
         > **NOTE** The method will return an empty JSON object if the referenced object is not strifiable. It will throw an error if the object has circular references.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.jsonValue()))
@@ -724,7 +595,6 @@ class ElementHandle(JSHandle):
     def asElement(self) -> typing.Union["ElementHandle", NoneType]:
         """
         - returns: <Optional[ElementHandle]>
-
         Returns either `null` or the object handle itself, if the object handle is an instance of [ElementHandle].
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.asElement()))
@@ -745,7 +615,6 @@ class ElementHandle(JSHandle):
         """
         - `name` <str> Attribute name to get the value for.
         - returns: <null|[str]>
-
         Returns element attribute value.
         """
         return mapping.from_maybe_impl(
@@ -775,15 +644,9 @@ class ElementHandle(JSHandle):
         - `type` <str> DOM event type: `"click"`, `"dragstart"`, etc.
         - `eventInit` <Dict> event-specific initialization properties.
         - returns: <Promise>
-
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling [`element.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
-        ```js
-        await elementHandle.dispatchEvent('click');
-        ```
-
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
@@ -792,14 +655,7 @@ class ElementHandle(JSHandle):
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
         - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-
          You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
-
-        ```js
-        // Note you can only create DataTransfer in Chromium and Firefox
-        const dataTransfer = await page.evaluateHandle(() => new DataTransfer());
-        await elementHandle.dispatchEvent('dragstart', { dataTransfer });
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.dispatchEvent(type=type, eventInit=eventInit))
@@ -810,10 +666,6 @@ class ElementHandle(JSHandle):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
-        This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is completely visible as defined by [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s ```ratio```.
-
-        Throws when ```elementHandle``` does not point to an element [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.scrollIntoViewIfNeeded(timeout=timeout))
@@ -837,7 +689,6 @@ class ElementHandle(JSHandle):
           - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully hovered.
-
         This method scrolls element into view if needed, and then uses [page.mouse](#pagemouse) to hover over the center of the element.
         If the element is detached from DOM, the method throws an error.
         """
@@ -875,7 +726,6 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully clicked. Promise gets rejected if the element is detached from DOM.
-
         This method scrolls element into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
         If the element is detached from DOM, the method throws an error.
         """
@@ -918,12 +768,9 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully double clicked. Promise gets rejected if the element is detached from DOM.
-
         This method scrolls element into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
         If the element is detached from DOM, the method throws an error.
-
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
-
         > **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
         """
         return mapping.from_maybe_impl(
@@ -962,23 +809,8 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <List[str]> An array of option values that have been successfully selected.
-
         Triggers a `change` and `input` event once all the provided options have been selected.
         If element is not a `<select>` element, the method throws an error.
-
-        ```js
-        // single selection matching the value
-        handle.selectOption('blue');
-
-        // single selection matching both the value and the label
-        handle.selectOption({ label: 'Blue' });
-
-        // multiple selection
-        handle.selectOption('red', 'green', 'blue');
-
-        // multiple selection for blue, red and second option
-        handle.selectOption({ value: 'blue' }, { index: 2 }, 'red');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -999,7 +831,6 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input` event after filling.
         If the element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
         Note that you can pass an empty str to clear the input field.
@@ -1017,7 +848,6 @@ class ElementHandle(JSHandle):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text content.
         """
         return mapping.from_maybe_impl(
@@ -1036,14 +866,12 @@ class ElementHandle(JSHandle):
         - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
-          - `buffer` <Buffer> File content **required**
+          - `buffer` <bytes> File content **required**
         - `options` <Dict>
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method expects `elementHandle` to point to an [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they are resolved relative to the [current working directory](https://nodejs.org/api/process.html#process_process_cwd). For empty array, clears the selected files.
         """
         return mapping.from_maybe_impl(
@@ -1057,7 +885,6 @@ class ElementHandle(JSHandle):
     def focus(self) -> NoneType:
         """
         - returns: <Promise>
-
         Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.focus()))
@@ -1076,22 +903,10 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
-
         To press a special key, like `Control` or `ArrowDown`, use [`elementHandle.press`](#elementhandlepresskey-options).
 
-        ```js
-        await elementHandle.type('Hello'); // Types instantly
-        await elementHandle.type('World', {delay: 100}); // Types slower, like a user
-        ```
-
         An example of typing into a text field and then submitting the form:
-        ```js
-        const elementHandle = await page.$('input');
-        await elementHandle.type('some text');
-        await elementHandle.press('Enter');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1111,19 +926,12 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         Focuses the element, and then uses [`keyboard.down`](#keyboarddownkey) and [`keyboard.up`](#keyboardupkey).
-
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
-
           `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
-
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
-
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-
         Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
         """
         return mapping.from_maybe_impl(
@@ -1143,7 +951,6 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully checked. Promise gets rejected if the operation fails.
-
         If element is not already checked, it scrolls it into view if needed, and then uses [elementHandle.click](#elementhandleclickoptions) to click in the center of the element.
         """
         return mapping.from_maybe_impl(
@@ -1163,7 +970,6 @@ class ElementHandle(JSHandle):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully unchecked. Promise gets rejected if the operation fails.
-
         If element is not already unchecked, it scrolls it into view if needed, and then uses [elementHandle.click](#elementhandleclickoptions) to click in the center of the element.
         """
         return mapping.from_maybe_impl(
@@ -1181,7 +987,6 @@ class ElementHandle(JSHandle):
           - y <int> the y coordinate of the element in pixels.
           - width <int> the width of the element in pixels.
           - height <int> the height of the element in pixels.
-
         This method returns the bounding box of the element (relative to the main frame), or `null` if the element is not visible.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.boundingBox()))
@@ -1201,8 +1006,7 @@ class ElementHandle(JSHandle):
           - `quality` <int> The quality of the image, between 0-100. Not applicable to `png` images.
           - `omitBackground` <bool> Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-        - returns: <Buffer> Promise which resolves to buffer with the captured screenshot.
-
+        - returns: <bytes> Promise which resolves to buffer with the captured screenshot.
         This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a screenshot. If the element is detached from DOM, the method throws an error.
         """
         return mapping.from_maybe_impl(
@@ -1221,7 +1025,6 @@ class ElementHandle(JSHandle):
         """
         - `selector` <str> A selector to query element for. See [working with selectors](#working-with-selectors) for more details.
         - returns: <Optional[ElementHandle]>
-
         The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the return value resolves to `null`.
         """
         return mapping.from_impl_nullable(
@@ -1232,7 +1035,6 @@ class ElementHandle(JSHandle):
         """
         - `selector` <str> A selector to query element for. See [working with selectors](#working-with-selectors) for more details.
         - returns: <List[ElementHandle]>
-
         The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the return value resolves to `[]`.
         """
         return mapping.from_impl_list(
@@ -1251,17 +1053,9 @@ class ElementHandle(JSHandle):
         - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the method throws an error.
-
         If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```js
-        const tweetHandle = await page.$('.tweet');
-        expect(await tweetHandle.$eval('.like', node => node.innerText)).toBe('100');
-        expect(await tweetHandle.$eval('.retweets', node => node.innerText)).toBe('10');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1286,22 +1080,13 @@ class ElementHandle(JSHandle):
         - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of matched elements as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details.
-
         If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```html
         <div class="feed">
           <div class="tweet">Hello!</div>
           <div class="tweet">Hi!</div>
         </div>
-        ```
-        ```js
-        const feedHandle = await page.$('.feed');
-        expect(await feedHandle.$$eval('.tweet', nodes => nodes.map(n => n.innerText))).toEqual(['Hello!', 'Hi!']);
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1356,35 +1141,12 @@ class Accessibility(SyncBase):
           - `invalid` <str> Whether and in what way this node's value is invalid, if applicable.
           - `orientation` <str> Whether the node is oriented horizontally or vertically, if applicable.
           - `children` <List[Dict]> Child [AXNode]s of this node, if any, if applicable.
-
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the page.
-
         > **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by
         most screen readers. Playwright will discard them as well for an easier to process tree,
         unless `interestingOnly` is set to `false`.
-
         An example of dumping the entire accessibility tree:
-        ```js
-        const snapshot = await page.accessibility.snapshot();
-        console.log(snapshot);
-        ```
-
         An example of logging the focused node's name:
-        ```js
-        const snapshot = await page.accessibility.snapshot();
-        const node = findFocusedNode(snapshot);
-        console.log(node && node.name);
-
-        function findFocusedNode(node) {
-          if (node.focused)
-            return node;
-          for (const child of node.children || []) {
-            const foundNode = findFocusedNode(child);
-            return foundNode;
-          }
-          return null;
-        }
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1406,7 +1168,6 @@ class FileChooser(SyncBase):
     def page(self) -> "Page":
         """
         - returns: <Page>
-
         Returns page this file chooser belongs to.
         """
         return mapping.from_impl(self._impl_obj.page)
@@ -1415,7 +1176,6 @@ class FileChooser(SyncBase):
     def element(self) -> "ElementHandle":
         """
         - returns: <ElementHandle>
-
         Returns input element associated with this file chooser.
         """
         return mapping.from_impl(self._impl_obj.element)
@@ -1424,7 +1184,6 @@ class FileChooser(SyncBase):
     def isMultiple(self) -> bool:
         """
         - returns: <bool>
-
         Returns whether this file chooser accepts multiple files.
         """
         return mapping.from_maybe_impl(self._impl_obj.isMultiple)
@@ -1441,12 +1200,11 @@ class FileChooser(SyncBase):
         - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
-          - `buffer` <Buffer> File content **required**
+          - `buffer` <bytes> File content **required**
         - `options` <Dict>
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then they are resolved relative to the [current working directory](https://nodejs.org/api/process.html#process_process_cwd). For empty array, clears the selected files.
         """
         return mapping.from_maybe_impl(
@@ -1469,11 +1227,8 @@ class Frame(SyncBase):
     def name(self) -> str:
         """
         - returns: <str>
-
         Returns frame's name attribute as specified in the tag.
-
         If the name is empty, returns the id attribute instead.
-
         > **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed later.
         """
         return mapping.from_maybe_impl(self._impl_obj.name)
@@ -1482,7 +1237,6 @@ class Frame(SyncBase):
     def url(self) -> str:
         """
         - returns: <str>
-
         Returns frame's url.
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
@@ -1518,18 +1272,14 @@ class Frame(SyncBase):
             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
           - `referer` <str> Referer header value. If provided it will take preference over the referer header value set by [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders).
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
-
         `frame.goto` will throw an error if:
         - there's an SSL error (e.g. in case of self-signed certificates).
         - target URL is invalid.
         - the `timeout` is exceeded during navigation.
         - the remote server does not respond or is unreachable.
         - the main resource failed to load.
-
         `frame.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling [response.status()](#responsestatus).
-
         > **NOTE** `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-
         > **NOTE** Headless mode doesn't support navigation to a PDF document. See the [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
         """
         return mapping.from_impl_nullable(
@@ -1555,16 +1305,8 @@ class Frame(SyncBase):
             - `'load'` - consider navigation to be finished when the `load` event is fired.
             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
-
         This resolves when the frame navigates to a new URL. It is useful for when you run code
         which will indirectly cause the frame to navigate. Consider this example:
-
-        ```js
-        const [response] = await Promise.all([
-          frame.waitForNavigation(), // The navigation promise resolves after navigation has finished
-          frame.click('a.my-link'), // Clicking the link will indirectly cause a navigation
-        ]);
-        ```
 
         **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is considered a navigation.
         """
@@ -1589,13 +1331,7 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the required load state has been reached.
-
         This resolves when the frame reaches a required load state, `load` by default. The navigation must have been committed when this method is called. If current document has already reached the required state, resolves immediately.
-
-        ```js
-        await frame.click('button'); // Click triggers navigation.
-        await frame.waitForLoadState(); // The promise resolves after 'load' event.
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.waitForLoadState(state=state, timeout=timeout))
@@ -1604,16 +1340,8 @@ class Frame(SyncBase):
     def frameElement(self) -> "ElementHandle":
         """
         - returns: <ElementHandle> Promise that resolves with a `frame` or `iframe` element handle which corresponds to this frame.
-
         This is an inverse of [elementHandle.contentFrame()](#elementhandlecontentframe). Note that returned handle actually belongs to the parent frame.
-
         This method throws an error if the frame has been detached before `frameElement()` returns.
-
-        ```js
-        const frameElement = await frame.frameElement();
-        const contentFrame = await frameElement.contentFrame();
-        console.log(frame === contentFrame);  // -> true
-        ```
         """
         return mapping.from_impl(self._sync(self._impl_obj.frameElement()))
 
@@ -1624,30 +1352,12 @@ class Frame(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         If the function passed to the `frame.evaluate` returns a [Promise], then `frame.evaluate` would wait for the promise to resolve and return its value.
-
         If the function passed to the `frame.evaluate` returns a non-[Serializable] value, then `frame.evaluate` resolves to `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
-
-        ```js
-        const result = await frame.evaluate(([x, y]) => {
-          return Promise.resolve(x * y);
-        }, [7, 8]);
-        console.log(result); // prints "56"
-        ```
 
         A str can also be passed in instead of a function.
 
-        ```js
-        console.log(await frame.evaluate('1 + 2')); // prints "3"
-        ```
-
         [ElementHandle] instances can be passed as an argument to the `frame.evaluate`:
-        ```js
-        const bodyHandle = await frame.$('body');
-        const html = await frame.evaluate(([body, suffix]) => body.innerHTML + suffix, [bodyHandle, 'hello']);
-        await bodyHandle.dispose();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1666,29 +1376,12 @@ class Frame(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
-
         The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page object (JSHandle).
-
         If the function, passed to the `frame.evaluateHandle`, returns a [Promise], then `frame.evaluateHandle` would wait for the promise to resolve and return its value.
-
-        ```js
-        const aWindowHandle = await frame.evaluateHandle(() => Promise.resolve(window));
-        aWindowHandle; // Handle for the window object.
-        ```
 
         A str can also be passed in instead of a function.
 
-        ```js
-        const aHandle = await frame.evaluateHandle('document'); // Handle for the 'document'.
-        ```
-
         [JSHandle] instances can be passed as an argument to the `frame.evaluateHandle`:
-        ```js
-        const aHandle = await frame.evaluateHandle(() => document.body);
-        const resultHandle = await frame.evaluateHandle(([body, suffix]) => body.innerHTML + suffix, [aHandle, 'hello']);
-        console.log(await resultHandle.jsonValue());
-        await resultHandle.dispose();
-        ```
         """
         return mapping.from_impl(
             self._sync(
@@ -1704,7 +1397,6 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector to query frame for. See [working with selectors](#working-with-selectors) for more details.
         - returns: <Optional[ElementHandle]> Promise which resolves to ElementHandle pointing to the frame element.
-
         The method finds an element matching the specified selector within the frame. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the return value resolves to `null`.
         """
         return mapping.from_impl_nullable(
@@ -1715,7 +1407,6 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector to query frame for. See [working with selectors](#working-with-selectors) for more details.
         - returns: <List[ElementHandle]> Promise which resolves to ElementHandles pointing to the frame elements.
-
         The method finds all elements matching the specified selector within the frame. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the return value resolves to `[]`.
         """
         return mapping.from_impl_list(
@@ -1738,26 +1429,8 @@ class Frame(SyncBase):
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Optional[ElementHandle]> Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
-
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
-
         This method works across navigations:
-        ```js
-        const { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.
-
-        (async () => {
-          const browser = await webkit.launch();
-          const page = await browser.newPage();
-          let currentURL;
-          page.mainFrame()
-            .waitForSelector('img')
-            .then(() => console.log('First URL with image: ' + currentURL));
-          for (currentURL of ['https://example.com', 'https://google.com', 'https://bbc.com']) {
-            await page.goto(currentURL);
-          }
-          await browser.close();
-        })();
-        ```
         """
         return mapping.from_impl_nullable(
             self._sync(
@@ -1781,15 +1454,9 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling [`element.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
-        ```js
-        await frame.dispatchEvent('button#submit', 'click');
-        ```
-
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
@@ -1798,14 +1465,7 @@ class Frame(SyncBase):
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
         - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-
          You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
-
-        ```js
-        // Note you can only create DataTransfer in Chromium and Firefox
-        const dataTransfer = await frame.evaluateHandle(() => new DataTransfer());
-        await frame.dispatchEvent('#source', 'dragstart', { dataTransfer });
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1827,17 +1487,9 @@ class Frame(SyncBase):
         - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         The method finds an element matching the specified selector within the frame and passes it as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details. If no elements match the selector, the method throws an error.
-
         If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```js
-        const searchValue = await frame.$eval('#search', el => el.value);
-        const preloadHref = await frame.$eval('link[rel=preload]', el => el.href);
-        const html = await frame.$eval('.main-container', (e, suffix) => e.outerHTML + suffix, 'hello');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1862,15 +1514,9 @@ class Frame(SyncBase):
         - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements as a first argument to `pageFunction`. See [Working with selectors](#working-with-selectors) for more details.
-
         If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```js
-        const divsCounts = await frame.$$eval('div', (divs, min) => divs.length >= min, 10);
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -1886,7 +1532,6 @@ class Frame(SyncBase):
     def content(self) -> str:
         """
         - returns: <str>
-
         Gets the full HTML contents of the frame, including the doctype.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.content()))
@@ -1918,7 +1563,6 @@ class Frame(SyncBase):
     def isDetached(self) -> bool:
         """
         - returns: <bool>
-
         Returns `true` if the frame has been detached, or `false` otherwise.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.isDetached()))
@@ -1933,7 +1577,6 @@ class Frame(SyncBase):
           - `content` <str> Raw JavaScript content to be injected into frame.
           - `type` <str> Script type. Use 'module' in order to load a Javascript ES6 module. See [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
         - returns: <ElementHandle> which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
-
         Adds a `<script>` tag into the page with the desired url or content.
         """
         return mapping.from_impl(
@@ -1953,7 +1596,6 @@ class Frame(SyncBase):
           - `path` <str> Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw CSS content to be injected into frame.
         - returns: <ElementHandle> which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
-
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the content.
         """
         return mapping.from_impl(
@@ -1988,7 +1630,6 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully clicked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
         """
@@ -2033,12 +1674,9 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully double clicked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to double click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
-
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
-
         > **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
         """
         return mapping.from_maybe_impl(
@@ -2065,11 +1703,9 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input` event after filling.
         If the element matching `selector` is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
         Note that you can pass an empty str to clear the input field.
-
         To send fine-grained keyboard events, use [`frame.type`](#frametypeselector-text-options).
         """
         return mapping.from_maybe_impl(
@@ -2089,7 +1725,6 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully focused. The promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector` and focuses it.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM.
         """
@@ -2103,7 +1738,6 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
-
         Resolves to the `element.textContent`.
         """
         return mapping.from_maybe_impl(
@@ -2116,7 +1750,6 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
-
         Resolves to the `element.innerText`.
         """
         return mapping.from_maybe_impl(
@@ -2129,7 +1762,6 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
-
         Resolves to the `element.innerHTML`.
         """
         return mapping.from_maybe_impl(
@@ -2143,7 +1775,6 @@ class Frame(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
-
         Returns element attribute value.
         """
         return mapping.from_maybe_impl(
@@ -2174,7 +1805,6 @@ class Frame(SyncBase):
           - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully hovered. Promise gets rejected if there's no element matching `selector`.
-
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to hover over the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
         """
@@ -2214,20 +1844,8 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <List[str]> An array of option values that have been successfully selected.
-
         Triggers a `change` and `input` event once all the provided options have been selected.
         If there's no `<select>` element matching `selector`, the method throws an error.
-
-        ```js
-        // single selection matching the value
-        frame.selectOption('select#colors', 'blue');
-
-        // single selection matching both the value and the label
-        frame.selectOption('select#colors', { label: 'Blue' });
-
-        // multiple selection
-        frame.selectOption('select#colors', 'red', 'green', 'blue');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -2254,14 +1872,12 @@ class Frame(SyncBase):
         - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
-          - `buffer` <Buffer> File content **required**
+          - `buffer` <bytes> File content **required**
         - `options` <Dict>
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method expects `selector` to point to an [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they are resolved relative to the [current working directory](https://nodejs.org/api/process.html#process_process_cwd). For empty array, clears the selected files.
         """
         return mapping.from_maybe_impl(
@@ -2291,15 +1907,8 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used to send fine-grained keyboard events. To fill values in form fields, use [`frame.fill`](#framefillselector-value-options).
-
         To press a special key, like `Control` or `ArrowDown`, use [`keyboard.press`](#keyboardpresskey-options).
-
-        ```js
-        await frame.type('#mytextarea', 'Hello'); // Types instantly
-        await frame.type('#mytextarea', 'World', {delay: 100}); // Types slower, like a user
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -2329,17 +1938,11 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
-
           `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
-
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
-
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-
         Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
         """
         return mapping.from_maybe_impl(
@@ -2368,7 +1971,6 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully checked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses [frame.click](#frameclickselector-options) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
         """
@@ -2397,7 +1999,6 @@ class Frame(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully unchecked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses [frame.click](#frameclickselector-options) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
         """
@@ -2416,9 +2017,7 @@ class Frame(SyncBase):
         """
         - `timeout` <int> A timeout to wait for
         - returns: <Promise>
-
         Returns a promise that resolves after the timeout.
-
         Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be flaky. Use signals such as network events, selectors becoming visible and others instead.
         """
         return mapping.from_maybe_impl(
@@ -2440,27 +2039,8 @@ class Frame(SyncBase):
           - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <JSHandle> Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
-
         The `waitForFunction` can be used to observe viewport size change:
-        ```js
-        const { firefox } = require('playwright');  // Or 'chromium' or 'webkit'.
-
-        (async () => {
-          const browser = await firefox.launch();
-          const page = await browser.newPage();
-          const watchDog = page.mainFrame().waitForFunction('window.innerWidth < 100');
-          page.setViewportSize({width: 50, height: 50});
-          await watchDog;
-          await browser.close();
-        })();
-        ```
-
         To pass an argument from Node.js to the predicate of `frame.waitForFunction` function:
-
-        ```js
-        const selector = '.foo';
-        await frame.waitForFunction(selector => !!document.querySelector(selector), selector);
-        ```
         """
         return mapping.from_impl(
             self._sync(
@@ -2502,9 +2082,7 @@ class Worker(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated in the worker context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         If the function passed to the `worker.evaluate` returns a [Promise], then `worker.evaluate` would wait for the promise to resolve and return its value.
-
         If the function passed to the `worker.evaluate` returns a non-[Serializable] value, then `worker.evaluate` resolves to `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
         """
         return mapping.from_maybe_impl(
@@ -2524,9 +2102,7 @@ class Worker(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
-
         The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns in-page object (JSHandle).
-
         If the function passed to the `worker.evaluateHandle` returns a [Promise], then `worker.evaluateHandle` would wait for the promise to resolve and return its value.
         """
         return mapping.from_impl(
@@ -2558,48 +2134,7 @@ class Selectors(SyncBase):
         - `options` <Dict>
           - `contentScript` <bool> Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not guaranteed when this engine is used together with other registered engines.
         - returns: <Promise>
-
         An example of registering selector engine that queries elements based on a tag name:
-        ```js
-        const { selectors, firefox } = require('playwright');  // Or 'chromium' or 'webkit'.
-
-        (async () => {
-          // Must be a function that evaluates to a selector engine instance.
-          const createTagNameEngine = () => ({
-            // Creates a selector that matches given target when queried at the root.
-            // Can return undefined if unable to create one.
-            create(root, target) {
-              return root.querySelector(target.tagName) === target ? target.tagName : undefined;
-            },
-
-            // Returns the first element matching given selector in the root's subtree.
-            query(root, selector) {
-              return root.querySelector(selector);
-            },
-
-            // Returns all elements matching given selector in the root's subtree.
-            queryAll(root, selector) {
-              return List.from(root.querySelectorAll(selector));
-            }
-          });
-
-          // Register the engine. Selectors will be prefixed with "tag=".
-          await selectors.register('tag', createTagNameEngine);
-
-          const browser = await firefox.launch();
-          const page = await browser.newPage();
-          await page.goto('https://example.com');
-
-          // Use the selector prefixed with its name.
-          const button = await page.$('tag=button');
-          // Combine it with other selector engines.
-          await page.click('tag=div >> text="Click me"');
-          // Can use it in any methods supporting selectors.
-          const buttonCount = await page.$$eval('tag=button', buttons => buttons.length);
-
-          await browser.close();
-        })();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -2621,7 +2156,6 @@ class ConsoleMessage(SyncBase):
     def type(self) -> str:
         """
         - returns: <str>
-
         One of the following values: `'log'`, `'debug'`, `'info'`, `'error'`, `'warning'`, `'dir'`, `'dirxml'`, `'table'`, `'trace'`, `'clear'`, `'startGroup'`, `'startGroupCollapsed'`, `'endGroup'`, `'assert'`, `'profile'`, `'profileEnd'`, `'count'`, `'timeEnd'`.
         """
         return mapping.from_maybe_impl(self._impl_obj.type)
@@ -2706,7 +2240,6 @@ class Download(SyncBase):
     def url(self) -> str:
         """
         - returns: <str>
-
         Returns downloaded url.
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
@@ -2715,7 +2248,6 @@ class Download(SyncBase):
     def suggestedFilename(self) -> str:
         """
         - returns: <str>
-
         Returns suggested filename for this download. It is typically computed by the browser from the [`Content-Disposition`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition) response header or the `download` attribute. See the spec on [whatwg](https://html.spec.whatwg.org/#downloading-resources). Different browsers can use different logic for computing it.
         """
         return mapping.from_maybe_impl(self._impl_obj.suggestedFilename)
@@ -2723,7 +2255,6 @@ class Download(SyncBase):
     def delete(self) -> NoneType:
         """
         - returns: <Promise>
-
         Deletes the downloaded file.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.delete()))
@@ -2731,7 +2262,6 @@ class Download(SyncBase):
     def failure(self) -> typing.Union[str, NoneType]:
         """
         - returns: <null|[str]>
-
         Returns download error if any.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.failure()))
@@ -2739,7 +2269,6 @@ class Download(SyncBase):
     def path(self) -> typing.Union[str, NoneType]:
         """
         - returns: <null|[str]>
-
         Returns path to the downloaded file in case of successful download.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
@@ -2790,7 +2319,6 @@ class Page(SyncBase):
     def context(self) -> "BrowserContext":
         """
         - returns: <BrowserContext>
-
         Get the browser context that the page belongs to.
         """
         return mapping.from_impl(self._impl_obj.context)
@@ -2799,7 +2327,6 @@ class Page(SyncBase):
     def mainFrame(self) -> "Frame":
         """
         - returns: <Frame> The page's main frame.
-
         Page is guaranteed to have a main frame which persists during navigations.
         """
         return mapping.from_impl(self._impl_obj.mainFrame)
@@ -2815,7 +2342,6 @@ class Page(SyncBase):
     def url(self) -> str:
         """
         - returns: <str>
-
         This is a shortcut for [page.mainFrame().url()](#frameurl)
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
@@ -2825,7 +2351,6 @@ class Page(SyncBase):
         """
         - returns: <List[Worker]>
         This method returns all of the dedicated [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) associated with the page.
-
         > **NOTE** This does not contain ServiceWorkers
         """
         return mapping.from_impl_list(self._impl_obj.workers)
@@ -2847,14 +2372,6 @@ class Page(SyncBase):
           - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object.
         - returns: <Optional[Frame]> frame matching the criteria. Returns `null` if no frame matches.
 
-        ```js
-        const frame = page.frame('frame-name');
-        ```
-
-        ```js
-        const frame = page.frame({ url: /.*domain.*/ });
-        ```
-
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
         """
         return mapping.from_impl_nullable(
@@ -2864,7 +2381,6 @@ class Page(SyncBase):
     def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
         """
         - `timeout` <int> Maximum navigation time in milliseconds
-
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
         - [page.goBack([options])](#pagegobackoptions)
         - [page.goForward([options])](#pagegoforwardoptions)
@@ -2872,7 +2388,6 @@ class Page(SyncBase):
         - [page.reload([options])](#pagereloadoptions)
         - [page.setContent(html[, options])](#pagesetcontenthtml-options)
         - [page.waitForNavigation([options])](#pagewaitfornavigationoptions)
-
         > **NOTE** [`page.setDefaultNavigationTimeout`](#pagesetdefaultnavigationtimeouttimeout) takes priority over [`page.setDefaultTimeout`](#pagesetdefaulttimeouttimeout), [`browserContext.setDefaultTimeout`](#browsercontextsetdefaulttimeouttimeout) and [`browserContext.setDefaultNavigationTimeout`](#browsercontextsetdefaultnavigationtimeouttimeout).
         """
         return mapping.from_maybe_impl(
@@ -2882,9 +2397,7 @@ class Page(SyncBase):
     def setDefaultTimeout(self, timeout: int) -> NoneType:
         """
         - `timeout` <int> Maximum time in milliseconds
-
         This setting will change the default maximum time for all the methods accepting `timeout` option.
-
         > **NOTE** [`page.setDefaultNavigationTimeout`](#pagesetdefaultnavigationtimeouttimeout) takes priority over [`page.setDefaultTimeout`](#pagesetdefaulttimeouttimeout).
         """
         return mapping.from_maybe_impl(
@@ -2895,9 +2408,7 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
         - returns: <Optional[ElementHandle]>
-
         The method finds an element matching the specified selector within the page. If no elements match the selector, the return value resolves to `null`.
-
         Shortcut for [page.mainFrame().$(selector)](#frameselector).
         """
         return mapping.from_impl_nullable(
@@ -2908,9 +2419,7 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
         - returns: <List[ElementHandle]>
-
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the return value resolves to `[]`.
-
         Shortcut for [page.mainFrame().$$(selector)](#frameselector-1).
         """
         return mapping.from_impl_list(
@@ -2933,26 +2442,8 @@ class Page(SyncBase):
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Optional[ElementHandle]> Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
-
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
-
         This method works across navigations:
-        ```js
-        const { chromium } = require('playwright');  // Or 'firefox' or 'webkit'.
-
-        (async () => {
-          const browser = await chromium.launch();
-          const page = await browser.newPage();
-          let currentURL;
-          page
-            .waitForSelector('img')
-            .then(() => console.log('First URL with image: ' + currentURL));
-          for (currentURL of ['https://example.com', 'https://google.com', 'https://bbc.com']) {
-            await page.goto(currentURL);
-          }
-          await browser.close();
-        })();
-        ```
         Shortcut for [page.mainFrame().waitForSelector(selector[, options])](#framewaitforselectorselector-options).
         """
         return mapping.from_impl_nullable(
@@ -2977,15 +2468,9 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling [`element.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
-        ```js
-        await page.dispatchEvent('button#submit', 'click');
-        ```
-
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
@@ -2994,14 +2479,7 @@ class Page(SyncBase):
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
         - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-
          You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
-
-        ```js
-        // Note you can only create DataTransfer in Chromium and Firefox
-        const dataTransfer = await page.evaluateHandle(() => new DataTransfer());
-        await page.dispatchEvent('#source', 'dragstart', { dataTransfer });
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3018,33 +2496,11 @@ class Page(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         If the function passed to the `page.evaluate` returns a [Promise], then `page.evaluate` would wait for the promise to resolve and return its value.
-
         If the function passed to the `page.evaluate` returns a non-[Serializable] value, then `page.evaluate` resolves to `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
-
         Passing argument to `pageFunction`:
-        ```js
-        const result = await page.evaluate(([x, y]) => {
-          return Promise.resolve(x * y);
-        }, [7, 8]);
-        console.log(result); // prints "56"
-        ```
-
         A str can also be passed in instead of a function:
-        ```js
-        console.log(await page.evaluate('1 + 2')); // prints "3"
-        const x = 10;
-        console.log(await page.evaluate(`1 + ${x}`)); // prints "11"
-        ```
-
         [ElementHandle] instances can be passed as an argument to the `page.evaluate`:
-        ```js
-        const bodyHandle = await page.$('body');
-        const html = await page.evaluate(([body, suffix]) => body.innerHTML + suffix, [bodyHandle, 'hello']);
-        await bodyHandle.dispose();
-        ```
-
         Shortcut for [page.mainFrame().evaluate(pageFunction[, arg])](#frameevaluatepagefunction-arg).
         """
         return mapping.from_maybe_impl(
@@ -3064,23 +2520,10 @@ class Page(SyncBase):
         - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
-
         The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page object (JSHandle).
-
         If the function passed to the `page.evaluateHandle` returns a [Promise], then `page.evaluateHandle` would wait for the promise to resolve and return its value.
-
         A str can also be passed in instead of a function:
-        ```js
-        const aHandle = await page.evaluateHandle('document'); // Handle for the 'document'
-        ```
-
         [JSHandle] instances can be passed as an argument to the `page.evaluateHandle`:
-        ```js
-        const aHandle = await page.evaluateHandle(() => document.body);
-        const resultHandle = await page.evaluateHandle(body => body.innerHTML, aHandle);
-        console.log(await resultHandle.jsonValue());
-        await resultHandle.dispose();
-        ```
         """
         return mapping.from_impl(
             self._sync(
@@ -3104,18 +2547,9 @@ class Page(SyncBase):
         - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         The method finds an element matching the specified selector within the page and passes it as a first argument to `pageFunction`. If no elements match the selector, the method throws an error.
-
         If `pageFunction` returns a [Promise], then `page.$eval` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```js
-        const searchValue = await page.$eval('#search', el => el.value);
-        const preloadHref = await page.$eval('link[rel=preload]', el => el.href);
-        const html = await page.$eval('.main-container', (e, suffix) => e.outerHTML + suffix, 'hello');
-        ```
-
         Shortcut for [page.mainFrame().$eval(selector, pageFunction)](#frameevalselector-pagefunction-arg).
         """
         return mapping.from_maybe_impl(
@@ -3141,15 +2575,9 @@ class Page(SyncBase):
         - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
-
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as a first argument to `pageFunction`.
-
         If `pageFunction` returns a [Promise], then `page.$$eval` would wait for the promise to resolve and return its value.
-
         Examples:
-        ```js
-        const divsCounts = await page.$$eval('div', (divs, min) => divs.length >= min, 10);
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3172,9 +2600,7 @@ class Page(SyncBase):
           - `content` <str> Raw JavaScript content to be injected into frame.
           - `type` <str> Script type. Use 'module' in order to load a Javascript ES6 module. See [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
         - returns: <ElementHandle> which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
-
         Adds a `<script>` tag into the page with the desired url or content.
-
         Shortcut for [page.mainFrame().addScriptTag(options)](#frameaddscripttagoptions).
         """
         return mapping.from_impl(
@@ -3194,9 +2620,7 @@ class Page(SyncBase):
           - `path` <str> Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw CSS content to be injected into frame.
         - returns: <ElementHandle> which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
-
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the content.
-
         Shortcut for [page.mainFrame().addStyleTag(options)](#frameaddstyletagoptions).
         """
         return mapping.from_impl(
@@ -3210,66 +2634,13 @@ class Page(SyncBase):
         - `name` <str> Name of the function on the window object
         - `playwrightFunction` <function> Callback function which will be called in Playwright's context.
         - returns: <Promise>
-
         The method adds a function called `name` on the `window` object of every frame in the page.
         When called, the function executes `playwrightFunction` in Node.js and returns a [Promise] which resolves to the return value of `playwrightFunction`.
-
         If the `playwrightFunction` returns a [Promise], it will be awaited.
-
         See [browserContext.exposeFunction(name, playwrightFunction)](#browsercontextexposefunctionname-playwrightfunction) for context-wide exposed function.
-
         > **NOTE** Functions installed via `page.exposeFunction` survive navigations.
-
         An example of adding an `md5` function to the page:
-        ```js
-        const { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.
-        const crypto = require('crypto');
-
-        (async () => {
-          const browser = await webkit.launch({ headless: false });
-          const page = await browser.newPage();
-          await page.exposeFunction('md5', text => crypto.createHash('md5').update(text).digest('hex'));
-          await page.setContent(`
-            <script>
-              async function onClick() {
-                document.querySelector('div').textContent = await window.md5('PLAYWRIGHT');
-              }
-            </script>
-            <button onclick="onClick()">Click me</button>
-            <div></div>
-          `);
-          await page.click('button');
-        })();
-        ```
-
         An example of adding a `window.readfile` function to the page:
-
-        ```js
-        const { chromium } = require('playwright');  // Or 'firefox' or 'webkit'.
-        const fs = require('fs');
-
-        (async () => {
-          const browser = await chromium.launch();
-          const page = await browser.newPage();
-          page.on('console', msg => console.log(msg.text()));
-          await page.exposeFunction('readfile', async filePath => {
-            return new Promise((resolve, reject) => {
-              fs.readFile(filePath, 'utf8', (err, text) => {
-                if (err)
-                  reject(err);
-                else
-                  resolve(text);
-              });
-            });
-          });
-          await page.evaluate(async () => {
-            // use window.readfile to read contents of a file
-            const content = await window.readfile('/etc/hosts');
-            console.log(content);
-          });
-          await browser.close();
-        })();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3286,39 +2657,14 @@ class Page(SyncBase):
         - `name` <str> Name of the function on the window object.
         - `playwrightBinding` <function> Callback function that will be called in the Playwright's context.
         - returns: <Promise>
-
         The method adds a function called `name` on the `window` object of every frame in this page.
         When called, the function executes `playwrightBinding` in Node.js and returns a [Promise] which resolves to the return value of `playwrightBinding`.
         If the `playwrightBinding` returns a [Promise], it will be awaited.
-
         The first argument of the `playwrightBinding` function contains information about the caller:
         `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-
         See [browserContext.exposeBinding(name, playwrightBinding)](#browsercontextexposebindingname-playwrightbinding) for the context-wide version.
-
         > **NOTE** Functions installed via `page.exposeBinding` survive navigations.
-
         An example of exposing page URL to all frames in a page:
-        ```js
-        const { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.
-
-        (async () => {
-          const browser = await webkit.launch({ headless: false });
-          const context = await browser.newContext();
-          const page = await context.newPage();
-          await page.exposeBinding('pageURL', ({ page }) => page.url());
-          await page.setContent(`
-            <script>
-              async function onClick() {
-                document.querySelector('div').textContent = await window.pageURL();
-              }
-            </script>
-            <button onclick="onClick()">Click me</button>
-            <div></div>
-          `);
-          await page.click('button');
-        })();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3332,9 +2678,7 @@ class Page(SyncBase):
         """
         - `headers` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
         - returns: <Promise>
-
         The extra HTTP headers will be sent with every request the page initiates.
-
         > **NOTE** page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.
         """
         return mapping.from_maybe_impl(
@@ -3344,7 +2688,6 @@ class Page(SyncBase):
     def content(self) -> str:
         """
         - returns: <str>
-
         Gets the full HTML contents of the page, including the doctype.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.content()))
@@ -3390,20 +2733,15 @@ class Page(SyncBase):
             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
           - `referer` <str> Referer header value. If provided it will take preference over the referer header value set by [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders).
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
-
         `page.goto` will throw an error if:
         - there's an SSL error (e.g. in case of self-signed certificates).
         - target URL is invalid.
         - the `timeout` is exceeded during navigation.
         - the remote server does not respond or is unreachable.
         - the main resource failed to load.
-
         `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling [response.status()](#responsestatus).
-
         > **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-
         > **NOTE** Headless mode doesn't support navigation to a PDF document. See the [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
-
         Shortcut for [page.mainFrame().goto(url[, options])](#framegotourl-options)
         """
         return mapping.from_impl_nullable(
@@ -3445,22 +2783,7 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the required load state has been reached.
-
         This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed when this method is called. If current document has already reached the required state, resolves immediately.
-
-        ```js
-        await page.click('button'); // Click triggers navigation.
-        await page.waitForLoadState(); // The promise resolves after 'load' event.
-        ```
-
-        ```js
-        const [popup] = await Promise.all([
-          page.waitForEvent('popup'),
-          page.click('button'), // Click triggers a popup.
-        ])
-        await popup.waitForLoadState('domcontentloaded'); // The promise resolves after 'domcontentloaded' event.
-        console.log(await popup.title()); // Popup is ready to use.
-        ```
 
         Shortcut for [page.mainFrame().waitForLoadState([options])](#framewaitforloadstatestate-options).
         """
@@ -3483,19 +2806,10 @@ class Page(SyncBase):
             - `'load'` - consider navigation to be finished when the `load` event is fired.
             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
-
         This resolves when the page navigates to a new URL or reloads. It is useful for when you run code
         which will indirectly cause the page to navigate. Consider this example:
 
-        ```js
-        const [response] = await Promise.all([
-          page.waitForNavigation(), // The promise resolves after navigation has finished
-          page.click('a.my-link'), // Clicking the link will indirectly cause a navigation
-        ]);
-        ```
-
         **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is considered a navigation.
-
         Shortcut for [page.mainFrame().waitForNavigation(options)](#framewaitfornavigationoptions).
         """
         return mapping.from_impl_nullable(
@@ -3517,16 +2831,6 @@ class Page(SyncBase):
         - `options` <Dict> Optional waiting parameters
           - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
         - returns: <Request> Promise which resolves to the matched request.
-
-        ```js
-        const firstRequest = await page.waitForRequest('http://example.com/resource');
-        const finalRequest = await page.waitForRequest(request => request.url() === 'http://example.com' && request.method() === 'GET');
-        return firstRequest.url();
-        ```
-
-        ```js
-        await page.waitForRequest(request => request.url().searchParams.get('foo') === 'bar' && request.url().searchParams.get('foo2') === 'bar2');
-        ```
         """
         return mapping.from_impl_nullable(
             self._sync(
@@ -3549,12 +2853,6 @@ class Page(SyncBase):
         - `options` <Dict> Optional waiting parameters
           - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Response> Promise which resolves to the matched response.
-
-        ```js
-        const firstResponse = await page.waitForResponse('https://example.com/resource');
-        const finalResponse = await page.waitForResponse(response => response.url() === 'https://example.com' && response.status() === 200);
-        return finalResponse.ok();
-        ```
         """
         return mapping.from_impl_nullable(
             self._sync(
@@ -3578,7 +2876,6 @@ class Page(SyncBase):
           - `predicate` <Function> receives the event data and resolves to truthy value when the waiting should resolve.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Dict> Promise which resolves to the event data value.
-
         Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the page is closed before the event
         is fired.
         """
@@ -3606,7 +2903,6 @@ class Page(SyncBase):
             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
         can not go back, resolves to `null`.
-
         Navigate to the previous page in history.
         """
         return mapping.from_impl_nullable(
@@ -3627,7 +2923,6 @@ class Page(SyncBase):
             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
         can not go forward, resolves to `null`.
-
         Navigate to the next page in history.
         """
         return mapping.from_impl_nullable(
@@ -3644,35 +2939,6 @@ class Page(SyncBase):
           - `media` <?"screen"|"print"> Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null` disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value.
           - `colorScheme` <?"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated value.
         - returns: <Promise>
-
-        ```js
-        await page.evaluate(() => matchMedia('screen').matches);
-        // → true
-        await page.evaluate(() => matchMedia('print').matches);
-        // → false
-
-        await page.emulateMedia({ media: 'print' });
-        await page.evaluate(() => matchMedia('screen').matches);
-        // → false
-        await page.evaluate(() => matchMedia('print').matches);
-        // → true
-
-        await page.emulateMedia({});
-        await page.evaluate(() => matchMedia('screen').matches);
-        // → true
-        await page.evaluate(() => matchMedia('print').matches);
-        // → false
-        ```
-
-        ```js
-        await page.emulateMedia({ colorScheme: 'dark' }] });
-        await page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
-        // → true
-        await page.evaluate(() => matchMedia('(prefers-color-scheme: light)').matches);
-        // → false
-        await page.evaluate(() => matchMedia('(prefers-color-scheme: no-preference)').matches);
-        // → false
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3686,19 +2952,8 @@ class Page(SyncBase):
           - `width` <int> page width in pixels. **required**
           - `height` <int> page height in pixels. **required**
         - returns: <Promise>
-
         In the case of multiple pages in a single browser, each page can have its own viewport size. However, [browser.newContext([options])](#browsernewcontextoptions) allows to set viewport size (and more) for all pages in the context at once.
-
         `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the viewport size before navigating to the page.
-
-        ```js
-        const page = await browser.newPage();
-        await page.setViewportSize({
-          width: 640,
-          height: 480,
-        });
-        await page.goto('https://example.com');
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.setViewportSize(width=width, height=height))
@@ -3719,23 +2974,11 @@ class Page(SyncBase):
           - `content` <str> Raw script content.
         - `arg` <Serializable> Optional argument to pass to `script` (only supported when passing a function).
         - returns: <Promise>
-
         Adds a script which would be evaluated in one of the following scenarios:
         - Whenever the page is navigated.
         - Whenever the child frame is attached or navigated. In this case, the scritp is evaluated in the context of the newly attached frame.
-
         The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend  the JavaScript environment, e.g. to seed `Math.random`.
-
         An example of overriding `Math.random` before the page loads:
-
-        ```js
-        // preload.js
-        Math.random = () => 42;
-
-        // In your playwright script, assuming the preload.js file is in same folder
-        const preloadFile = fs.readFileSync('./preload.js', 'utf8');
-        await page.addInitScript(preloadFile);
-        ```
 
         > **NOTE** The order of evaluation of multiple scripts installed via [browserContext.addInitScript(script[, arg])](#browsercontextaddinitscriptscript-arg) and [page.addInitScript(script[, arg])](#pageaddinitscriptscript-arg) is not defined.
         """
@@ -3752,31 +2995,13 @@ class Page(SyncBase):
         - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
         - `handler` <[function]\\([Route], [Request]\\)> handler function to route the request.
         - returns: <Promise>.
-
         Routing provides the capability to modify network requests that are made by a page.
-
         Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
-
         An example of a naïve handler that aborts all image requests:
-
-        ```js
-        const page = await browser.newPage();
-        await page.route('**/*.{png,jpg,jpeg}', route => route.abort());
-        await page.goto('https://example.com');
-        await browser.close();
-        ```
 
         or the same snippet using a regex pattern instead:
 
-        ```js
-        const page = await browser.newPage();
-        await page.route(/(\\.png$)|(\\.jpg$)/, route => route.abort());
-        await page.goto('https://example.com');
-        await browser.close();
-        ```
-
         Page routes take precedence over browser context routes (set up with [browserContext.route(url, handler)](#browsercontextrouteurl-handler)) when request matches both handlers.
-
         > **NOTE** Enabling routing disables http cache.
         """
         return mapping.from_maybe_impl(
@@ -3796,7 +3021,6 @@ class Page(SyncBase):
         - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
         - `handler` <[function]\\([Route], [Request]\\)> Handler function to route the request.
         - returns: <Promise>
-
         Removes a route created with [page.route(url, handler)](#pagerouteurl-handler). When `handler` is not specified, removes all routes for the `url`.
         """
         return mapping.from_maybe_impl(
@@ -3830,8 +3054,7 @@ class Page(SyncBase):
             - `height` <int> height of clipping area
           - `omitBackground` <bool> Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-        - returns: <Buffer> Promise which resolves to buffer with the captured screenshot.
-
+        - returns: <bytes> Promise which resolves to buffer with the captured screenshot.
         > **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for discussion.
         """
         return mapping.from_maybe_impl(
@@ -3851,7 +3074,6 @@ class Page(SyncBase):
     def title(self) -> str:
         """
         - returns: <str> The page's title.
-
         Shortcut for [page.mainFrame().title()](#frametitle).
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
@@ -3863,9 +3085,7 @@ class Page(SyncBase):
             [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload)
             page handlers.
         - returns: <Promise>
-
         By default, `page.close()` **does not** run beforeunload handlers.
-
         > **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
         > and should be handled manually via page's ['dialog'](#event-dialog) event.
         """
@@ -3876,7 +3096,6 @@ class Page(SyncBase):
     def isClosed(self) -> bool:
         """
         - returns: <bool>
-
         Indicates that the page has been closed.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.isClosed()))
@@ -3909,10 +3128,8 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully clicked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
 
         Shortcut for [page.mainFrame().click(selector[, options])](#frameclickselector-options).
         """
@@ -3957,14 +3174,10 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully double clicked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to double click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
-
         > **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
-
         Shortcut for [page.mainFrame().dblclick(selector[, options])](#framedblclickselector-options).
         """
         return mapping.from_maybe_impl(
@@ -3991,13 +3204,10 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input` event after filling.
         If the element matching `selector` is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
         Note that you can pass an empty str to clear the input field.
-
         To send fine-grained keyboard events, use [`page.type`](#pagetypeselector-text-options).
-
         Shortcut for [page.mainFrame().fill()](#framefillselector-value-options)
         """
         return mapping.from_maybe_impl(
@@ -4017,10 +3227,8 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully focused. The promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector` and focuses it.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM.
-
         Shortcut for [page.mainFrame().focus(selector)](#framefocusselector-options).
         """
         return mapping.from_maybe_impl(
@@ -4033,7 +3241,6 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
-
         Resolves to the `element.textContent`.
         """
         return mapping.from_maybe_impl(
@@ -4046,7 +3253,6 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
-
         Resolves to the `element.innerText`.
         """
         return mapping.from_maybe_impl(
@@ -4059,7 +3265,6 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
-
         Resolves to the `element.innerHTML`.
         """
         return mapping.from_maybe_impl(
@@ -4073,7 +3278,6 @@ class Page(SyncBase):
         - `options` <Dict>
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
-
         Returns element attribute value.
         """
         return mapping.from_maybe_impl(
@@ -4104,10 +3308,8 @@ class Page(SyncBase):
           - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully hovered. Promise gets rejected if there's no element matching `selector`.
-
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to hover over the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
         Shortcut for [page.mainFrame().hover(selector[, options])](#framehoverselector-options).
         """
         return mapping.from_maybe_impl(
@@ -4146,21 +3348,8 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <List[str]> An array of option values that have been successfully selected.
-
         Triggers a `change` and `input` event once all the provided options have been selected.
         If there's no `<select>` element matching `selector`, the method throws an error.
-
-        ```js
-        // single selection matching the value
-        page.selectOption('select#colors', 'blue');
-
-        // single selection matching both the value and the label
-        page.selectOption('select#colors', { label: 'Blue' });
-
-        // multiple selection
-        page.selectOption('select#colors', ['red', 'green', 'blue']);
-
-        ```
 
         Shortcut for [page.mainFrame().selectOption()](#frameselectoptionselector-values-options)
         """
@@ -4189,14 +3378,12 @@ class Page(SyncBase):
         - `files` <[str]|[List]<str>|[Dict]|[List]<Dict>>
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
-          - `buffer` <Buffer> File content **required**
+          - `buffer` <bytes> File content **required**
         - `options` <Dict>
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         This method expects `selector` to point to an [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they are resolved relative to the [current working directory](https://nodejs.org/api/process.html#process_process_cwd). For empty array, clears the selected files.
         """
         return mapping.from_maybe_impl(
@@ -4226,15 +3413,8 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to send fine-grained keyboard events. To fill values in form fields, use [`page.fill`](#pagefillselector-value-options).
-
         To press a special key, like `Control` or `ArrowDown`, use [`keyboard.press`](#keyboardpresskey-options).
-
-        ```js
-        await page.type('#mytextarea', 'Hello'); // Types instantly
-        await page.type('#mytextarea', 'World', {delay: 100}); // Types slower, like a user
-        ```
 
         Shortcut for [page.mainFrame().type(selector, text[, options])](#frametypeselector-text-options).
         """
@@ -4266,32 +3446,13 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
-
         Focuses the element, and then uses [`keyboard.down`](#keyboarddownkey) and [`keyboard.up`](#keyboardupkey).
-
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
-
           `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
-
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
-
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-
         Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
-
-        ```js
-        const page = await browser.newPage();
-        await page.goto('https://keycode.info');
-        await page.press('body', 'A');
-        await page.screenshot({ path: 'A.png' });
-        await page.press('body', 'ArrowLeft');
-        await page.screenshot({ path: 'ArrowLeft.png' });
-        await page.press('body', 'Shift+O');
-        await page.screenshot({ path: 'O.png' });
-        await browser.close();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -4319,10 +3480,8 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully checked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses [page.click](#pageclickselector-options) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
         Shortcut for [page.mainFrame().check(selector[, options])](#framecheckselector-options).
         """
         return mapping.from_maybe_impl(
@@ -4350,10 +3509,8 @@ class Page(SyncBase):
           - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
           - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully unchecked. The Promise will be rejected if there is no element matching `selector`.
-
         This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses [page.click](#pageclickselector-options) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
         Shortcut for [page.mainFrame().uncheck(selector[, options])](#frameuncheckselector-options).
         """
         return mapping.from_maybe_impl(
@@ -4371,15 +3528,8 @@ class Page(SyncBase):
         """
         - `timeout` <int> A timeout to wait for
         - returns: <Promise>
-
         Returns a promise that resolves after the timeout.
-
         Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be flaky. Use signals such as network events, selectors becoming visible and others instead.
-
-        ```js
-        // wait for 1 second
-        await page.waitForTimeout(1000);
-        ```
 
         Shortcut for [page.mainFrame().waitForTimeout(timeout)](#pagewaitfortimeouttimeout).
         """
@@ -4402,27 +3552,8 @@ class Page(SyncBase):
           - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
         - returns: <JSHandle> Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
-
         The `waitForFunction` can be used to observe viewport size change:
-        ```js
-        const { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.
-
-        (async () => {
-          const browser = await webkit.launch();
-          const page = await browser.newPage();
-          const watchDog = page.waitForFunction('window.innerWidth < 100');
-          await page.setViewportSize({width: 50, height: 50});
-          await watchDog;
-          await browser.close();
-        })();
-        ```
-
         To pass an argument from Node.js to the predicate of `page.waitForFunction` function:
-
-        ```js
-        const selector = '.foo';
-        await page.waitForFunction(selector => !!document.querySelector(selector), selector);
-        ```
 
         Shortcut for [page.mainFrame().waitForFunction(pageFunction, arg, options]])](#framewaitforfunctionpagefunction-arg-options).
         """
@@ -4478,33 +3609,21 @@ class Page(SyncBase):
             - `bottom` <[str]|[int]> Bottom margin, accepts values labeled with units. Defaults to `0`.
             - `left` <[str]|[int]> Left margin, accepts values labeled with units. Defaults to `0`.
           - `preferCSSPageSize` <bool> Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
-        - returns: <Buffer> Promise which resolves with PDF buffer.
-
+        - returns: <bytes> Promise which resolves with PDF buffer.
         > **NOTE** Generating a pdf is currently only supported in Chromium headless.
-
         `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call [page.emulateMedia({ media: 'screen' })](#pageemulatemediaoptions) before calling `page.pdf()`:
-
         > **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust) property to force rendering of exact colors.
 
-        ```js
-        // Generates a PDF with 'screen' media type.
-        await page.emulateMedia({media: 'screen'});
-        await page.pdf({path: 'page.pdf'});
-        ```
-
         The `width`, `height`, and `margin` options accept values labeled with units. Unlabeled values are treated as pixels.
-
         A few examples:
         - `page.pdf({width: 100})` - prints with width set to 100 pixels
         - `page.pdf({width: '100px'})` - prints with width set to 100 pixels
         - `page.pdf({width: '10cm'})` - prints with width set to 10 centimeters.
-
         All possible units are:
         - `px` - pixel
         - `in` - inch
         - `cm` - centimeter
         - `mm` - millimeter
-
         The `format` options are:
         - `Letter`: 8.5in x 11in
         - `Legal`: 8.5in x 14in
@@ -4517,7 +3636,6 @@ class Page(SyncBase):
         - `A4`: 8.27in x 11.7in
         - `A5`: 5.83in x 8.27in
         - `A6`: 4.13in x 5.83in
-
         > **NOTE** `headerTemplate` and `footerTemplate` markup have the following limitations:
         > 1. Script tags inside templates are not evaluated.
         > 2. Page styles are not visible inside templates.
@@ -4616,7 +3734,6 @@ class BrowserContext(SyncBase):
     def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
         """
         - `timeout` <int> Maximum navigation time in milliseconds
-
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
         - [page.goBack([options])](#pagegobackoptions)
         - [page.goForward([options])](#pagegoforwardoptions)
@@ -4624,7 +3741,6 @@ class BrowserContext(SyncBase):
         - [page.reload([options])](#pagereloadoptions)
         - [page.setContent(html[, options])](#pagesetcontenthtml-options)
         - [page.waitForNavigation([options])](#pagewaitfornavigationoptions)
-
         > **NOTE** [`page.setDefaultNavigationTimeout`](#pagesetdefaultnavigationtimeouttimeout) and [`page.setDefaultTimeout`](#pagesetdefaulttimeouttimeout) take priority over [`browserContext.setDefaultNavigationTimeout`](#browsercontextsetdefaultnavigationtimeouttimeout).
         """
         return mapping.from_maybe_impl(
@@ -4634,9 +3750,7 @@ class BrowserContext(SyncBase):
     def setDefaultTimeout(self, timeout: int) -> NoneType:
         """
         - `timeout` <int> Maximum time in milliseconds
-
         This setting will change the default maximum time for all the methods accepting `timeout` option.
-
         > **NOTE** [`page.setDefaultNavigationTimeout`](#pagesetdefaultnavigationtimeouttimeout), [`page.setDefaultTimeout`](#pagesetdefaulttimeouttimeout) and [`browserContext.setDefaultNavigationTimeout`](#browsercontextsetdefaultnavigationtimeouttimeout) take priority over [`browserContext.setDefaultTimeout`](#browsercontextsetdefaulttimeouttimeout).
         """
         return mapping.from_maybe_impl(
@@ -4646,7 +3760,6 @@ class BrowserContext(SyncBase):
     def newPage(self) -> "Page":
         """
         - returns: <Page>
-
         Creates a new page in the browser context.
         """
         return mapping.from_impl(self._sync(self._impl_obj.newPage()))
@@ -4665,7 +3778,6 @@ class BrowserContext(SyncBase):
           - `httpOnly` <bool>
           - `secure` <bool>
           - `sameSite` <"Strict"|"Lax"|"None">
-
         If no URLs are specified, this method returns all cookies.
         If URLs are specified, only cookies that affect those URLs are returned.
         """
@@ -4689,10 +3801,6 @@ class BrowserContext(SyncBase):
           - `secure` <bool>
           - `sameSite` <"Strict"|"Lax"|"None">
         - returns: <Promise>
-
-        ```js
-        await browserContext.addCookies([cookieDict1, cookieDict2]);
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.addCookies(cookies=cookies))
@@ -4701,7 +3809,6 @@ class BrowserContext(SyncBase):
     def clearCookies(self) -> NoneType:
         """
         - returns: <Promise>
-
         Clears context cookies.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.clearCookies()))
@@ -4731,7 +3838,6 @@ class BrowserContext(SyncBase):
         - `options` <Dict>
           - `origin` <str> The [origin] to grant permissions to, e.g. "https://example.com".
         - returns: <Promise>
-
         Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if specified.
         """
         return mapping.from_maybe_impl(
@@ -4743,15 +3849,7 @@ class BrowserContext(SyncBase):
     def clearPermissions(self) -> NoneType:
         """
         - returns: <Promise>
-
         Clears all permission overrides for the browser context.
-
-        ```js
-        const context = await browser.newContext();
-        await context.grantPermissions(['clipboard-read']);
-        // do stuff ..
-        context.clearPermissions();
-        ```
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.clearPermissions()))
 
@@ -4762,12 +3860,7 @@ class BrowserContext(SyncBase):
           - `longitude` <int> Longitude between -180 and 180. **required**
           - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
         - returns: <Promise>
-
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
-
-        ```js
-        await browserContext.setGeolocation({latitude: 59.95, longitude: 30.31667});
-        ```
 
         > **NOTE** Consider using [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) to grant permissions for the browser context pages to read its geolocation.
         """
@@ -4779,9 +3872,7 @@ class BrowserContext(SyncBase):
         """
         - `headers` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
         - returns: <Promise>
-
         The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged with page-specific extra HTTP headers set with [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders). If page overrides a particular header, page-specific header value will be used instead of the browser context header value.
-
         > **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
         """
         return mapping.from_maybe_impl(
@@ -4804,26 +3895,11 @@ class BrowserContext(SyncBase):
           - `content` <str> Raw script content.
         - `arg` <Serializable> Optional argument to pass to `script` (only supported when passing a function).
         - returns: <Promise>
-
         Adds a script which would be evaluated in one of the following scenarios:
         - Whenever a page is created in the browser context or is navigated.
         - Whenever a child frame is attached or navigated in any page in the browser context. In this case, the script is evaluated in the context of the newly attached frame.
-
         The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend  the JavaScript environment, e.g. to seed `Math.random`.
-
         An example of overriding `Math.random` before the page loads:
-
-        ```js
-        // preload.js
-        Math.random = () => 42;
-        ```
-
-        ```js
-        // In your playwright script, assuming the preload.js file is in same folder.
-        await browserContext.addInitScript({
-          path: 'preload.js'
-        });
-        ```
 
         > **NOTE** The order of evaluation of multiple scripts installed via [browserContext.addInitScript(script[, arg])](#browsercontextaddinitscriptscript-arg) and [page.addInitScript(script[, arg])](#pageaddinitscriptscript-arg) is not defined.
         """
@@ -4838,37 +3914,13 @@ class BrowserContext(SyncBase):
         - `name` <str> Name of the function on the window object.
         - `playwrightBinding` <function> Callback function that will be called in the Playwright's context.
         - returns: <Promise>
-
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
         When called, the function executes `playwrightBinding` in Node.js and returns a [Promise] which resolves to the return value of `playwrightBinding`.
         If the `playwrightBinding` returns a [Promise], it will be awaited.
-
         The first argument of the `playwrightBinding` function contains information about the caller:
         `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-
         See [page.exposeBinding(name, playwrightBinding)](#pageexposebindingname-playwrightbinding) for page-only version.
-
         An example of exposing page URL to all frames in all pages in the context:
-        ```js
-        const { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.
-
-        (async () => {
-          const browser = await webkit.launch({ headless: false });
-          const context = await browser.newContext();
-          await context.exposeBinding('pageURL', ({ page }) => page.url());
-          const page = await context.newPage();
-          await page.setContent(`
-            <script>
-              async function onClick() {
-                document.querySelector('div').textContent = await window.pageURL();
-              }
-            </script>
-            <button onclick="onClick()">Click me</button>
-            <div></div>
-          `);
-          await page.click('button');
-        })();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -4885,36 +3937,11 @@ class BrowserContext(SyncBase):
         - `name` <str> Name of the function on the window object.
         - `playwrightFunction` <function> Callback function that will be called in the Playwright's context.
         - returns: <Promise>
-
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
         When called, the function executes `playwrightFunction` in Node.js and returns a [Promise] which resolves to the return value of `playwrightFunction`.
-
         If the `playwrightFunction` returns a [Promise], it will be awaited.
-
         See [page.exposeFunction(name, playwrightFunction)](#pageexposefunctionname-playwrightfunction) for page-only version.
-
         An example of adding an `md5` function to all pages in the context:
-        ```js
-        const { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.
-        const crypto = require('crypto');
-
-        (async () => {
-          const browser = await webkit.launch({ headless: false });
-          const context = await browser.newContext();
-          await context.exposeFunction('md5', text => crypto.createHash('md5').update(text).digest('hex'));
-          const page = await context.newPage();
-          await page.setContent(`
-            <script>
-              async function onClick() {
-                document.querySelector('div').textContent = await window.md5('PLAYWRIGHT');
-              }
-            </script>
-            <button onclick="onClick()">Click me</button>
-            <div></div>
-          `);
-          await page.click('button');
-        })();
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -4933,32 +3960,13 @@ class BrowserContext(SyncBase):
         - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
         - `handler` <[function]\\([Route], [Request]\\)> handler function to route the request.
         - returns: <Promise>
-
         Routing provides the capability to modify network requests that are made by any page in the browser context.
         Once route is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
-
         An example of a naïve handler that aborts all image requests:
-
-        ```js
-        const context = await browser.newContext();
-        await context.route('**/*.{png,jpg,jpeg}', route => route.abort());
-        const page = await context.newPage();
-        await page.goto('https://example.com');
-        await browser.close();
-        ```
 
         or the same snippet using a regex pattern instead:
 
-        ```js
-        const context = await browser.newContext();
-        await context.route(/(\\.png$)|(\\.jpg$)/, route => route.abort());
-        const page = await context.newPage();
-        await page.goto('https://example.com');
-        await browser.close();
-        ```
-
         Page routes (set up with [page.route(url, handler)](#pagerouteurl-handler)) take precedence over browser context routes when request matches both handlers.
-
         > **NOTE** Enabling routing disables http cache.
         """
         return mapping.from_maybe_impl(
@@ -4978,7 +3986,6 @@ class BrowserContext(SyncBase):
         - `url` <[str]|[RegExp]|[function]\\([URL]\\):[bool]> A glob pattern, regex pattern or predicate receiving [URL] used to register a routing with [browserContext.route(url, handler)](#browsercontextrouteurl-handler).
         - `handler` <[function]\\([Route], [Request]\\)> Handler function used to register a routing with [browserContext.route(url, handler)](#browsercontextrouteurl-handler).
         - returns: <Promise>
-
         Removes a route created with [browserContext.route(url, handler)](#browsercontextrouteurl-handler). When `handler` is not specified, removes all routes for the `url`.
         """
         return mapping.from_maybe_impl(
@@ -5001,14 +4008,8 @@ class BrowserContext(SyncBase):
           - `predicate` <Function> receives the event data and resolves to truthy value when the waiting should resolve.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout).
         - returns: <Dict> Promise which resolves to the event data value.
-
         Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the context closes before the event
         is fired.
-
-        ```js
-        const context = await browser.newContext();
-        await context.grantPermissions(['geolocation']);
-        ```
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -5023,10 +4024,8 @@ class BrowserContext(SyncBase):
     def close(self) -> NoneType:
         """
         - returns: <Promise>
-
         Closes the browser context. All the pages that belong to the browser context
         will be closed.
-
         > **NOTE** the default browser context cannot be closed.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
@@ -5050,24 +4049,14 @@ class Browser(SyncBase):
     def contexts(self) -> typing.List["BrowserContext"]:
         """
         - returns: <List[BrowserContext]>
-
         Returns an array of all open browser contexts. In a newly created browser, this will return zero
         browser contexts.
-
-        ```js
-        const browser = await pw.webkit.launch();
-        console.log(browser.contexts().length); // prints `0`
-
-        const context = await browser.newContext();
-        console.log(browser.contexts().length); // prints `1`
-        ```
         """
         return mapping.from_impl_list(self._impl_obj.contexts)
 
     def isConnected(self) -> bool:
         """
         - returns: <bool>
-
         Indicates that the browser is connected.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.isConnected()))
@@ -5120,19 +4109,7 @@ class Browser(SyncBase):
           - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
           - `logger` <Logger> Logger sink for Playwright logging.
         - returns: <BrowserContext>
-
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
-
-        ```js
-        (async () => {
-          const browser = await playwright.firefox.launch();  // Or 'chromium' or 'webkit'.
-          // Create a new incognito browser context.
-          const context = await browser.newContext();
-          // Create a new page in a pristine context.
-          const page = await context.newPage();
-          await page.goto('https://example.com');
-        })();
-        ```
         """
         return mapping.from_impl(
             self._sync(
@@ -5206,9 +4183,7 @@ class Browser(SyncBase):
           - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
           - `logger` <Logger> Logger sink for Playwright logging.
         - returns: <Page>
-
         Creates a new page in a new browser context. Closing this page will close the context as well.
-
         This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and testing frameworks should explicitly create [browser.newContext](#browsernewcontextoptions) followed by the [browserContext.newPage](#browsercontextnewpage) to control their exact life times.
         """
         return mapping.from_impl(
@@ -5238,11 +4213,8 @@ class Browser(SyncBase):
     def close(self) -> NoneType:
         """
         - returns: <Promise>
-
         In case this browser is obtained using [browserType.launch](#browsertypelaunchoptions), closes the browser and all of its pages (if any were opened).
-
         In case this browser is obtained using [browserType.connect](#browsertypeconnectoptions), clears all created contexts belonging to this browser and disconnects from the browser server.
-
         The [Browser] object itself is considered to be disposed and cannot be used anymore.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
@@ -5263,7 +4235,6 @@ class BrowserServer(SyncBase):
     def wsEndpoint(self) -> str:
         """
         - returns: <str> Browser websocket url.
-
         Browser websocket endpoint which can be used as an argument to [browserType.connect(options)](#browsertypeconnectoptions) to establish connection to the browser.
         """
         return mapping.from_maybe_impl(self._impl_obj.wsEndpoint)
@@ -5271,7 +4242,6 @@ class BrowserServer(SyncBase):
     def kill(self) -> NoneType:
         """
         - returns: <Promise>
-
         Kills the browser process and waits for the process to exit.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.kill()))
@@ -5279,7 +4249,6 @@ class BrowserServer(SyncBase):
     def close(self) -> NoneType:
         """
         - returns: <Promise>
-
         Closes the browser gracefully and makes sure the process is terminated.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
@@ -5296,7 +4265,6 @@ class BrowserType(SyncBase):
     def name(self) -> str:
         """
         - returns: <str>
-
         Returns browser name. For example: `'chromium'`, `'webkit'` or `'firefox'`.
         """
         return mapping.from_maybe_impl(self._impl_obj.name)
@@ -5349,14 +4317,7 @@ class BrowserType(SyncBase):
           - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         - returns: <Browser> Promise which resolves to browser instance.
 
-
         You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
-        ```js
-        const browser = await chromium.launch({  // Or 'firefox' or 'webkit'.
-          ignoreDefaultArgs: ['--mute-audio']
-        });
-        ```
-
         > **Chromium-only** Playwright can also be used to control the Chrome browser, but it works best with the version of Chromium it is bundled with. There is no guarantee it will work with any other version. Use `executablePath` option with extreme caution.
         >
         > If Google Chrome (rather than Chromium) is preferred, a [Chrome Canary](https://www.google.com/chrome/browser/canary.html) or [Dev Channel](https://www.chromium.org/getting-involved/dev-channel) build is suggested.
@@ -5426,21 +4387,7 @@ class BrowserType(SyncBase):
           - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
           - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         - returns: <BrowserServer> Promise which resolves to the browser app instance.
-
         Launches browser server that client can connect to. An example of launching a browser executable and connecting to it later:
-
-        ```js
-        const { chromium } = require('playwright');  // Or 'webkit' or 'firefox'.
-
-        (async () => {
-          const browserServer = await chromium.launchServer();
-          const wsEndpoint = browserServer.wsEndpoint();
-          // Use web socket endpoint later to establish a connection.
-          const browser = await chromium.connect({ wsEndpoint });
-          // Close browser instance.
-          await browserServer.close();
-        })();
-        ```
         """
         return mapping.from_impl(
             self._sync(
@@ -5544,7 +4491,6 @@ class BrowserType(SyncBase):
             - `password` <str>
           - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
         - returns: <BrowserContext> Promise that resolves to the persistent browser context instance.
-
         Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this context will automatically close the browser.
         """
         return mapping.from_impl(
@@ -5595,7 +4541,6 @@ class BrowserType(SyncBase):
           - `logger` <Logger> Logger sink for Playwright logging.
           - `timeout` <int> Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         - returns: <Browser>
-
         This methods attaches Playwright to an existing browser instance.
         """
         return mapping.from_impl(
@@ -5618,7 +4563,6 @@ class Playwright(SyncBase):
     def chromium(self) -> "BrowserType":
         """
         - returns: <BrowserType>
-
         This object can be used to launch or connect to Chromium, returning instances of [ChromiumBrowser].
         """
         return mapping.from_impl(self._impl_obj.chromium)
@@ -5627,7 +4571,6 @@ class Playwright(SyncBase):
     def firefox(self) -> "BrowserType":
         """
         - returns: <BrowserType>
-
         This object can be used to launch or connect to Firefox, returning instances of [FirefoxBrowser].
         """
         return mapping.from_impl(self._impl_obj.firefox)
@@ -5636,7 +4579,6 @@ class Playwright(SyncBase):
     def webkit(self) -> "BrowserType":
         """
         - returns: <BrowserType>
-
         This object can be used to launch or connect to WebKit, returning instances of [WebKitBrowser].
         """
         return mapping.from_impl(self._impl_obj.webkit)
@@ -5645,7 +4587,6 @@ class Playwright(SyncBase):
     def selectors(self) -> "Selectors":
         """
         - returns: <Selectors>
-
         Selectors can be used to install custom selector engines. See [Working with selectors](#working-with-selectors) for more information.
         """
         return mapping.from_impl(self._impl_obj.selectors)
@@ -5654,24 +4595,7 @@ class Playwright(SyncBase):
     def devices(self) -> typing.Dict[str, DeviceDescriptor]:
         """
         - returns: <Dict>
-
         Returns a list of devices to be used with [`browser.newContext([options])`](#browsernewcontextoptions) or [`browser.newPage([options])`](#browsernewpageoptions). Actual list of devices can be found in [src/deviceDescriptors.ts](https://github.com/Microsoft/playwright/blob/master/src/deviceDescriptors.ts).
-
-        ```js
-        const { webkit, devices } = require('playwright');
-        const iPhone = devices['iPhone 6'];
-
-        (async () => {
-          const browser = await webkit.launch();
-          const context = await browser.newContext({
-            ...iPhone
-          });
-          const page = await context.newPage();
-          await page.goto('http://example.com');
-          // other actions...
-          await browser.close();
-        })();
-        ```
         """
         return mapping.from_maybe_impl(self._impl_obj.devices)
 
