@@ -30,7 +30,7 @@ class EventInfoImpl(Generic[T]):
         timeout: int = None,
     ) -> None:
         self._value: Optional[T] = None
-        wait_helper = WaitHelper()
+        wait_helper = WaitHelper(channel_owner._loop)
         wait_helper.reject_on_timeout(
             timeout or 30000, f'Timeout while waiting for event "${event}"'
         )

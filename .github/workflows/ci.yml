@@ -73,13 +73,7 @@ jobs:
     - name: Build package
       run: python build_package.py
     - name: Test
-      if: ${{ matrix.os == 'windows-latest' }}
-      # pytest-xdist does not exit on Windows
-      # https://github.com/pytest-dev/pytest-xdist/issues/60
       run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov-report xml
-    - name: Test
-      if: ${{ matrix.os != 'windows-latest' }}
-      run: pytest -vv --browser=${{ matrix.browser }} -n auto --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov-report xml
     - name: Coveralls
       run: coveralls
       env:

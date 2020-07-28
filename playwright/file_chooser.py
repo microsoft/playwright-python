@@ -26,6 +26,7 @@ class FileChooser:
         self, page: "Page", element_handle: "ElementHandle", is_multiple: bool
     ) -> None:
         self._page = page
+        self._loop = page._loop
         self._element_handle = element_handle
         self._is_multiple = is_multiple
 

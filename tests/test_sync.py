@@ -16,19 +16,25 @@ import os
 
 import pytest
 
-from playwright import Error, playwright_sync
+from playwright import Error, sync_playwright
 from playwright.sync_api import Browser, Page
 
 
-@pytest.fixture(scope="session")
-def browser(browser_name, launch_arguments):
+@pytest.fixture
+def playwright():
+    with sync_playwright() as p:
+        yield p
+
+
+@pytest.fixture
+def browser(playwright, browser_name, launch_arguments):
     browser_type = None
     if browser_name == "chromium":
-        browser_type = playwright_sync.chromium
+        browser_type = playwright.chromium
     elif browser_name == "firefox":
-        browser_type = playwright_sync.firefox
+        browser_type = playwright.firefox
     elif browser_name == "webkit":
-        browser_type = playwright_sync.webkit
+        browser_type = playwright.webkit
     browser = browser_type.launch(**launch_arguments)
     yield browser
     browser.close()
@@ -104,9 +110,9 @@ def test_sync_handle_multiple_pages(context):
             page.content()
 
 
-def test_sync_wait_for_event(page: Page):
+def test_sync_wait_for_event(page: Page, server):
     with page.expect_event("popup", timeout=10000) as popup:
-        page.evaluate("() => window.open('https://example.com')")
+        page.evaluate("(url) => window.open(url)", server.EMPTY_PAGE)
     assert popup.value
 
 

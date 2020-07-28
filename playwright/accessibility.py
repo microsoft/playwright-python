@@ -55,6 +55,7 @@ def _ax_node_from_protocol(axNode: Dict[str, Any]) -> Dict[str, Any]:
 class Accessibility:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
+        self._loop = channel._scope._loop
 
     async def snapshot(
         self, interestingOnly: bool = True, root: ElementHandle = None
