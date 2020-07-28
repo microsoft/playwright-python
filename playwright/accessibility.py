@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional
 
 from playwright.connection import Channel
 from playwright.element_handle import ElementHandle
+from playwright.helper import locals_to_params
 
 
 def _ax_node_from_protocol(axNode: Dict[str, Any]) -> Dict[str, Any]:
@@ -62,6 +63,7 @@ class Accessibility:
     ) -> Optional[Dict[str, Any]]:
         root = root._channel if root else None
         result = await self._channel.send(
-            "accessibilitySnapshot", dict(root=root, interestingOnly=interestingOnly),
+            "accessibilitySnapshot",
+            locals_to_params(dict(root=root, interestingOnly=interestingOnly)),
         )
         return _ax_node_from_protocol(result) if result else None

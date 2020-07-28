@@ -71,5 +71,6 @@ class Transport:
         if "DEBUGP" in os.environ:  # pragma: no cover
             print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
         data = bytes(msg, "utf-8")
-        self._output.write(len(data).to_bytes(4, byteorder="little", signed=False))
-        self._output.write(data)
+        self._output.write(
+            len(data).to_bytes(4, byteorder="little", signed=False) + data
+        )

@@ -1,8 +1,10 @@
 import json
+import os
 import re
+from pathlib import Path
 from typing import Dict, List
 
-import requests
+_dirname = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
 class DocumentationProvider:
@@ -19,9 +21,9 @@ class DocumentationProvider:
     }
 
     def load(self) -> None:
-        api_md = requests.get(
-            "https://raw.githubusercontent.com/microsoft/playwright/master/docs/api.md"
-        ).text
+        api_md = (
+            _dirname / ".." / "driver" / "node_modules" / "playwright" / "api.md"
+        ).read_text()
 
         class_name = None
         method_name = None

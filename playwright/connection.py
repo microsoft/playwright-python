@@ -54,16 +54,10 @@ class Channel(BaseEventEmitter):
 
 
 class ChannelOwner(BaseEventEmitter):
-    def __init__(
-        self,
-        scope: "ConnectionScope",
-        guid: str,
-        initializer: Dict,
-        is_scope: bool = False,
-    ) -> None:
+    def __init__(self, scope: "ConnectionScope", guid: str, initializer: Dict,) -> None:
         super().__init__()
         self._guid = guid
-        self._scope = scope.create_child(guid) if is_scope else scope
+        self._scope = scope.create_child(guid)
         self._loop = self._scope._loop
         self._channel = Channel(self._scope, guid)
         self._channel._object = self
@@ -88,22 +82,20 @@ class ConnectionScope:
 
     def dispose(self) -> None:
         # Take care of hierarchy.
-        for child in self._children:
-            child.dispose()
-        self._children.clear()
+        for key in list(self._objects.keys()):
+            self._objects[key]._scope.dispose()
 
         # Delete self from scopes and objects.
         self._connection._scopes.pop(self._guid)
         self._connection._objects.pop(self._guid)
 
-        # Delete all of the objects from connection.
-        for guid in self._objects:
-            self._connection._objects.pop(guid)
-
         # Clean up from parent.
         if self._parent:
             self._parent._objects.pop(self._guid)
             self._parent._children.remove(self)
+
+        # Delete all of the objects from connection.
+        self._objects.clear()
 
     async def send_message_to_server(self, guid: str, method: str, params: Dict) -> Any:
         callback = self._connection._send_message_to_server(guid, method, params)
@@ -220,8 +212,11 @@ class Connection:
                 params["type"], params["guid"], params["initializer"]
             )
             return
-
         object = self._objects[guid]
+        if method == "__dispose__":
+            object._scope.dispose()
+            return
+
         try:
             if self._is_sync:
                 for listener in object._channel.listeners(method):

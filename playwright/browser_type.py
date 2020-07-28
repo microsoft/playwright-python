@@ -22,7 +22,7 @@ from playwright.helper import ColorScheme, locals_to_params, not_installed_error
 
 class BrowserType(ChannelOwner):
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer, True)
+        super().__init__(scope, guid, initializer)
 
     @property
     def name(self) -> str:

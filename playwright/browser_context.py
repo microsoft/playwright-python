@@ -42,7 +42,7 @@ class BrowserContext(ChannelOwner):
     Events = SimpleNamespace(Close="close", Page="page",)
 
     def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer, True)
+        super().__init__(scope, guid, initializer)
         self._pages: List[Page] = []
         self._routes: List[RouteHandlerEntry] = []
         self._bindings: Dict[str, Any] = {}
@@ -206,7 +206,6 @@ class BrowserContext(ChannelOwner):
             pending_event.reject(False, "Context")
 
         self.emit(BrowserContext.Events.Close)
-        self._scope.dispose()
 
     async def close(self) -> None:
         if self._is_closed_or_closing:

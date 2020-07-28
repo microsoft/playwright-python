@@ -705,8 +705,14 @@ class Page(ChannelOwner):
         margin: Dict = None,
         path: str = None,
     ) -> bytes:
-        binary = await self._channel.send("pdf", locals_to_params(locals()))
-        return base64.b64decode(binary)
+        params = locals_to_params(locals())
+        del params["path"]
+        binary = await self._channel.send("pdf", params)
+        decoded_binary = base64.b64decode(binary)
+        if path:
+            with open(path, "wb") as fd:
+                fd.write(decoded_binary)
+        return decoded_binary
 
     def expect_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
