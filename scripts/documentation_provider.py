@@ -41,8 +41,19 @@ class DocumentationProvider:
                     self.documentation[class_name][method_name] = []  # type: ignore
                 self.documentation[class_name][method_name].append(line)  # type: ignore
 
-    def _trim_lines(self, entries: List[str]) -> List[str]:
-        return "\n".join(entries).strip().replace("\\", "\\\\").split("\n")
+    def _transform_doc_entry(self, entries: List[str]) -> List[str]:
+        trimmed = "\n".join(entries).strip().replace("\\", "\\\\")
+        trimmed = re.sub(r"<\[Array\]<\[(.*?)\]>>", r"<List[\1]>", trimmed)
+        trimmed = trimmed.replace("Object", "Dict")
+        trimmed = trimmed.replace("Array", "List")
+        trimmed = trimmed.replace("boolean", "bool")
+        trimmed = trimmed.replace("string", "str")
+        trimmed = trimmed.replace("number", "int")
+        trimmed = re.sub(r"<\?\[(.*?)\]>", r"<Optional[\1]>", trimmed)
+        trimmed = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", trimmed)
+        trimmed = re.sub(r"<\[(.*?)\]>", r"<\1>", trimmed)
+
+        return trimmed.split("\n")
 
     def print_entry(self, class_name: str, method_name: str) -> None:
         if class_name == "BindingCall" or method_name == "pid":
@@ -57,7 +68,7 @@ class DocumentationProvider:
         else:
             raw_doc = self.documentation[class_name][method_name]
         ident = " " * 4 * 2
-        doc_entries = self._trim_lines(raw_doc)
+        doc_entries = self._transform_doc_entry(raw_doc)
         print(f'{ident}"""')
         for line in doc_entries:
             print(f"{ident}{line}")
