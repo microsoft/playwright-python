@@ -72,6 +72,8 @@ jobs:
         PKG_CACHE_PATH: ${{ steps.node-pkg-cache.outputs.dir }}
     - name: Build package
       run: python build_package.py
+    - name: Install
+      run: python -m playwright install
     - name: Test
       run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov-report xml
     - name: Coveralls
