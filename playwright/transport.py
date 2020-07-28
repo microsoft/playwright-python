@@ -30,10 +30,20 @@ class Transport:
         self._output: asyncio.StreamWriter = output
         self.loop: asyncio.AbstractEventLoop = loop
         self.on_message = lambda _: None
-        loop.create_task(self._run())
+        self._stopped = False
+
+    def run_sync(self) -> None:
+        self.loop.run_until_complete(self._run())
+
+    def run_async(self) -> None:
+        self.loop.create_task(self._run())
+
+    def stop(self) -> None:
+        self._stopped = True
+        self._output.close()
 
     async def _run(self) -> None:
-        while True:
+        while not self._stopped:
             try:
                 buffer = await self._input.readexactly(4)
                 length = int.from_bytes(buffer, byteorder="little", signed=False)

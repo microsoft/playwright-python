@@ -17,7 +17,7 @@ import sys
 
 import pytest
 
-import playwright
+from playwright import async_playwright
 
 from .server import test_server
 from .utils import utils as utils_object
@@ -43,12 +43,18 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-def selectors():
+async def playwright():
+    async with async_playwright() as playwright_object:
+        yield playwright_object
+
+
+@pytest.fixture(scope="session")
+def selectors(playwright):
     return playwright.selectors
 
 
 @pytest.fixture(scope="session")
-def browser_type(browser_name: str, event_loop: asyncio.AbstractEventLoop):
+def browser_type(playwright, browser_name: str):
     if browser_name == "chromium":
         return playwright.chromium
     if browser_name == "firefox":

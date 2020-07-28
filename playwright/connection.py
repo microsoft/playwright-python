@@ -15,11 +15,13 @@
 import asyncio
 import sys
 import traceback
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
+from greenlet import greenlet
 from pyee import BaseEventEmitter
 
 from playwright.helper import ParsedMessagePayload, parse_error
+from playwright.sync_base import dispatcher_fiber
 from playwright.transport import Transport
 
 
@@ -62,6 +64,7 @@ class ChannelOwner(BaseEventEmitter):
         super().__init__()
         self._guid = guid
         self._scope = scope.create_child(guid) if is_scope else scope
+        self._loop = self._scope._loop
         self._channel = Channel(self._scope, guid)
         self._channel._object = self
         self._initializer = initializer
@@ -118,7 +121,7 @@ class ConnectionScope:
         self._connection._objects[guid] = result
         self._objects[guid] = result
         if guid in self._connection._waiting_for_object:
-            self._connection._waiting_for_object.pop(guid).set_result(result)
+            self._connection._waiting_for_object.pop(guid)(result)
         return result
 
 
@@ -146,13 +149,37 @@ class Connection:
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._root_scope = self.create_scope("", None)
         self._object_factory = object_factory
+        self._is_sync = False
+
+    def run_sync(self) -> None:
+        self._is_sync = True
+        self._transport.run_sync()
+
+    def run_async(self) -> None:
+        self._transport.run_async()
+
+    def stop_sync(self) -> None:
+        self._transport.stop()
+        dispatcher_fiber().switch()
+
+    def stop_async(self) -> None:
+        self._transport.stop()
 
     async def wait_for_object_with_known_name(self, guid: str) -> Any:
         if guid in self._objects:
             return self._objects[guid]
         callback = self._loop.create_future()
-        self._waiting_for_object[guid] = callback
+
+        def callback_wrapper(result: Any) -> None:
+            callback.set_result(result)
+
+        self._waiting_for_object[guid] = callback_wrapper
         return await callback
+
+    def call_on_object_with_known_name(
+        self, guid: str, callback: Callable[[Any], None]
+    ) -> None:
+        self._waiting_for_object[guid] = callback
 
     def _send_message_to_server(
         self, guid: str, method: str, params: Dict
@@ -171,7 +198,6 @@ class Connection:
         return callback
 
     def _dispatch(self, msg: ParsedMessagePayload) -> None:
-
         id = msg.get("id")
         if id:
             callback = self._callbacks.pop(id)
@@ -197,7 +223,12 @@ class Connection:
 
         object = self._objects[guid]
         try:
-            object._channel.emit(method, self._replace_guids_with_channels(params))
+            if self._is_sync:
+                for listener in object._channel.listeners(method):
+                    g = greenlet(listener)
+                    g.switch(self._replace_guids_with_channels(params))
+            else:
+                object._channel.emit(method, self._replace_guids_with_channels(params))
         except Exception:
             print(
                 "Error dispatching the event",

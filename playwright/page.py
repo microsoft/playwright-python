@@ -448,7 +448,7 @@ class Page(ChannelOwner):
     ) -> Any:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
-        wait_helper = WaitHelper()
+        wait_helper = WaitHelper(self._loop)
         wait_helper.reject_on_timeout(
             timeout, f'Timeout while waiting for event "${event}"'
         )

@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright import Error, TimeoutError, devices
+from playwright import Error, TimeoutError
 
 
 async def give_it_a_chance_to_click(page):
@@ -297,8 +297,8 @@ async def test_click_on_checkbox_label_and_toggle(page, server):
     assert await page.evaluate("result.check") is False
 
 
-async def test_not_hang_with_touch_enabled_viewports(server, browser):
-    iphone_6 = devices["iPhone 6"]
+async def test_not_hang_with_touch_enabled_viewports(playwright, server, browser):
+    iphone_6 = playwright.devices["iPhone 6"]
     context = await browser.newContext(
         viewport=iphone_6["viewport"], hasTouch=iphone_6["hasTouch"]
     )

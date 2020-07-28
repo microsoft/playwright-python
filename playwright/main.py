@@ -19,16 +19,19 @@ import shutil
 import stat
 import subprocess
 import sys
+from typing import Any
 
+from greenlet import greenlet
+
+from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
 from playwright.object_factory import create_remote_object
 from playwright.playwright import Playwright
+from playwright.sync_api import Playwright as SyncPlaywright
+from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
 
-playwright_impl: Playwright
 
-
-async def async_init() -> None:
-    global playwright_impl
+async def run_driver_async() -> Connection:
     package_path = os.path.dirname(os.path.abspath(__file__))
     platform = sys.platform
     if platform == "darwin":
@@ -66,11 +69,50 @@ async def async_init() -> None:
     connection = Connection(
         proc.stdout, proc.stdin, create_remote_object, asyncio.get_event_loop()
     )
-    playwright_impl = await connection.wait_for_object_with_known_name("Playwright")
+    return connection
+
+
+def run_driver() -> Connection:
+    return asyncio.get_event_loop().run_until_complete(run_driver_async())
+
+
+class SyncPlaywrightContextManager:
+    def __init__(self) -> None:
+        self._connection = run_driver()
+        self._playwright: SyncPlaywright
+
+    def __enter__(self) -> SyncPlaywright:
+        g_self = greenlet.getcurrent()
+
+        def callback_wrapper(playwright_impl: Playwright) -> None:
+            self._playwright = SyncPlaywright(playwright_impl)
+            g_self.switch()
+
+        self._connection.call_on_object_with_known_name("Playwright", callback_wrapper)
+        set_dispatcher_fiber(greenlet(lambda: self._connection.run_sync()))
+        dispatcher_fiber().switch()
+        return self._playwright
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self._connection.stop_sync()
+
+
+class AsyncPlaywrightContextManager:
+    def __init__(self) -> None:
+        self._connection: Connection
+
+    async def __aenter__(self) -> AsyncPlaywright:
+        self._connection = await run_driver_async()
+        self._connection.run_async()
+        return AsyncPlaywright(
+            await self._connection.wait_for_object_with_known_name("Playwright")
+        )
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self._connection.stop_async()
 
 
 if sys.platform == "win32":
     # Use ProactorEventLoop in 3.7, which is default in 3.8
     loop = asyncio.ProactorEventLoop()
     asyncio.set_event_loop(loop)
-asyncio.get_event_loop().run_until_complete(async_init())

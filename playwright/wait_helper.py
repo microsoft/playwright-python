@@ -21,9 +21,9 @@ from playwright.helper import Error, TimeoutError
 
 
 class WaitHelper:
-    def __init__(self) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self._failures: List[asyncio.Future] = []
-        self._loop = asyncio.get_event_loop()
+        self._loop = loop
 
     def reject_on_event(
         self,

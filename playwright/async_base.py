@@ -27,19 +27,19 @@ T = TypeVar("T")
 class AsyncEventInfo(Generic[T]):
     def __init__(
         self,
-        sync_base: "AsyncBase",
+        async_base: "AsyncBase",
         event: str,
         predicate: Callable[[T], bool] = None,
         timeout: int = None,
     ) -> None:
         self._value: Optional[T] = None
 
-        wait_helper = WaitHelper()
+        wait_helper = WaitHelper(async_base._loop)
         wait_helper.reject_on_timeout(
             timeout or 30000, f'Timeout while waiting for event "${event}"'
         )
         self._future = asyncio.get_event_loop().create_task(
-            wait_helper.wait_for_event(sync_base._impl_obj, event, predicate)
+            wait_helper.wait_for_event(async_base._impl_obj, event, predicate)
         )
 
     @property
@@ -52,12 +52,12 @@ class AsyncEventInfo(Generic[T]):
 class AsyncEventContextManager(Generic[T]):
     def __init__(
         self,
-        sync_base: "AsyncBase",
+        async_base: "AsyncBase",
         event: str,
         predicate: Callable[[T], bool] = None,
         timeout: int = None,
     ) -> None:
-        self._event = AsyncEventInfo(sync_base, event, predicate, timeout)
+        self._event = AsyncEventInfo(async_base, event, predicate, timeout)
 
     async def __aenter__(self) -> AsyncEventInfo[T]:
         return self._event
@@ -69,6 +69,7 @@ class AsyncEventContextManager(Generic[T]):
 class AsyncBase(ImplWrapper):
     def __init__(self, impl_obj: Any) -> None:
         super().__init__(impl_obj)
+        self._loop = impl_obj._loop
 
     def __str__(self) -> str:
         return self._impl_obj.__str__()

@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright import Error, devices
+from playwright import Error
 
 
 async def test_page_event_should_create_new_context(browser):
@@ -183,8 +183,10 @@ async def test_user_agent_should_work_for_subframes(browser, server, utils):
     await context.close()
 
 
-async def test_user_agent_should_emulate_device_user_agent(browser, server):
-    context = await browser.newContext(userAgent=devices["iPhone 6"]["userAgent"])
+async def test_user_agent_should_emulate_device_user_agent(playwright, browser, server):
+    context = await browser.newContext(
+        userAgent=playwright.devices["iPhone 6"]["userAgent"]
+    )
     page = await context.newPage()
     await page.goto(server.PREFIX + "/mobile.html")
     assert "iPhone" in await page.evaluate("navigator.userAgent")

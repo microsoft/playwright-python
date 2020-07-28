@@ -13,28 +13,23 @@
 # limitations under the License.
 
 import playwright.helper as helper
-from playwright._repo_version import version as __version__  # noqa:F401
-from playwright.async_api import Playwright as AsyncPlaywright
-from playwright.main import playwright_impl
-from playwright.sync_api import Playwright as SyncPlaywright
+from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
-playwright_sync = SyncPlaywright(playwright_impl)
-playwright_async = AsyncPlaywright(playwright_impl)
-
-chromium = playwright_async.chromium
-firefox = playwright_async.firefox
-webkit = playwright_async.webkit
-devices = playwright_async.devices
-selectors = playwright_async.selectors
 Error = helper.Error
 TimeoutError = helper.TimeoutError
 
+
+def async_playwright() -> AsyncPlaywrightContextManager:
+    return AsyncPlaywrightContextManager()
+
+
+def sync_playwright() -> SyncPlaywrightContextManager:
+    return SyncPlaywrightContextManager()
+
+
 __all__ = [
-    "playwright_sync",
-    "firefox",
-    "webkit",
-    "devices",
-    "selectors",
+    "async_playwright",
+    "sync_playwright",
     "Error",
     "TimeoutError",
 ]
