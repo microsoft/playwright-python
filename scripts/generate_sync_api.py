@@ -79,7 +79,9 @@ def generate(t: Any) -> None:
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
             )
-            documentation_provider.print_entry(class_name, name)
+            documentation_provider.print_entry(
+                class_name, name, get_type_hints(value, api_globals)
+            )
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
             )

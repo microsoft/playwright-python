@@ -158,20 +158,19 @@ class BrowserContext(ChannelOwner):
     async def exposeFunction(self, name: str, binding: Callable[..., Any]) -> None:
         await self.exposeBinding(name, lambda source, *args: binding(*args))
 
-    async def route(self, match: URLMatch, handler: RouteHandler) -> None:
-        self._routes.append(RouteHandlerEntry(URLMatcher(match), handler))
+    async def route(self, url: URLMatch, handler: RouteHandler) -> None:
+        self._routes.append(RouteHandlerEntry(URLMatcher(url), handler))
         if len(self._routes) == 1:
             await self._channel.send(
                 "setNetworkInterceptionEnabled", dict(enabled=True)
             )
 
     async def unroute(
-        self, match: URLMatch, handler: Optional[RouteHandler] = None
+        self, url: URLMatch, handler: Optional[RouteHandler] = None
     ) -> None:
         self._routes = list(
             filter(
-                lambda r: r.matcher.match != match
-                or (handler and r.handler != handler),
+                lambda r: r.matcher.match != url or (handler and r.handler != handler),
                 self._routes,
             )
         )
