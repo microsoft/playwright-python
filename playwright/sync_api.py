@@ -260,7 +260,7 @@ class Route(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.request)
 
-    def abort(self, error_code: str = "failed") -> NoneType:
+    def abort(self, errorCode: str = "failed") -> NoneType:
         """
         - `errorCode` <str> Optional error code. Defaults to `failed`, could be
           one of the following:
@@ -284,7 +284,7 @@ class Route(SyncBase):
         Aborts the route's request.
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.abort(error_code=error_code))
+            self._sync(self._impl_obj.abort(errorCode=errorCode))
         )
 
     def fulfill(
@@ -295,12 +295,11 @@ class Route(SyncBase):
         contentType: str = None,
     ) -> NoneType:
         """
-        - `response` <Dict> Response that will fulfill this route's request.
-          - `status` <int> Response status code, defaults to `200`.
-          - `headers` <[Dict]<[str], [str]>> Optional response headers. Header values will be converted to a str.
-          - `contentType` <str> If set, equals to setting `Content-Type` response header.
-          - `body` <[str]|[bytes]> Optional response body.
-          - `path` <str> Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
+        - `status` <int> Response status code, defaults to `200`.
+        - `headers` <[Dict]<[str], [str]>> Optional response headers. Header values will be converted to a str.
+        - `contentType` <str> If set, equals to setting `Content-Type` response header.
+        - `body` <[str]|[bytes]> Optional response body.
+        - `path` <str> Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
         - returns: <Promise>
 
         Fulfills route's request with given response.
@@ -324,10 +323,9 @@ class Route(SyncBase):
         postData: typing.Union[str, bytes] = None,
     ) -> NoneType:
         """
-        - `overrides` <Dict> Optional request overrides, which can be one of the following:
-          - `method` <str> If set changes the request method (e.g. GET or POST)
-          - `postData` <[str]|[bytes]> If set changes the post data of request
-          - `headers` <[Dict]<[str], [str]>> If set changes the request HTTP headers. Header values will be converted to a str.
+        - `method` <str> If set changes the request method (e.g. GET or POST)
+        - `postData` <[str]|[bytes]> If set changes the post data of request
+        - `headers` <[Dict]<[str], [str]>> If set changes the request HTTP headers. Header values will be converted to a str.
         - returns: <Promise>
 
         Continues route's request with optional overrides.
@@ -396,8 +394,7 @@ class Keyboard(SyncBase):
     def type(self, text: str, delay: int = None) -> NoneType:
         """
         - `text` <str> A text to type into a focused element.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
+        - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
         - returns: <Promise>
 
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
@@ -413,8 +410,7 @@ class Keyboard(SyncBase):
     def press(self, key: str, delay: int = None) -> NoneType:
         """
         - `key` <str> Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
+        - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         - returns: <Promise>
 
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
@@ -428,8 +424,6 @@ class Keyboard(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
 
         Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
-
-        Shortcut for [`keyboard.down`](#keyboarddownkey) and [`keyboard.up`](#keyboardupkey).
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.press(key=key, delay=delay))
@@ -447,8 +441,7 @@ class Mouse(SyncBase):
         """
         - `x` <int>
         - `y` <int>
-        - `options` <Dict>
-          - `steps` <int> defaults to 1. Sends intermediate `mousemove` events.
+        - `steps` <int> defaults to 1. Sends intermediate `mousemove` events.
         - returns: <Promise>
 
         Dispatches a `mousemove` event.
@@ -461,9 +454,8 @@ class Mouse(SyncBase):
         self, button: Literal["left", "right", "middle"] = None, clickCount: int = None
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `clickCount` <int> defaults to 1. See [UIEvent.detail].
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `clickCount` <int> defaults to 1. See [UIEvent.detail].
         - returns: <Promise>
 
         Dispatches a `mousedown` event.
@@ -476,9 +468,8 @@ class Mouse(SyncBase):
         self, button: Literal["left", "right", "middle"] = None, clickCount: int = None
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `clickCount` <int> defaults to 1. See [UIEvent.detail].
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `clickCount` <int> defaults to 1. See [UIEvent.detail].
         - returns: <Promise>
 
         Dispatches a `mouseup` event.
@@ -498,13 +489,10 @@ class Mouse(SyncBase):
         """
         - `x` <int>
         - `y` <int>
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `clickCount` <int> defaults to 1. See [UIEvent.detail].
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `clickCount` <int> defaults to 1. See [UIEvent.detail].
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         - returns: <Promise>
-
-        Shortcut for [`mouse.move`](#mousemovex-y-options), [`mouse.down`](#mousedownoptions) and [`mouse.up`](#mouseupoptions).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -524,12 +512,9 @@ class Mouse(SyncBase):
         """
         - `x` <int>
         - `y` <int>
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         - returns: <Promise>
-
-        Shortcut for [`mouse.move`](#mousemovex-y-options), [`mouse.down`](#mousedownoptions), [`mouse.up`](#mouseupoptions), [`mouse.down`](#mousedownoptions) and [`mouse.up`](#mouseupoptions).
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button))
@@ -547,7 +532,8 @@ class JSHandle(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <[function]\\([Dict]\\)> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -571,7 +557,8 @@ class JSHandle(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated
+        - `expression` <[str]> Function to be evaluated
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
@@ -593,14 +580,16 @@ class JSHandle(SyncBase):
             )
         )
 
-    def getProperty(self, name: str) -> "JSHandle":
+    def getProperty(self, propertyName: str) -> "JSHandle":
         """
         - `propertyName` <str> property to get
         - returns: <JSHandle>
 
         Fetches a single property from the referenced object.
         """
-        return mapping.from_impl(self._sync(self._impl_obj.getProperty(name=name)))
+        return mapping.from_impl(
+            self._sync(self._impl_obj.getProperty(propertyName=propertyName))
+        )
 
     def getProperties(self) -> typing.Dict[str, "JSHandle"]:
         """
@@ -722,8 +711,7 @@ class ElementHandle(JSHandle):
 
     def scrollIntoViewIfNeeded(self, timeout: int = None) -> NoneType:
         """
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
         """
         return mapping.from_maybe_impl(
@@ -740,13 +728,12 @@ class ElementHandle(JSHandle):
         force: bool = None,
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `position` <Dict> A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `position` <Dict> A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully hovered.
 
         This method scrolls element into view if needed, and then uses [page.mouse](#pagemouse) to hover over the center of the element.
@@ -774,17 +761,16 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `clickCount` <int> defaults to 1. See [UIEvent.detail].
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-          - `position` <Dict> A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `clickCount` <int> defaults to 1. See [UIEvent.detail].
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `position` <Dict> A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully clicked. Promise gets rejected if the element is detached from DOM.
 
         This method scrolls element into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
@@ -818,16 +804,15 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-          - `position` <Dict> A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `position` <Dict> A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully double clicked. Promise gets rejected if the element is detached from DOM.
 
         This method scrolls element into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
@@ -869,9 +854,8 @@ class ElementHandle(JSHandle):
           - `value` <str> Matches by `option.value`.
           - `label` <str> Matches by `option.label`.
           - `index` <int> Matches by the index.
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <List[str]> An array of option values that have been successfully selected.
 
         Triggers a `change` and `input` event once all the provided options have been selected.
@@ -892,9 +876,8 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """
         - `value` <str> Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input` event after filling.
@@ -911,8 +894,7 @@ class ElementHandle(JSHandle):
 
     def selectText(self, timeout: int = None) -> NoneType:
         """
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text content.
@@ -934,9 +916,8 @@ class ElementHandle(JSHandle):
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <bytes> File content **required**
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method expects `elementHandle` to point to an [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
@@ -968,10 +949,9 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """
         - `text` <str> A text to type into a focused element.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
@@ -993,10 +973,9 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """
         - `key` <str> Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         Focuses the element, and then uses [`keyboard.down`](#keyboarddownkey) and [`keyboard.up`](#keyboardupkey).
@@ -1025,10 +1004,9 @@ class ElementHandle(JSHandle):
         self, timeout: int = None, force: bool = None, noWaitAfter: bool = None
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully checked. Promise gets rejected if the operation fails.
 
         If element is not already checked, it scrolls it into view if needed, and then uses [elementHandle.click](#elementhandleclickoptions) to click in the center of the element.
@@ -1045,10 +1023,9 @@ class ElementHandle(JSHandle):
         self, timeout: int = None, force: bool = None, noWaitAfter: bool = None
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element is successfully unchecked. Promise gets rejected if the operation fails.
 
         If element is not already unchecked, it scrolls it into view if needed, and then uses [elementHandle.click](#elementhandleclickoptions) to click in the center of the element.
@@ -1082,12 +1059,11 @@ class ElementHandle(JSHandle):
         omitBackground: bool = None,
     ) -> bytes:
         """
-        - `options` <Dict> Screenshot options.
-          - `path` <str> The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, the image won't be saved to the disk.
-          - `type` <"png"|"jpeg"> Specify screenshot type, defaults to `png`.
-          - `quality` <int> The quality of the image, between 0-100. Not applicable to `png` images.
-          - `omitBackground` <bool> Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `path` <str> The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, the image won't be saved to the disk.
+        - `type` <"png"|"jpeg"> Specify screenshot type, defaults to `png`.
+        - `quality` <int> The quality of the image, between 0-100. Not applicable to `png` images.
+        - `omitBackground` <bool> Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <bytes> Promise which resolves to buffer with the captured screenshot.
 
         This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a screenshot. If the element is detached from DOM, the method throws an error.
@@ -1135,7 +1111,8 @@ class ElementHandle(JSHandle):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query element for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -1165,7 +1142,8 @@ class ElementHandle(JSHandle):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query element for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
+        - `expression` <[str]>\\)> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -1202,9 +1180,8 @@ class Accessibility(SyncBase):
         self, interestingOnly: bool = True, root: "ElementHandle" = None
     ) -> typing.Union[typing.Dict[str, typing.Any], NoneType]:
         """
-        - `options` <Dict>
-          - `interestingOnly` <bool> Prune uninteresting nodes from the tree. Defaults to `true`.
-          - `root` <ElementHandle> The root DOM element for the snapshot. Defaults to the whole page.
+        - `interestingOnly` <bool> Prune uninteresting nodes from the tree. Defaults to `true`.
+        - `root` <ElementHandle> The root DOM element for the snapshot. Defaults to the whole page.
         - returns: <Optional[Dict]> An [AXNode] object with the following properties:
           - `role` <str> The [role](https://www.w3.org/TR/wai-aria/#usage_intro).
           - `name` <str> A human readable name for the node.
@@ -1299,9 +1276,8 @@ class FileChooser(SyncBase):
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <bytes> File content **required**
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then they are resolved relative to the [current working directory](https://nodejs.org/api/process.html#process_process_cwd). For empty array, clears the selected files.
@@ -1367,13 +1343,12 @@ class Frame(SyncBase):
     ) -> typing.Union["Response", NoneType]:
         """
         - `url` <str> URL to navigate frame to. The url should include scheme, e.g. `https://`.
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
-          - `referer` <str> Referer header value. If provided it will take preference over the referer header value set by [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders).
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `referer` <str> Referer header value. If provided it will take preference over the referer header value set by [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders).
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
 
         `frame.goto` will throw an error if:
@@ -1404,13 +1379,12 @@ class Frame(SyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Response", NoneType]:
         """
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `url` <[str]|[RegExp]|[Function]> URL str, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `url` <[str]|[RegExp]|[Function]> URL str, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
 
         This resolves when the frame navigates to a new URL. It is useful for when you run code
@@ -1436,8 +1410,7 @@ class Frame(SyncBase):
           - `'load'` - wait for the `load` event to be fired.
           - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
           - `'networkidle'` - wait until there are no network connections for at least `500` ms.
-        - `options` <Dict>
-          - `timeout` <int> Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the required load state has been reached.
 
         This resolves when the frame reaches a required load state, `load` by default. The navigation must have been committed when this method is called. If current document has already reached the required state, resolves immediately.
@@ -1460,7 +1433,8 @@ class Frame(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -1486,7 +1460,8 @@ class Frame(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `expression` <[str]> Function to be evaluated in the page context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
@@ -1538,13 +1513,12 @@ class Frame(SyncBase):
     ) -> typing.Union["ElementHandle", NoneType]:
         """
         - `selector` <str> A selector of an element to wait for. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `state` <"attached"|"detached"|"visible"|"hidden"> Defaults to `'visible'`. Can be either:
-            - `'attached'` - wait for element to be present in DOM.
-            - `'detached'` - wait for element to not be present in DOM.
-            - `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
-            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `state` <"attached"|"detached"|"visible"|"hidden"> Defaults to `'visible'`. Can be either:
+          - `'attached'` - wait for element to be present in DOM.
+          - `'detached'` - wait for element to not be present in DOM.
+          - `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
+          - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Optional[ElementHandle]> Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
@@ -1570,8 +1544,7 @@ class Frame(SyncBase):
         - `selector` <str> A selector to search for element to use. If there are multiple elements satisfying the selector, the first will be double clicked. See [working with selectors](#working-with-selectors) for more details.
         - `type` <str> DOM event type: `"click"`, `"dragstart"`, etc.
         - `eventInit` <Dict> event-specific initialization properties.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling [`element.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
@@ -1606,7 +1579,8 @@ class Frame(SyncBase):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query frame for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -1636,7 +1610,8 @@ class Frame(SyncBase):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query frame for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
+        - `expression` <[str]>\\)> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -1673,12 +1648,11 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `html` <str> HTML markup to assign to the page.
-        - `options` <Dict> Parameters which might have the following properties:
-          - `timeout` <int> Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider setting content to be finished when the `load` event is fired.
-            - `'networkidle'` - consider setting content to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider setting content to be finished when the `load` event is fired.
+          - `'networkidle'` - consider setting content to be finished when there are no network connections for at least `500` ms.
         - returns: <Promise>
         """
         return mapping.from_maybe_impl(
@@ -1701,11 +1675,10 @@ class Frame(SyncBase):
         self, url: str = None, path: str = None, content: str = None, type: str = None
     ) -> "ElementHandle":
         """
-        - `options` <Dict>
-          - `url` <str> URL of a script to be added.
-          - `path` <str> Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
-          - `content` <str> Raw JavaScript content to be injected into frame.
-          - `type` <str> Script type. Use 'module' in order to load a Javascript ES6 module. See [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
+        - `url` <str> URL of a script to be added.
+        - `path` <str> Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
+        - `content` <str> Raw JavaScript content to be injected into frame.
+        - `type` <str> Script type. Use 'module' in order to load a Javascript ES6 module. See [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
         - returns: <ElementHandle> which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
 
         Adds a `<script>` tag into the page with the desired url or content.
@@ -1722,10 +1695,9 @@ class Frame(SyncBase):
         self, url: str = None, path: str = None, content: str = None
     ) -> "ElementHandle":
         """
-        - `options` <Dict>
-          - `url` <str> URL of the `<link>` tag.
-          - `path` <str> Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
-          - `content` <str> Raw CSS content to be injected into frame.
+        - `url` <str> URL of the `<link>` tag.
+        - `path` <str> Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
+        - `content` <str> Raw CSS content to be injected into frame.
         - returns: <ElementHandle> which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
 
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the content.
@@ -1750,17 +1722,16 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `clickCount` <int> defaults to 1. See [UIEvent.detail].
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-          - `position` <Dict> A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `clickCount` <int> defaults to 1. See [UIEvent.detail].
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `position` <Dict> A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully clicked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
@@ -1796,16 +1767,14 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to double click. If there are multiple elements satisfying the selector, the first will be double clicked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-          - `position` <Dict> A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `position` <Dict> A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully double clicked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to double click in the center of the element.
@@ -1835,9 +1804,8 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
         - `value` <str> Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input` event after filling.
@@ -1860,8 +1828,7 @@ class Frame(SyncBase):
     def focus(self, selector: str, timeout: int = None) -> NoneType:
         """
         - `selector` <str> A selector of an element to focus. If there are multiple elements satisfying the selector, the first will be focused. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully focused. The promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector` and focuses it.
@@ -1874,8 +1841,7 @@ class Frame(SyncBase):
     def textContent(self, selector: str, timeout: int = None) -> str:
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
 
         Resolves to the `element.textContent`.
@@ -1887,8 +1853,7 @@ class Frame(SyncBase):
     def innerText(self, selector: str, timeout: int = None) -> str:
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
 
         Resolves to the `element.innerText`.
@@ -1900,8 +1865,7 @@ class Frame(SyncBase):
     def innerHTML(self, selector: str, timeout: int = None) -> str:
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
 
         Resolves to the `element.innerHTML`.
@@ -1914,8 +1878,7 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
         - `name` <str> Attribute name to get the value for.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
 
         Returns element attribute value.
@@ -1940,13 +1903,12 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to hover. If there are multiple elements satisfying the selector, the first will be hovered. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `position` <Dict> A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `position` <Dict> A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully hovered. Promise gets rejected if there's no element matching `selector`.
 
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to hover over the center of the element.
@@ -1984,9 +1946,8 @@ class Frame(SyncBase):
           - `value` <str> Matches by `option.value`.
           - `label` <str> Matches by `option.label`.
           - `index` <int> Matches by the index.
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <List[str]> An array of option values that have been successfully selected.
 
         Triggers a `change` and `input` event once all the provided options have been selected.
@@ -2018,9 +1979,8 @@ class Frame(SyncBase):
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <bytes> File content **required**
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method expects `selector` to point to an [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
@@ -2049,10 +2009,9 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See [working with selectors](#working-with-selectors) for more details.
         - `text` <str> A text to type into a focused element.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used to send fine-grained keyboard events. To fill values in form fields, use [`frame.fill`](#framefillselector-value-options).
@@ -2082,10 +2041,9 @@ class Frame(SyncBase):
         """
         - `selector` <str> A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See [working with selectors](#working-with-selectors) for more details.
         - `key` <str> Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character to generate the text for. A superset of the `key` values can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
@@ -2121,10 +2079,9 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for checkbox to check. If there are multiple elements satisfying the selector, the first will be checked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully checked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses [frame.click](#frameclickselector-options) to click in the center of the element.
@@ -2150,10 +2107,9 @@ class Frame(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for uncheckbox to check. If there are multiple elements satisfying the selector, the first will be checked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully unchecked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses [frame.click](#frameclickselector-options) to click in the center of the element.
@@ -2192,11 +2148,11 @@ class Frame(SyncBase):
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
-        - `options` <Dict> Optional waiting parameters
-          - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
-          - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+        - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <JSHandle> Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
 
         The `waitForFunction` can be used to observe viewport size change:
@@ -2240,7 +2196,8 @@ class Worker(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in the worker context
+        - `expression` <[str]> Function to be evaluated in the worker context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -2262,7 +2219,8 @@ class Worker(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `expression` <[str]> Function to be evaluated in the page context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
@@ -2293,11 +2251,10 @@ class Selectors(SyncBase):
     ) -> NoneType:
         """
         - `name` <str> Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only contain `[a-zA-Z0-9_]` characters.
-        - `script` <[function]|[str]|[Dict]> Script that evaluates to a selector engine instance.
+        - `source` <[function]|[str]|[Dict]> Script that evaluates to a selector engine instance.
           - `path` <str> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw script content.
-        - `options` <Dict>
-          - `contentScript` <bool> Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not guaranteed when this engine is used together with other registered engines.
+        - `contentScript` <bool> Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not guaranteed when this engine is used together with other registered engines.
         - returns: <Promise>
 
         An example of registering selector engine that queries elements based on a tag name:
@@ -2380,13 +2337,13 @@ class Dialog(SyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.defaultValue)
 
-    def accept(self, prompt_text: str = None) -> NoneType:
+    def accept(self, promptText: str = None) -> NoneType:
         """
         - `promptText` <str> A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt.
         - returns: <Promise> Promise which resolves when the dialog has been accepted.
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.accept(prompt_text=prompt_text))
+            self._sync(self._impl_obj.accept(promptText=promptText))
         )
 
     def dismiss(self) -> NoneType:
@@ -2543,11 +2500,9 @@ class Page(SyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
     ) -> typing.Union["Frame", NoneType]:
         """
-        - `options` <[str]|[Dict]> Frame name or other frame lookup options.
-          - `name` <str> frame name specified in the `iframe`'s `name` attribute
-          - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object.
+        - `name` <str> frame name specified in the `iframe`'s `name` attribute
+        - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object.
         - returns: <Optional[Frame]> frame matching the criteria. Returns `null` if no frame matches.
-
 
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
         """
@@ -2591,8 +2546,6 @@ class Page(SyncBase):
         - returns: <Optional[ElementHandle]>
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the return value resolves to `null`.
-
-        Shortcut for [page.mainFrame().$(selector)](#frameselector).
         """
         return mapping.from_impl_nullable(
             self._sync(self._impl_obj.querySelector(selector=selector))
@@ -2604,8 +2557,6 @@ class Page(SyncBase):
         - returns: <List[ElementHandle]>
 
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the return value resolves to `[]`.
-
-        Shortcut for [page.mainFrame().$$(selector)](#frameselector-1).
         """
         return mapping.from_impl_list(
             self._sync(self._impl_obj.querySelectorAll(selector=selector))
@@ -2619,19 +2570,17 @@ class Page(SyncBase):
     ) -> typing.Union["ElementHandle", NoneType]:
         """
         - `selector` <str> A selector of an element to wait for. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `state` <"attached"|"detached"|"visible"|"hidden"> Defaults to `'visible'`. Can be either:
-            - `'attached'` - wait for element to be present in DOM.
-            - `'detached'` - wait for element to not be present in DOM.
-            - `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
-            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `state` <"attached"|"detached"|"visible"|"hidden"> Defaults to `'visible'`. Can be either:
+          - `'attached'` - wait for element to be present in DOM.
+          - `'detached'` - wait for element to not be present in DOM.
+          - `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
+          - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Optional[ElementHandle]> Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 
         This method works across navigations:
-        Shortcut for [page.mainFrame().waitForSelector(selector[, options])](#framewaitforselectorselector-options).
         """
         return mapping.from_impl_nullable(
             self._sync(
@@ -2652,8 +2601,7 @@ class Page(SyncBase):
         - `selector` <str> A selector to search for element to use. If there are multiple elements satisfying the selector, the first will be used. See [working with selectors](#working-with-selectors) for more details.
         - `type` <str> DOM event type: `"click"`, `"dragstart"`, etc.
         - `eventInit` <Dict> event-specific initialization properties.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling [`element.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
@@ -2683,7 +2631,8 @@ class Page(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> typing.Any:
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `expression` <[str]> Function to be evaluated in the page context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -2696,8 +2645,6 @@ class Page(SyncBase):
         A str can also be passed in instead of a function:
 
         [ElementHandle] instances can be passed as an argument to the `page.evaluate`:
-
-        Shortcut for [page.mainFrame().evaluate(pageFunction[, arg])](#frameevaluatepagefunction-arg).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -2713,7 +2660,8 @@ class Page(SyncBase):
         self, expression: str, arg: typing.Any = None, force_expr: bool = False
     ) -> "JSHandle":
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in the page context
+        - `expression` <[str]> Function to be evaluated in the page context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <JSHandle> Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
 
@@ -2744,7 +2692,8 @@ class Page(SyncBase):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <[function]\\([Element]\\)> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -2753,8 +2702,6 @@ class Page(SyncBase):
         If `pageFunction` returns a [Promise], then `page.$eval` would wait for the promise to resolve and return its value.
 
         Examples:
-
-        Shortcut for [page.mainFrame().$eval(selector, pageFunction)](#frameevalselector-pagefunction-arg).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -2776,7 +2723,8 @@ class Page(SyncBase):
     ) -> typing.Any:
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
-        - `pageFunction` <[function]\\([List]<Element>\\)> Function to be evaluated in browser context
+        - `expression` <[str]>\\)> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
         - returns: <Serializable> Promise which resolves to the return value of `pageFunction`
 
@@ -2801,16 +2749,13 @@ class Page(SyncBase):
         self, url: str = None, path: str = None, content: str = None, type: str = None
     ) -> "ElementHandle":
         """
-        - `options` <Dict>
-          - `url` <str> URL of a script to be added.
-          - `path` <str> Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
-          - `content` <str> Raw JavaScript content to be injected into frame.
-          - `type` <str> Script type. Use 'module' in order to load a Javascript ES6 module. See [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
+        - `url` <str> URL of a script to be added.
+        - `path` <str> Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
+        - `content` <str> Raw JavaScript content to be injected into frame.
+        - `type` <str> Script type. Use 'module' in order to load a Javascript ES6 module. See [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
         - returns: <ElementHandle> which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
 
         Adds a `<script>` tag into the page with the desired url or content.
-
-        Shortcut for [page.mainFrame().addScriptTag(options)](#frameaddscripttagoptions).
         """
         return mapping.from_impl(
             self._sync(
@@ -2824,15 +2769,12 @@ class Page(SyncBase):
         self, url: str = None, path: str = None, content: str = None
     ) -> "ElementHandle":
         """
-        - `options` <Dict>
-          - `url` <str> URL of the `<link>` tag.
-          - `path` <str> Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
-          - `content` <str> Raw CSS content to be injected into frame.
+        - `url` <str> URL of the `<link>` tag.
+        - `path` <str> Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
+        - `content` <str> Raw CSS content to be injected into frame.
         - returns: <ElementHandle> which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
 
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the content.
-
-        Shortcut for [page.mainFrame().addStyleTag(options)](#frameaddstyletagoptions).
         """
         return mapping.from_impl(
             self._sync(self._impl_obj.addStyleTag(url=url, path=path, content=content))
@@ -2843,7 +2785,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `name` <str> Name of the function on the window object
-        - `playwrightFunction` <function> Callback function which will be called in Playwright's context.
+        - `binding` <function> Callback function which will be called in Playwright's context.
         - returns: <Promise>
 
         The method adds a function called `name` on the `window` object of every frame in the page.
@@ -2872,7 +2814,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `name` <str> Name of the function on the window object.
-        - `playwrightBinding` <function> Callback function that will be called in the Playwright's context.
+        - `binding` <function> Callback function that will be called in the Playwright's context.
         - returns: <Promise>
 
         The method adds a function called `name` on the `window` object of every frame in this page.
@@ -2925,12 +2867,11 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `html` <str> HTML markup to assign to the page.
-        - `options` <Dict> Parameters which might have the following properties:
-          - `timeout` <int> Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider setting markup succeeded, defaults to `load`. Given an array of event strs, setting content is considered to be successful after all events have been fired. Events can be either:
-            - `'load'` - consider setting content to be finished when the `load` event is fired.
-            - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
-            - `'networkidle'` - consider setting content to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider setting markup succeeded, defaults to `load`. Given an array of event strs, setting content is considered to be successful after all events have been fired. Events can be either:
+          - `'load'` - consider setting content to be finished when the `load` event is fired.
+          - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
+          - `'networkidle'` - consider setting content to be finished when there are no network connections for at least `500` ms.
         - returns: <Promise>
         """
         return mapping.from_maybe_impl(
@@ -2950,13 +2891,12 @@ class Page(SyncBase):
     ) -> typing.Union["Response", NoneType]:
         """
         - `url` <str> URL to navigate page to. The url should include scheme, e.g. `https://`.
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
-          - `referer` <str> Referer header value. If provided it will take preference over the referer header value set by [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders).
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `referer` <str> Referer header value. If provided it will take preference over the referer header value set by [page.setExtraHTTPHeaders()](#pagesetextrahttpheadersheaders).
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
 
         `page.goto` will throw an error if:
@@ -2971,8 +2911,6 @@ class Page(SyncBase):
         > **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
 
         > **NOTE** Headless mode doesn't support navigation to a PDF document. See the [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
-
-        Shortcut for [page.mainFrame().goto(url[, options])](#framegotourl-options)
         """
         return mapping.from_impl_nullable(
             self._sync(
@@ -2988,12 +2926,11 @@ class Page(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = "load",
     ) -> typing.Union["Response", NoneType]:
         """
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
@@ -3010,14 +2947,10 @@ class Page(SyncBase):
           - `'load'` - wait for the `load` event to be fired.
           - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
           - `'networkidle'` - wait until there are no network connections for at least `500` ms.
-        - `options` <Dict>
-          - `timeout` <int> Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the required load state has been reached.
 
         This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed when this method is called. If current document has already reached the required state, resolves immediately.
-
-
-        Shortcut for [page.mainFrame().waitForLoadState([options])](#framewaitforloadstatestate-options).
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.waitForLoadState(state=state, timeout=timeout))
@@ -3030,21 +2963,18 @@ class Page(SyncBase):
         url: str = None,
     ) -> typing.Union["Response", NoneType]:
         """
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `url` <[str]|[RegExp]|[Function]> A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
 
         This resolves when the page navigates to a new URL or reloads. It is useful for when you run code
         which will indirectly cause the page to navigate. Consider this example:
 
         **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is considered a navigation.
-
-        Shortcut for [page.mainFrame().waitForNavigation(options)](#framewaitfornavigationoptions).
         """
         return mapping.from_impl_nullable(
             self._sync(
@@ -3061,9 +2991,8 @@ class Page(SyncBase):
         timeout: int = None,
     ) -> typing.Union["Request", NoneType]:
         """
-        - `urlOrPredicate` <[str]|[RegExp]|[Function]> Request URL str, regex or predicate receiving [Request] object.
-        - `options` <Dict> Optional waiting parameters
-          - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
+        - `url` <[str]|[RegExp]|[Function]> Request URL str, regex or predicate receiving [Request] object.
+        - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
         - returns: <Request> Promise which resolves to the matched request.
         """
         return mapping.from_impl_nullable(
@@ -3083,9 +3012,8 @@ class Page(SyncBase):
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         """
-        - `urlOrPredicate` <[str]|[RegExp]|[Function]> Request URL str, regex or predicate receiving [Response] object.
-        - `options` <Dict> Optional waiting parameters
-          - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `url` <[str]|[RegExp]|[Function]> Request URL str, regex or predicate receiving [Response] object.
+        - `timeout` <int> Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Response> Promise which resolves to the matched response.
         """
         return mapping.from_impl_nullable(
@@ -3106,7 +3034,6 @@ class Page(SyncBase):
     ) -> typing.Any:
         """
         - `event` <str> Event name, same one would pass into `page.on(event)`.
-        - `optionsOrPredicate` <[Function]|[Dict]> Either a predicate that receives an event or an options object.
           - `predicate` <Function> receives the event data and resolves to truthy value when the waiting should resolve.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Dict> Promise which resolves to the event data value.
@@ -3130,12 +3057,11 @@ class Page(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         """
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
         can not go back, resolves to `null`.
 
@@ -3151,12 +3077,11 @@ class Page(SyncBase):
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         """
-        - `options` <Dict> Navigation parameters which might have the following properties:
-          - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
-          - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider navigation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+        - `timeout` <int> Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultNavigationTimeout(timeout)](#browsercontextsetdefaultnavigationtimeouttimeout), [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout), [page.setDefaultNavigationTimeout(timeout)](#pagesetdefaultnavigationtimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `waitUntil` <"load"|"domcontentloaded"|"networkidle"> When to consider navigation succeeded, defaults to `load`. Events can be either:
+          - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
+          - `'load'` - consider navigation to be finished when the `load` event is fired.
+          - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
         - returns: <Optional[Response]> Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
         can not go forward, resolves to `null`.
 
@@ -3172,9 +3097,8 @@ class Page(SyncBase):
         colorScheme: Literal["light", "dark", "no-preference"] = None,
     ) -> NoneType:
         """
-        - `options` <Dict>
-          - `media` <?"screen"|"print"> Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null` disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value.
-          - `colorScheme` <?"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated value.
+        - `media` <?"screen"|"print"> Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null` disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value.
+        - `colorScheme` <?"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated value.
         - returns: <Promise>
         """
         return mapping.from_maybe_impl(
@@ -3185,7 +3109,6 @@ class Page(SyncBase):
 
     def setViewportSize(self, width: int, height: int) -> NoneType:
         """
-        - `viewportSize` <Dict>
           - `width` <int> page width in pixels. **required**
           - `height` <int> page height in pixels. **required**
         - returns: <Promise>
@@ -3208,10 +3131,9 @@ class Page(SyncBase):
 
     def addInitScript(self, source: str = None, path: str = None) -> NoneType:
         """
-        - `script` <[function]|[str]|[Dict]> Script to be evaluated in the page.
+        - `source` <[function]|[str]|[Dict]> Script to be evaluated in the page.
           - `path` <str> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw script content.
-        - `arg` <Serializable> Optional argument to pass to `script` (only supported when passing a function).
         - returns: <Promise>
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -3289,18 +3211,17 @@ class Page(SyncBase):
         clip: typing.Dict = None,
     ) -> bytes:
         """
-        - `options` <Dict> Options object which might have the following properties:
-          - `path` <str> The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, the image won't be saved to the disk.
-          - `type` <"png"|"jpeg"> Specify screenshot type, defaults to `png`.
-          - `quality` <int> The quality of the image, between 0-100. Not applicable to `png` images.
-          - `fullPage` <bool> When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
-          - `clip` <Dict> An object which specifies clipping of the resulting image. Should have the following fields:
-            - `x` <int> x-coordinate of top-left corner of clip area
-            - `y` <int> y-coordinate of top-left corner of clip area
-            - `width` <int> width of clipping area
-            - `height` <int> height of clipping area
-          - `omitBackground` <bool> Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `path` <str> The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, the image won't be saved to the disk.
+        - `type` <"png"|"jpeg"> Specify screenshot type, defaults to `png`.
+        - `quality` <int> The quality of the image, between 0-100. Not applicable to `png` images.
+        - `fullPage` <bool> When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
+        - `clip` <Dict> An object which specifies clipping of the resulting image. Should have the following fields:
+          - `x` <int> x-coordinate of top-left corner of clip area
+          - `y` <int> y-coordinate of top-left corner of clip area
+          - `width` <int> width of clipping area
+          - `height` <int> height of clipping area
+        - `omitBackground` <bool> Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <bytes> Promise which resolves to buffer with the captured screenshot.
 
         > **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for discussion.
@@ -3322,17 +3243,14 @@ class Page(SyncBase):
     def title(self) -> str:
         """
         - returns: <str> The page's title.
-
-        Shortcut for [page.mainFrame().title()](#frametitle).
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
 
     def close(self, runBeforeUnload: bool = None) -> NoneType:
         """
-        - `options` <Dict>
-          - `runBeforeUnload` <bool> Defaults to `false`. Whether to run the
-            [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload)
-            page handlers.
+        - `runBeforeUnload` <bool> Defaults to `false`. Whether to run the
+          [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload)
+          page handlers.
         - returns: <Promise>
 
         By default, `page.close()` **does not** run beforeunload handlers.
@@ -3368,23 +3286,20 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `clickCount` <int> defaults to 1. See [UIEvent.detail].
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-          - `position` <Dict> A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `clickCount` <int> defaults to 1. See [UIEvent.detail].
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `position` <Dict> A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully clicked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
-        Shortcut for [page.mainFrame().click(selector[, options])](#frameclickselector-options).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3416,16 +3331,14 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to double click. If there are multiple elements satisfying the selector, the first will be double clicked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `button` <"left"|"right"|"middle"> Defaults to `left`.
-          - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-          - `position` <Dict> A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `button` <"left"|"right"|"middle"> Defaults to `left`.
+        - `delay` <int> Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        - `position` <Dict> A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully double clicked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to double click in the center of the element.
@@ -3434,8 +3347,6 @@ class Page(SyncBase):
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
 
         > **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
-
-        Shortcut for [page.mainFrame().dblclick(selector[, options])](#framedblclickselector-options).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3457,9 +3368,8 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector to query page for. See [working with selectors](#working-with-selectors) for more details.
         - `value` <str> Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input` event after filling.
@@ -3467,8 +3377,6 @@ class Page(SyncBase):
         Note that you can pass an empty str to clear the input field.
 
         To send fine-grained keyboard events, use [`page.type`](#pagetypeselector-text-options).
-
-        Shortcut for [page.mainFrame().fill()](#framefillselector-value-options)
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3484,14 +3392,11 @@ class Page(SyncBase):
     def focus(self, selector: str, timeout: int = None) -> NoneType:
         """
         - `selector` <str> A selector of an element to focus. If there are multiple elements satisfying the selector, the first will be focused. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully focused. The promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector` and focuses it.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM.
-
-        Shortcut for [page.mainFrame().focus(selector)](#framefocusselector-options).
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.focus(selector=selector, timeout=timeout))
@@ -3500,8 +3405,7 @@ class Page(SyncBase):
     def textContent(self, selector: str, timeout: int = None) -> str:
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
 
         Resolves to the `element.textContent`.
@@ -3513,8 +3417,7 @@ class Page(SyncBase):
     def innerText(self, selector: str, timeout: int = None) -> str:
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
 
         Resolves to the `element.innerText`.
@@ -3526,8 +3429,7 @@ class Page(SyncBase):
     def innerHTML(self, selector: str, timeout: int = None) -> str:
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <str>
 
         Resolves to the `element.innerHTML`.
@@ -3540,8 +3442,7 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See [working with selectors](#working-with-selectors) for more details.
         - `name` <str> Attribute name to get the value for.
-        - `options` <Dict>
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <null|[str]>
 
         Returns element attribute value.
@@ -3566,19 +3467,16 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for element to hover. If there are multiple elements satisfying the selector, the first will be hovered. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `position` <Dict> A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
-            - x <int>
-            - y <int>
-          - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `position` <Dict> A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
+          - x <int>
+          - y <int>
+        - `modifiers` <[List]<"Alt"|"Control"|"Meta"|"Shift">> Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully hovered. Promise gets rejected if there's no element matching `selector`.
 
         This method fetches an element with `selector`, scrolls it into view if needed, and then uses [page.mouse](#pagemouse) to hover over the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
-        Shortcut for [page.mainFrame().hover(selector[, options])](#framehoverselector-options).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3612,15 +3510,12 @@ class Page(SyncBase):
           - `value` <str> Matches by `option.value`.
           - `label` <str> Matches by `option.label`.
           - `index` <int> Matches by the index.
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <List[str]> An array of option values that have been successfully selected.
 
         Triggers a `change` and `input` event once all the provided options have been selected.
         If there's no `<select>` element matching `selector`, the method throws an error.
-
-        Shortcut for [page.mainFrame().selectOption()](#frameselectoptionselector-values-options)
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3648,9 +3543,8 @@ class Page(SyncBase):
           - `name` <str> [File] name **required**
           - `mimeType` <str> [File] type **required**
           - `buffer` <bytes> File content **required**
-        - `options` <Dict>
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         This method expects `selector` to point to an [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
@@ -3679,17 +3573,14 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See [working with selectors](#working-with-selectors) for more details.
         - `text` <str> A text to type into a focused element.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `delay` <int> Time to wait between key presses in milliseconds. Defaults to 0.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to send fine-grained keyboard events. To fill values in form fields, use [`page.fill`](#pagefillselector-value-options).
 
         To press a special key, like `Control` or `ArrowDown`, use [`keyboard.press`](#keyboardpresskey-options).
-
-        Shortcut for [page.mainFrame().type(selector, text[, options])](#frametypeselector-text-options).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3714,10 +3605,9 @@ class Page(SyncBase):
         """
         - `selector` <str> A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See [working with selectors](#working-with-selectors) for more details.
         - `key` <str> Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        - `options` <Dict>
-          - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `delay` <int> Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise>
 
         Focuses the element, and then uses [`keyboard.down`](#keyboarddownkey) and [`keyboard.up`](#keyboardupkey).
@@ -3755,16 +3645,13 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for checkbox or radio button to check. If there are multiple elements satisfying the selector, the first will be checked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully checked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses [page.click](#pageclickselector-options) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
-        Shortcut for [page.mainFrame().check(selector[, options])](#framecheckselector-options).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3786,16 +3673,13 @@ class Page(SyncBase):
     ) -> NoneType:
         """
         - `selector` <str> A selector to search for uncheckbox to check. If there are multiple elements satisfying the selector, the first will be checked. See [working with selectors](#working-with-selectors) for more details.
-        - `options` <Dict>
-          - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-          - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
-          - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
+        - `force` <bool> Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        - `noWaitAfter` <bool> Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        - `timeout` <int> Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout) or [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) methods.
         - returns: <Promise> Promise which resolves when the element matching `selector` is successfully unchecked. The Promise will be rejected if there is no element matching `selector`.
 
         This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses [page.click](#pageclickselector-options) to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the [actionability](./actionability.md) checks, the action is retried.
-
-        Shortcut for [page.mainFrame().uncheck(selector[, options])](#frameuncheckselector-options).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -3816,8 +3700,6 @@ class Page(SyncBase):
         Returns a promise that resolves after the timeout.
 
         Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be flaky. Use signals such as network events, selectors becoming visible and others instead.
-
-        Shortcut for [page.mainFrame().waitForTimeout(timeout)](#pagewaitfortimeouttimeout).
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.waitForTimeout(timeout=timeout))
@@ -3832,18 +3714,16 @@ class Page(SyncBase):
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
         """
-        - `pageFunction` <[function]|[str]> Function to be evaluated in browser context
+        - `expression` <[str]> Function to be evaluated in browser context
+        - `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
         - `arg` <[Serializable]|[JSHandle]> Optional argument to pass to `pageFunction`
-        - `options` <Dict> Optional waiting parameters
-          - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
-          - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
+        - `polling` <[int]|"raf"> If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a int, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+        - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [page.setDefaultTimeout(timeout)](#pagesetdefaulttimeouttimeout) method.
         - returns: <JSHandle> Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
 
         The `waitForFunction` can be used to observe viewport size change:
 
         To pass an argument from Node.js to the predicate of `page.waitForFunction` function:
-
-        Shortcut for [page.mainFrame().waitForFunction(pageFunction, arg, options]])](#framewaitforfunctionpagefunction-arg-options).
         """
         return mapping.from_impl(
             self._sync(
@@ -3874,29 +3754,28 @@ class Page(SyncBase):
         path: str = None,
     ) -> bytes:
         """
-        - `options` <Dict> Options object which might have the following properties:
-          - `path` <str> The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, the PDF won't be saved to the disk.
-          - `scale` <int> Scale of the webpage rendering. Defaults to `1`. Scale amount must be between 0.1 and 2.
-          - `displayHeaderFooter` <bool> Display header and footer. Defaults to `false`.
-          - `headerTemplate` <str> HTML template for the print header. Should be valid HTML markup with following classes used to inject printing values into them:
-            - `'date'` formatted print date
-            - `'title'` document title
-            - `'url'` document location
-            - `'pageNumber'` current page int
-            - `'totalPages'` total pages in the document
-          - `footerTemplate` <str> HTML template for the print footer. Should use the same format as the `headerTemplate`.
-          - `printBackground` <bool> Print background graphics. Defaults to `false`.
-          - `landscape` <bool> Paper orientation. Defaults to `false`.
-          - `pageRanges` <str> Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty str, which means print all pages.
-          - `format` <str> Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
-          - `width` <[str]|[int]> Paper width, accepts values labeled with units.
-          - `height` <[str]|[int]> Paper height, accepts values labeled with units.
-          - `margin` <Dict> Paper margins, defaults to none.
-            - `top` <[str]|[int]> Top margin, accepts values labeled with units. Defaults to `0`.
-            - `right` <[str]|[int]> Right margin, accepts values labeled with units. Defaults to `0`.
-            - `bottom` <[str]|[int]> Bottom margin, accepts values labeled with units. Defaults to `0`.
-            - `left` <[str]|[int]> Left margin, accepts values labeled with units. Defaults to `0`.
-          - `preferCSSPageSize` <bool> Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
+        - `path` <str> The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, the PDF won't be saved to the disk.
+        - `scale` <int> Scale of the webpage rendering. Defaults to `1`. Scale amount must be between 0.1 and 2.
+        - `displayHeaderFooter` <bool> Display header and footer. Defaults to `false`.
+        - `headerTemplate` <str> HTML template for the print header. Should be valid HTML markup with following classes used to inject printing values into them:
+          - `'date'` formatted print date
+          - `'title'` document title
+          - `'url'` document location
+          - `'pageNumber'` current page int
+          - `'totalPages'` total pages in the document
+        - `footerTemplate` <str> HTML template for the print footer. Should use the same format as the `headerTemplate`.
+        - `printBackground` <bool> Print background graphics. Defaults to `false`.
+        - `landscape` <bool> Paper orientation. Defaults to `false`.
+        - `pageRanges` <str> Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty str, which means print all pages.
+        - `format` <str> Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
+        - `width` <[str]|[int]> Paper width, accepts values labeled with units.
+        - `height` <[str]|[int]> Paper height, accepts values labeled with units.
+        - `margin` <Dict> Paper margins, defaults to none.
+          - `top` <[str]|[int]> Top margin, accepts values labeled with units. Defaults to `0`.
+          - `right` <[str]|[int]> Right margin, accepts values labeled with units. Defaults to `0`.
+          - `bottom` <[str]|[int]> Bottom margin, accepts values labeled with units. Defaults to `0`.
+          - `left` <[str]|[int]> Left margin, accepts values labeled with units. Defaults to `0`.
+        - `preferCSSPageSize` <bool> Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
         - returns: <bytes> Promise which resolves with PDF buffer.
 
         > **NOTE** Generating a pdf is currently only supported in Chromium headless.
@@ -4137,8 +4016,7 @@ class BrowserContext(SyncBase):
             - `'clipboard-read'`
             - `'clipboard-write'`
             - `'payment-handler'`
-        - `options` <Dict>
-          - `origin` <str> The [origin] to grant permissions to, e.g. "https://example.com".
+        - `origin` <str> The [origin] to grant permissions to, e.g. "https://example.com".
         - returns: <Promise>
 
         Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if specified.
@@ -4197,10 +4075,9 @@ class BrowserContext(SyncBase):
 
     def addInitScript(self, source: str = None, path: str = None) -> NoneType:
         """
-        - `script` <[function]|[str]|[Dict]> Script to be evaluated in all pages in the browser context.
+        - `source` <[function]|[str]|[Dict]> Script to be evaluated in all pages in the browser context.
           - `path` <str> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd).
           - `content` <str> Raw script content.
-        - `arg` <Serializable> Optional argument to pass to `script` (only supported when passing a function).
         - returns: <Promise>
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -4210,7 +4087,6 @@ class BrowserContext(SyncBase):
         The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend  the JavaScript environment, e.g. to seed `Math.random`.
 
         An example of overriding `Math.random` before the page loads:
-
 
         > **NOTE** The order of evaluation of multiple scripts installed via [browserContext.addInitScript(script[, arg])](#browsercontextaddinitscriptscript-arg) and [page.addInitScript(script[, arg])](#pageaddinitscriptscript-arg) is not defined.
         """
@@ -4223,7 +4099,7 @@ class BrowserContext(SyncBase):
     ) -> NoneType:
         """
         - `name` <str> Name of the function on the window object.
-        - `playwrightBinding` <function> Callback function that will be called in the Playwright's context.
+        - `binding` <function> Callback function that will be called in the Playwright's context.
         - returns: <Promise>
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -4250,7 +4126,7 @@ class BrowserContext(SyncBase):
     ) -> NoneType:
         """
         - `name` <str> Name of the function on the window object.
-        - `playwrightFunction` <function> Callback function that will be called in the Playwright's context.
+        - `binding` <function> Callback function that will be called in the Playwright's context.
         - returns: <Promise>
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -4272,7 +4148,7 @@ class BrowserContext(SyncBase):
 
     def route(
         self,
-        match: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
         handler: typing.Callable[["Route", "Request"], typing.Any],
     ) -> NoneType:
         """
@@ -4294,14 +4170,14 @@ class BrowserContext(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.route(
-                    match=self._wrap_handler(match), handler=self._wrap_handler(handler)
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
                 )
             )
         )
 
     def unroute(
         self,
-        match: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
         handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
     ) -> NoneType:
         """
@@ -4314,7 +4190,7 @@ class BrowserContext(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.unroute(
-                    match=self._wrap_handler(match), handler=self._wrap_handler(handler)
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
                 )
             )
         )
@@ -4327,7 +4203,6 @@ class BrowserContext(SyncBase):
     ) -> typing.Any:
         """
         - `event` <str> Event name, same one would pass into `browserContext.on(event)`.
-        - `optionsOrPredicate` <[Function]|[Dict]> Either a predicate that receives an event or an options object.
           - `predicate` <Function> receives the event data and resolves to truthy value when the waiting should resolve.
           - `timeout` <int> maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the [browserContext.setDefaultTimeout(timeout)](#browsercontextsetdefaulttimeouttimeout).
         - returns: <Dict> Promise which resolves to the event data value.
@@ -4410,32 +4285,31 @@ class Browser(SyncBase):
         acceptDownloads: bool = None,
     ) -> "BrowserContext":
         """
-        - `options` <Dict>
-          - `acceptDownloads` <bool> Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-          - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-          - `bypassCSP` <bool> Toggles bypassing page's Content-Security-Policy.
-          - `viewport` <Optional[Dict]> Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
-            - `width` <int> page width in pixels.
-            - `height` <int> page height in pixels.
-          - `userAgent` <str> Specific user agent to use in this context.
-          - `deviceScaleFactor` <int> Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-          - `isMobile` <bool> Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
-          - `hasTouch` <bool> Specifies if viewport supports touch events. Defaults to false.
-          - `javaScriptEnabled` <bool> Whether or not to enable JavaScript in the context. Defaults to true.
-          - `timezoneId` <str> Changes the timezone of the context. See [ICU’s `metaZones.txt`](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
-          - `geolocation` <Dict>
-            - `latitude` <int> Latitude between -90 and 90.
-            - `longitude` <int> Longitude between -180 and 180.
-            - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
-          - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
-          - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
-          - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
-          - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
-          - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-            - `username` <str>
-            - `password` <str>
-          - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
-          - `logger` <Logger> Logger sink for Playwright logging.
+        - `acceptDownloads` <bool> Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+        - `bypassCSP` <bool> Toggles bypassing page's Content-Security-Policy.
+        - `viewport` <Optional[Dict]> Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
+          - `width` <int> page width in pixels.
+          - `height` <int> page height in pixels.
+        - `userAgent` <str> Specific user agent to use in this context.
+        - `deviceScaleFactor` <int> Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+        - `isMobile` <bool> Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
+        - `hasTouch` <bool> Specifies if viewport supports touch events. Defaults to false.
+        - `javaScriptEnabled` <bool> Whether or not to enable JavaScript in the context. Defaults to true.
+        - `timezoneId` <str> Changes the timezone of the context. See [ICU’s `metaZones.txt`](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
+        - `geolocation` <Dict>
+          - `latitude` <int> Latitude between -90 and 90.
+          - `longitude` <int> Longitude between -180 and 180.
+          - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
+        - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
+        - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
+        - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+        - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
+        - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+          - `username` <str>
+          - `password` <str>
+        - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
+        - `logger` <Logger> Logger sink for Playwright logging.
         - returns: <BrowserContext>
 
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
@@ -4485,32 +4359,31 @@ class Browser(SyncBase):
         acceptDownloads: bool = None,
     ) -> "Page":
         """
-        - `options` <Dict>
-          - `acceptDownloads` <bool> Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-          - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-          - `bypassCSP` <bool> Toggles bypassing page's Content-Security-Policy.
-          - `viewport` <Optional[Dict]> Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
-            - `width` <int> page width in pixels.
-            - `height` <int> page height in pixels.
-          - `userAgent` <str> Specific user agent to use in this context.
-          - `deviceScaleFactor` <int> Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-          - `isMobile` <bool> Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
-          - `hasTouch` <bool> Specifies if viewport supports touch events. Defaults to false.
-          - `javaScriptEnabled` <bool> Whether or not to enable JavaScript in the context. Defaults to `true`.
-          - `timezoneId` <str> Changes the timezone of the context. See [ICU’s `metaZones.txt`](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
-          - `geolocation` <Dict>
-            - `latitude` <int> Latitude between -90 and 90.
-            - `longitude` <int> Longitude between -180 and 180.
-            - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
-          - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
-          - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
-          - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
-          - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
-          - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-            - `username` <str>
-            - `password` <str>
-          - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
-          - `logger` <Logger> Logger sink for Playwright logging.
+        - `acceptDownloads` <bool> Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+        - `bypassCSP` <bool> Toggles bypassing page's Content-Security-Policy.
+        - `viewport` <Optional[Dict]> Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
+          - `width` <int> page width in pixels.
+          - `height` <int> page height in pixels.
+        - `userAgent` <str> Specific user agent to use in this context.
+        - `deviceScaleFactor` <int> Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+        - `isMobile` <bool> Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
+        - `hasTouch` <bool> Specifies if viewport supports touch events. Defaults to false.
+        - `javaScriptEnabled` <bool> Whether or not to enable JavaScript in the context. Defaults to `true`.
+        - `timezoneId` <str> Changes the timezone of the context. See [ICU’s `metaZones.txt`](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
+        - `geolocation` <Dict>
+          - `latitude` <int> Latitude between -90 and 90.
+          - `longitude` <int> Longitude between -180 and 180.
+          - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
+        - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
+        - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
+        - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+        - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
+        - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+          - `username` <str>
+          - `password` <str>
+        - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
+        - `logger` <Logger> Logger sink for Playwright logging.
         - returns: <Page>
 
         Creates a new page in a new browser context. Closing this page will close the context as well.
@@ -4632,27 +4505,24 @@ class BrowserType(SyncBase):
         chromiumSandbox: bool = None,
     ) -> "Browser":
         """
-        - `options` <Dict> Set of configurable options to set on the browser. Can have the following fields:
-          - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
-          - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
-          - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
-          - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-          - `proxy` <Dict> Network proxy settings.
-            - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
-            - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
-            - `username` <str> Optional username to use if HTTP proxy requires authentication.
-            - `password` <str> Optional password to use if HTTP proxy requires authentication.
-          - `downloadsPath` <str> If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
-          - `chromiumSandbox` <bool> Enable Chromium sandboxing. Defaults to `true`.
-          - `firefoxUserPrefs` <Dict> Firefox user preferences. Learn more about the Firefox user preferences at [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
-          - `handleSIGINT` <bool> Close the browser process on Ctrl-C. Defaults to `true`.
-          - `handleSIGTERM` <bool> Close the browser process on SIGTERM. Defaults to `true`.
-          - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
-          - `logger` <Logger> Logger sink for Playwright logging.
-          - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-          - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-          - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
-          - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
+        - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
+        - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
+        - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
+        - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+        - `proxy` <Dict> Network proxy settings.
+          - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
+          - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+          - `username` <str> Optional username to use if HTTP proxy requires authentication.
+          - `password` <str> Optional password to use if HTTP proxy requires authentication.
+        - `downloadsPath` <str> If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
+        - `chromiumSandbox` <bool> Enable Chromium sandboxing. Defaults to `true`.
+        - `handleSIGINT` <bool> Close the browser process on Ctrl-C. Defaults to `true`.
+        - `handleSIGTERM` <bool> Close the browser process on SIGTERM. Defaults to `true`.
+        - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
+        - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+        - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
+        - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         - returns: <Browser> Promise which resolves to browser instance.
 
         You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
@@ -4704,27 +4574,24 @@ class BrowserType(SyncBase):
         chromiumSandbox: bool = None,
     ) -> "Browser":
         """
-        - `options` <Dict> Set of configurable options to set on the browser. Can have the following fields:
-          - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
-          - `port` <int> Port to use for the web socket. Defaults to 0 that picks any available port.
-          - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
-          - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
-          - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-          - `proxy` <Dict> Network proxy settings.
-            - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
-            - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
-            - `username` <str> Optional username to use if HTTP proxy requires authentication.
-            - `password` <str> Optional password to use if HTTP proxy requires authentication.
-          - `downloadsPath` <str> If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
-          - `chromiumSandbox` <bool> Enable Chromium sandboxing. Defaults to `true`.
-          - `firefoxUserPrefs` <Dict> Firefox user preferences. Learn more about the Firefox user preferences at [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
-          - `handleSIGINT` <bool> Close the browser process on Ctrl-C. Defaults to `true`.
-          - `handleSIGTERM` <bool> Close the browser process on SIGTERM. Defaults to `true`.
-          - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
-          - `logger` <Logger> Logger sink for Playwright logging.
-          - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-          - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-          - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
+        - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
+        - `port` <int> Port to use for the web socket. Defaults to 0 that picks any available port.
+        - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
+        - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
+        - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+        - `proxy` <Dict> Network proxy settings.
+          - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
+          - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+          - `username` <str> Optional username to use if HTTP proxy requires authentication.
+          - `password` <str> Optional password to use if HTTP proxy requires authentication.
+        - `downloadsPath` <str> If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
+        - `chromiumSandbox` <bool> Enable Chromium sandboxing. Defaults to `true`.
+        - `handleSIGINT` <bool> Close the browser process on Ctrl-C. Defaults to `true`.
+        - `handleSIGTERM` <bool> Close the browser process on SIGTERM. Defaults to `true`.
+        - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
+        - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+        - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         - returns: <BrowserServer> Promise which resolves to the browser app instance.
 
         Launches browser server that client can connect to. An example of launching a browser executable and connecting to it later:
@@ -4785,51 +4652,48 @@ class BrowserType(SyncBase):
         acceptDownloads: bool = None,
     ) -> "BrowserContext":
         """
-        - `userDataDir` <str> Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile).
-        - `options` <Dict> Set of configurable options to set on the browser. Can have the following fields:
-          - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
-          - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
-          - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
-          - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-          - `proxy` <Dict> Network proxy settings.
-            - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
-            - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
-            - `username` <str> Optional username to use if HTTP proxy requires authentication.
-            - `password` <str> Optional password to use if HTTP proxy requires authentication.
-          - `acceptDownloads` <bool> Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-          - `downloadsPath` <str> If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
-          - `chromiumSandbox` <bool> Enable Chromium sandboxing. Defaults to `true`.
-          - `handleSIGINT` <bool> Close the browser process on Ctrl-C. Defaults to `true`.
-          - `handleSIGTERM` <bool> Close the browser process on SIGTERM. Defaults to `true`.
-          - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
-          - `logger` <Logger> Logger sink for Playwright logging.
-          - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-          - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-          - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
-          - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-          - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-          - `bypassCSP` <bool> Toggles bypassing page's Content-Security-Policy.
-          - `viewport` <Optional[Dict]> Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
-            - `width` <int> page width in pixels.
-            - `height` <int> page height in pixels.
-          - `userAgent` <str> Specific user agent to use in this context.
-          - `deviceScaleFactor` <int> Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-          - `isMobile` <bool> Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
-          - `hasTouch` <bool> Specifies if viewport supports touch events. Defaults to false.
-          - `javaScriptEnabled` <bool> Whether or not to enable JavaScript in the context. Defaults to true.
-          - `timezoneId` <str> Changes the timezone of the context. See [ICU’s `metaZones.txt`](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
-          - `geolocation` <Dict>
-            - `latitude` <int> Latitude between -90 and 90.
-            - `longitude` <int> Longitude between -180 and 180.
-            - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
-          - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
-          - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
-          - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
-          - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
-          - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-            - `username` <str>
-            - `password` <str>
-          - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
+         - `userDataDir` <str> Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile).
+        - `headless` <bool> Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
+        - `executablePath` <str> Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to [current working directory](https://nodejs.org/api/process.html#process_process_cwd). **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
+        - `args` <List[str]> Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
+        - `ignoreDefaultArgs` <[bool]|[List]<str>> If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+        - `proxy` <Dict> Network proxy settings.
+          - `server` <str> Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
+          - `bypass` <str> Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+          - `username` <str> Optional username to use if HTTP proxy requires authentication.
+          - `password` <str> Optional password to use if HTTP proxy requires authentication.
+        - `acceptDownloads` <bool> Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        - `downloadsPath` <str> If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
+        - `handleSIGINT` <bool> Close the browser process on Ctrl-C. Defaults to `true`.
+        - `handleSIGTERM` <bool> Close the browser process on SIGTERM. Defaults to `true`.
+        - `handleSIGHUP` <bool> Close the browser process on SIGHUP. Defaults to `true`.
+        - `timeout` <int> Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        - `env` <[Dict]<[str], [str]|[int]|[bool]>> Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+        - `devtools` <bool> **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
+        - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
+        - `ignoreHTTPSErrors` <bool> Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+        - `bypassCSP` <bool> Toggles bypassing page's Content-Security-Policy.
+        - `viewport` <Optional[Dict]> Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
+          - `width` <int> page width in pixels.
+          - `height` <int> page height in pixels.
+        - `userAgent` <str> Specific user agent to use in this context.
+        - `deviceScaleFactor` <int> Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+        - `isMobile` <bool> Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
+        - `hasTouch` <bool> Specifies if viewport supports touch events. Defaults to false.
+        - `javaScriptEnabled` <bool> Whether or not to enable JavaScript in the context. Defaults to true.
+        - `timezoneId` <str> Changes the timezone of the context. See [ICU’s `metaZones.txt`](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
+        - `geolocation` <Dict>
+          - `latitude` <int> Latitude between -90 and 90.
+          - `longitude` <int> Longitude between -180 and 180.
+          - `accuracy` <int> Non-negative accuracy value. Defaults to `0`.
+        - `locale` <str> Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as int and date formatting rules.
+        - `permissions` <List[str]> A list of permissions to grant to all pages in this context. See [browserContext.grantPermissions](#browsercontextgrantpermissionspermissions-options) for more details.
+        - `extraHTTPHeaders` <[Dict]<[str], [str]>> An object containing additional HTTP headers to be sent with every request. All header values must be strs.
+        - `offline` <bool> Whether to emulate network being offline. Defaults to `false`.
+        - `httpCredentials` <Dict> Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+          - `username` <str>
+          - `password` <str>
+        - `colorScheme` <"dark"|"light"|"no-preference"> Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See [page.emulateMedia(options)](#pageemulatemediaoptions) for more details. Defaults to '`light`'.
         - returns: <BrowserContext> Promise that resolves to the persistent browser context instance.
 
         Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this context will automatically close the browser.
@@ -4876,11 +4740,9 @@ class BrowserType(SyncBase):
         self, wsEndpoint: str = None, slowMo: int = None, timeout: int = None
     ) -> "Browser":
         """
-        - `options` <Dict>
-          - `wsEndpoint` <str> A browser websocket endpoint to connect to. **required**
-          - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-          - `logger` <Logger> Logger sink for Playwright logging.
-          - `timeout` <int> Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        - `wsEndpoint` <str> A browser websocket endpoint to connect to. **required**
+        - `slowMo` <int> Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
+        - `timeout` <int> Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         - returns: <Browser>
 
         This methods attaches Playwright to an existing browser instance.

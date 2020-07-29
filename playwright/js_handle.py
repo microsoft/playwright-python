@@ -69,8 +69,10 @@ class JSHandle(ChannelOwner):
             )
         )
 
-    async def getProperty(self, name: str) -> "JSHandle":
-        return from_channel(await self._channel.send("getProperty", dict(name=name)))
+    async def getProperty(self, propertyName: str) -> "JSHandle":
+        return from_channel(
+            await self._channel.send("getProperty", dict(name=propertyName))
+        )
 
     async def getProperties(self) -> Dict[str, "JSHandle"]:
         return {

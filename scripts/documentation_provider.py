@@ -1,6 +1,20 @@
-import json
+# Copyright (c) Microsoft Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import re
-from typing import Dict, List
+from sys import stderr
+from typing import Any, Dict, List, cast
 
 import requests
 
@@ -26,44 +40,91 @@ class DocumentationProvider:
         class_name = None
         method_name = None
         in_a_code_block = False
+        in_options = False
+        pending_empty_line = False
+
         for line in api_md.split("\n"):
-            matches = re.search(r"(class: (\w+)|(Playwright) module)", line)
-            if matches:
-                class_name = matches.group(2) or matches.group(3)
-                method_name = None
-            if class_name:
-                if class_name not in self.documentation:
-                    self.documentation[class_name] = {}
-            matches = re.search(r"#### \w+\.(.+?)(\(|$)", line)
-            if matches:
-                method_name = matches.group(1)
-                # Skip heading
-                continue
             if "```js" in line:
                 in_a_code_block = True
             elif "```" in line:
                 in_a_code_block = False
-            elif method_name and not in_a_code_block:
-                if method_name not in self.documentation[class_name]:  # type: ignore
+                continue
+            if in_a_code_block:
+                continue
+
+            if line.startswith("### "):
+                class_name = None
+                method_name = None
+                match = re.search(r"### class: (\w+)", line) or re.search(
+                    r"### Playwright module", line
+                )
+                if match:
+                    class_name = match.group(1) if match.groups() else "Playwright"
+                    self.documentation[class_name] = {}  # type: ignore
+                    continue
+            if line.startswith("#### "):
+                match = re.search(r"#### (\w+)\.(.+?)(\(|$)", line)
+                if match:
+                    if not class_name or match.group(1).lower() != class_name.lower():
+                        print("Error: " + line + " in " + cast(str, class_name))
+                    method_name = match.group(2)
+                    pending_empty_line = False
                     self.documentation[class_name][method_name] = []  # type: ignore
-                self.documentation[class_name][method_name].append(line)  # type: ignore
+                continue
 
-    def _transform_doc_entry(self, entries: List[str]) -> List[str]:
-        trimmed = "\n".join(entries).strip().replace("\\", "\\\\")
-        trimmed = re.sub(r"<\[Array\]<\[(.*?)\]>>", r"<List[\1]>", trimmed)
-        trimmed = trimmed.replace("Object", "Dict")
-        trimmed = trimmed.replace("Array", "List")
-        trimmed = trimmed.replace("boolean", "bool")
-        trimmed = trimmed.replace("string", "str")
-        trimmed = trimmed.replace("number", "int")
-        trimmed = trimmed.replace("Buffer", "bytes")
-        trimmed = re.sub(r"<\?\[(.*?)\]>", r"<Optional[\1]>", trimmed)
-        trimmed = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", trimmed)
-        trimmed = re.sub(r"<\[(\w+?)\]>", r"<\1>", trimmed)
+            if not method_name:  # type: ignore
+                continue
 
-        return trimmed.replace("\n\n\n", "\n\n").split("\n")
+            if (
+                line.startswith("- `options` <[Object]>")
+                or line.startswith("- `options` <[string]|[Object]>")
+                or line.startswith("- `overrides` <")
+                or line.startswith("- `response` <")
+            ):
+                in_options = True
+                continue
+            if not line.startswith("  "):
+                in_options = False
+            if in_options:
+                line = line[2:]
+            # if not line.strip():
+            #     continue
+            if "Shortcut for" in line:
+                continue
+            if not line.strip():
+                pending_empty_line = bool(self.documentation[class_name][method_name])  # type: ignore
+                continue
+            else:
+                if pending_empty_line:
+                    pending_empty_line = False
+                    self.documentation[class_name][method_name].append("")  # type: ignore
+            self.documentation[class_name][method_name].append(line)  # type: ignore
 
-    def print_entry(self, class_name: str, method_name: str) -> None:
+    def _transform_doc_entry(self, line: str) -> str:
+        line = line.replace("\\", "\\\\")
+        line = re.sub(r"<\[Array\]<\[(.*?)\]>>", r"<List[\1]>", line)
+        line = line.replace("Object", "Dict")
+        line = line.replace("Array", "List")
+        line = line.replace("boolean", "bool")
+        line = line.replace("string", "str")
+        line = line.replace("number", "int")
+        line = line.replace("Buffer", "bytes")
+        line = re.sub(r"<\?\[(.*?)\]>", r"<Optional[\1]>", line)
+        line = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", line)
+        line = re.sub(r"<\[(\w+?)\]>", r"<\1>", line)
+
+        # Following should be fixed in the api.md upstream
+        line = re.sub(r"- `pageFunction` <[^>]+>", "- `expression` <[str]>", line)
+        line = re.sub("- `urlOrPredicate`", "- `url`", line)
+        line = re.sub("- `playwrightBinding`", "- `binding`", line)
+        line = re.sub("- `playwrightFunction`", "- `binding`", line)
+        line = re.sub("- `script`", "- `source`", line)
+
+        return line
+
+    def print_entry(
+        self, class_name: str, method_name: str, signature: Dict[str, Any] = None
+    ) -> None:
         if class_name == "BindingCall" or method_name == "pid":
             return
         if method_name in self.method_name_rewrites:
@@ -75,19 +136,55 @@ class DocumentationProvider:
             raw_doc = self.documentation["JSHandle"][method_name]
         else:
             raw_doc = self.documentation[class_name][method_name]
+
         ident = " " * 4 * 2
-        doc_entries = self._transform_doc_entry(raw_doc)
+
+        if signature:
+            if "return" in signature:
+                del signature["return"]
+
         print(f'{ident}"""')
-        for line in doc_entries:
-            print(f"{ident}{line}")
+
+        # Validate signature
+        validate_parameters = True
+        for line in raw_doc:
+            if not line.strip():
+                validate_parameters = (
+                    False  # Stop validating parameters after a blank line
+                )
+
+            transformed = self._transform_doc_entry(line)
+            match = re.search(r"^\- `(\w+)`", transformed)
+            if validate_parameters and signature and match:
+                name = match.group(1)
+                if name not in signature:
+                    print(
+                        f"Not implemented parameter {class_name}.{method_name}({name}=)",
+                        file=stderr,
+                    )
+                    continue
+                else:
+                    del signature[name]
+                print(f"{ident}{transformed}")
+                if name == "expression" and "force_expr" in signature:
+                    print(
+                        f"{ident}- `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function"
+                    )
+                    del signature["force_expr"]
+            else:
+                print(f"{ident}{transformed}")
+
         print(f'{ident}"""')
+
+        if signature:
+            print(
+                f"Not documented parameters: {class_name}.{method_name}({signature.keys()})",
+                file=stderr,
+            )
 
 
 if __name__ == "__main__":
-    print(
-        json.dumps(
-            DocumentationProvider().documentation["Page"].get("keyboard"),
-            sort_keys=True,
-            indent=4,
-        )
-    )
+    DocumentationProvider().print_entry("Page", "goto")
+    DocumentationProvider().print_entry("Page", "evaluateHandle")
+    DocumentationProvider().print_entry("ElementHandle", "click")
+    DocumentationProvider().print_entry("Page", "screenshot")

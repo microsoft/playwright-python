@@ -34,7 +34,7 @@ class Dialog(ChannelOwner):
     def defaultValue(self) -> str:
         return self._initializer["defaultValue"]
 
-    async def accept(self, prompt_text: str = None) -> None:
+    async def accept(self, promptText: str = None) -> None:
         await self._channel.send("accept", locals_to_params(locals()))
 
     async def dismiss(self) -> None:
