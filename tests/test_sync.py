@@ -205,3 +205,12 @@ def test_sync_workers_page_workers(page: Page, server):
 
     page.goto(server.EMPTY_PAGE)
     assert len(page.workers) == 0
+
+
+def test_sync_playwright_multiple_times():
+    with sync_playwright() as pw1:
+        assert pw1.chromium
+        with pytest.raises(Error) as exc:
+            with sync_playwright() as pw2:
+                assert pw1.chromium == pw2.chromium
+        assert "Can only run one Playwright at a time." in exc.value.message

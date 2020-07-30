@@ -25,7 +25,7 @@ from greenlet import greenlet
 
 from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
-from playwright.helper import not_installed_error
+from playwright.helper import Error, not_installed_error
 from playwright.object_factory import create_remote_object
 from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
@@ -72,7 +72,10 @@ async def run_driver_async() -> Connection:
 
 
 def run_driver() -> Connection:
-    return asyncio.get_event_loop().run_until_complete(run_driver_async())
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        raise Error("Can only run one Playwright at a time.")
+    return loop.run_until_complete(run_driver_async())
 
 
 class SyncPlaywrightContextManager:
