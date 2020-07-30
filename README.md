@@ -70,10 +70,10 @@ with sync_playwright() as p:
     iphone_11 = p.devices['iPhone 11 Pro']
     browser = p.webkit.launch(headless=False)
     context = browser.newContext(
-      **iphone_11,
-      locale='en-US',
-      geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
-      permissions=['geolocation']
+        **iphone_11,
+        locale='en-US',
+        geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
+        permissions=['geolocation']
     )
     page = context.newPage()
     page.goto('https://maps.google.com')
@@ -81,6 +81,32 @@ with sync_playwright() as p:
     page.waitForRequest('*preview/pwa')
     page.screenshot(path='colosseum-iphone.png')
     browser.close()
+```
+
+... or, if you are comfortable using asyncio, you can do the following:
+
+```py
+import asyncio
+from playwright import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        iphone_11 = p.devices['iPhone 11 Pro']
+        browser = await p.webkit.launch(headless=False)
+        context = await browser.newContext(
+            **iphone_11,
+            locale='en-US',
+            geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
+            permissions=['geolocation']
+        )
+        page = await context.newPage()
+        await page.goto('https://maps.google.com')
+        await page.click('text="Your location"')
+        await page.waitForRequest('*preview/pwa')
+        await page.screenshot(path='colosseum-iphone.png')
+        await browser.close()
+
+asyncio.get_event_loop().run_until_complete(main())
 ```
 
 #### Evaluate in browser context
@@ -105,6 +131,30 @@ with sync_playwright() as p:
     browser.close()
 ```
 
+... and again, async version:
+
+```py
+import asyncio
+from playwright import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.firefox.launch()
+        page = await browser.newPage()
+        await page.goto('https://www.example.com/')
+        dimensions = await page.evaluate('''() => {
+          return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight,
+            deviceScaleFactor: window.devicePixelRatio
+          }
+        }''')
+        print(dimensions)
+        await browser.close()
+
+asyncio.get_event_loop().run_until_complete(main())
+```
+
 #### Intercept network requests
 
 This code snippet sets up request routing for a Chromium page to log all network requests.
@@ -125,6 +175,30 @@ with sync_playwright() as p:
 
     page.goto('http://todomvc.com')
     browser.close()
+```
+
+... async version:
+
+```py
+import asyncio
+from playwright import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.newPage()
+
+        def log_and_continue_request(route, request):
+            print(request.url)
+            asyncio.create_task(route.continue_())
+
+        # Log and continue all network requests
+        await page.route('**', lambda route, request: log_and_continue_request(route, request))
+
+        await page.goto('http://todomvc.com')
+        await browser.close()
+
+asyncio.get_event_loop().run_until_complete(main())
 ```
 
 # Is Playwright for Python ready?
