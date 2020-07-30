@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import re
-from sys import stderr
+import sys
+from pathlib import Path
 from typing import Any, Dict, List, cast
 
-import requests
+_dirname = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
 class DocumentationProvider:
@@ -33,9 +35,9 @@ class DocumentationProvider:
     }
 
     def load(self) -> None:
-        api_md = requests.get(
-            "https://raw.githubusercontent.com/microsoft/playwright/master/docs/api.md"
-        ).text
+        api_md = (
+            _dirname / ".." / "driver" / "node_modules" / "playwright" / "api.md"
+        ).read_text()
 
         class_name = None
         method_name = None
@@ -160,7 +162,7 @@ class DocumentationProvider:
                 if name not in signature:
                     print(
                         f"Not implemented parameter {class_name}.{method_name}({name}=)",
-                        file=stderr,
+                        file=sys.stderr,
                     )
                     continue
                 else:
@@ -179,7 +181,7 @@ class DocumentationProvider:
         if signature:
             print(
                 f"Not documented parameters: {class_name}.{method_name}({signature.keys()})",
-                file=stderr,
+                file=sys.stderr,
             )
 
 
