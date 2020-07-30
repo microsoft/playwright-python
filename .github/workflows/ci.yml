@@ -75,7 +75,7 @@ jobs:
     - name: Install
       run: python -m playwright install
     - name: Test
-      run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov-report xml
+      run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov=scripts --cov-report xml
     - name: Coveralls
       run: coveralls
       env:
