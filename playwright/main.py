@@ -74,9 +74,7 @@ async def run_driver_async() -> Connection:
 def run_driver() -> Connection:
     loop = asyncio.get_event_loop()
     if loop.is_running():
-        raise Error(
-            "Existing event loop is already running. Most likely that you have nested Playwright initialisations."
-        )
+        raise Error("Can only run one Playwright at a time.")
     return loop.run_until_complete(run_driver_async())
 
 
