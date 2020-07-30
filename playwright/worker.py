@@ -30,7 +30,7 @@ class Worker(ChannelOwner):
         self._channel.on("close", lambda _: self._on_close())
 
     def _on_close(self) -> None:
-        if self._page:
+        if hasattr(self, "_page"):
             self._page._workers.remove(self)
         self.emit(Worker.Events.Close, self)
 

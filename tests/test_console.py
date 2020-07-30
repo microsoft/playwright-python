@@ -150,3 +150,15 @@ async def test_console_should_not_throw_when_there_are_console_messages_in_detac
     )[0]
     # 4. Connect to the popup and make sure it doesn't throw.
     assert await popup.evaluate("1 + 1") == 2
+
+
+async def test_console_raise_exception(page, capsys):
+    error_msg = "Unexpected error foo!"
+
+    def _on_console_message(message):
+        raise ValueError(error_msg)
+
+    page.once("console", _on_console_message)
+    await page.evaluate('() => console.log("hello")'),
+    capture = capsys.readouterr()
+    assert error_msg in capture.err

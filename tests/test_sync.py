@@ -214,3 +214,16 @@ def test_sync_playwright_multiple_times():
             with sync_playwright() as pw2:
                 assert pw1.chromium == pw2.chromium
         assert "Can only run one Playwright at a time." in exc.value.message
+
+
+def test_sync_network_on_route_exception(page, server, capsys):
+    error_msg = "Unexpected error foo!"
+
+    def _throw_exception(route, request):
+        raise ValueError(error_msg)
+
+    page.route("**", _throw_exception)
+    with pytest.raises(Error):
+        page.goto(server.EMPTY_PAGE, timeout=500)
+    capture = capsys.readouterr()
+    assert error_msg in capture.err

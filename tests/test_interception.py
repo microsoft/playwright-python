@@ -761,3 +761,21 @@ async def test_request_fulfill_should_work_with_status_code_422(page, server):
     assert response.status == 422
     assert response.statusText == "Unprocessable Entity"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
+
+
+async def test_network_on_route_exception(page, server, capsys):
+    error_msg = "Unexpected error foo!"
+
+    async def log_and_continue_request(route, request):
+        raise ValueError(error_msg)
+
+    await page.route(
+        "**",
+        lambda route, request: asyncio.create_task(
+            log_and_continue_request(route, request)
+        ),
+    )
+    with pytest.raises(Error):
+        await page.goto(server.EMPTY_PAGE, timeout=500)
+    capture = capsys.readouterr()
+    assert error_msg in capture.err

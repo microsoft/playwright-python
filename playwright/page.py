@@ -116,8 +116,10 @@ class Page(ChannelOwner):
         self._channel.on("close", lambda _: self._on_close())
         self._channel.on(
             "console",
-            lambda params: self.emit(
-                Page.Events.Console, from_channel(params["message"])
+            self._wrap_cb_with_exc_handling(
+                lambda params: self.emit(
+                    Page.Events.Console, from_channel(params["message"])
+                )
             ),
         )
         self._channel.on("crash", lambda _: self._on_crash())
@@ -219,7 +221,9 @@ class Page(ChannelOwner):
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
             if handler_entry.matcher.matches(request.url):
-                handler_entry.handler(route, request)
+                self._wrap_cb_with_exc_handling(
+                    lambda: handler_entry.handler(route, request)
+                )()
                 return
         self._browser_context._on_route(route, request)
 

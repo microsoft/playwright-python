@@ -15,6 +15,7 @@
 import asyncio
 import sys
 import traceback
+from asyncio import Future
 from typing import Any, Callable, Dict, Optional, Union
 
 from greenlet import greenlet
@@ -91,6 +92,25 @@ class ChannelOwner(BaseEventEmitter):
         for object in list(self._objects.values()):
             object._dispose()
         self._objects.clear()
+
+    def _wrap_cb_with_exc_handling(self, cb: Callable[..., Any]) -> Callable[..., Any]:
+        """Will wrap the given callback to print the error to the stdout"""
+
+        def _cb(*args: Any, **kargs: Any) -> Any:
+            try:
+                maybe_task: Optional[Future] = cb(*args, **kargs)
+                if maybe_task and asyncio.isfuture(maybe_task):
+
+                    def _on_done_cb(cb: Future) -> None:
+                        exc = cb.exception()
+                        if exc:
+                            print(exc, file=sys.stderr)
+
+                    maybe_task.add_done_callback(_on_done_cb)
+            except Exception:
+                traceback.print_exc()
+
+        return _cb
 
 
 class ProtocolCallback:
