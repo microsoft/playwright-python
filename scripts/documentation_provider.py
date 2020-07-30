@@ -12,19 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import re
-import sys
-from typing import Any, Dict, List, cast
+from sys import stderr
+from typing import Any, Dict, List
 
-from playwright.path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
+enum_regex = r"^\"[^\"]+\"(?:\|\"[^\"]+\")+$"
+union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
 
 
 class DocumentationProvider:
     def __init__(self) -> None:
-        self.documentation: Dict[str, Dict[str, List[str]]] = {}
-        self.load()
+        self.api: Any = {}
+        self.printed_entries: List[str] = []
+        with open("api.json") as json_file:
+            self.api = json.load(json_file)
 
     method_name_rewrites: Dict[str, str] = {
         "continue_": "continue",
@@ -34,155 +36,242 @@ class DocumentationProvider:
         "querySelectorAll": "$$",
     }
 
-    def load(self) -> None:
-        api_md = (
-            _dirname / ".." / "driver" / "node_modules" / "playwright" / "api.md"
-        ).read_text()
-
-        class_name = None
-        method_name = None
-        in_a_code_block = False
-        in_options = False
-        pending_empty_line = False
-
-        for line in api_md.split("\n"):
-            if "```js" in line:
-                in_a_code_block = True
-            elif "```" in line:
-                in_a_code_block = False
-                continue
-            if in_a_code_block:
-                continue
-
-            if line.startswith("### "):
-                class_name = None
-                method_name = None
-                match = re.search(r"### class: (\w+)", line) or re.search(
-                    r"### Playwright module", line
-                )
-                if match:
-                    class_name = match.group(1) if match.groups() else "Playwright"
-                    self.documentation[class_name] = {}  # type: ignore
-                    continue
-            if line.startswith("#### "):
-                match = re.search(r"#### (\w+)\.(.+?)(\(|$)", line)
-                if match:
-                    if not class_name or match.group(1).lower() != class_name.lower():
-                        print("Error: " + line + " in " + cast(str, class_name))
-                    method_name = match.group(2)
-                    pending_empty_line = False
-                    self.documentation[class_name][method_name] = []  # type: ignore
-                continue
-
-            if not method_name:  # type: ignore
-                continue
-
-            if (
-                line.startswith("- `options` <[Object]>")
-                or line.startswith("- `options` <[string]|[Object]>")
-                or line.startswith("- `overrides` <")
-                or line.startswith("- `response` <")
-            ):
-                in_options = True
-                continue
-            if not line.startswith("  "):
-                in_options = False
-            if in_options:
-                line = line[2:]
-            # if not line.strip():
-            #     continue
-            if "Shortcut for" in line:
-                continue
-            if not line.strip():
-                pending_empty_line = bool(self.documentation[class_name][method_name])  # type: ignore
-                continue
-            else:
-                if pending_empty_line:
-                    pending_empty_line = False
-                    self.documentation[class_name][method_name].append("")  # type: ignore
-            self.documentation[class_name][method_name].append(line)  # type: ignore
-
-    def _transform_doc_entry(self, line: str) -> str:
-        line = line.replace("\\", "\\\\")
-        line = re.sub(r"<\[Array\]<\[(.*?)\]>>", r"<List[\1]>", line)
-        line = line.replace("Object", "Dict")
-        line = line.replace("Array", "List")
-        line = line.replace("boolean", "bool")
-        line = line.replace("string", "str")
-        line = line.replace("number", "int")
-        line = line.replace("Buffer", "bytes")
-        line = re.sub(r"<\?\[(.*?)\]>", r"<Optional[\1]>", line)
-        line = re.sub(r"<\[Promise\]<(.*)>>", r"<\1>", line)
-        line = re.sub(r"<\[(\w+?)\]>", r"<\1>", line)
-
-        # Following should be fixed in the api.md upstream
-        line = re.sub(r"- `pageFunction` <[^>]+>", "- `expression` <[str]>", line)
-        line = re.sub("- `urlOrPredicate`", "- `url`", line)
-        line = re.sub("- `playwrightBinding`", "- `binding`", line)
-        line = re.sub("- `playwrightFunction`", "- `binding`", line)
-        line = re.sub("- `script`", "- `source`", line)
-
-        return line
-
     def print_entry(
         self, class_name: str, method_name: str, signature: Dict[str, Any] = None
     ) -> None:
+        if class_name == "Playwright":
+            return
         if class_name == "BindingCall" or method_name == "pid":
             return
+        original_method_name = method_name
         if method_name in self.method_name_rewrites:
             method_name = self.method_name_rewrites[method_name]
+        self.printed_entries.append(f"{class_name}.{method_name}")
+        if class_name == "JSHandle":
+            self.printed_entries.append(f"ElementHandle.{method_name}")
+        clazz = self.api[class_name]
+        method = clazz["members"][method_name]
+        fqname = f"{class_name}.{method_name}"
+        indent = " " * 8
+        print(f'{indent}"""{class_name}.{original_method_name}')
+        if method["comment"]:
+            print(f"{indent}{self.beautify_method_comment(method['comment'], indent)}")
+        signature_no_return = {**signature} if signature else None
+        if signature_no_return and "return" in signature_no_return:
+            del signature_no_return["return"]
+        if signature and signature_no_return:
+            print("")
+            print("        Parameters")
+            print("        ----------")
+            for [name, value] in signature.items():
+                if name == "return":
+                    continue
+                del signature_no_return[name]
+                if name == "force_expr":
+                    continue
+                original_name = name
+                name = self.rewrite_param_name(fqname, method_name, name)
+                args = method["args"]
+                doc_value = args.get(name)
+                if not doc_value and "options" in args:
+                    args = args["options"]["type"]["properties"]
+                    doc_value = args.get(name)
+                if not doc_value and fqname == "Route.fulfill":
+                    args = args["response"]["type"]["properties"]
+                    doc_value = args.get(name)
+                if not doc_value and fqname == "Route.continue":
+                    args = args["overrides"]["type"]["properties"]
+                    doc_value = args.get(name)
+                if not doc_value and fqname == "Page.setViewportSize":
+                    args = args["viewportSize"]["type"]["properties"]
+                    doc_value = args.get(name)
+                if not doc_value:
+                    print(
+                        f"Missing parameter documentation: {fqname}({name}=)",
+                        file=stderr,
+                    )
+                else:
+                    code_type = self.normalize_class_type(value)
+
+                    print(
+                        f"{indent}{original_name} : {self.beautify_code_type(code_type)}"
+                    )
+                    if doc_value["comment"]:
+                        print(
+                            f"{indent}    {self.indent_paragraph(doc_value['comment'], f'{indent}    ')}"
+                        )
+                    if original_name == "expression":
+                        print(f"{indent}force_expr : bool")
+                        print(
+                            f"{indent}    Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function"
+                        )
+                    self.compare_types(code_type, doc_value, f"{fqname}({name}=)")
         if (
-            class_name == "ElementHandle"
-            and method_name not in self.documentation[class_name]
+            signature
+            and "return" in signature
+            and str(signature["return"]) != "<class 'NoneType'>"
         ):
-            raw_doc = self.documentation["JSHandle"][method_name]
-        else:
-            raw_doc = self.documentation[class_name][method_name]
+            value = signature["return"]
+            code_type = self.normalize_class_type(value)
+            doc_value = method
+            self.compare_types(code_type, doc_value, f"{fqname}(return=)")
+            print("")
+            print("        Returns")
+            print("        -------")
+            print(f"        {self.normalize_class_type(signature['return'])}")
+            if method["returnComment"]:
+                print(
+                    f"            {self.indent_paragraph(method['returnComment'], '              ')}"
+                )
+        print(f'{indent}"""')
 
-        ident = " " * 4 * 2
-
-        if signature:
-            if "return" in signature:
-                del signature["return"]
-
-        print(f'{ident}"""')
-
-        # Validate signature
-        validate_parameters = True
-        for line in raw_doc:
-            if not line.strip():
-                validate_parameters = (
-                    False  # Stop validating parameters after a blank line
+        if signature_no_return:
+            for name in signature_no_return:
+                print(
+                    f"Parameter not implemented: {class_name}.{method_name}({name}=)",
+                    file=stderr,
                 )
 
-            transformed = self._transform_doc_entry(line)
-            match = re.search(r"^\- `(\w+)`", transformed)
-            if validate_parameters and signature and match:
-                name = match.group(1)
-                if name not in signature:
-                    print(
-                        f"Not implemented parameter {class_name}.{method_name}({name}=)",
-                        file=sys.stderr,
-                    )
-                    continue
-                else:
-                    del signature[name]
-                print(f"{ident}{transformed}")
-                if name == "expression" and "force_expr" in signature:
-                    print(
-                        f"{ident}- `force_expr` <[bool]> Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function"
-                    )
-                    del signature["force_expr"]
-            else:
-                print(f"{ident}{transformed}")
+    def normalize_class_type(self, value: Any) -> str:
+        code_type = str(value)
+        code_type = re.sub(r"<class '(.*)'>", r"\1", code_type)
+        code_type = re.sub(r"playwright\.[\w]+\.([\w]+)", r"\1", code_type)
+        return code_type
 
-        print(f'{ident}"""')
+    def indent_paragraph(self, p: str, indent: str) -> str:
+        lines = p.split("\n")
+        result = [lines[0]]
+        for line in lines[1:]:
+            result.append(indent + line)
+        return "\n".join(result)
 
-        if signature:
+    def beautify_method_comment(self, comment: str, indent: str) -> str:
+        lines = comment.split("\n")
+        result = []
+        in_example = False
+        last_was_blank = True
+        for line in lines:
+            if not line.strip():
+                last_was_blank = True
+                continue
+            if line.strip() == "```js":
+                in_example = True
+            if not in_example:
+                if last_was_blank:
+                    last_was_blank = False
+                    result.append("")
+                result.append(line)
+            if line.strip() == "```":
+                in_example = False
+        return self.indent_paragraph("\n".join(result), indent)
+
+    def beautify_code_type(self, code_type: str) -> str:
+        return re.sub(r"^typing.Union\[(.*), NoneType\]$", r"Optional[\1]", code_type)
+
+    def compare_types(self, code_type: str, doc_value: Any, fqname: str) -> None:
+        type_name = doc_value["type"]["name"]
+        doc_type = self.serialize_doc_type(type_name, fqname)
+        if not doc_value["required"]:
+            doc_type = f"typing.Union[{doc_type}, NoneType]"
+        if doc_type != code_type:
             print(
-                f"Not documented parameters: {class_name}.{method_name}({signature.keys()})",
-                file=sys.stderr,
+                f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}",
+                file=stderr,
             )
+
+    def serialize_doc_type(self, doc_value: Any, fqname: str) -> str:
+        if doc_value == "string":
+            return "str"
+
+        if doc_value == "Buffer":
+            return "bytes"
+
+        if doc_value == "boolean":
+            return "bool"
+
+        if doc_value == "number":
+            if "Mouse" in fqname and ("(x=)" in fqname or "(y=)" in fqname):
+                return "float"
+            elif fqname == "Page.pdf(width=)" or fqname == "Page.pdf(height=)":
+                return "float"
+            else:
+                return "int"
+
+        if doc_value == "Object":
+            return "typing.Dict"
+
+        if doc_value == "?Object":
+            return "typing.Union[typing.Dict, NoneType]"
+
+        if doc_value == "function":
+            return "typing.Callable"
+
+        match = re.match(r"^Object<([^,]+),\s*([^)]+)>$", doc_value)
+        if match:
+            return f"typing.Dict[{self.serialize_doc_type(match.group(1), fqname)}, {self.serialize_doc_type(match.group(2), fqname)}]"
+
+        match = re.match(r"^Promise<(.*)>$", doc_value)
+        if match:
+            return self.serialize_doc_type(match.group(1), fqname)
+
+        if re.match(enum_regex, doc_value):
+            result = f"typing.Literal[{', '.join(doc_value.split('|'))}]"
+            return result.replace('"', "'")
+
+        match = re.match(r"^Array<(.*)>$", doc_value)
+        if match:
+            return f"typing.List[{self.serialize_doc_type(match.group(1), fqname)}]"
+
+        match = re.match(r"^\?(.*)$", doc_value)
+        if match:
+            return f"typing.Union[{self.serialize_doc_type(match.group(1), fqname)}, NoneType]"
+
+        match = re.match(r"^null\|(.*)$", doc_value)
+        if match:
+            return f"typing.Union[{self.serialize_doc_type(match.group(1), fqname)}, NoneType]"
+
+        # Union detection is greedy
+        if re.match(union_regex, doc_value):
+            result = ", ".join(
+                list(
+                    map(
+                        lambda a: self.serialize_doc_type(a, fqname),
+                        doc_value.split("|"),
+                    )
+                )
+            )
+            return result.replace('"', "'")
+
+        return doc_value
+
+    def rewrite_param_name(self, fqname: str, method_name: str, name: str) -> str:
+        if name == "expression":
+            return "pageFunction"
+        if method_name == "exposeBinding" and name == "binding":
+            return "playwrightBinding"
+        if method_name == "exposeFunction" and name == "binding":
+            return "playwrightFunction"
+        if method_name == "addInitScript" and name == "source":
+            return "script"
+        if fqname == "Selectors.register" and name == "source":
+            return "script"
+        if fqname == "Page.waitForRequest" and name == "url":
+            return "urlOrPredicate"
+        if fqname == "Page.waitForResponse" and name == "url":
+            return "urlOrPredicate"
+        return name
+
+    def print_remainder(self) -> None:
+        for [class_name, value] in self.api.items():
+            class_name = re.sub(r"Chromium(.*)", r"\1", class_name)
+            class_name = re.sub(r"WebKit(.*)", r"\1", class_name)
+            class_name = re.sub(r"Firefox(.*)", r"\1", class_name)
+            for [method_name, method] in value["members"].items():
+                if method["kind"] == "event":
+                    continue
+                entry = f"{class_name}.{method_name}"
+                if entry not in self.printed_entries:
+                    print(f"Method not implemented: {entry}", file=stderr)
 
 
 if __name__ == "__main__":

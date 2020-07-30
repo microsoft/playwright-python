@@ -15,7 +15,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
 from pyee import BaseEventEmitter
 
@@ -94,7 +94,7 @@ class Frame(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: DocumentLoadState = "load",
+        waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
         return cast(
@@ -126,9 +126,11 @@ class Frame(ChannelOwner):
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: DocumentLoadState = "load",
+        waitUntil: DocumentLoadState = None,
         url: URLMatch = None,
     ) -> Optional[Response]:
+        if not waitUntil:
+            waitUntil = "load"
         wait_helper = self._setup_navigation_wait_helper(timeout)
         matcher = URLMatcher(url) if url else None
         event = await wait_helper.wait_for_event(
@@ -141,11 +143,18 @@ class Frame(ChannelOwner):
             return await request.response()
         if "error" in event:
             raise Error(event["error"])
+
+        if waitUntil not in self._load_states:
+            await wait_helper.wait_for_event(
+                self._event_emitter, "loadstate", lambda s: s == waitUntil
+            )
         return None
 
     async def waitForLoadState(
-        self, state: DocumentLoadState = "load", timeout: int = None
+        self, state: DocumentLoadState = None, timeout: int = None
     ) -> None:
+        if not state:
+            state = "load"
         if state in self._load_states:
             return
         wait_helper = self._setup_navigation_wait_helper(timeout)
@@ -331,7 +340,7 @@ class Frame(ChannelOwner):
     async def focus(self, selector: str, timeout: int = None) -> None:
         await self._channel.send("focus", locals_to_params(locals()))
 
-    async def textContent(self, selector: str, timeout: int = None) -> str:
+    async def textContent(self, selector: str, timeout: int = None) -> Optional[str]:
         return await self._channel.send("textContent", locals_to_params(locals()))
 
     async def innerText(self, selector: str, timeout: int = None) -> str:
@@ -340,7 +349,9 @@ class Frame(ChannelOwner):
     async def innerHTML(self, selector: str, timeout: int = None) -> str:
         return await self._channel.send("innerHTML", locals_to_params(locals()))
 
-    async def getAttribute(self, selector: str, name: str, timeout: int = None) -> str:
+    async def getAttribute(
+        self, selector: str, name: str, timeout: int = None
+    ) -> Optional[str]:
         return await self._channel.send("getAttribute", locals_to_params(locals()))
 
     async def hover(
@@ -415,8 +426,8 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 
-    async def waitForTimeout(self, timeout: int) -> Awaitable[None]:
-        return self._connection._loop.create_task(asyncio.sleep(timeout / 1000))
+    async def waitForTimeout(self, timeout: int) -> None:
+        await self._connection._loop.create_task(asyncio.sleep(timeout / 1000))
 
     async def waitForFunction(
         self,

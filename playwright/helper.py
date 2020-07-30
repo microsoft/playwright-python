@@ -39,10 +39,9 @@ else:  # pragma: no cover
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.network import Request, Route
 
-Cookie = List[Dict[str, Union[str, int, bool]]]
+Cookie = Dict
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], Any]
-FunctionWithSource = Callable[[Dict], Any]
 
 ColorScheme = Literal["light", "dark", "no-preference"]
 DocumentLoadState = Literal["load", "domcontentloaded", "networkidle"]

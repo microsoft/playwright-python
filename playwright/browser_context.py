@@ -21,7 +21,6 @@ from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     Cookie,
     Error,
-    FunctionWithSource,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
@@ -106,7 +105,7 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.newContext()")
         return from_channel(await self._channel.send("newPage"))
 
-    async def cookies(self, urls: Union[str, List[str]]) -> List[Cookie]:
+    async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
         if urls is None:
             urls = []
         return await self._channel.send("cookies", dict(urls=urls))
@@ -146,7 +145,7 @@ class BrowserContext(ChannelOwner):
             raise Error("Either path or source parameter must be specified")
         await self._channel.send("addInitScript", dict(source=source))
 
-    async def exposeBinding(self, name: str, binding: FunctionWithSource) -> None:
+    async def exposeBinding(self, name: str, binding: Callable) -> None:
         for page in self._pages:
             if name in page._bindings:
                 raise Error(
@@ -157,7 +156,7 @@ class BrowserContext(ChannelOwner):
         self._bindings[name] = binding
         await self._channel.send("exposeBinding", dict(name=name))
 
-    async def exposeFunction(self, name: str, binding: Callable[..., Any]) -> None:
+    async def exposeFunction(self, name: str, binding: Callable) -> None:
         await self.exposeBinding(name, lambda source, *args: binding(*args))
 
     async def route(self, url: URLMatch, handler: RouteHandler) -> None:
