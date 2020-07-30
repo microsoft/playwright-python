@@ -14,13 +14,15 @@
 
 from typing import Dict, Optional
 
-from playwright.connection import ChannelOwner, ConnectionScope
+from playwright.connection import ChannelOwner
 from playwright.element_handle import ElementHandle
 
 
 class Selectors(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     async def register(
         self, name: str, source: str = "", path: str = None, contentScript: bool = False

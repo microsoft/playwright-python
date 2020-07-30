@@ -16,13 +16,15 @@ from typing import Dict, List
 
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import ColorScheme, locals_to_params, not_installed_error
 
 
 class BrowserType(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer, True)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     @property
     def name(self) -> str:

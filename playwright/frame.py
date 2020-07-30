@@ -18,12 +18,7 @@ from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Optional, Set, Uni
 
 from pyee import BaseEventEmitter
 
-from playwright.connection import (
-    ChannelOwner,
-    ConnectionScope,
-    from_channel,
-    from_nullable_channel,
-)
+from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.element_handle import (
     ElementHandle,
     ValuesToSelect,
@@ -56,8 +51,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Frame(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._parent_frame = from_nullable_channel(initializer.get("parentFrame"))
         if self._parent_frame:
             self._parent_frame._child_frames.append(self)
@@ -416,7 +413,7 @@ class Frame(ChannelOwner):
         await self._channel.send("uncheck", locals_to_params(locals()))
 
     async def waitForTimeout(self, timeout: int) -> Awaitable[None]:
-        return self._scope._loop.create_task(asyncio.sleep(timeout / 1000))
+        return self._connection._loop.create_task(asyncio.sleep(timeout / 1000))
 
     async def waitForFunction(
         self,

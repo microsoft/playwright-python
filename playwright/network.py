@@ -16,12 +16,7 @@ import base64
 import json
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
-from playwright.connection import (
-    ChannelOwner,
-    ConnectionScope,
-    from_channel,
-    from_nullable_channel,
-)
+from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.helper import ContinueParameters, Error, Header
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -29,8 +24,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Request(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._redirected_from: Optional["Request"] = from_nullable_channel(
             initializer.get("redirectedFrom")
         )
@@ -86,8 +83,10 @@ class Request(ChannelOwner):
 
 
 class Route(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     @property
     def request(self) -> Request:
@@ -133,8 +132,10 @@ class Route(ChannelOwner):
 
 
 class Response(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     @property
     def url(self) -> str:

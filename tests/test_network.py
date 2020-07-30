@@ -502,7 +502,4 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
         await page.setExtraHTTPHeaders({"foo": 1})
     except Error as exc:
         error = exc
-    assert (
-        error.message
-        == 'Expected value of header "foo" to be String, but "number" is found.'
-    )
+    assert error.message == "headers[0].value: expected string, got number"

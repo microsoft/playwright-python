@@ -16,7 +16,7 @@ import asyncio
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     Cookie,
@@ -41,8 +41,10 @@ class BrowserContext(ChannelOwner):
 
     Events = SimpleNamespace(Close="close", Page="page",)
 
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer, True)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._pages: List[Page] = []
         self._routes: List[RouteHandlerEntry] = []
         self._bindings: Dict[str, Any] = {}
@@ -205,7 +207,6 @@ class BrowserContext(ChannelOwner):
             pending_event.reject(False, "Context")
 
         self.emit(BrowserContext.Events.Close)
-        self._scope.dispose()
 
     async def close(self) -> None:
         if self._is_closed_or_closing:

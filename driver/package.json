@@ -13,7 +13,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "playwright": "1.2.0-next.1595625808301"
+    "playwright": "1.2.0-next.1596080705875"
   },
   "devDependencies": {
     "pkg": "^4.4.9"

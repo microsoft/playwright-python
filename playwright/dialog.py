@@ -14,13 +14,15 @@
 
 from typing import Dict
 
-from playwright.connection import ChannelOwner, ConnectionScope
+from playwright.connection import ChannelOwner
 from playwright.helper import locals_to_params
 
 
 class Dialog(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     @property
     def type(self) -> str:

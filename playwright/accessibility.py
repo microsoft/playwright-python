@@ -55,13 +55,13 @@ def _ax_node_from_protocol(axNode: Dict[str, Any]) -> Dict[str, Any]:
 class Accessibility:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
-        self._loop = channel._scope._loop
+        self._loop = channel._connection._loop
 
     async def snapshot(
         self, interestingOnly: bool = True, root: ElementHandle = None
     ) -> Optional[Dict[str, Any]]:
-        root = root._channel if root else None
-        result = await self._channel.send(
-            "accessibilitySnapshot", dict(root=root, interestingOnly=interestingOnly),
-        )
+        params = {"interestingOnly": interestingOnly}
+        if root:
+            params["root"] = root._channel
+        result = await self._channel.send("accessibilitySnapshot", params,)
         return _ax_node_from_protocol(result) if result else None
