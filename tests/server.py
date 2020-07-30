@@ -16,18 +16,18 @@ import abc
 import asyncio
 import gzip
 import mimetypes
-import os
 import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
-from pathlib import Path
 
 from OpenSSL import crypto
 from twisted.internet import reactor, ssl
 from twisted.web import http
 
-_dirname = Path(os.path.join(os.path.dirname(__file__)))
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
 
 
 def _find_free_port():
@@ -107,7 +107,7 @@ class Server:
                 file_content = None
                 try:
                     file_content = open(
-                        os.path.join(static_path, request.path.decode()[1:]), "rb"
+                        static_path / request.path.decode()[1:], "rb"
                     ).read()
                 except (FileNotFoundError, IsADirectoryError):
                     request.setResponseCode(HTTPStatus.NOT_FOUND)

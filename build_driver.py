@@ -17,9 +17,10 @@ import os
 import re
 import shutil
 import subprocess
-from pathlib import Path
 
-_dirname = Path(os.path.dirname(os.path.abspath(__file__)))
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
 
 driver_path = _dirname / "driver"
 package_path = _dirname / "playwright"

@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import re
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, cast
 
-_dirname = Path(os.path.dirname(os.path.abspath(__file__)))
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
 
 
 class DocumentationProvider:

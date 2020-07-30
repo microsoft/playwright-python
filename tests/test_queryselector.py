@@ -1,10 +1,12 @@
-import os
 from typing import Any, cast
 
 import pytest
 
 from playwright.helper import Error
 from playwright.page import Page
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
 
 
 async def test_selectors_register_should_work(selectors, page: Page, utils):
@@ -42,12 +44,7 @@ async def test_selectors_register_should_work(selectors, page: Page, utils):
 
 async def test_selectors_register_should_work_with_path(selectors, page: Page, utils):
     await utils.register_selector_engine(
-        selectors,
-        "foo",
-        path=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "assets/sectionselectorengine.js",
-        ),
+        selectors, "foo", path=_dirname / "assets/sectionselectorengine.js"
     )
     await page.setContent("<section></section>")
     assert await page.evalOnSelector("foo=whatever", "e => e.nodeName") == "SECTION"

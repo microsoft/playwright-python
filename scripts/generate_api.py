@@ -153,6 +153,7 @@ header = """
 
 import typing
 import sys
+import pathlib
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

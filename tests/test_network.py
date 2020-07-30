@@ -14,7 +14,6 @@
 
 import asyncio
 import json
-import os
 from asyncio.futures import Future
 from typing import Dict, List
 
@@ -23,6 +22,9 @@ import pytest
 from playwright.helper import Error
 from playwright.network import Request
 from playwright.page import Page
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
 
 
 async def test_request_fulfill(page):
@@ -245,20 +247,14 @@ async def test_response_json_should_work(page, server):
 
 async def test_response_body_should_work(page, server):
     response = await page.goto(server.PREFIX + "/pptr.png")
-    with open(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets/pptr.png"),
-        "rb",
-    ) as fd:
+    with open(_dirname / "assets/pptr.png", "rb",) as fd:
         assert fd.read() == await response.body()
 
 
 async def test_response_body_should_work_with_compression(page, server):
     server.enable_gzip("/pptr.png")
     response = await page.goto(server.PREFIX + "/pptr.png")
-    with open(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets/pptr.png"),
-        "rb",
-    ) as fd:
+    with open(_dirname / "assets/pptr.png", "rb",) as fd:
         assert fd.read() == await response.body()
 
 

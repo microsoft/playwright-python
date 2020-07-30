@@ -19,8 +19,9 @@ import pytest
 
 from playwright.browser_type import BrowserType
 from playwright.helper import Error
+from playwright.path_utils import get_file_dirname
 
-__dirname = os.path.dirname(os.path.abspath(__file__))
+_dirname = get_file_dirname()
 
 
 async def test_browser_type_launch_should_reject_all_promises_when_browser_is_closed(
@@ -51,9 +52,7 @@ async def test_browser_type_launch_should_reject_if_launched_browser_fails_immed
     with pytest.raises(Error):
         await browser_type.launch(
             **launch_arguments,
-            executablePath=os.path.join(
-                __dirname, "assets", "dummy_bad_browser_executable.js"
-            )
+            executablePath=_dirname / "assets" / "dummy_bad_browser_executable.js"
         )
 
 

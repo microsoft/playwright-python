@@ -14,6 +14,7 @@
 
 import asyncio
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Optional, Set, Union, cast
 
 from pyee import BaseEventEmitter
@@ -280,7 +281,7 @@ class Frame(ChannelOwner):
         params = locals_to_params(locals())
         if path:
             with open(path, "r") as file:
-                params["content"] = file.read() + "\n//# sourceURL=" + path
+                params["content"] = file.read() + "\n//# sourceURL=" + str(Path(path))
                 del params["path"]
         return from_channel(await self._channel.send("addScriptTag", params))
 
@@ -290,7 +291,9 @@ class Frame(ChannelOwner):
         params = locals_to_params(locals())
         if path:
             with open(path, "r") as file:
-                params["content"] = file.read() + "\n/*# sourceURL=" + path + "*/"
+                params["content"] = (
+                    file.read() + "\n/*# sourceURL=" + str(Path(path)) + "*/"
+                )
                 del params["path"]
         return from_channel(await self._channel.send("addStyleTag", params))
 
@@ -366,7 +369,7 @@ class Frame(ChannelOwner):
     async def setInputFiles(
         self,
         selector: str,
-        files: Union[str, FilePayload, List[str], List[FilePayload]],
+        files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:

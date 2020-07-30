@@ -27,6 +27,7 @@ from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
 from playwright.helper import Error, not_installed_error
 from playwright.object_factory import create_remote_object
+from playwright.path_utils import get_file_dirname
 from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
 from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
@@ -44,12 +45,12 @@ def compute_driver_name() -> str:
 
 
 async def run_driver_async() -> Connection:
-    package_path = os.path.dirname(os.path.abspath(__file__))
+    package_path = get_file_dirname()
     driver_name = compute_driver_name()
-    driver_executable = os.path.join(package_path, driver_name)
-    archive_name = os.path.join(package_path, "drivers", driver_name + ".gz")
+    driver_executable = package_path / driver_name
+    archive_name = package_path / "drivers" / (driver_name + ".gz")
 
-    if not os.path.exists(driver_executable) or os.path.getmtime(
+    if not driver_executable.exists() or os.path.getmtime(
         driver_executable
     ) < os.path.getmtime(archive_name):
         raise not_installed_error(
@@ -57,7 +58,7 @@ async def run_driver_async() -> Connection:
         )
 
     proc = await asyncio.create_subprocess_exec(
-        driver_executable,
+        str(driver_executable),
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -124,12 +125,12 @@ def main() -> None:
     if "install" not in sys.argv:
         print('Run "python -m playwright install" to complete installation')
         return
-    package_path = os.path.dirname(os.path.abspath(__file__))
+    package_path = get_file_dirname()
     driver_name = compute_driver_name()
-    driver_executable = os.path.join(package_path, driver_name)
-    archive_name = os.path.join(package_path, "drivers", driver_name + ".gz")
+    driver_executable = package_path / driver_name
+    archive_name = package_path / "drivers" / (driver_name + ".gz")
 
-    if not os.path.exists(driver_executable) or os.path.getmtime(
+    if not driver_executable.exists() or os.path.getmtime(
         driver_executable
     ) < os.path.getmtime(archive_name):
         print(f"Extracting {archive_name} into {driver_executable}...")
