@@ -18,7 +18,7 @@ from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
 from playwright.browser_server import BrowserServer
 from playwright.browser_type import BrowserType
-from playwright.connection import ChannelOwner, ConnectionScope
+from playwright.connection import ChannelOwner
 from playwright.console_message import ConsoleMessage
 from playwright.dialog import Dialog
 from playwright.download import Download
@@ -33,47 +33,49 @@ from playwright.worker import Worker
 
 
 class DummyObject(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
 
 def create_remote_object(
-    scope: ConnectionScope, type: str, guid: str, initializer: Dict
+    parent: ChannelOwner, type: str, guid: str, initializer: Dict
 ) -> Any:
     if type == "BindingCall":
-        return BindingCall(scope, guid, initializer)
+        return BindingCall(parent, type, guid, initializer)
     if type == "Browser":
-        return Browser(scope, guid, initializer)
+        return Browser(parent, type, guid, initializer)
     if type == "BrowserServer":
-        return BrowserServer(scope, guid, initializer)
+        return BrowserServer(parent, type, guid, initializer)
     if type == "BrowserType":
-        return BrowserType(scope, guid, initializer)
+        return BrowserType(parent, type, guid, initializer)
     if type == "BrowserContext":
-        return BrowserContext(scope, guid, initializer)
+        return BrowserContext(parent, type, guid, initializer)
     if type == "ConsoleMessage":
-        return ConsoleMessage(scope, guid, initializer)
+        return ConsoleMessage(parent, type, guid, initializer)
     if type == "Dialog":
-        return Dialog(scope, guid, initializer)
+        return Dialog(parent, type, guid, initializer)
     if type == "Download":
-        return Download(scope, guid, initializer)
+        return Download(parent, type, guid, initializer)
     if type == "ElementHandle":
-        return ElementHandle(scope, guid, initializer)
+        return ElementHandle(parent, type, guid, initializer)
     if type == "Frame":
-        return Frame(scope, guid, initializer)
+        return Frame(parent, type, guid, initializer)
     if type == "JSHandle":
-        return JSHandle(scope, guid, initializer)
+        return JSHandle(parent, type, guid, initializer)
     if type == "Page":
-        return Page(scope, guid, initializer)
+        return Page(parent, type, guid, initializer)
     if type == "Playwright":
-        return Playwright(scope, guid, initializer)
+        return Playwright(parent, type, guid, initializer)
     if type == "Request":
-        return Request(scope, guid, initializer)
+        return Request(parent, type, guid, initializer)
     if type == "Response":
-        return Response(scope, guid, initializer)
+        return Response(parent, type, guid, initializer)
     if type == "Route":
-        return Route(scope, guid, initializer)
+        return Route(parent, type, guid, initializer)
     if type == "Worker":
-        return Worker(scope, guid, initializer)
+        return Worker(parent, type, guid, initializer)
     if type == "Selectors":
-        return Selectors(scope, guid, initializer)
-    return DummyObject(scope, guid, initializer)
+        return Selectors(parent, type, guid, initializer)
+    return DummyObject(parent, type, guid, initializer)

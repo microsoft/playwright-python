@@ -15,7 +15,7 @@
 from types import SimpleNamespace
 from typing import Any, Dict
 
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import is_function_body
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 
@@ -23,8 +23,10 @@ from playwright.js_handle import JSHandle, parse_result, serialize_argument
 class Worker(ChannelOwner):
     Events = SimpleNamespace(Close="close")
 
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._channel.on("close", lambda _: self._on_close())
 
     def _on_close(self) -> None:

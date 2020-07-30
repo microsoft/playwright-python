@@ -14,14 +14,16 @@
 
 from typing import Dict, List
 
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import ConsoleMessageLocation
 from playwright.js_handle import JSHandle
 
 
 class ConsoleMessage(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     def __str__(self) -> str:
         return self.text

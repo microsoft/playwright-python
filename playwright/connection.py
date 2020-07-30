@@ -15,7 +15,7 @@
 import asyncio
 import sys
 import traceback
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from greenlet import greenlet
 from pyee import BaseEventEmitter
@@ -26,16 +26,17 @@ from playwright.transport import Transport
 
 
 class Channel(BaseEventEmitter):
-    def __init__(self, scope: "ConnectionScope", guid: str) -> None:
+    def __init__(self, connection: "Connection", guid: str) -> None:
         super().__init__()
-        self._scope: ConnectionScope = scope
+        self._connection: Connection = connection
         self._guid = guid
         self._object: Optional[ChannelOwner] = None
 
     async def send(self, method: str, params: dict = None) -> Any:
         if params is None:
             params = {}
-        result = await self._scope.send_message_to_server(self._guid, method, params)
+        callback = self._connection._send_message_to_server(self._guid, method, params)
+        result = await callback.future
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:
@@ -50,85 +51,57 @@ class Channel(BaseEventEmitter):
     def send_no_reply(self, method: str, params: dict = None) -> None:
         if params is None:
             params = {}
-        self._scope.send_message_to_server_no_reply(self._guid, method, params)
+        self._connection._send_message_to_server(self._guid, method, params)
 
 
 class ChannelOwner(BaseEventEmitter):
     def __init__(
         self,
-        scope: "ConnectionScope",
+        parent: Union["ChannelOwner", "Connection"],
+        type: str,
         guid: str,
         initializer: Dict,
-        is_scope: bool = False,
     ) -> None:
         super().__init__()
+        self._loop: asyncio.AbstractEventLoop = parent._loop
+        self._type = type
         self._guid = guid
-        self._scope = scope.create_child(guid) if is_scope else scope
-        self._loop = self._scope._loop
-        self._channel = Channel(self._scope, guid)
+        self._connection: Connection = parent._connection if isinstance(
+            parent, ChannelOwner
+        ) else parent
+        self._parent: Optional[ChannelOwner] = parent if isinstance(
+            parent, ChannelOwner
+        ) else None
+        self._objects: Dict[str, "ChannelOwner"] = {}
+        self._channel = Channel(self._connection, guid)
         self._channel._object = self
         self._initializer = initializer
 
-
-class ConnectionScope:
-    def __init__(
-        self, connection: "Connection", guid: str, parent: Optional["ConnectionScope"]
-    ) -> None:
-        self._connection: "Connection" = connection
-        self._loop: asyncio.AbstractEventLoop = connection._loop
-        self._guid: str = guid
-        self._children: List["ConnectionScope"] = []
-        self._objects: Dict[str, ChannelOwner] = {}
-        self._parent = parent
-
-    def create_child(self, guid: str) -> "ConnectionScope":
-        scope = self._connection.create_scope(guid, self)
-        self._children.append(scope)
-        return scope
-
-    def dispose(self) -> None:
-        # Take care of hierarchy.
-        for child in self._children:
-            child.dispose()
-        self._children.clear()
-
-        # Delete self from scopes and objects.
-        self._connection._scopes.pop(self._guid)
-        self._connection._objects.pop(self._guid)
-
-        # Delete all of the objects from connection.
-        for guid in self._objects:
-            self._connection._objects.pop(guid)
-
-        # Clean up from parent.
+        self._connection._objects[guid] = self
         if self._parent:
-            self._parent._objects.pop(self._guid)
-            self._parent._children.remove(self)
+            self._parent._objects[guid] = self
 
-    async def send_message_to_server(self, guid: str, method: str, params: Dict) -> Any:
-        callback = self._connection._send_message_to_server(guid, method, params)
-        return await callback.future
+    def _dispose(self) -> None:
+        # Clean up from parent and connection.
+        if self._parent:
+            del self._parent._objects[self._guid]
+        del self._connection._objects[self._guid]
 
-    def send_message_to_server_no_reply(
-        self, guid: str, method: str, params: Dict
-    ) -> Any:
-        self._connection._send_message_to_server(guid, method, params)
-
-    def create_remote_object(self, type: str, guid: str, initializer: Dict) -> Any:
-        result: ChannelOwner
-        initializer = self._connection._replace_guids_with_channels(initializer)
-        result = self._connection._object_factory(self, type, guid, initializer)
-        self._connection._objects[guid] = result
-        self._objects[guid] = result
-        if guid in self._connection._waiting_for_object:
-            self._connection._waiting_for_object.pop(guid)(result)
-        return result
+        # Dispose all children.
+        for object in list(self._objects.values()):
+            object._dispose()
+        self._objects.clear()
 
 
 class ProtocolCallback:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.stack_trace = "".join(traceback.format_stack()[-10:])
         self.future = loop.create_future()
+
+
+class RootChannelOwner(ChannelOwner):
+    def __init__(self, connection: "Connection") -> None:
+        super().__init__(connection, "", "", {})
 
 
 class Connection:
@@ -145,9 +118,8 @@ class Connection:
         self._last_id = 0
         self._loop = loop
         self._objects: Dict[str, ChannelOwner] = {}
-        self._scopes: Dict[str, ConnectionScope] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
-        self._root_scope = self.create_scope("", None)
+        self._root_object = RootChannelOwner(self)
         self._object_factory = object_factory
         self._is_sync = False
 
@@ -215,10 +187,13 @@ class Connection:
         method = msg.get("method")
         params = msg["params"]
         if method == "__create__":
-            scope = self._scopes[guid]
-            scope.create_remote_object(
-                params["type"], params["guid"], params["initializer"]
+            parent = self._objects[guid]
+            self._create_remote_object(
+                parent, params["type"], params["guid"], params["initializer"]
             )
+            return
+        if method == "__dispose__":
+            self._objects[guid]._dispose()
             return
 
         object = self._objects[guid]
@@ -234,6 +209,16 @@ class Connection:
                 "Error dispatching the event",
                 "".join(traceback.format_exception(*sys.exc_info())),
             )
+
+    def _create_remote_object(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> Any:
+        result: ChannelOwner
+        initializer = self._replace_guids_with_channels(initializer)
+        result = self._object_factory(parent, type, guid, initializer)
+        if guid in self._waiting_for_object:
+            self._waiting_for_object.pop(guid)(result)
+        return result
 
     def _replace_channels_with_guids(self, payload: Any) -> Any:
         if payload is None:
@@ -262,13 +247,6 @@ class Connection:
                 result[key] = self._replace_guids_with_channels(payload[key])
             return result
         return payload
-
-    def create_scope(
-        self, guid: str, parent: Optional[ConnectionScope]
-    ) -> ConnectionScope:
-        scope = ConnectionScope(self, guid, parent)
-        self._scopes[guid] = scope
-        return scope
 
 
 def from_channel(channel: Channel) -> Any:

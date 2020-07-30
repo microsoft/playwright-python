@@ -17,7 +17,7 @@ from types import SimpleNamespace
 from typing import Dict, List, Union
 
 from playwright.browser_context import BrowserContext
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import ColorScheme, locals_to_params
 from playwright.network import serialize_headers
 from playwright.page import Page
@@ -32,8 +32,10 @@ class Browser(ChannelOwner):
 
     Events = SimpleNamespace(Disconnected="disconnected",)
 
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer, True)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._is_connected = True
         self._is_closed_or_closing = False
 
@@ -44,7 +46,6 @@ class Browser(ChannelOwner):
         self._is_connected = False
         self.emit(Browser.Events.Disconnected)
         self._is_closed_or_closing = True
-        self._scope.dispose()
 
     @property
     def contexts(self) -> List[BrowserContext]:
@@ -75,7 +76,7 @@ class Browser(ChannelOwner):
     ) -> BrowserContext:
         params = locals_to_params(locals())
         if viewport == 0:
-            params["viewport"] = None
+            del params["viewport"]
             params["noDefaultViewport"] = True
         if extraHTTPHeaders:
             params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)

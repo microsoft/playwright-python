@@ -18,7 +18,7 @@ import os
 import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
-from playwright.connection import ConnectionScope, from_nullable_channel
+from playwright.connection import ChannelOwner, from_nullable_channel
 from playwright.helper import (
     FilePayload,
     KeyboardModifier,
@@ -38,8 +38,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class ElementHandle(JSHandle):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     def asElement(self) -> Optional["ElementHandle"]:
         return self

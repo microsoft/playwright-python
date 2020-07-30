@@ -16,7 +16,7 @@ import math
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import Error, is_function_body
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -24,8 +24,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class JSHandle(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._preview = self._initializer["preview"]
         self._channel.on(
             "previewUpdated", lambda params: self._on_preview_updated(params["preview"])

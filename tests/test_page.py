@@ -762,7 +762,7 @@ async def test_select_option_should_not_select_single_option_when_some_attribute
 
 async def test_select_option_should_select_only_first_option(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
-    await page.selectOption("select", "blue", "green", "red")
+    await page.selectOption("select", ["blue", "green", "red"])
     assert await page.evaluate("result.onInput") == ["blue"]
     assert await page.evaluate("result.onChange") == ["blue"]
 

@@ -225,12 +225,6 @@ async def test_goto_should_not_crash_when_navigating_to_bad_ssl_after_a_cross_or
         await page.goto(https_server.EMPTY_PAGE)
 
 
-async def test_goto_should_not_throw_if_networkidle0_is_passed_as_an_option(
-    page, server
-):
-    await page.goto(server.EMPTY_PAGE, waitUntil="networkidle0")
-
-
 async def test_goto_should_throw_if_networkidle2_is_passed_as_an_option(page, server):
     with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE, waitUntil="networkidle2")

@@ -19,12 +19,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Union, cast
 
 from playwright.accessibility import Accessibility
-from playwright.connection import (
-    ChannelOwner,
-    ConnectionScope,
-    from_channel,
-    from_nullable_channel,
-)
+from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.console_message import ConsoleMessage
 from playwright.dialog import Dialog
 from playwright.download import Download
@@ -94,8 +89,10 @@ class Page(ChannelOwner):
     keyboard: Keyboard
     mouse: Mouse
 
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)
@@ -110,7 +107,7 @@ class Page(ChannelOwner):
         self._pending_wait_for_events: List[PendingWaitEvent] = []
         self._routes: List[RouteHandlerEntry] = []
         self._owned_context: Optional["BrowserContext"] = None
-        self._timeout_settings = TimeoutSettings(None)
+        self._timeout_settings: TimeoutSettings = TimeoutSettings(None)
 
         self._channel.on(
             "bindingCall",
@@ -705,8 +702,14 @@ class Page(ChannelOwner):
         margin: Dict = None,
         path: str = None,
     ) -> bytes:
-        binary = await self._channel.send("pdf", locals_to_params(locals()))
-        return base64.b64decode(binary)
+        params = locals_to_params(locals())
+        del params["path"]
+        encoded_binary = await self._channel.send("pdf", params)
+        decoded_binary = base64.b64decode(encoded_binary)
+        if path:
+            with open(path, "wb") as fd:
+                fd.write(decoded_binary)
+        return decoded_binary
 
     def expect_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
@@ -755,8 +758,10 @@ class Page(ChannelOwner):
 
 
 class BindingCall(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     async def call(self, func: FunctionWithSource) -> None:
         try:

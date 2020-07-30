@@ -15,7 +15,7 @@
 from typing import Dict
 
 from playwright.browser_type import BrowserType
-from playwright.connection import ChannelOwner, ConnectionScope, from_channel
+from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import Devices
 from playwright.selectors import Selectors
 
@@ -27,8 +27,10 @@ class Playwright(ChannelOwner):
     selectors: Selectors
     devices: Devices
 
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self.chromium = from_channel(initializer["chromium"])
         self.firefox = from_channel(initializer["firefox"])
         self.webkit = from_channel(initializer["webkit"])

@@ -15,15 +15,17 @@
 from types import SimpleNamespace
 from typing import Dict
 
-from playwright.connection import ChannelOwner, ConnectionScope
+from playwright.connection import ChannelOwner
 
 
 class BrowserServer(ChannelOwner):
 
     Events = SimpleNamespace(Close="close",)
 
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
         self._channel.on("close", lambda _: self.emit(BrowserServer.Events.Close))
 
     @property

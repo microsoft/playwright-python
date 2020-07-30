@@ -14,12 +14,14 @@
 
 from typing import Dict, Optional
 
-from playwright.connection import ChannelOwner, ConnectionScope
+from playwright.connection import ChannelOwner
 
 
 class Download(ChannelOwner):
-    def __init__(self, scope: ConnectionScope, guid: str, initializer: Dict) -> None:
-        super().__init__(scope, guid, initializer)
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
 
     @property
     def url(self) -> str:
