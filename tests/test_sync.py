@@ -214,6 +214,6 @@ def test_sync_playwright_multiple_times():
             with sync_playwright() as pw2:
                 assert pw1.chromium == pw2.chromium
         assert (
-            "Most likely that you have nested Playwright initialisations."
+            "Can only run one Playwright at a time."
             in exc.value.message
         )
