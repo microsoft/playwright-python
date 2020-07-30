@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -20,7 +21,7 @@ from playwright.page import Page
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_be_able_to_save_pdf_file(page: Page, server, tmpdir):
+async def test_should_be_able_to_save_pdf_file(page: Page, server, tmpdir: Path):
     output_file = tmpdir / "foo.png"
     await page.pdf(path=str(output_file))
     assert os.path.getsize(output_file) > 0

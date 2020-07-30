@@ -186,7 +186,7 @@ def skip_by_browser(request, browser_name):
     )
 
     if browser_name in skip_browsers_names:
-        pytest.skip("skipped for this browser: {}".format(browser_name))
+        pytest.skip(f"skipped for this browser: {browser_name}")
 
 
 @pytest.fixture(autouse=True)
@@ -196,7 +196,7 @@ def skip_by_platform(request):
     )
 
     if sys.platform in skip_platform_names:
-        pytest.skip("skipped on this platform: {}".format(sys.platform))
+        pytest.skip(f"skipped on this platform: {sys.platform}")
 
 
 def pytest_addoption(parser):

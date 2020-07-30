@@ -12,16 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import shutil
 import subprocess
 
-folder = os.path.dirname(os.path.abspath(__file__))
-if os.path.exists(os.path.join(folder, "build")):
-    shutil.rmtree(os.path.join(folder, "build"))
-if os.path.exists(os.path.join(folder, "dist")):
-    shutil.rmtree(os.path.join(folder, "dist"))
-if os.path.exists(os.path.join(folder, "playwright.egg-info")):
-    shutil.rmtree(os.path.join(folder, "playwright.egg-info"))
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
+_build_dir = _dirname / "build"
+if _build_dir.exists():
+    shutil.rmtree(_build_dir)
+_dist_dir = _dirname / "dist"
+if _dist_dir.exists():
+    shutil.rmtree(_dist_dir)
+_egg_dir = _dirname / "playwright.egg-info"
+if _egg_dir.exists():
+    shutil.rmtree(_egg_dir)
 
 subprocess.run("python setup.py sdist bdist_wheel", shell=True)

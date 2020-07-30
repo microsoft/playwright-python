@@ -16,6 +16,7 @@ import base64
 import mimetypes
 import os
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright.connection import ChannelOwner, from_nullable_channel
@@ -123,7 +124,7 @@ class ElementHandle(JSHandle):
 
     async def setInputFiles(
         self,
-        files: Union[str, FilePayload, List[str], List[FilePayload]],
+        files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]],
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -242,16 +243,16 @@ def convert_select_option_values(arg: ValuesToSelect) -> Any:
 
 
 def normalize_file_payloads(
-    files: Union[str, FilePayload, List[str], List[FilePayload]]
+    files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]]
 ) -> List[FilePayload]:
     file_list = files if isinstance(files, list) else [files]
     file_payloads: List[FilePayload] = []
     for item in file_list:
-        if isinstance(item, str):
+        if isinstance(item, str) or isinstance(item, Path):
             with open(item, mode="rb") as fd:
                 file: FilePayload = {
                     "name": os.path.basename(item),
-                    "mimeType": mimetypes.guess_type(item)[0]
+                    "mimeType": mimetypes.guess_type(str(Path(item)))[0]
                     or "application/octet-stream",
                     "buffer": base64.b64encode(fd.read()).decode(),
                 }

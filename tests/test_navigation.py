@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import os
-import pathlib
 import sys
 
 import pytest
@@ -22,8 +20,9 @@ import pytest
 from playwright import Error
 from playwright.helper import TimeoutError
 from playwright.network import Request
+from playwright.path_utils import get_file_dirname
 
-__dirname = os.path.dirname(os.path.realpath(__file__))
+_dirname = get_file_dirname()
 
 
 async def test_goto_should_work(page, server):
@@ -32,9 +31,7 @@ async def test_goto_should_work(page, server):
 
 
 async def test_goto_should_work_with_file_URL(page, server):
-    fileurl = pathlib.Path(
-        os.path.join(__dirname, "assets", "frames", "two-frames.html")
-    ).as_uri()
+    fileurl = (_dirname / "assets" / "frames" / "two-frames.html").as_uri()
     await page.goto(fileurl)
     assert page.url.lower() == fileurl.lower()
     assert len(page.frames) == 3

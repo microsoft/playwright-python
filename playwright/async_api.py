@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import pathlib
 import sys
 import typing
 
@@ -870,7 +871,12 @@ class ElementHandle(JSHandle):
     async def setInputFiles(
         self,
         files: typing.Union[
-            str, FilePayload, typing.List[str], typing.List[FilePayload]
+            str,
+            pathlib.Path,
+            FilePayload,
+            typing.List[str],
+            typing.List[pathlib.Path],
+            typing.List[FilePayload],
         ],
         timeout: int = None,
         noWaitAfter: bool = None,
@@ -1877,7 +1883,12 @@ class Frame(AsyncBase):
         self,
         selector: str,
         files: typing.Union[
-            str, FilePayload, typing.List[str], typing.List[FilePayload]
+            str,
+            pathlib.Path,
+            FilePayload,
+            typing.List[str],
+            typing.List[pathlib.Path],
+            typing.List[FilePayload],
         ],
         timeout: int = None,
         noWaitAfter: bool = None,
