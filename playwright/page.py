@@ -16,7 +16,7 @@ import asyncio
 import base64
 import sys
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union, cast
 
 from playwright.accessibility import Accessibility
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
@@ -32,7 +32,6 @@ from playwright.helper import (
     DocumentLoadState,
     Error,
     FilePayload,
-    FunctionWithSource,
     KeyboardModifier,
     MouseButton,
     Optional,
@@ -337,10 +336,10 @@ class Page(ChannelOwner):
     ) -> ElementHandle:
         return await self._main_frame.addStyleTag(**locals_to_params(locals()))
 
-    async def exposeFunction(self, name: str, binding: Callable[..., Any]) -> None:
+    async def exposeFunction(self, name: str, binding: Callable) -> None:
         await self.exposeBinding(name, lambda source, *args: binding(*args))
 
-    async def exposeBinding(self, name: str, binding: FunctionWithSource) -> None:
+    async def exposeBinding(self, name: str, binding: Callable) -> None:
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         if name in self._browser_context._bindings:
@@ -371,27 +370,27 @@ class Page(ChannelOwner):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: DocumentLoadState = "load",
+        waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
         return await self._main_frame.goto(**locals_to_params(locals()))
 
     async def reload(
-        self, timeout: int = None, waitUntil: DocumentLoadState = "load",
+        self, timeout: int = None, waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("reload", locals_to_params(locals()))
         )
 
     async def waitForLoadState(
-        self, state: DocumentLoadState = "load", timeout: int = None
+        self, state: DocumentLoadState = None, timeout: int = None
     ) -> None:
         return await self._main_frame.waitForLoadState(**locals_to_params(locals()))
 
     async def waitForNavigation(
         self,
         timeout: int = None,
-        waitUntil: DocumentLoadState = "load",
+        waitUntil: DocumentLoadState = None,
         url: str = None,  # TODO: add url, callback
     ) -> Optional[Response]:
         return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
@@ -401,7 +400,7 @@ class Page(ChannelOwner):
         url: URLMatch = None,
         predicate: Callable[[Request], bool] = None,
         timeout: int = None,
-    ) -> Optional[Request]:
+    ) -> Request:
         matcher = URLMatcher(url) if url else None
 
         def my_predicate(request: Request) -> bool:
@@ -412,7 +411,7 @@ class Page(ChannelOwner):
             return True
 
         return cast(
-            Optional[Request],
+            Request,
             await self.waitForEvent(
                 Page.Events.Request, predicate=my_predicate, timeout=timeout
             ),
@@ -423,7 +422,7 @@ class Page(ChannelOwner):
         url: URLMatch = None,
         predicate: Callable[[Response], bool] = None,
         timeout: int = None,
-    ) -> Optional[Response]:
+    ) -> Response:
         matcher = URLMatcher(url) if url else None
 
         def my_predicate(response: Response) -> bool:
@@ -434,7 +433,7 @@ class Page(ChannelOwner):
             return True
 
         return cast(
-            Optional[Response],
+            Response,
             await self.waitForEvent(
                 Page.Events.Response, predicate=my_predicate, timeout=timeout
             ),
@@ -482,6 +481,9 @@ class Page(ChannelOwner):
 
     def viewportSize(self) -> Optional[Viewport]:
         return self._viewport_size
+
+    async def bringToFront(self) -> None:
+        await self._channel.send("bringToFront")
 
     async def addInitScript(self, source: str = None, path: str = None) -> None:
         if path:
@@ -570,7 +572,7 @@ class Page(ChannelOwner):
     async def focus(self, selector: str, timeout: int = None) -> None:
         return await self._main_frame.focus(**locals_to_params(locals()))
 
-    async def textContent(self, selector: str, timeout: int = None) -> str:
+    async def textContent(self, selector: str, timeout: int = None) -> Optional[str]:
         return await self._main_frame.textContent(**locals_to_params(locals()))
 
     async def innerText(self, selector: str, timeout: int = None) -> str:
@@ -579,7 +581,9 @@ class Page(ChannelOwner):
     async def innerHTML(self, selector: str, timeout: int = None) -> str:
         return await self._main_frame.innerHTML(**locals_to_params(locals()))
 
-    async def getAttribute(self, selector: str, name: str, timeout: int = None) -> str:
+    async def getAttribute(
+        self, selector: str, name: str, timeout: int = None
+    ) -> Optional[str]:
         return await self._main_frame.getAttribute(**locals_to_params(locals()))
 
     async def hover(
@@ -651,8 +655,8 @@ class Page(ChannelOwner):
     ) -> None:
         return await self._main_frame.uncheck(**locals_to_params(locals()))
 
-    async def waitForTimeout(self, timeout: int) -> Awaitable[None]:
-        return await self._main_frame.waitForTimeout(timeout)
+    async def waitForTimeout(self, timeout: int) -> None:
+        await self._main_frame.waitForTimeout(timeout)
 
     async def waitForFunction(
         self,
@@ -763,7 +767,7 @@ class BindingCall(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
-    async def call(self, func: FunctionWithSource) -> None:
+    async def call(self, func: Callable) -> None:
         try:
             frame = from_channel(self._initializer["frame"])
             source = dict(context=frame._page.context, page=frame._page, frame=frame)

@@ -118,3 +118,6 @@ class Browser(ChannelOwner):
             return
         self._is_closed_or_closing = True
         await self._channel.send("close")
+
+    async def version(self) -> str:
+        return await self._channel.send("version")

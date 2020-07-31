@@ -49,7 +49,7 @@ def generate(t: Any) -> None:
         print("")
         print("    @property")
         print(f"    def {name}(self) -> {process_type(type)}:")
-        documentation_provider.print_entry(class_name, name)
+        documentation_provider.print_entry(class_name, name, {"return": type})
         [prefix, suffix] = return_value(type)
         prefix = "        return " + prefix + f"self._impl_obj.{name}"
         print(f"{prefix}{suffix}")
@@ -63,7 +63,9 @@ def generate(t: Any) -> None:
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
             )
-            documentation_provider.print_entry(class_name, name)
+            documentation_provider.print_entry(
+                class_name, name, get_type_hints(value, api_globals)
+            )
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
             )
@@ -113,6 +115,7 @@ def main() -> None:
 
     for t in all_types:
         generate(t)
+    documentation_provider.print_remainder()
 
 
 if __name__ == "__main__":

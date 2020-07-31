@@ -53,10 +53,10 @@ class ElementHandle(JSHandle):
     async def contentFrame(self) -> Optional["Frame"]:
         return from_nullable_channel(await self._channel.send("contentFrame"))
 
-    async def getAttribute(self, name: str) -> str:
+    async def getAttribute(self, name: str) -> Optional[str]:
         return await self._channel.send("getAttribute", dict(name=name))
 
-    async def textContent(self) -> str:
+    async def textContent(self) -> Optional[str]:
         return await self._channel.send("textContent")
 
     async def innerText(self) -> str:

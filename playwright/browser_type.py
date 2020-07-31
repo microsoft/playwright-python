@@ -132,7 +132,7 @@ class BrowserType(ChannelOwner):
             raise e
 
     async def connect(
-        self, wsEndpoint: str = None, slowMo: int = None, timeout: int = None
+        self, wsEndpoint: str, slowMo: int = None, timeout: int = None
     ) -> Browser:
         return from_channel(
             await self._channel.send("connect", locals_to_params(locals()))

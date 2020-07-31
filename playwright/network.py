@@ -17,7 +17,7 @@ import json
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
-from playwright.helper import ContinueParameters, Error, Header
+from playwright.helper import ContinueParameters, Error, Header, locals_to_params
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.frame import Frame
@@ -92,26 +92,31 @@ class Route(ChannelOwner):
     def request(self) -> Request:
         return from_channel(self._initializer["request"])
 
-    async def abort(self, errorCode: str = "failed") -> None:
-        await self._channel.send("abort", dict(errorCode=errorCode))
+    async def abort(self, errorCode: str = None) -> None:
+        await self._channel.send("abort", locals_to_params(locals()))
 
     async def fulfill(
         self,
-        status: int = 200,
-        headers: Dict[str, str] = {},
+        status: int = None,
+        headers: Dict[str, str] = None,
         body: Union[str, bytes] = None,
         contentType: str = None,
     ) -> None:
+        params = locals_to_params(locals())
         if contentType:
+            if headers is None:
+                headers = {}
             headers["Content-Type"] = contentType
-        response = dict(status=status, headers=serialize_headers(headers))
+            del params["contentType"]
+        if headers:
+            params["headers"] = serialize_headers(headers)
         if isinstance(body, str):
-            response["body"] = body
-            response["isBase64"] = False
+            params["body"] = body
+            params["isBase64"] = False
         elif isinstance(body, bytes):
-            response["body"] = base64.b64encode(body).decode()
-            response["isBase64"] = True
-        await self._channel.send("fulfill", response)
+            params["body"] = base64.b64encode(body).decode()
+            params["isBase64"] = True
+        await self._channel.send("fulfill", params)
 
     async def continue_(
         self,
