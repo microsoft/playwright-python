@@ -53,7 +53,7 @@ class Request(ChannelOwner):
         b64_content = self._initializer.get("postData")
         if not b64_content:
             return None
-        return base64.b64decode(b64_content.encode()).decode()
+        return base64.b64decode(b64_content).decode()
 
     @property
     def headers(self) -> Dict[str, str]:

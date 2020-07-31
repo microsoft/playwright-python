@@ -395,12 +395,9 @@ class Page(ChannelOwner):
     ) -> Optional[Response]:
         return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
 
-    async def waitForRequest(
-        self,
-        url: URLMatch = None,
-        predicate: Callable[[Request], bool] = None,
-        timeout: int = None,
-    ) -> Request:
+    def _get_request_predicate(
+        self, url: Optional[URLMatch], predicate: Optional[Callable[[Request], bool]]
+    ) -> Callable[[Any], bool]:
         matcher = URLMatcher(url) if url else None
 
         def my_predicate(request: Request) -> bool:
@@ -410,19 +407,11 @@ class Page(ChannelOwner):
                 return predicate(request)
             return True
 
-        return cast(
-            Request,
-            await self.waitForEvent(
-                Page.Events.Request, predicate=my_predicate, timeout=timeout
-            ),
-        )
+        return my_predicate
 
-    async def waitForResponse(
-        self,
-        url: URLMatch = None,
-        predicate: Callable[[Response], bool] = None,
-        timeout: int = None,
-    ) -> Response:
+    def _get_response_predicate(
+        self, url: Optional[URLMatch], predicate: Optional[Callable[[Response], bool]]
+    ) -> Callable[[Any], bool]:
         matcher = URLMatcher(url) if url else None
 
         def my_predicate(response: Response) -> bool:
@@ -432,10 +421,35 @@ class Page(ChannelOwner):
                 return predicate(response)
             return True
 
+        return my_predicate
+
+    async def waitForRequest(
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Request], bool] = None,
+        timeout: int = None,
+    ) -> Request:
+        predicate = self._get_request_predicate(url, predicate)
+
+        return cast(
+            Request,
+            await self.waitForEvent(
+                Page.Events.Request, predicate=predicate, timeout=timeout
+            ),
+        )
+
+    async def waitForResponse(
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Response], bool] = None,
+        timeout: int = None,
+    ) -> Response:
+        predicate = self._get_response_predicate(url, predicate)
+
         return cast(
             Response,
             await self.waitForEvent(
-                Page.Events.Response, predicate=my_predicate, timeout=timeout
+                Page.Events.Response, predicate=predicate, timeout=timeout
             ),
         )
 
@@ -741,13 +755,21 @@ class Page(ChannelOwner):
         return EventContextManagerImpl(self, "filechooser", predicate, timeout)
 
     def expect_request(
-        self, predicate: Callable[[Request], bool] = None, timeout: int = None,
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Request], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Request]:
+        predicate = self._get_request_predicate(url, predicate)
         return EventContextManagerImpl(self, "request", predicate, timeout)
 
     def expect_response(
-        self, predicate: Callable[[Response], bool] = None, timeout: int = None,
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Response], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Response]:
+        predicate = self._get_response_predicate(url, predicate)
         return EventContextManagerImpl(self, "response", predicate, timeout)
 
     def expect_popup(
