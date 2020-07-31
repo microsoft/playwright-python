@@ -4664,6 +4664,7 @@ class Page(AsyncBase):
 
     def expect_request(
         self,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager["Request"]:
@@ -4671,6 +4672,7 @@ class Page(AsyncBase):
 
     def expect_response(
         self,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         predicate: typing.Union[typing.Callable[["Response"], bool]] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager["Response"]:

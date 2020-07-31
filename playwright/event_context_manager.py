@@ -58,5 +58,5 @@ class EventContextManagerImpl(Generic[T]):
     async def __aenter__(self) -> EventInfoImpl[T]:
         return self._event
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def __aexit__(self, *args: Any) -> None:
         await self._event.value

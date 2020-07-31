@@ -53,7 +53,7 @@ class Request(ChannelOwner):
         b64_content = self._initializer.get("postData")
         if not b64_content:
             return None
-        return base64.b64decode(bytes(b64_content, "utf-8")).decode()
+        return base64.b64decode(b64_content).decode()
 
     @property
     def headers(self) -> Dict[str, str]:
@@ -130,7 +130,7 @@ class Route(ChannelOwner):
         if headers:
             overrides["headers"] = serialize_headers(headers)
         if isinstance(postData, str):
-            overrides["postData"] = base64.b64encode(bytes(postData, "utf-8")).decode()
+            overrides["postData"] = base64.b64encode(postData.encode()).decode()
         elif isinstance(postData, bytes):
             overrides["postData"] = base64.b64encode(postData).decode()
         await self._channel.send("continue", cast(Any, overrides))
@@ -173,7 +173,7 @@ class Response(ChannelOwner):
 
     async def text(self) -> str:
         content = await self.body()
-        return content.decode("utf-8")
+        return content.decode()
 
     async def json(self) -> Union[Dict, List]:
         return json.loads(await self.text())

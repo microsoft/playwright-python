@@ -53,11 +53,10 @@ class Transport:
                     data = await self._input.readexactly(to_read)
                     length -= to_read
                     if len(buffer):
-                        buffer = b"".join([buffer, data])
+                        buffer = buffer + data
                     else:
                         buffer = data
-                msg = buffer.decode("utf-8")
-                obj = json.loads(msg)
+                obj = json.loads(buffer)
 
                 if "DEBUGP" in os.environ:  # pragma: no cover
                     print("\x1b[33mRECV>\x1b[0m", json.dumps(obj, indent=2))
@@ -70,7 +69,7 @@ class Transport:
         msg = json.dumps(message)
         if "DEBUGP" in os.environ:  # pragma: no cover
             print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
-        data = bytes(msg, "utf-8")
+        data = msg.encode()
         self._output.write(
             len(data).to_bytes(4, byteorder="little", signed=False) + data
         )
