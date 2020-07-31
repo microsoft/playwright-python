@@ -49,10 +49,10 @@ from playwright.network import Response as ResponseImpl
 from playwright.network import Route as RouteImpl
 from playwright.page import BindingCall as BindingCallImpl
 from playwright.page import Page as PageImpl
+from playwright.page import Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
 from playwright.sync_base import EventContextManager, SyncBase, mapping
-from playwright.worker import Worker as WorkerImpl
 
 NoneType = type(None)
 
@@ -1678,9 +1678,9 @@ class Frame(SyncBase):
 
     def waitForNavigation(
         self,
-        timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         """Frame.waitForNavigation
 
@@ -1690,15 +1690,15 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+            URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
              - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
-        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
-            URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
+        timeout : Optional[int]
+            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
         Returns
         -------
@@ -1708,7 +1708,7 @@ class Frame(SyncBase):
         return mapping.from_impl_nullable(
             self._sync(
                 self._impl_obj.waitForNavigation(
-                    timeout=timeout, waitUntil=waitUntil, url=self._wrap_handler(url)
+                    url=self._wrap_handler(url), waitUntil=waitUntil, timeout=timeout
                 )
             )
         )
@@ -2708,6 +2708,25 @@ class Frame(SyncBase):
             The page's title.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
+
+    def expect_load_state(
+        self,
+        state: Literal["load", "domcontentloaded", "networkidle"] = None,
+        timeout: int = None,
+    ) -> EventContextManager[typing.Union["Response", NoneType]]:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+        )
+
+    def expect_navigation(
+        self,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        timeout: int = None,
+    ) -> EventContextManager[typing.Union["Response", NoneType]]:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+        )
 
 
 mapping.register(FrameImpl, Frame)
@@ -3723,9 +3742,9 @@ class Page(SyncBase):
 
     def waitForNavigation(
         self,
-        timeout: int = None,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
-        url: str = None,
+        timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.waitForNavigation
 
@@ -3736,15 +3755,15 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+            A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
              - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
-        url : Optional[str]
-            A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
+        timeout : Optional[int]
+            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
         Returns
         -------
@@ -3754,7 +3773,7 @@ class Page(SyncBase):
         return mapping.from_impl_nullable(
             self._sync(
                 self._impl_obj.waitForNavigation(
-                    timeout=timeout, waitUntil=waitUntil, url=url
+                    url=self._wrap_handler(url), waitUntil=waitUntil, timeout=timeout
                 )
             )
         )
@@ -4836,33 +4855,84 @@ class Page(SyncBase):
             )
         )
 
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
+
     def expect_console_message(
         self,
         predicate: typing.Union[typing.Callable[["ConsoleMessage"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["ConsoleMessage"]:
-        return EventContextManager(self, "console", predicate, timeout)
+        event = "console"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
 
     def expect_dialog(
         self,
         predicate: typing.Union[typing.Callable[["Dialog"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["Dialog"]:
-        return EventContextManager(self, "dialog", predicate, timeout)
+        event = "dialog"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
 
     def expect_download(
         self,
         predicate: typing.Union[typing.Callable[["Download"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["Download"]:
-        return EventContextManager(self, "download", predicate, timeout)
+        event = "download"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
 
     def expect_file_chooser(
         self,
         predicate: typing.Union[typing.Callable[["FileChooser"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["FileChooser"]:
-        return EventContextManager(self, "filechooser", predicate, timeout)
+        event = "filechooser"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
+
+    def expect_load_state(
+        self,
+        state: Literal["load", "domcontentloaded", "networkidle"] = None,
+        timeout: int = None,
+    ) -> EventContextManager[typing.Union["Response", NoneType]]:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+        )
+
+    def expect_navigation(
+        self,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        timeout: int = None,
+    ) -> EventContextManager[typing.Union["Response", NoneType]]:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+        )
+
+    def expect_popup(
+        self,
+        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager["Page"]:
+        event = "popup"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
 
     def expect_request(
         self,
@@ -4870,29 +4940,29 @@ class Page(SyncBase):
         predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["Request"]:
-        return EventContextManager(self, "request", predicate, timeout)
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForRequest(url, predicate, timeout)
+        )
 
     def expect_response(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        predicate: typing.Union[typing.Callable[["Response"], bool]] = None,
+        predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["Response"]:
-        return EventContextManager(self, "response", predicate, timeout)
-
-    def expect_popup(
-        self,
-        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
-        timeout: int = None,
-    ) -> EventContextManager["Page"]:
-        return EventContextManager(self, "popup", predicate, timeout)
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForResponse(url, predicate, timeout)
+        )
 
     def expect_worker(
         self,
         predicate: typing.Union[typing.Callable[["Worker"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["Worker"]:
-        return EventContextManager(self, "worker", predicate, timeout)
+        event = "worker"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
 
 
 mapping.register(PageImpl, Page)
@@ -5254,12 +5324,25 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
 
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -> EventContextManager:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
+
     def expect_page(
         self,
         predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
         timeout: int = None,
     ) -> EventContextManager["Page"]:
-        return EventContextManager(self, "page", predicate, timeout)
+        event = "page"
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
 
 
 mapping.register(BrowserContextImpl, BrowserContext)

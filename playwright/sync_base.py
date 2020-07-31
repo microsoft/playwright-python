@@ -13,12 +13,11 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Generic, Optional, TypeVar, cast
+from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar, cast
 
 import greenlet
 
 from playwright.impl_to_api_mapping import ImplToApiMapping, ImplWrapper
-from playwright.wait_helper import WaitHelper
 
 mapping = ImplToApiMapping()
 
@@ -38,24 +37,11 @@ def dispatcher_fiber() -> greenlet:
 
 
 class EventInfo(Generic[T]):
-    def __init__(
-        self,
-        sync_base: "SyncBase",
-        event: str,
-        predicate: Callable[[T], bool] = None,
-        timeout: int = None,
-    ) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop, coroutine: Coroutine) -> None:
+        self._loop = loop
         self._value: Optional[T] = None
         self._exception = None
-        self._loop = sync_base._loop
-
-        wait_helper = WaitHelper(sync_base._loop)
-        wait_helper.reject_on_timeout(
-            timeout or 30000, f'Timeout while waiting for event "${event}"'
-        )
-        self._future = sync_base._loop.create_task(
-            wait_helper.wait_for_event(sync_base._impl_obj, event, predicate)
-        )
+        self._future = loop.create_task(coroutine)
         g_self = greenlet.getcurrent()
 
         def done_callback(task: Any) -> None:
@@ -70,7 +56,7 @@ class EventInfo(Generic[T]):
 
     @property
     def value(self) -> T:
-        while not self._value and not self._exception:
+        while not self._future.done():
             dispatcher_fiber_.switch()
         asyncio._set_running_loop(self._loop)
         if self._exception:
@@ -79,15 +65,8 @@ class EventInfo(Generic[T]):
 
 
 class EventContextManager(Generic[T]):
-    def __init__(
-        self,
-        sync_base: "SyncBase",
-        event: str,
-        predicate: Callable[[T], bool] = None,
-        timeout: int = None,
-    ) -> None:
-        self._loop = sync_base._loop
-        self._event = EventInfo(sync_base, event, predicate, timeout)
+    def __init__(self, loop: asyncio.AbstractEventLoop, coroutine: Coroutine) -> None:
+        self._event: EventInfo = EventInfo(loop, coroutine)
 
     def __enter__(self) -> EventInfo[T]:
         return self._event
@@ -130,8 +109,3 @@ class SyncBase(ImplWrapper):
 
     def remove_listener(self, event_name: str, handler: Any) -> None:
         self._impl_obj.remove_listener(event_name, handler)
-
-    def expect_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
-    ) -> EventContextManager:
-        return EventContextManager(self, event, predicate, timeout)

@@ -51,7 +51,6 @@ from playwright.input import Keyboard, Mouse
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Request, Response, Route, serialize_headers
 from playwright.wait_helper import WaitHelper
-from playwright.worker import Worker
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -101,7 +100,7 @@ class Page(ChannelOwner):
         self._frames = [self._main_frame]
         self._viewport_size = initializer.get("viewportSize")
         self._is_closed = False
-        self._workers: List[Worker] = []
+        self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
         self._pending_wait_for_events: List[PendingWaitEvent] = []
         self._routes: List[RouteHandlerEntry] = []
@@ -228,7 +227,7 @@ class Page(ChannelOwner):
             asyncio.create_task(binding_call.call(func))
         self._browser_context._on_binding(binding_call)
 
-    def _on_worker(self, worker: Worker) -> None:
+    def _on_worker(self, worker: "Worker") -> None:
         self._workers.append(worker)
         worker._page = self
         self.emit(Page.Events.Worker, worker)
@@ -389,15 +388,18 @@ class Page(ChannelOwner):
 
     async def waitForNavigation(
         self,
-        timeout: int = None,
+        url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
-        url: str = None,  # TODO: add url, callback
+        timeout: int = None,
     ) -> Optional[Response]:
         return await self._main_frame.waitForNavigation(**locals_to_params(locals()))
 
-    def _get_request_predicate(
-        self, url: Optional[URLMatch], predicate: Optional[Callable[[Request], bool]]
-    ) -> Callable[[Any], bool]:
+    async def waitForRequest(
+        self,
+        url: URLMatch = None,
+        predicate: Callable[[Request], bool] = None,
+        timeout: int = None,
+    ) -> Request:
         matcher = URLMatcher(url) if url else None
 
         def my_predicate(request: Request) -> bool:
@@ -407,34 +409,10 @@ class Page(ChannelOwner):
                 return predicate(request)
             return True
 
-        return my_predicate
-
-    def _get_response_predicate(
-        self, url: Optional[URLMatch], predicate: Optional[Callable[[Response], bool]]
-    ) -> Callable[[Any], bool]:
-        matcher = URLMatcher(url) if url else None
-
-        def my_predicate(response: Response) -> bool:
-            if matcher:
-                return matcher.matches(response.url)
-            if predicate:
-                return predicate(response)
-            return True
-
-        return my_predicate
-
-    async def waitForRequest(
-        self,
-        url: URLMatch = None,
-        predicate: Callable[[Request], bool] = None,
-        timeout: int = None,
-    ) -> Request:
-        predicate = self._get_request_predicate(url, predicate)
-
         return cast(
             Request,
             await self.waitForEvent(
-                Page.Events.Request, predicate=predicate, timeout=timeout
+                Page.Events.Request, predicate=my_predicate, timeout=timeout
             ),
         )
 
@@ -444,12 +422,19 @@ class Page(ChannelOwner):
         predicate: Callable[[Response], bool] = None,
         timeout: int = None,
     ) -> Response:
-        predicate = self._get_response_predicate(url, predicate)
+        matcher = URLMatcher(url) if url else None
+
+        def my_predicate(response: Response) -> bool:
+            if matcher:
+                return matcher.matches(response.url)
+            if predicate:
+                return predicate(response)
+            return True
 
         return cast(
             Response,
             await self.waitForEvent(
-                Page.Events.Response, predicate=predicate, timeout=timeout
+                Page.Events.Response, predicate=my_predicate, timeout=timeout
             ),
         )
 
@@ -685,7 +670,7 @@ class Page(ChannelOwner):
         return await self._main_frame.waitForFunction(**locals_to_params(locals()))
 
     @property
-    def workers(self) -> List[Worker]:
+    def workers(self) -> List["Worker"]:
         return self._workers.copy()
 
     # on(event: str | symbol, listener: Listener): self {
@@ -732,27 +717,49 @@ class Page(ChannelOwner):
     def expect_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self, event, predicate, timeout)
+        return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def expect_console_message(
         self, predicate: Callable[[ConsoleMessage], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl[ConsoleMessage]:
-        return EventContextManagerImpl(self, "console", predicate, timeout)
+        return EventContextManagerImpl(self.waitForEvent("console", predicate, timeout))
 
     def expect_dialog(
         self, predicate: Callable[[Dialog], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl[Dialog]:
-        return EventContextManagerImpl(self, "dialog", predicate, timeout)
+        return EventContextManagerImpl(self.waitForEvent("dialog", predicate, timeout))
 
     def expect_download(
         self, predicate: Callable[[Download], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl[Download]:
-        return EventContextManagerImpl(self, "download", predicate, timeout)
+        return EventContextManagerImpl(
+            self.waitForEvent("download", predicate, timeout)
+        )
 
     def expect_file_chooser(
         self, predicate: Callable[[FileChooser], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl[FileChooser]:
-        return EventContextManagerImpl(self, "filechooser", predicate, timeout)
+        return EventContextManagerImpl(
+            self.waitForEvent("filechooser", predicate, timeout)
+        )
+
+    def expect_load_state(
+        self, state: DocumentLoadState = None, timeout: int = None,
+    ) -> EventContextManagerImpl[Optional[Response]]:
+        return EventContextManagerImpl(self.waitForLoadState(state, timeout))
+
+    def expect_navigation(
+        self,
+        url: URLMatch = None,
+        waitUntil: DocumentLoadState = None,
+        timeout: int = None,
+    ) -> EventContextManagerImpl[Optional[Response]]:
+        return EventContextManagerImpl(self.waitForNavigation(url, waitUntil, timeout))
+
+    def expect_popup(
+        self, predicate: Callable[["Page"], bool] = None, timeout: int = None,
+    ) -> EventContextManagerImpl["Page"]:
+        return EventContextManagerImpl(self.waitForEvent("popup", predicate, timeout))
 
     def expect_request(
         self,
@@ -760,27 +767,70 @@ class Page(ChannelOwner):
         predicate: Callable[[Request], bool] = None,
         timeout: int = None,
     ) -> EventContextManagerImpl[Request]:
-        predicate = self._get_request_predicate(url, predicate)
-        return EventContextManagerImpl(self, "request", predicate, timeout)
+        return EventContextManagerImpl(self.waitForRequest(url, predicate, timeout))
 
     def expect_response(
         self,
         url: URLMatch = None,
-        predicate: Callable[[Response], bool] = None,
+        predicate: Callable[[Request], bool] = None,
         timeout: int = None,
     ) -> EventContextManagerImpl[Response]:
-        predicate = self._get_response_predicate(url, predicate)
-        return EventContextManagerImpl(self, "response", predicate, timeout)
-
-    def expect_popup(
-        self, predicate: Callable[["Page"], bool] = None, timeout: int = None,
-    ) -> EventContextManagerImpl["Page"]:
-        return EventContextManagerImpl(self, "popup", predicate, timeout)
+        return EventContextManagerImpl(self.waitForResponse(url, predicate, timeout))
 
     def expect_worker(
-        self, predicate: Callable[[Worker], bool] = None, timeout: int = None,
-    ) -> EventContextManagerImpl[Worker]:
-        return EventContextManagerImpl(self, "worker", predicate, timeout)
+        self, predicate: Callable[["Worker"], bool] = None, timeout: int = None,
+    ) -> EventContextManagerImpl["Worker"]:
+        return EventContextManagerImpl(self.waitForEvent("worker", predicate, timeout))
+
+
+class Worker(ChannelOwner):
+    Events = SimpleNamespace(Close="close")
+
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
+        self._channel.on("close", lambda _: self._on_close())
+        self._page: Optional[Page] = None
+
+    def _on_close(self) -> None:
+        if self._page:
+            self._page._workers.remove(self)
+        self.emit(Worker.Events.Close, self)
+
+    @property
+    def url(self) -> str:
+        return self._initializer["url"]
+
+    async def evaluate(
+        self, expression: str, arg: Any = None, force_expr: bool = False
+    ) -> Any:
+        if not is_function_body(expression):
+            force_expr = True
+        return parse_result(
+            await self._channel.send(
+                "evaluateExpression",
+                dict(
+                    expression=expression,
+                    isFunction=not (force_expr),
+                    arg=serialize_argument(arg),
+                ),
+            )
+        )
+
+    async def evaluateHandle(
+        self, expression: str, arg: Any = None, force_expr: bool = False
+    ) -> JSHandle:
+        return from_channel(
+            await self._channel.send(
+                "evaluateExpressionHandle",
+                dict(
+                    expression=expression,
+                    isFunction=not (force_expr),
+                    arg=serialize_argument(arg),
+                ),
+            )
+        )
 
 
 class BindingCall(ChannelOwner):

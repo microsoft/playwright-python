@@ -105,18 +105,32 @@ def generate(t: Any) -> None:
                 prefix = "        return " + prefix + f"self._impl_obj.{name}("
                 suffix = ")" + suffix
                 print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
-        if "expect_" in name and "expect_event" not in name:
+        if "expect_" in name:
             print("")
             return_type_value = return_type(value)
             return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
             event_name = re.sub(r"expect_(.*)", r"\1", name)
             event_name = re.sub(r"_", "", event_name)
             event_name = re.sub(r"consolemessage", "console", event_name)
+
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> Async{return_type_value}:"
             )
+
+            wait_for_method = "waitForEvent(event, predicate, timeout)"
+            if event_name == "request":
+                wait_for_method = "waitForRequest(url, predicate, timeout)"
+            elif event_name == "response":
+                wait_for_method = "waitForResponse(url, predicate, timeout)"
+            elif event_name == "loadstate":
+                wait_for_method = "waitForLoadState(state, timeout)"
+            elif event_name == "navigation":
+                wait_for_method = "waitForNavigation(url, waitUntil, timeout)"
+            elif event_name != "event":
+                print(f'        event = "{event_name}"')
+
             print(
-                f'        return AsyncEventContextManager(self, "{event_name}", predicate, timeout)'
+                f"        return AsyncEventContextManager(self._impl_obj.{wait_for_method})"
             )
 
     print("")
