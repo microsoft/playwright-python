@@ -18,7 +18,9 @@ from types import FunctionType
 from typing import (  # type: ignore
     Any,
     List,
+    Match,
     Union,
+    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -81,10 +83,6 @@ def signature(func: FunctionType, indent: int) -> str:
             else:
                 raise ValueError(f"value {default_value} not recognized")
             tokens.append(f"{name}: {processed} = {default_value}")
-        elif name == "contentScript":
-            tokens.append(f"{name}: {processed} = False")
-        elif name == "arg":
-            tokens.append(f"{name}: typing.Any")
         else:
             tokens.append(f"{name}: {processed}")
     return split.join(tokens)
@@ -113,10 +111,8 @@ def return_type(func: FunctionType) -> str:
 
 
 def short_name(t: Any) -> str:
-    match = re.compile(r"playwright\.[^.]+\.([^']+)").search(str(t))
-    if match:
-        return match.group(1)
-    return str(t)
+    match = cast(Match[str], re.compile(r"playwright\.[^.]+\.([^']+)").search(str(t)))
+    return match.group(1)
 
 
 def return_value(value: Any) -> List[str]:

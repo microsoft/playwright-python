@@ -106,9 +106,9 @@ class Server:
                     return
                 file_content = None
                 try:
-                    file_content = open(
-                        static_path / request.path.decode()[1:], "rb"
-                    ).read()
+                    file_content = (
+                        static_path / request.path.decode()[1:]
+                    ).read_bytes()
                 except (FileNotFoundError, IsADirectoryError):
                     request.setResponseCode(HTTPStatus.NOT_FOUND)
                 if file_content:
