@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
@@ -87,8 +88,14 @@ def generate(t: Any) -> None:
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
             )
-            prefix = "        return " + prefix + f"self._sync(self._impl_obj.{name}("
-            suffix = "))" + suffix
+            if inspect.iscoroutinefunction(value):
+                prefix = (
+                    "        return " + prefix + f"self._sync(self._impl_obj.{name}("
+                )
+                suffix = "))" + suffix
+            else:
+                prefix = "        return " + prefix + f"self._impl_obj.{name}("
+                suffix = ")" + suffix
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
         if "expect_" in name:
             print("")
