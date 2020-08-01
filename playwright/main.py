@@ -13,10 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import gzip
-import os
-import shutil
-import stat
 import subprocess
 import sys
 from typing import Any
@@ -25,7 +21,7 @@ from greenlet import greenlet
 
 from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
-from playwright.helper import Error, not_installed_error
+from playwright.helper import Error
 from playwright.object_factory import create_remote_object
 from playwright.path_utils import get_file_dirname
 from playwright.playwright import Playwright
@@ -47,15 +43,7 @@ def compute_driver_name() -> str:
 async def run_driver_async() -> Connection:
     package_path = get_file_dirname()
     driver_name = compute_driver_name()
-    driver_executable = package_path / driver_name
-    archive_name = package_path / "drivers" / (driver_name + ".gz")
-
-    if not driver_executable.exists() or os.path.getmtime(
-        driver_executable
-    ) < os.path.getmtime(archive_name):
-        raise not_installed_error(
-            "Playwright requires additional post-installation step to be made."
-        )
+    driver_executable = package_path / "drivers" / driver_name
 
     proc = await asyncio.create_subprocess_exec(
         str(driver_executable),
@@ -127,24 +115,8 @@ def main() -> None:
         return
     package_path = get_file_dirname()
     driver_name = compute_driver_name()
-    driver_executable = package_path / driver_name
-    archive_name = package_path / "drivers" / (driver_name + ".gz")
-
-    if not driver_executable.exists() or os.path.getmtime(
-        driver_executable
-    ) < os.path.getmtime(archive_name):
-        print(f"Extracting {archive_name} into {driver_executable}...")
-        with gzip.open(archive_name, "rb") as f_in, open(
-            driver_executable, "wb"
-        ) as f_out:
-            shutil.copyfileobj(f_in, f_out)
-
-        st = os.stat(driver_executable)
-        if st.st_mode & stat.S_IEXEC == 0:
-            print(f"Making {driver_executable} executable...")
-            os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
-
+    driver_executable = package_path / "drivers" / driver_name
     print("Installing the browsers...")
-    subprocess.run(f"{driver_executable} install", shell=True)
+    subprocess.check_call(f"{driver_executable} install", shell=True)
 
     print("Playwright is now ready for use")

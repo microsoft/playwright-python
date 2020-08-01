@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import gzip
 import os
 import re
 import shutil
@@ -33,17 +32,8 @@ if (driver_path / "node_modules").exists():
 if (driver_path / "out").exists():
     shutil.rmtree(driver_path / "out")
 
-subprocess.run("npm i", cwd=driver_path, shell=True)
-subprocess.run("npm run bake", cwd=driver_path, shell=True)
-
-for driver in ["driver-linux", "driver-macos", "driver-win.exe"]:
-    if (package_path / driver).exists():
-        os.remove((package_path / driver))
-
-    in_path = driver_path / "out" / driver
-    out_path = drivers_path / (driver + ".gz")
-    with open(in_path, "rb") as f_in, gzip.open(out_path, "wb") as f_out:
-        shutil.copyfileobj(f_in, f_out)
+subprocess.check_call("npm i", cwd=driver_path, shell=True)
+subprocess.check_call("npm run bake", cwd=driver_path, shell=True)
 
 node_modules_playwright = driver_path / "node_modules" / "playwright"
 
