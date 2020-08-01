@@ -328,3 +328,33 @@ async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
     await browser.close()
 
     await browser_server.close()
+
+
+async def test_browser_type_with_launch_should_work(
+    browser_type: BrowserType, launch_arguments
+):
+    async with browser_type.withLaunch(**launch_arguments) as browser:
+        assert len(browser.contexts) == 0
+        async with browser.withNewContext() as context:
+            assert len(browser.contexts) == 1
+            assert len(context.pages) == 0
+            async with context.withNewPage() as page:
+                assert len(context.pages) == 1
+                assert await page.content()
+            assert len(context.pages) == 0
+        assert len(browser.contexts) == 0
+
+        async with browser.withNewPage() as page:
+            assert len(browser.contexts) == 1
+            assert len(browser.contexts[0].pages) == 1
+            assert await page.content()
+        assert len(browser.contexts) == 0
+
+    assert browser.isConnected() is False
+
+
+async def test_browser_type_with_launch_server_should_work(
+    browser_type, launch_arguments
+):
+    async with browser_type.withLaunchServer(**launch_arguments) as browser_server:
+        assert browser_server.pid > 0

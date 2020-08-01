@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import sys
+from contextlib import asynccontextmanager
 from types import SimpleNamespace
-from typing import Dict, List, Union
+from typing import Any, AsyncGenerator, Dict, List, Union
 
 from playwright.browser_context import BrowserContext
 from playwright.connection import ChannelOwner, from_channel
@@ -86,6 +87,14 @@ class Browser(ChannelOwner):
         context._browser = self
         return context
 
+    @asynccontextmanager
+    async def withNewContext(
+        self, *args: Any, **kwargs: Any
+    ) -> AsyncGenerator[BrowserContext, None]:
+        context = await self.newContext(*args, **kwargs)
+        yield context
+        await context.close()
+
     async def newPage(
         self,
         viewport: Union[Dict, Literal[0]] = None,
@@ -112,6 +121,14 @@ class Browser(ChannelOwner):
         page._owned_context = context
         context._owner_page = page
         return page
+
+    @asynccontextmanager
+    async def withNewPage(
+        self, *args: Any, **kwargs: Any
+    ) -> AsyncGenerator[Page, None]:
+        page = await self.newPage(*args, **kwargs)
+        yield page
+        await page.close()
 
     async def close(self) -> None:
         if self._is_closed_or_closing:

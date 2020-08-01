@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator, Dict, List
 
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
@@ -60,6 +61,14 @@ class BrowserType(ChannelOwner):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
 
+    @asynccontextmanager
+    async def withLaunch(
+        self, *args: Any, **kwargs: Any
+    ) -> AsyncGenerator[Browser, None]:
+        browser = await self.launch(*args, **kwargs)
+        yield browser
+        await browser.close()
+
     async def launchServer(
         self,
         executablePath: str = None,
@@ -85,6 +94,14 @@ class BrowserType(ChannelOwner):
             if f"{self.name}-" in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
+
+    @asynccontextmanager
+    async def withLaunchServer(
+        self, *args: Any, **kwargs: Any
+    ) -> AsyncGenerator[Browser, None]:
+        browser = await self.launchServer(*args, **kwargs)
+        yield browser
+        await browser.close()
 
     async def launchPersistentContext(
         self,

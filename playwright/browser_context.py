@@ -13,8 +13,18 @@
 # limitations under the License.
 
 import asyncio
+from contextlib import asynccontextmanager
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+)
 
 from playwright.connection import ChannelOwner, from_channel
 from playwright.event_context_manager import EventContextManagerImpl
@@ -105,7 +115,13 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.newContext()")
         return from_channel(await self._channel.send("newPage"))
 
-    async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
+    @asynccontextmanager
+    async def withNewPage(self) -> AsyncGenerator[Page, None]:
+        page = await self.newPage()
+        yield page
+        await page.close()
+
+    async def cookies(self, urls: Union[str, List[str]]) -> List[Cookie]:
         if urls is None:
             urls = []
         return await self._channel.send("cookies", dict(urls=urls))
