@@ -35,6 +35,11 @@ if (driver_path / "out").exists():
 subprocess.check_call("npm i", cwd=driver_path, shell=True)
 subprocess.check_call("npm run bake", cwd=driver_path, shell=True)
 
+# for local development
+drivers = (driver_path / "out").glob("**/*")
+for driver in drivers:
+    shutil.copy(driver, drivers_path)
+
 node_modules_playwright = driver_path / "node_modules" / "playwright"
 
 shutil.copyfile(
