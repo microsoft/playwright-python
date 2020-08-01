@@ -40,10 +40,9 @@ from playwright.frame import Frame
 from playwright.input import Keyboard, Mouse
 from playwright.js_handle import JSHandle
 from playwright.network import Request, Response, Route
-from playwright.page import BindingCall, Page
+from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
-from playwright.worker import Worker
 
 
 def process_type(value: Any, param: bool = False) -> str:
@@ -171,10 +170,9 @@ from playwright.helper import ConsoleMessageLocation, Error, FilePayload, Select
 from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl
 from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl
-from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl
+from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
-from playwright.worker import Worker as WorkerImpl
 """
 
 all_types = [

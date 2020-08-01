@@ -26,6 +26,7 @@ from playwright.element_handle import (
     convert_select_option_values,
     normalize_file_payloads,
 )
+from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     DocumentLoadState,
     Error,
@@ -37,6 +38,7 @@ from playwright.helper import (
     URLMatcher,
     is_function_body,
     locals_to_params,
+    monotonic_time,
 )
 from playwright.js_handle import JSHandle, parse_result, serialize_argument
 from playwright.network import Response
@@ -64,7 +66,7 @@ class Frame(ChannelOwner):
         self._detached = False
         self._child_frames: List[Frame] = []
         self._page: "Page"
-        self._load_states: Set[str] = set()
+        self._load_states: Set[str] = set(initializer["loadStates"])
         self._event_emitter = BaseEventEmitter()
         self._channel.on(
             "loadstate",
@@ -125,29 +127,39 @@ class Frame(ChannelOwner):
 
     async def waitForNavigation(
         self,
-        timeout: int = None,
-        waitUntil: DocumentLoadState = None,
         url: URLMatch = None,
+        waitUntil: DocumentLoadState = None,
+        timeout: int = None,
     ) -> Optional[Response]:
         if not waitUntil:
             waitUntil = "load"
+
+        if timeout is None:
+            timeout = self._page._timeout_settings.navigation_timeout()
+        deadline = monotonic_time() + timeout
         wait_helper = self._setup_navigation_wait_helper(timeout)
         matcher = URLMatcher(url) if url else None
+
+        def predicate(event: Any) -> bool:
+            # Any failed navigation results in a rejection.
+            if event.get("error"):
+                return True
+            return not matcher or matcher.matches(event["url"])
+
         event = await wait_helper.wait_for_event(
-            self._event_emitter,
-            "navigated",
-            lambda event: not matcher or matcher.matches(event["url"]),
+            self._event_emitter, "navigated", predicate=predicate,
         )
-        if "newDocument" in event and "request" in event["newDocument"]:
-            request = from_channel(event["newDocument"]["request"])
-            return await request.response()
         if "error" in event:
             raise Error(event["error"])
 
         if waitUntil not in self._load_states:
-            await wait_helper.wait_for_event(
-                self._event_emitter, "loadstate", lambda s: s == waitUntil
-            )
+            timeout = deadline - monotonic_time()
+            if timeout > 0:
+                await self.waitForLoadState(state=waitUntil, timeout=timeout)
+
+        if "newDocument" in event and "request" in event["newDocument"]:
+            request = from_channel(event["newDocument"]["request"])
+            return await request.response()
         return None
 
     async def waitForLoadState(
@@ -155,6 +167,8 @@ class Frame(ChannelOwner):
     ) -> None:
         if not state:
             state = "load"
+        if state not in ("load", "domcontentloaded", "networkidle"):
+            raise Error("state: expected one of (load|domcontentloaded|networkidle)")
         if state in self._load_states:
             return
         wait_helper = self._setup_navigation_wait_helper(timeout)
@@ -446,3 +460,16 @@ class Frame(ChannelOwner):
 
     async def title(self) -> str:
         return await self._channel.send("title")
+
+    def expect_load_state(
+        self, state: DocumentLoadState = None, timeout: int = None,
+    ) -> EventContextManagerImpl[Optional[Response]]:
+        return EventContextManagerImpl(self.waitForLoadState(state, timeout))
+
+    def expect_navigation(
+        self,
+        url: URLMatch = None,
+        waitUntil: DocumentLoadState = None,
+        timeout: int = None,
+    ) -> EventContextManagerImpl[Optional[Response]]:
+        return EventContextManagerImpl(self.waitForNavigation(url, waitUntil, timeout))

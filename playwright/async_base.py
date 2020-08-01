@@ -13,10 +13,9 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Generic, Optional, TypeVar, cast
+from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar, cast
 
 from playwright.impl_to_api_mapping import ImplToApiMapping, ImplWrapper
-from playwright.wait_helper import WaitHelper
 
 mapping = ImplToApiMapping()
 
@@ -25,39 +24,22 @@ T = TypeVar("T")
 
 
 class AsyncEventInfo(Generic[T]):
-    def __init__(
-        self,
-        async_base: "AsyncBase",
-        event: str,
-        predicate: Callable[[T], bool] = None,
-        timeout: int = None,
-    ) -> None:
+    def __init__(self, coroutine: Coroutine) -> None:
         self._value: Optional[T] = None
-
-        wait_helper = WaitHelper(async_base._loop)
-        wait_helper.reject_on_timeout(
-            timeout or 30000, f'Timeout while waiting for event "${event}"'
-        )
-        self._future = asyncio.get_event_loop().create_task(
-            wait_helper.wait_for_event(async_base._impl_obj, event, predicate)
-        )
+        self._future = asyncio.get_event_loop().create_task(coroutine)
+        self._done = False
 
     @property
     async def value(self) -> T:
-        if not self._value:
+        if not self._done:
             self._value = mapping.from_maybe_impl(await self._future)
+            self._done = True
         return cast(T, self._value)
 
 
 class AsyncEventContextManager(Generic[T]):
-    def __init__(
-        self,
-        async_base: "AsyncBase",
-        event: str,
-        predicate: Callable[[T], bool] = None,
-        timeout: int = None,
-    ) -> None:
-        self._event = AsyncEventInfo(async_base, event, predicate, timeout)
+    def __init__(self, coroutine: Coroutine) -> None:
+        self._event: AsyncEventInfo = AsyncEventInfo(coroutine)
 
     async def __aenter__(self) -> AsyncEventInfo[T]:
         return self._event
@@ -90,8 +72,3 @@ class AsyncBase(ImplWrapper):
 
     def remove_listener(self, event_name: str, handler: Any) -> None:
         self._impl_obj.remove_listener(event_name, handler)
-
-    def expect_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
-    ) -> AsyncEventContextManager:
-        return AsyncEventContextManager(self, event, predicate, timeout)

@@ -13,47 +13,28 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Generic, Optional, TypeVar, cast
-
-from playwright.connection import ChannelOwner
-from playwright.wait_helper import WaitHelper
+from typing import Any, Coroutine, Generic, Optional, TypeVar, cast
 
 T = TypeVar("T")
 
 
 class EventInfoImpl(Generic[T]):
-    def __init__(
-        self,
-        channel_owner: ChannelOwner,
-        event: str,
-        predicate: Callable[[T], bool] = None,
-        timeout: int = None,
-    ) -> None:
+    def __init__(self, coroutine: Coroutine) -> None:
         self._value: Optional[T] = None
-        wait_helper = WaitHelper(channel_owner._loop)
-        wait_helper.reject_on_timeout(
-            timeout or 30000, f'Timeout while waiting for event "${event}"'
-        )
-        self._future = asyncio.get_event_loop().create_task(
-            wait_helper.wait_for_event(channel_owner, event, predicate)
-        )
+        self._task = asyncio.get_event_loop().create_task(coroutine)
+        self._done = False
 
     @property
     async def value(self) -> T:
-        if not self._value:
-            self._value = await self._future
+        if not self._done:
+            self._value = await self._task
+            self._done = True
         return cast(T, self._value)
 
 
 class EventContextManagerImpl(Generic[T]):
-    def __init__(
-        self,
-        channel_owner: ChannelOwner,
-        event: str,
-        predicate: Callable[[T], bool] = None,
-        timeout: int = None,
-    ) -> None:
-        self._event = EventInfoImpl(channel_owner, event, predicate, timeout)
+    def __init__(self, coroutine: Coroutine) -> None:
+        self._event: EventInfoImpl = EventInfoImpl(coroutine)
 
     async def __aenter__(self) -> EventInfoImpl[T]:
         return self._event

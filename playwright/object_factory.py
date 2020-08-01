@@ -26,10 +26,9 @@ from playwright.element_handle import ElementHandle
 from playwright.frame import Frame
 from playwright.js_handle import JSHandle
 from playwright.network import Request, Response, Route
-from playwright.page import BindingCall, Page
+from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
-from playwright.worker import Worker
 
 
 class DummyObject(ChannelOwner):

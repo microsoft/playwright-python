@@ -216,9 +216,9 @@ class BrowserContext(ChannelOwner):
     def expect_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self, event, predicate, timeout)
+        return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def expect_page(
         self, predicate: Callable[[Page], bool] = None, timeout: int = None,
     ) -> EventContextManagerImpl[Page]:
-        return EventContextManagerImpl(self, "page", predicate, timeout)
+        return EventContextManagerImpl(self.waitForEvent("page", predicate, timeout))

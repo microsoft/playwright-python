@@ -14,8 +14,10 @@
 
 import asyncio
 import fnmatch
+import math
 import re
 import sys
+import time
 import traceback
 from types import TracebackType
 from typing import (
@@ -217,6 +219,10 @@ def locals_to_params(args: Dict) -> Dict:
         if args[key] is not None:
             copy[key] = args[key]
     return copy
+
+
+def monotonic_time() -> int:
+    return math.floor(time.monotonic() * 1000)
 
 
 class PendingWaitEvent:
