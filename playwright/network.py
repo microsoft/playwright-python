@@ -99,7 +99,7 @@ class Route(ChannelOwner):
 
     async def fulfill(
         self,
-        status: int = 200,
+        status: int = None,
         headers: Dict[str, str] = None,
         body: Union[str, bytes] = None,
         path: Union[str, Path] = None,
@@ -110,12 +110,13 @@ class Route(ChannelOwner):
         if isinstance(body, str):
             params["body"] = body
             params["isBase64"] = False
-            length = len(body)
+            length = len(body.encode())
         elif isinstance(body, bytes):
             params["body"] = base64.b64encode(body).decode()
             params["isBase64"] = True
             length = len(body)
         elif path:
+            del params["path"]
             file_content = Path(path).read_bytes()
             params["body"] = base64.b64encode(file_content).decode()
             params["isBase64"] = True
@@ -131,8 +132,6 @@ class Route(ChannelOwner):
         if length and "content-length" not in headers:
             headers["content-length"] = str(length)
         params["headers"] = serialize_headers(headers)
-        if "path" in params:
-            del params["path"]
         await self._channel.send("fulfill", params)
 
     async def continue_(

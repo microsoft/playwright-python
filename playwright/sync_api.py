@@ -375,7 +375,7 @@ class Route(SyncBase):
 
     def fulfill(
         self,
-        status: int = 200,
+        status: int = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
         path: typing.Union[str, pathlib.Path] = None,
@@ -389,7 +389,7 @@ class Route(SyncBase):
 
         Parameters
         ----------
-        status : int
+        status : Optional[int]
             Response status code, defaults to `200`.
         headers : Optional[typing.Dict[str, str]]
             Optional response headers. Header values will be converted to a string.
