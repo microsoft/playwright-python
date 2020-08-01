@@ -13,15 +13,21 @@
 # limitations under the License.
 
 import asyncio
+import io
 import sys
 
 import pytest
+from PIL import Image
+from pixelmatch import pixelmatch
+from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
 from playwright import async_playwright
+from playwright.path_utils import get_file_dirname
 
 from .server import test_server
 from .utils import utils as utils_object
 
+_dirname = get_file_dirname()
 
 # Will mark all the tests as async
 def pytest_collection_modifyitems(items):
@@ -213,3 +219,25 @@ def pytest_addoption(parser):
         default=False,
         help="Run tests in headful mode.",
     )
+
+
+@pytest.fixture(scope="session")
+def assert_to_be_golden(browser_name: str):
+    def compare(received_raw: bytes, golden_name: str):
+        golden_file = (_dirname / f"golden-{browser_name}" / golden_name).read_bytes()
+        received_image = Image.open(io.BytesIO(received_raw))
+        golden_image = Image.open(io.BytesIO(golden_file))
+
+        if golden_image.size != received_image.size:
+            pytest.fail("Image size differs to golden image")
+            return
+        diff_pixels = pixelmatch(
+            from_PIL_to_raw_data(received_image),
+            from_PIL_to_raw_data(golden_image),
+            golden_image.size[0],
+            golden_image.size[1],
+            threshold=0.2,
+        )
+        assert diff_pixels == 0
+
+    return compare
