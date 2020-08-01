@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 from typing import Any, Callable, Dict, List, Optional
 from weakref import WeakKeyDictionary
 
@@ -80,7 +81,10 @@ class ImplToApiMapping:
             return self._instances[handler]
 
         def wrapper(*args: Any) -> Any:
-            return handler(*list(map(lambda a: self.from_maybe_impl(a), args)))
+            arg_count = len(inspect.signature(handler).parameters)
+            return handler(
+                *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
+            )
 
         self._instances[handler] = wrapper
         return wrapper

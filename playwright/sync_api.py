@@ -378,6 +378,7 @@ class Route(SyncBase):
         status: int = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
+        path: typing.Union[str, pathlib.Path] = None,
         contentType: str = None,
     ) -> NoneType:
         """Route.fulfill
@@ -394,13 +395,19 @@ class Route(SyncBase):
             Optional response headers. Header values will be converted to a string.
         body : Optional[str, bytes]
             Optional response body.
+        path : Optional[str, pathlib.Path]
+            Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory.
         contentType : Optional[str]
             If set, equals to setting `Content-Type` response header.
         """
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.fulfill(
-                    status=status, headers=headers, body=body, contentType=contentType
+                    status=status,
+                    headers=headers,
+                    body=body,
+                    path=path,
+                    contentType=contentType,
                 )
             )
         )

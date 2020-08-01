@@ -14,6 +14,8 @@
 
 import base64
 import json
+import mimetypes
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
@@ -100,22 +102,36 @@ class Route(ChannelOwner):
         status: int = None,
         headers: Dict[str, str] = None,
         body: Union[str, bytes] = None,
+        path: Union[str, Path] = None,
         contentType: str = None,
     ) -> None:
         params = locals_to_params(locals())
-        if contentType:
-            if headers is None:
-                headers = {}
-            headers["Content-Type"] = contentType
-            del params["contentType"]
-        if headers:
-            params["headers"] = serialize_headers(headers)
+        length = 0
         if isinstance(body, str):
             params["body"] = body
             params["isBase64"] = False
+            length = len(body.encode())
         elif isinstance(body, bytes):
             params["body"] = base64.b64encode(body).decode()
             params["isBase64"] = True
+            length = len(body)
+        elif path:
+            del params["path"]
+            file_content = Path(path).read_bytes()
+            params["body"] = base64.b64encode(file_content).decode()
+            params["isBase64"] = True
+            length = len(file_content)
+
+        headers = {k.lower(): str(v) for k, v in params.get("headers", {}).items()}
+        if params.get("contentType"):
+            headers["content-type"] = params["contentType"]
+        elif path:
+            headers["content-type"] = (
+                mimetypes.guess_type(str(Path(path)))[0] or "application/octet-stream"
+            )
+        if length and "content-length" not in headers:
+            headers["content-length"] = str(length)
+        params["headers"] = serialize_headers(headers)
         await self._channel.send("fulfill", params)
 
     async def continue_(

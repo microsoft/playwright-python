@@ -16,8 +16,12 @@ import json
 
 import pytest
 
+from playwright.async_api import Browser, Route
 from playwright.helper import Error
 from playwright.page import Page
+from playwright.path_utils import get_file_dirname
+
+_dirname = get_file_dirname()
 
 
 async def test_page_route_should_intercept(page, server):
@@ -761,3 +765,241 @@ async def test_request_fulfill_should_work_with_status_code_422(page, server):
     assert response.status == 422
     assert response.statusText == "Unprocessable Entity"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
+
+
+async def test_request_fulfill_should_allow_mocking_binary_responses(
+    page: Page, server, assert_to_be_golden
+):
+    await page.route(
+        "**/*",
+        lambda route, request: asyncio.create_task(
+            route.fulfill(
+                contentType="image/png",
+                body=(_dirname / "assets" / "pptr.png").read_bytes(),
+            )
+        ),
+    )
+
+    await page.evaluate(
+        """PREFIX => {
+      const img = document.createElement('img');
+      img.src = PREFIX + '/does-not-exist.png';
+      document.body.appendChild(img);
+      return new Promise(fulfill => img.onload = fulfill);
+    }""",
+        server.PREFIX,
+    )
+    img = await page.querySelector("img")
+    assert img
+    assert_to_be_golden(await img.screenshot(), "mock-binary-response.png")
+
+
+async def test_request_fulfill_should_allow_mocking_svg_with_charset(
+    page, server, assert_to_be_golden
+):
+    await page.route(
+        "**/*",
+        lambda route: asyncio.create_task(
+            route.fulfill(
+                contentType="image/svg+xml ; charset=utf-8",
+                body='<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="30" height="30" stroke="black" fill="transparent" stroke-width="5"/></svg>',
+            )
+        ),
+    )
+
+    await page.evaluate(
+        """PREFIX => {
+      const img = document.createElement('img');
+      img.src = PREFIX + '/does-not-exist.svg';
+      document.body.appendChild(img);
+      return new Promise((f, r) => { img.onload = f; img.onerror = r; });
+    }""",
+        server.PREFIX,
+    )
+    img = await page.querySelector("img")
+    assert_to_be_golden(await img.screenshot(), "mock-svg.png")
+
+
+async def test_request_fulfill_should_work_with_file_path(
+    page: Page, server, assert_to_be_golden
+):
+    await page.route(
+        "**/*",
+        lambda route, request: asyncio.create_task(
+            route.fulfill(
+                contentType="shouldBeIgnored", path=_dirname / "assets" / "pptr.png"
+            )
+        ),
+    )
+    await page.evaluate(
+        """PREFIX => {
+      const img = document.createElement('img');
+      img.src = PREFIX + '/does-not-exist.png';
+      document.body.appendChild(img);
+      return new Promise(fulfill => img.onload = fulfill);
+    }""",
+        server.PREFIX,
+    )
+    img = await page.querySelector("img")
+    assert img
+    assert_to_be_golden(await img.screenshot(), "mock-binary-response.png")
+
+
+async def test_request_fulfill_should_stringify_intercepted_request_response_headers(
+    page, server
+):
+    await page.route(
+        "**/*",
+        lambda route: asyncio.create_task(
+            route.fulfill(status=200, headers={"foo": True}, body="Yo, page!")
+        ),
+    )
+
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.status == 200
+    headers = response.headers
+    assert headers["foo"] == "True"
+    assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
+
+
+async def test_request_fulfill_should_not_modify_the_headers_sent_to_the_server(
+    page, server
+):
+    await page.goto(server.PREFIX + "/empty.html")
+    interceptedRequests = []
+
+    # this is just to enable request interception, which disables caching in chromium
+    await page.route(server.PREFIX + "/unused", lambda route, req: None)
+
+    server.set_route(
+        "/something",
+        lambda response: (
+            interceptedRequests.append(response),
+            response.setHeader("Access-Control-Allow-Origin", "*"),
+            response.write(b"done"),
+            response.finish(),
+        ),
+    )
+
+    text = await page.evaluate(
+        """async url => {
+      const data = await fetch(url);
+      return data.text();
+    }""",
+        server.CROSS_PROCESS_PREFIX + "/something",
+    )
+    assert text == "done"
+
+    playwrightRequest = asyncio.Future()
+    await page.route(
+        server.CROSS_PROCESS_PREFIX + "/something",
+        lambda route, request: (
+            playwrightRequest.set_result(request),
+            asyncio.create_task(route.continue_(headers={**request.headers})),
+        ),
+    )
+
+    textAfterRoute = await page.evaluate(
+        """async url => {
+      const data = await fetch(url);
+      return data.text();
+    }""",
+        server.CROSS_PROCESS_PREFIX + "/something",
+    )
+    assert textAfterRoute == "done"
+
+    assert len(interceptedRequests) == 2
+    assert (
+        interceptedRequests[0].requestHeaders == interceptedRequests[1].requestHeaders
+    )
+
+
+async def test_request_fulfill_should_include_the_origin_header(page, server):
+    await page.goto(server.PREFIX + "/empty.html")
+    interceptedRequest = []
+    await page.route(
+        server.CROSS_PROCESS_PREFIX + "/something",
+        lambda route, request: (
+            interceptedRequest.append(request),
+            asyncio.create_task(
+                route.fulfill(
+                    headers={"Access-Control-Allow-Origin": "*"},
+                    contentType="text/plain",
+                    body="done",
+                )
+            ),
+        ),
+    )
+
+    text = await page.evaluate(
+        """async url => {
+      const data = await fetch(url);
+      return data.text();
+    }""",
+        server.CROSS_PROCESS_PREFIX + "/something",
+    )
+    assert text == "done"
+    assert len(interceptedRequest) == 1
+    assert interceptedRequest[0].headers["origin"] == server.PREFIX
+
+
+async def test_request_fulfill_should_work_with_request_interception(page, server):
+    requests = {}
+
+    def _handle_route(route: Route):
+        requests[route.request.url.split("/").pop()] = route.request
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handle_route)
+
+    server.set_redirect("/rrredirect", "/frames/one-frame.html")
+    await page.goto(server.PREFIX + "/rrredirect")
+    assert requests["rrredirect"].isNavigationRequest()
+    assert requests["frame.html"].isNavigationRequest()
+    assert requests["script.js"].isNavigationRequest() is False
+    assert requests["style.css"].isNavigationRequest() is False
+
+
+async def test_Interception_should_work_with_request_interception(
+    browser: Browser, https_server
+):
+    context = await browser.newContext(ignoreHTTPSErrors=True)
+    page = await context.newPage()
+
+    await page.route(
+        "**/*", lambda route, request: asyncio.ensure_future(route.continue_())
+    )
+    response = await page.goto(https_server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    await context.close()
+
+
+async def test_ignoreHTTPSErrors_service_worker_should_intercept_after_a_service_worker(
+    browser, page, server, context
+):
+    await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
+    await page.evaluate("() => window.activationPromise")
+
+    # Sanity check.
+    sw_response = await page.evaluate('() => fetchDummy("foo")')
+    assert sw_response == "responseFromServiceWorker:foo"
+
+    def _handle_route(route):
+        asyncio.ensure_future(
+            route.fulfill(
+                status=200,
+                contentType="text/css",
+                body="responseFromInterception:" + route.request.url.split("/")[-1],
+            )
+        )
+
+    await page.route("**/foo", _handle_route)
+
+    # Page route is applied after service worker fetch event.
+    sw_response2 = await page.evaluate('() => fetchDummy("foo")')
+    assert sw_response2 == "responseFromServiceWorker:foo"
+
+    # Page route is not applied to service worker initiated fetch.
+    nonInterceptedResponse = await page.evaluate('() => fetchDummy("passthrough")')
+    assert nonInterceptedResponse == "FAILURE: Not Found"
