@@ -13,9 +13,6 @@
 # limitations under the License.
 
 from playwright import Error
-from playwright.path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
 
 
 async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
@@ -24,8 +21,8 @@ async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
     assert await page.evaluate("window.result") == 123
 
 
-async def test_add_init_script_work_with_a_path(page):
-    await page.addInitScript(path=_dirname / "assets/injectedfile.js")
+async def test_add_init_script_work_with_a_path(page, assetdir):
+    await page.addInitScript(path=assetdir / "injectedfile.js")
     await page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert await page.evaluate("window.result") == 123
 
@@ -54,9 +51,9 @@ async def test_add_init_script_work_with_browser_context_scripts(page, context):
 
 
 async def test_add_init_script_work_with_browser_context_scripts_with_a_path(
-    page, context
+    page, context, assetdir
 ):
-    await context.addInitScript(path=_dirname / "assets/injectedfile.js")
+    await context.addInitScript(path=assetdir / "injectedfile.js")
     page = await context.newPage()
     await page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert await page.evaluate("window.result") == 123

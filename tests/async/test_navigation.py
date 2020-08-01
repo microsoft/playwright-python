@@ -22,9 +22,6 @@ import pytest
 from playwright import Error
 from playwright.helper import TimeoutError
 from playwright.network import Request
-from playwright.path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
 
 
 async def test_goto_should_work(page, server):
@@ -32,8 +29,8 @@ async def test_goto_should_work(page, server):
     assert page.url == server.EMPTY_PAGE
 
 
-async def test_goto_should_work_with_file_URL(page, server):
-    fileurl = (_dirname / "assets" / "frames" / "two-frames.html").as_uri()
+async def test_goto_should_work_with_file_URL(page, server, assetdir):
+    fileurl = (assetdir / "frames" / "two-frames.html").as_uri()
     await page.goto(fileurl)
     assert page.url.lower() == fileurl.lower()
     assert len(page.frames) == 3

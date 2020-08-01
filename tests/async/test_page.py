@@ -19,9 +19,6 @@ import re
 import pytest
 
 from playwright import Error, TimeoutError
-from playwright.path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
 
 
 async def test_close_should_reject_all_promises(context):
@@ -531,11 +528,11 @@ async def test_add_script_tag_should_work_with_a_url_and_type_module(page, serve
     assert await page.evaluate("__es6injected") == 42
 
 
-async def test_add_script_tag_should_work_with_a_path_and_type_module(page, server):
+async def test_add_script_tag_should_work_with_a_path_and_type_module(
+    page, server, assetdir
+):
     await page.goto(server.EMPTY_PAGE)
-    await page.addScriptTag(
-        path=_dirname / "assets" / "es6" / "es6pathimport.js", type="module"
-    )
+    await page.addScriptTag(path=assetdir / "es6" / "es6pathimport.js", type="module")
     await page.waitForFunction("window.__es6injected")
     assert await page.evaluate("__es6injected") == 42
 
@@ -559,22 +556,20 @@ async def test_add_script_tag_should_throw_an_error_if_loading_from_url_fail(
     assert exc_info.value
 
 
-async def test_add_script_tag_should_work_with_a_path(page, server):
+async def test_add_script_tag_should_work_with_a_path(page, server, assetdir):
     await page.goto(server.EMPTY_PAGE)
-    script_handle = await page.addScriptTag(
-        path=_dirname / "assets" / "injectedfile.js"
-    )
+    script_handle = await page.addScriptTag(path=assetdir / "injectedfile.js")
     assert script_handle.asElement()
     assert await page.evaluate("__injected") == 42
 
 
 @pytest.mark.skip_browser("webkit")
 async def test_add_script_tag_should_include_source_url_when_path_is_provided(
-    page, server
+    page, server, assetdir
 ):
     # Lacking sourceURL support in WebKit
     await page.goto(server.EMPTY_PAGE)
-    await page.addScriptTag(path=_dirname / "assets" / "injectedfile.js")
+    await page.addScriptTag(path=assetdir / "injectedfile.js")
     result = await page.evaluate("__injectedError.stack")
     assert os.path.join("assets", "injectedfile.js") in result
 
@@ -637,11 +632,9 @@ async def test_add_style_tag_should_throw_an_error_if_loading_from_url_fail(
     assert exc_info.value
 
 
-async def test_add_style_tag_should_work_with_a_path(page, server):
+async def test_add_style_tag_should_work_with_a_path(page, server, assetdir):
     await page.goto(server.EMPTY_PAGE)
-    style_handle = await page.addStyleTag(
-        path=_dirname / "assets" / "injectedstyle.css"
-    )
+    style_handle = await page.addStyleTag(path=assetdir / "injectedstyle.css")
     assert style_handle.asElement()
     assert (
         await page.evaluate(
@@ -652,10 +645,10 @@ async def test_add_style_tag_should_work_with_a_path(page, server):
 
 
 async def test_add_style_tag_should_include_source_url_when_path_is_provided(
-    page, server
+    page, server, assetdir
 ):
     await page.goto(server.EMPTY_PAGE)
-    await page.addStyleTag(path=_dirname / "assets" / "injectedstyle.css")
+    await page.addStyleTag(path=assetdir / "injectedstyle.css")
     style_handle = await page.querySelector("style")
     style_content = await page.evaluate("style => style.innerHTML", style_handle)
     assert os.path.join("assets", "injectedstyle.css") in style_content
