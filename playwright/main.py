@@ -145,6 +145,6 @@ def main() -> None:
             os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
 
     print("Installing the browsers...")
-    subprocess.run(f"{driver_executable} install", shell=True)
+    subprocess.run(f"{driver_executable} {' '.join(sys.argv[1:])}", shell=True)
 
     print("Playwright is now ready for use")

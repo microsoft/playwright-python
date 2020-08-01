@@ -16,9 +16,12 @@
 
 const path = require('path');
 
+const arguments = process.argv.slice(2)
+
 (async() => {
-  if (process.argv.includes('install')) {
-    await require('playwright/lib/install/installer').installBrowsersWithProgressBar(path.join(path.dirname(process.argv[0]), 'drivers'));
+  if (arguments.length > 0 && arguments[0] === 'install') {
+    const browserAllowList = arguments.slice(1)
+    await require('playwright/lib/install/installer').installBrowsersWithProgressBar(path.join(path.dirname(process.argv[0]), 'drivers'), browserAllowList);
     return;
   }
 
