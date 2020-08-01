@@ -16,7 +16,7 @@ import os
 
 import pytest
 
-from playwright import Error, sync_playwright
+from playwright import Error, TimeoutError, sync_playwright
 from playwright.sync_api import Browser, Page
 
 
@@ -214,3 +214,10 @@ def test_sync_playwright_multiple_times():
             with sync_playwright() as pw2:
                 assert pw1.chromium == pw2.chromium
         assert "Can only run one Playwright at a time." in exc.value.message
+
+
+def test_sync_set_default_timeout(page):
+    page.setDefaultTimeout(1)
+    with pytest.raises(TimeoutError) as exc:
+        page.waitForFunction("false")
+    assert "Timeout 1ms exceeded." in exc.value.message

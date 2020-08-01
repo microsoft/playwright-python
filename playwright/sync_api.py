@@ -191,7 +191,7 @@ class Request(SyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.isNavigationRequest()))
+        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest())
 
 
 mapping.register(RequestImpl, Request)
@@ -756,7 +756,7 @@ class JSHandle(SyncBase):
         -------
         typing.Union[ElementHandle, NoneType]
         """
-        return mapping.from_impl_nullable(self._sync(self._impl_obj.asElement()))
+        return mapping.from_impl_nullable(self._impl_obj.asElement())
 
     def dispose(self) -> NoneType:
         """JSHandle.dispose
@@ -797,7 +797,7 @@ class ElementHandle(JSHandle):
         -------
         typing.Union[ElementHandle, NoneType]
         """
-        return mapping.from_impl_nullable(self._sync(self._impl_obj.asElement()))
+        return mapping.from_impl_nullable(self._impl_obj.asElement())
 
     def ownerFrame(self) -> typing.Union["Frame", NoneType]:
         """ElementHandle.ownerFrame
@@ -2062,7 +2062,7 @@ class Frame(SyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.isDetached()))
+        return mapping.from_maybe_impl(self._impl_obj.isDetached())
 
     def addScriptTag(
         self, url: str = None, path: str = None, content: str = None, type: str = None
@@ -3155,7 +3155,7 @@ class Page(SyncBase):
             frame matching the criteria. Returns `null` if no frame matches.
         """
         return mapping.from_impl_nullable(
-            self._sync(self._impl_obj.frame(name=name, url=self._wrap_handler(url)))
+            self._impl_obj.frame(name=name, url=self._wrap_handler(url))
         )
 
     def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
@@ -3178,7 +3178,7 @@ class Page(SyncBase):
             Maximum navigation time in milliseconds
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setDefaultNavigationTimeout(timeout=timeout))
+            self._impl_obj.setDefaultNavigationTimeout(timeout=timeout)
         )
 
     def setDefaultTimeout(self, timeout: int) -> NoneType:
@@ -3194,7 +3194,7 @@ class Page(SyncBase):
             Maximum time in milliseconds
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setDefaultTimeout(timeout=timeout))
+            self._impl_obj.setDefaultTimeout(timeout=timeout)
         )
 
     def querySelector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
@@ -3974,7 +3974,7 @@ class Page(SyncBase):
         -------
         typing.Union[Viewport, NoneType]
         """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.viewportSize()))
+        return mapping.from_maybe_impl(self._impl_obj.viewportSize())
 
     def bringToFront(self) -> NoneType:
         """Page.bringToFront
@@ -4149,7 +4149,7 @@ class Page(SyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.isClosed()))
+        return mapping.from_maybe_impl(self._impl_obj.isClosed())
 
     def click(
         self,
@@ -5003,7 +5003,7 @@ class BrowserContext(SyncBase):
             Maximum navigation time in milliseconds
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setDefaultNavigationTimeout(timeout=timeout))
+            self._impl_obj.setDefaultNavigationTimeout(timeout=timeout)
         )
 
     def setDefaultTimeout(self, timeout: int) -> NoneType:
@@ -5019,7 +5019,7 @@ class BrowserContext(SyncBase):
             Maximum time in milliseconds
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setDefaultTimeout(timeout=timeout))
+            self._impl_obj.setDefaultTimeout(timeout=timeout)
         )
 
     def newPage(self) -> "Page":
@@ -5374,7 +5374,7 @@ class Browser(SyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.isConnected()))
+        return mapping.from_maybe_impl(self._impl_obj.isConnected())
 
     def newContext(
         self,
