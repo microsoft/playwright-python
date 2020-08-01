@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
+import os
 import shutil
 import subprocess
+import zipfile
 
 from playwright.path_utils import get_file_dirname
 
@@ -28,4 +31,24 @@ _egg_dir = _dirname / "playwright.egg-info"
 if _egg_dir.exists():
     shutil.rmtree(_egg_dir)
 
-subprocess.run("python setup.py sdist bdist_wheel", shell=True)
+subprocess.check_call("python setup.py sdist bdist_wheel", shell=True)
+
+base_wheel_location = glob.glob("dist/*.whl")[0]
+without_platform = base_wheel_location[:-7]
+
+pack_wheel_drivers = [
+    ("driver-linux", "manylinux1_x86_64.whl"),
+    ("driver-macos", "macosx_10_13_x86_64.whl"),
+    ("driver-win.exe", "win_amd64.whl"),
+]
+
+for driver, wheel in pack_wheel_drivers:
+    wheel_location = without_platform + wheel
+    shutil.copy(base_wheel_location, wheel_location)
+    from_location = f"driver/out/{driver}"
+    to_location = f"playwright/drivers/{driver}"
+    with zipfile.ZipFile(wheel_location, "a") as zipf:
+        zipf.write(from_location, to_location)
+    # for local development
+    shutil.copy(from_location, to_location)
+os.remove(base_wheel_location)
