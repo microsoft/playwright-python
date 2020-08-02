@@ -76,13 +76,13 @@ class DocumentationProvider:
                 if not doc_value and "options" in args:
                     args = args["options"]["type"]["properties"]
                     doc_value = args.get(name)
-                if not doc_value and fqname == "Route.fulfill":
+                elif not doc_value and fqname == "Route.fulfill":
                     args = args["response"]["type"]["properties"]
                     doc_value = args.get(name)
-                if not doc_value and fqname == "Route.continue":
+                elif not doc_value and fqname == "Route.continue":
                     args = args["overrides"]["type"]["properties"]
                     doc_value = args.get(name)
-                if not doc_value and fqname == "Page.setViewportSize":
+                elif not doc_value and fqname == "Page.setViewportSize":
                     args = args["viewportSize"]["type"]["properties"]
                     doc_value = args.get(name)
                 if not doc_value:
