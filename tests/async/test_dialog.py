@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-from asyncio import Future
 
 import pytest
 
@@ -22,64 +21,69 @@ from playwright.page import Page
 
 
 async def test_should_fire(page: Page, server):
-    on_dialog_actions_complete: Future[None] = asyncio.Future()
+    result = []
 
-    async def on_dialog(dialog: Dialog):
+    def on_dialog(dialog: Dialog):
+        result.append(True)
         assert dialog.type == "alert"
         assert dialog.defaultValue == ""
         assert dialog.message == "yo"
-        on_dialog_actions_complete.set_result(await dialog.accept())
+        asyncio.create_task(dialog.accept())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     await page.evaluate("alert('yo')")
-    await on_dialog_actions_complete
+    assert result
 
 
 async def test_should_allow_accepting_prompts(page: Page, server):
-    on_dialog_actions_complete: Future[None] = asyncio.Future()
+    result = []
 
-    async def on_dialog(dialog: Dialog):
+    def on_dialog(dialog: Dialog):
+        result.append(True)
         assert dialog.type == "prompt"
         assert dialog.defaultValue == "yes."
         assert dialog.message == "question?"
-        on_dialog_actions_complete.set_result(await dialog.accept("answer!"))
+        asyncio.create_task(dialog.accept("answer!"))
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("prompt('question?', 'yes.')") == "answer!"
-    await on_dialog_actions_complete
+    assert result
 
 
 async def test_should_dismiss_the_prompt(page: Page, server):
-    on_dialog_actions_complete: Future[None] = asyncio.Future()
+    result = []
 
-    async def on_dialog(dialog: Dialog):
-        on_dialog_actions_complete.set_result(await dialog.dismiss())
+    def on_dialog(dialog: Dialog):
+        result.append(True)
+        asyncio.create_task(dialog.dismiss())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("prompt('question?')") is None
-    await on_dialog_actions_complete
+    assert result
 
 
 async def test_should_accept_the_confirm_prompt(page: Page, server):
-    on_dialog_actions_complete: Future[None] = asyncio.Future()
+    result = []
 
-    async def on_dialog(dialog: Dialog):
-        on_dialog_actions_complete.set_result(await dialog.accept())
+    def on_dialog(dialog: Dialog):
+        result.append(True)
+        asyncio.create_task(dialog.accept())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("confirm('boolean?')") is True
-    await on_dialog_actions_complete
+    assert result
 
 
 async def test_should_dismiss_the_confirm_prompt(page: Page, server):
-    on_dialog_actions_complete: Future[None] = asyncio.Future()
+    result = []
 
-    async def on_dialog(dialog: Dialog):
-        on_dialog_actions_complete.set_result(await dialog.dismiss())
+    def on_dialog(dialog: Dialog):
+        result.append(True)
+        asyncio.create_task(dialog.dismiss())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("confirm('boolean?')") is False
-    await on_dialog_actions_complete
+    assert result
 
 
 # TODO: Logger support not yet here
