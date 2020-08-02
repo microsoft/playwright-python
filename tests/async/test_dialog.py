@@ -30,7 +30,7 @@ async def test_should_fire(page: Page, server):
         assert dialog.message == "yo"
         asyncio.create_task(dialog.accept())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     await page.evaluate("alert('yo')")
     assert result
 
@@ -45,7 +45,7 @@ async def test_should_allow_accepting_prompts(page: Page, server):
         assert dialog.message == "question?"
         asyncio.create_task(dialog.accept("answer!"))
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("prompt('question?', 'yes.')") == "answer!"
     assert result
 
@@ -57,7 +57,7 @@ async def test_should_dismiss_the_prompt(page: Page, server):
         result.append(True)
         asyncio.create_task(dialog.dismiss())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("prompt('question?')") is None
     assert result
 
@@ -69,7 +69,7 @@ async def test_should_accept_the_confirm_prompt(page: Page, server):
         result.append(True)
         asyncio.create_task(dialog.accept())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("confirm('boolean?')") is True
     assert result
 
@@ -81,7 +81,7 @@ async def test_should_dismiss_the_confirm_prompt(page: Page, server):
         result.append(True)
         asyncio.create_task(dialog.dismiss())
 
-    page.on("dialog", lambda dialog: asyncio.create_task(on_dialog(dialog)))
+    page.on("dialog", on_dialog)
     assert await page.evaluate("confirm('boolean?')") is False
     assert result
 
