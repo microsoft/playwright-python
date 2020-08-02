@@ -27,6 +27,7 @@ from playwright.helper import (
     TimeoutSettings,
     URLMatch,
     URLMatcher,
+    locals_to_params,
 )
 from playwright.network import Request, Route, serialize_headers
 from playwright.page import BindingCall, Page
@@ -119,15 +120,13 @@ class BrowserContext(ChannelOwner):
     async def grantPermissions(
         self, permissions: List[str], origin: str = None
     ) -> None:
-        await self._channel.send(
-            "grantPermissions", dict(permissions=permissions, origin=origin)
-        )
+        await self._channel.send("grantPermissions", locals_to_params(locals()))
 
     async def clearPermissions(self) -> None:
         await self._channel.send("clearPermissions")
 
     async def setGeolocation(self, geolocation: Optional[Dict]) -> None:
-        await self._channel.send("setGeolocation", dict(geolocation=geolocation))
+        await self._channel.send("setGeolocation", locals_to_params(locals()))
 
     async def setExtraHTTPHeaders(self, headers: Dict) -> None:
         await self._channel.send(
