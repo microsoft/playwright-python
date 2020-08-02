@@ -14,14 +14,16 @@ if CAN_RUN_GENERATION_SCRIPT:
 @pytest.mark.skipif(
     not CAN_RUN_GENERATION_SCRIPT, reason="requires python3.8 or higher"
 )
-def test_generate_sync_api():
-    with patch("sys.stdout", new_callable=StringIO):
-        generate_sync_api()
+@patch("sys.stderr", new_callable=StringIO)
+@patch("sys.stdout", new_callable=StringIO)
+def test_generate_sync_api(stdout, stderr):
+    generate_sync_api()
 
 
 @pytest.mark.skipif(
     not CAN_RUN_GENERATION_SCRIPT, reason="requires python3.8 or higher"
 )
-def test_generate_async_api():
-    with patch("sys.stdout", new_callable=StringIO):
-        generate_async_api()
+@patch("sys.stderr", new_callable=StringIO)
+@patch("sys.stdout", new_callable=StringIO)
+def test_generate_async_api(stdout, stderr):
+    generate_async_api()

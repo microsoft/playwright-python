@@ -20,40 +20,6 @@ from playwright import Error, TimeoutError, sync_playwright
 from playwright.sync_api import Browser, Page
 
 
-@pytest.fixture
-def playwright():
-    with sync_playwright() as p:
-        yield p
-
-
-@pytest.fixture
-def browser(playwright, browser_name, launch_arguments):
-    browser_type = None
-    if browser_name == "chromium":
-        browser_type = playwright.chromium
-    elif browser_name == "firefox":
-        browser_type = playwright.firefox
-    elif browser_name == "webkit":
-        browser_type = playwright.webkit
-    browser = browser_type.launch(**launch_arguments)
-    yield browser
-    browser.close()
-
-
-@pytest.fixture
-def context(browser):
-    context = browser.newContext()
-    yield context
-    context.close()
-
-
-@pytest.fixture
-def page(context):
-    page = context.newPage()
-    yield page
-    page.close()
-
-
 def test_sync_query_selector(page):
     page.setContent(
         """

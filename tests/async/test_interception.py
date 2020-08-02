@@ -19,9 +19,6 @@ import pytest
 from playwright.async_api import Browser, Route
 from playwright.helper import Error
 from playwright.page import Page
-from playwright.path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
 
 
 async def test_page_route_should_intercept(page, server):
@@ -768,14 +765,13 @@ async def test_request_fulfill_should_work_with_status_code_422(page, server):
 
 
 async def test_request_fulfill_should_allow_mocking_binary_responses(
-    page: Page, server, assert_to_be_golden
+    page: Page, server, assert_to_be_golden, assetdir
 ):
     await page.route(
         "**/*",
         lambda route, request: asyncio.create_task(
             route.fulfill(
-                contentType="image/png",
-                body=(_dirname / "assets" / "pptr.png").read_bytes(),
+                contentType="image/png", body=(assetdir / "pptr.png").read_bytes(),
             )
         ),
     )
@@ -821,14 +817,12 @@ async def test_request_fulfill_should_allow_mocking_svg_with_charset(
 
 
 async def test_request_fulfill_should_work_with_file_path(
-    page: Page, server, assert_to_be_golden
+    page: Page, server, assert_to_be_golden, assetdir
 ):
     await page.route(
         "**/*",
         lambda route, request: asyncio.create_task(
-            route.fulfill(
-                contentType="shouldBeIgnored", path=_dirname / "assets" / "pptr.png"
-            )
+            route.fulfill(contentType="shouldBeIgnored", path=assetdir / "pptr.png")
         ),
     )
     await page.evaluate(

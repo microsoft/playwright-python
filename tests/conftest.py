@@ -21,7 +21,6 @@ from PIL import Image
 from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
-from playwright import async_playwright
 from playwright.path_utils import get_file_dirname
 
 from .server import test_server
@@ -49,24 +48,8 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def playwright():
-    async with async_playwright() as playwright_object:
-        yield playwright_object
-
-
-@pytest.fixture(scope="session")
-def selectors(playwright):
-    return playwright.selectors
-
-
-@pytest.fixture(scope="session")
-def browser_type(playwright, browser_name: str):
-    if browser_name == "chromium":
-        return playwright.chromium
-    if browser_name == "firefox":
-        return playwright.firefox
-    if browser_name == "webkit":
-        return playwright.webkit
+def assetdir():
+    return _dirname / "assets"
 
 
 @pytest.fixture(scope="session")
@@ -75,35 +58,6 @@ def launch_arguments(pytestconfig):
         "headless": not pytestconfig.getoption("--headful"),
         "chromiumSandbox": False,
     }
-
-
-@pytest.fixture(scope="session")
-async def browser_factory(launch_arguments, browser_type):
-    async def launch(**kwargs):
-        return await browser_type.launch(**launch_arguments, **kwargs)
-
-    return launch
-
-
-@pytest.fixture(scope="session")
-async def browser(browser_factory):
-    browser = await browser_factory()
-    yield browser
-    await browser.close()
-
-
-@pytest.fixture
-async def context(browser):
-    context = await browser.newContext()
-    yield context
-    await context.close()
-
-
-@pytest.fixture
-async def page(context):
-    page = await context.newPage()
-    yield page
-    await page.close()
 
 
 @pytest.fixture

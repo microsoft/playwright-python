@@ -19,9 +19,6 @@ import pytest
 
 from playwright.browser_type import BrowserType
 from playwright.helper import Error
-from playwright.path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
 
 
 async def test_browser_type_launch_should_reject_all_promises_when_browser_is_closed(
@@ -47,12 +44,12 @@ async def test_browser_type_launch_should_throw_if_page_argument_is_passed(
 
 @pytest.mark.skip("currently disabled on upstream")
 async def test_browser_type_launch_should_reject_if_launched_browser_fails_immediately(
-    browser_type, launch_arguments
+    browser_type, launch_arguments, assetdir
 ):
     with pytest.raises(Error):
         await browser_type.launch(
             **launch_arguments,
-            executablePath=_dirname / "assets" / "dummy_bad_browser_executable.js"
+            executablePath=assetdir / "dummy_bad_browser_executable.js"
         )
 
 

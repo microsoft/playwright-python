@@ -19,7 +19,7 @@ from playwright.page import Page
 from playwright.path_utils import get_file_dirname
 
 _dirname = get_file_dirname()
-FILE_TO_UPLOAD = _dirname / "assets/file-to-upload.txt"
+FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
 
 
 async def test_should_upload_the_file(page, server):
@@ -42,9 +42,9 @@ async def test_should_upload_the_file(page, server):
     )
 
 
-async def test_should_work(page):
+async def test_should_work(page, assetdir):
     await page.setContent("<input type=file>")
-    await page.setInputFiles("input", _dirname / "assets/file-to-upload.txt")
+    await page.setInputFiles("input", assetdir / "file-to-upload.txt")
     assert await page.evalOnSelector("input", "input => input.files.length") == 1
     assert (
         await page.evalOnSelector("input", "input => input.files[0].name")
@@ -184,7 +184,9 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
     assert file_length_2 == 0
 
 
-async def test_should_not_accept_multiple_files_for_single_file_input(page, server):
+async def test_should_not_accept_multiple_files_for_single_file_input(
+    page, server, assetdir
+):
     await page.setContent("<input type=file>")
     file_chooser = (
         await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
@@ -193,8 +195,8 @@ async def test_should_not_accept_multiple_files_for_single_file_input(page, serv
     try:
         await file_chooser.setFiles(
             [
-                os.path.realpath(_dirname / "assets/file-to-upload.txt"),
-                os.path.realpath(_dirname / "assets/pptr.png"),
+                os.path.realpath(assetdir / "file-to-upload.txt"),
+                os.path.realpath(assetdir / "pptr.png"),
             ]
         )
     except Exception as exc:
