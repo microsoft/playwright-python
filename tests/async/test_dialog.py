@@ -52,36 +52,30 @@ async def test_should_allow_accepting_prompts(page: Page, server):
 
 async def test_should_dismiss_the_prompt(page: Page, server):
     result = []
-
-    def on_dialog(dialog: Dialog):
-        result.append(True)
-        asyncio.create_task(dialog.dismiss())
-
-    page.on("dialog", on_dialog)
+    page.on(
+        "dialog",
+        lambda dialog: (result.append(True), asyncio.create_task(dialog.dismiss())),
+    )
     assert await page.evaluate("prompt('question?')") is None
     assert result
 
 
 async def test_should_accept_the_confirm_prompt(page: Page, server):
     result = []
-
-    def on_dialog(dialog: Dialog):
-        result.append(True)
-        asyncio.create_task(dialog.accept())
-
-    page.on("dialog", on_dialog)
+    page.on(
+        "dialog",
+        lambda dialog: (result.append(True), asyncio.create_task(dialog.accept())),
+    )
     assert await page.evaluate("confirm('boolean?')") is True
     assert result
 
 
 async def test_should_dismiss_the_confirm_prompt(page: Page, server):
     result = []
-
-    def on_dialog(dialog: Dialog):
-        result.append(True)
-        asyncio.create_task(dialog.dismiss())
-
-    page.on("dialog", on_dialog)
+    page.on(
+        "dialog",
+        lambda dialog: (result.append(True), asyncio.create_task(dialog.dismiss())),
+    )
     assert await page.evaluate("confirm('boolean?')") is False
     assert result
 
