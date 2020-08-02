@@ -66,7 +66,9 @@ class ElementHandle(JSHandle):
         return await self._channel.send("innerHTML")
 
     async def dispatchEvent(self, type: str, eventInit: Dict = None) -> None:
-        await self._channel.send("dispatchEvent", dict(type=type, eventInit=eventInit))
+        await self._channel.send(
+            "dispatchEvent", dict(type=type, eventInit=serialize_argument(eventInit))
+        )
 
     async def scrollIntoViewIfNeeded(self, timeout: int = None) -> None:
         await self._channel.send("scrollIntoViewIfNeeded", locals_to_params(locals()))
