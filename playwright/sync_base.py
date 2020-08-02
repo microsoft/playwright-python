@@ -13,7 +13,17 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar, cast
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TypeVar,
+    cast,
+)
 
 import greenlet
 
@@ -109,3 +119,35 @@ class SyncBase(ImplWrapper):
 
     def remove_listener(self, event_name: str, handler: Any) -> None:
         self._impl_obj.remove_listener(event_name, handler)
+
+    def _gather(self, *actions: Callable) -> List[Any]:
+        g_self = greenlet.getcurrent()
+        results: Dict[Callable, Any] = {}
+        exceptions: List[Exception] = []
+
+        def action_wrapper(action: Callable) -> Callable:
+            def body() -> Any:
+                try:
+                    results[action] = action()
+                except Exception as e:
+                    results[action] = e
+                    exceptions.append(e)
+                g_self.switch()
+
+            return body
+
+        async def task() -> None:
+            for action in actions:
+                g = greenlet.greenlet(action_wrapper(action))
+                g.switch()
+
+        self._loop.create_task(task())
+
+        while len(results) < len(actions):
+            dispatcher_fiber_.switch()
+
+        asyncio._set_running_loop(self._loop)
+        if exceptions:
+            raise exceptions[0]
+
+        return list(map(lambda action: results[action], actions))

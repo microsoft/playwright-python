@@ -658,7 +658,7 @@ async def test_expect_navigation_should_work_for_cross_process_navigations(
     await goto_task
 
 
-@pytest.mark.skip_browser("webkit")
+@pytest.mark.skip("flaky, investigate")
 async def test_wait_for_load_state_should_pick_up_ongoing_navigation(page, server):
     requests = []
 
