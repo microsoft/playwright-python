@@ -106,7 +106,3 @@ async def test_should_traverse_only_form_elements(page):
     assert await page.evaluate("() => document.activeElement.id") == "button"
     await page.keyboard.press("Alt+Shift+Tab")
     assert await page.evaluate("() => document.activeElement.id") == "input-1"
-
-
-#   });
-# });
