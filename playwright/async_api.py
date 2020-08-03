@@ -405,7 +405,7 @@ class Route(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.fulfill(
                 status=status,
-                headers=headers,
+                headers=mapping.to_impl(headers),
                 body=body,
                 path=path,
                 contentType=contentType,
@@ -433,7 +433,7 @@ class Route(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.continue_(
-                method=method, headers=headers, postData=postData
+                method=method, headers=mapping.to_impl(headers), postData=postData
             )
         )
 
@@ -881,7 +881,9 @@ class ElementHandle(JSHandle):
             event-specific initialization properties.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.dispatchEvent(type=type, eventInit=eventInit)
+            await self._impl_obj.dispatchEvent(
+                type=type, eventInit=mapping.to_impl(eventInit)
+            )
         )
 
     async def scrollIntoViewIfNeeded(self, timeout: int = None) -> NoneType:
@@ -926,7 +928,10 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.hover(
-                modifiers=modifiers, position=position, timeout=timeout, force=force
+                modifiers=modifiers,
+                position=mapping.to_impl(position),
+                timeout=timeout,
+                force=force,
             )
         )
 
@@ -970,7 +975,7 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             await self._impl_obj.click(
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 delay=delay,
                 button=button,
                 clickCount=clickCount,
@@ -1020,7 +1025,7 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 delay=delay,
                 button=button,
                 timeout=timeout,
@@ -1873,7 +1878,10 @@ class Frame(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.dispatchEvent(
-                selector=selector, type=type, eventInit=eventInit, timeout=timeout
+                selector=selector,
+                type=type,
+                eventInit=mapping.to_impl(eventInit),
+                timeout=timeout,
             )
         )
 
@@ -2099,7 +2107,7 @@ class Frame(AsyncBase):
             await self._impl_obj.click(
                 selector=selector,
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 delay=delay,
                 button=button,
                 clickCount=clickCount,
@@ -2150,7 +2158,7 @@ class Frame(AsyncBase):
             await self._impl_obj.dblclick(
                 selector=selector,
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 delay=delay,
                 button=button,
                 timeout=timeout,
@@ -2322,7 +2330,7 @@ class Frame(AsyncBase):
             await self._impl_obj.hover(
                 selector=selector,
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 timeout=timeout,
                 force=force,
             )
@@ -3201,7 +3209,10 @@ class Page(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.dispatchEvent(
-                selector=selector, type=type, eventInit=eventInit, timeout=timeout
+                selector=selector,
+                type=type,
+                eventInit=mapping.to_impl(eventInit),
+                timeout=timeout,
             )
         )
 
@@ -3467,7 +3478,7 @@ class Page(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.setExtraHTTPHeaders(headers=headers)
+            await self._impl_obj.setExtraHTTPHeaders(headers=mapping.to_impl(headers))
         )
 
     async def content(self) -> str:
@@ -3954,7 +3965,7 @@ class Page(AsyncBase):
                 quality=quality,
                 omitBackground=omitBackground,
                 fullPage=fullPage,
-                clip=clip,
+                clip=mapping.to_impl(clip),
             )
         )
 
@@ -4045,7 +4056,7 @@ class Page(AsyncBase):
             await self._impl_obj.click(
                 selector=selector,
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 delay=delay,
                 button=button,
                 clickCount=clickCount,
@@ -4098,7 +4109,7 @@ class Page(AsyncBase):
             await self._impl_obj.dblclick(
                 selector=selector,
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 delay=delay,
                 button=button,
                 timeout=timeout,
@@ -4273,7 +4284,7 @@ class Page(AsyncBase):
             await self._impl_obj.hover(
                 selector=selector,
                 modifiers=modifiers,
-                position=position,
+                position=mapping.to_impl(position),
                 timeout=timeout,
                 force=force,
             )
@@ -4661,7 +4672,7 @@ class Page(AsyncBase):
                 width=width,
                 height=height,
                 preferCSSPageSize=preferCSSPageSize,
-                margin=margin,
+                margin=mapping.to_impl(margin),
                 path=path,
             )
         )
@@ -4868,7 +4879,9 @@ class BrowserContext(AsyncBase):
         ----------
         cookies : typing.List[typing.Dict]
         """
-        return mapping.from_maybe_impl(await self._impl_obj.addCookies(cookies=cookies))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.addCookies(cookies=mapping.to_impl(cookies))
+        )
 
     async def clearCookies(self) -> NoneType:
         """BrowserContext.clearCookies
@@ -4933,7 +4946,9 @@ class BrowserContext(AsyncBase):
         geolocation : Optional[typing.Dict]
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.setGeolocation(geolocation=geolocation)
+            await self._impl_obj.setGeolocation(
+                geolocation=mapping.to_impl(geolocation)
+            )
         )
 
     async def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
@@ -4949,7 +4964,7 @@ class BrowserContext(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.setExtraHTTPHeaders(headers=headers)
+            await self._impl_obj.setExtraHTTPHeaders(headers=mapping.to_impl(headers))
         )
 
     async def setOffline(self, offline: bool) -> NoneType:
@@ -5160,7 +5175,7 @@ class CDPSession(AsyncBase):
         typing.Dict
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.send(method=method, params=params)
+            await self._impl_obj.send(method=method, params=mapping.to_impl(params))
         )
 
     async def detach(self) -> NoneType:
@@ -5314,18 +5329,18 @@ class Browser(AsyncBase):
         """
         return mapping.from_impl(
             await self._impl_obj.newContext(
-                viewport=viewport,
+                viewport=mapping.to_impl(viewport),
                 ignoreHTTPSErrors=ignoreHTTPSErrors,
                 javaScriptEnabled=javaScriptEnabled,
                 bypassCSP=bypassCSP,
                 userAgent=userAgent,
                 locale=locale,
                 timezoneId=timezoneId,
-                geolocation=geolocation,
+                geolocation=mapping.to_impl(geolocation),
                 permissions=permissions,
-                extraHTTPHeaders=extraHTTPHeaders,
+                extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                 offline=offline,
-                httpCredentials=httpCredentials,
+                httpCredentials=mapping.to_impl(httpCredentials),
                 deviceScaleFactor=deviceScaleFactor,
                 isMobile=isMobile,
                 hasTouch=hasTouch,
@@ -5401,18 +5416,18 @@ class Browser(AsyncBase):
         """
         return mapping.from_impl(
             await self._impl_obj.newPage(
-                viewport=viewport,
+                viewport=mapping.to_impl(viewport),
                 ignoreHTTPSErrors=ignoreHTTPSErrors,
                 javaScriptEnabled=javaScriptEnabled,
                 bypassCSP=bypassCSP,
                 userAgent=userAgent,
                 locale=locale,
                 timezoneId=timezoneId,
-                geolocation=geolocation,
+                geolocation=mapping.to_impl(geolocation),
                 permissions=permissions,
-                extraHTTPHeaders=extraHTTPHeaders,
+                extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                 offline=offline,
-                httpCredentials=httpCredentials,
+                httpCredentials=mapping.to_impl(httpCredentials),
                 deviceScaleFactor=deviceScaleFactor,
                 isMobile=isMobile,
                 hasTouch=hasTouch,
@@ -5582,10 +5597,10 @@ class BrowserType(AsyncBase):
                 handleSIGTERM=handleSIGTERM,
                 handleSIGHUP=handleSIGHUP,
                 timeout=timeout,
-                env=env,
+                env=mapping.to_impl(env),
                 headless=headless,
                 devtools=devtools,
-                proxy=proxy,
+                proxy=mapping.to_impl(proxy),
                 downloadsPath=downloadsPath,
                 slowMo=slowMo,
                 chromiumSandbox=chromiumSandbox,
@@ -5658,10 +5673,10 @@ class BrowserType(AsyncBase):
                 handleSIGTERM=handleSIGTERM,
                 handleSIGHUP=handleSIGHUP,
                 timeout=timeout,
-                env=env,
+                env=mapping.to_impl(env),
                 headless=headless,
                 devtools=devtools,
-                proxy=proxy,
+                proxy=mapping.to_impl(proxy),
                 downloadsPath=downloadsPath,
                 port=port,
                 chromiumSandbox=chromiumSandbox,
@@ -5785,24 +5800,24 @@ class BrowserType(AsyncBase):
                 handleSIGTERM=handleSIGTERM,
                 handleSIGHUP=handleSIGHUP,
                 timeout=timeout,
-                env=env,
+                env=mapping.to_impl(env),
                 headless=headless,
                 devtools=devtools,
-                proxy=proxy,
+                proxy=mapping.to_impl(proxy),
                 downloadsPath=downloadsPath,
                 slowMo=slowMo,
-                viewport=viewport,
+                viewport=mapping.to_impl(viewport),
                 ignoreHTTPSErrors=ignoreHTTPSErrors,
                 javaScriptEnabled=javaScriptEnabled,
                 bypassCSP=bypassCSP,
                 userAgent=userAgent,
                 locale=locale,
                 timezoneId=timezoneId,
-                geolocation=geolocation,
+                geolocation=mapping.to_impl(geolocation),
                 permissions=permissions,
-                extraHTTPHeaders=extraHTTPHeaders,
+                extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                 offline=offline,
-                httpCredentials=httpCredentials,
+                httpCredentials=mapping.to_impl(httpCredentials),
                 deviceScaleFactor=deviceScaleFactor,
                 isMobile=isMobile,
                 hasTouch=hasTouch,

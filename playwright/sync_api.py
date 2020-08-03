@@ -408,7 +408,7 @@ class Route(SyncBase):
             self._sync(
                 self._impl_obj.fulfill(
                     status=status,
-                    headers=headers,
+                    headers=mapping.to_impl(headers),
                     body=body,
                     path=path,
                     contentType=contentType,
@@ -438,7 +438,7 @@ class Route(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.continue_(
-                    method=method, headers=headers, postData=postData
+                    method=method, headers=mapping.to_impl(headers), postData=postData
                 )
             )
         )
@@ -903,7 +903,11 @@ class ElementHandle(JSHandle):
             event-specific initialization properties.
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.dispatchEvent(type=type, eventInit=eventInit))
+            self._sync(
+                self._impl_obj.dispatchEvent(
+                    type=type, eventInit=mapping.to_impl(eventInit)
+                )
+            )
         )
 
     def scrollIntoViewIfNeeded(self, timeout: int = None) -> NoneType:
@@ -949,7 +953,10 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.hover(
-                    modifiers=modifiers, position=position, timeout=timeout, force=force
+                    modifiers=modifiers,
+                    position=mapping.to_impl(position),
+                    timeout=timeout,
+                    force=force,
                 )
             )
         )
@@ -995,7 +1002,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 self._impl_obj.click(
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     delay=delay,
                     button=button,
                     clickCount=clickCount,
@@ -1047,7 +1054,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 self._impl_obj.dblclick(
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     delay=delay,
                     button=button,
                     timeout=timeout,
@@ -1940,7 +1947,10 @@ class Frame(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.dispatchEvent(
-                    selector=selector, type=type, eventInit=eventInit, timeout=timeout
+                    selector=selector,
+                    type=type,
+                    eventInit=mapping.to_impl(eventInit),
+                    timeout=timeout,
                 )
             )
         )
@@ -2176,7 +2186,7 @@ class Frame(SyncBase):
                 self._impl_obj.click(
                     selector=selector,
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     delay=delay,
                     button=button,
                     clickCount=clickCount,
@@ -2229,7 +2239,7 @@ class Frame(SyncBase):
                 self._impl_obj.dblclick(
                     selector=selector,
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     delay=delay,
                     button=button,
                     timeout=timeout,
@@ -2410,7 +2420,7 @@ class Frame(SyncBase):
                 self._impl_obj.hover(
                     selector=selector,
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     timeout=timeout,
                     force=force,
                 )
@@ -3326,7 +3336,10 @@ class Page(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.dispatchEvent(
-                    selector=selector, type=type, eventInit=eventInit, timeout=timeout
+                    selector=selector,
+                    type=type,
+                    eventInit=mapping.to_impl(eventInit),
+                    timeout=timeout,
                 )
             )
         )
@@ -3611,7 +3624,9 @@ class Page(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setExtraHTTPHeaders(headers=headers))
+            self._sync(
+                self._impl_obj.setExtraHTTPHeaders(headers=mapping.to_impl(headers))
+            )
         )
 
     def content(self) -> str:
@@ -4119,7 +4134,7 @@ class Page(SyncBase):
                     quality=quality,
                     omitBackground=omitBackground,
                     fullPage=fullPage,
-                    clip=clip,
+                    clip=mapping.to_impl(clip),
                 )
             )
         )
@@ -4212,7 +4227,7 @@ class Page(SyncBase):
                 self._impl_obj.click(
                     selector=selector,
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     delay=delay,
                     button=button,
                     clickCount=clickCount,
@@ -4267,7 +4282,7 @@ class Page(SyncBase):
                 self._impl_obj.dblclick(
                     selector=selector,
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     delay=delay,
                     button=button,
                     timeout=timeout,
@@ -4451,7 +4466,7 @@ class Page(SyncBase):
                 self._impl_obj.hover(
                     selector=selector,
                     modifiers=modifiers,
-                    position=position,
+                    position=mapping.to_impl(position),
                     timeout=timeout,
                     force=force,
                 )
@@ -4864,7 +4879,7 @@ class Page(SyncBase):
                     width=width,
                     height=height,
                     preferCSSPageSize=preferCSSPageSize,
-                    margin=margin,
+                    margin=mapping.to_impl(margin),
                     path=path,
                 )
             )
@@ -5075,7 +5090,7 @@ class BrowserContext(SyncBase):
         cookies : typing.List[typing.Dict]
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.addCookies(cookies=cookies))
+            self._sync(self._impl_obj.addCookies(cookies=mapping.to_impl(cookies)))
         )
 
     def clearCookies(self) -> NoneType:
@@ -5141,7 +5156,9 @@ class BrowserContext(SyncBase):
         geolocation : Optional[typing.Dict]
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setGeolocation(geolocation=geolocation))
+            self._sync(
+                self._impl_obj.setGeolocation(geolocation=mapping.to_impl(geolocation))
+            )
         )
 
     def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
@@ -5157,7 +5174,9 @@ class BrowserContext(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setExtraHTTPHeaders(headers=headers))
+            self._sync(
+                self._impl_obj.setExtraHTTPHeaders(headers=mapping.to_impl(headers))
+            )
         )
 
     def setOffline(self, offline: bool) -> NoneType:
@@ -5382,7 +5401,9 @@ class CDPSession(SyncBase):
         typing.Dict
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.send(method=method, params=params))
+            self._sync(
+                self._impl_obj.send(method=method, params=mapping.to_impl(params))
+            )
         )
 
     def detach(self) -> NoneType:
@@ -5537,18 +5558,18 @@ class Browser(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.newContext(
-                    viewport=viewport,
+                    viewport=mapping.to_impl(viewport),
                     ignoreHTTPSErrors=ignoreHTTPSErrors,
                     javaScriptEnabled=javaScriptEnabled,
                     bypassCSP=bypassCSP,
                     userAgent=userAgent,
                     locale=locale,
                     timezoneId=timezoneId,
-                    geolocation=geolocation,
+                    geolocation=mapping.to_impl(geolocation),
                     permissions=permissions,
-                    extraHTTPHeaders=extraHTTPHeaders,
+                    extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                     offline=offline,
-                    httpCredentials=httpCredentials,
+                    httpCredentials=mapping.to_impl(httpCredentials),
                     deviceScaleFactor=deviceScaleFactor,
                     isMobile=isMobile,
                     hasTouch=hasTouch,
@@ -5626,18 +5647,18 @@ class Browser(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.newPage(
-                    viewport=viewport,
+                    viewport=mapping.to_impl(viewport),
                     ignoreHTTPSErrors=ignoreHTTPSErrors,
                     javaScriptEnabled=javaScriptEnabled,
                     bypassCSP=bypassCSP,
                     userAgent=userAgent,
                     locale=locale,
                     timezoneId=timezoneId,
-                    geolocation=geolocation,
+                    geolocation=mapping.to_impl(geolocation),
                     permissions=permissions,
-                    extraHTTPHeaders=extraHTTPHeaders,
+                    extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                     offline=offline,
-                    httpCredentials=httpCredentials,
+                    httpCredentials=mapping.to_impl(httpCredentials),
                     deviceScaleFactor=deviceScaleFactor,
                     isMobile=isMobile,
                     hasTouch=hasTouch,
@@ -5809,10 +5830,10 @@ class BrowserType(SyncBase):
                     handleSIGTERM=handleSIGTERM,
                     handleSIGHUP=handleSIGHUP,
                     timeout=timeout,
-                    env=env,
+                    env=mapping.to_impl(env),
                     headless=headless,
                     devtools=devtools,
-                    proxy=proxy,
+                    proxy=mapping.to_impl(proxy),
                     downloadsPath=downloadsPath,
                     slowMo=slowMo,
                     chromiumSandbox=chromiumSandbox,
@@ -5887,10 +5908,10 @@ class BrowserType(SyncBase):
                     handleSIGTERM=handleSIGTERM,
                     handleSIGHUP=handleSIGHUP,
                     timeout=timeout,
-                    env=env,
+                    env=mapping.to_impl(env),
                     headless=headless,
                     devtools=devtools,
-                    proxy=proxy,
+                    proxy=mapping.to_impl(proxy),
                     downloadsPath=downloadsPath,
                     port=port,
                     chromiumSandbox=chromiumSandbox,
@@ -6016,24 +6037,24 @@ class BrowserType(SyncBase):
                     handleSIGTERM=handleSIGTERM,
                     handleSIGHUP=handleSIGHUP,
                     timeout=timeout,
-                    env=env,
+                    env=mapping.to_impl(env),
                     headless=headless,
                     devtools=devtools,
-                    proxy=proxy,
+                    proxy=mapping.to_impl(proxy),
                     downloadsPath=downloadsPath,
                     slowMo=slowMo,
-                    viewport=viewport,
+                    viewport=mapping.to_impl(viewport),
                     ignoreHTTPSErrors=ignoreHTTPSErrors,
                     javaScriptEnabled=javaScriptEnabled,
                     bypassCSP=bypassCSP,
                     userAgent=userAgent,
                     locale=locale,
                     timezoneId=timezoneId,
-                    geolocation=geolocation,
+                    geolocation=mapping.to_impl(geolocation),
                     permissions=permissions,
-                    extraHTTPHeaders=extraHTTPHeaders,
+                    extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                     offline=offline,
-                    httpCredentials=httpCredentials,
+                    httpCredentials=mapping.to_impl(httpCredentials),
                     deviceScaleFactor=deviceScaleFactor,
                     isMobile=isMobile,
                     hasTouch=hasTouch,
