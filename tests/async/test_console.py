@@ -15,8 +15,7 @@
 import asyncio
 from typing import List
 
-from playwright.console_message import ConsoleMessage
-from playwright.page import Page
+from playwright.async_api import ConsoleMessage, Page
 
 
 async def test_console_should_work(page: Page, server):

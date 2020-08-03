@@ -16,9 +16,8 @@ import json
 
 import pytest
 
-from playwright.async_api import Browser, Route
-from playwright.helper import Error
-from playwright.page import Page
+from playwright import Error
+from playwright.async_api import Browser, Page, Route
 
 
 async def test_page_route_should_intercept(page, server):

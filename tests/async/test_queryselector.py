@@ -2,8 +2,8 @@ from typing import Any, cast
 
 import pytest
 
-from playwright.helper import Error
-from playwright.page import Page
+from playwright import Error
+from playwright.async_api import Page
 
 
 async def test_selectors_register_should_work(selectors, page: Page, utils):

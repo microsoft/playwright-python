@@ -19,9 +19,8 @@ from typing import Dict, List
 
 import pytest
 
-from playwright.helper import Error
-from playwright.network import Request
-from playwright.page import Page
+from playwright import Error
+from playwright.async_api import Page, Request
 
 
 async def test_request_fulfill(page):

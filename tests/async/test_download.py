@@ -19,8 +19,7 @@ from typing import Optional
 import pytest
 
 from playwright import Error as PlaywrightError
-from playwright.browser import Browser
-from playwright.page import Page
+from playwright.async_api import Browser, Page
 
 
 def assert_file_content(path, content):
