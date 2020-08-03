@@ -187,3 +187,13 @@ def test_sync_set_default_timeout(page):
     with pytest.raises(TimeoutError) as exc:
         page.waitForFunction("false")
     assert "Timeout 1ms exceeded." in exc.value.message
+
+
+def test_close_should_reject_all_promises(context):
+    new_page = context.newPage()
+    with pytest.raises(Error) as exc_info:
+        new_page._gather(
+            lambda: new_page.evaluate("() => new Promise(r => {})"),
+            lambda: new_page.close(),
+        )
+    assert "Protocol error" in exc_info.value.message
