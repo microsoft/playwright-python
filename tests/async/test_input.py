@@ -15,7 +15,7 @@
 import asyncio
 import os
 
-from playwright.page import Page
+from playwright.async_api import Page
 from playwright.path_utils import get_file_dirname
 
 _dirname = get_file_dirname()
@@ -69,7 +69,7 @@ async def test_should_set_from_memory(page):
 async def test_should_emit_event(page: Page, server):
     await page.setContent("<input type=file>")
     fc_done: asyncio.Future = asyncio.Future()
-    page.once("filechooser", lambda file_chooser: fc_done.set_result(file_chooser)),
+    page.once("filechooser", lambda file_chooser: fc_done.set_result(file_chooser))
     await page.click("input")
     file_chooser = await fc_done
     assert file_chooser

@@ -17,8 +17,8 @@ import asyncio
 
 import pytest
 
+from playwright import Error
 from playwright.async_api import BrowserContext, Page
-from playwright.helper import Error
 
 
 async def test_should_work(page: Page, server, context: BrowserContext):

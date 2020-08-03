@@ -15,8 +15,7 @@
 import asyncio
 from typing import List, cast
 
-from playwright.browser import Browser, Page
-from playwright.network import Request, Route
+from playwright.async_api import Browser, Page, Request, Route
 
 
 async def test_link_navigation_inherit_user_agent_from_browser_context(

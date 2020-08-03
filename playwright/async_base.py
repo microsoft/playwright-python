@@ -57,7 +57,7 @@ class AsyncBase(ImplWrapper):
         return self._impl_obj.__str__()
 
     def _sync(self, future: asyncio.Future) -> Any:
-        return asyncio.get_event_loop().run_until_complete(future)
+        return self._loop.run_until_complete(future)
 
     def _wrap_handler(self, handler: Any) -> Callable[..., None]:
         if callable(handler):

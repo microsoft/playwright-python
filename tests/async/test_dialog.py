@@ -16,8 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.dialog import Dialog
-from playwright.page import Page
+from playwright.async_api import Dialog, Page
 
 
 async def test_should_fire(page: Page, server):
