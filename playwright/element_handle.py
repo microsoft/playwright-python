@@ -187,7 +187,7 @@ class ElementHandle(JSHandle):
         )
 
     async def evalOnSelector(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = False
+        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -202,7 +202,7 @@ class ElementHandle(JSHandle):
         )
 
     async def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = False
+        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return parse_result(
             await self._channel.send(

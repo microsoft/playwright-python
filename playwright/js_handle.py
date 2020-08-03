@@ -40,7 +40,7 @@ class JSHandle(ChannelOwner):
         self._preview = preview
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         if not is_function_body(expression):
             force_expr = True
@@ -56,7 +56,7 @@ class JSHandle(ChannelOwner):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> "JSHandle":
         if not is_function_body(expression):
             force_expr = True

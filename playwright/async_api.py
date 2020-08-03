@@ -28,6 +28,10 @@ from playwright.browser import Browser as BrowserImpl
 from playwright.browser_context import BrowserContext as BrowserContextImpl
 from playwright.browser_server import BrowserServer as BrowserServerImpl
 from playwright.browser_type import BrowserType as BrowserTypeImpl
+from playwright.cdp_session import CDPSession as CDPSessionImpl
+from playwright.chromium_browser_context import (
+    ChromiumBrowserContext as ChromiumBrowserContextImpl,
+)
 from playwright.console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright.dialog import Dialog as DialogImpl
 from playwright.download import Download as DownloadImpl
@@ -647,7 +651,7 @@ class JSHandle(AsyncBase):
         super().__init__(obj)
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> typing.Any:
         """JSHandle.evaluate
 
@@ -676,7 +680,7 @@ class JSHandle(AsyncBase):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
         """JSHandle.evaluateHandle
 
@@ -1034,7 +1038,7 @@ class ElementHandle(JSHandle):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-        ],
+        ] = None,
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> typing.List[str]:
@@ -1336,7 +1340,7 @@ class ElementHandle(JSHandle):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
     ) -> typing.Any:
         """ElementHandle.evalOnSelector
 
@@ -1374,7 +1378,7 @@ class ElementHandle(JSHandle):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
     ) -> typing.Any:
         """ElementHandle.evalOnSelectorAll
 
@@ -1699,7 +1703,7 @@ class Frame(AsyncBase):
         return mapping.from_impl(await self._impl_obj.frameElement())
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> typing.Any:
         """Frame.evaluate
 
@@ -1729,7 +1733,7 @@ class Frame(AsyncBase):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
         """Frame.evaluateHandle
 
@@ -1878,7 +1882,7 @@ class Frame(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
     ) -> typing.Any:
         """Frame.evalOnSelector
 
@@ -1916,7 +1920,7 @@ class Frame(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
     ) -> typing.Any:
         """Frame.evalOnSelectorAll
 
@@ -2334,7 +2338,7 @@ class Frame(AsyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-        ],
+        ] = None,
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> typing.List[str]:
@@ -2556,7 +2560,7 @@ class Frame(AsyncBase):
         self,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
@@ -2640,7 +2644,7 @@ class Worker(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> typing.Any:
         """Worker.evaluate
 
@@ -2668,7 +2672,7 @@ class Worker(AsyncBase):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
         """Worker.evaluateHandle
 
@@ -2704,7 +2708,11 @@ class Selectors(AsyncBase):
         super().__init__(obj)
 
     async def register(
-        self, name: str, source: str = "", path: str = None, contentScript: bool = False
+        self,
+        name: str,
+        source: str = None,
+        path: str = None,
+        contentScript: bool = None,
     ) -> NoneType:
         """Selectors.register
 
@@ -2714,9 +2722,9 @@ class Selectors(AsyncBase):
         ----------
         name : str
             Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only contain `[a-zA-Z0-9_]` characters.
-        source : str
+        source : Optional[str]
             Script that evaluates to a selector engine instance.
-        contentScript : bool
+        contentScript : Optional[bool]
             Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not guaranteed when this engine is used together with other registered engines.
         """
         return mapping.from_maybe_impl(
@@ -3198,7 +3206,7 @@ class Page(AsyncBase):
         )
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> typing.Any:
         """Page.evaluate
 
@@ -3230,7 +3238,7 @@ class Page(AsyncBase):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = False
+        self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
         """Page.evaluateHandle
 
@@ -3264,7 +3272,7 @@ class Page(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
     ) -> typing.Any:
         """Page.evalOnSelector
 
@@ -3303,7 +3311,7 @@ class Page(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
     ) -> typing.Any:
         """Page.evalOnSelectorAll
 
@@ -4281,7 +4289,7 @@ class Page(AsyncBase):
             typing.List[str],
             typing.List["ElementHandle"],
             typing.List[SelectOption],
-        ],
+        ] = None,
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> typing.List[str]:
@@ -4505,7 +4513,7 @@ class Page(AsyncBase):
         self,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
@@ -4913,7 +4921,7 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.clearPermissions())
 
-    async def setGeolocation(self, geolocation: typing.Dict) -> NoneType:
+    async def setGeolocation(self, geolocation: typing.Dict = None) -> NoneType:
         """BrowserContext.setGeolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -5131,6 +5139,85 @@ class BrowserContext(AsyncBase):
 
 
 mapping.register(BrowserContextImpl, BrowserContext)
+
+
+class CDPSession(AsyncBase):
+    def __init__(self, obj: CDPSessionImpl):
+        super().__init__(obj)
+
+    async def send(self, method: str, params: typing.Dict = None) -> typing.Dict:
+        """CDPSession.send
+
+        Parameters
+        ----------
+        method : str
+            protocol method name
+        params : Optional[typing.Dict]
+            Optional method parameters
+
+        Returns
+        -------
+        typing.Dict
+        """
+        return mapping.from_maybe_impl(
+            await self._impl_obj.send(method=method, params=params)
+        )
+
+    async def detach(self) -> NoneType:
+        """CDPSession.detach
+
+        Detaches the CDPSession from the target. Once detached, the CDPSession object won't emit any events and can't be used
+        to send messages.
+        """
+        return mapping.from_maybe_impl(await self._impl_obj.detach())
+
+
+mapping.register(CDPSessionImpl, CDPSession)
+
+
+class ChromiumBrowserContext(BrowserContext):
+    def __init__(self, obj: ChromiumBrowserContextImpl):
+        super().__init__(obj)
+
+    def backgroundPages(self) -> typing.List["Page"]:
+        """ChromiumBrowserContext.backgroundPages
+
+        Returns
+        -------
+        typing.List[Page]
+            All existing background pages in the context.
+        """
+        return mapping.from_impl_list(self._impl_obj.backgroundPages())
+
+    def serviceWorkers(self) -> typing.List["Worker"]:
+        """ChromiumBrowserContext.serviceWorkers
+
+        Returns
+        -------
+        typing.List[Worker]
+            All existing service workers in the context.
+        """
+        return mapping.from_impl_list(self._impl_obj.serviceWorkers())
+
+    async def newCDPSession(self, page: "Page") -> "CDPSession":
+        """ChromiumBrowserContext.newCDPSession
+
+        Parameters
+        ----------
+        page : Page
+            Page to create new session for.
+
+        Returns
+        -------
+        CDPSession
+            Promise that resolves to the newly created session.
+        """
+        return mapping.from_impl(
+            await self._impl_obj.newCDPSession(page=page._impl_obj)
+        )
+
+
+mapping.register(ChromiumBrowserContextImpl, ChromiumBrowserContext)
 
 
 class Browser(AsyncBase):

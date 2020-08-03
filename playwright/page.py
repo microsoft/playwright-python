@@ -300,26 +300,26 @@ class Page(ChannelOwner):
         return await self._main_frame.dispatchEvent(**locals_to_params(locals()))
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return await self._main_frame.evaluate(expression, arg, force_expr=force_expr)
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> JSHandle:
         return await self._main_frame.evaluateHandle(
             expression, arg, force_expr=force_expr
         )
 
     async def evalOnSelector(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = False
+        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return await self._main_frame.evalOnSelector(
             selector, expression, arg, force_expr=force_expr
         )
 
     async def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = False
+        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return await self._main_frame.evalOnSelectorAll(
             selector, expression, arg, force_expr=force_expr
@@ -661,7 +661,7 @@ class Page(ChannelOwner):
         self,
         expression: str,
         arg: Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
         timeout: int = None,
         polling: Union[int, Literal["raf"]] = None,
     ) -> JSHandle:
@@ -792,10 +792,13 @@ class Worker(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self._channel.on("close", lambda _: self._on_close())
         self._page: Optional[Page] = None
+        self._context: Optional["BrowserContext"] = None
 
     def _on_close(self) -> None:
         if self._page:
             self._page._workers.remove(self)
+        if self._context:
+            self._context._service_workers.remove(self)
         self.emit(Worker.Events.Close, self)
 
     @property
@@ -803,7 +806,7 @@ class Worker(ChannelOwner):
         return self._initializer["url"]
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         if not is_function_body(expression):
             force_expr = True
@@ -819,7 +822,7 @@ class Worker(ChannelOwner):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> JSHandle:
         return from_channel(
             await self._channel.send(

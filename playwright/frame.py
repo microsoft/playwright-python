@@ -180,7 +180,7 @@ class Frame(ChannelOwner):
         return from_channel(await self._channel.send("frameElement"))
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         if not is_function_body(expression):
             force_expr = True
@@ -196,7 +196,7 @@ class Frame(ChannelOwner):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = False
+        self, expression: str, arg: Any = None, force_expr: bool = None
     ) -> JSHandle:
         if not is_function_body(expression):
             force_expr = True
@@ -242,7 +242,7 @@ class Frame(ChannelOwner):
         )
 
     async def evalOnSelector(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = False
+        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -257,7 +257,7 @@ class Frame(ChannelOwner):
         )
 
     async def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = False
+        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -447,7 +447,7 @@ class Frame(ChannelOwner):
         self,
         expression: str,
         arg: Any = None,
-        force_expr: bool = False,
+        force_expr: bool = None,
         timeout: int = None,
         polling: Union[int, Literal["raf"]] = None,
     ) -> JSHandle:

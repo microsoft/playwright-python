@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
 from playwright.browser_server import BrowserServer
 from playwright.browser_type import BrowserType
+from playwright.cdp_session import CDPSession
+from playwright.chromium_browser_context import ChromiumBrowserContext
 from playwright.connection import ChannelOwner
 from playwright.console_message import ConsoleMessage
 from playwright.dialog import Dialog
@@ -44,13 +46,22 @@ def create_remote_object(
     if type == "BindingCall":
         return BindingCall(parent, type, guid, initializer)
     if type == "Browser":
-        return Browser(parent, type, guid, initializer)
+        return Browser(cast(BrowserType, parent), type, guid, initializer)
     if type == "BrowserServer":
         return BrowserServer(parent, type, guid, initializer)
     if type == "BrowserType":
         return BrowserType(parent, type, guid, initializer)
     if type == "BrowserContext":
+        browser_name: str = ""
+        if isinstance(parent, Browser):
+            browser_name = parent._browser_type.name
+        if isinstance(parent, BrowserType):
+            browser_name = parent.name
+        if browser_name == "chromium":
+            return ChromiumBrowserContext(parent, type, guid, initializer)
         return BrowserContext(parent, type, guid, initializer)
+    if type == "CDPSession":
+        return CDPSession(parent, type, guid, initializer)
     if type == "ConsoleMessage":
         return ConsoleMessage(parent, type, guid, initializer)
     if type == "Dialog":

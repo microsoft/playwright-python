@@ -14,7 +14,7 @@
 
 import sys
 from types import SimpleNamespace
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from playwright.browser_context import BrowserContext
 from playwright.connection import ChannelOwner, from_channel
@@ -27,15 +27,19 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal
 
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright.browser_type import BrowserType
+
 
 class Browser(ChannelOwner):
 
     Events = SimpleNamespace(Disconnected="disconnected",)
 
     def __init__(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+        self, parent: "BrowserType", type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._browser_type = parent
         self._is_connected = True
         self._is_closed_or_closing = False
 

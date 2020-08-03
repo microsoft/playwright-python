@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import inspect
 import re
 from types import FunctionType
 from typing import (  # type: ignore
@@ -31,6 +30,8 @@ from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
 from playwright.browser_server import BrowserServer
 from playwright.browser_type import BrowserType
+from playwright.cdp_session import CDPSession
+from playwright.chromium_browser_context import ChromiumBrowserContext
 from playwright.console_message import ConsoleMessage
 from playwright.dialog import Dialog
 from playwright.download import Download
@@ -53,13 +54,13 @@ def process_type(value: Any, param: bool = False) -> str:
     value = re.sub(r"playwright\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
-        value = re.sub(r"typing.Union\[([^,]+), NoneType\]", r"\1", value)
-        if "Union[Literal" in value:
-            value = re.sub(r"typing.Union\[(.*), NoneType\]", r"\1", value)
-        else:
-            value = re.sub(
-                r"typing.Union\[(.*), NoneType\]", r"typing.Union[\1]", value
-            )
+        value = re.sub(r"^typing.Union\[([^,]+), NoneType\]$", r"\1 = None", value)
+        value = re.sub(
+            r"typing.Union\[(Literal\[[^\]]+\]), NoneType\]", r"\1 = None", value
+        )
+        value = re.sub(
+            r"^typing.Union\[(.+), NoneType\]$", r"typing.Union[\1] = None", value
+        )
     return value
 
 
@@ -68,22 +69,11 @@ def signature(func: FunctionType, indent: int) -> str:
     tokens = ["self"]
     split = ",\n" + " " * indent
 
-    func_signature = inspect.signature(func)
     for [name, value] in hints.items():
         if name == "return":
             continue
         processed = process_type(value, True)
-        default_value = func_signature.parameters[name].default
-        if default_value is not func_signature.parameters[name].empty:
-            if isinstance(default_value, str):
-                default_value = '"' + default_value + '"'
-            elif isinstance(default_value, object):
-                default_value = str(default_value)
-            else:
-                raise ValueError(f"value {default_value} not recognized")
-            tokens.append(f"{name}: {processed} = {default_value}")
-        else:
-            tokens.append(f"{name}: {processed}")
+        tokens.append(f"{name}: {processed}")
     return split.join(tokens)
 
 
@@ -99,6 +89,8 @@ def arguments(func: FunctionType, indent: int) -> str:
             tokens.append(f"{name}=self._wrap_handler({name})")
         elif "typing.Any" in value_str or "Handle" in value_str:
             tokens.append(f"{name}=mapping.to_impl({name})")
+        elif re.match(r"<class 'playwright\.[\w]+\.[\w]+", value_str):
+            tokens.append(f"{name}={name}._impl_obj")
         else:
             tokens.append(f"{name}={name}")
     return split.join(tokens)
@@ -160,6 +152,8 @@ from playwright.browser import Browser as BrowserImpl
 from playwright.browser_context import BrowserContext as BrowserContextImpl
 from playwright.browser_server import BrowserServer as BrowserServerImpl
 from playwright.browser_type import BrowserType as BrowserTypeImpl
+from playwright.cdp_session import CDPSession as CDPSessionImpl
+from playwright.chromium_browser_context import ChromiumBrowserContext as ChromiumBrowserContextImpl
 from playwright.console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright.dialog import Dialog as DialogImpl
 from playwright.download import Download as DownloadImpl
@@ -194,6 +188,8 @@ all_types = [
     BindingCall,
     Page,
     BrowserContext,
+    CDPSession,
+    ChromiumBrowserContext,
     Browser,
     BrowserServer,
     BrowserType,
