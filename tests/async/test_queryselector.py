@@ -133,8 +133,8 @@ async def test_selectors_register_should_handle_errors(selectors, page: Page, ut
     with pytest.raises(Error) as exc:
         await selectors.register("$", dummy_selector_engine_script)
     assert (
-        "Selector engine name may only contain [a-zA-Z0-9_] characters"
-        == exc.value.message
+        exc.value.message
+        == "Selector engine name may only contain [a-zA-Z0-9_] characters"
     )
 
     # Selector names are case-sensitive.

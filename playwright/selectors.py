@@ -16,6 +16,7 @@ from typing import Dict, Optional
 
 from playwright.connection import ChannelOwner
 from playwright.element_handle import ElementHandle
+from playwright.helper import Error
 
 
 class Selectors(ChannelOwner):
@@ -25,14 +26,21 @@ class Selectors(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
 
     async def register(
-        self, name: str, source: str = "", path: str = None, contentScript: bool = False
+        self,
+        name: str,
+        source: str = None,
+        path: str = None,
+        contentScript: bool = None,
     ) -> None:
+        if not source and not path:
+            raise Error("Either source or path should be specified")
         if path:
             with open(path, "r") as file:
                 source = file.read()
-        await self._channel.send(
-            "register", dict(name=name, source=source, contentScript=contentScript),
-        )
+        params: Dict = dict(name=name, source=source)
+        if contentScript:
+            params["contentScript"] = True
+        await self._channel.send("register", params)
 
     async def _createSelector(self, name: str, handle: ElementHandle) -> Optional[str]:
         return await self._channel.send(
