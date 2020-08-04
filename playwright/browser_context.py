@@ -21,6 +21,7 @@ from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     Cookie,
     Error,
+    Geolocation,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
@@ -127,10 +128,10 @@ class BrowserContext(ChannelOwner):
     async def clearPermissions(self) -> None:
         await self._channel.send("clearPermissions")
 
-    async def setGeolocation(self, geolocation: Optional[Dict]) -> None:
+    async def setGeolocation(self, geolocation: Optional[Geolocation]) -> None:
         await self._channel.send("setGeolocation", locals_to_params(locals()))
 
-    async def setExtraHTTPHeaders(self, headers: Dict) -> None:
+    async def setExtraHTTPHeaders(self, headers: Dict[str, str]) -> None:
         await self._channel.send(
             "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
         )

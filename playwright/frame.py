@@ -34,13 +34,19 @@ from playwright.helper import (
     FrameNavigatedEvent,
     KeyboardModifier,
     MouseButton,
+    MousePosition,
     URLMatch,
     URLMatcher,
     is_function_body,
     locals_to_params,
     monotonic_time,
 )
-from playwright.js_handle import JSHandle, parse_result, serialize_argument
+from playwright.js_handle import (
+    JSHandle,
+    Serializable,
+    parse_result,
+    serialize_argument,
+)
 from playwright.network import Response
 from playwright.wait_helper import WaitHelper
 
@@ -180,7 +186,7 @@ class Frame(ChannelOwner):
         return from_channel(await self._channel.send("frameElement"))
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> Any:
         if not is_function_body(expression):
             force_expr = True
@@ -196,7 +202,7 @@ class Frame(ChannelOwner):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> JSHandle:
         if not is_function_body(expression):
             force_expr = True
@@ -243,7 +249,11 @@ class Frame(ChannelOwner):
         )
 
     async def evalOnSelector(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
+        self,
+        selector: str,
+        expression: str,
+        arg: Serializable = None,
+        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -258,7 +268,11 @@ class Frame(ChannelOwner):
         )
 
     async def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
+        self,
+        selector: str,
+        expression: str,
+        arg: Serializable = None,
+        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -325,7 +339,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -339,7 +353,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -373,7 +387,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -447,7 +461,7 @@ class Frame(ChannelOwner):
     async def waitForFunction(
         self,
         expression: str,
-        arg: Any = None,
+        arg: Serializable = None,
         force_expr: bool = None,
         timeout: int = None,
         polling: Union[int, Literal["raf"]] = None,

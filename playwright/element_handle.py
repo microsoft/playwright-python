@@ -22,12 +22,19 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, ca
 from playwright.connection import ChannelOwner, from_nullable_channel
 from playwright.helper import (
     FilePayload,
+    FloatRect,
     KeyboardModifier,
     MouseButton,
+    MousePosition,
     SelectOption,
     locals_to_params,
 )
-from playwright.js_handle import JSHandle, parse_result, serialize_argument
+from playwright.js_handle import (
+    JSHandle,
+    Serializable,
+    parse_result,
+    serialize_argument,
+)
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -76,7 +83,7 @@ class ElementHandle(JSHandle):
     async def hover(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -85,7 +92,7 @@ class ElementHandle(JSHandle):
     async def click(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -98,7 +105,7 @@ class ElementHandle(JSHandle):
     async def dblclick(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -161,7 +168,7 @@ class ElementHandle(JSHandle):
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 
-    async def boundingBox(self) -> Dict[str, float]:
+    async def boundingBox(self) -> Optional[FloatRect]:
         return await self._channel.send("boundingBox")
 
     async def screenshot(
@@ -189,7 +196,11 @@ class ElementHandle(JSHandle):
         )
 
     async def evalOnSelector(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
+        self,
+        selector: str,
+        expression: str,
+        arg: Serializable = None,
+        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -204,7 +215,11 @@ class ElementHandle(JSHandle):
         )
 
     async def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
+        self,
+        selector: str,
+        expression: str,
+        arg: Serializable = None,
+        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(

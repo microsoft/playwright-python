@@ -39,7 +39,7 @@ from playwright.element_handle import ElementHandle, ValuesToSelect
 from playwright.file_chooser import FileChooser
 from playwright.frame import Frame
 from playwright.input import Keyboard, Mouse
-from playwright.js_handle import JSHandle
+from playwright.js_handle import JSHandle, Serializable
 from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
@@ -164,7 +164,7 @@ from playwright.download import Download as DownloadImpl
 from playwright.element_handle import ElementHandle as ElementHandleImpl
 from playwright.file_chooser import FileChooser as FileChooserImpl
 from playwright.frame import Frame as FrameImpl
-from playwright.helper import ConsoleMessageLocation, Error, FilePayload, SelectOption, Viewport, DeviceDescriptor
+from playwright.helper import ConsoleMessageLocation, Credentials, MousePosition, Error, FilePayload, SelectOption, RequestFailure, Viewport, DeviceDescriptor, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins
 from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl
 from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl
@@ -202,3 +202,4 @@ all_types = [
 
 api_globals = globals()
 assert ValuesToSelect
+assert Serializable

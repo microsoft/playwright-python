@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from playwright.connection import Channel
 from playwright.element_handle import ElementHandle
 from playwright.helper import locals_to_params
 
 
-def _ax_node_from_protocol(axNode: Dict[str, Any]) -> Dict[str, Any]:
+def _ax_node_from_protocol(axNode: Dict) -> Dict:
     result = {**axNode}
     if "valueNumber" in axNode:
         result["value"] = axNode["valueNumber"]
@@ -60,7 +60,7 @@ class Accessibility:
 
     async def snapshot(
         self, interestingOnly: bool = None, root: ElementHandle = None
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[Dict]:
         params = locals_to_params(locals())
         if root:
             params["root"] = root._channel

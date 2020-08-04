@@ -13,12 +13,22 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
+from playwright.browser_server import BrowserServer
 from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import ColorScheme, locals_to_params, not_installed_error
+from playwright.helper import (
+    ColorScheme,
+    Credentials,
+    Env,
+    Geolocation,
+    IntSize,
+    ProxyServer,
+    locals_to_params,
+    not_installed_error,
+)
 
 
 class BrowserType(ChannelOwner):
@@ -39,23 +49,23 @@ class BrowserType(ChannelOwner):
         self,
         executablePath: str = None,
         args: List[str] = None,
-        ignoreDefaultArgs: List[str] = None,
+        ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
         timeout: int = None,
-        env: Dict = None,
+        env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: Dict = None,
+        proxy: ProxyServer = None,
         downloadsPath: str = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
     ) -> Browser:
+        params = locals_to_params(locals())
+        normalize_launch_params(params)
         try:
-            return from_channel(
-                await self._channel.send("launch", locals_to_params(locals()))
-            )
+            return from_channel(await self._channel.send("launch", params))
         except Exception as e:
             if f"{self.name}-" in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
@@ -65,23 +75,23 @@ class BrowserType(ChannelOwner):
         self,
         executablePath: str = None,
         args: List[str] = None,
-        ignoreDefaultArgs: List[str] = None,
+        ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
         timeout: int = None,
-        env: Dict = None,
+        env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: Dict = None,
+        proxy: ProxyServer = None,
         downloadsPath: str = None,
         port: int = None,
         chromiumSandbox: bool = None,
-    ) -> Browser:
+    ) -> BrowserServer:
+        params = locals_to_params(locals())
+        normalize_launch_params(params)
         try:
-            return from_channel(
-                await self._channel.send("launchServer", locals_to_params(locals()))
-            )
+            return from_channel(await self._channel.send("launchServer", params))
         except Exception as e:
             if f"{self.name}-" in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
@@ -92,29 +102,29 @@ class BrowserType(ChannelOwner):
         userDataDir: str,
         executablePath: str = None,
         args: List[str] = None,
-        ignoreDefaultArgs: List[str] = None,
+        ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
         timeout: int = None,
-        env: Dict = None,
+        env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: Dict = None,
+        proxy: ProxyServer = None,
         downloadsPath: str = None,
         slowMo: int = None,
-        viewport: Dict = None,
+        viewport: IntSize = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
         userAgent: str = None,
         locale: str = None,
         timezoneId: str = None,
-        geolocation: Dict = None,
+        geolocation: Geolocation = None,
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Dict = None,
+        httpCredentials: Credentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -123,11 +133,11 @@ class BrowserType(ChannelOwner):
         chromiumSandbox: bool = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
+        params = locals_to_params(locals())
+        normalize_launch_params(params)
         try:
             return from_channel(
-                await self._channel.send(
-                    "launchPersistentContext", locals_to_params(locals())
-                )
+                await self._channel.send("launchPersistentContext", params)
             )
         except Exception as e:
             if f"{self.name}-" in str(e):
@@ -140,3 +150,13 @@ class BrowserType(ChannelOwner):
         return from_channel(
             await self._channel.send("connect", locals_to_params(locals()))
         )
+
+
+def normalize_launch_params(params: Dict) -> None:
+    if "env" in params:
+        params["env"] = {name: str(value) for [name, value] in params["env"].items()}
+    if "ignoreDefaultArgs" in params:
+        if isinstance(params["ignoreDefaultArgs"], bool):
+            params["ignoreAllDefaultArgs"] = True
+            del params["ignoreDefaultArgs"]
+        params["env"] = {name: str(value) for [name, value] in params["env"].items()}

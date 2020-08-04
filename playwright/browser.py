@@ -18,7 +18,13 @@ from typing import TYPE_CHECKING, Dict, List, Union
 
 from playwright.browser_context import BrowserContext
 from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import ColorScheme, locals_to_params
+from playwright.helper import (
+    ColorScheme,
+    Credentials,
+    Geolocation,
+    IntSize,
+    locals_to_params,
+)
 from playwright.network import serialize_headers
 from playwright.page import Page
 
@@ -60,18 +66,18 @@ class Browser(ChannelOwner):
 
     async def newContext(
         self,
-        viewport: Union[Dict, Literal[0]] = None,
+        viewport: Union[IntSize, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
         userAgent: str = None,
         locale: str = None,
         timezoneId: str = None,
-        geolocation: Dict = None,
+        geolocation: Geolocation = None,
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Dict = None,
+        httpCredentials: Credentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -92,18 +98,18 @@ class Browser(ChannelOwner):
 
     async def newPage(
         self,
-        viewport: Union[Dict, Literal[0]] = None,
+        viewport: Union[IntSize, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
         userAgent: str = None,
         locale: str = None,
         timezoneId: str = None,
-        geolocation: Dict = None,
+        geolocation: Geolocation = None,
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Dict = None,
+        httpCredentials: Credentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,

@@ -15,10 +15,33 @@
 import json
 import re
 from sys import stderr
-from typing import Any, Dict, List
+from typing import (  # type: ignore
+    Any,
+    Dict,
+    List,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 enum_regex = r"^\"[^\"]+\"(?:\|\"[^\"]+\")+$"
 union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
+
+exceptions = {
+    "Route.fulfill(path=)": {
+        "doc": "Optional[str]",
+        "code": "Union[str, pathlib.Path, NoneType]",
+    },
+    "Browser.newContext(viewport=)": {
+        "doc": 'Optional[{"width": int, "height": int}]',
+        "code": 'Union[{"width": int, "height": int}, \'0\', NoneType]',
+    },
+    "Browser.newPage(viewport=)": {
+        "doc": 'Optional[{"width": int, "height": int}]',
+        "code": 'Union[{"width": int, "height": int}, \'0\', NoneType]',
+    },
+}
 
 
 class DocumentationProvider:
@@ -91,11 +114,9 @@ class DocumentationProvider:
                         file=stderr,
                     )
                 else:
-                    code_type = self.normalize_class_type(value)
+                    code_type = self.serialize_python_type(value)
 
-                    print(
-                        f"{indent}{original_name} : {self.beautify_code_type(code_type)}"
-                    )
+                    print(f"{indent}{original_name} : {code_type}")
                     if doc_value["comment"]:
                         print(
                             f"{indent}    {self.indent_paragraph(doc_value['comment'], f'{indent}    ')}"
@@ -112,13 +133,12 @@ class DocumentationProvider:
             and str(signature["return"]) != "<class 'NoneType'>"
         ):
             value = signature["return"]
-            code_type = self.normalize_class_type(value)
             doc_value = method
-            self.compare_types(code_type, doc_value, f"{fqname}(return=)")
+            self.compare_types(value, doc_value, f"{fqname}(return=)")
             print("")
             print("        Returns")
             print("        -------")
-            print(f"        {self.normalize_class_type(signature['return'])}")
+            print(f"        {self.serialize_python_type(value)}")
             if method["returnComment"]:
                 print(
                     f"            {self.indent_paragraph(method['returnComment'], '              ')}"
@@ -131,12 +151,6 @@ class DocumentationProvider:
                     f"Parameter not implemented: {class_name}.{method_name}({name}=)",
                     file=stderr,
                 )
-
-    def normalize_class_type(self, value: Any) -> str:
-        code_type = str(value)
-        code_type = re.sub(r"<class '(.*)'>", r"\1", code_type)
-        code_type = re.sub(r"playwright\.[\w]+\.([\w]+)", r"\1", code_type)
-        return code_type
 
     def indent_paragraph(self, p: str, indent: str) -> str:
         lines = p.split("\n")
@@ -165,84 +179,177 @@ class DocumentationProvider:
                 in_example = False
         return self.indent_paragraph("\n".join(result), indent)
 
-    def beautify_code_type(self, code_type: str) -> str:
-        return re.sub(r"^typing.Union\[(.*), NoneType\]$", r"Optional[\1]", code_type)
+    def make_optional(self, text: str) -> str:
+        if text.startswith("Union["):
+            return text[:-1] + ", NoneType]"
+        if text.startswith("Optional["):
+            return text
+        return f"Optional[{text}]"
 
-    def compare_types(self, code_type: str, doc_value: Any, fqname: str) -> None:
-        type_name = doc_value["type"]["name"]
-        doc_type = self.serialize_doc_type(type_name, fqname)
+    def compare_types(self, value: Any, doc_value: Any, fqname: str) -> None:
+        if "(arg=)" in fqname or "(pageFunction=)" in fqname:
+            return
+        code_type = self.serialize_python_type(value)
+        doc_type = self.serialize_doc_type(
+            doc_value["type"]["name"], fqname, doc_value["type"],
+        )
         if not doc_value["required"]:
-            doc_type = f"typing.Union[{doc_type}, NoneType]"
+            doc_type = self.make_optional(doc_type)
+        if (
+            fqname in exceptions
+            and exceptions[fqname]["doc"] == doc_type
+            and exceptions[fqname]["code"] == code_type
+        ):
+            return
+
         if doc_type != code_type:
             print(
                 f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}",
                 file=stderr,
             )
 
-    def serialize_doc_type(self, doc_value: Any, fqname: str) -> str:
-        if doc_value == "string":
+    def serialize_python_type(self, value: Any) -> str:
+        str_value = str(value)
+        if str_value == "<class 'playwright.helper.Error'>":
+            return "Error"
+        match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
+        if match:
+            return match.group(1)
+        match = re.match(r"^<class 'playwright\.[\w]+\.([\w]+)'>$", str_value)
+        if match and "helper" not in str_value:
+            return match.group(1)
+
+        match = re.match(r"^typing\.(\w+)$", str_value)
+        if match:
+            return match.group(1)
+
+        origin = get_origin(value)
+        args = get_args(value)
+        hints = None
+        try:
+            hints = get_type_hints(value)
+        except Exception:
+            pass
+        if hints:
+            signature: List[str] = []
+            for [name, value] in hints.items():
+                signature.append(f'"{name}": {self.serialize_python_type(value)}')
+            return f"{{{', '.join(signature)}}}"
+        if origin == Union:
+            args = get_args(value)
+            if len(args) == 2 and "None" in str(args[1]):
+                return self.make_optional(self.serialize_python_type(args[0]))
+            return f"Union[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+        if str(origin) == "<class 'dict'>":
+            args = get_args(value)
+            return f"Dict[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+        if str(origin) == "<class 'list'>":
+            args = get_args(value)
+            return f"List[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+        if str(origin) == "typing.Literal":
+            args = get_args(value)
+            if len(args) == 1:
+                return "'" + self.serialize_python_type(args[0]) + "'"
+            body = ", ".join(
+                list(map(lambda a: "'" + self.serialize_python_type(a) + "'", args))
+            )
+            return f"Literal[{body}]"
+        return str_value
+
+    def serialize_doc_type(
+        self, type_name: Any, fqname: str, doc_type: Any = None
+    ) -> str:
+        type_name = re.sub(r"^Promise<(.*)>$", r"\1", type_name)
+
+        if type_name == "string":
             return "str"
 
-        if doc_value == "Buffer":
+        if type_name == "Buffer":
             return "bytes"
 
-        if doc_value == "boolean":
+        if type_name == "Array":
+            return "List"
+
+        if type_name == "boolean":
             return "bool"
 
-        if doc_value == "number":
+        if type_name == "number":
             if "Mouse" in fqname and ("(x=)" in fqname or "(y=)" in fqname):
                 return "float"
-            elif fqname == "Page.pdf(width=)" or fqname == "Page.pdf(height=)":
+            if (
+                "(position=)" in fqname
+                or "(geolocation=)" in fqname
+                or ".boundingBox(" in fqname
+            ):
                 return "float"
-            else:
-                return "int"
+            if "screenshot(clip=)" in fqname:
+                return "float"
+            if fqname == "Page.pdf(width=)" or fqname == "Page.pdf(height=)":
+                return "float"
+            return "int"
 
-        if doc_value == "Object":
-            return "typing.Dict"
+        if type_name == "Serializable":
+            return "Any"
 
-        if doc_value == "?Object":
-            return "typing.Union[typing.Dict, NoneType]"
+        if type_name == "Object" or type_name == "?Object":
+            intermediate = "Dict"
+            if doc_type and len(doc_type["properties"]):
+                signature: List[str] = []
+                for [name, value] in doc_type["properties"].items():
+                    value_type = self.serialize_doc_type(
+                        value["type"]["name"], fqname, value["type"]
+                    )
+                    signature.append(
+                        f"\"{name}\": {value_type if value['required'] else self.make_optional(value_type)}"
+                    )
+                intermediate = f"{{{', '.join(signature)}}}"
+            return (
+                intermediate
+                if type_name == "Object"
+                else self.make_optional(intermediate)
+            )
 
-        if doc_value == "function":
-            return "typing.Callable"
+        if type_name == "function":
+            return "Callable"
 
-        match = re.match(r"^Object<([^,]+),\s*([^)]+)>$", doc_value)
+        match = re.match(r"^Object<([^,]+),\s*([^)]+)>$", type_name)
         if match:
-            return f"typing.Dict[{self.serialize_doc_type(match.group(1), fqname)}, {self.serialize_doc_type(match.group(2), fqname)}]"
+            return f"Dict[{self.serialize_doc_type(match.group(1), fqname)}, {self.serialize_doc_type(match.group(2), fqname)}]"
 
-        match = re.match(r"^Promise<(.*)>$", doc_value)
+        match = re.match(r"^Map<([^,]+),\s*([^)]+)>$", type_name)
         if match:
-            return self.serialize_doc_type(match.group(1), fqname)
+            return f"Dict[{self.serialize_doc_type(match.group(1), fqname)}, {self.serialize_doc_type(match.group(2), fqname)}]"
 
-        if re.match(enum_regex, doc_value):
-            result = f"typing.Literal[{', '.join(doc_value.split('|'))}]"
+        if re.match(enum_regex, type_name):
+            result = f"Literal[{', '.join(type_name.split('|'))}]"
             return result.replace('"', "'")
 
-        match = re.match(r"^Array<(.*)>$", doc_value)
+        match = re.match(r"^Array<(.*)>$", type_name)
         if match:
-            return f"typing.List[{self.serialize_doc_type(match.group(1), fqname)}]"
+            return f"List[{self.serialize_doc_type(match.group(1), fqname)}]"
 
-        match = re.match(r"^\?(.*)$", doc_value)
+        match = re.match(r"^\?(.*)$", type_name)
         if match:
-            return f"typing.Union[{self.serialize_doc_type(match.group(1), fqname)}, NoneType]"
+            return self.make_optional(self.serialize_doc_type(match.group(1), fqname))
 
-        match = re.match(r"^null\|(.*)$", doc_value)
+        match = re.match(r"^null\|(.*)$", type_name)
         if match:
-            return f"typing.Union[{self.serialize_doc_type(match.group(1), fqname)}, NoneType]"
+            return self.make_optional(self.serialize_doc_type(match.group(1), fqname))
 
         # Union detection is greedy
-        if re.match(union_regex, doc_value):
+        if re.match(union_regex, type_name):
             result = ", ".join(
                 list(
                     map(
                         lambda a: self.serialize_doc_type(a, fqname),
-                        doc_value.split("|"),
+                        type_name.split("|"),
                     )
                 )
             )
-            return result.replace('"', "'")
+            body = result.replace('"', "'")
+            return f"Union[{body}]"
 
-        return doc_value
+        return type_name
 
     def rewrite_param_name(self, fqname: str, method_name: str, name: str) -> str:
         if name == "expression":

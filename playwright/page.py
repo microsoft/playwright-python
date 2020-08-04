@@ -32,9 +32,12 @@ from playwright.helper import (
     DocumentLoadState,
     Error,
     FilePayload,
+    FloatRect,
     KeyboardModifier,
     MouseButton,
+    MousePosition,
     Optional,
+    PdfMargins,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
@@ -48,7 +51,12 @@ from playwright.helper import (
     serialize_error,
 )
 from playwright.input import Keyboard, Mouse
-from playwright.js_handle import JSHandle, parse_result, serialize_argument
+from playwright.js_handle import (
+    JSHandle,
+    Serializable,
+    parse_result,
+    serialize_argument,
+)
 from playwright.network import Request, Response, Route, serialize_headers
 from playwright.wait_helper import WaitHelper
 
@@ -300,26 +308,34 @@ class Page(ChannelOwner):
         return await self._main_frame.dispatchEvent(**locals_to_params(locals()))
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> Any:
         return await self._main_frame.evaluate(expression, arg, force_expr=force_expr)
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> JSHandle:
         return await self._main_frame.evaluateHandle(
             expression, arg, force_expr=force_expr
         )
 
     async def evalOnSelector(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
+        self,
+        selector: str,
+        expression: str,
+        arg: Serializable = None,
+        force_expr: bool = None,
     ) -> Any:
         return await self._main_frame.evalOnSelector(
             selector, expression, arg, force_expr=force_expr
         )
 
     async def evalOnSelectorAll(
-        self, selector: str, expression: str, arg: Any = None, force_expr: bool = None
+        self,
+        selector: str,
+        expression: str,
+        arg: Serializable = None,
+        force_expr: bool = None,
     ) -> Any:
         return await self._main_frame.evalOnSelectorAll(
             selector, expression, arg, force_expr=force_expr
@@ -348,7 +364,7 @@ class Page(ChannelOwner):
         self._bindings[name] = binding
         await self._channel.send("exposeBinding", dict(name=name))
 
-    async def setExtraHTTPHeaders(self, headers: Dict) -> None:
+    async def setExtraHTTPHeaders(self, headers: Dict[str, str]) -> None:
         await self._channel.send(
             "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
         )
@@ -521,7 +537,7 @@ class Page(ChannelOwner):
         quality: int = None,
         omitBackground: bool = None,
         fullPage: bool = None,
-        clip: Dict = None,
+        clip: FloatRect = None,
     ) -> bytes:
         binary = await self._channel.send("screenshot", locals_to_params(locals()))
         return base64.b64decode(binary)
@@ -541,7 +557,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -555,7 +571,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -589,7 +605,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Dict = None,
+        position: MousePosition = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -660,7 +676,7 @@ class Page(ChannelOwner):
     async def waitForFunction(
         self,
         expression: str,
-        arg: Any = None,
+        arg: Serializable = None,
         force_expr: bool = None,
         timeout: int = None,
         polling: Union[int, Literal["raf"]] = None,
@@ -702,7 +718,7 @@ class Page(ChannelOwner):
         width: Union[str, float] = None,
         height: Union[str, float] = None,
         preferCSSPageSize: bool = None,
-        margin: Dict = None,
+        margin: PdfMargins = None,
         path: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
@@ -806,7 +822,7 @@ class Worker(ChannelOwner):
         return self._initializer["url"]
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> Any:
         if not is_function_body(expression):
             force_expr = True
@@ -822,7 +838,7 @@ class Worker(ChannelOwner):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> JSHandle:
         return from_channel(
             await self._channel.send(
