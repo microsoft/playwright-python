@@ -76,7 +76,11 @@ jobs:
     - name: Install
       run: python -m playwright install
     - name: Test
+      if: matrix.os != 'ubuntu-latest'
       run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov=scripts --cov-report xml --timeout 30
+    - name: Test
+      if: matrix.os == 'ubuntu-latest'
+      run: xvfb-run pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov=scripts --cov-report xml --timeout 30
     - name: Coveralls
       run: coveralls
       env:
