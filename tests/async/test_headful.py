@@ -30,9 +30,10 @@ async def test_should_have_default_url_when_launching_browser(
 
 
 async def test_headless_should_be_able_to_read_cookies_written_by_headful(
-    browser_type, launch_arguments, server, tmpdir
+    browser_type, launch_arguments, server, tmpdir, is_chromium, is_win
 ):
-    # see https://github.com/microsoft/playwright/issues/717
+    if is_chromium and is_win:
+        pytest.skip("see https://github.com/microsoft/playwright/issues/717")
     # Write a cookie in headful chrome
     headful_context = await browser_type.launchPersistentContext(
         tmpdir, **{**launch_arguments, "headless": False}
