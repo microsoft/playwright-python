@@ -87,7 +87,11 @@ def arguments(func: FunctionType, indent: int) -> str:
             continue
         if "Callable" in value_str:
             tokens.append(f"{name}=self._wrap_handler({name})")
-        elif "typing.Any" in value_str or "Handle" in value_str:
+        elif (
+            "typing.Any" in value_str
+            or "typing.Dict" in value_str
+            or "Handle" in value_str
+        ):
             tokens.append(f"{name}=mapping.to_impl({name})")
         elif re.match(r"<class 'playwright\.[\w]+\.[\w]+", value_str):
             tokens.append(f"{name}={name}._impl_obj")
