@@ -109,6 +109,8 @@ class BrowserContext(ChannelOwner):
     async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
         if urls is None:
             urls = []
+        if not isinstance(urls, list):
+            urls = [urls]
         return await self._channel.send("cookies", dict(urls=urls))
 
     async def addCookies(self, cookies: List[Cookie]) -> None:

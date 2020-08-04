@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
 from typing import Dict, List
 
 from playwright.browser import Browser
@@ -119,7 +120,9 @@ class BrowserType(ChannelOwner):
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
+        chromiumSandbox: bool = None,
     ) -> BrowserContext:
+        userDataDir = str(Path(userDataDir))
         try:
             return from_channel(
                 await self._channel.send(

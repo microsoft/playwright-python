@@ -5716,6 +5716,7 @@ class BrowserType(AsyncBase):
         hasTouch: bool = None,
         colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
+        chromiumSandbox: bool = None,
     ) -> "BrowserContext":
         """BrowserType.launchPersistentContext
 
@@ -5784,6 +5785,8 @@ class BrowserType(AsyncBase):
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        chromiumSandbox : Optional[bool]
+            Enable Chromium sandboxing. Defaults to `true`.
 
         Returns
         -------
@@ -5823,6 +5826,7 @@ class BrowserType(AsyncBase):
                 hasTouch=hasTouch,
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
+                chromiumSandbox=chromiumSandbox,
             )
         )
 
