@@ -238,7 +238,8 @@ class Frame(ChannelOwner):
         self, selector: str, type: str, eventInit: Dict = None, timeout: int = None
     ) -> None:
         await self._channel.send(
-            "dispatchEvent", dict(selector=selector, type=type, eventInit=eventInit)
+            "dispatchEvent",
+            dict(selector=selector, type=type, eventInit=serialize_argument(eventInit)),
         )
 
     async def evalOnSelector(
