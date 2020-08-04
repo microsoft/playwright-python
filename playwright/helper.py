@@ -51,6 +51,11 @@ KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "right", "middle"]
 
 
+class MousePosition(TypedDict):
+    x: float
+    y: float
+
+
 class FilePayload(TypedDict):
     name: str
     mimeType: str
@@ -118,13 +123,55 @@ class FrameNavigatedEvent(TypedDict):
     error: Optional[str]
 
 
-Size = TypedDict("Size", {"width": int, "height": int})
+class RequestFailure(TypedDict):
+    errorText: str
+
+
+class Credentials(TypedDict):
+    username: str
+    password: str
+
+
+class IntSize(TypedDict):
+    width: int
+    height: int
+
+
+class FloatRect(TypedDict):
+    x: float
+    y: float
+    width: float
+    height: float
+
+
+class Geolocation(TypedDict, total=False):
+    latitude: float
+    longitude: float
+    accuracy: Optional[float]
+
+
+Env = Dict[str, Union[str, int, bool]]
+
+
+class ProxyServer(TypedDict):
+    server: str
+    bypass: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+
+
+class PdfMargins(TypedDict):
+    top: Optional[Union[str, int]]
+    right: Optional[Union[str, int]]
+    bottom: Optional[Union[str, int]]
+    left: Optional[Union[str, int]]
+
 
 DeviceDescriptor = TypedDict(
     "DeviceDescriptor",
     {
         "userAgent": str,
-        "viewport": Size,
+        "viewport": IntSize,
         "deviceScaleFactor": int,
         "isMobile": bool,
         "hasTouch": bool,

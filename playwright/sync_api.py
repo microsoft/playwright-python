@@ -39,9 +39,17 @@ from playwright.file_chooser import FileChooser as FileChooserImpl
 from playwright.frame import Frame as FrameImpl
 from playwright.helper import (
     ConsoleMessageLocation,
+    Credentials,
     DeviceDescriptor,
     Error,
     FilePayload,
+    FloatRect,
+    Geolocation,
+    IntSize,
+    MousePosition,
+    PdfMargins,
+    ProxyServer,
+    RequestFailure,
     SelectOption,
     Viewport,
 )
@@ -106,7 +114,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
             Request's post body, if any.
         """
         return mapping.from_maybe_impl(self._impl_obj.postData)
@@ -117,7 +125,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        typing.Dict[str, str]
+        Dict[str, str]
             An object with HTTP headers associated with the request. All header names are lower-case.
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
@@ -143,7 +151,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        typing.Union[Request, NoneType]
+        Optional[Request]
             Request that was redirected by the server to this one, if any.
         """
         return mapping.from_impl_nullable(self._impl_obj.redirectedFrom)
@@ -156,13 +164,13 @@ class Request(SyncBase):
 
         Returns
         -------
-        typing.Union[Request, NoneType]
+        Optional[Request]
             New request issued by the browser if the server responded with redirect.
         """
         return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
 
     @property
-    def failure(self) -> typing.Union[str, NoneType]:
+    def failure(self) -> typing.Union[RequestFailure, NoneType]:
         """Request.failure
 
         The method returns `null` unless this request has failed, as reported by
@@ -171,7 +179,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[{"errorText": str}]
             Object describing request failure, if any
         """
         return mapping.from_maybe_impl(self._impl_obj.failure)
@@ -181,7 +189,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             A matching Response object, or `null` if the response was not received due to error.
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.response()))
@@ -259,7 +267,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        typing.Dict[str, str]
+        Dict[str, str]
             An object with HTTP headers associated with the response. All header names are lower-case.
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
@@ -291,7 +299,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        typing.Union[Error, NoneType]
+        Optional[Error]
             Waits for this response to finish, returns failure error if request failed.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.finished()))
@@ -323,7 +331,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        typing.Union[typing.Dict, typing.List]
+        Union[Dict, List]
             Promise which resolves to a JSON representation of response body.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.json()))
@@ -395,11 +403,11 @@ class Route(SyncBase):
         ----------
         status : Optional[int]
             Response status code, defaults to `200`.
-        headers : Optional[typing.Dict[str, str]]
+        headers : Optional[Dict[str, str]]
             Optional response headers. Header values will be converted to a string.
-        body : Optional[str, bytes]
+        body : Union[str, bytes, NoneType]
             Optional response body.
-        path : Optional[str, pathlib.Path]
+        path : Union[str, pathlib.Path, NoneType]
             Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory.
         contentType : Optional[str]
             If set, equals to setting `Content-Type` response header.
@@ -430,9 +438,9 @@ class Route(SyncBase):
         ----------
         method : Optional[str]
             If set changes the request method (e.g. GET or POST)
-        headers : Optional[typing.Dict[str, str]]
+        headers : Optional[Dict[str, str]]
             If set changes the request HTTP headers. Header values will be converted to a string.
-        postData : Optional[str, bytes]
+        postData : Union[str, bytes, NoneType]
             If set changes the post data of request
         """
         return mapping.from_maybe_impl(
@@ -572,7 +580,7 @@ class Mouse(SyncBase):
 
         Parameters
         ----------
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -590,7 +598,7 @@ class Mouse(SyncBase):
 
         Parameters
         ----------
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -617,7 +625,7 @@ class Mouse(SyncBase):
         y : float
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -647,7 +655,7 @@ class Mouse(SyncBase):
         y : float
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         """
         return mapping.from_maybe_impl(
@@ -677,12 +685,12 @@ class JSHandle(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -711,7 +719,7 @@ class JSHandle(SyncBase):
             Function to be evaluated
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
@@ -754,7 +762,7 @@ class JSHandle(SyncBase):
 
         Returns
         -------
-        typing.Dict[str, JSHandle]
+        Dict[str, JSHandle]
         """
         return mapping.from_impl_dict(self._sync(self._impl_obj.getProperties()))
 
@@ -765,7 +773,7 @@ class JSHandle(SyncBase):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
         return mapping.from_impl_nullable(self._impl_obj.asElement())
 
@@ -787,7 +795,7 @@ class JSHandle(SyncBase):
 
         Returns
         -------
-        typing.Any
+        Any
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.jsonValue()))
 
@@ -806,7 +814,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
         return mapping.from_impl_nullable(self._impl_obj.asElement())
 
@@ -815,7 +823,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.Union[Frame, NoneType]
+        Optional[Frame]
             Returns the frame containing the given element.
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.ownerFrame()))
@@ -825,7 +833,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.Union[Frame, NoneType]
+        Optional[Frame]
             Resolves to the content frame for element handles referencing iframe nodes, or `null` otherwise
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.contentFrame()))
@@ -842,7 +850,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.getAttribute(name=name))
@@ -853,7 +861,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
             Resolves to the `node.textContent`.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.textContent()))
@@ -899,7 +907,7 @@ class ElementHandle(JSHandle):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        eventInit : Optional[typing.Dict]
+        eventInit : Optional[Dict]
             event-specific initialization properties.
         """
         return mapping.from_maybe_impl(
@@ -930,7 +938,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -941,9 +949,9 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -953,10 +961,7 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.hover(
-                    modifiers=modifiers,
-                    position=mapping.to_impl(position),
-                    timeout=timeout,
-                    force=force,
+                    modifiers=modifiers, position=position, timeout=timeout, force=force
                 )
             )
         )
@@ -966,7 +971,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
@@ -981,13 +986,13 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -1002,7 +1007,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 self._impl_obj.click(
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     delay=delay,
                     button=button,
                     clickCount=clickCount,
@@ -1018,7 +1023,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
@@ -1035,13 +1040,13 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -1054,7 +1059,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 self._impl_obj.dblclick(
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     delay=delay,
                     button=button,
                     timeout=timeout,
@@ -1084,7 +1089,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        values : Optional[str, ElementHandle, SelectOption, typing.List[str], typing.List[ElementHandle], typing.List[SelectOption]]
+        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -1093,7 +1098,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.List[str]
+        List[str]
             An array of option values that have been successfully selected.
         """
         return mapping.from_maybe_impl(
@@ -1166,7 +1171,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : typing.Union[str, pathlib.Path, FilePayload, typing.List[str], typing.List[pathlib.Path], typing.List[FilePayload]]
+        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -1299,14 +1304,14 @@ class ElementHandle(JSHandle):
             )
         )
 
-    def boundingBox(self) -> typing.Dict[str, float]:
+    def boundingBox(self) -> typing.Union[FloatRect, NoneType]:
         """ElementHandle.boundingBox
 
         This method returns the bounding box of the element (relative to the main frame), or `null` if the element is not visible.
 
         Returns
         -------
-        typing.Dict[str, float]
+        Optional[{"x": float, "y": float, "width": float, "height": float}]
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.boundingBox()))
 
@@ -1326,7 +1331,7 @@ class ElementHandle(JSHandle):
         ----------
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        type : Optional[typing.Literal['png', 'jpeg']]
+        type : Optional[Literal['png', 'jpeg']]
             Specify screenshot type, defaults to `png`.
         path : Optional[str]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
@@ -1364,7 +1369,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
         return mapping.from_impl_nullable(
             self._sync(self._impl_obj.querySelector(selector=selector))
@@ -1382,7 +1387,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        typing.List[ElementHandle]
+        List[ElementHandle]
         """
         return mapping.from_impl_list(
             self._sync(self._impl_obj.querySelectorAll(selector=selector))
@@ -1409,12 +1414,12 @@ class ElementHandle(JSHandle):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -1455,12 +1460,12 @@ class ElementHandle(JSHandle):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -1484,7 +1489,7 @@ class Accessibility(SyncBase):
 
     def snapshot(
         self, interestingOnly: bool = None, root: "ElementHandle" = None
-    ) -> typing.Union[typing.Dict[str, typing.Any], NoneType]:
+    ) -> typing.Union[typing.Dict, NoneType]:
         """Accessibility.snapshot
 
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the page.
@@ -1505,7 +1510,7 @@ class Accessibility(SyncBase):
 
         Returns
         -------
-        typing.Union[typing.Dict[str, typing.Any], NoneType]
+        Optional[Dict]
             An AXNode object with the following properties:
         """
         return mapping.from_maybe_impl(
@@ -1574,7 +1579,7 @@ class FileChooser(SyncBase):
 
         Parameters
         ----------
-        files : typing.Union[str, FilePayload, typing.List[str], typing.List[FilePayload]]
+        files : Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -1629,7 +1634,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[Frame, NoneType]
+        Optional[Frame]
             Parent frame, if any. Detached frames and main frames return `null`.
         """
         return mapping.from_impl_nullable(self._impl_obj.parentFrame)
@@ -1640,7 +1645,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.List[Frame]
+        List[Frame]
         """
         return mapping.from_impl_list(self._impl_obj.childFrames)
 
@@ -1673,7 +1678,7 @@ class Frame(SyncBase):
             URL to navigate frame to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -1683,7 +1688,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
@@ -1708,9 +1713,9 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -1720,7 +1725,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
         """
         return mapping.from_impl_nullable(
@@ -1742,7 +1747,7 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        state : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        state : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately.
              - `'load'` - wait for the `load` event to be fired.
              - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
@@ -1783,12 +1788,12 @@ class Frame(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -1817,7 +1822,7 @@ class Frame(SyncBase):
             Function to be evaluated in the page context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
@@ -1847,7 +1852,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
             Promise which resolves to ElementHandle pointing to the frame element.
         """
         return mapping.from_impl_nullable(
@@ -1866,7 +1871,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.List[ElementHandle]
+        List[ElementHandle]
             Promise which resolves to ElementHandles pointing to the frame elements.
         """
         return mapping.from_impl_list(
@@ -1890,7 +1895,7 @@ class Frame(SyncBase):
             A selector of an element to wait for. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        state : Optional[typing.Literal['attached', 'detached', 'visible', 'hidden']]
+        state : Optional[Literal['attached', 'detached', 'visible', 'hidden']]
             Defaults to `'visible'`. Can be either:
              - `'attached'` - wait for element to be present in DOM.
              - `'detached'` - wait for element to not be present in DOM.
@@ -1899,7 +1904,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
             Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
         """
         return mapping.from_impl_nullable(
@@ -1939,7 +1944,7 @@ class Frame(SyncBase):
             A selector to search for element to use. If there are multiple elements satisfying the selector, the first will be double clicked. See working with selectors for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        eventInit : Optional[typing.Dict]
+        eventInit : Optional[Dict]
             event-specific initialization properties.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -1976,12 +1981,12 @@ class Frame(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -2016,12 +2021,12 @@ class Frame(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -2060,7 +2065,7 @@ class Frame(SyncBase):
             HTML markup to assign to the page.
         timeout : Optional[int]
             Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider setting content to be finished when the `load` event is fired.
@@ -2147,7 +2152,7 @@ class Frame(SyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
@@ -2164,13 +2169,13 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -2186,7 +2191,7 @@ class Frame(SyncBase):
                 self._impl_obj.click(
                     selector=selector,
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     delay=delay,
                     button=button,
                     clickCount=clickCount,
@@ -2203,7 +2208,7 @@ class Frame(SyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
@@ -2221,13 +2226,13 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element to double click. If there are multiple elements satisfying the selector, the first will be double clicked. See working with selectors for more details.
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2239,7 +2244,7 @@ class Frame(SyncBase):
                 self._impl_obj.dblclick(
                     selector=selector,
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     delay=delay,
                     button=button,
                     timeout=timeout,
@@ -2313,7 +2318,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.textContent(selector=selector, timeout=timeout))
@@ -2377,7 +2382,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -2393,7 +2398,7 @@ class Frame(SyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -2406,9 +2411,9 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element to hover. If there are multiple elements satisfying the selector, the first will be hovered. See working with selectors for more details.
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2420,7 +2425,7 @@ class Frame(SyncBase):
                 self._impl_obj.hover(
                     selector=selector,
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     timeout=timeout,
                     force=force,
                 )
@@ -2450,7 +2455,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to query frame for. See working with selectors for more details.
-        values : Optional[str, ElementHandle, SelectOption, typing.List[str], typing.List[ElementHandle], typing.List[SelectOption]]
+        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2459,7 +2464,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        typing.List[str]
+        List[str]
             An array of option values that have been successfully selected.
         """
         return mapping.from_maybe_impl(
@@ -2496,7 +2501,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : typing.Union[str, pathlib.Path, FilePayload, typing.List[str], typing.List[pathlib.Path], typing.List[FilePayload]]
+        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -2696,11 +2701,11 @@ class Frame(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
         timeout : Optional[int]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        polling : Optional[int, typing.Literal['raf']]
+        polling : Union[int, 'raf', NoneType]
             If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
         Returns
@@ -2781,12 +2786,12 @@ class Worker(SyncBase):
             Function to be evaluated in the worker context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -2813,7 +2818,7 @@ class Worker(SyncBase):
             Function to be evaluated in the page context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
@@ -2903,7 +2908,7 @@ class ConsoleMessage(SyncBase):
 
         Returns
         -------
-        typing.List[JSHandle]
+        List[JSHandle]
         """
         return mapping.from_impl_list(self._impl_obj.args)
 
@@ -2913,7 +2918,7 @@ class ConsoleMessage(SyncBase):
 
         Returns
         -------
-        ConsoleMessageLocation
+        {"url": Optional[str], "lineNumber": Optional[int], "columnNumber": Optional[int]}
         """
         return mapping.from_maybe_impl(self._impl_obj.location)
 
@@ -3021,7 +3026,7 @@ class Download(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.failure()))
 
@@ -3032,7 +3037,7 @@ class Download(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
 
@@ -3118,7 +3123,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.List[Frame]
+        List[Frame]
             An array of all frames attached to the page.
         """
         return mapping.from_impl_list(self._impl_obj.frames)
@@ -3143,7 +3148,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.List[Worker]
+        List[Worker]
             This method returns all of the dedicated WebWorkers associated with the page.
         """
         return mapping.from_impl_list(self._impl_obj.workers)
@@ -3153,7 +3158,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Page, NoneType]
+        Optional[Page]
             Promise which resolves to the opener for popup pages and `null` for others. If the opener has been closed already the promise may resolve to `null`.
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.opener()))
@@ -3171,12 +3176,12 @@ class Page(SyncBase):
         ----------
         name : Optional[str]
             frame name specified in the `iframe`'s `name` attribute
-        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving frame's `url` as a URL object.
 
         Returns
         -------
-        typing.Union[Frame, NoneType]
+        Optional[Frame]
             frame matching the criteria. Returns `null` if no frame matches.
         """
         return mapping.from_impl_nullable(
@@ -3235,7 +3240,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
         return mapping.from_impl_nullable(
             self._sync(self._impl_obj.querySelector(selector=selector))
@@ -3254,7 +3259,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.List[ElementHandle]
+        List[ElementHandle]
         """
         return mapping.from_impl_list(
             self._sync(self._impl_obj.querySelectorAll(selector=selector))
@@ -3279,7 +3284,7 @@ class Page(SyncBase):
             A selector of an element to wait for. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        state : Optional[typing.Literal['attached', 'detached', 'visible', 'hidden']]
+        state : Optional[Literal['attached', 'detached', 'visible', 'hidden']]
             Defaults to `'visible'`. Can be either:
              - `'attached'` - wait for element to be present in DOM.
              - `'detached'` - wait for element to not be present in DOM.
@@ -3288,7 +3293,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
             Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
         """
         return mapping.from_impl_nullable(
@@ -3328,7 +3333,7 @@ class Page(SyncBase):
             A selector to search for element to use. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        eventInit : Optional[typing.Dict]
+        eventInit : Optional[Dict]
             event-specific initialization properties.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -3362,12 +3367,12 @@ class Page(SyncBase):
             Function to be evaluated in the page context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -3396,7 +3401,7 @@ class Page(SyncBase):
             Function to be evaluated in the page context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
@@ -3436,12 +3441,12 @@ class Page(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -3476,12 +3481,12 @@ class Page(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
@@ -3571,7 +3576,7 @@ class Page(SyncBase):
         ----------
         name : str
             Name of the function on the window object
-        binding : typing.Callable
+        binding : Callable
             Callback function which will be called in Playwright's context.
         """
         return mapping.from_maybe_impl(
@@ -3600,7 +3605,7 @@ class Page(SyncBase):
         ----------
         name : str
             Name of the function on the window object.
-        binding : typing.Callable
+        binding : Callable
             Callback function that will be called in the Playwright's context.
         """
         return mapping.from_maybe_impl(
@@ -3611,7 +3616,7 @@ class Page(SyncBase):
             )
         )
 
-    def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
+    def setExtraHTTPHeaders(self, headers: typing.Dict[str, str]) -> NoneType:
         """Page.setExtraHTTPHeaders
 
         The extra HTTP headers will be sent with every request the page initiates.
@@ -3620,7 +3625,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        headers : typing.Dict
+        headers : Dict[str, str]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
         return mapping.from_maybe_impl(
@@ -3654,7 +3659,7 @@ class Page(SyncBase):
             HTML markup to assign to the page.
         timeout : Optional[int]
             Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider setting markup succeeded, defaults to `load`. Given an array of event strings, setting content is considered to be successful after all events have been fired. Events can be either:
              - `'load'` - consider setting content to be finished when the `load` event is fired.
              - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
@@ -3699,7 +3704,7 @@ class Page(SyncBase):
             URL to navigate page to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3709,7 +3714,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
@@ -3731,7 +3736,7 @@ class Page(SyncBase):
         ----------
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3739,7 +3744,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
@@ -3758,7 +3763,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        state : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        state : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately.
              - `'load'` - wait for the `load` event to be fired.
              - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
@@ -3785,9 +3790,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3797,7 +3802,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
         """
         return mapping.from_impl_nullable(
@@ -3819,7 +3824,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Request object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
@@ -3850,7 +3855,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Optional[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Response object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -3888,7 +3893,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the event data value.
         """
         return mapping.from_maybe_impl(
@@ -3914,7 +3919,7 @@ class Page(SyncBase):
         ----------
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3922,7 +3927,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
               can not go back, resolves to `null`.
         """
@@ -3943,7 +3948,7 @@ class Page(SyncBase):
         ----------
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[typing.Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3951,7 +3956,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Response, NoneType]
+        Optional[Response]
             Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
               can not go forward, resolves to `null`.
         """
@@ -3969,9 +3974,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        media : Optional[typing.Literal['screen', 'print']]
+        media : Optional[Literal['screen', 'print']]
             Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null` disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value.
-        colorScheme : Optional[typing.Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated value.
         """
         return mapping.from_maybe_impl(
@@ -4002,7 +4007,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[Viewport, NoneType]
+        Optional[{"width": int, "height": int}]
         """
         return mapping.from_maybe_impl(self._impl_obj.viewportSize())
 
@@ -4052,9 +4057,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : typing.Union[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[Route, Request], typing.Any]
+        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -4076,9 +4081,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : typing.Union[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[typing.Callable[[Route, Request], typing.Any]]
+        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
             Handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -4097,7 +4102,7 @@ class Page(SyncBase):
         quality: int = None,
         omitBackground: bool = None,
         fullPage: bool = None,
-        clip: typing.Dict = None,
+        clip: FloatRect = None,
     ) -> bytes:
         """Page.screenshot
 
@@ -4107,7 +4112,7 @@ class Page(SyncBase):
         ----------
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        type : Optional[typing.Literal['png', 'jpeg']]
+        type : Optional[Literal['png', 'jpeg']]
             Specify screenshot type, defaults to `png`.
         path : Optional[str]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
@@ -4117,7 +4122,7 @@ class Page(SyncBase):
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
         fullPage : Optional[bool]
             When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
-        clip : Optional[typing.Dict]
+        clip : Optional[{"x": float, "y": float, "width": float, "height": float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
 
         Returns
@@ -4134,7 +4139,7 @@ class Page(SyncBase):
                     quality=quality,
                     omitBackground=omitBackground,
                     fullPage=fullPage,
-                    clip=mapping.to_impl(clip),
+                    clip=clip,
                 )
             )
         )
@@ -4187,7 +4192,7 @@ class Page(SyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: Literal["left", "right", "middle"] = None,
         clickCount: int = None,
@@ -4205,13 +4210,13 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -4227,7 +4232,7 @@ class Page(SyncBase):
                 self._impl_obj.click(
                     selector=selector,
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     delay=delay,
                     button=button,
                     clickCount=clickCount,
@@ -4244,7 +4249,7 @@ class Page(SyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         delay: int = None,
         button: Literal["left", "right", "middle"] = None,
         timeout: int = None,
@@ -4264,13 +4269,13 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element to double click. If there are multiple elements satisfying the selector, the first will be double clicked. See working with selectors for more details.
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[typing.Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'right', 'middle']]
             Defaults to `left`.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4282,7 +4287,7 @@ class Page(SyncBase):
                 self._impl_obj.dblclick(
                     selector=selector,
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     delay=delay,
                     button=button,
                     timeout=timeout,
@@ -4358,7 +4363,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.textContent(selector=selector, timeout=timeout))
@@ -4422,7 +4427,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -4438,7 +4443,7 @@ class Page(SyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Dict = None,
+        position: MousePosition = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -4452,9 +4457,9 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element to hover. If there are multiple elements satisfying the selector, the first will be hovered. See working with selectors for more details.
-        modifiers : Optional[typing.List[typing.Literal['Alt', 'Control', 'Meta', 'Shift']]]
+        modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[typing.Dict]
+        position : Optional[{"x": float, "y": float}]
             A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4466,7 +4471,7 @@ class Page(SyncBase):
                 self._impl_obj.hover(
                     selector=selector,
                     modifiers=modifiers,
-                    position=mapping.to_impl(position),
+                    position=position,
                     timeout=timeout,
                     force=force,
                 )
@@ -4498,7 +4503,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to query page for. See working with selectors for more details.
-        values : Optional[str, ElementHandle, SelectOption, typing.List[str], typing.List[ElementHandle], typing.List[SelectOption]]
+        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4507,7 +4512,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        typing.List[str]
+        List[str]
             An array of option values that have been successfully selected.
         """
         return mapping.from_maybe_impl(
@@ -4539,7 +4544,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : typing.Union[str, FilePayload, typing.List[str], typing.List[FilePayload]]
+        files : Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -4745,11 +4750,11 @@ class Page(SyncBase):
             Function to be evaluated in browser context
         force_expr : bool
             Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
-        arg : Optional[typing.Any]
+        arg : Optional[Any]
             Optional argument to pass to `pageFunction`
         timeout : Optional[int]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
-        polling : Optional[int, typing.Literal['raf']]
+        polling : Union[int, 'raf', NoneType]
             If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
         Returns
@@ -4782,7 +4787,7 @@ class Page(SyncBase):
         width: typing.Union[str, float] = None,
         height: typing.Union[str, float] = None,
         preferCSSPageSize: bool = None,
-        margin: typing.Dict = None,
+        margin: PdfMargins = None,
         path: str = None,
     ) -> bytes:
         """Page.pdf
@@ -4849,13 +4854,13 @@ class Page(SyncBase):
             Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
         format : Optional[str]
             Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
-        width : Optional[str, float]
+        width : Union[str, float, NoneType]
             Paper width, accepts values labeled with units.
-        height : Optional[str, float]
+        height : Union[str, float, NoneType]
             Paper height, accepts values labeled with units.
         preferCSSPageSize : Optional[bool]
             Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
-        margin : Optional[typing.Dict]
+        margin : Optional[{"top": Union[str, int, NoneType], "right": Union[str, int, NoneType], "bottom": Union[str, int, NoneType], "left": Union[str, int, NoneType]}]
             Paper margins, defaults to none.
         path : Optional[str]
             The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the PDF won't be saved to the disk.
@@ -4879,7 +4884,7 @@ class Page(SyncBase):
                     width=width,
                     height=height,
                     preferCSSPageSize=preferCSSPageSize,
-                    margin=mapping.to_impl(margin),
+                    margin=margin,
                     path=path,
                 )
             )
@@ -5008,7 +5013,7 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        typing.List[Page]
+        List[Page]
             All open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can find them using chromiumBrowserContext.backgroundPages().
         """
         return mapping.from_impl_list(self._impl_obj.pages)
@@ -5073,11 +5078,11 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        urls : Optional[str, typing.List[str]]
+        urls : Union[str, List[str], NoneType]
 
         Returns
         -------
-        typing.List[typing.Dict]
+        List[Dict]
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.cookies(urls=urls)))
 
@@ -5087,7 +5092,7 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        cookies : typing.List[typing.Dict]
+        cookies : List[Dict]
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.addCookies(cookies=mapping.to_impl(cookies)))
@@ -5109,7 +5114,7 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        permissions : typing.List[str]
+        permissions : List[str]
             A permission or an array of permissions to grant. Permissions can be one of the following values:
              - `'*'`
              - `'geolocation'`
@@ -5144,7 +5149,7 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.clearPermissions()))
 
-    def setGeolocation(self, geolocation: typing.Dict = None) -> NoneType:
+    def setGeolocation(self, geolocation: Geolocation = None) -> NoneType:
         """BrowserContext.setGeolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -5153,15 +5158,13 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        geolocation : Optional[typing.Dict]
+        geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         """
         return mapping.from_maybe_impl(
-            self._sync(
-                self._impl_obj.setGeolocation(geolocation=mapping.to_impl(geolocation))
-            )
+            self._sync(self._impl_obj.setGeolocation(geolocation=geolocation))
         )
 
-    def setExtraHTTPHeaders(self, headers: typing.Dict) -> NoneType:
+    def setExtraHTTPHeaders(self, headers: typing.Dict[str, str]) -> NoneType:
         """BrowserContext.setExtraHTTPHeaders
 
         The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged with page-specific extra HTTP headers set with page.setExtraHTTPHeaders(). If page overrides a particular header, page-specific header value will be used instead of the browser context header value.
@@ -5170,7 +5173,7 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        headers : typing.Dict
+        headers : Dict[str, str]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
         return mapping.from_maybe_impl(
@@ -5228,7 +5231,7 @@ class BrowserContext(SyncBase):
         ----------
         name : str
             Name of the function on the window object.
-        binding : typing.Callable
+        binding : Callable
             Callback function that will be called in the Playwright's context.
         """
         return mapping.from_maybe_impl(
@@ -5252,7 +5255,7 @@ class BrowserContext(SyncBase):
         ----------
         name : str
             Name of the function on the window object.
-        binding : typing.Callable
+        binding : Callable
             Callback function that will be called in the Playwright's context.
         """
         return mapping.from_maybe_impl(
@@ -5280,9 +5283,9 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        url : typing.Union[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[Route, Request], typing.Any]
+        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -5304,9 +5307,9 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        url : typing.Union[str, typing.Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, typing.Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
-        handler : Optional[typing.Callable[[Route, Request], typing.Any]]
+        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
             Handler function used to register a routing with browserContext.route(url, handler).
         """
         return mapping.from_maybe_impl(
@@ -5335,7 +5338,7 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        typing.Any
+        Any
             Promise which resolves to the event data value.
         """
         return mapping.from_maybe_impl(
@@ -5393,12 +5396,12 @@ class CDPSession(SyncBase):
         ----------
         method : str
             protocol method name
-        params : Optional[typing.Dict]
+        params : Optional[Dict]
             Optional method parameters
 
         Returns
         -------
-        typing.Dict
+        Dict
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -5427,7 +5430,7 @@ class ChromiumBrowserContext(BrowserContext):
 
         Returns
         -------
-        typing.List[Page]
+        List[Page]
             All existing background pages in the context.
         """
         return mapping.from_impl_list(self._impl_obj.backgroundPages())
@@ -5437,7 +5440,7 @@ class ChromiumBrowserContext(BrowserContext):
 
         Returns
         -------
-        typing.List[Worker]
+        List[Worker]
             All existing service workers in the context.
         """
         return mapping.from_impl_list(self._impl_obj.serviceWorkers())
@@ -5476,7 +5479,7 @@ class Browser(SyncBase):
 
         Returns
         -------
-        typing.List[BrowserContext]
+        List[BrowserContext]
         """
         return mapping.from_impl_list(self._impl_obj.contexts)
 
@@ -5493,18 +5496,18 @@ class Browser(SyncBase):
 
     def newContext(
         self,
-        viewport: typing.Union[typing.Dict, Literal[0]] = None,
+        viewport: typing.Union[IntSize, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
         userAgent: str = None,
         locale: str = None,
         timezoneId: str = None,
-        geolocation: typing.Dict = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        httpCredentials: typing.Dict = None,
+        httpCredentials: Credentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -5517,7 +5520,7 @@ class Browser(SyncBase):
 
         Parameters
         ----------
-        viewport : Optional[typing.Dict, typing.Literal[0]]
+        viewport : Union[{"width": int, "height": int}, '0', NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
         ignoreHTTPSErrors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
@@ -5531,14 +5534,14 @@ class Browser(SyncBase):
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as number and date formatting rules.
         timezoneId : Optional[str]
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
-        geolocation : Optional[typing.Dict]
-        permissions : Optional[typing.List[str]]
+        geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
+        permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See browserContext.grantPermissions for more details.
-        extraHTTPHeaders : Optional[typing.Dict[str, str]]
+        extraHTTPHeaders : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        httpCredentials : Optional[typing.Dict]
+        httpCredentials : Optional[{"username": str, "password": str}]
             Credentials for HTTP authentication.
         deviceScaleFactor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -5546,7 +5549,7 @@ class Browser(SyncBase):
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[typing.Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
@@ -5558,18 +5561,18 @@ class Browser(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.newContext(
-                    viewport=mapping.to_impl(viewport),
+                    viewport=viewport,
                     ignoreHTTPSErrors=ignoreHTTPSErrors,
                     javaScriptEnabled=javaScriptEnabled,
                     bypassCSP=bypassCSP,
                     userAgent=userAgent,
                     locale=locale,
                     timezoneId=timezoneId,
-                    geolocation=mapping.to_impl(geolocation),
+                    geolocation=geolocation,
                     permissions=permissions,
                     extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                     offline=offline,
-                    httpCredentials=mapping.to_impl(httpCredentials),
+                    httpCredentials=httpCredentials,
                     deviceScaleFactor=deviceScaleFactor,
                     isMobile=isMobile,
                     hasTouch=hasTouch,
@@ -5581,18 +5584,18 @@ class Browser(SyncBase):
 
     def newPage(
         self,
-        viewport: typing.Union[typing.Dict, Literal[0]] = None,
+        viewport: typing.Union[IntSize, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
         userAgent: str = None,
         locale: str = None,
         timezoneId: str = None,
-        geolocation: typing.Dict = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        httpCredentials: typing.Dict = None,
+        httpCredentials: Credentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -5606,7 +5609,7 @@ class Browser(SyncBase):
 
         Parameters
         ----------
-        viewport : Optional[typing.Dict, typing.Literal[0]]
+        viewport : Union[{"width": int, "height": int}, '0', NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
         ignoreHTTPSErrors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
@@ -5620,14 +5623,14 @@ class Browser(SyncBase):
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as number and date formatting rules.
         timezoneId : Optional[str]
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
-        geolocation : Optional[typing.Dict]
-        permissions : Optional[typing.List[str]]
+        geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
+        permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See browserContext.grantPermissions for more details.
-        extraHTTPHeaders : Optional[typing.Dict[str, str]]
+        extraHTTPHeaders : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        httpCredentials : Optional[typing.Dict]
+        httpCredentials : Optional[{"username": str, "password": str}]
             Credentials for HTTP authentication.
         deviceScaleFactor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -5635,7 +5638,7 @@ class Browser(SyncBase):
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[typing.Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
@@ -5647,18 +5650,18 @@ class Browser(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.newPage(
-                    viewport=mapping.to_impl(viewport),
+                    viewport=viewport,
                     ignoreHTTPSErrors=ignoreHTTPSErrors,
                     javaScriptEnabled=javaScriptEnabled,
                     bypassCSP=bypassCSP,
                     userAgent=userAgent,
                     locale=locale,
                     timezoneId=timezoneId,
-                    geolocation=mapping.to_impl(geolocation),
+                    geolocation=geolocation,
                     permissions=permissions,
                     extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                     offline=offline,
-                    httpCredentials=mapping.to_impl(httpCredentials),
+                    httpCredentials=httpCredentials,
                     deviceScaleFactor=deviceScaleFactor,
                     isMobile=isMobile,
                     hasTouch=hasTouch,
@@ -5762,15 +5765,15 @@ class BrowserType(SyncBase):
         self,
         executablePath: str = None,
         args: typing.List[str] = None,
-        ignoreDefaultArgs: typing.List[str] = None,
+        ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
         timeout: int = None,
-        env: typing.Dict = None,
+        env: typing.Union[typing.Dict[str, typing.Union[str, int, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: typing.Dict = None,
+        proxy: ProxyServer = None,
         downloadsPath: str = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
@@ -5788,9 +5791,9 @@ class BrowserType(SyncBase):
         ----------
         executablePath : Optional[str]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
-        args : Optional[typing.List[str]]
+        args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
-        ignoreDefaultArgs : Optional[typing.List[str]]
+        ignoreDefaultArgs : Union[bool, List[str], NoneType]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
         handleSIGINT : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
@@ -5800,13 +5803,13 @@ class BrowserType(SyncBase):
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Optional[int]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        env : Optional[typing.Dict]
+        env : Optional[Dict[str, Union[str, int, bool]]]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
         headless : Optional[bool]
             Whether to run browser in headless mode. More details for Chromium and Firefox. Defaults to `true` unless the `devtools` option is `true`.
         devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
-        proxy : Optional[typing.Dict]
+        proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
         downloadsPath : Optional[str]
             If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
@@ -5833,7 +5836,7 @@ class BrowserType(SyncBase):
                     env=mapping.to_impl(env),
                     headless=headless,
                     devtools=devtools,
-                    proxy=mapping.to_impl(proxy),
+                    proxy=proxy,
                     downloadsPath=downloadsPath,
                     slowMo=slowMo,
                     chromiumSandbox=chromiumSandbox,
@@ -5845,19 +5848,19 @@ class BrowserType(SyncBase):
         self,
         executablePath: str = None,
         args: typing.List[str] = None,
-        ignoreDefaultArgs: typing.List[str] = None,
+        ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
         timeout: int = None,
-        env: typing.Dict = None,
+        env: typing.Union[typing.Dict[str, typing.Union[str, int, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: typing.Dict = None,
+        proxy: ProxyServer = None,
         downloadsPath: str = None,
         port: int = None,
         chromiumSandbox: bool = None,
-    ) -> "Browser":
+    ) -> "BrowserServer":
         """BrowserType.launchServer
 
         Launches browser server that client can connect to. An example of launching a browser executable and connecting to it later:
@@ -5866,9 +5869,9 @@ class BrowserType(SyncBase):
         ----------
         executablePath : Optional[str]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
-        args : Optional[typing.List[str]]
+        args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
-        ignoreDefaultArgs : Optional[typing.List[str]]
+        ignoreDefaultArgs : Union[bool, List[str], NoneType]
             If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
         handleSIGINT : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
@@ -5878,13 +5881,13 @@ class BrowserType(SyncBase):
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Optional[int]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        env : Optional[typing.Dict]
+        env : Optional[Dict[str, Union[str, int, bool]]]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
         headless : Optional[bool]
             Whether to run browser in headless mode. More details for Chromium and Firefox. Defaults to `true` unless the `devtools` option is `true`.
         devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
-        proxy : Optional[typing.Dict]
+        proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
         downloadsPath : Optional[str]
             If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
@@ -5895,7 +5898,7 @@ class BrowserType(SyncBase):
 
         Returns
         -------
-        Browser
+        BrowserServer
             Promise which resolves to the browser app instance.
         """
         return mapping.from_impl(
@@ -5911,7 +5914,7 @@ class BrowserType(SyncBase):
                     env=mapping.to_impl(env),
                     headless=headless,
                     devtools=devtools,
-                    proxy=mapping.to_impl(proxy),
+                    proxy=proxy,
                     downloadsPath=downloadsPath,
                     port=port,
                     chromiumSandbox=chromiumSandbox,
@@ -5924,29 +5927,29 @@ class BrowserType(SyncBase):
         userDataDir: str,
         executablePath: str = None,
         args: typing.List[str] = None,
-        ignoreDefaultArgs: typing.List[str] = None,
+        ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
         timeout: int = None,
-        env: typing.Dict = None,
+        env: typing.Union[typing.Dict[str, typing.Union[str, int, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: typing.Dict = None,
+        proxy: ProxyServer = None,
         downloadsPath: str = None,
         slowMo: int = None,
-        viewport: typing.Dict = None,
+        viewport: IntSize = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
         userAgent: str = None,
         locale: str = None,
         timezoneId: str = None,
-        geolocation: typing.Dict = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        httpCredentials: typing.Dict = None,
+        httpCredentials: Credentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -5964,9 +5967,9 @@ class BrowserType(SyncBase):
             Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for Chromium and Firefox.
         executablePath : Optional[str]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
-        args : Optional[typing.List[str]]
+        args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
-        ignoreDefaultArgs : Optional[typing.List[str]]
+        ignoreDefaultArgs : Union[bool, List[str], NoneType]
             If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
         handleSIGINT : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
@@ -5976,19 +5979,19 @@ class BrowserType(SyncBase):
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Optional[int]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        env : Optional[typing.Dict]
+        env : Optional[Dict[str, Union[str, int, bool]]]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
         headless : Optional[bool]
             Whether to run browser in headless mode. More details for Chromium and Firefox. Defaults to `true` unless the `devtools` option is `true`.
         devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
-        proxy : Optional[typing.Dict]
+        proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
         downloadsPath : Optional[str]
             If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-        viewport : Optional[typing.Dict]
+        viewport : Optional[{"width": int, "height": int}]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
         ignoreHTTPSErrors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
@@ -6002,14 +6005,14 @@ class BrowserType(SyncBase):
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as number and date formatting rules.
         timezoneId : Optional[str]
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
-        geolocation : Optional[typing.Dict]
-        permissions : Optional[typing.List[str]]
+        geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
+        permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See browserContext.grantPermissions for more details.
-        extraHTTPHeaders : Optional[typing.Dict[str, str]]
+        extraHTTPHeaders : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        httpCredentials : Optional[typing.Dict]
+        httpCredentials : Optional[{"username": str, "password": str}]
             Credentials for HTTP authentication.
         deviceScaleFactor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -6017,7 +6020,7 @@ class BrowserType(SyncBase):
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[typing.Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
@@ -6043,21 +6046,21 @@ class BrowserType(SyncBase):
                     env=mapping.to_impl(env),
                     headless=headless,
                     devtools=devtools,
-                    proxy=mapping.to_impl(proxy),
+                    proxy=proxy,
                     downloadsPath=downloadsPath,
                     slowMo=slowMo,
-                    viewport=mapping.to_impl(viewport),
+                    viewport=viewport,
                     ignoreHTTPSErrors=ignoreHTTPSErrors,
                     javaScriptEnabled=javaScriptEnabled,
                     bypassCSP=bypassCSP,
                     userAgent=userAgent,
                     locale=locale,
                     timezoneId=timezoneId,
-                    geolocation=mapping.to_impl(geolocation),
+                    geolocation=geolocation,
                     permissions=permissions,
                     extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
                     offline=offline,
-                    httpCredentials=mapping.to_impl(httpCredentials),
+                    httpCredentials=httpCredentials,
                     deviceScaleFactor=deviceScaleFactor,
                     isMobile=isMobile,
                     hasTouch=hasTouch,

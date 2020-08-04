@@ -23,6 +23,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright.element_handle import ElementHandle
 
 
+Serializable = Any
+
+
 class JSHandle(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
@@ -40,7 +43,7 @@ class JSHandle(ChannelOwner):
         self._preview = preview
 
     async def evaluate(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> Any:
         if not is_function_body(expression):
             force_expr = True
@@ -56,7 +59,7 @@ class JSHandle(ChannelOwner):
         )
 
     async def evaluateHandle(
-        self, expression: str, arg: Any = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> "JSHandle":
         if not is_function_body(expression):
             force_expr = True
@@ -137,7 +140,7 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     return dict(v="undefined")
 
 
-def serialize_argument(arg: Any) -> Any:
+def serialize_argument(arg: Serializable = None) -> Any:
     handles: List[JSHandle] = []
     value = serialize_value(arg, handles, 0)
     return dict(value=value, handles=handles)

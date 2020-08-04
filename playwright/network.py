@@ -19,7 +19,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
-from playwright.helper import ContinueParameters, Error, Header, locals_to_params
+from playwright.helper import (
+    ContinueParameters,
+    Error,
+    Header,
+    RequestFailure,
+    locals_to_params,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.frame import Frame
@@ -80,8 +86,8 @@ class Request(ChannelOwner):
         return self._redirected_to
 
     @property
-    def failure(self) -> Optional[str]:
-        return self._failure_text
+    def failure(self) -> Optional[RequestFailure]:
+        return {"errorText": self._failure_text} if self._failure_text else None
 
 
 class Route(ChannelOwner):

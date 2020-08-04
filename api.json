@@ -9481,7 +9481,7 @@
                 "name": "string",
                 "properties": {}
               },
-              "comment": "URL of the resource if available.",
+              "comment": "Optional URL of the resource if available.",
               "returnComment": "",
               "required": false,
               "templates": []
@@ -9493,7 +9493,7 @@
                 "name": "number",
                 "properties": {}
               },
-              "comment": "0-based line number in the resource if available.",
+              "comment": "Optional 0-based line number in the resource if available.",
               "returnComment": "",
               "required": false,
               "templates": []
@@ -9505,7 +9505,7 @@
                 "name": "number",
                 "properties": {}
               },
-              "comment": "0-based column number in the resource if available.",
+              "comment": "Optional 0-based column number in the resource if available.",
               "returnComment": "",
               "required": false,
               "templates": []
@@ -9703,7 +9703,7 @@
               "name": "string",
               "properties": {}
             },
-            "comment": "Path where the download should be saved. The directory structure MUST exist as `saveAs` will not create it.",
+            "comment": "Path where the download should be saved.",
             "returnComment": "",
             "required": true,
             "templates": []
@@ -10632,7 +10632,7 @@
         "kind": "method",
         "name": "headers",
         "type": {
-          "name": "Object",
+          "name": "Object<string, string>",
           "properties": {}
         },
         "comment": "",
@@ -12216,7 +12216,7 @@
                   "kind": "property",
                   "name": "viewport",
                   "type": {
-                    "name": "null|Object",
+                    "name": "?Object",
                     "properties": {
                       "width": {
                         "kind": "property",
@@ -12358,7 +12358,7 @@
                           "name": "number",
                           "properties": {}
                         },
-                        "comment": "Non-negative accuracy value. Defaults to `0`.",
+                        "comment": "Optional non-negative accuracy value. Defaults to `0`.",
                         "returnComment": "",
                         "required": false,
                         "templates": []

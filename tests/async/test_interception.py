@@ -257,11 +257,11 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
     assert len(failed_requests) == 1
     failed_request = failed_requests[0]
     if is_webkit:
-        assert failed_request.failure == "Request intercepted"
+        assert failed_request.failure["errorText"] == "Request intercepted"
     elif is_firefox:
-        assert failed_request.failure == "NS_ERROR_OFFLINE"
+        assert failed_request.failure["errorText"] == "NS_ERROR_OFFLINE"
     else:
-        assert failed_request.failure == "net::ERR_INTERNET_DISCONNECTED"
+        assert failed_request.failure["errorText"] == "net::ERR_INTERNET_DISCONNECTED"
 
 
 async def test_page_route_should_send_referer(page, server):
