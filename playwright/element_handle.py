@@ -151,7 +151,7 @@ class ElementHandle(JSHandle):
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send("text", locals_to_params(locals()))
+        await self._channel.send("type", locals_to_params(locals()))
 
     async def press(
         self, key: str, delay: int = None, timeout: int = None, noWaitAfter: bool = None

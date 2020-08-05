@@ -197,3 +197,13 @@ def test_close_should_reject_all_promises(context):
             lambda: new_page.close(),
         )
     assert "Protocol error" in exc_info.value.message
+
+
+def test_expect_response_should_work(page: Page, server):
+    with page.expect_response("**/*") as resp:
+        page.goto(server.EMPTY_PAGE)
+    assert resp.value
+    assert resp.value.url == server.EMPTY_PAGE
+    assert resp.value.status == 200
+    assert resp.value.ok
+    assert resp.value.request
