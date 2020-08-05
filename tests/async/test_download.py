@@ -14,11 +14,12 @@
 import asyncio
 import os
 from asyncio.futures import Future
+from pathlib import Path
 from typing import Optional
 
 import pytest
 
-from playwright import Error as PlaywrightError
+from playwright import Error
 from playwright.async_api import Browser, Page
 
 
@@ -53,10 +54,10 @@ async def test_should_report_downloads_with_acceptDownloads_false(page: Page, se
     download = (await asyncio.gather(page.waitForEvent("download"), page.click("a")))[0]
     assert download.url == f"{server.PREFIX}/downloadWithFilename"
     assert download.suggestedFilename == "file.txt"
-    error: Optional[PlaywrightError] = None
+    error: Optional[Error] = None
     try:
         await download.path()
-    except PlaywrightError as exc:
+    except Error as exc:
         error = exc
     assert "acceptDownloads" in await download.failure()
     assert error
@@ -70,6 +71,107 @@ async def test_should_report_downloads_with_acceptDownloads_true(browser, server
     path = await download.path()
     assert os.path.isfile(path)
     assert_file_content(path, "Hello world")
+    await page.close()
+
+
+async def test_should_save_to_user_specified_path(tmpdir: Path, browser, server):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    user_path = tmpdir / "download.txt"
+    await download.saveAs(user_path)
+    assert user_path.exists()
+    assert user_path.read_text("utf-8") == "Hello world"
+    await page.close()
+
+
+async def test_should_save_to_user_specified_path_without_updating_original_path(
+    tmpdir, browser, server
+):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    user_path = tmpdir / "download.txt"
+    await download.saveAs(user_path)
+    assert user_path.exists()
+    assert user_path.read_text("utf-8") == "Hello world"
+
+    originalPath = Path(await download.path())
+    assert originalPath.exists()
+    assert originalPath.read_text("utf-8") == "Hello world"
+    await page.close()
+
+
+async def test_should_save_to_two_different_paths_with_multiple_saveAs_calls(
+    tmpdir, browser, server
+):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    user_path = tmpdir / "download.txt"
+    await download.saveAs(user_path)
+    assert user_path.exists()
+    assert user_path.read_text("utf-8") == "Hello world"
+
+    anotheruser_path = tmpdir / "download (2).txt"
+    await download.saveAs(anotheruser_path)
+    assert anotheruser_path.exists()
+    assert anotheruser_path.read_text("utf-8") == "Hello world"
+    await page.close()
+
+
+async def test_should_save_to_overwritten_filepath(tmpdir: Path, browser, server):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    user_path = tmpdir / "download.txt"
+    await download.saveAs(user_path)
+    assert len(list(Path(tmpdir).glob("*.*"))) == 1
+    await download.saveAs(user_path)
+    assert len(list(Path(tmpdir).glob("*.*"))) == 1
+    assert user_path.exists()
+    assert user_path.read_text("utf-8") == "Hello world"
+    await page.close()
+
+
+async def test_should_create_subdirectories_when_saving_to_non_existent_user_specified_path(
+    tmpdir, browser, server
+):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    nested_path = tmpdir / "these" / "are" / "directories" / "download.txt"
+    await download.saveAs(nested_path)
+    assert nested_path.exists()
+    assert nested_path.read_text("utf-8") == "Hello world"
+    await page.close()
+
+
+async def test_should_error_when_saving_with_downloads_disabled(
+    tmpdir, browser, server
+):
+    page = await browser.newPage(acceptDownloads=False)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    user_path = tmpdir / "download.txt"
+    with pytest.raises(Error) as exc:
+        await download.saveAs(user_path)
+    assert (
+        "Pass { acceptDownloads: true } when you are creating your browser context"
+        in exc.value.message
+    )
+    await page.close()
+
+
+async def test_should_error_when_saving_after_deletion(tmpdir, browser, server):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    user_path = tmpdir / "download.txt"
+    await download.delete()
+    with pytest.raises(Error) as exc:
+        await download.saveAs(user_path)
+    assert "Download already deleted. Save before deleting." in exc.value.message
     await page.close()
 
 

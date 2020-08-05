@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Optional
+from pathlib import Path
+from typing import Dict, Optional, Union
 
 from playwright.connection import ChannelOwner
 
@@ -39,3 +40,7 @@ class Download(ChannelOwner):
 
     async def path(self) -> Optional[str]:
         return await self._channel.send("path")
+
+    async def saveAs(self, path: Union[Path, str]) -> None:
+        path = str(Path(path))
+        return await self._channel.send("saveAs", dict(path=path))
