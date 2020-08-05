@@ -120,6 +120,19 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.postData)
 
     @property
+    def postDataJSON(self) -> typing.Union[typing.Dict, NoneType]:
+        """Request.postDataJSON
+
+        When the response is `application/x-www-form-urlencoded` then a key/value object of the values will be returned. Otherwise it will be parsed as JSON.
+
+        Returns
+        -------
+        Optional[Dict]
+            Parsed request's body for `form-urlencoded` and JSON as a fallback if any.
+        """
+        return mapping.from_maybe_impl(self._impl_obj.postDataJSON)
+
+    @property
     def headers(self) -> typing.Dict[str, str]:
         """Request.headers
 

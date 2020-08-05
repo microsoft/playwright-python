@@ -17,6 +17,7 @@ import json
 import mimetypes
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from urllib import parse
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.helper import (
@@ -62,6 +63,18 @@ class Request(ChannelOwner):
         if not b64_content:
             return None
         return base64.b64decode(b64_content).decode()
+
+    @property
+    def postDataJSON(self) -> Optional[Dict]:
+        post_data = self.postData
+        if not post_data:
+            return None
+        content_type = self.headers["content-type"]
+        if not content_type:
+            return None
+        if content_type == "application/x-www-form-urlencoded":
+            return dict(parse.parse_qsl(post_data))
+        return json.loads(post_data)
 
     @property
     def headers(self) -> Dict[str, str]:
