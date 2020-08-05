@@ -449,7 +449,7 @@ async def test_wait_for_nav_should_respect_timeout(page, server):
     # assert f'navigated to "{server.EMPTY_PAGE}"' in exc_info.value.message
 
 
-@pytest.mark.skip_browser("webkit")
+@pytest.mark.skip("TODO: needs to be investigated, flaky")
 async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
     page, server
 ):
