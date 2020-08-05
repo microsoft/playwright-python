@@ -17,6 +17,12 @@ import pytest
 from playwright import async_playwright
 
 
+# Will mark all the tests as async
+def pytest_collection_modifyitems(items):
+    for item in items:
+        item.add_marker(pytest.mark.asyncio)
+
+
 @pytest.fixture(scope="session")
 async def playwright():
     async with async_playwright() as playwright_object:

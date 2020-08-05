@@ -28,11 +28,6 @@ from .utils import utils as utils_object
 
 _dirname = get_file_dirname()
 
-# Will mark all the tests as async
-def pytest_collection_modifyitems(items):
-    for item in items:
-        item.add_marker(pytest.mark.asyncio)
-
 
 def pytest_generate_tests(metafunc):
     if "browser_name" in metafunc.fixturenames:

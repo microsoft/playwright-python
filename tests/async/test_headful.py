@@ -34,6 +34,7 @@ async def test_headless_should_be_able_to_read_cookies_written_by_headful(
 ):
     if is_chromium and is_win:
         pytest.skip("see https://github.com/microsoft/playwright/issues/717")
+        return
     # Write a cookie in headful chrome
     headful_context = await browser_type.launchPersistentContext(
         tmpdir, **{**launch_arguments, "headless": False}
