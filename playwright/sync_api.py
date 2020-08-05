@@ -3065,6 +3065,18 @@ class Download(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
 
+    def saveAs(self, path: typing.Union[pathlib.Path, str]) -> NoneType:
+        """Download.saveAs
+
+        Saves the download to a user-specified path.
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str]
+            Path where the download should be saved.
+        """
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.saveAs(path=path)))
+
 
 mapping.register(DownloadImpl, Download)
 
