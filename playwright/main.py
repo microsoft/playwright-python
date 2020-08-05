@@ -49,7 +49,7 @@ async def run_driver_async() -> Connection:
         str(driver_executable),
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+        stderr=sys.stderr,
         limit=32768,
     )
     assert proc.stdout
