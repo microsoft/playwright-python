@@ -237,6 +237,41 @@ async def test_should_be_undefined_when_there_is_no_post_data(page, server):
     assert response.request.postDataJSON is None
 
 
+async def test_should_work_with_binary_post_data(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    server.set_route("/post", lambda req: req.finish())
+    requests = []
+    page.on("request", lambda r: requests.append(r))
+    await page.evaluate(
+        """async () => {
+        await fetch('./post', { method: 'POST', body: new Uint8Array(Array.from(Array(256).keys())) })
+    }"""
+    )
+    assert len(requests) == 1
+    buffer = requests[0].postDataBuffer
+    assert len(buffer) == 256
+    for i in range(256):
+        assert buffer[i] == i
+
+
+async def test_should_work_with_binary_post_data_and_interception(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    server.set_route("/post", lambda req: req.finish())
+    requests = []
+    await page.route("/post", lambda route: asyncio.ensure_future(route.continue_()))
+    page.on("request", lambda r: requests.append(r))
+    await page.evaluate(
+        """async () => {
+        await fetch('./post', { method: 'POST', body: new Uint8Array(Array.from(Array(256).keys())) })
+    }"""
+    )
+    assert len(requests) == 1
+    buffer = requests[0].postDataBuffer
+    assert len(buffer) == 256
+    for i in range(256):
+        assert buffer[i] == i
+
+
 async def test_response_text_should_work(page, server):
     response = await page.goto(server.PREFIX + "/simple.json")
     assert await response.text() == '{"foo": "bar"}\n'

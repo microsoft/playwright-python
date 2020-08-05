@@ -78,7 +78,7 @@ class Server:
         class TestServerHTTPHandler(http.Request):
             def process(self):
                 request = self
-                self.post_body = request.content.read().decode()
+                self.post_body = request.content.read()
                 request.content.seek(0, 0)
                 uri = request.uri.decode()
                 if request_subscribers.get(uri):

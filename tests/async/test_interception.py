@@ -727,7 +727,7 @@ async def test_request_continue_should_amend_post_data(page, server):
       """
         ),
     )
-    assert serverRequest.post_body == "doggo"
+    assert serverRequest.post_body.decode() == "doggo"
 
 
 async def test_request_fulfill_should_work_a(page, server):
