@@ -207,6 +207,36 @@ async def test_request_postdata_should_be_undefined_when_there_is_no_post_data(
     assert response.request.postData is None
 
 
+async def test_should_parse_the_json_post_data(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    server.set_route("/post", lambda req: req.finish())
+    requests = []
+    page.on("request", lambda r: requests.append(r))
+    await page.evaluate(
+        """() => fetch('./post', { method: 'POST', body: JSON.stringify({ foo: 'bar' }) })"""
+    )
+    assert len(requests) == 1
+    assert requests[0].postDataJSON == {"foo": "bar"}
+
+
+async def test_should_parse_the_data_if_content_type_is_form_urlencoded(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    server.set_route("/post", lambda req: req.finish())
+    requests = []
+    page.on("request", lambda r: requests.append(r))
+    await page.setContent(
+        """<form method='POST' action='/post'><input type='text' name='foo' value='bar'><input type='number' name='baz' value='123'><input type='submit'></form>"""
+    )
+    await page.click("input[type=submit]")
+    assert len(requests) == 1
+    assert requests[0].postDataJSON == {"foo": "bar", "baz": "123"}
+
+
+async def test_should_be_undefined_when_there_is_no_post_data(page, server):
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.request.postDataJSON is None
+
+
 async def test_response_text_should_work(page, server):
     response = await page.goto(server.PREFIX + "/simple.json")
     assert await response.text() == '{"foo": "bar"}\n'
