@@ -133,6 +133,17 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.postDataJSON)
 
     @property
+    def postDataBuffer(self) -> typing.Union[bytes, NoneType]:
+        """Request.postDataBuffer
+
+        Returns
+        -------
+        Optional[bytes]
+            Request's post body in a binary form, if any.
+        """
+        return mapping.from_maybe_impl(self._impl_obj.postDataBuffer)
+
+    @property
     def headers(self) -> typing.Dict[str, str]:
         """Request.headers
 

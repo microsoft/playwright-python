@@ -59,10 +59,10 @@ class Request(ChannelOwner):
 
     @property
     def postData(self) -> Optional[str]:
-        b64_content = self._initializer.get("postData")
-        if not b64_content:
+        data = self.postDataBuffer
+        if not data:
             return None
-        return base64.b64decode(b64_content).decode()
+        return data.decode()
 
     @property
     def postDataJSON(self) -> Optional[Dict]:
@@ -75,6 +75,13 @@ class Request(ChannelOwner):
         if content_type == "application/x-www-form-urlencoded":
             return dict(parse.parse_qsl(post_data))
         return json.loads(post_data)
+
+    @property
+    def postDataBuffer(self) -> Optional[bytes]:
+        b64_content = self._initializer.get("postData")
+        if not b64_content:
+            return None
+        return base64.b64decode(b64_content)
 
     @property
     def headers(self) -> Dict[str, str]:
