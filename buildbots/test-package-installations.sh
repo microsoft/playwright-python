@@ -17,7 +17,7 @@ echo "Creating virtual environment"
 virtualenv env
 source env/bin/activate
 echo "Installing Playwright Python via Wheel"
-pip install "$(echo $base_dir/dist/playwright*manylinux1*.whl)"
+pip install "$(echo $base_dir/dist/playwright*.whl)"
 echo "Installing browsers"
 python -m playwright install
 echo "Running basic tests"

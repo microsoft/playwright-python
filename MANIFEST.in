@@ -1,4 +1,4 @@
-include playwright/drivers/browsers.json
+include-recursive playwright/drivers/
 include playwright/*.py
 include README.md
 include SECURITY.md
