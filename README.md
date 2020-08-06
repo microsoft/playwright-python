@@ -234,11 +234,11 @@ asyncio.get_event_loop().run_until_complete(main())
 
 ## Documentation
 
-We are in the process of converting the [documentation](https://playwright.dev/) from the Node form to the Python one. But you can go ahead and use the Node's documentation because the API is pretty much the same. You might have noticed that Playwright uses non-Python naming conventions, `camelCase` instead of the `snake_case` for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon the stack overflow answers and the documentation of the Playwright for Node.
+We are in the process of converting the [documentation](https://playwright.dev/) from the Node.js form to the Python one. But you can go ahead and use the Node.js documentation because the API is pretty much the same. You might have noticed that Playwright uses non-Python naming conventions, `camelCase` instead of the `snake_case` for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon the stack overflow answers and the documentation of the Playwright for Node.js.
 
 ### Understanding examples from the JavaScript documentation
 
-You can use all the same methods and arguments as [documented](https://playwright.dev/), just remember that since Python allows named arguments, we didn't need to put `options` parameter into every call as we had to in the Node version:
+You can use all the same methods and arguments as [documented](https://playwright.dev/), just remember that since Python allows named arguments, we didn't need to put `options` parameter into every call as we had to in the Node.js version:
 
 So when you see example like this in JavaScript
 
@@ -282,7 +282,7 @@ The library will detect that what are passing it is a function and will invoke i
 
 ### Using context managers
 
-Python enabled us to do some of the things that were not possible in the Node version and we used the opportunity. Instead of using the `page.waitFor*` methods, we recommend using corresponding `page.expect_*` context manager.
+Python enabled us to do some of the things that were not possible in the Node.js version and we used the opportunity. Instead of using the `page.waitFor*` methods, we recommend using corresponding `page.expect_*` context manager.
 
 In JavaScript it will be documented as:
 
