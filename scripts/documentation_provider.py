@@ -108,15 +108,14 @@ class DocumentationProvider:
                 elif not doc_value and fqname == "Page.setViewportSize":
                     args = args["viewportSize"]["type"]["properties"]
                     doc_value = args.get(name)
+                code_type = self.serialize_python_type(value)
+                print(f"{indent}{original_name} : {code_type}")
                 if not doc_value:
                     print(
                         f"Missing parameter documentation: {fqname}({name}=)",
                         file=stderr,
                     )
                 else:
-                    code_type = self.serialize_python_type(value)
-
-                    print(f"{indent}{original_name} : {code_type}")
                     if doc_value["comment"]:
                         print(
                             f"{indent}    {self.indent_paragraph(doc_value['comment'], f'{indent}    ')}"
@@ -210,6 +209,8 @@ class DocumentationProvider:
 
     def serialize_python_type(self, value: Any) -> str:
         str_value = str(value)
+        if str_value == "<class '_io.BytesIO'>":
+            return "io.BytesIO"
         if str_value == "<class 'playwright.helper.Error'>":
             return "Error"
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)

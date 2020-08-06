@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 from pathlib import Path
 from typing import Dict, Optional, Union
 
-from playwright.connection import ChannelOwner
+from playwright.connection import ChannelOwner, from_channel
 
 
 class Download(ChannelOwner):
@@ -44,3 +45,11 @@ class Download(ChannelOwner):
     async def saveAs(self, path: Union[Path, str]) -> None:
         path = str(Path(path))
         return await self._channel.send("saveAs", dict(path=path))
+
+    async def createReadStream(
+        self, fp: Optional[io.BytesIO], size: int = None
+    ) -> Optional[io.BytesIO]:
+        stream = await self._channel.send("stream")
+        if not stream:
+            return None
+        return await from_channel(stream).stream(fp, size)

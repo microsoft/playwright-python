@@ -48,6 +48,7 @@ from playwright.selectors import Selectors
 
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
+    value = value.replace("_io.BytesIO", "io.BytesIO")
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
     if "playwright.helper" in value:
         value = re.sub(r"playwright\.helper\.", "", value)
@@ -141,7 +142,7 @@ header = """
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import io
 import typing
 import sys
 import pathlib

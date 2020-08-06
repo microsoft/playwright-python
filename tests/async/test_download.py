@@ -286,6 +286,26 @@ async def test_should_delete_file(browser, server):
     await page.close()
 
 
+async def test_should_expose_stream_new(browser, server):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    stream = await download.createReadStream()
+    assert stream.read().decode() == "Hello world"
+    await page.close()
+
+
+async def test_should_expose_stream_to_file(browser, server, tmpdir):
+    page = await browser.newPage(acceptDownloads=True)
+    await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    [download, _] = await asyncio.gather(page.waitForEvent("download"), page.click("a"))
+    tmpfile = tmpdir / "myfile"
+    with open(tmpfile, "wb") as fp:
+        await download.createReadStream(fp)
+    assert tmpfile.read_text("utf-8") == "Hello world"
+    await page.close()
+
+
 async def test_should_delete_downloads_on_context_destruction(browser, server):
     page = await browser.newPage(acceptDownloads=True)
     await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')

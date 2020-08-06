@@ -31,6 +31,7 @@ from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
+from playwright.stream import Stream
 
 
 class DummyObject(ChannelOwner):
@@ -88,4 +89,6 @@ def create_remote_object(
         return Worker(parent, type, guid, initializer)
     if type == "Selectors":
         return Selectors(parent, type, guid, initializer)
+    if type == "Stream":
+        return Stream(parent, type, guid, initializer)
     return DummyObject(parent, type, guid, initializer)

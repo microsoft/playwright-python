@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import io
 import pathlib
 import sys
 import typing
@@ -2885,6 +2885,7 @@ class Selectors(SyncBase):
             Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only contain `[a-zA-Z0-9_]` characters.
         source : Optional[str]
             Script that evaluates to a selector engine instance.
+        path : Optional[str]
         contentScript : Optional[bool]
             Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not guaranteed when this engine is used together with other registered engines.
         """
@@ -3076,6 +3077,26 @@ class Download(SyncBase):
             Path where the download should be saved.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.saveAs(path=path)))
+
+    def createReadStream(
+        self, fp: io.BytesIO = None, size: int = None
+    ) -> typing.Union[io.BytesIO, NoneType]:
+        """Download.createReadStream
+
+        Returns readable stream for current download or `null` if download failed.
+
+        Parameters
+        ----------
+        fp : Optional[io.BytesIO]
+        size : Optional[int]
+
+        Returns
+        -------
+        Optional[io.BytesIO]
+        """
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.createReadStream(fp=fp, size=size))
+        )
 
 
 mapping.register(DownloadImpl, Download)
@@ -3862,6 +3883,7 @@ class Page(SyncBase):
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Request object.
+        predicate : Optional[typing.Callable[[playwright.network.Request], bool]]
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
 
@@ -3893,6 +3915,7 @@ class Page(SyncBase):
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Response object.
+        predicate : Optional[typing.Callable[[playwright.network.Response], bool]]
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -3926,6 +3949,8 @@ class Page(SyncBase):
         ----------
         event : str
             Event name, same one would pass into `page.on(event)`.
+        predicate : Optional[typing.Callable[[typing.Any], bool]]
+        timeout : Optional[int]
 
         Returns
         -------
@@ -4071,6 +4096,7 @@ class Page(SyncBase):
         ----------
         source : Optional[str]
             Script to be evaluated in the page.
+        path : Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.addInitScript(source=source, path=path))
@@ -5247,6 +5273,7 @@ class BrowserContext(SyncBase):
         ----------
         source : Optional[str]
             Script to be evaluated in all pages in the browser context.
+        path : Optional[str]
         """
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.addInitScript(source=source, path=path))
@@ -5371,6 +5398,8 @@ class BrowserContext(SyncBase):
         ----------
         event : str
             Event name, same one would pass into `browserContext.on(event)`.
+        predicate : Optional[typing.Callable[[typing.Any], bool]]
+        timeout : Optional[int]
 
         Returns
         -------
