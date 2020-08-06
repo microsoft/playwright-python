@@ -44,21 +44,11 @@ Playwright is built to automate the broad and growing set of web browser capabil
 
 ### Pytest
 
-For writing end-to-end tests we recommend to use the official [Pytest plugin](https://github.com/microsoft/playwright-pytest#readme) for Playwright. It contains utilities for running it on multiple browsers, having a new page instance on every test or base-url support via a command-line argument. This will in the end look like that:
+Playwright can be used as a library in your application or as a part of the testing solution. We recommend using our [Pytest plugin](https://github.com/microsoft/playwright-pytest#readme) for testing.
 
-```py
-def test_playwright_is_visible_on_google(page):
-    page.goto("https://www.google.com")
-    page.type("input[name=q]", "Playwright GitHub")
-    page.click("input[type=submit]")
-    page.waitForSelector("text=microsoft/Playwright")
-```
+As a library, Playwright offers both blocking (synchronous) API and asyncio API (async/await). You can pick the one that works best for you. They are identical in terms of capabilities and only differ in a way one consumes the API.
 
-For more information checkout the project on [GitHub](https://github.com/microsoft/playwright-pytest#readme).
-
-### Standalone
-
-For using Playwright standalone, you can either use the sync version or the async variant (async/await). In most cases the sync variant is the right choice to automate the web browsers e.g. for writing end-to-end tests. Both will get initialized with a context manager.
+Below are some of the examples on how these variations of the API can be used:
 
 #### Sync variant
 
@@ -82,32 +72,29 @@ from playwright import async_playwright
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.webkit.launch()
-        page = await browser.newPage()
-        await page.goto('http://whatsmyuseragent.org/')
-        await page.screenshot(path=f'example-{browser_type.name}.png')
-        await browser.close()
+        for browser_type in [p.chromium, p.firefox, p.webkit]:
+            browser = await browser_type.launch()
+            page = await browser.newPage()
+            await page.goto('http://whatsmyuseragent.org/')
+            await page.screenshot(path=f'example-{browser_type.name}.png')
+            await browser.close()
 
 asyncio.get_event_loop().run_until_complete(main())
 ```
 
-## Examples
-
-#### Page screenshot
-
-This code snippet navigates to whatsmyuseragent.org in Chromium, Firefox and WebKit, and saves 3 screenshots.
+#### Using pytest-playwright
 
 ```py
-from playwright import sync_playwright
-
-with sync_playwright() as p:
-    for browser_type in [p.chromium, p.firefox, p.webkit]:
-        browser = browser_type.launch()
-        page = browser.newPage()
-        page.goto('http://whatsmyuseragent.org/')
-        page.screenshot(path=f'example-{browser_type.name}.png')
-        browser.close()
+def test_playwright_is_visible_on_google(page):
+    page.goto("https://www.google.com")
+    page.type("input[name=q]", "Playwright GitHub")
+    page.click("input[type=submit]")
+    page.waitForSelector("text=microsoft/Playwright")
 ```
+
+For more information on pytest-playwright, see [GitHub](https://github.com/microsoft/playwright-pytest#readme).
+
+## More examples
 
 #### Mobile and geolocation
 
@@ -128,7 +115,6 @@ with sync_playwright() as p:
     page = context.newPage()
     page.goto('https://maps.google.com')
     page.click('text="Your location"')
-    page.waitForRequest('*preview/pwa')
     page.screenshot(path='colosseum-iphone.png')
     browser.close()
 ```
@@ -152,7 +138,6 @@ async def main():
         page = await context.newPage()
         await page.goto('https://maps.google.com')
         await page.click('text="Your location"')
-        await page.waitForRequest('*preview/pwa')
         await page.screenshot(path='colosseum-iphone.png')
         await browser.close()
 
@@ -251,9 +236,98 @@ async def main():
 asyncio.get_event_loop().run_until_complete(main())
 ```
 
+## Documentation
+
+We are in the process of converting the [documentation](https://playwright.dev/) from the Node form to the Python one. But you can go ahead and use the Node's documentation because the API is pretty much the same. You might have noticed that Playwright uses non-Python naming conventions, `camelCase` instead of the `snake_case` for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon the stack overflow answers and the documentation of the Playwright for Node.
+
+### Understanding examples from the JavaScript documentation
+
+You can use all the same methods and arguments as [documented](https://playwright.dev/), just remember that since Python allows named arguments, we didn't need to put `options` parameter into every call as we had to in the Node version:
+
+So when you see example like this in JavaScript
+
+```js
+await webkit.launch({ headless: false });
+```
+
+It translates into Python like this:
+
+```py
+webkit.launch(headless=False)
+```
+
+If you are using an IDE, it'll suggest parameters that are available in every call.
+
+### Evaluating functions
+
+Another difference is that in the JavaScript version, `page.evaluate` accepts JavaScript functions, while this does not make any sense in the Python version.
+
+In JavaScript it will be documented as:
+
+```js
+const result = await page.evaluate(([x, y]) => {
+  return Promise.resolve(x * y);
+}, [7, 8]);
+console.log(result); // prints "56"
+```
+
+And in Python that would look like:
+
+```py
+result = page.evaluate("""
+    ([x, y]) => {
+        return Promise.resolve(x * y);
+    }""",
+    [7, 8])
+print(result) # prints "56"
+```
+
+The library will detect that what are passing it is a function and will invoke it with the given parameters. You can opt out of this function detection and pass `force_expr=True` to all evaluate functions, but you probably will never need to do that.
+
+### Using context managers
+
+Python enabled us to do some of the things that were not possible in the Node version and we used the opportunity. Instead of using the `page.waitFor*` methods, we recommend using corresponding `page.expect_*` context manager.
+
+In JavaScript it will be documented as:
+
+```js
+const [ download ] = await Promise.all([
+  page.waitForEvent('download'), // <-- start waiting for the download
+  page.click('button#delayed-download') // <-- perform the action that directly or indirectly initiates it.
+]);
+const path = await download.path();
+```
+
+And in Python that would look much simpler:
+
+```py
+with page.expect_download() as download_info:
+    page.click("button#delayed-download")
+download = download_info.value
+path = download.path()
+```
+
+Similarly, for waiting for the network response:
+
+```js
+const [response] = await Promise.all([
+  page.waitForResponse('**/api/fetch_data'),
+  page.click('button#update'),
+]);
+```
+
+Becomes
+
+```py
+with page.expect_response("**/api/fetch_data"):
+    page.click("button#update")
+```
+
 ## Is Playwright for Python ready?
 
-We are ready for your feedback, but we are still covering Playwright Python with the tests, so expect some API changes and don't use for production.
+Yes, Playwright for Python is ready. We are still not at the version v1.0, so minor breaking API changes could potentially happen. But a) this is unlikely and b) we will only do that if we know it improves your experience with the new library. We'd like to collect your feedback before we freeze the API for v1.0.
+
+> Note: We don't yet support some of the edge-cases of the vendor-specific APIs such as collecting chromium trace, coverage report, etc.
 
 ## Resources
 
