@@ -44,6 +44,7 @@ from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
+from playwright.stream import Stream, StreamIO
 
 
 def process_type(value: Any, param: bool = False) -> str:
@@ -142,7 +143,6 @@ header = """
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import io
 import typing
 import sys
 import pathlib
@@ -172,6 +172,7 @@ from playwright.network import Request as RequestImpl, Response as ResponseImpl,
 from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
+from playwright.stream import Stream as StreamImpl, StreamIO as StreamIOImpl
 """
 
 all_types = [
@@ -189,6 +190,8 @@ all_types = [
     Selectors,
     ConsoleMessage,
     Dialog,
+    StreamIO,
+    Stream,
     Download,
     BindingCall,
     Page,
@@ -204,3 +207,7 @@ all_types = [
 api_globals = globals()
 assert ValuesToSelect
 assert Serializable
+
+
+def check_inheritance(base_class):
+    return base_class in ["ChannelOwner", "object", "RawIOBase"]

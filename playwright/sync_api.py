@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import io
 import pathlib
 import sys
 import typing
@@ -64,6 +63,8 @@ from playwright.page import Page as PageImpl
 from playwright.page import Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
+from playwright.stream import Stream as StreamImpl
+from playwright.stream import StreamIO as StreamIOImpl
 from playwright.sync_base import EventContextManager, SyncBase, mapping
 
 NoneType = type(None)
@@ -3009,6 +3010,49 @@ class Dialog(SyncBase):
 mapping.register(DialogImpl, Dialog)
 
 
+class StreamIO(SyncBase):
+    def __init__(self, obj: StreamIOImpl):
+        super().__init__(obj)
+
+    def read(self, size: int = None) -> typing.Union[bytes, NoneType]:
+        """StreamIO.read
+
+        Reads from the download bytes
+
+        Parameters
+        ----------
+        size : Optional[int]
+            Size in bytes how much should be read.
+
+        Returns
+        -------
+        Optional[bytes]
+        """
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.read(size=size)))
+
+
+mapping.register(StreamIOImpl, StreamIO)
+
+
+class Stream(SyncBase):
+    def __init__(self, obj: StreamImpl):
+        super().__init__(obj)
+
+    def stream(self) -> "StreamIO":
+        """Stream.stream
+
+        Returns the file stream
+
+        Returns
+        -------
+        StreamIO
+        """
+        return mapping.from_impl(self._sync(self._impl_obj.stream()))
+
+
+mapping.register(StreamImpl, Stream)
+
+
 class Download(SyncBase):
     def __init__(self, obj: DownloadImpl):
         super().__init__(obj)
@@ -3078,25 +3122,16 @@ class Download(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.saveAs(path=path)))
 
-    def createReadStream(
-        self, fp: io.BytesIO = None, size: int = None
-    ) -> typing.Union[io.BytesIO, NoneType]:
+    def createReadStream(self) -> typing.Union["StreamIO", NoneType]:
         """Download.createReadStream
 
         Returns readable stream for current download or `null` if download failed.
 
-        Parameters
-        ----------
-        fp : Optional[io.BytesIO]
-        size : Optional[int]
-
         Returns
         -------
-        Optional[io.BytesIO]
+        Optional[StreamIO]
         """
-        return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.createReadStream(fp=fp, size=size))
-        )
+        return mapping.from_impl_nullable(self._sync(self._impl_obj.createReadStream()))
 
 
 mapping.register(DownloadImpl, Download)

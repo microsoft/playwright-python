@@ -207,3 +207,19 @@ def test_expect_response_should_work(page: Page, server):
     assert resp.value.status == 200
     assert resp.value.ok
     assert resp.value.request
+
+def test_should_expose_stream_new(browser:Browser, server):
+    def handle_download(request):
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.write(b"Hello world")
+        request.finish()
+
+    server.set_route("/download", handle_download)
+    page = browser.newPage(acceptDownloads=True)
+    page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
+    with page.expect_download() as download:
+        page.click("a")
+    download = download.value
+    stream = download.createReadStream()
+    assert stream.read().decode() == "Hello world"
+    page.close()

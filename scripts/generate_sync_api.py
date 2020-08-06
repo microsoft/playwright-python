@@ -21,7 +21,7 @@ from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
     api_globals,
-    arguments,
+    arguments, check_inheritance,
     header,
     process_type,
     return_type,
@@ -39,7 +39,7 @@ def generate(t: Any) -> None:
     base_class = t.__bases__[0].__name__
     base_sync_class = (
         "SyncBase"
-        if base_class == "ChannelOwner" or base_class == "object"
+        if check_inheritance(base_class)
         else base_class
     )
     print(f"class {class_name}({base_sync_class}):")

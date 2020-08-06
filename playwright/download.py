@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from playwright.connection import ChannelOwner, from_channel
+from playwright.stream import StreamIO
 
 
 class Download(ChannelOwner):
@@ -46,10 +47,8 @@ class Download(ChannelOwner):
         path = str(Path(path))
         return await self._channel.send("saveAs", dict(path=path))
 
-    async def createReadStream(
-        self, fp: Optional[io.BytesIO], size: int = None
-    ) -> Optional[io.BytesIO]:
+    async def createReadStream(self) -> Optional[StreamIO]:
         stream = await self._channel.send("stream")
         if not stream:
             return None
-        return await from_channel(stream).stream(fp, size)
+        return await from_channel(stream).stream()

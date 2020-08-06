@@ -50,6 +50,46 @@ class DocumentationProvider:
         self.printed_entries: List[str] = []
         with open("api.json") as json_file:
             self.api = json.load(json_file)
+        self.api["StreamIO"] = {
+            "name": "StreamIO",
+            "members": {
+                "read": {
+                    "kind": "method",
+                    "name": "read",
+                    "type": {"name": "Promise<null|bytes>", "properties": {}},
+                    "comment": "Reads from the download bytes",
+                    "returnComment": "",
+                    "required": True,
+                    "templates": [],
+                    "args": {
+                        "size": {
+                            "kind": "property",
+                            "name": "size",
+                            "type": {"name": "int", "properties": {}},
+                            "comment": "Size in bytes how much should be read.",
+                            "returnComment": "",
+                            "required": False,
+                            "templates": [],
+                        }
+                    },
+                }
+            },
+        }
+        self.api["Stream"] = {
+            "name": "Stream",
+            "members": {
+                "stream": {
+                    "kind": "method",
+                    "name": "stream",
+                    "type": {"name": "Promise<StreamIO>", "properties": {}},
+                    "comment": "Returns the file stream",
+                    "returnComment": "",
+                    "required": True,
+                    "templates": [],
+                    "args": {},
+                }
+            },
+        }
 
     method_name_rewrites: Dict[str, str] = {
         "continue_": "continue",

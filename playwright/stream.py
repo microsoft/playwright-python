@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import base64
 import io
 from typing import Dict, Optional
@@ -19,21 +20,25 @@ from typing import Dict, Optional
 from playwright.connection import ChannelOwner
 
 
+class StreamIO(io.RawIOBase):
+    def __init__(self, channel: ChannelOwner, loop) -> None:
+        self._channel = channel
+        self._loop = loop
+
+
+    async def read(self, size: int = None) -> Optional[bytes]: # type: ignore
+        if not size:
+            size = 16384
+        result = await self._channel.send("read", dict(size=size))
+        return base64.b64decode(result)
+
+
 class Stream(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._loop = parent._loop
 
-    async def stream(self, fp: io.BytesIO, size: Optional[int]) -> io.BytesIO:
-        if not fp:
-            fp = io.BytesIO()
-        if not size:
-            size = 16384  # default 16kb in Node.js
-
-        while True:
-            result = await self._channel.send("read", dict(size=size))
-            if not result:
-                fp.seek(0)
-                return fp
-            fp.write(base64.b64decode(result))
+    async def stream(self,) -> StreamIO:
+        return StreamIO(self._channel, self._loop)
