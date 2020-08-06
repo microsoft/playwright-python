@@ -5291,6 +5291,18 @@ class Browser(AsyncBase):
         """
         return mapping.from_impl_list(self._impl_obj.contexts)
 
+    @property
+    def version(self) -> str:
+        """Browser.version
+
+        Returns the browser version.
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.version)
+
     def isConnected(self) -> bool:
         """Browser.isConnected
 
@@ -5483,17 +5495,6 @@ class Browser(AsyncBase):
         The Browser object itself is considered to be disposed and cannot be used anymore.
         """
         return mapping.from_maybe_impl(await self._impl_obj.close())
-
-    async def version(self) -> str:
-        """Browser.version
-
-        Returns the browser version.
-
-        Returns
-        -------
-        str
-        """
-        return mapping.from_maybe_impl(await self._impl_obj.version())
 
 
 mapping.register(BrowserImpl, Browser)
