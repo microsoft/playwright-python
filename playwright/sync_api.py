@@ -5519,6 +5519,18 @@ class Browser(SyncBase):
         """
         return mapping.from_impl_list(self._impl_obj.contexts)
 
+    @property
+    def version(self) -> str:
+        """Browser.version
+
+        Returns the browser version.
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.version)
+
     def isConnected(self) -> bool:
         """Browser.isConnected
 
@@ -5715,17 +5727,6 @@ class Browser(SyncBase):
         The Browser object itself is considered to be disposed and cannot be used anymore.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
-
-    def version(self) -> str:
-        """Browser.version
-
-        Returns the browser version.
-
-        Returns
-        -------
-        str
-        """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.version()))
 
 
 mapping.register(BrowserImpl, Browser)
