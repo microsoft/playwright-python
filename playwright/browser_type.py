@@ -29,6 +29,7 @@ from playwright.helper import (
     locals_to_params,
     not_installed_error,
 )
+from playwright.network import serialize_headers
 
 
 class BrowserType(ChannelOwner):
@@ -134,6 +135,8 @@ class BrowserType(ChannelOwner):
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
+        if extraHTTPHeaders:
+            params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
         normalize_launch_params(params)
         try:
             return from_channel(
