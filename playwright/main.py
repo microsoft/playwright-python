@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import io
 import subprocess
 import sys
 from typing import Any
@@ -45,11 +46,21 @@ async def run_driver_async() -> Connection:
     driver_name = compute_driver_name()
     driver_executable = package_path / "drivers" / driver_name
 
+    # Sourced from: https://github.com/pytest-dev/pytest/blob/49827adcb9256c9c9c06a25729421dcc3c385edc/src/_pytest/faulthandler.py#L73-L80
+    def _get_stderr_fileno() -> int:
+        try:
+            return sys.stderr.fileno()
+        except io.UnsupportedOperation:
+            # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
+            # https://docs.python.org/3/library/faulthandler.html#issue-with-file-descriptors
+            # This is potentially dangerous, but the best we can do.
+            return sys.__stderr__.fileno()
+
     proc = await asyncio.create_subprocess_exec(
         str(driver_executable),
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
-        stderr=sys.stderr,
+        stderr=_get_stderr_fileno(),
         limit=32768,
     )
     assert proc.stdout
