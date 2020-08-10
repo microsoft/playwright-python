@@ -25,3 +25,9 @@ def test_should_be_able_to_save_pdf_file(page: Page, server, tmpdir: Path):
     output_file = tmpdir / "foo.png"
     page.pdf(path=str(output_file))
     assert os.path.getsize(output_file) > 0
+
+
+@pytest.mark.only_browser("chromium")
+def test_should_be_able_capture_pdf_without_path(page: Page):
+    buffer = page.pdf()
+    assert buffer

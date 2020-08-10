@@ -539,8 +539,15 @@ class Page(ChannelOwner):
         fullPage: bool = None,
         clip: FloatRect = None,
     ) -> bytes:
-        binary = await self._channel.send("screenshot", locals_to_params(locals()))
-        return base64.b64decode(binary)
+        params = locals_to_params(locals())
+        if "path" in params:
+            del params["path"]
+        encoded_binary = await self._channel.send("screenshot", params)
+        decoded_binary = base64.b64decode(encoded_binary)
+        if path:
+            with open(path, "wb") as fd:
+                fd.write(decoded_binary)
+        return decoded_binary
 
     async def title(self) -> str:
         return await self._main_frame.title()
@@ -722,7 +729,8 @@ class Page(ChannelOwner):
         path: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
-        del params["path"]
+        if "path" in params:
+            del params["path"]
         encoded_binary = await self._channel.send("pdf", params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:

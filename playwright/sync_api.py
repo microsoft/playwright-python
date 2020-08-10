@@ -968,7 +968,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.hover
 
-        This method scrolls element into view if needed, and then uses page.mouse to hover over the center of the element.
+        This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.
         If the element is detached from DOM, the method throws an error.
 
         Parameters
@@ -1005,7 +1005,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.click
 
-        This method scrolls element into view if needed, and then uses page.mouse to click in the center of the element.
+        This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.
         If the element is detached from DOM, the method throws an error.
 
         Parameters
@@ -1056,7 +1056,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.dblclick
 
-        This method scrolls element into view if needed, and then uses page.mouse to click in the center of the element.
+        This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.
         If the element is detached from DOM, the method throws an error.
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
 
@@ -1285,7 +1285,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.check
 
-        If element is not already checked, it scrolls it into view if needed, and then uses elementHandle.click to click in the center of the element.
+        This method waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
 
         Parameters
         ----------
@@ -1309,7 +1309,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.uncheck
 
-        If element is not already unchecked, it scrolls it into view if needed, and then uses elementHandle.click to click in the center of the element.
+        This method waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
 
         Parameters
         ----------
@@ -2186,7 +2186,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.click
 
-        This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
 
         Parameters
@@ -2240,7 +2240,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.dblclick
 
-        This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to double click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
 
@@ -2428,7 +2428,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.hover
 
-        This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to hover over the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
 
         Parameters
@@ -2631,7 +2631,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.check
 
-        This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses frame.click to click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
 
         Parameters
@@ -2665,7 +2665,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.uncheck
 
-        This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses frame.click to click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
 
         Parameters
@@ -4238,7 +4238,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.click
 
-        This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
         Shortcut for page.mainFrame().click(selector[, options]).
 
@@ -4293,7 +4293,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.dblclick
 
-        This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to double click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
         Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
 
@@ -4485,7 +4485,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.hover
 
-        This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to hover over the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
         Shortcut for page.mainFrame().hover(selector[, options]).
 
@@ -4688,7 +4688,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.check
 
-        This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses page.click to click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
         Shortcut for page.mainFrame().check(selector[, options]).
 
@@ -4723,7 +4723,7 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.uncheck
 
-        This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses page.click to click in the center of the element.
+        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
         If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
         Shortcut for page.mainFrame().uncheck(selector[, options]).
 
@@ -4778,7 +4778,7 @@ class Page(SyncBase):
         The `waitForFunction` can be used to observe viewport size change:
 
         To pass an argument from Node.js to the predicate of `page.waitForFunction` function:
-        Shortcut for [page.mainFrame().waitForFunction(pageFunction, arg, options]])](#framewaitforfunctionpagefunction-arg-options).
+        Shortcut for page.mainFrame().waitForFunction(pageFunction[, arg, options]).
 
         Parameters
         ----------

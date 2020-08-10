@@ -21,7 +21,7 @@ async def test_should_return_no_cookies_in_pristine_browser_context(context):
     assert await context.cookies() == []
 
 
-async def test_should_get_a_cookie(context, page, server):
+async def test_should_get_a_cookie(context, page, server, is_firefox):
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
         """() => {
@@ -39,12 +39,12 @@ async def test_should_get_a_cookie(context, page, server):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_firefox else "None",
         }
     ]
 
 
-async def test_should_get_a_non_session_cookie(context, page, server):
+async def test_should_get_a_non_session_cookie(context, page, server, is_firefox):
     await page.goto(server.EMPTY_PAGE)
     # @see https://en.wikipedia.org/wiki/Year_2038_problem
     date = int(datetime.datetime(2038, 1, 1).timestamp() * 1000)
@@ -66,7 +66,7 @@ async def test_should_get_a_non_session_cookie(context, page, server):
             "expires": date / 1000,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_firefox else "None",
         }
     ]
 
@@ -121,7 +121,7 @@ async def test_should_properly_report_lax_samesite_cookie(
     assert cookies[0]["sameSite"] == "Lax"
 
 
-async def test_should_get_multiple_cookies(context, page, server):
+async def test_should_get_multiple_cookies(context, page, server, is_firefox):
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
         """() => {
@@ -142,7 +142,7 @@ async def test_should_get_multiple_cookies(context, page, server):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_firefox else "None",
         },
         {
             "name": "username",
@@ -152,7 +152,7 @@ async def test_should_get_multiple_cookies(context, page, server):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_firefox else "None",
         },
     ]
 

@@ -47,4 +47,4 @@ async def test_version_should_work(browser: Browser, is_chromium):
     if is_chromium:
         assert re.match(r"^\d+\.\d+\.\d+\.\d+$", version)
     else:
-        assert re.match(r"^\d+\.\d+$", version)
+        assert re.match(r"^\d+\.\d+", version)

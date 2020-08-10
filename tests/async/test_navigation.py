@@ -133,6 +133,7 @@ async def test_goto_should_return_response_when_page_changes_its_url_after_load(
     assert response.status == 200
 
 
+@pytest.mark.skip_browser("firefox")
 async def test_goto_should_work_with_subframes_return_204(page, server):
     def handle(request):
         request.setResponseCode(204)
@@ -554,6 +555,7 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     assert page.url == server.PREFIX + "/second.html"
 
 
+@pytest.mark.skip_browser("firefox")
 async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(page, server):
     server.set_route("/frames/style.css", lambda _: None)
     navigation_promise = asyncio.create_task(

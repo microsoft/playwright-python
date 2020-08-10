@@ -1954,7 +1954,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -2004,7 +2004,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -2248,7 +2248,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses page.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().check(selector[, options]).",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().check(selector[, options]).",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully checked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -2323,7 +2323,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().click(selector[, options]).",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().click(selector[, options]).",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully clicked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -2522,7 +2522,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to double click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nBear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.\n\n**NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.\n\nShortcut for page.mainFrame().dblclick(selector[, options]).",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nBear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.\n\n**NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.\n\nShortcut for page.mainFrame().dblclick(selector[, options]).",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully double clicked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -2817,7 +2817,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -2855,7 +2855,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -3378,7 +3378,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to hover over the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().hover(selector[, options]).",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().hover(selector[, options]).",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully hovered. Promise gets rejected if there's no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -4786,7 +4786,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses page.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().uncheck(selector[, options]).",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nShortcut for page.mainFrame().uncheck(selector[, options]).",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully unchecked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -5013,7 +5013,7 @@
           "name": "Promise<JSHandle>",
           "properties": {}
         },
-        "comment": "The `waitForFunction` can be used to observe viewport size change:\n```js\nconst { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.\n\n(async () => {\n  const browser = await webkit.launch();\n  const page = await browser.newPage();\n  const watchDog = page.waitForFunction('window.innerWidth < 100');\n  await page.setViewportSize({width: 50, height: 50});\n  await watchDog;\n  await browser.close();\n})();\n```\nTo pass an argument from Node.js to the predicate of `page.waitForFunction` function:\n```js\nconst selector = '.foo';\nawait page.waitForFunction(selector => !!document.querySelector(selector), selector);\n```\nShortcut for [page.mainFrame().waitForFunction(pageFunction, arg, options]])](#framewaitforfunctionpagefunction-arg-options).",
+        "comment": "The `waitForFunction` can be used to observe viewport size change:\n```js\nconst { webkit } = require('playwright');  // Or 'chromium' or 'firefox'.\n\n(async () => {\n  const browser = await webkit.launch();\n  const page = await browser.newPage();\n  const watchDog = page.waitForFunction('window.innerWidth < 100');\n  await page.setViewportSize({width: 50, height: 50});\n  await watchDog;\n  await browser.close();\n})();\n```\nTo pass an argument from Node.js to the predicate of `page.waitForFunction` function:\n```js\nconst selector = '.foo';\nawait page.waitForFunction(selector => !!document.querySelector(selector), selector);\n```\nShortcut for page.mainFrame().waitForFunction(pageFunction[, arg, options]).",
         "returnComment": "Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.",
         "required": true,
         "templates": [],
@@ -5034,7 +5034,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -5496,7 +5496,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -5546,7 +5546,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -5701,7 +5701,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, if element is not already checked, it scrolls it into view if needed, and then uses frame.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully checked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -5789,7 +5789,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully clicked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -5962,7 +5962,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to double click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nBear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.\n\n**NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.\nBear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.\n\n**NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully double clicked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -6206,7 +6206,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -6244,7 +6244,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -6538,7 +6538,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, scrolls it into view if needed, and then uses page.mouse to hover over the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully hovered. Promise gets rejected if there's no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -7316,7 +7316,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method fetches an element with `selector`, if element is not already unchecked, it scrolls it into view if needed, and then uses frame.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
+        "comment": "This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.\nIf there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.",
         "returnComment": "Promise which resolves when the element matching `selector` is successfully unchecked. The Promise will be rejected if there is no element matching `selector`.",
         "required": true,
         "templates": [],
@@ -7425,7 +7425,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -7772,7 +7772,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -7822,7 +7822,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -7901,7 +7901,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "If element is not already checked, it scrolls it into view if needed, and then uses elementHandle.click to click in the center of the element.",
+        "comment": "This method waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.",
         "returnComment": "Promise which resolves when the element is successfully checked. Promise gets rejected if the operation fails.",
         "required": true,
         "templates": [],
@@ -7964,7 +7964,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method scrolls element into view if needed, and then uses page.mouse to click in the center of the element.\nIf the element is detached from DOM, the method throws an error.",
+        "comment": "This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.\nIf the element is detached from DOM, the method throws an error.",
         "returnComment": "Promise which resolves when the element is successfully clicked. Promise gets rejected if the element is detached from DOM.",
         "required": true,
         "templates": [],
@@ -8125,7 +8125,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method scrolls element into view if needed, and then uses page.mouse to click in the center of the element.\nIf the element is detached from DOM, the method throws an error.\nBear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.\n\n**NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.",
+        "comment": "This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.\nIf the element is detached from DOM, the method throws an error.\nBear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.\n\n**NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.",
         "returnComment": "Promise which resolves when the element is successfully double clicked. Promise gets rejected if the element is detached from DOM.",
         "required": true,
         "templates": [],
@@ -8401,7 +8401,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "This method scrolls element into view if needed, and then uses page.mouse to hover over the center of the element.\nIf the element is detached from DOM, the method throws an error.",
+        "comment": "This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.\nIf the element is detached from DOM, the method throws an error.",
         "returnComment": "Promise which resolves when the element is successfully hovered.",
         "required": true,
         "templates": [],
@@ -9081,7 +9081,7 @@
           "name": "Promise",
           "properties": {}
         },
-        "comment": "If element is not already unchecked, it scrolls it into view if needed, and then uses elementHandle.click to click in the center of the element.",
+        "comment": "This method waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.",
         "returnComment": "Promise which resolves when the element is successfully unchecked. Promise gets rejected if the operation fails.",
         "required": true,
         "templates": [],
@@ -9191,7 +9191,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -9229,7 +9229,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -9350,7 +9350,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -9388,7 +9388,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -9481,9 +9481,9 @@
                 "name": "string",
                 "properties": {}
               },
-              "comment": "Optional URL of the resource if available.",
+              "comment": "URL of the resource if available, otherwise empty string.",
               "returnComment": "",
-              "required": false,
+              "required": true,
               "templates": []
             },
             "lineNumber": {
@@ -9493,9 +9493,9 @@
                 "name": "number",
                 "properties": {}
               },
-              "comment": "Optional 0-based line number in the resource if available.",
+              "comment": "0-based line number in the resource.",
               "returnComment": "",
-              "required": false,
+              "required": true,
               "templates": []
             },
             "columnNumber": {
@@ -9505,9 +9505,9 @@
                 "name": "number",
                 "properties": {}
               },
-              "comment": "Optional 0-based column number in the resource if available.",
+              "comment": "0-based column number in the resource.",
               "returnComment": "",
-              "required": false,
+              "required": true,
               "templates": []
             }
           }
@@ -11438,7 +11438,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
@@ -11476,7 +11476,7 @@
             "kind": "property",
             "name": "arg",
             "type": {
-              "name": "Serializable|JSHandle",
+              "name": "EvaluationArgument",
               "properties": {}
             },
             "comment": "Optional argument to pass to `pageFunction`",
