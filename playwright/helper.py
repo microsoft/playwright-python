@@ -232,6 +232,7 @@ class Error(Exception):
     def __init__(self, message: str, stack: str = None) -> None:
         self.message = message
         self.stack = stack
+        super().__init__(message)
 
 
 class TimeoutError(Error):

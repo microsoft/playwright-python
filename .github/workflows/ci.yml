@@ -64,7 +64,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install coveralls
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build driver
@@ -77,14 +76,10 @@ jobs:
       run: python -m playwright install
     - name: Test
       if: matrix.os != 'ubuntu-latest'
-      run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov=scripts --cov-report xml --timeout 90
+      run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --timeout 90
     - name: Test
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --cov=playwright --cov=scripts --cov-report xml --timeout 90
-    - name: Coveralls
-      run: coveralls
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: xvfb-run pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --timeout 90
     - name: Upload pytest test results
       uses: actions/upload-artifact@v1
       with:
