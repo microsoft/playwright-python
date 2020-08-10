@@ -15,6 +15,7 @@
 import asyncio
 import base64
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union, cast
 
@@ -342,12 +343,16 @@ class Page(ChannelOwner):
         )
 
     async def addScriptTag(
-        self, url: str = None, path: str = None, content: str = None, type: str = None
+        self,
+        url: str = None,
+        path: Union[str, Path] = None,
+        content: str = None,
+        type: str = None,
     ) -> ElementHandle:
         return await self._main_frame.addScriptTag(**locals_to_params(locals()))
 
     async def addStyleTag(
-        self, url: str = None, path: str = None, content: str = None
+        self, url: str = None, path: Union[str, Path] = None, content: str = None
     ) -> ElementHandle:
         return await self._main_frame.addStyleTag(**locals_to_params(locals()))
 
@@ -500,7 +505,9 @@ class Page(ChannelOwner):
     async def bringToFront(self) -> None:
         await self._channel.send("bringToFront")
 
-    async def addInitScript(self, source: str = None, path: str = None) -> None:
+    async def addInitScript(
+        self, source: str = None, path: Union[str, Path] = None
+    ) -> None:
         if path:
             with open(path, "r") as file:
                 source = file.read()
@@ -533,7 +540,7 @@ class Page(ChannelOwner):
         self,
         timeout: int = None,
         type: Literal["png", "jpeg"] = None,
-        path: str = None,
+        path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
         fullPage: bool = None,
@@ -726,7 +733,7 @@ class Page(ChannelOwner):
         height: Union[str, float] = None,
         preferCSSPageSize: bool = None,
         margin: PdfMargins = None,
-        path: str = None,
+        path: Union[str, Path] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:

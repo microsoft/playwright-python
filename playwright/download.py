@@ -41,6 +41,6 @@ class Download(ChannelOwner):
     async def path(self) -> Optional[str]:
         return await self._channel.send("path")
 
-    async def saveAs(self, path: Union[Path, str]) -> None:
+    async def saveAs(self, path: Union[str, Path]) -> None:
         path = str(Path(path))
         return await self._channel.send("saveAs", dict(path=path))

@@ -1343,7 +1343,7 @@ class ElementHandle(JSHandle):
         self,
         timeout: int = None,
         type: Literal["png", "jpeg"] = None,
-        path: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
     ) -> bytes:
@@ -1357,7 +1357,7 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         type : Optional[Literal['png', 'jpeg']]
             Specify screenshot type, defaults to `png`.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
         quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
@@ -2115,7 +2115,11 @@ class Frame(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.isDetached())
 
     def addScriptTag(
-        self, url: str = None, path: str = None, content: str = None, type: str = None
+        self,
+        url: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
+        content: str = None,
+        type: str = None,
     ) -> "ElementHandle":
         """Frame.addScriptTag
 
@@ -2125,7 +2129,7 @@ class Frame(SyncBase):
         ----------
         url : Optional[str]
             URL of a script to be added.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to current working directory.
         content : Optional[str]
             Raw JavaScript content to be injected into frame.
@@ -2146,7 +2150,10 @@ class Frame(SyncBase):
         )
 
     def addStyleTag(
-        self, url: str = None, path: str = None, content: str = None
+        self,
+        url: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
+        content: str = None,
     ) -> "ElementHandle":
         """Frame.addStyleTag
 
@@ -2156,7 +2163,7 @@ class Frame(SyncBase):
         ----------
         url : Optional[str]
             URL of the `<link>` tag.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to current working directory.
         content : Optional[str]
             Raw CSS content to be injected into frame.
@@ -2872,7 +2879,7 @@ class Selectors(SyncBase):
         self,
         name: str,
         source: str = None,
-        path: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
         contentScript: bool = None,
     ) -> NoneType:
         """Selectors.register
@@ -3065,14 +3072,14 @@ class Download(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
 
-    def saveAs(self, path: typing.Union[pathlib.Path, str]) -> NoneType:
+    def saveAs(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
         """Download.saveAs
 
         Saves the download to a user-specified path.
 
         Parameters
         ----------
-        path : Union[pathlib.Path, str]
+        path : Union[str, pathlib.Path]
             Path where the download should be saved.
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.saveAs(path=path)))
@@ -3537,7 +3544,11 @@ class Page(SyncBase):
         )
 
     def addScriptTag(
-        self, url: str = None, path: str = None, content: str = None, type: str = None
+        self,
+        url: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
+        content: str = None,
+        type: str = None,
     ) -> "ElementHandle":
         """Page.addScriptTag
 
@@ -3548,7 +3559,7 @@ class Page(SyncBase):
         ----------
         url : Optional[str]
             URL of a script to be added.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to current working directory.
         content : Optional[str]
             Raw JavaScript content to be injected into frame.
@@ -3569,7 +3580,10 @@ class Page(SyncBase):
         )
 
     def addStyleTag(
-        self, url: str = None, path: str = None, content: str = None
+        self,
+        url: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
+        content: str = None,
     ) -> "ElementHandle":
         """Page.addStyleTag
 
@@ -3580,7 +3594,7 @@ class Page(SyncBase):
         ----------
         url : Optional[str]
             URL of the `<link>` tag.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to current working directory.
         content : Optional[str]
             Raw CSS content to be injected into frame.
@@ -4054,7 +4068,9 @@ class Page(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.bringToFront()))
 
-    def addInitScript(self, source: str = None, path: str = None) -> NoneType:
+    def addInitScript(
+        self, source: str = None, path: typing.Union[str, pathlib.Path] = None
+    ) -> NoneType:
         """Page.addInitScript
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -4134,7 +4150,7 @@ class Page(SyncBase):
         self,
         timeout: int = None,
         type: Literal["png", "jpeg"] = None,
-        path: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
         fullPage: bool = None,
@@ -4150,7 +4166,7 @@ class Page(SyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         type : Optional[Literal['png', 'jpeg']]
             Specify screenshot type, defaults to `png`.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
         quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
@@ -4824,7 +4840,7 @@ class Page(SyncBase):
         height: typing.Union[str, float] = None,
         preferCSSPageSize: bool = None,
         margin: PdfMargins = None,
-        path: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
     ) -> bytes:
         """Page.pdf
 
@@ -4898,7 +4914,7 @@ class Page(SyncBase):
             Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
         margin : Optional[{"top": Union[str, int, NoneType], "right": Union[str, int, NoneType], "bottom": Union[str, int, NoneType], "left": Union[str, int, NoneType]}]
             Paper margins, defaults to none.
-        path : Optional[str]
+        path : Union[str, pathlib.Path, NoneType]
             The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the PDF won't be saved to the disk.
 
         Returns
@@ -5230,7 +5246,9 @@ class BrowserContext(SyncBase):
             self._sync(self._impl_obj.setOffline(offline=offline))
         )
 
-    def addInitScript(self, source: str = None, path: str = None) -> NoneType:
+    def addInitScript(
+        self, source: str = None, path: typing.Union[str, pathlib.Path] = None
+    ) -> NoneType:
         """BrowserContext.addInitScript
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -5800,7 +5818,7 @@ class BrowserType(SyncBase):
 
     def launch(
         self,
-        executablePath: str = None,
+        executablePath: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
         handleSIGINT: bool = None,
@@ -5811,7 +5829,7 @@ class BrowserType(SyncBase):
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxyServer = None,
-        downloadsPath: str = None,
+        downloadsPath: typing.Union[str, pathlib.Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
     ) -> "Browser":
@@ -5826,7 +5844,7 @@ class BrowserType(SyncBase):
 
         Parameters
         ----------
-        executablePath : Optional[str]
+        executablePath : Union[str, pathlib.Path, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
         args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
@@ -5848,7 +5866,7 @@ class BrowserType(SyncBase):
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
-        downloadsPath : Optional[str]
+        downloadsPath : Union[str, pathlib.Path, NoneType]
             If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
@@ -5883,7 +5901,7 @@ class BrowserType(SyncBase):
 
     def launchServer(
         self,
-        executablePath: str = None,
+        executablePath: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
         handleSIGINT: bool = None,
@@ -5894,7 +5912,7 @@ class BrowserType(SyncBase):
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxyServer = None,
-        downloadsPath: str = None,
+        downloadsPath: typing.Union[str, pathlib.Path] = None,
         port: int = None,
         chromiumSandbox: bool = None,
     ) -> "BrowserServer":
@@ -5904,7 +5922,7 @@ class BrowserType(SyncBase):
 
         Parameters
         ----------
-        executablePath : Optional[str]
+        executablePath : Union[str, pathlib.Path, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
         args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
@@ -5926,7 +5944,7 @@ class BrowserType(SyncBase):
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
-        downloadsPath : Optional[str]
+        downloadsPath : Union[str, pathlib.Path, NoneType]
             If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
         port : Optional[int]
             Port to use for the web socket. Defaults to 0 that picks any available port.
@@ -5961,8 +5979,8 @@ class BrowserType(SyncBase):
 
     def launchPersistentContext(
         self,
-        userDataDir: str,
-        executablePath: str = None,
+        userDataDir: typing.Union[str, pathlib.Path],
+        executablePath: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
         handleSIGINT: bool = None,
@@ -5973,7 +5991,7 @@ class BrowserType(SyncBase):
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxyServer = None,
-        downloadsPath: str = None,
+        downloadsPath: typing.Union[str, pathlib.Path] = None,
         slowMo: int = None,
         viewport: IntSize = None,
         ignoreHTTPSErrors: bool = None,
@@ -6000,9 +6018,9 @@ class BrowserType(SyncBase):
 
         Parameters
         ----------
-        userDataDir : str
+        userDataDir : Union[str, pathlib.Path]
             Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for Chromium and Firefox.
-        executablePath : Optional[str]
+        executablePath : Union[str, pathlib.Path, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
         args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
@@ -6024,7 +6042,7 @@ class BrowserType(SyncBase):
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
-        downloadsPath : Optional[str]
+        downloadsPath : Union[str, pathlib.Path, NoneType]
             If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.

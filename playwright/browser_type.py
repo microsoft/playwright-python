@@ -48,7 +48,7 @@ class BrowserType(ChannelOwner):
 
     async def launch(
         self,
-        executablePath: str = None,
+        executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -59,7 +59,7 @@ class BrowserType(ChannelOwner):
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxyServer = None,
-        downloadsPath: str = None,
+        downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
     ) -> Browser:
@@ -74,7 +74,7 @@ class BrowserType(ChannelOwner):
 
     async def launchServer(
         self,
-        executablePath: str = None,
+        executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -85,7 +85,7 @@ class BrowserType(ChannelOwner):
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxyServer = None,
-        downloadsPath: str = None,
+        downloadsPath: Union[str, Path] = None,
         port: int = None,
         chromiumSandbox: bool = None,
     ) -> BrowserServer:
@@ -100,8 +100,8 @@ class BrowserType(ChannelOwner):
 
     async def launchPersistentContext(
         self,
-        userDataDir: str,
-        executablePath: str = None,
+        userDataDir: Union[str, Path],
+        executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -112,7 +112,7 @@ class BrowserType(ChannelOwner):
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxyServer = None,
-        downloadsPath: str = None,
+        downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
         viewport: IntSize = None,
         ignoreHTTPSErrors: bool = None,
@@ -163,3 +163,7 @@ def normalize_launch_params(params: Dict) -> None:
             params["ignoreAllDefaultArgs"] = True
             del params["ignoreDefaultArgs"]
         params["env"] = {name: str(value) for [name, value] in params["env"].items()}
+    if "executablePath" in params:
+        params["executablePath"] = str(Path(params["executablePath"]))
+    if "downloadsPath" in params:
+        params["downloadsPath"] = str(Path(params["downloadsPath"]))

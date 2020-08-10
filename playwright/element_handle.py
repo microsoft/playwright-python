@@ -175,12 +175,19 @@ class ElementHandle(JSHandle):
         self,
         timeout: int = None,
         type: Literal["png", "jpeg"] = None,
-        path: str = None,
+        path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
     ) -> bytes:
-        binary = await self._channel.send("screenshot", locals_to_params(locals()))
-        return base64.b64decode(binary)
+        params = locals_to_params(locals())
+        if "path" in params:
+            del params["path"]
+        encoded_binary = await self._channel.send("screenshot", params)
+        decoded_binary = base64.b64decode(encoded_binary)
+        if path:
+            with open(path, "wb") as fd:
+                fd.write(decoded_binary)
+        return decoded_binary
 
     async def querySelector(self, selector: str) -> Optional["ElementHandle"]:
         return from_nullable_channel(
