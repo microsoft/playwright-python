@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
@@ -139,7 +140,9 @@ class BrowserContext(ChannelOwner):
     async def setOffline(self, offline: bool) -> None:
         await self._channel.send("setOffline", dict(offline=offline))
 
-    async def addInitScript(self, source: str = None, path: str = None) -> None:
+    async def addInitScript(
+        self, source: str = None, path: Union[str, Path] = None
+    ) -> None:
         if path:
             with open(path, "r") as file:
                 source = file.read()

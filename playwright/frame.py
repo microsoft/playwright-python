@@ -314,7 +314,11 @@ class Frame(ChannelOwner):
         return self._detached
 
     async def addScriptTag(
-        self, url: str = None, path: str = None, content: str = None, type: str = None,
+        self,
+        url: str = None,
+        path: Union[str, Path] = None,
+        content: str = None,
+        type: str = None,
     ) -> ElementHandle:
         params = locals_to_params(locals())
         if path:
@@ -324,7 +328,7 @@ class Frame(ChannelOwner):
         return from_channel(await self._channel.send("addScriptTag", params))
 
     async def addStyleTag(
-        self, url: str = None, path: str = None, content: str = None
+        self, url: str = None, path: Union[str, Path] = None, content: str = None
     ) -> ElementHandle:
         params = locals_to_params(locals())
         if path:
