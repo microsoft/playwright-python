@@ -89,6 +89,24 @@ def test_playwright_is_visible_on_google(page):
 
 For more information on pytest-playwright, see [GitHub](https://github.com/microsoft/playwright-pytest#readme).
 
+#### REPL support without context managers
+
+For scripting purposes, it is also possible to start and stop Playwright manually without relying on the indentation of the REPL.
+
+```py
+from playwright import sync_playwright
+
+playwright = sync_playwright().start()
+for browser_type in [playwright.chromium, playwright.firefox, playwright.webkit]:
+    browser = browser_type.launch()
+    page = browser.newPage()
+    page.goto("http://whatsmyuseragent.org/")
+    page.screenshot(path=f"example-{browser_type.name}.png")
+    browser.close()
+
+playwright.stop()
+```
+
 ## More examples
 
 #### Mobile and geolocation

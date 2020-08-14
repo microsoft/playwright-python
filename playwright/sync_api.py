@@ -6182,5 +6182,8 @@ class Playwright(SyncBase):
     def devices(self) -> typing.Dict[str, DeviceDescriptor]:
         return mapping.from_maybe_impl(self._impl_obj.devices)
 
+    def stop(self) -> NoneType:
+        return mapping.from_maybe_impl(self._impl_obj.stop())
+
 
 mapping.register(PlaywrightImpl, Playwright)
