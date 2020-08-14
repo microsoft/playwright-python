@@ -93,9 +93,14 @@ class SyncPlaywrightContextManager:
         self._connection.call_on_object_with_known_name("Playwright", callback_wrapper)
         set_dispatcher_fiber(greenlet(lambda: self._connection.run_sync()))
         dispatcher_fiber().switch()
-        return self._playwright
+        playwright = self._playwright
+        playwright.stop = self.__exit__  # type: ignore
+        return playwright
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def start(self) -> SyncPlaywright:
+        return self.__enter__()
+
+    def __exit__(self, *args: Any) -> None:
         self._connection.stop_sync()
 
 
@@ -106,11 +111,16 @@ class AsyncPlaywrightContextManager:
     async def __aenter__(self) -> AsyncPlaywright:
         self._connection = await run_driver_async()
         self._connection.run_async()
-        return AsyncPlaywright(
+        playwright = AsyncPlaywright(
             await self._connection.wait_for_object_with_known_name("Playwright")
         )
+        playwright.stop = self.__aexit__  # type: ignore
+        return playwright
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def start(self) -> AsyncPlaywright:
+        return await self.__aenter__()
+
+    async def __aexit__(self, *args: Any) -> None:
         self._connection.stop_async()
 
 

@@ -39,3 +39,6 @@ class Playwright(ChannelOwner):
             device["name"]: device["descriptor"]
             for device in initializer["deviceDescriptors"]
         }
+
+    def stop(self) -> None:
+        pass
