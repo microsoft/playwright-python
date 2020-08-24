@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
         browser: [chromium, firefox, webkit]
     runs-on: ${{ matrix.os }}
     steps:
