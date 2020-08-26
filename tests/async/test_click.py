@@ -581,6 +581,7 @@ async def test_timeout_waiting_for_hit_target(page, server):
         """() => {
       document.body.style.position = 'relative'
       blocker = document.createElement('div')
+      blocker.id = 'blocker';
       blocker.style.position = 'absolute'
       blocker.style.width = '400px'
       blocker.style.height = '20px'
@@ -595,7 +596,8 @@ async def test_timeout_waiting_for_hit_target(page, server):
     except TimeoutError as e:
         error = e
     assert "Timeout 5000ms exceeded." in error.message
-    assert "element does not receive pointer events" in error.message
+    assert '<div id="blocker"></div> intercepts pointer events' in error.message
+    assert "retrying click action" in error.message
 
 
 async def test_fail_when_obscured_and_not_waiting_for_hit_target(page, server):

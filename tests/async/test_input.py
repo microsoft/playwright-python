@@ -84,6 +84,7 @@ async def test_should_work_when_file_input_is_attached_to_DOM(page: Page, server
 
 
 async def test_should_work_when_file_input_is_not_attached_to_DOM(page, server):
+    file_chooser = asyncio.create_task(page.waitForEvent("filechooser"))
     await page.evaluate(
         """() => {
         el = document.createElement('input')
@@ -91,7 +92,7 @@ async def test_should_work_when_file_input_is_not_attached_to_DOM(page, server):
         el.click()
       }"""
     )
-    assert await page.waitForEvent("filechooser")
+    assert await file_chooser
 
 
 async def test_should_return_the_same_file_chooser_when_there_are_many_watchdogs_simultaneously(

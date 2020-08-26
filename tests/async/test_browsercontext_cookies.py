@@ -39,7 +39,7 @@ async def test_should_get_a_cookie(context, page, server, is_firefox):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_firefox else "None",
+            "sameSite": "None",
         }
     ]
 
@@ -66,7 +66,7 @@ async def test_should_get_a_non_session_cookie(context, page, server, is_firefox
             "expires": date / 1000,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_firefox else "None",
+            "sameSite": "None",
         }
     ]
 
@@ -142,7 +142,7 @@ async def test_should_get_multiple_cookies(context, page, server, is_firefox):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_firefox else "None",
+            "sameSite": "None",
         },
         {
             "name": "username",
@@ -152,7 +152,7 @@ async def test_should_get_multiple_cookies(context, page, server, is_firefox):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_firefox else "None",
+            "sameSite": "None",
         },
     ]
 

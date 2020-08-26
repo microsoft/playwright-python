@@ -255,6 +255,20 @@ class Page(ChannelOwner):
         for pending_event in self._pending_wait_for_events:
             pending_event.reject(is_crash, "Page")
 
+    def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
+        if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
+            self._channel.send_no_reply(
+                "setFileChooserInterceptedNoReply", {"intercepted": True}
+            )
+        super()._add_event_handler(event, k, v)
+
+    def remove_listener(self, event: str, f: Any) -> None:
+        super().remove_listener(event, f)
+        if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
+            self._channel.send_no_reply(
+                "setFileChooserInterceptedNoReply", {"intercepted": False}
+            )
+
     @property
     def context(self) -> "BrowserContext":
         return self._browser_context

@@ -23,7 +23,7 @@ from playwright import Error
 from playwright.async_api import Page, Request
 
 
-async def test_request_fulfill(page):
+async def test_request_fulfill(page, server):
     async def handle_request(route, request):
         assert route.request == request
         assert "empty.html" in request.url
@@ -41,7 +41,7 @@ async def test_request_fulfill(page):
         lambda route, request: asyncio.create_task(handle_request(route, request)),
     )
 
-    response = await page.goto("http://www.non-existent.com/empty.html")
+    response = await page.goto(server.EMPTY_PAGE)
     assert response.ok
     assert await response.text() == "Text"
 

@@ -62,9 +62,11 @@ class DocumentationProvider:
     def print_entry(
         self, class_name: str, method_name: str, signature: Dict[str, Any] = None
     ) -> None:
-        if class_name == "Playwright":
-            return
-        if class_name == "BindingCall" or method_name == "pid":
+        if class_name in ["BindingCall", "Playwright"] or method_name in [
+            "pid",
+            "_add_event_handler",
+            "remove_listener",
+        ]:
             return
         original_method_name = method_name
         if method_name in self.method_name_rewrites:
