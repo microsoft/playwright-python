@@ -349,7 +349,9 @@ async def test_should_set_cookies_for_a_frame(context, page, server):
     assert await page.frames[1].evaluate("document.cookie") == "frame-cookie=value"
 
 
-async def test_should_not_block_third_party_cookies(context, page, server, is_chromium):
+async def test_should_not_block_third_party_cookies(
+    context, page, server, is_chromium, is_firefox
+):
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         """src => {
@@ -365,7 +367,7 @@ async def test_should_not_block_third_party_cookies(context, page, server, is_ch
     )
     await page.frames[1].evaluate("document.cookie = 'username=John Doe'")
     await page.waitForTimeout(2000)
-    allows_third_party = is_chromium
+    allows_third_party = is_chromium or is_firefox
     cookies = await context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
 
     if allows_third_party:

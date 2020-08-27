@@ -16,7 +16,6 @@ from typing import Any, Dict, cast
 
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
-from playwright.browser_server import BrowserServer
 from playwright.browser_type import BrowserType
 from playwright.cdp_session import CDPSession
 from playwright.chromium_browser_context import ChromiumBrowserContext
@@ -47,8 +46,6 @@ def create_remote_object(
         return BindingCall(parent, type, guid, initializer)
     if type == "Browser":
         return Browser(cast(BrowserType, parent), type, guid, initializer)
-    if type == "BrowserServer":
-        return BrowserServer(parent, type, guid, initializer)
     if type == "BrowserType":
         return BrowserType(parent, type, guid, initializer)
     if type == "BrowserContext":

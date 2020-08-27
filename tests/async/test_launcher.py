@@ -66,6 +66,7 @@ async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
     assert "Failed to launch" in exc.value.message
 
 
+@pytest.mark.skip()
 async def test_browser_type_launch_server_should_return_child_process_instance(
     browser_type, launch_arguments
 ):
@@ -74,6 +75,7 @@ async def test_browser_type_launch_server_should_return_child_process_instance(
     await browser_server.close()
 
 
+@pytest.mark.skip()
 async def test_browser_type_launch_server_should_fire_close_event(
     browser_type, launch_arguments
 ):
@@ -102,6 +104,7 @@ async def test_browser_type_name_should_work(
         raise ValueError("Unknown browser")
 
 
+@pytest.mark.skip()
 async def test_browser_is_connected_should_set_connected_state(
     browser_type, launch_arguments
 ):
@@ -113,6 +116,7 @@ async def test_browser_is_connected_should_set_connected_state(
     await browser_server.close()
 
 
+@pytest.mark.skip()
 async def test_browser_is_connected_should_throw_when_used_after_isConnected_returns_false(
     browser_type, launch_arguments
 ):
@@ -128,7 +132,7 @@ async def test_browser_is_connected_should_throw_when_used_after_isConnected_ret
     assert "has been closed" in exc.value.message
 
 
-@pytest.mark.skip("currently flaky")  # TODO: should be removed
+@pytest.mark.skip()
 async def test_browser_disconnect_should_reject_navigation_when_browser_closes(
     browser_type, launch_arguments, server
 ):
@@ -150,6 +154,7 @@ async def test_browser_disconnect_should_reject_navigation_when_browser_closes(
     await browser_server.close()
 
 
+@pytest.mark.skip()
 async def test_browser_disconnect_should_reject_waitForSelector_when_browser_closes(
     browser_type, launch_arguments, server
 ):
@@ -176,6 +181,7 @@ async def test_browser_disconnect_should_reject_waitForSelector_when_browser_clo
     await browser_server.close()
 
 
+@pytest.mark.skip()
 async def test_browser_disconnect_should_throw_if_used_after_disconnect(
     browser_type, launch_arguments
 ):
@@ -189,6 +195,7 @@ async def test_browser_disconnect_should_throw_if_used_after_disconnect(
     await browser_server.close()
 
 
+@pytest.mark.skip()
 async def test_browser_disconnect_should_emit_close_events_on_pages_and_contexts(
     browser_type, launch_arguments
 ):
@@ -204,6 +211,7 @@ async def test_browser_disconnect_should_emit_close_events_on_pages_and_contexts
     assert len(pages_closed) == 1
 
 
+@pytest.mark.skip()
 async def test_browser_close_should_terminate_network_waiters(
     browser_type, launch_arguments, server
 ):
@@ -257,6 +265,7 @@ async def test_browser_close_should_be_callable_twice(browser_type, launch_argum
     await browser.close()
 
 
+@pytest.mark.skip()
 async def test_browser_type_launch_server_should_work(browser_type, launch_arguments):
     browser_server = await browser_type.launchServer(**launch_arguments)
     browser = await browser_type.connect(wsEndpoint=browser_server.wsEndpoint)
@@ -270,6 +279,7 @@ async def test_browser_type_launch_server_should_work(browser_type, launch_argum
     await browser_server.close()
 
 
+@pytest.mark.skip()
 async def test_browser_type_launch_server_should_fire_disconnected_when_closing_the_server(
     browser_type, launch_arguments
 ):
@@ -288,6 +298,7 @@ async def test_browser_type_launch_server_should_fire_disconnected_when_closing_
     )
 
 
+@pytest.mark.skip()
 async def test_browser_type_launch_server_should_fire_close_event_during_kill(
     browser_type, launch_arguments
 ):
@@ -307,6 +318,7 @@ async def test_browser_type_launch_server_should_fire_close_event_during_kill(
     assert order == ["closed", "killed"]
 
 
+@pytest.mark.skip()
 async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
     browser_type, launch_arguments, server
 ):

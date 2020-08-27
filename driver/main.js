@@ -35,5 +35,5 @@ const util = require('util');
     return;
   }
 
-  require('playwright/lib/rpc/server');
+  require('playwright/lib/server');
 })();

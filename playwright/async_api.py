@@ -26,7 +26,6 @@ from playwright.accessibility import Accessibility as AccessibilityImpl
 from playwright.async_base import AsyncBase, AsyncEventContextManager, mapping
 from playwright.browser import Browser as BrowserImpl
 from playwright.browser_context import BrowserContext as BrowserContextImpl
-from playwright.browser_server import BrowserServer as BrowserServerImpl
 from playwright.browser_type import BrowserType as BrowserTypeImpl
 from playwright.cdp_session import CDPSession as CDPSessionImpl
 from playwright.chromium_browser_context import (
@@ -3070,6 +3069,11 @@ class Page(AsyncBase):
         """
         return mapping.from_impl_list(self._impl_obj.workers)
 
+    def remove_listener(self, event: str, f: typing.Any) -> NoneType:
+        return mapping.from_maybe_impl(
+            self._impl_obj.remove_listener(event=event, f=mapping.to_impl(f))
+        )
+
     async def opener(self) -> typing.Union["Page", NoneType]:
         """Page.opener
 
@@ -5518,45 +5522,6 @@ class Browser(AsyncBase):
 mapping.register(BrowserImpl, Browser)
 
 
-class BrowserServer(AsyncBase):
-    def __init__(self, obj: BrowserServerImpl):
-        super().__init__(obj)
-
-    @property
-    def pid(self) -> str:
-        return mapping.from_maybe_impl(self._impl_obj.pid)
-
-    @property
-    def wsEndpoint(self) -> str:
-        """BrowserServer.wsEndpoint
-
-        Browser websocket endpoint which can be used as an argument to browserType.connect(options) to establish connection to the browser.
-
-        Returns
-        -------
-        str
-            Browser websocket url.
-        """
-        return mapping.from_maybe_impl(self._impl_obj.wsEndpoint)
-
-    async def kill(self) -> NoneType:
-        """BrowserServer.kill
-
-        Kills the browser process and waits for the process to exit.
-        """
-        return mapping.from_maybe_impl(await self._impl_obj.kill())
-
-    async def close(self) -> NoneType:
-        """BrowserServer.close
-
-        Closes the browser gracefully and makes sure the process is terminated.
-        """
-        return mapping.from_maybe_impl(await self._impl_obj.close())
-
-
-mapping.register(BrowserServerImpl, BrowserServer)
-
-
 class BrowserType(AsyncBase):
     def __init__(self, obj: BrowserTypeImpl):
         super().__init__(obj)
@@ -5661,82 +5626,6 @@ class BrowserType(AsyncBase):
                 proxy=proxy,
                 downloadsPath=downloadsPath,
                 slowMo=slowMo,
-                chromiumSandbox=chromiumSandbox,
-            )
-        )
-
-    async def launchServer(
-        self,
-        executablePath: typing.Union[str, pathlib.Path] = None,
-        args: typing.List[str] = None,
-        ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
-        handleSIGINT: bool = None,
-        handleSIGTERM: bool = None,
-        handleSIGHUP: bool = None,
-        timeout: int = None,
-        env: typing.Union[typing.Dict[str, typing.Union[str, int, bool]]] = None,
-        headless: bool = None,
-        devtools: bool = None,
-        proxy: ProxyServer = None,
-        downloadsPath: typing.Union[str, pathlib.Path] = None,
-        port: int = None,
-        chromiumSandbox: bool = None,
-    ) -> "BrowserServer":
-        """BrowserType.launchServer
-
-        Launches browser server that client can connect to. An example of launching a browser executable and connecting to it later:
-
-        Parameters
-        ----------
-        executablePath : Union[str, pathlib.Path, NoneType]
-            Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
-        args : Optional[List[str]]
-            Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
-        ignoreDefaultArgs : Union[bool, List[str], NoneType]
-            If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handleSIGINT : Optional[bool]
-            Close the browser process on Ctrl-C. Defaults to `true`.
-        handleSIGTERM : Optional[bool]
-            Close the browser process on SIGTERM. Defaults to `true`.
-        handleSIGHUP : Optional[bool]
-            Close the browser process on SIGHUP. Defaults to `true`.
-        timeout : Optional[int]
-            Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        env : Optional[Dict[str, Union[str, int, bool]]]
-            Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-        headless : Optional[bool]
-            Whether to run browser in headless mode. More details for Chromium and Firefox. Defaults to `true` unless the `devtools` option is `true`.
-        devtools : Optional[bool]
-            **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
-        proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
-            Network proxy settings.
-        downloadsPath : Union[str, pathlib.Path, NoneType]
-            If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
-        port : Optional[int]
-            Port to use for the web socket. Defaults to 0 that picks any available port.
-        chromiumSandbox : Optional[bool]
-            Enable Chromium sandboxing. Defaults to `true`.
-
-        Returns
-        -------
-        BrowserServer
-            Promise which resolves to the browser app instance.
-        """
-        return mapping.from_impl(
-            await self._impl_obj.launchServer(
-                executablePath=executablePath,
-                args=args,
-                ignoreDefaultArgs=ignoreDefaultArgs,
-                handleSIGINT=handleSIGINT,
-                handleSIGTERM=handleSIGTERM,
-                handleSIGHUP=handleSIGHUP,
-                timeout=timeout,
-                env=mapping.to_impl(env),
-                headless=headless,
-                devtools=devtools,
-                proxy=proxy,
-                downloadsPath=downloadsPath,
-                port=port,
                 chromiumSandbox=chromiumSandbox,
             )
         )

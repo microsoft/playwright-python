@@ -32,7 +32,7 @@ class Channel(BaseEventEmitter):
         self._guid = guid
         self._object: Optional[ChannelOwner] = None
 
-    async def send(self, method: str, params: dict = None) -> Any:
+    async def send(self, method: str, params: Dict = None) -> Any:
         if params is None:
             params = {}
         callback = self._connection._send_message_to_server(self._guid, method, params)
@@ -48,7 +48,7 @@ class Channel(BaseEventEmitter):
         key = next(iter(result))
         return result[key]
 
-    def send_no_reply(self, method: str, params: dict = None) -> None:
+    def send_no_reply(self, method: str, params: Dict = None) -> None:
         if params is None:
             params = {}
         self._connection._send_message_to_server(self._guid, method, params)

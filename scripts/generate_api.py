@@ -28,7 +28,6 @@ from typing import (  # type: ignore
 from playwright.accessibility import Accessibility
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
-from playwright.browser_server import BrowserServer
 from playwright.browser_type import BrowserType
 from playwright.cdp_session import CDPSession
 from playwright.chromium_browser_context import ChromiumBrowserContext
@@ -154,7 +153,6 @@ else:  # pragma: no cover
 from playwright.accessibility import Accessibility as AccessibilityImpl
 from playwright.browser import Browser as BrowserImpl
 from playwright.browser_context import BrowserContext as BrowserContextImpl
-from playwright.browser_server import BrowserServer as BrowserServerImpl
 from playwright.browser_type import BrowserType as BrowserTypeImpl
 from playwright.cdp_session import CDPSession as CDPSessionImpl
 from playwright.chromium_browser_context import ChromiumBrowserContext as ChromiumBrowserContextImpl
@@ -195,7 +193,6 @@ all_types = [
     CDPSession,
     ChromiumBrowserContext,
     Browser,
-    BrowserServer,
     BrowserType,
     Playwright,
 ]

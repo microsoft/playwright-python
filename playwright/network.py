@@ -234,4 +234,4 @@ def serialize_headers(headers: Dict[str, str]) -> List[Header]:
 
 
 def parse_headers(headers: List[Header]) -> Dict[str, str]:
-    return {header["name"]: header["value"] for header in headers}
+    return {header["name"].lower(): header["value"] for header in headers}

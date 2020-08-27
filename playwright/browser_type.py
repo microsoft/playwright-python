@@ -17,7 +17,6 @@ from typing import Dict, List, Union
 
 from playwright.browser import Browser
 from playwright.browser_context import BrowserContext
-from playwright.browser_server import BrowserServer
 from playwright.connection import ChannelOwner, from_channel
 from playwright.helper import (
     ColorScheme,
@@ -67,32 +66,6 @@ class BrowserType(ChannelOwner):
         normalize_launch_params(params)
         try:
             return from_channel(await self._channel.send("launch", params))
-        except Exception as e:
-            if f"{self.name}-" in str(e):
-                raise not_installed_error(f'"{self.name}" browser was not found.')
-            raise e
-
-    async def launchServer(
-        self,
-        executablePath: Union[str, Path] = None,
-        args: List[str] = None,
-        ignoreDefaultArgs: Union[bool, List[str]] = None,
-        handleSIGINT: bool = None,
-        handleSIGTERM: bool = None,
-        handleSIGHUP: bool = None,
-        timeout: int = None,
-        env: Env = None,
-        headless: bool = None,
-        devtools: bool = None,
-        proxy: ProxyServer = None,
-        downloadsPath: Union[str, Path] = None,
-        port: int = None,
-        chromiumSandbox: bool = None,
-    ) -> BrowserServer:
-        params = locals_to_params(locals())
-        normalize_launch_params(params)
-        try:
-            return from_channel(await self._channel.send("launchServer", params))
         except Exception as e:
             if f"{self.name}-" in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
