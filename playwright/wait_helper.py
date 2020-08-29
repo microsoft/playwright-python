@@ -83,7 +83,6 @@ def wait_for_event_future(
         if not predicate or predicate(event_data):
             future.set_result(event_data)
 
-    emitter.on(event, listener)
+    emitter.once(event, listener)
 
-    future.add_done_callback(lambda f: emitter.remove_listener(event, listener))
     return future

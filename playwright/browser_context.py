@@ -192,7 +192,7 @@ class BrowserContext(ChannelOwner):
             timeout = self._timeout_settings.timeout()
         wait_helper = WaitHelper(self._loop)
         wait_helper.reject_on_timeout(
-            timeout, f'Timeout while waiting for event "${event}"'
+            timeout, f'Timeout while waiting for event "{event}"'
         )
         if event != BrowserContext.Events.Close:
             wait_helper.reject_on_event(

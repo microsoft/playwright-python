@@ -1,6 +1,5 @@
 playwright/__pycache__/
-playwright/drivers/driver*
-playwright/driver-*
+playwright/drivers/
 driver/node_modules/
 driver/out/
 driver/package-lock.json

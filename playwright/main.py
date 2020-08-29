@@ -14,8 +14,12 @@
 
 import asyncio
 import io
+import os
+import stat
 import subprocess
 import sys
+import urllib.request
+from pathlib import Path
 from typing import Any
 
 from greenlet import greenlet
@@ -29,22 +33,47 @@ from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
 from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
 
+_dirname = get_file_dirname()
 
-def compute_driver_name() -> str:
+
+def _compute_driver_name() -> str:
     platform = sys.platform
     if platform == "darwin":
-        result = "driver-macos"
+        result = "playwright-driver-macos"
     elif platform == "linux":
-        result = "driver-linux"
+        result = "playwright-driver-linux"
     elif platform == "win32":
-        result = "driver-win.exe"
+        result = "playwright-driver-win.exe"
     return result
 
 
+def _download_driver_if_needed() -> Path:
+    driver_name = _compute_driver_name()
+    driver_dir = _dirname / "drivers"
+    driver_executable = driver_dir / driver_name
+    if os.path.isdir(driver_dir):
+        return driver_executable
+    print("Downloading driver...")
+    os.mkdir(driver_dir)
+    base_url = "https://storage.googleapis.com/mxschmitt-public-files/"
+    version = "playwright-driver-1598658542214"
+    driver_url = f"{base_url}{version}/{driver_name}"
+    response = urllib.request.urlopen(driver_url)
+    with open(driver_executable, "wb") as fd:
+        while True:
+            chunk = response.read(8192)
+            if not chunk:
+                break
+            fd.write(chunk)
+    st = os.stat(driver_executable)
+    if st.st_mode & stat.S_IEXEC == 0:
+        os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
+    print("Downloaded driver successfully...")
+    return driver_executable
+
+
 async def run_driver_async() -> Connection:
-    package_path = get_file_dirname()
-    driver_name = compute_driver_name()
-    driver_executable = package_path / "drivers" / driver_name
+    driver_executable = _download_driver_if_needed()
 
     # Sourced from: https://github.com/pytest-dev/pytest/blob/49827adcb9256c9c9c06a25729421dcc3c385edc/src/_pytest/faulthandler.py#L73-L80
     def _get_stderr_fileno() -> int:
@@ -58,6 +87,7 @@ async def run_driver_async() -> Connection:
 
     proc = await asyncio.create_subprocess_exec(
         str(driver_executable),
+        "--run",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=_get_stderr_fileno(),
@@ -134,10 +164,8 @@ def main() -> None:
     if "install" not in sys.argv:
         print('Run "python -m playwright install" to complete installation')
         return
-    package_path = get_file_dirname()
-    driver_name = compute_driver_name()
-    driver_executable = package_path / "drivers" / driver_name
+    driver_executable = _download_driver_if_needed()
     print("Installing the browsers...")
-    subprocess.check_call(f"{driver_executable} install", shell=True)
+    subprocess.check_call(f"{driver_executable} --install", shell=True)
 
     print("Playwright is now ready for use")

@@ -26,8 +26,6 @@ jobs:
         pip install -e .
     - name: Lint
       run: pre-commit run --all-files
-    - name: Build driver
-      run: python build_driver.py
     - name: Test Sync generation script
       run: bash buildbots/test-sync-generation.sh
   build:
@@ -47,16 +45,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
-    - name: Get Node PKG Cache dir
-      id: node-pkg-cache
-      run: |
-        node -e "const path = require('path'); const fs = require('fs'); const cachePath = path.join(os.tmpdir(), 'pkg-cache'); fs.mkdirSync(cachePath); console.log('::set-output name=dir::' + cachePath)"
-    - name: Cache driver
-      id: cache-primes
-      uses: actions/cache@v2
-      with:
-        path: ${{ steps.node-pkg-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -66,10 +54,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
-    - name: Build driver
-      run: python build_driver.py
-      env:
-        PKG_CACHE_PATH: ${{ steps.node-pkg-cache.outputs.dir }}
     - name: Build package
       run: python build_package.py
     - name: Install
@@ -107,8 +91,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
-    - name: Build driver
-      run: python build_driver.py
     - name: Build package
       run: python build_package.py
     - name: Test package installation

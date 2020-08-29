@@ -111,8 +111,6 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
             return dict(v="-Infinity")
         if value == float("-0"):
             return dict(v="-0")
-        if value == float("-0"):
-            return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
     if isinstance(value, datetime):

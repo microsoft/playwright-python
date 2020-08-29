@@ -94,7 +94,7 @@ def test_console_should_not_fail_for_window_object(page: Page, server):
 def test_console_should_trigger_correct_Log(page, server):
     page.goto("about:blank")
     with page.expect_console_message() as message:
-        page.evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE),
+        page.evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
     assert "Access-Control-Allow-Origin" in message.value.text
     assert message.value.type == "error"
 

@@ -190,9 +190,7 @@ class Response(ChannelOwner):
 
     @property
     def ok(self) -> bool:
-        return self._initializer["status"] == 0 or (
-            self._initializer["status"] >= 200 and self._initializer["status"] <= 299
-        )
+        return self.status == 0 or (self.status >= 200 and self.status <= 299)
 
     @property
     def status(self) -> int:
