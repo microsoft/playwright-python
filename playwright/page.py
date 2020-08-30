@@ -227,7 +227,7 @@ class Page(ChannelOwner):
         for handler_entry in self._routes:
             if handler_entry.matcher.matches(request.url):
                 handler_entry.handler(route, request)
-                return
+                break
         self._browser_context._on_route(route, request)
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
