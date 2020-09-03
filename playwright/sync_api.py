@@ -830,6 +830,15 @@ class ElementHandle(JSHandle):
     def __init__(self, obj: ElementHandleImpl):
         super().__init__(obj)
 
+    def toString(self) -> str:
+        """ElementHandle.toString
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.toString())
+
     def asElement(self) -> typing.Union["ElementHandle", NoneType]:
         """ElementHandle.asElement
 

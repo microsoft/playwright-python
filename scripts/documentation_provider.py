@@ -43,6 +43,29 @@ exceptions = {
     },
 }
 
+expected_mismatches = [
+    "Download.createReadStream",
+    "Browser.startTracing",
+    "Browser.stopTracing",
+    "Logger.log",
+    "BrowserContext.setHTTPCredentials",  # deprecated
+    "BrowserContext.serviceWorkers",  # CR only (and the following)
+    "BrowserContext.backgroundPages",
+    "Browser.newBrowserCDPSession",
+    "Page.coverage",
+    "Coverage.startCSSCoverage",
+    "Coverage.stopCSSCoverage",
+    "Coverage.startJSCoverage",
+    "Coverage.stopJSCoverage",
+    "BrowserContext.newCDPSession",
+    "Logger.isEnabled",
+    "BrowserServer.kill",  # not relevant for RPC clients (and the following)
+    "BrowserType.launchServer",
+    "BrowserServer.close",
+    "BrowserServer.process",
+    "BrowserServer.wsEndpoint",
+]
+
 
 class DocumentationProvider:
     def __init__(self) -> None:
@@ -371,6 +394,7 @@ class DocumentationProvider:
         return name
 
     def print_remainder(self) -> None:
+        remainders = set()
         for [class_name, value] in self.api.items():
             class_name = re.sub(r"Chromium(.*)", r"\1", class_name)
             class_name = re.sub(r"WebKit(.*)", r"\1", class_name)
@@ -379,8 +403,15 @@ class DocumentationProvider:
                 if method["kind"] == "event":
                     continue
                 entry = f"{class_name}.{method_name}"
-                if entry not in self.printed_entries:
-                    print(f"Method not implemented: {entry}", file=stderr)
+                if (
+                    entry not in self.printed_entries
+                    and entry not in expected_mismatches
+                ):
+                    remainders.add(f"Method not implemented: {entry}")
+        for remainder in remainders:
+            print(remainder, file=stderr)
+        if len(remainders) > 0:
+            exit(1)
 
 
 if __name__ == "__main__":
