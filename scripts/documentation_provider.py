@@ -371,6 +371,7 @@ class DocumentationProvider:
         return name
 
     def print_remainder(self) -> None:
+        remainders = set()
         for [class_name, value] in self.api.items():
             class_name = re.sub(r"Chromium(.*)", r"\1", class_name)
             class_name = re.sub(r"WebKit(.*)", r"\1", class_name)
@@ -380,7 +381,9 @@ class DocumentationProvider:
                     continue
                 entry = f"{class_name}.{method_name}"
                 if entry not in self.printed_entries:
-                    print(f"Method not implemented: {entry}", file=stderr)
+                    remainders.add(f"Method not implemented: {entry}")
+        for remainder in remainders:
+            print(remainder, file=stderr)
 
 
 if __name__ == "__main__":

@@ -51,6 +51,9 @@ class ElementHandle(JSHandle):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    def toString(self) -> str:
+        return self._preview
+
     def asElement(self) -> Optional["ElementHandle"]:
         return self
 
