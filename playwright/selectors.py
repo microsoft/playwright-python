@@ -13,10 +13,9 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 from playwright.connection import ChannelOwner
-from playwright.element_handle import ElementHandle
 from playwright.helper import Error
 
 
@@ -42,8 +41,3 @@ class Selectors(ChannelOwner):
         if contentScript:
             params["contentScript"] = True
         await self._channel.send("register", params)
-
-    async def _createSelector(self, name: str, handle: ElementHandle) -> Optional[str]:
-        return await self._channel.send(
-            "createSelector", dict(name=name, handle=handle._channel)
-        )

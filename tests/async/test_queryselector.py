@@ -23,12 +23,8 @@ async def test_selectors_register_should_work(selectors, page: Page, utils):
     }""",
     )
     await page.setContent("<div><span></span></div><div></div>")
-    assert (
-        await selectors._impl_obj._createSelector(
-            "tag", cast(Any, await page.querySelector("div"))._impl_obj
-        )
-        == "DIV"
-    )
+    element_handle_impl = cast(Any, (await page.querySelector("div")))._impl_obj
+    assert await element_handle_impl._createSelectorForTest("tag") == "DIV"
     assert await page.evalOnSelector("tag=DIV", "e => e.nodeName") == "DIV"
     assert await page.evalOnSelector("tag=SPAN", "e => e.nodeName") == "SPAN"
     assert await page.evalOnSelectorAll("tag=DIV", "es => es.length") == 2
