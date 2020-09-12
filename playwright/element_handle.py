@@ -51,6 +51,9 @@ class ElementHandle(JSHandle):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    async def _createSelectorForTest(self, name: str) -> Optional[str]:
+        return await self._channel.send("createSelectorForTest", dict(name=name))
+
     def toString(self) -> str:
         return self._preview
 
