@@ -17,4 +17,4 @@ htmlcov/
 _repo_version.py
 coverage.xml
 junit/
-docs/
+htmldocs/

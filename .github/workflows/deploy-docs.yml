@@ -17,9 +17,9 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Generate docs
-      run: pdoc3 --html -o docs playwright
+      run: pdoc3 --html -o htmldocs playwright
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
+        publish_dir: ./htmldocs/playwright
