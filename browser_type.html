@@ -160,10 +160,9 @@ def normalize_launch_params(params: Dict) -&gt; None:
     if &#34;env&#34; in params:
         params[&#34;env&#34;] = {name: str(value) for [name, value] in params[&#34;env&#34;].items()}
     if &#34;ignoreDefaultArgs&#34; in params:
-        if isinstance(params[&#34;ignoreDefaultArgs&#34;], bool):
+        if params[&#34;ignoreDefaultArgs&#34;] is True:
             params[&#34;ignoreAllDefaultArgs&#34;] = True
             del params[&#34;ignoreDefaultArgs&#34;]
-        params[&#34;env&#34;] = {name: str(value) for [name, value] in params[&#34;env&#34;].items()}
     if &#34;executablePath&#34; in params:
         params[&#34;executablePath&#34;] = str(Path(params[&#34;executablePath&#34;]))
     if &#34;downloadsPath&#34; in params:
@@ -190,10 +189,9 @@ def normalize_launch_params(params: Dict) -&gt; None:
     if &#34;env&#34; in params:
         params[&#34;env&#34;] = {name: str(value) for [name, value] in params[&#34;env&#34;].items()}
     if &#34;ignoreDefaultArgs&#34; in params:
-        if isinstance(params[&#34;ignoreDefaultArgs&#34;], bool):
+        if params[&#34;ignoreDefaultArgs&#34;] is True:
             params[&#34;ignoreAllDefaultArgs&#34;] = True
             del params[&#34;ignoreDefaultArgs&#34;]
-        params[&#34;env&#34;] = {name: str(value) for [name, value] in params[&#34;env&#34;].items()}
     if &#34;executablePath&#34; in params:
         params[&#34;executablePath&#34;] = str(Path(params[&#34;executablePath&#34;]))
     if &#34;downloadsPath&#34; in params:
