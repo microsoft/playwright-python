@@ -7,6 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -18,6 +22,8 @@ jobs:
         pip install -e .
     - name: Generate docs
       run: pdoc3 --html -o htmldocs playwright
+    - name: Post doc generation
+      run: node scripts/postPdoc3Generation.js
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
