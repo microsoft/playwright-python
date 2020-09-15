@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>playwright API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Python package `playwright` is a Python library to automate Chromium,
+Firefox and WebKit with a single API. Playwright is built to enable …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,6 +23,11 @@
 <h1 class="title">Package <code>playwright</code></h1>
 </header>
 <section id="section-intro">
+<p>Python package <code><a title="playwright" href="#playwright">playwright</a></code> is a Python library to automate Chromium,
+Firefox and WebKit with a single API. Playwright is built to enable cross-browser
+web automation that is ever-green, capable, reliable and fast.
+For more information you'll find the documentation for the sync API <a href="sync_api.html">here</a>
+and for the async API <a href="async_api.html">here</a>.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -39,6 +45,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+&#34;&#34;&#34;
+Python package `playwright` is a Python library to automate Chromium,
+Firefox and WebKit with a single API. Playwright is built to enable cross-browser
+web automation that is ever-green, capable, reliable and fast.
+For more information you&#39;ll find the documentation for the sync API [here](sync_api.html)
+and for the async API [here](async_api.html).
+&#34;&#34;&#34;
 
 import playwright.helper as helper
 from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
@@ -60,117 +73,47 @@ __all__ = [
     &#34;sync_playwright&#34;,
     &#34;Error&#34;,
     &#34;TimeoutError&#34;,
-]</code></pre>
+]
+
+__pdoc__ = {
+    &#34;accessibility&#34;: False,
+    &#34;async_base&#34;: False,
+    &#34;browser&#34;: False,
+    &#34;browser_context&#34;: False,
+    &#34;browser_type&#34;: False,
+    &#34;cdp_session&#34;: False,
+    &#34;chromium_browser_context&#34;: False,
+    &#34;connection&#34;: False,
+    &#34;console_message&#34;: False,
+    &#34;dialog&#34;: False,
+    &#34;download&#34;: False,
+    &#34;element_handle&#34;: False,
+    &#34;event_context_manager&#34;: False,
+    &#34;file_chooser&#34;: False,
+    &#34;frame&#34;: False,
+    &#34;helper&#34;: False,
+    &#34;impl_to_api_mapping&#34;: False,
+    &#34;input&#34;: False,
+    &#34;js_handle&#34;: False,
+    &#34;main&#34;: False,
+    &#34;network&#34;: False,
+    &#34;object_factory&#34;: False,
+    &#34;page&#34;: False,
+    &#34;path_utils&#34;: False,
+    &#34;playwright&#34;: False,
+    &#34;selectors&#34;: False,
+    &#34;sync_base&#34;: False,
+    &#34;transport&#34;: False,
+    &#34;wait_helper&#34;: False,
+    &#34;async_playwright&#34;: False,
+    &#34;sync_playwright&#34;: False,
+}</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="playwright.accessibility" href="accessibility.html">playwright.accessibility</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt><code class="name"><a title="playwright.async_api" href="async_api.html">playwright.async_api</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.async_base" href="async_base.html">playwright.async_base</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.browser" href="browser.html">playwright.browser</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.browser_context" href="browser_context.html">playwright.browser_context</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.browser_type" href="browser_type.html">playwright.browser_type</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.cdp_session" href="cdp_session.html">playwright.cdp_session</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.chromium_browser_context" href="chromium_browser_context.html">playwright.chromium_browser_context</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.connection" href="connection.html">playwright.connection</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.console_message" href="console_message.html">playwright.console_message</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.dialog" href="dialog.html">playwright.dialog</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.download" href="download.html">playwright.download</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.element_handle" href="element_handle.html">playwright.element_handle</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.event_context_manager" href="event_context_manager.html">playwright.event_context_manager</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.file_chooser" href="file_chooser.html">playwright.file_chooser</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.frame" href="frame.html">playwright.frame</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.helper" href="helper.html">playwright.helper</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.impl_to_api_mapping" href="impl_to_api_mapping.html">playwright.impl_to_api_mapping</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.input" href="input.html">playwright.input</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.js_handle" href="js_handle.html">playwright.js_handle</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.main" href="main.html">playwright.main</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.network" href="network.html">playwright.network</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.object_factory" href="object_factory.html">playwright.object_factory</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.page" href="page.html">playwright.page</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.path_utils" href="path_utils.html">playwright.path_utils</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.playwright" href="playwright.html">playwright.playwright</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.selectors" href="selectors.html">playwright.selectors</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -178,52 +121,11 @@ __all__ = [
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="playwright.sync_base" href="sync_base.html">playwright.sync_base</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.transport" href="transport.html">playwright.transport</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.wait_helper" href="wait_helper.html">playwright.wait_helper</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 </dl>
 </section>
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="playwright.async_playwright"><code class="name flex">
-<span>def <span class="ident">async_playwright</span></span>(<span>) ‑> <a title="playwright.main.AsyncPlaywrightContextManager" href="main.html#playwright.main.AsyncPlaywrightContextManager">AsyncPlaywrightContextManager</a></span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def async_playwright() -&gt; AsyncPlaywrightContextManager:
-    return AsyncPlaywrightContextManager()</code></pre>
-</details>
-</dd>
-<dt id="playwright.sync_playwright"><code class="name flex">
-<span>def <span class="ident">sync_playwright</span></span>(<span>) ‑> <a title="playwright.main.SyncPlaywrightContextManager" href="main.html#playwright.main.SyncPlaywrightContextManager">SyncPlaywrightContextManager</a></span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sync_playwright() -&gt; SyncPlaywrightContextManager:
-    return SyncPlaywrightContextManager()</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -251,7 +153,7 @@ __all__ = [
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="playwright.helper.TimeoutError" href="helper.html#playwright.helper.TimeoutError">TimeoutError</a></li>
+<li>playwright.helper.TimeoutError</li>
 </ul>
 </dd>
 <dt id="playwright.TimeoutError"><code class="flex name class">
@@ -269,7 +171,7 @@ __all__ = [
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.helper.Error" href="helper.html#playwright.helper.Error">Error</a></li>
+<li>playwright.helper.Error</li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
@@ -277,65 +179,7 @@ __all__ = [
 </dl>
 </section>
 </article>
-<nav id="sidebar">
-<h1>Index</h1>
-<div class="toc">
-<ul></ul>
-</div>
-<ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="playwright.accessibility" href="accessibility.html">playwright.accessibility</a></code></li>
-<li><code><a title="playwright.async_api" href="async_api.html">playwright.async_api</a></code></li>
-<li><code><a title="playwright.async_base" href="async_base.html">playwright.async_base</a></code></li>
-<li><code><a title="playwright.browser" href="browser.html">playwright.browser</a></code></li>
-<li><code><a title="playwright.browser_context" href="browser_context.html">playwright.browser_context</a></code></li>
-<li><code><a title="playwright.browser_type" href="browser_type.html">playwright.browser_type</a></code></li>
-<li><code><a title="playwright.cdp_session" href="cdp_session.html">playwright.cdp_session</a></code></li>
-<li><code><a title="playwright.chromium_browser_context" href="chromium_browser_context.html">playwright.chromium_browser_context</a></code></li>
-<li><code><a title="playwright.connection" href="connection.html">playwright.connection</a></code></li>
-<li><code><a title="playwright.console_message" href="console_message.html">playwright.console_message</a></code></li>
-<li><code><a title="playwright.dialog" href="dialog.html">playwright.dialog</a></code></li>
-<li><code><a title="playwright.download" href="download.html">playwright.download</a></code></li>
-<li><code><a title="playwright.element_handle" href="element_handle.html">playwright.element_handle</a></code></li>
-<li><code><a title="playwright.event_context_manager" href="event_context_manager.html">playwright.event_context_manager</a></code></li>
-<li><code><a title="playwright.file_chooser" href="file_chooser.html">playwright.file_chooser</a></code></li>
-<li><code><a title="playwright.frame" href="frame.html">playwright.frame</a></code></li>
-<li><code><a title="playwright.helper" href="helper.html">playwright.helper</a></code></li>
-<li><code><a title="playwright.impl_to_api_mapping" href="impl_to_api_mapping.html">playwright.impl_to_api_mapping</a></code></li>
-<li><code><a title="playwright.input" href="input.html">playwright.input</a></code></li>
-<li><code><a title="playwright.js_handle" href="js_handle.html">playwright.js_handle</a></code></li>
-<li><code><a title="playwright.main" href="main.html">playwright.main</a></code></li>
-<li><code><a title="playwright.network" href="network.html">playwright.network</a></code></li>
-<li><code><a title="playwright.object_factory" href="object_factory.html">playwright.object_factory</a></code></li>
-<li><code><a title="playwright.page" href="page.html">playwright.page</a></code></li>
-<li><code><a title="playwright.path_utils" href="path_utils.html">playwright.path_utils</a></code></li>
-<li><code><a title="playwright.playwright" href="playwright.html">playwright.playwright</a></code></li>
-<li><code><a title="playwright.selectors" href="selectors.html">playwright.selectors</a></code></li>
-<li><code><a title="playwright.sync_api" href="sync_api.html">playwright.sync_api</a></code></li>
-<li><code><a title="playwright.sync_base" href="sync_base.html">playwright.sync_base</a></code></li>
-<li><code><a title="playwright.transport" href="transport.html">playwright.transport</a></code></li>
-<li><code><a title="playwright.wait_helper" href="wait_helper.html">playwright.wait_helper</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="playwright.async_playwright" href="#playwright.async_playwright">async_playwright</a></code></li>
-<li><code><a title="playwright.sync_playwright" href="#playwright.sync_playwright">sync_playwright</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="playwright.Error" href="#playwright.Error">Error</a></code></h4>
-</li>
-<li>
-<h4><code><a title="playwright.TimeoutError" href="#playwright.TimeoutError">TimeoutError</a></code></h4>
-</li>
-</ul>
-</li>
-</ul>
-</nav>
+
 </main>
 <footer id="footer">
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>

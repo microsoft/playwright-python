@@ -6124,7 +6124,7 @@ mapping.register(PlaywrightImpl, Playwright)</code></pre>
 <dl>
 <dt id="playwright.sync_api.Accessibility"><code class="flex name class">
 <span>class <span class="ident">Accessibility</span></span>
-<span>(</span><span>obj: <a title="playwright.accessibility.Accessibility" href="accessibility.html#playwright.accessibility.Accessibility">Accessibility</a>)</span>
+<span>(</span><span>obj: playwright.accessibility.Accessibility)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -6172,8 +6172,8 @@ mapping.register(PlaywrightImpl, Playwright)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -6243,7 +6243,7 @@ An example of logging the focused node's name:</p>
 </dd>
 <dt id="playwright.sync_api.BindingCall"><code class="flex name class">
 <span>class <span class="ident">BindingCall</span></span>
-<span>(</span><span>obj: <a title="playwright.page.BindingCall" href="page.html#playwright.page.BindingCall">BindingCall</a>)</span>
+<span>(</span><span>obj: playwright.page.BindingCall)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -6262,8 +6262,8 @@ An example of logging the focused node's name:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -6286,7 +6286,7 @@ An example of logging the focused node's name:</p>
 </dd>
 <dt id="playwright.sync_api.Browser"><code class="flex name class">
 <span>class <span class="ident">Browser</span></span>
-<span>(</span><span>obj: <a title="playwright.browser.Browser" href="browser.html#playwright.browser.Browser">Browser</a>)</span>
+<span>(</span><span>obj: playwright.browser.Browser)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -6522,8 +6522,8 @@ An example of logging the focused node's name:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -6634,7 +6634,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newContext"><code class="name flex">
-<span>def <span class="ident">newContext</span></span>(<span>self, viewport: Union[<a title="playwright.helper.IntSize" href="helper.html#playwright.helper.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.helper.Geolocation" href="helper.html#playwright.helper.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.helper.Credentials" href="helper.html#playwright.helper.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['light', 'dark', 'no-preference'] = None, acceptDownloads: bool = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
+<span>def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['light', 'dark', 'no-preference'] = None, acceptDownloads: bool = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -6775,7 +6775,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newPage"><code class="name flex">
-<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[<a title="playwright.helper.IntSize" href="helper.html#playwright.helper.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.helper.Geolocation" href="helper.html#playwright.helper.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.helper.Credentials" href="helper.html#playwright.helper.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['light', 'dark', 'no-preference'] = None, acceptDownloads: bool = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
+<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['light', 'dark', 'no-preference'] = None, acceptDownloads: bool = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -6921,7 +6921,7 @@ This is a convenience API that should only be used for the single-page scenarios
 </dd>
 <dt id="playwright.sync_api.BrowserContext"><code class="flex name class">
 <span>class <span class="ident">BrowserContext</span></span>
-<span>(</span><span>obj: <a title="playwright.browser_context.BrowserContext" href="browser_context.html#playwright.browser_context.BrowserContext">BrowserContext</a>)</span>
+<span>(</span><span>obj: playwright.browser_context.BrowserContext)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -7311,8 +7311,8 @@ This is a convenience API that should only be used for the single-page scenarios
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -7520,7 +7520,7 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.expect_event"><code class="name flex">
-<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a></span>
+<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -7540,7 +7540,7 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.expect_page"><code class="name flex">
-<span>def <span class="ident">expect_page</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>]</span>
+<span>def <span class="ident">expect_page</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -7769,7 +7769,7 @@ Page routes (set up with page.route(url, handler)) take precedence over browser 
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>typing.Callable[[<a title="playwright.network.Route" href="network.html#playwright.network.Route">Route</a>, <a title="playwright.network.Request" href="network.html#playwright.network.Request">Request</a>], typing.Any]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]</code></dt>
 <dd>handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -7922,7 +7922,7 @@ page.waitForNavigation([options])</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.setGeolocation"><code class="name flex">
-<span>def <span class="ident">setGeolocation</span></span>(<span>self, geolocation: <a title="playwright.helper.Geolocation" href="helper.html#playwright.helper.Geolocation">Geolocation</a> = None) ‑> NoneType</span>
+<span>def <span class="ident">setGeolocation</span></span>(<span>self, geolocation: playwright.helper.Geolocation = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.setGeolocation</p>
@@ -7990,7 +7990,7 @@ page.waitForNavigation([options])</p>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[typing.Callable[[<a title="playwright.network.Route" href="network.html#playwright.network.Route">Route</a>, <a title="playwright.network.Request" href="network.html#playwright.network.Request">Request</a>], typing.Any]]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]</code></dt>
 <dd>Handler function used to register a routing with browserContext.route(url, handler).</dd>
 </dl></div>
 <details class="source">
@@ -8079,7 +8079,7 @@ is fired.</p>
 </dd>
 <dt id="playwright.sync_api.BrowserType"><code class="flex name class">
 <span>class <span class="ident">BrowserType</span></span>
-<span>(</span><span>obj: <a title="playwright.browser_type.BrowserType" href="browser_type.html#playwright.browser_type.BrowserType">BrowserType</a>)</span>
+<span>(</span><span>obj: playwright.browser_type.BrowserType)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -8376,8 +8376,8 @@ is fired.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -8488,7 +8488,7 @@ def name(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserType.launch"><code class="name flex">
-<span>def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.helper.ProxyServer" href="helper.html#playwright.helper.ProxyServer">ProxyServer</a> = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None) ‑> <a title="playwright.sync_api.Browser" href="#playwright.sync_api.Browser">Browser</a></span>
+<span>def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None) ‑> <a title="playwright.sync_api.Browser" href="#playwright.sync_api.Browser">Browser</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launch</p>
@@ -8622,7 +8622,7 @@ See <code>this article</code> for a description of the differences between Chrom
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserType.launchPersistentContext"><code class="name flex">
-<span>def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.helper.ProxyServer" href="helper.html#playwright.helper.ProxyServer">ProxyServer</a> = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: <a title="playwright.helper.IntSize" href="helper.html#playwright.helper.IntSize">IntSize</a> = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.helper.Geolocation" href="helper.html#playwright.helper.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.helper.Credentials" href="helper.html#playwright.helper.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['light', 'dark', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
+<span>def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: playwright.helper.IntSize = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['light', 'dark', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launchPersistentContext</p>
@@ -8857,7 +8857,7 @@ See <code>this article</code> for a description of the differences between Chrom
 </dd>
 <dt id="playwright.sync_api.CDPSession"><code class="flex name class">
 <span>class <span class="ident">CDPSession</span></span>
-<span>(</span><span>obj: <a title="playwright.cdp_session.CDPSession" href="cdp_session.html#playwright.cdp_session.CDPSession">CDPSession</a>)</span>
+<span>(</span><span>obj: playwright.cdp_session.CDPSession)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -8899,8 +8899,8 @@ See <code>this article</code> for a description of the differences between Chrom
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -8970,7 +8970,7 @@ to send messages.</p></div>
 </dd>
 <dt id="playwright.sync_api.ChromiumBrowserContext"><code class="flex name class">
 <span>class <span class="ident">ChromiumBrowserContext</span></span>
-<span>(</span><span>obj: <a title="playwright.chromium_browser_context.ChromiumBrowserContext" href="chromium_browser_context.html#playwright.chromium_browser_context.ChromiumBrowserContext">ChromiumBrowserContext</a>)</span>
+<span>(</span><span>obj: playwright.chromium_browser_context.ChromiumBrowserContext)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -9022,8 +9022,8 @@ to send messages.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></li>
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -9144,7 +9144,7 @@ to send messages.</p></div>
 </dd>
 <dt id="playwright.sync_api.ConsoleMessage"><code class="flex name class">
 <span>class <span class="ident">ConsoleMessage</span></span>
-<span>(</span><span>obj: <a title="playwright.console_message.ConsoleMessage" href="console_message.html#playwright.console_message.ConsoleMessage">ConsoleMessage</a>)</span>
+<span>(</span><span>obj: playwright.console_message.ConsoleMessage)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -9200,8 +9200,8 @@ to send messages.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -9228,7 +9228,7 @@ def args(self) -&gt; typing.List[&#34;JSHandle&#34;]:
     return mapping.from_impl_list(self._impl_obj.args)</code></pre>
 </details>
 </dd>
-<dt id="playwright.sync_api.ConsoleMessage.location"><code class="name">var <span class="ident">location</span> : <a title="playwright.helper.ConsoleMessageLocation" href="helper.html#playwright.helper.ConsoleMessageLocation">ConsoleMessageLocation</a></code></dt>
+<dt id="playwright.sync_api.ConsoleMessage.location"><code class="name">var <span class="ident">location</span> : playwright.helper.ConsoleMessageLocation</code></dt>
 <dd>
 <div class="desc"><p>ConsoleMessage.location</p>
 <h2 id="returns">Returns</h2>
@@ -9301,7 +9301,7 @@ def type(self) -&gt; str:
 </dd>
 <dt id="playwright.sync_api.Dialog"><code class="flex name class">
 <span>class <span class="ident">Dialog</span></span>
-<span>(</span><span>obj: <a title="playwright.dialog.Dialog" href="dialog.html#playwright.dialog.Dialog">Dialog</a>)</span>
+<span>(</span><span>obj: playwright.dialog.Dialog)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -9365,8 +9365,8 @@ def type(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -9491,7 +9491,7 @@ def type(self) -&gt; str:
 </dd>
 <dt id="playwright.sync_api.Download"><code class="flex name class">
 <span>class <span class="ident">Download</span></span>
-<span>(</span><span>obj: <a title="playwright.download.Download" href="download.html#playwright.download.Download">Download</a>)</span>
+<span>(</span><span>obj: playwright.download.Download)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -9570,8 +9570,8 @@ def type(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -9734,7 +9734,7 @@ def url(self) -&gt; str:
 </dd>
 <dt id="playwright.sync_api.ElementHandle"><code class="flex name class">
 <span>class <span class="ident">ElementHandle</span></span>
-<span>(</span><span>obj: <a title="playwright.element_handle.ElementHandle" href="element_handle.html#playwright.element_handle.ElementHandle">ElementHandle</a>)</span>
+<span>(</span><span>obj: playwright.element_handle.ElementHandle)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -10430,8 +10430,8 @@ def url(self) -&gt; str:
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="playwright.sync_api.JSHandle" href="#playwright.sync_api.JSHandle">JSHandle</a></li>
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -10463,7 +10463,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.boundingBox"><code class="name flex">
-<span>def <span class="ident">boundingBox</span></span>(<span>self) ‑> Union[<a title="playwright.helper.FloatRect" href="helper.html#playwright.helper.FloatRect">FloatRect</a>, NoneType]</span>
+<span>def <span class="ident">boundingBox</span></span>(<span>self) ‑> Union[playwright.helper.FloatRect, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.boundingBox</p>
@@ -10534,7 +10534,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.click</p>
@@ -10642,7 +10642,7 @@ If the element is detached from DOM, the method throws an error.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.dblclick</p>
@@ -11038,7 +11038,7 @@ Note that you can pass an empty string to clear the input field.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.hover</p>
@@ -11410,7 +11410,7 @@ Throws when <code>elementHandle</code> does not point to an element connected to
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.selectOption"><code class="name flex">
-<span>def <span class="ident">selectOption</span></span>(<span>self, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), <a title="playwright.helper.SelectOption" href="helper.html#playwright.helper.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.helper.SelectOption" href="helper.html#playwright.helper.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>def <span class="ident">selectOption</span></span>(<span>self, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), playwright.helper.SelectOption, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[playwright.helper.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.selectOption</p>
@@ -11508,7 +11508,7 @@ If element is not a <code>&lt;select&gt;</code> element, the method throws an er
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.setInputFiles"><code class="name flex">
-<span>def <span class="ident">setInputFiles</span></span>(<span>self, files: Union[str, pathlib.Path, <a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>, List[str], List[pathlib.Path], List[<a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setInputFiles</span></span>(<span>self, files: Union[str, pathlib.Path, playwright.helper.FilePayload, List[str], List[pathlib.Path], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.setInputFiles</p>
@@ -11728,7 +11728,7 @@ An example of typing into a text field and then submitting the form:</p>
 </dd>
 <dt id="playwright.sync_api.FileChooser"><code class="flex name class">
 <span>class <span class="ident">FileChooser</span></span>
-<span>(</span><span>obj: <a title="playwright.file_chooser.FileChooser" href="file_chooser.html#playwright.file_chooser.FileChooser">FileChooser</a>)</span>
+<span>(</span><span>obj: playwright.file_chooser.FileChooser)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -11806,8 +11806,8 @@ An example of typing into a text field and then submitting the form:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -11893,7 +11893,7 @@ def page(self) -&gt; &#34;Page&#34;:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.FileChooser.setFiles"><code class="name flex">
-<span>def <span class="ident">setFiles</span></span>(<span>self, files: Union[str, <a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>, List[str], List[<a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setFiles</span></span>(<span>self, files: Union[str, playwright.helper.FilePayload, List[str], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>FileChooser.setFiles</p>
@@ -11944,7 +11944,7 @@ def page(self) -&gt; &#34;Page&#34;:
 </dd>
 <dt id="playwright.sync_api.Frame"><code class="flex name class">
 <span>class <span class="ident">Frame</span></span>
-<span>(</span><span>obj: <a title="playwright.frame.Frame" href="frame.html#playwright.frame.Frame">Frame</a>)</span>
+<span>(</span><span>obj: playwright.frame.Frame)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -13118,8 +13118,8 @@ def page(self) -&gt; &#34;Page&#34;:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -13403,7 +13403,7 @@ If there's no element matching <code>selector</code>, the method waits until a m
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.click</p>
@@ -13519,7 +13519,7 @@ If there's no element matching <code>selector</code>, the method waits until a m
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.dblclick</p>
@@ -13940,7 +13940,7 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.expect_load_state"><code class="name flex">
-<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -13959,7 +13959,7 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.expect_navigation"><code class="name flex">
-<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -14244,7 +14244,7 @@ The status code for such responses can be retrieved by calling response.status()
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.hover</p>
@@ -14573,7 +14573,7 @@ Shortcuts such as <code>key: "Control+o"</code> or <code>key: "Control+Shift+T"<
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.selectOption"><code class="name flex">
-<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), <a title="playwright.helper.SelectOption" href="helper.html#playwright.helper.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.helper.SelectOption" href="helper.html#playwright.helper.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), playwright.helper.SelectOption, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[playwright.helper.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.selectOption</p>
@@ -14697,7 +14697,7 @@ If there's no <code>&lt;select&gt;</code> element matching <code>selector</code>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.setInputFiles"><code class="name flex">
-<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, <a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>, List[str], List[pathlib.Path], List[<a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, playwright.helper.FilePayload, List[str], List[pathlib.Path], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.setInputFiles</p>
@@ -15237,7 +15237,7 @@ Note that <code>frame.waitForTimeout()</code> should only be used for debugging.
 </dd>
 <dt id="playwright.sync_api.JSHandle"><code class="flex name class">
 <span>class <span class="ident">JSHandle</span></span>
-<span>(</span><span>obj: <a title="playwright.js_handle.JSHandle" href="js_handle.html#playwright.js_handle.JSHandle">JSHandle</a>)</span>
+<span>(</span><span>obj: playwright.js_handle.JSHandle)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -15380,8 +15380,8 @@ Note that <code>frame.waitForTimeout()</code> should only be used for debugging.
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -15660,7 +15660,7 @@ function, it <strong>will not be called</strong>.</p>
 </dd>
 <dt id="playwright.sync_api.Keyboard"><code class="flex name class">
 <span>class <span class="ident">Keyboard</span></span>
-<span>(</span><span>obj: <a title="playwright.input.Keyboard" href="input.html#playwright.input.Keyboard">Keyboard</a>)</span>
+<span>(</span><span>obj: playwright.input.Keyboard)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -15762,8 +15762,8 @@ function, it <strong>will not be called</strong>.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -15960,7 +15960,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </dd>
 <dt id="playwright.sync_api.Mouse"><code class="flex name class">
 <span>class <span class="ident">Mouse</span></span>
-<span>(</span><span>obj: <a title="playwright.input.Mouse" href="input.html#playwright.input.Mouse">Mouse</a>)</span>
+<span>(</span><span>obj: playwright.input.Mouse)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -16081,8 +16081,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -16299,7 +16299,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </dd>
 <dt id="playwright.sync_api.Page"><code class="flex name class">
 <span>class <span class="ident">Page</span></span>
-<span>(</span><span>obj: <a title="playwright.page.Page" href="page.html#playwright.page.Page">Page</a>)</span>
+<span>(</span><span>obj: playwright.page.Page)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -18264,8 +18264,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -18714,7 +18714,7 @@ Shortcut for page.mainFrame().check(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.click</p>
@@ -18871,7 +18871,7 @@ page handlers.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'right', 'middle'] = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.dblclick</p>
@@ -19339,7 +19339,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_console_message"><code class="name flex">
-<span>def <span class="ident">expect_console_message</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.ConsoleMessage" href="#playwright.sync_api.ConsoleMessage">ConsoleMessage</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.ConsoleMessage" href="#playwright.sync_api.ConsoleMessage">ConsoleMessage</a>]</span>
+<span>def <span class="ident">expect_console_message</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.ConsoleMessage" href="#playwright.sync_api.ConsoleMessage">ConsoleMessage</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.ConsoleMessage" href="#playwright.sync_api.ConsoleMessage">ConsoleMessage</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19359,7 +19359,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_dialog"><code class="name flex">
-<span>def <span class="ident">expect_dialog</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Dialog" href="#playwright.sync_api.Dialog">Dialog</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Dialog" href="#playwright.sync_api.Dialog">Dialog</a>]</span>
+<span>def <span class="ident">expect_dialog</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Dialog" href="#playwright.sync_api.Dialog">Dialog</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Dialog" href="#playwright.sync_api.Dialog">Dialog</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19379,7 +19379,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_download"><code class="name flex">
-<span>def <span class="ident">expect_download</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Download" href="#playwright.sync_api.Download">Download</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Download" href="#playwright.sync_api.Download">Download</a>]</span>
+<span>def <span class="ident">expect_download</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Download" href="#playwright.sync_api.Download">Download</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Download" href="#playwright.sync_api.Download">Download</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19399,7 +19399,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_event"><code class="name flex">
-<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a></span>
+<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19419,7 +19419,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_file_chooser"><code class="name flex">
-<span>def <span class="ident">expect_file_chooser</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.FileChooser" href="#playwright.sync_api.FileChooser">FileChooser</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.FileChooser" href="#playwright.sync_api.FileChooser">FileChooser</a>]</span>
+<span>def <span class="ident">expect_file_chooser</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.FileChooser" href="#playwright.sync_api.FileChooser">FileChooser</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.FileChooser" href="#playwright.sync_api.FileChooser">FileChooser</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19439,7 +19439,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_load_state"><code class="name flex">
-<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19458,7 +19458,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_navigation"><code class="name flex">
-<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['load', 'domcontentloaded', 'networkidle'] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[typing.Union[<a title="playwright.async_api.Response" href="async_api.html#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19478,7 +19478,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_popup"><code class="name flex">
-<span>def <span class="ident">expect_popup</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>]</span>
+<span>def <span class="ident">expect_popup</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19498,7 +19498,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_request"><code class="name flex">
-<span>def <span class="ident">expect_request</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>]</span>
+<span>def <span class="ident">expect_request</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19518,7 +19518,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_response"><code class="name flex">
-<span>def <span class="ident">expect_response</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Response" href="#playwright.sync_api.Response">Response</a>]</span>
+<span>def <span class="ident">expect_response</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Response" href="#playwright.sync_api.Response">Response</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -19538,7 +19538,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.expect_worker"><code class="name flex">
-<span>def <span class="ident">expect_worker</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Worker" href="#playwright.sync_api.Worker">Worker</a>')], bool] = None, timeout: int = None) ‑> <a title="playwright.sync_base.EventContextManager" href="sync_base.html#playwright.sync_base.EventContextManager">EventContextManager</a>[<a title="playwright.sync_api.Worker" href="#playwright.sync_api.Worker">Worker</a>]</span>
+<span>def <span class="ident">expect_worker</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Worker" href="#playwright.sync_api.Worker">Worker</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Worker" href="#playwright.sync_api.Worker">Worker</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -20067,7 +20067,7 @@ The status code for such responses can be retrieved by calling response.status()
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.helper.MousePosition" href="helper.html#playwright.helper.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.hover</p>
@@ -20272,7 +20272,7 @@ Shortcut for page.mainFrame().hover(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.pdf"><code class="name flex">
-<span>def <span class="ident">pdf</span></span>(<span>self, scale: int = None, displayHeaderFooter: bool = None, headerTemplate: str = None, footerTemplate: str = None, printBackground: bool = None, landscape: bool = None, pageRanges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, preferCSSPageSize: bool = None, margin: <a title="playwright.helper.PdfMargins" href="helper.html#playwright.helper.PdfMargins">PdfMargins</a> = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
+<span>def <span class="ident">pdf</span></span>(<span>self, scale: int = None, displayHeaderFooter: bool = None, headerTemplate: str = None, footerTemplate: str = None, printBackground: bool = None, landscape: bool = None, pageRanges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, preferCSSPageSize: bool = None, margin: playwright.helper.PdfMargins = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.pdf</p>
@@ -20700,7 +20700,7 @@ Page routes take precedence over browser context routes (set up with browserCont
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>typing.Callable[[<a title="playwright.network.Route" href="network.html#playwright.network.Route">Route</a>, <a title="playwright.network.Request" href="network.html#playwright.network.Request">Request</a>], typing.Any]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]</code></dt>
 <dd>handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -20739,7 +20739,7 @@ Page routes take precedence over browser context routes (set up with browserCont
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.screenshot"><code class="name flex">
-<span>def <span class="ident">screenshot</span></span>(<span>self, timeout: int = None, type: Literal['png', 'jpeg'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omitBackground: bool = None, fullPage: bool = None, clip: <a title="playwright.helper.FloatRect" href="helper.html#playwright.helper.FloatRect">FloatRect</a> = None) ‑> bytes</span>
+<span>def <span class="ident">screenshot</span></span>(<span>self, timeout: int = None, type: Literal['png', 'jpeg'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omitBackground: bool = None, fullPage: bool = None, clip: playwright.helper.FloatRect = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.screenshot</p>
@@ -20822,7 +20822,7 @@ Page routes take precedence over browser context routes (set up with browserCont
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.selectOption"><code class="name flex">
-<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), <a title="playwright.helper.SelectOption" href="helper.html#playwright.helper.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.helper.SelectOption" href="helper.html#playwright.helper.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), playwright.helper.SelectOption, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[playwright.helper.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.selectOption</p>
@@ -21063,7 +21063,7 @@ page.waitForNavigation([options])</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.setInputFiles"><code class="name flex">
-<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, <a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>, List[str], List[<a title="playwright.helper.FilePayload" href="helper.html#playwright.helper.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, playwright.helper.FilePayload, List[str], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.setInputFiles</p>
@@ -21363,7 +21363,7 @@ Shortcut for page.mainFrame().uncheck(selector[, options]).</p>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[typing.Callable[[<a title="playwright.network.Route" href="network.html#playwright.network.Route">Route</a>, <a title="playwright.network.Request" href="network.html#playwright.network.Request">Request</a>], typing.Any]]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]</code></dt>
 <dd>Handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -21396,7 +21396,7 @@ Shortcut for page.mainFrame().uncheck(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.viewportSize"><code class="name flex">
-<span>def <span class="ident">viewportSize</span></span>(<span>self) ‑> Union[<a title="playwright.helper.Viewport" href="helper.html#playwright.helper.Viewport">Viewport</a>, NoneType]</span>
+<span>def <span class="ident">viewportSize</span></span>(<span>self) ‑> Union[playwright.helper.Viewport, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.viewportSize</p>
@@ -21877,7 +21877,7 @@ Shortcut for page.mainFrame().waitForTimeout(timeout).</p>
 </dd>
 <dt id="playwright.sync_api.Playwright"><code class="flex name class">
 <span>class <span class="ident">Playwright</span></span>
-<span>(</span><span>obj: <a title="playwright.playwright.Playwright" href="playwright.html#playwright.playwright.Playwright">Playwright</a>)</span>
+<span>(</span><span>obj: playwright.playwright.Playwright)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -21914,8 +21914,8 @@ Shortcut for page.mainFrame().waitForTimeout(timeout).</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -21931,7 +21931,7 @@ def chromium(self) -&gt; &#34;BrowserType&#34;:
     return mapping.from_impl(self._impl_obj.chromium)</code></pre>
 </details>
 </dd>
-<dt id="playwright.sync_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict[str, <a title="playwright.helper.DeviceDescriptor" href="helper.html#playwright.helper.DeviceDescriptor">DeviceDescriptor</a>]</code></dt>
+<dt id="playwright.sync_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict[str, playwright.helper.DeviceDescriptor]</code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -21999,7 +21999,7 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
 </dd>
 <dt id="playwright.sync_api.Request"><code class="flex name class">
 <span>class <span class="ident">Request</span></span>
-<span>(</span><span>obj: <a title="playwright.network.Request" href="network.html#playwright.network.Request">Request</a>)</span>
+<span>(</span><span>obj: playwright.network.Request)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -22169,12 +22169,12 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="playwright.sync_api.Request.failure"><code class="name">var <span class="ident">failure</span> : Union[<a title="playwright.helper.RequestFailure" href="helper.html#playwright.helper.RequestFailure">RequestFailure</a>, NoneType]</code></dt>
+<dt id="playwright.sync_api.Request.failure"><code class="name">var <span class="ident">failure</span> : Union[playwright.helper.RequestFailure, NoneType]</code></dt>
 <dd>
 <div class="desc"><p>Request.failure</p>
 <p>The method returns <code>null</code> unless this request has failed, as reported by
@@ -22521,7 +22521,7 @@ def url(self) -&gt; str:
 </dd>
 <dt id="playwright.sync_api.Response"><code class="flex name class">
 <span>class <span class="ident">Response</span></span>
-<span>(</span><span>obj: <a title="playwright.network.Response" href="network.html#playwright.network.Response">Response</a>)</span>
+<span>(</span><span>obj: playwright.network.Response)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -22658,8 +22658,8 @@ def url(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -22868,7 +22868,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.sync_api.Response.finished"><code class="name flex">
-<span>def <span class="ident">finished</span></span>(<span>self) ‑> Union[<a title="playwright.helper.Error" href="helper.html#playwright.helper.Error">Error</a>, NoneType]</span>
+<span>def <span class="ident">finished</span></span>(<span>self) ‑> Union[playwright.helper.Error, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Response.finished</p>
@@ -22949,7 +22949,7 @@ def url(self) -&gt; str:
 </dd>
 <dt id="playwright.sync_api.Route"><code class="flex name class">
 <span>class <span class="ident">Route</span></span>
-<span>(</span><span>obj: <a title="playwright.network.Route" href="network.html#playwright.network.Route">Route</a>)</span>
+<span>(</span><span>obj: playwright.network.Route)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -23070,8 +23070,8 @@ def url(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -23280,7 +23280,7 @@ An example of serving static file:</p>
 </dd>
 <dt id="playwright.sync_api.Selectors"><code class="flex name class">
 <span>class <span class="ident">Selectors</span></span>
-<span>(</span><span>obj: <a title="playwright.selectors.Selectors" href="selectors.html#playwright.selectors.Selectors">Selectors</a>)</span>
+<span>(</span><span>obj: playwright.selectors.Selectors)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -23322,8 +23322,8 @@ An example of serving static file:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -23379,7 +23379,7 @@ An example of serving static file:</p>
 </dd>
 <dt id="playwright.sync_api.Worker"><code class="flex name class">
 <span>class <span class="ident">Worker</span></span>
-<span>(</span><span>obj: <a title="playwright.page.Worker" href="page.html#playwright.page.Worker">Worker</a>)</span>
+<span>(</span><span>obj: playwright.page.Worker)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -23467,8 +23467,8 @@ An example of serving static file:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.sync_base.SyncBase" href="sync_base.html#playwright.sync_base.SyncBase">SyncBase</a></li>
-<li><a title="playwright.impl_to_api_mapping.ImplWrapper" href="impl_to_api_mapping.html#playwright.impl_to_api_mapping.ImplWrapper">ImplWrapper</a></li>
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
