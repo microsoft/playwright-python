@@ -21,11 +21,27 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Build and push
+    - name: Build docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: ./docker
+        file: ./docker/Dockerfile
+        push: false
+        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.sha }}
+        build-args: python_image_version=${{ matrix.python-version }}
+    - name: Test docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: ./Dockerfile
+        push: false
+        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.sha }}-tests
+        build-args: python_image_version=${{ matrix.python-version }}
+    - name: Deloy docker image
       uses: docker/build-push-action@v2
       with:
         context: ./docker
         file: ./docker/Dockerfile
         push: true
         tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.sha }}
-        build-args: python_image_version=${{ matrix.python-version }}
+        build-args: base_version=python-${{ matrix.python-version }}-${{ github.sha }}
