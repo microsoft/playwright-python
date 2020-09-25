@@ -83,8 +83,13 @@ class Browser(ChannelOwner):
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
+        defaultBrowserType: str = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
+        # Python is strict in which variables gets passed to methods. We get this
+        # value from the device descriptors, thats why we have to strip it out.
+        if "defaultBrowserType" in params:
+            del params["defaultBrowserType"]
         if viewport == 0:
             del params["viewport"]
             params["noDefaultViewport"] = True
