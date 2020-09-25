@@ -36,7 +36,7 @@ jobs:
         file: ./Dockerfile
         push: false
         tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.sha }}-tests
-        build-args: python_image_version=${{ matrix.python-version }}
+        build-args: python_image_version=python-${{ matrix.python-version }}-${{ github.sha }}
     - name: Deloy docker image
       uses: docker/build-push-action@v2
       with:
@@ -44,4 +44,4 @@ jobs:
         file: ./docker/Dockerfile
         push: true
         tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.sha }}
-        build-args: base_version=python-${{ matrix.python-version }}-${{ github.sha }}
+        build-args: base_version=${{ matrix.python-version }}
