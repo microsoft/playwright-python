@@ -1,0 +1,18 @@
+name: Upload Docker Image
+on:
+  pull_request:
+    branches: [ master ]
+jobs:
+  deploy-docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7-buster, 3.8-buster]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: microsoft/playwright-github-action@v1
+    - name: Build image
+      run: |
+        cd docker
+        docker build -t domderen/playwright-python:python-${{ matrix.python-version }} --build-arg python_image_version=${{ matrix.python-version }} .
