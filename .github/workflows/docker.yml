@@ -14,3 +14,9 @@ jobs:
       run: |
         cd docker
         docker build -t domderen/playwright-python:python-${{ matrix.python-version }} --build-arg python_image_version=${{ matrix.python-version }} .
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: domderen/playwright-python
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
