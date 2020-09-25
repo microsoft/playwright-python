@@ -5,7 +5,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7-buster, 3.8-buster]
+        python-version: [3.7, 3.8]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -23,5 +23,5 @@ jobs:
         context: ./docker
         file: ./docker/Dockerfile
         push: true
-        tags: domderen/playwright-python:python-${{ matrix.python-version }}
+        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.ref }}
         build-args: python_image_version=${{ matrix.python-version }}
