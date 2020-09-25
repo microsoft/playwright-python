@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
     - uses: microsoft/playwright-github-action@v1
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -23,5 +27,5 @@ jobs:
         context: ./docker
         file: ./docker/Dockerfile
         push: true
-        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.ref }}
+        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.head_ref }}
         build-args: python_image_version=${{ matrix.python-version }}
