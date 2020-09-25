@@ -5592,6 +5592,7 @@ class Browser(SyncBase):
         hasTouch: bool = None,
         colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
+        defaultBrowserType: str = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -5657,6 +5658,7 @@ class Browser(SyncBase):
                     hasTouch=hasTouch,
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
+                    defaultBrowserType=defaultBrowserType,
                 )
             )
         )

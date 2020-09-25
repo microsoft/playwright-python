@@ -5364,6 +5364,7 @@ class Browser(AsyncBase):
         hasTouch: bool = None,
         colorScheme: Literal["light", "dark", "no-preference"] = None,
         acceptDownloads: bool = None,
+        defaultBrowserType: str = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -5428,6 +5429,7 @@ class Browser(AsyncBase):
                 hasTouch=hasTouch,
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
+                defaultBrowserType=defaultBrowserType,
             )
         )
 
