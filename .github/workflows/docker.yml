@@ -27,5 +27,5 @@ jobs:
         context: ./docker
         file: ./docker/Dockerfile
         push: true
-        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.head_ref }}
+        tags: ${{ github.repository_owner }}/playwright-python:python-${{ matrix.python-version }}-${{ github.sha }}
         build-args: python_image_version=${{ matrix.python-version }}
