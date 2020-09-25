@@ -1,7 +1,4 @@
 name: Upload Docker Image
-on:
-  pull_request:
-    branches: [ master ]
 jobs:
   deploy-docker:
     strategy:
