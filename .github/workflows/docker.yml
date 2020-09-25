@@ -10,13 +10,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: microsoft/playwright-github-action@v1
-    - name: Build image
-      run: |
-        cd docker
-        docker build -t domderen/playwright-python:python-${{ matrix.python-version }} --build-arg python_image_version=${{ matrix.python-version }} .
-    - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
       with:
-        name: domderen/playwright-python
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: ./docker
+        file: ./docker/Dockerfile
+        push: true
+        tags: domderen/playwright-python:python-${{ matrix.python-version }}
+        build-args: python_image_version=${{ matrix.python-version }}
