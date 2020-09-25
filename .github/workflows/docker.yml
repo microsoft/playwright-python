@@ -1,5 +1,7 @@
 name: Upload Docker Image
-on: [push]
+on:
+  release:
+    types: [published]
 jobs:
   deploy-docker:
     strategy:
