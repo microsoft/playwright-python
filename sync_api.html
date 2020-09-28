@@ -5903,6 +5903,7 @@ class Browser(SyncBase):
         hasTouch: bool = None,
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
+        defaultBrowserType: str = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -5969,6 +5970,7 @@ class Browser(SyncBase):
                     hasTouch=hasTouch,
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
+                    defaultBrowserType=defaultBrowserType,
                 )
             )
         )
@@ -6638,6 +6640,7 @@ An example of logging the focused node's name:</p>
         hasTouch: bool = None,
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
+        defaultBrowserType: str = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6704,6 +6707,7 @@ An example of logging the focused node's name:</p>
                     hasTouch=hasTouch,
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
+                    defaultBrowserType=defaultBrowserType,
                 )
             )
         )
@@ -6974,7 +6978,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newPage"><code class="name flex">
-<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
+<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -7045,6 +7049,7 @@ This is a convenience API that should only be used for the single-page scenarios
     hasTouch: bool = None,
     colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     acceptDownloads: bool = None,
+    defaultBrowserType: str = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.newPage
 
@@ -7111,6 +7116,7 @@ This is a convenience API that should only be used for the single-page scenarios
                 hasTouch=hasTouch,
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
+                defaultBrowserType=defaultBrowserType,
             )
         )
     )</code></pre>
