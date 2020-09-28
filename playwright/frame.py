@@ -98,6 +98,9 @@ class Frame(ChannelOwner):
         if "error" not in event and hasattr(self, "_page") and self._page:
             self._page.emit("framenavigated", self)
 
+    def page(self) -> "Page":
+        return self._page
+
     async def goto(
         self,
         url: str,
@@ -234,7 +237,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         timeout: int = None,
-        state: Literal["attached", "detached", "visible", "hidden"] = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
             await self._channel.send("waitForSelector", locals_to_params(locals()))

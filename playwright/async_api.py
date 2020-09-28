@@ -585,7 +585,7 @@ class Mouse(AsyncBase):
         return mapping.from_maybe_impl(await self._impl_obj.move(x=x, y=y, steps=steps))
 
     async def down(
-        self, button: Literal["left", "right", "middle"] = None, clickCount: int = None
+        self, button: Literal["left", "middle", "right"] = None, clickCount: int = None
     ) -> NoneType:
         """Mouse.down
 
@@ -593,7 +593,7 @@ class Mouse(AsyncBase):
 
         Parameters
         ----------
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -603,7 +603,7 @@ class Mouse(AsyncBase):
         )
 
     async def up(
-        self, button: Literal["left", "right", "middle"] = None, clickCount: int = None
+        self, button: Literal["left", "middle", "right"] = None, clickCount: int = None
     ) -> NoneType:
         """Mouse.up
 
@@ -611,7 +611,7 @@ class Mouse(AsyncBase):
 
         Parameters
         ----------
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -625,7 +625,7 @@ class Mouse(AsyncBase):
         x: float,
         y: float,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         clickCount: int = None,
     ) -> NoneType:
         """Mouse.click
@@ -638,7 +638,7 @@ class Mouse(AsyncBase):
         y : float
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -654,7 +654,7 @@ class Mouse(AsyncBase):
         x: float,
         y: float,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
     ) -> NoneType:
         """Mouse.dblclick
 
@@ -666,7 +666,7 @@ class Mouse(AsyncBase):
         y : float
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         """
         return mapping.from_maybe_impl(
@@ -952,8 +952,15 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.hover
 
-        This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.
-        If the element is detached from DOM, the method throws an error.
+        This method hovers over the element by performing the following steps:
+
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.mouse to hover over the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -979,7 +986,7 @@ class ElementHandle(JSHandle):
         ] = None,
         position: MousePosition = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -987,8 +994,15 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.click
 
-        This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.
-        If the element is detached from DOM, the method throws an error.
+        This method clicks the element by performing the following steps:
+
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -998,7 +1012,7 @@ class ElementHandle(JSHandle):
             A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -1029,16 +1043,22 @@ class ElementHandle(JSHandle):
         ] = None,
         position: MousePosition = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> NoneType:
         """ElementHandle.dblclick
 
-        This method waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.
-        If the element is detached from DOM, the method throws an error.
-        Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
+        This method double clicks the element by performing the following steps:
+
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.mouse to double click in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the first click of the `dblclick()` triggers a navigation event, this method will reject.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
@@ -1050,7 +1070,7 @@ class ElementHandle(JSHandle):
             A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -1249,7 +1269,17 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.check
 
-        This method waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
+        This method checks the element by performing the following steps:
+
+        Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already checked, this method returns immediately.
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        Ensure that the element is now checked. If not, this method rejects.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -1271,7 +1301,17 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.uncheck
 
-        This method waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
+        This method checks the element by performing the following steps:
+
+        Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already unchecked, this method returns immediately.
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        Ensure that the element is now unchecked. If not, this method rejects.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -1302,7 +1342,7 @@ class ElementHandle(JSHandle):
     async def screenshot(
         self,
         timeout: int = None,
-        type: Literal["png", "jpeg"] = None,
+        type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -1315,7 +1355,7 @@ class ElementHandle(JSHandle):
         ----------
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        type : Optional[Literal['png', 'jpeg']]
+        type : Optional[Literal['jpeg', 'png']]
             Specify screenshot type, defaults to `png`.
         path : Union[str, pathlib.Path, NoneType]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
@@ -1456,6 +1496,70 @@ class ElementHandle(JSHandle):
                 expression=expression,
                 arg=mapping.to_impl(arg),
                 force_expr=force_expr,
+            )
+        )
+
+    async def waitForElementState(
+        self,
+        state: Literal["disabled", "enabled", "hidden", "stable", "visible"],
+        timeout: int = None,
+    ) -> NoneType:
+        """ElementHandle.waitForElementState
+
+        Depending on the `state` parameter, this method waits for one of the actionability checks to pass. This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
+
+        `"visible"` Wait until the element is visible.
+        `"hidden"` Wait until the element is not visible or not attached. Note that waiting for hidden does not throw when the element detaches.
+        `"stable"` Wait until the element is both visible and stable.
+        `"enabled"` Wait until the element is enabled.
+        `"disabled"` Wait until the element is not enabled.
+
+        If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
+
+        Parameters
+        ----------
+        state : Literal['disabled', 'enabled', 'hidden', 'stable', 'visible']
+            A state to wait for, see below for more details.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        """
+        return mapping.from_maybe_impl(
+            await self._impl_obj.waitForElementState(state=state, timeout=timeout)
+        )
+
+    async def waitForSelector(
+        self,
+        selector: str,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        timeout: int = None,
+    ) -> typing.Union["ElementHandle", NoneType]:
+        """ElementHandle.waitForSelector
+
+        Wait for the `selector` relative to the element handle to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
+
+        **NOTE** This method does not work across navigations, use page.waitForSelector(selector[, options]) instead.
+
+        Parameters
+        ----------
+        selector : str
+            A selector of an element to wait for, relative to the element handle. See working with selectors for more details.
+        state : Optional[Literal['attached', 'detached', 'hidden', 'visible']]
+            Defaults to `'visible'`. Can be either:
+             - `'attached'` - wait for element to be present in DOM.
+             - `'detached'` - wait for element to not be present in DOM.
+             - `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
+             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+
+        Returns
+        -------
+        Optional[ElementHandle]
+            Promise that resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
+        """
+        return mapping.from_impl_nullable(
+            await self._impl_obj.waitForSelector(
+                selector=selector, state=state, timeout=timeout
             )
         )
 
@@ -1625,11 +1729,22 @@ class Frame(AsyncBase):
         """
         return mapping.from_impl_list(self._impl_obj.childFrames)
 
+    def page(self) -> "Page":
+        """Frame.page
+
+        Returns the page containing this frame.
+
+        Returns
+        -------
+        Page
+        """
+        return mapping.from_impl(self._impl_obj.page())
+
     async def goto(
         self,
         url: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None,
     ) -> typing.Union["Response", NoneType]:
         """Frame.goto
@@ -1654,7 +1769,7 @@ class Frame(AsyncBase):
             URL to navigate frame to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -1676,7 +1791,7 @@ class Frame(AsyncBase):
     async def waitForNavigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         """Frame.waitForNavigation
@@ -1689,7 +1804,7 @@ class Frame(AsyncBase):
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -1710,7 +1825,7 @@ class Frame(AsyncBase):
 
     async def waitForLoadState(
         self,
-        state: Literal["load", "domcontentloaded", "networkidle"] = None,
+        state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> NoneType:
         """Frame.waitForLoadState
@@ -1719,7 +1834,7 @@ class Frame(AsyncBase):
 
         Parameters
         ----------
-        state : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        state : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately.
              - `'load'` - wait for the `load` event to be fired.
              - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
@@ -1848,7 +1963,7 @@ class Frame(AsyncBase):
         self,
         selector: str,
         timeout: int = None,
-        state: Literal["attached", "detached", "visible", "hidden"] = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
         """Frame.waitForSelector
 
@@ -1861,7 +1976,7 @@ class Frame(AsyncBase):
             A selector of an element to wait for. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        state : Optional[Literal['attached', 'detached', 'visible', 'hidden']]
+        state : Optional[Literal['attached', 'detached', 'hidden', 'visible']]
             Defaults to `'visible'`. Can be either:
              - `'attached'` - wait for element to be present in DOM.
              - `'detached'` - wait for element to not be present in DOM.
@@ -2013,7 +2128,7 @@ class Frame(AsyncBase):
         self,
         html: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> NoneType:
         """Frame.setContent
 
@@ -2023,7 +2138,7 @@ class Frame(AsyncBase):
             HTML markup to assign to the page.
         timeout : Optional[int]
             Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider setting content to be finished when the `load` event is fired.
@@ -2115,7 +2230,7 @@ class Frame(AsyncBase):
         ] = None,
         position: MousePosition = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -2123,8 +2238,15 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.click
 
-        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method clicks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -2136,7 +2258,7 @@ class Frame(AsyncBase):
             A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -2169,15 +2291,21 @@ class Frame(AsyncBase):
         ] = None,
         position: MousePosition = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
         """Frame.dblclick
 
-        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
-        Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
+        This method double clicks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to double click in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the first click of the `dblclick()` triggers a navigation event, this method will reject.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
@@ -2191,7 +2319,7 @@ class Frame(AsyncBase):
             A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2354,8 +2482,15 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.hover
 
-        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method hovers over an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to hover over the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -2544,8 +2679,17 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.check
 
-        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method checks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already checked, this method returns immediately.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        Ensure that the element is now checked. If not, this method rejects.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -2573,8 +2717,17 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.uncheck
 
-        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method checks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already unchecked, this method returns immediately.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        Ensure that the element is now unchecked. If not, this method rejects.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -2662,7 +2815,7 @@ class Frame(AsyncBase):
 
     def expect_load_state(
         self,
-        state: Literal["load", "domcontentloaded", "networkidle"] = None,
+        state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
         return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
@@ -2670,7 +2823,7 @@ class Frame(AsyncBase):
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
         return AsyncEventContextManager(
@@ -2831,7 +2984,7 @@ class ConsoleMessage(AsyncBase):
 
         Returns
         -------
-        {"url": Optional[str], "lineNumber": Optional[int], "columnNumber": Optional[int]}
+        {"url": str, "lineNumber": int, "columnNumber": int}
         """
         return mapping.from_maybe_impl(self._impl_obj.location)
 
@@ -3201,7 +3354,7 @@ class Page(AsyncBase):
         self,
         selector: str,
         timeout: int = None,
-        state: Literal["attached", "detached", "visible", "hidden"] = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
         """Page.waitForSelector
 
@@ -3216,7 +3369,7 @@ class Page(AsyncBase):
             A selector of an element to wait for. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        state : Optional[Literal['attached', 'detached', 'visible', 'hidden']]
+        state : Optional[Literal['attached', 'detached', 'hidden', 'visible']]
             Defaults to `'visible'`. Can be either:
              - `'attached'` - wait for element to be present in DOM.
              - `'detached'` - wait for element to not be present in DOM.
@@ -3564,7 +3717,7 @@ class Page(AsyncBase):
         self,
         html: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> NoneType:
         """Page.setContent
 
@@ -3574,7 +3727,7 @@ class Page(AsyncBase):
             HTML markup to assign to the page.
         timeout : Optional[int]
             Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider setting markup succeeded, defaults to `load`. Given an array of event strings, setting content is considered to be successful after all events have been fired. Events can be either:
              - `'load'` - consider setting content to be finished when the `load` event is fired.
              - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
@@ -3590,7 +3743,7 @@ class Page(AsyncBase):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.goto
@@ -3617,7 +3770,7 @@ class Page(AsyncBase):
             URL to navigate page to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3639,7 +3792,7 @@ class Page(AsyncBase):
     async def reload(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.reload
 
@@ -3647,7 +3800,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3664,7 +3817,7 @@ class Page(AsyncBase):
 
     async def waitForLoadState(
         self,
-        state: Literal["load", "domcontentloaded", "networkidle"] = None,
+        state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> NoneType:
         """Page.waitForLoadState
@@ -3674,7 +3827,7 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        state : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        state : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately.
              - `'load'` - wait for the `load` event to be fired.
              - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
@@ -3689,13 +3842,13 @@ class Page(AsyncBase):
     async def waitForNavigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.waitForNavigation
 
         This resolves when the page navigates to a new URL or reloads. It is useful for when you run code
-        which will indirectly cause the page to navigate. Consider this example:
+        which will indirectly cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`. Consider this example:
         **NOTE** Usage of the History API to change the URL is considered a navigation.
         Shortcut for page.mainFrame().waitForNavigation(options).
 
@@ -3703,7 +3856,7 @@ class Page(AsyncBase):
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3810,7 +3963,7 @@ class Page(AsyncBase):
     async def goBack(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.goBack
 
@@ -3820,7 +3973,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3839,7 +3992,7 @@ class Page(AsyncBase):
     async def goForward(
         self,
         timeout: int = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.goForward
 
@@ -3849,7 +4002,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['load', 'domcontentloaded', 'networkidle']]
+        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider navigation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider navigation to be finished when the `load` event is fired.
@@ -3867,17 +4020,17 @@ class Page(AsyncBase):
 
     async def emulateMedia(
         self,
-        media: Literal["screen", "print"] = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = None,
+        media: Literal["print", "screen"] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
     ) -> NoneType:
         """Page.emulateMedia
 
 
         Parameters
         ----------
-        media : Optional[Literal['screen', 'print']]
+        media : Optional[Literal['print', 'screen']]
             Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null` disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value.
-        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated value.
         """
         return mapping.from_maybe_impl(
@@ -3925,7 +4078,7 @@ class Page(AsyncBase):
         Adds a script which would be evaluated in one of the following scenarios:
 
         Whenever the page is navigated.
-        Whenever the child frame is attached or navigated. In this case, the scritp is evaluated in the context of the newly attached frame.
+        Whenever the child frame is attached or navigated. In this case, the script is evaluated in the context of the newly attached frame.
 
         The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend  the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
@@ -3994,7 +4147,7 @@ class Page(AsyncBase):
     async def screenshot(
         self,
         timeout: int = None,
-        type: Literal["png", "jpeg"] = None,
+        type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -4009,7 +4162,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        type : Optional[Literal['png', 'jpeg']]
+        type : Optional[Literal['jpeg', 'png']]
             Specify screenshot type, defaults to `png`.
         path : Union[str, pathlib.Path, NoneType]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
@@ -4089,7 +4242,7 @@ class Page(AsyncBase):
         ] = None,
         position: MousePosition = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         clickCount: int = None,
         timeout: int = None,
         force: bool = None,
@@ -4097,8 +4250,15 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.click
 
-        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method clicks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
         Shortcut for page.mainFrame().click(selector[, options]).
 
         Parameters
@@ -4111,7 +4271,7 @@ class Page(AsyncBase):
             A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         clickCount : Optional[int]
             defaults to 1. See UIEvent.detail.
@@ -4144,15 +4304,21 @@ class Page(AsyncBase):
         ] = None,
         position: MousePosition = None,
         delay: int = None,
-        button: Literal["left", "right", "middle"] = None,
+        button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
         """Page.dblclick
 
-        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to double click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
-        Bear in mind that if the first click of the `dblclick()` triggers a navigation event, there will be an exception.
+        This method double clicks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to double click in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the first click of the `dblclick()` triggers a navigation event, this method will reject.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
 
         **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
@@ -4168,7 +4334,7 @@ class Page(AsyncBase):
             A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Optional[Literal['left', 'right', 'middle']]
+        button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4333,8 +4499,15 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.hover
 
-        This method waits for an element matching `selector`, waits for actionability checks, then scrolls the element into view if needed and uses page.mouse to hover over the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method hovers over an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to hover over the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
         Shortcut for page.mainFrame().hover(selector[, options]).
 
         Parameters
@@ -4523,8 +4696,17 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.check
 
-        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already checked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method checks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already checked, this method returns immediately.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        Ensure that the element is now checked. If not, this method rejects.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
         Shortcut for page.mainFrame().check(selector[, options]).
 
         Parameters
@@ -4553,8 +4735,17 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.uncheck
 
-        This method waits for an element matching `selector`, waits for actionability checks. Then, if the element is not already unchecked, this method scrolls the element into view and uses elementHandle.click to click in the center of the element.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM. If the element is detached during the actionability checks, the action is retried.
+        This method unchecks an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already unchecked, this method returns immediately.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.mouse to click in the center of the element.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        Ensure that the element is now unchecked. If not, this method rejects.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
         Shortcut for page.mainFrame().uncheck(selector[, options]).
 
         Parameters
@@ -4799,7 +4990,7 @@ class Page(AsyncBase):
 
     def expect_load_state(
         self,
-        state: Literal["load", "domcontentloaded", "networkidle"] = None,
+        state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
         return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
@@ -4807,7 +4998,7 @@ class Page(AsyncBase):
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["load", "domcontentloaded", "networkidle"] = None,
+        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
         return AsyncEventContextManager(
@@ -5362,7 +5553,7 @@ class Browser(AsyncBase):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
     ) -> "BrowserContext":
@@ -5401,7 +5592,7 @@ class Browser(AsyncBase):
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
@@ -5450,7 +5641,7 @@ class Browser(AsyncBase):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
     ) -> "Page":
         """Browser.newPage
@@ -5489,7 +5680,7 @@ class Browser(AsyncBase):
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
@@ -5672,7 +5863,7 @@ class BrowserType(AsyncBase):
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
-        colorScheme: Literal["light", "dark", "no-preference"] = None,
+        colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
     ) -> "BrowserContext":
@@ -5739,7 +5930,7 @@ class BrowserType(AsyncBase):
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[Literal['light', 'dark', 'no-preference']]
+        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
