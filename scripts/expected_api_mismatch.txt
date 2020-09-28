@@ -100,3 +100,4 @@ Parameter type mismatch in Selectors.register(script=): documented as Union[Call
 
 # Device support
 Missing parameter documentation: Browser.newContext(defaultBrowserType=)
+Missing parameter documentation: Browser.newPage(defaultBrowserType=)

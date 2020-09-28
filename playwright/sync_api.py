@@ -5875,6 +5875,7 @@ class Browser(SyncBase):
         hasTouch: bool = None,
         colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
+        defaultBrowserType: str = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -5941,6 +5942,7 @@ class Browser(SyncBase):
                     hasTouch=hasTouch,
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
+                    defaultBrowserType=defaultBrowserType,
                 )
             )
         )
