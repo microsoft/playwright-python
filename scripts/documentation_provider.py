@@ -19,6 +19,7 @@ from typing import (  # type: ignore
     Any,
     Dict,
     List,
+    Set,
     Union,
     get_args,
     get_origin,
@@ -43,29 +44,6 @@ exceptions = {
     },
 }
 
-expected_mismatches = [
-    "Download.createReadStream",
-    "Browser.startTracing",
-    "Browser.stopTracing",
-    "Logger.log",
-    "BrowserContext.setHTTPCredentials",  # deprecated
-    "BrowserContext.serviceWorkers",  # CR only (and the following)
-    "BrowserContext.backgroundPages",
-    "Browser.newBrowserCDPSession",
-    "Page.coverage",
-    "Coverage.startCSSCoverage",
-    "Coverage.stopCSSCoverage",
-    "Coverage.startJSCoverage",
-    "Coverage.stopJSCoverage",
-    "BrowserContext.newCDPSession",
-    "Logger.isEnabled",
-    "BrowserServer.kill",  # not relevant for RPC clients (and the following)
-    "BrowserType.launchServer",
-    "BrowserServer.close",
-    "BrowserServer.process",
-    "BrowserServer.wsEndpoint",
-]
-
 
 class DocumentationProvider:
     def __init__(self) -> None:
@@ -73,6 +51,7 @@ class DocumentationProvider:
         self.printed_entries: List[str] = []
         with open("api.json") as json_file:
             self.api = json.load(json_file)
+        self.errors: Set[str] = set()
 
     method_name_rewrites: Dict[str, str] = {
         "continue_": "continue",
@@ -134,9 +113,8 @@ class DocumentationProvider:
                     args = args["viewportSize"]["type"]["properties"]
                     doc_value = args.get(name)
                 if not doc_value:
-                    print(
-                        f"Missing parameter documentation: {fqname}({name}=)",
-                        file=stderr,
+                    self.errors.add(
+                        f"Missing parameter documentation: {fqname}({name}=)"
                     )
                 else:
                     code_type = self.serialize_python_type(value)
@@ -172,9 +150,8 @@ class DocumentationProvider:
 
         if signature_no_return:
             for name in signature_no_return:
-                print(
-                    f"Parameter not implemented: {class_name}.{method_name}({name}=)",
-                    file=stderr,
+                self.errors.add(
+                    f"Parameter not implemented: {class_name}.{method_name}({name}=)"
                 )
 
     def indent_paragraph(self, p: str, indent: str) -> str:
@@ -228,9 +205,8 @@ class DocumentationProvider:
             return
 
         if doc_type != code_type:
-            print(
-                f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}",
-                file=stderr,
+            self.errors.add(
+                f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}"
             )
 
     def serialize_python_type(self, value: Any) -> str:
@@ -394,7 +370,6 @@ class DocumentationProvider:
         return name
 
     def print_remainder(self) -> None:
-        remainders = set()
         for [class_name, value] in self.api.items():
             class_name = re.sub(r"Chromium(.*)", r"\1", class_name)
             class_name = re.sub(r"WebKit(.*)", r"\1", class_name)
@@ -403,14 +378,19 @@ class DocumentationProvider:
                 if method["kind"] == "event":
                     continue
                 entry = f"{class_name}.{method_name}"
-                if (
-                    entry not in self.printed_entries
-                    and entry not in expected_mismatches
-                ):
-                    remainders.add(f"Method not implemented: {entry}")
-        for remainder in remainders:
-            print(remainder, file=stderr)
-        if len(remainders) > 0:
+                if entry not in self.printed_entries:
+                    self.errors.add(f"Method not implemented: {entry}")
+
+        with open("scripts/expected_api_mismatch.txt") as f:
+            for line in f.readlines():
+                sline = line.strip()
+                if not len(sline) or sline.startswith("#"):
+                    continue
+                self.errors.remove(sline)
+
+        if len(self.errors) > 0:
+            for error in self.errors:
+                print(error, file=stderr)
             exit(1)
 
 

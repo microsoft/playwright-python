@@ -180,7 +180,7 @@ class ElementHandle(JSHandle):
     async def screenshot(
         self,
         timeout: int = None,
-        type: Literal["png", "jpeg"] = None,
+        type: Literal["jpeg", "png"] = None,
         path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -244,6 +244,23 @@ class ElementHandle(JSHandle):
                     arg=serialize_argument(arg),
                 ),
             )
+        )
+
+    async def waitForElementState(
+        self,
+        state: Literal["disabled", "enabled", "hidden", "stable", "visible"],
+        timeout: int = None,
+    ) -> None:
+        await self._channel.send("waitForElementState", locals_to_params(locals()))
+
+    async def waitForSelector(
+        self,
+        selector: str,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        timeout: int = None,
+    ) -> Optional["ElementHandle"]:
+        return from_nullable_channel(
+            await self._channel.send("waitForSelector", locals_to_params(locals()))
         )
 
 

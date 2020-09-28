@@ -313,7 +313,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         timeout: int = None,
-        state: Literal["attached", "detached", "visible", "hidden"] = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> Optional[ElementHandle]:
         return await self._main_frame.waitForSelector(**locals_to_params(locals()))
 
@@ -503,7 +503,7 @@ class Page(ChannelOwner):
         )
 
     async def emulateMedia(
-        self, media: Literal["screen", "print"] = None, colorScheme: ColorScheme = None,
+        self, media: Literal["print", "screen"] = None, colorScheme: ColorScheme = None,
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
@@ -553,7 +553,7 @@ class Page(ChannelOwner):
     async def screenshot(
         self,
         timeout: int = None,
-        type: Literal["png", "jpeg"] = None,
+        type: Literal["jpeg", "png"] = None,
         path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,

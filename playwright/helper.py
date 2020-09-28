@@ -45,10 +45,10 @@ Cookie = Dict
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], Any]
 
-ColorScheme = Literal["light", "dark", "no-preference"]
-DocumentLoadState = Literal["load", "domcontentloaded", "networkidle"]
+ColorScheme = Literal["dark", "light", "no-preference"]
+DocumentLoadState = Literal["domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
-MouseButton = Literal["left", "right", "middle"]
+MouseButton = Literal["left", "middle", "right"]
 
 
 class MousePosition(TypedDict):
@@ -69,9 +69,9 @@ class SelectOption(TypedDict):
 
 
 class ConsoleMessageLocation(TypedDict):
-    url: Optional[str]
-    lineNumber: Optional[int]
-    columnNumber: Optional[int]
+    url: str
+    lineNumber: int
+    columnNumber: int
 
 
 class ErrorPayload(TypedDict, total=False):

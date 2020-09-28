@@ -1,0 +1,102 @@
+# Missing methods
+Method not implemented: Browser.newBrowserCDPSession
+Method not implemented: Browser.startTracing
+Method not implemented: Browser.stopTracing
+Method not implemented: BrowserContext.backgroundPages
+Method not implemented: BrowserContext.newCDPSession
+Method not implemented: BrowserContext.serviceWorkers
+Method not implemented: BrowserContext.setHTTPCredentials
+Method not implemented: BrowserServer.close
+Method not implemented: BrowserServer.kill
+Method not implemented: BrowserServer.process
+Method not implemented: BrowserServer.wsEndpoint
+Method not implemented: BrowserType.launchServer
+Method not implemented: Coverage.startCSSCoverage
+Method not implemented: Coverage.startJSCoverage
+Method not implemented: Coverage.stopCSSCoverage
+Method not implemented: Coverage.stopJSCoverage
+Method not implemented: Download.createReadStream
+Method not implemented: Logger.isEnabled
+Method not implemented: Logger.log
+Method not implemented: Page.coverage
+
+# Parameter overloads
+Missing parameter documentation: BrowserContext.waitForEvent(predicate=)
+Missing parameter documentation: BrowserContext.waitForEvent(timeout=)
+Missing parameter documentation: Page.waitForEvent(predicate=)
+Missing parameter documentation: Page.waitForEvent(timeout=)
+Missing parameter documentation: Page.waitForRequest(predicate=)
+Missing parameter documentation: Page.waitForResponse(predicate=)
+Missing parameter documentation: Selectors.register(path=)
+
+# Documented as Dict / Any
+Parameter type mismatch in BrowserContext.setGeolocation(geolocation=): documented as Optional[Dict], code has Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
+Parameter type mismatch in BrowserContext.waitForEvent(return=): documented as Dict, code has Any
+Parameter type mismatch in Browser.newContext(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
+Parameter type mismatch in Browser.newPage(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
+Parameter type mismatch in BrowserType.launchPersistentContext(viewport=): documented as Optional[Dict], code has Optional[{"width": int, "height": int}]
+Parameter type mismatch in ElementHandle.boundingBox(return=): documented as Optional[Dict], code has Optional[{"x": float, "y": float, "width": float, "height": float}]
+Parameter type mismatch in Page.viewportSize(return=): documented as Optional[Dict], code has Optional[{"width": int, "height": int}]
+Parameter type mismatch in Page.waitForEvent(return=): documented as Dict, code has Any
+Parameter type mismatch in Request.failure(return=): documented as Optional[Dict], code has Optional[{"errorText": str}]
+Parameter type mismatch in Response.json(return=): documented as Any, code has Union[Dict, List]
+
+# Pathlib
+Parameter type mismatch in BrowserType.launch(executablePath=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in BrowserType.launch(downloadsPath=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in BrowserType.launchPersistentContext(downloadsPath=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in BrowserType.launchPersistentContext(executablePath=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in BrowserType.launchPersistentContext(userDataDir=): documented as str, code has Union[str, pathlib.Path]
+Parameter type mismatch in Download.saveAs(path=): documented as str, code has Union[str, pathlib.Path]
+Parameter type mismatch in ElementHandle.screenshot(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in Frame.addScriptTag(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in Frame.addStyleTag(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in Page.addScriptTag(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in Page.addStyleTag(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in Page.screenshot(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+Parameter type mismatch in Page.pdf(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+
+# Pattern
+Parameter type mismatch in BrowserContext.route(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
+Parameter type mismatch in BrowserContext.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
+Parameter type mismatch in Frame.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.frame(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.route(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
+Parameter type mismatch in Page.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
+Parameter type mismatch in Page.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.waitForRequest(urlOrPredicate=): documented as Union[str, RegExp, Function], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.waitForResponse(urlOrPredicate=): documented as Union[str, RegExp, Function], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+
+# Add init script
+Parameter type mismatch in Page.addInitScript(script=): documented as Union[Callable, str, Dict], code has Optional[str]
+Parameter type mismatch in BrowserContext.addInitScript(script=): documented as Union[Callable, str, Dict], code has Optional[str]
+Missing parameter documentation: BrowserContext.addInitScript(path=)
+Missing parameter documentation: Page.addInitScript(path=)
+
+# File payload
+Parameter type mismatch in FileChooser.setFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+Parameter type mismatch in Page.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+Parameter type mismatch in ElementHandle.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+Parameter type mismatch in Frame.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+
+# Select option
+Parameter type mismatch in ElementHandle.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+Parameter type mismatch in Frame.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+Parameter type mismatch in Page.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+
+# Evaluation argument
+Parameter type mismatch in ElementHandle.dispatchEvent(eventInit=): documented as Optional[EvaluationArgument], code has Optional[Dict]
+Parameter type mismatch in Frame.dispatchEvent(eventInit=): documented as Optional[EvaluationArgument], code has Optional[Dict]
+Parameter type mismatch in Page.dispatchEvent(eventInit=): documented as Optional[EvaluationArgument], code has Optional[Dict]
+
+# Route
+Parameter type mismatch in BrowserContext.route(handler=): documented as function(Route, Request), code has typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+Parameter type mismatch in BrowserContext.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+Parameter type mismatch in Page.route(handler=): documented as function(Route, Request), code has typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+Parameter type mismatch in Page.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+
+# Selectors
+Parameter type mismatch in Selectors.register(script=): documented as Union[Callable, str, Dict], code has Optional[str]
+
+# Device support
+Missing parameter documentation: Browser.newContext(defaultBrowserType=)
