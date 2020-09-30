@@ -24,7 +24,8 @@ from playwright.page import Page, Worker
 class ChromiumBrowserContext(BrowserContext):
 
     Events = SimpleNamespace(
-        BackgroundPage="backgroundpage", ServiceWorker="serviceworker",
+        BackgroundPage="backgroundpage",
+        ServiceWorker="serviceworker",
     )
 
     def __init__(

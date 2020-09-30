@@ -31,7 +31,13 @@ async def test_link_navigation_inherit_user_agent_from_browser_context(
     request_waitable = asyncio.create_task(server.wait_for_request("/popup/popup.html"))
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     popup = cast(
-        Page, (await asyncio.gather(context.waitForEvent("page"), page.click("a"),))[0]
+        Page,
+        (
+            await asyncio.gather(
+                context.waitForEvent("page"),
+                page.click("a"),
+            )
+        )[0],
     )
     await popup.waitForLoadState("domcontentloaded")
     user_agent = await popup.evaluate("window.initialUserAgent")
@@ -56,7 +62,8 @@ async def test_link_navigation_respect_routes_from_browser_context(context, serv
         lambda route, request: handle_request(route, request, intercepted),
     )
     await asyncio.gather(
-        context.waitForEvent("page"), page.click("a"),
+        context.waitForEvent("page"),
+        page.click("a"),
     )
     assert intercepted == [True]
 
@@ -407,7 +414,12 @@ async def test_should_work_with_clicking_target__blank(context, server):
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel="opener" href="/one-style.html">yo</a>')
-    popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
+    popup = (
+        await asyncio.gather(
+            page.waitForEvent("popup"),
+            page.click("a"),
+        )
+    )[0]
     assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener")
 
@@ -420,7 +432,8 @@ async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(
     await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"), page.evalOnSelector("a", "a => a.click()"),
+            page.waitForEvent("popup"),
+            page.evalOnSelector("a", "a => a.click()"),
         )
     )[0]
     assert await page.evaluate("!!window.opener") is False
@@ -433,7 +446,12 @@ async def test_should_work_with_clicking_target__blank_and_rel_noopener(
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
-    popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a"),))[0]
+    popup = (
+        await asyncio.gather(
+            page.waitForEvent("popup"),
+            page.click("a"),
+        )
+    )[0]
     assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener") is False
 
@@ -446,7 +464,8 @@ async def test_should_not_treat_navigations_as_new_popups(context, server):
 
     handled_popups = []
     page.on(
-        "popup", lambda popup: handled_popups.append(True),
+        "popup",
+        lambda popup: handled_popups.append(True),
     )
 
     await popup.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")

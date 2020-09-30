@@ -112,7 +112,10 @@ async def test_should_return_the_same_file_chooser_when_there_are_many_watchdogs
 async def test_should_accept_single_file(page: Page, server):
     await page.setContent('<input type=file oninput="javascript:console.timeStamp()">')
     file_chooser = (
-        await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
+        await asyncio.gather(
+            page.waitForEvent("filechooser"),
+            page.click("input"),
+        )
     )[0]
     assert file_chooser.page == page
     assert file_chooser.element
@@ -192,7 +195,10 @@ async def test_should_not_accept_multiple_files_for_single_file_input(
 ):
     await page.setContent("<input type=file>")
     file_chooser = (
-        await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
+        await asyncio.gather(
+            page.waitForEvent("filechooser"),
+            page.click("input"),
+        )
     )[0]
     error = None
     try:
@@ -228,7 +234,10 @@ async def test_should_emit_input_and_change_events(page, server):
 async def test_should_work_for_single_file_pick(page, server):
     await page.setContent("<input type=file>")
     file_chooser = (
-        await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
+        await asyncio.gather(
+            page.waitForEvent("filechooser"),
+            page.click("input"),
+        )
     )[0]
     assert file_chooser.isMultiple is False
 
@@ -236,7 +245,10 @@ async def test_should_work_for_single_file_pick(page, server):
 async def test_should_work_for_multiple(page, server):
     await page.setContent("<input multiple type=file>")
     file_chooser = (
-        await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
+        await asyncio.gather(
+            page.waitForEvent("filechooser"),
+            page.click("input"),
+        )
     )[0]
     assert file_chooser.isMultiple
 
@@ -244,6 +256,9 @@ async def test_should_work_for_multiple(page, server):
 async def test_should_work_for_webkitdirectory(page, server):
     await page.setContent("<input multiple webkitdirectory type=file>")
     file_chooser = (
-        await asyncio.gather(page.waitForEvent("filechooser"), page.click("input"),)
+        await asyncio.gather(
+            page.waitForEvent("filechooser"),
+            page.click("input"),
+        )
     )[0]
     assert file_chooser.isMultiple

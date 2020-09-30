@@ -3170,8 +3170,7 @@ class Dialog(SyncBase):
         )
 
     def dismiss(self) -> NoneType:
-        """Dialog.dismiss
-        """
+        """Dialog.dismiss"""
         return mapping.from_maybe_impl(self._sync(self._impl_obj.dismiss()))
 
 

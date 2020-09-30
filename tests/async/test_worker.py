@@ -137,7 +137,8 @@ async def test_workers_should_clear_upon_cross_process_navigation(server, page):
 
 async def test_workers_should_report_network_activity(page, server):
     [worker, _] = await asyncio.gather(
-        page.waitForEvent("worker"), page.goto(server.PREFIX + "/worker/worker.html"),
+        page.waitForEvent("worker"),
+        page.goto(server.PREFIX + "/worker/worker.html"),
     )
     url = server.PREFIX + "/one-style.css"
     request_promise = asyncio.create_task(page.waitForRequest(url))

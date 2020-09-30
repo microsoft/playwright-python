@@ -105,14 +105,16 @@ async def test_close_should_terminate_network_waiters(context, server):
 async def test_close_should_be_callable_twice(context):
     page = await context.newPage()
     await asyncio.gather(
-        page.close(), page.close(),
+        page.close(),
+        page.close(),
     )
     await page.close()
 
 
 async def test_load_should_fire_when_expected(page):
     await asyncio.gather(
-        page.goto("about:blank"), page.waitForEvent("load"),
+        page.goto("about:blank"),
+        page.waitForEvent("load"),
     )
 
 
@@ -130,7 +132,8 @@ async def test_async_stacks_should_work(page, server):
 
 async def test_opener_should_provide_access_to_the_opener_page(page):
     [popup, _] = await asyncio.gather(
-        page.waitForEvent("popup"), page.evaluate("window.open('about:blank')"),
+        page.waitForEvent("popup"),
+        page.evaluate("window.open('about:blank')"),
     )
     opener = await popup.opener()
     assert opener == page
@@ -138,7 +141,8 @@ async def test_opener_should_provide_access_to_the_opener_page(page):
 
 async def test_opener_should_return_null_if_parent_page_has_been_closed(page):
     [popup, _] = await asyncio.gather(
-        page.waitForEvent("popup"), page.evaluate("window.open('about:blank')"),
+        page.waitForEvent("popup"),
+        page.evaluate("window.open('about:blank')"),
     )
     await page.close()
     opener = await popup.opener()
@@ -383,7 +387,8 @@ async def test_expose_function_should_work_with_complex_objects(page, server):
 
 async def test_page_error_should_fire(page, server, is_webkit):
     [error, _] = await asyncio.gather(
-        page.waitForEvent("pageerror"), page.goto(server.PREFIX + "/error.html"),
+        page.waitForEvent("pageerror"),
+        page.goto(server.PREFIX + "/error.html"),
     )
     assert error.message == "Fancy error!"
     stack = await page.evaluate("window.e.stack")
@@ -771,7 +776,8 @@ async def test_select_option_should_not_throw_when_select_causes_navigation(
         "select => select.addEventListener('input', () => window.location = '/empty.html')",
     )
     await asyncio.gather(
-        page.waitForNavigation(), page.selectOption("select", "blue"),
+        page.waitForNavigation(),
+        page.selectOption("select", "blue"),
     )
     assert "empty.html" in page.url
 

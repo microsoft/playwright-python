@@ -79,7 +79,8 @@ class Frame(ChannelOwner):
             lambda params: self._on_load_state(params.get("add"), params.get("remove")),
         )
         self._channel.on(
-            "navigated", lambda params: self._on_frame_navigated(params),
+            "navigated",
+            lambda params: self._on_frame_navigated(params),
         )
 
     def _on_load_state(
@@ -156,7 +157,9 @@ class Frame(ChannelOwner):
             return not matcher or matcher.matches(event["url"])
 
         event = await wait_helper.wait_for_event(
-            self._event_emitter, "navigated", predicate=predicate,
+            self._event_emitter,
+            "navigated",
+            predicate=predicate,
         )
         if "error" in event:
             raise Error(event["error"])
@@ -293,7 +296,10 @@ class Frame(ChannelOwner):
         return await self._channel.send("content")
 
     async def setContent(
-        self, html: str, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self,
+        html: str,
+        timeout: int = None,
+        waitUntil: DocumentLoadState = None,
     ) -> None:
         await self._channel.send("setContent", locals_to_params(locals()))
 
@@ -484,7 +490,9 @@ class Frame(ChannelOwner):
         return await self._channel.send("title")
 
     def expect_load_state(
-        self, state: DocumentLoadState = None, timeout: int = None,
+        self,
+        state: DocumentLoadState = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
         return EventContextManagerImpl(self.waitForLoadState(state, timeout))
 

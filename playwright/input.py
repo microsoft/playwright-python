@@ -45,10 +45,18 @@ class Mouse:
     async def move(self, x: float, y: float, steps: int = None) -> None:
         await self._channel.send("mouseMove", locals_to_params(locals()))
 
-    async def down(self, button: MouseButton = None, clickCount: int = None,) -> None:
+    async def down(
+        self,
+        button: MouseButton = None,
+        clickCount: int = None,
+    ) -> None:
         await self._channel.send("mouseDown", locals_to_params(locals()))
 
-    async def up(self, button: MouseButton = None, clickCount: int = None,) -> None:
+    async def up(
+        self,
+        button: MouseButton = None,
+        clickCount: int = None,
+    ) -> None:
         await self._channel.send("mouseUp", locals_to_params(locals()))
 
     async def click(
@@ -62,6 +70,10 @@ class Mouse:
         await self._channel.send("mouseClick", locals_to_params(locals()))
 
     async def dblclick(
-        self, x: float, y: float, delay: int = None, button: MouseButton = None,
+        self,
+        x: float,
+        y: float,
+        delay: int = None,
+        button: MouseButton = None,
     ) -> None:
         await self.click(x, y, delay=delay, button=button, clickCount=2)

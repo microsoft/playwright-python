@@ -2,14 +2,14 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0
+    rev: v3.2.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
         exclude: ^playwright/drivers/browsers.json$
     -   id: check-yaml
 -   repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 20.8b1
     hooks:
     -   id: black
 -   repo: https://github.com/pre-commit/mirrors-mypy
@@ -17,10 +17,10 @@ repos:
     hooks:
     -   id: mypy
 -   repo: https://gitlab.com/pycqa/flake8
-    rev: 'a7be77f761a4c29121d6bb6f61c11902281f9105'
+    rev: '3.8.3'
     hooks:
     -   id: flake8
 -   repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.1.3
+    rev: v5.5.4
     hooks:
     -   id: isort

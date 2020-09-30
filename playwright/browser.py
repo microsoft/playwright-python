@@ -39,7 +39,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class Browser(ChannelOwner):
 
-    Events = SimpleNamespace(Disconnected="disconnected",)
+    Events = SimpleNamespace(
+        Disconnected="disconnected",
+    )
 
     def __init__(
         self, parent: "BrowserType", type: str, guid: str, initializer: Dict

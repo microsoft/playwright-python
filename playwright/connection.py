@@ -66,12 +66,12 @@ class ChannelOwner(BaseEventEmitter):
         self._loop: asyncio.AbstractEventLoop = parent._loop
         self._type = type
         self._guid = guid
-        self._connection: Connection = parent._connection if isinstance(
-            parent, ChannelOwner
-        ) else parent
-        self._parent: Optional[ChannelOwner] = parent if isinstance(
-            parent, ChannelOwner
-        ) else None
+        self._connection: Connection = (
+            parent._connection if isinstance(parent, ChannelOwner) else parent
+        )
+        self._parent: Optional[ChannelOwner] = (
+            parent if isinstance(parent, ChannelOwner) else None
+        )
         self._objects: Dict[str, "ChannelOwner"] = {}
         self._channel = Channel(self._connection, guid)
         self._channel._object = self

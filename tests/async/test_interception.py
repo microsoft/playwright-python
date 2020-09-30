@@ -269,7 +269,8 @@ async def test_page_route_should_send_referer(page, server):
 
     await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
     [request, _] = await asyncio.gather(
-        server.wait_for_request("/grid.html"), page.goto(server.PREFIX + "/grid.html"),
+        server.wait_for_request("/grid.html"),
+        page.goto(server.PREFIX + "/grid.html"),
     )
     assert request.getHeader("referer") == "http://google.com/"
 
@@ -770,7 +771,8 @@ async def test_request_fulfill_should_allow_mocking_binary_responses(
         "**/*",
         lambda route, request: asyncio.create_task(
             route.fulfill(
-                contentType="image/png", body=(assetdir / "pptr.png").read_bytes(),
+                contentType="image/png",
+                body=(assetdir / "pptr.png").read_bytes(),
             )
         ),
     )

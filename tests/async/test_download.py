@@ -207,7 +207,8 @@ async def test_report_download_path_within_page_on_download_handler_for_files(
         on_download_path.set_result(await download.path())
 
     page.once(
-        "download", lambda res: asyncio.create_task(on_download(res)),
+        "download",
+        lambda res: asyncio.create_task(on_download(res)),
     )
     await page.setContent(f'<a href="{server.PREFIX}/download">download</a>')
     await page.click("a")
@@ -226,7 +227,8 @@ async def test_download_report_download_path_within_page_on_handle_for_blobs(
         on_download_path.set_result(await download.path())
 
     page.once(
-        "download", lambda res: asyncio.create_task(on_download(res)),
+        "download",
+        lambda res: asyncio.create_task(on_download(res)),
     )
 
     await page.goto(server.PREFIX + "/download-blob.html")
