@@ -111,18 +111,14 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
             return dict(v="-Infinity")
         if value == float("-0"):
             return dict(v="-0")
-        if value == float("-0"):
-            return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
     if isinstance(value, datetime):
         return dict(d=value.isoformat() + "Z")
     if isinstance(value, bool):
         return {"b": value}
-    if isinstance(value, int):
+    if isinstance(value, (int, float)):
         return {"n": value}
-    if isinstance(value, float):
-        return {"f": value}
     if isinstance(value, str):
         return {"s": value}
 
