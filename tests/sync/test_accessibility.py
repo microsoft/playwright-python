@@ -199,7 +199,8 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
 # WebKit rich text accessibility is iffy
 @pytest.mark.skip_browser("webkit")
 def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_fields_with_role_should_have_children(
-    page, is_firefox,
+    page,
+    is_firefox,
 ):
     page.setContent(
         """
@@ -245,7 +246,9 @@ def test_accessibility_plain_text_field_with_role_should_not_have_children(page)
 
 
 @pytest.mark.only_browser("chromium")
-def test_accessibility_plain_text_field_without_role_should_not_have_content(page,):
+def test_accessibility_plain_text_field_without_role_should_not_have_content(
+    page,
+):
     page.setContent(
         """
     <div contenteditable="plaintext-only">Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
@@ -379,7 +382,9 @@ def test_accessibility_should_work_on_a_menu(page, is_webkit):
     assert page.accessibility.snapshot(root=menu) == golden
 
 
-def test_accessibility_should_return_null_when_the_element_is_no_longer_in_DOM(page,):
+def test_accessibility_should_return_null_when_the_element_is_no_longer_in_DOM(
+    page,
+):
     page.setContent("<button>My Button</button>")
     button = page.querySelector("button")
     page.evalOnSelector("button", "button => button.remove()")

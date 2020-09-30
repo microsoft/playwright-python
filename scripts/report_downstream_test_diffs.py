@@ -26,7 +26,9 @@ def pytest_test_cases() -> typing.Generator[TestCase, None, None]:
     matches = re.finditer(regex, p.stdout.decode(), re.MULTILINE)
     for match in matches:
         yield TestCase(
-            match.group("api"), match.group("file"), match.group("test"),
+            match.group("api"),
+            match.group("file"),
+            match.group("test"),
         )
 
 

@@ -43,7 +43,8 @@ for driver in drivers:
 node_modules_playwright = driver_path / "node_modules" / "playwright"
 
 shutil.copyfile(
-    node_modules_playwright / "browsers.json", drivers_path / "browsers.json",
+    node_modules_playwright / "browsers.json",
+    drivers_path / "browsers.json",
 )
 
 upstream_readme = (node_modules_playwright / "README.md").read_text()

@@ -481,7 +481,10 @@ async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
 async def test_wait_for_nav_should_work_with_clicking_on_anchor_links(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.setContent('<a href="#foobar">foobar</a>')
-    [response, _] = await asyncio.gather(page.waitForNavigation(), page.click("a"),)
+    [response, _] = await asyncio.gather(
+        page.waitForNavigation(),
+        page.click("a"),
+    )
     assert response is None
     assert page.url == server.EMPTY_PAGE + "#foobar"
 
@@ -493,7 +496,8 @@ async def test_wait_for_nav_should_work_with_clicking_on_links_which_do_not_comm
     await page.setContent(f"<a href='{https_server.EMPTY_PAGE}'>foobar</a>")
     with pytest.raises(Error) as exc_info:
         await asyncio.gather(
-            page.waitForNavigation(), page.click("a"),
+            page.waitForNavigation(),
+            page.click("a"),
         )
     expect_ssl_error(exc_info.value.message, browser_name)
 
@@ -508,7 +512,10 @@ async def test_wait_for_nav_should_work_with_history_push_state(page, server):
         </script>
     """
     )
-    [response, _] = await asyncio.gather(page.waitForNavigation(), page.click("a"),)
+    [response, _] = await asyncio.gather(
+        page.waitForNavigation(),
+        page.click("a"),
+    )
     assert response is None
     assert page.url == server.PREFIX + "/wow.html"
 
@@ -523,7 +530,10 @@ async def test_wait_for_nav_should_work_with_history_replace_state(page, server)
         </script>
     """
     )
-    [response, _] = await asyncio.gather(page.waitForNavigation(), page.click("a"),)
+    [response, _] = await asyncio.gather(
+        page.waitForNavigation(),
+        page.click("a"),
+    )
     assert response is None
     assert page.url == server.PREFIX + "/replaced.html"
 
@@ -544,12 +554,14 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     )
     assert page.url == server.PREFIX + "/second.html"
     [back_response, _] = await asyncio.gather(
-        page.waitForNavigation(), page.click("a#back"),
+        page.waitForNavigation(),
+        page.click("a#back"),
     )
     assert back_response is None
     assert page.url == server.PREFIX + "/first.html"
     [forward_response, _] = await asyncio.gather(
-        page.waitForNavigation(), page.click("a#forward"),
+        page.waitForNavigation(),
+        page.click("a#forward"),
     )
     assert forward_response is None
     assert page.url == server.PREFIX + "/second.html"

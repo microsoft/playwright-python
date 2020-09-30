@@ -87,7 +87,10 @@ async def test_should_isolate_cookies_in_browser_contexts(context, server, brows
 async def test_should_isolate_session_cookies(context, server, browser):
     server.set_route(
         "/setcookie.html",
-        lambda r: (r.setHeader("Set-Cookie", "session=value"), r.finish(),),
+        lambda r: (
+            r.setHeader("Set-Cookie", "session=value"),
+            r.finish(),
+        ),
     )
 
     page_1 = await context.newPage()

@@ -41,7 +41,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class BrowserContext(ChannelOwner):
 
-    Events = SimpleNamespace(Close="close", Page="page",)
+    Events = SimpleNamespace(
+        Close="close",
+        Page="page",
+    )
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
@@ -219,11 +222,16 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("close")
 
     def expect_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
+        self,
+        event: str,
+        predicate: Callable[[Any], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def expect_page(
-        self, predicate: Callable[[Page], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[[Page], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Page]:
         return EventContextManagerImpl(self.waitForEvent("page", predicate, timeout))

@@ -111,7 +111,8 @@ async def test_console_should_have_location_for_console_api_calls(page, server):
     await page.goto(server.EMPTY_PAGE)
     message = (
         await asyncio.gather(
-            page.waitForEvent("console"), page.goto(server.PREFIX + "/consolelog.html"),
+            page.waitForEvent("console"),
+            page.goto(server.PREFIX + "/consolelog.html"),
         )
     )[0]
     assert message.text == "yellow"

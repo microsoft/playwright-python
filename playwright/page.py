@@ -396,7 +396,10 @@ class Page(ChannelOwner):
         return await self._main_frame.content()
 
     async def setContent(
-        self, html: str, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self,
+        html: str,
+        timeout: int = None,
+        waitUntil: DocumentLoadState = None,
     ) -> None:
         return await self._main_frame.setContent(**locals_to_params(locals()))
 
@@ -410,7 +413,9 @@ class Page(ChannelOwner):
         return await self._main_frame.goto(**locals_to_params(locals()))
 
     async def reload(
-        self, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self,
+        timeout: int = None,
+        waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("reload", locals_to_params(locals()))
@@ -489,21 +494,27 @@ class Page(ChannelOwner):
         return await wait_helper.wait_for_event(self, event, predicate)
 
     async def goBack(
-        self, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self,
+        timeout: int = None,
+        waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("goBack", locals_to_params(locals()))
         )
 
     async def goForward(
-        self, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self,
+        timeout: int = None,
+        waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send("goForward", locals_to_params(locals()))
         )
 
     async def emulateMedia(
-        self, media: Literal["print", "screen"] = None, colorScheme: ColorScheme = None,
+        self,
+        media: Literal["print", "screen"] = None,
+        colorScheme: ColorScheme = None,
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
@@ -760,36 +771,49 @@ class Page(ChannelOwner):
         return decoded_binary
 
     def expect_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
+        self,
+        event: str,
+        predicate: Callable[[Any], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def expect_console_message(
-        self, predicate: Callable[[ConsoleMessage], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[[ConsoleMessage], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[ConsoleMessage]:
         return EventContextManagerImpl(self.waitForEvent("console", predicate, timeout))
 
     def expect_dialog(
-        self, predicate: Callable[[Dialog], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[[Dialog], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Dialog]:
         return EventContextManagerImpl(self.waitForEvent("dialog", predicate, timeout))
 
     def expect_download(
-        self, predicate: Callable[[Download], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[[Download], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Download]:
         return EventContextManagerImpl(
             self.waitForEvent("download", predicate, timeout)
         )
 
     def expect_file_chooser(
-        self, predicate: Callable[[FileChooser], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[[FileChooser], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[FileChooser]:
         return EventContextManagerImpl(
             self.waitForEvent("filechooser", predicate, timeout)
         )
 
     def expect_load_state(
-        self, state: DocumentLoadState = None, timeout: int = None,
+        self,
+        state: DocumentLoadState = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
         return EventContextManagerImpl(self.waitForLoadState(state, timeout))
 
@@ -802,7 +826,9 @@ class Page(ChannelOwner):
         return EventContextManagerImpl(self.waitForNavigation(url, waitUntil, timeout))
 
     def expect_popup(
-        self, predicate: Callable[["Page"], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[["Page"], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl["Page"]:
         return EventContextManagerImpl(self.waitForEvent("popup", predicate, timeout))
 
@@ -823,7 +849,9 @@ class Page(ChannelOwner):
         return EventContextManagerImpl(self.waitForResponse(url, predicate, timeout))
 
     def expect_worker(
-        self, predicate: Callable[["Worker"], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[["Worker"], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl["Worker"]:
         return EventContextManagerImpl(self.waitForEvent("worker", predicate, timeout))
 

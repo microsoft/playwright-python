@@ -113,7 +113,10 @@ async def test_should_properly_report_lax_samesite_cookie(
 
     server.set_route(
         "/empty.html",
-        lambda r: (r.setHeader("Set-Cookie", "name=value;SameSite=Lax"), r.finish(),),
+        lambda r: (
+            r.setHeader("Set-Cookie", "name=value;SameSite=Lax"),
+            r.finish(),
+        ),
     )
     await page.goto(server.EMPTY_PAGE)
     cookies = await context.cookies()

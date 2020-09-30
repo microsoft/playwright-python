@@ -193,7 +193,9 @@ class DocumentationProvider:
             return
         code_type = self.serialize_python_type(value)
         doc_type = self.serialize_doc_type(
-            doc_value["type"]["name"], fqname, doc_value["type"],
+            doc_value["type"]["name"],
+            fqname,
+            doc_value["type"],
         )
         if not doc_value["required"]:
             doc_type = self.make_optional(doc_type)

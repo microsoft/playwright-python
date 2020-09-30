@@ -3042,8 +3042,7 @@ class Dialog(AsyncBase):
         )
 
     async def dismiss(self) -> NoneType:
-        """Dialog.dismiss
-        """
+        """Dialog.dismiss"""
         return mapping.from_maybe_impl(await self._impl_obj.dismiss())
 
 
