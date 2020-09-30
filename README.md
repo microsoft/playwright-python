@@ -1,10 +1,8 @@
-# 🎭 [Playwright](https://github.com/microsoft/playwright) for Python
+# 🎭 [Playwright](https://playwright.dev) for Python [![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://join.slack.com/t/playwright/shared_invite/enQtOTEyMTUxMzgxMjIwLThjMDUxZmIyNTRiMTJjNjIyMzdmZDA3MTQxZWUwZTFjZjQwNGYxZGM5MzRmNzZlMWI5ZWUyOTkzMjE5Njg1NDg)
 
-[![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://join.slack.com/t/playwright/shared_invite/enQtOTEyMTUxMzgxMjIwLThjMDUxZmIyNTRiMTJjNjIyMzdmZDA3MTQxZWUwZTFjZjQwNGYxZGM5MzRmNzZlMWI5ZWUyOTkzMjE5Njg1NDg) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-86.0.4238.0-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-80.0b8-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> [![WebKit version](https://img.shields.io/badge/webkit-14.0-blue.svg?logo=safari)](https://webkit.org/)
+#### [Docs](#documentation) | [Website](https://playwright.dev/) | [Python API reference](https://microsoft.github.io/playwright-python/)
 
-##### [Docs](#documentation) | [Playwright API reference](https://playwright.dev/#?path=docs/api.md) | [Playwright Python API Docs](https://microsoft.github.io/playwright-python/)
-
-Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) with a single API. Playwright is built to enable cross-browser web automation that is **ever-green**, **capable**, **reliable** and **fast**.
+Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) browsers with a single API. Playwright delivers automation that is **ever-green**, **capable**, **reliable** and **fast**. [See how Playwright is better](https://playwright.dev/#path=docs%2Fwhy-playwright.md&q=).
 
 |          | Linux | macOS | Windows |
 |   :---   | :---: | :---: | :---:   |
@@ -14,38 +12,29 @@ Playwright is a Python library to automate [Chromium](https://www.chromium.org/H
 
 Headless execution is supported for all the browsers on all platforms.
 
-## Installation
+* [Usage](#usage)
+  - [Sync API](#sync-api)
+  - [Async API](#async-api)
+  - [With pytest](#with-pytest)
+  - [Interactive mode (REPL)](#interactive-mode-repl)
+* [Examples](#examples)
+  - [Mobile and geolocation](#mobile-and-geolocation)
+  - [Evaluate JS in browser](#evaluate-js-in-browser)
+  - [Intercept network requests](#intercept-network-requests)
+* [Documentation](#documentation)
+
+## Usage
 
 ```
 pip install playwright
 python -m playwright install
 ```
 
-This installs Playwright and browser binaries for Chromium, Firefox and WebKit. Once installed, you can `import` Playwright in a Python script and automate web browser interactions. Playwright requires Python 3.7+.
+This installs Playwright and browser binaries for Chromium, Firefox and WebKit. Playwright requires Python 3.7+.
 
-## Capabilities
+Playwright offers both sync (blocking) API and async API. They are identical in terms of capabilities and only differ in how one consumes the API.
 
-Playwright is built to automate the broad and growing set of web browser capabilities used by Single Page Apps and Progressive Web Apps.
-
-* Scenarios that span multiple page, domains and iframes
-* Auto-wait for elements to be ready before executing actions (like click, fill)
-* Intercept network activity for stubbing and mocking network requests
-* Emulate mobile devices, geolocation, permissions
-* Support for web components via shadow-piercing selectors
-* Native input events for mouse and keyboard
-* Upload and download files
-
-## Usage
-
-### Pytest
-
-Playwright can be used as a library in your application or as a part of the testing solution. We recommend using our [Pytest plugin](https://github.com/microsoft/playwright-pytest#readme) for testing.
-
-As a library, Playwright offers both blocking (synchronous) API and asyncio API (async/await). You can pick the one that works best for you. They are identical in terms of capabilities and only differ in a way one consumes the API.
-
-Below are some of the examples on how these variations of the API can be used:
-
-#### Sync variant
+#### Sync API
 
 ```py
 from playwright import sync_playwright
@@ -59,7 +48,7 @@ with sync_playwright() as p:
         browser.close()
 ```
 
-#### Async variant
+#### Async API
 
 ```py
 import asyncio
@@ -77,7 +66,9 @@ async def main():
 asyncio.get_event_loop().run_until_complete(main())
 ```
 
-#### Using pytest-playwright
+#### With pytest
+
+Use our [pytest plugin for Playwright](https://github.com/microsoft/playwright-pytest#readme).
 
 ```py
 def test_playwright_is_visible_on_google(page):
@@ -87,27 +78,23 @@ def test_playwright_is_visible_on_google(page):
     page.waitForSelector("text=microsoft/Playwright")
 ```
 
-For more information on pytest-playwright, see [GitHub](https://github.com/microsoft/playwright-pytest#readme).
-
-#### REPL support without context managers
-
-For scripting purposes, it is also possible to start and stop Playwright manually without relying on the indentation of the REPL.
+#### Interactive mode (REPL)
 
 ```py
-from playwright import sync_playwright
+>>> from playwright import sync_playwright
+>>> playwright = sync_playwright().start()
 
-playwright = sync_playwright().start()
-for browser_type in [playwright.chromium, playwright.firefox, playwright.webkit]:
-    browser = browser_type.launch()
-    page = browser.newPage()
-    page.goto("http://whatsmyuseragent.org/")
-    page.screenshot(path=f"example-{browser_type.name}.png")
-    browser.close()
-
-playwright.stop()
+# Use playwright.chromium, playwright.firefox or playwright.webkit
+# Pass headless=False to see the browser UI
+>>> browser = playwright.chromium.launch()
+>>> page = browser.newPage()
+>>> page.goto("http://whatsmyuseragent.org/")
+>>> page.screenshot(path="example.png")
+>>> browser.close()
+>>> playwright.stop()
 ```
 
-## More examples
+## Examples
 
 #### Mobile and geolocation
 
@@ -132,7 +119,8 @@ with sync_playwright() as p:
     browser.close()
 ```
 
-The asyncio variant:
+<details>
+<summary>Async variant</summary>
 
 ```py
 import asyncio
@@ -156,8 +144,9 @@ async def main():
 
 asyncio.get_event_loop().run_until_complete(main())
 ```
+</details>
 
-#### Evaluate in browser context
+#### Evaluate JS in browser
 
 This code snippet navigates to example.com in Firefox, and executes a script in the page context.
 
@@ -178,8 +167,8 @@ with sync_playwright() as p:
     print(dimensions)
     browser.close()
 ```
-
-The asyncio variant:
+<details>
+<summary>Async variant</summary>
 
 ```py
 import asyncio
@@ -202,6 +191,7 @@ async def main():
 
 asyncio.get_event_loop().run_until_complete(main())
 ```
+</details>
 
 #### Intercept network requests
 
@@ -224,8 +214,8 @@ with sync_playwright() as p:
     page.goto('http://todomvc.com')
     browser.close()
 ```
-
-The asyncio variant:
+<details>
+<summary>Async variant</summary>
 
 ```py
 import asyncio
@@ -248,16 +238,15 @@ async def main():
 
 asyncio.get_event_loop().run_until_complete(main())
 ```
+</details>
 
 ## Documentation
 
-We are in the process of converting the [documentation](https://playwright.dev/) from the Node.js form to the Python one. But you can go ahead and use the Node.js documentation because the API is pretty much the same. You might have noticed that Playwright uses non-Python naming conventions, `camelCase` instead of the `snake_case` for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon the stack overflow answers and the documentation of the Playwright for Node.js.
+We are in the process of converting our [documentation](https://playwright.dev/) from the Node.js form to Python. You can go ahead and use the Node.js documentation since the API is pretty much the same. Playwright uses non-Python naming conventions (`camelCase` instead of `snake_case`) for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon Stack Overflow answers and existing documentation.
 
-### Understanding examples from the JavaScript documentation
+### Named arguments
 
-You can use all the same methods and arguments as [documented](https://playwright.dev/), just remember that since Python allows named arguments, we didn't need to put `options` parameter into every call as we had to in the Node.js version:
-
-So when you see example like this in JavaScript
+Since Python allows named arguments, we didn't need to put the `options` parameter into every call as in the Node.js API. So when you see example like this in JavaScript
 
 ```js
 await webkit.launch({ headless: false });
@@ -269,7 +258,7 @@ It translates into Python like this:
 webkit.launch(headless=False)
 ```
 
-If you are using an IDE, it'll suggest parameters that are available in every call.
+If you are using an IDE, it will suggest parameters that are available in every call.
 
 ### Evaluating functions
 
@@ -340,11 +329,4 @@ with page.expect_response("**/api/fetch_data"):
 
 Yes, Playwright for Python is ready. We are still not at the version v1.0, so minor breaking API changes could potentially happen. But a) this is unlikely and b) we will only do that if we know it improves your experience with the new library. We'd like to collect your feedback before we freeze the API for v1.0.
 
-> Note: We don't yet support some of the edge-cases of the vendor-specific APIs such as collecting chromium trace, coverage report, etc.
-
-## Resources
-
-* [Documentation](https://github.com/microsoft/playwright/blob/master/docs/README.md)
-* [API reference](https://github.com/microsoft/playwright/blob/master/docs/api.md)
-* [Example recipes](https://github.com/microsoft/playwright/blob/master/docs/examples/README.md)
-* [Contributing](CONTRIBUTING.md)
+> Note: We don't yet support some of the edge-cases of the vendor-specific APIs such as collecting Chromium trace, coverage report, etc.
