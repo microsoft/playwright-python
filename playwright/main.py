@@ -14,8 +14,11 @@
 
 import asyncio
 import io
+import os
+import stat
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 from greenlet import greenlet
@@ -30,21 +33,23 @@ from playwright.sync_api import Playwright as SyncPlaywright
 from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
 
 
-def compute_driver_name() -> str:
+def compute_driver_executable() -> Path:
+    package_path = get_file_dirname()
     platform = sys.platform
     if platform == "darwin":
-        result = "driver-macos"
+        return package_path / "drivers" / "driver-darwin"
     elif platform == "linux":
-        result = "driver-linux"
+        return package_path / "drivers" / "driver-linux"
     elif platform == "win32":
-        result = "driver-win.exe"
-    return result
+        result = package_path / "drivers" / "driver-win32-amd64.exe"
+        if result.exists():
+            return result
+        return package_path / "drivers" / "driver-win32.exe"
+    return package_path / "drivers" / "driver-linux"
 
 
 async def run_driver_async() -> Connection:
-    package_path = get_file_dirname()
-    driver_name = compute_driver_name()
-    driver_executable = package_path / "drivers" / driver_name
+    driver_executable = compute_driver_executable()
 
     # Sourced from: https://github.com/pytest-dev/pytest/blob/49827adcb9256c9c9c06a25729421dcc3c385edc/src/_pytest/faulthandler.py#L73-L80
     def _get_stderr_fileno() -> int:
@@ -134,9 +139,12 @@ def main() -> None:
     if "install" not in sys.argv:
         print('Run "python -m playwright install" to complete installation')
         return
-    package_path = get_file_dirname()
-    driver_name = compute_driver_name()
-    driver_executable = package_path / "drivers" / driver_name
+    driver_executable = compute_driver_executable()
+    # Fix the executable bit during the installation.
+    if not sys.platform == "win32":
+        st = os.stat(driver_executable)
+        if st.st_mode & stat.S_IEXEC == 0:
+            os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
     print("Installing the browsers...")
     subprocess.check_call(f"{driver_executable} install", shell=True)
 
