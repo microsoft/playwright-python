@@ -40,6 +40,9 @@ pack_wheel_drivers = [
     ("driver-linux", "manylinux1_x86_64.whl"),
     ("driver-macos", "macosx_10_13_x86_64.whl"),
     ("driver-win.exe", "win_amd64.whl"),
+    # This is a hack, we bundle 64bit binary for win32 - we assume that
+    # majority of Python 32bit installs are in fact on 64bit machines.
+    ("driver-win.exe", "win32.whl"),
 ]
 
 for driver, wheel in pack_wheel_drivers:
