@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 from playwright.path_utils import get_file_dirname
 
@@ -33,7 +34,19 @@ if (driver_path / "out").exists():
     shutil.rmtree(driver_path / "out")
 
 subprocess.check_call("npm i", cwd=driver_path, shell=True)
-subprocess.check_call("npm run bake", cwd=driver_path, shell=True)
+
+platform = sys.platform
+if platform == "darwin":
+    subprocess.check_call("npm run bake-darwin", cwd=driver_path, shell=True)
+elif platform == "linux":
+    subprocess.check_call("npm run bake-linux", cwd=driver_path, shell=True)
+elif platform == "win32":
+    # Windows is the only one that can build all drivers (x86 and x64),
+    # so we publish from it
+    subprocess.check_call("npm run bake-darwin", cwd=driver_path, shell=True)
+    subprocess.check_call("npm run bake-linux", cwd=driver_path, shell=True)
+    subprocess.check_call("npm run bake-win32", cwd=driver_path, shell=True)
+    subprocess.check_call("npm run bake-win32-amd64", cwd=driver_path, shell=True)
 
 # for local development
 drivers = (driver_path / "out").glob("**/*")

@@ -16,6 +16,7 @@ import glob
 import os
 import shutil
 import subprocess
+import sys
 import zipfile
 
 from playwright.path_utils import get_file_dirname
@@ -36,11 +37,18 @@ subprocess.check_call("python setup.py sdist bdist_wheel", shell=True)
 base_wheel_location = glob.glob("dist/*.whl")[0]
 without_platform = base_wheel_location[:-7]
 
-pack_wheel_drivers = [
-    ("driver-linux", "manylinux1_x86_64.whl"),
-    ("driver-macos", "macosx_10_13_x86_64.whl"),
-    ("driver-win.exe", "win_amd64.whl"),
-]
+pack_wheel_drivers = []
+if sys.platform == "linux":
+    pack_wheel_drivers.append(("driver-linux", "manylinux1_x86_64.whl"))
+if sys.platform == "darwin":
+    pack_wheel_drivers.append(("driver-darwin", "macosx_10_13_x86_64.whl"))
+if sys.platform == "win32":
+    # Windows is the only one that can build all drivers (x86 and x64),
+    # so we publish from it
+    pack_wheel_drivers.append(("driver-linux", "manylinux1_x86_64.whl"))
+    pack_wheel_drivers.append(("driver-darwin", "macosx_10_13_x86_64.whl"))
+    pack_wheel_drivers.append(("driver-win32.exe", "win32.whl"))
+    pack_wheel_drivers.append(("driver-win32-amd64.exe", "win_amd64.whl"))
 
 for driver, wheel in pack_wheel_drivers:
     wheel_location = without_platform + wheel

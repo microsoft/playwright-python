@@ -5,7 +5,10 @@
   "description": "Playwright driver",
   "bin": "main.js",
   "scripts": {
-    "bake": "pkg --public --out-path=out ."
+    "bake-darwin": "pkg --public --targets node12-macos-x64 --output=out/driver-darwin .",
+    "bake-win32": "pkg --public --targets node12-win-x86 --output=out/driver-win32.exe .",
+    "bake-win32-amd64": "pkg --public --targets node12-win-x64 --output=out/driver-win32-amd64.exe .",
+    "bake-linux": "pkg --public --targets node12-linux-x64 --output=out/driver-linux ."
   },
   "keywords": [],
   "author": {
