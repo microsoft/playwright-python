@@ -15,7 +15,7 @@
 import asyncio
 from typing import Any, Callable, List
 
-from pyee import BaseEventEmitter
+from pyee import EventEmitter
 
 from playwright.helper import Error, TimeoutError
 
@@ -27,7 +27,7 @@ class WaitHelper:
 
     def reject_on_event(
         self,
-        emitter: BaseEventEmitter,
+        emitter: EventEmitter,
         event: str,
         error: Error,
         predicate: Callable[[Any], bool] = None,
@@ -52,7 +52,7 @@ class WaitHelper:
 
     async def wait_for_event(
         self,
-        emitter: BaseEventEmitter,
+        emitter: EventEmitter,
         event: str,
         predicate: Callable[[Any], bool] = None,
     ) -> Any:
@@ -75,7 +75,7 @@ class WaitHelper:
 
 
 def wait_for_event_future(
-    emitter: BaseEventEmitter, event: str, predicate: Callable[[Any], bool] = None
+    emitter: EventEmitter, event: str, predicate: Callable[[Any], bool] = None
 ) -> asyncio.Future:
     future: asyncio.Future = asyncio.Future()
 

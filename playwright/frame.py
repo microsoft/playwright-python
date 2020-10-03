@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
-from pyee import BaseEventEmitter
+from pyee import EventEmitter
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.element_handle import (
@@ -73,7 +73,7 @@ class Frame(ChannelOwner):
         self._child_frames: List[Frame] = []
         self._page: "Page"
         self._load_states: Set[str] = set(initializer["loadStates"])
-        self._event_emitter = BaseEventEmitter()
+        self._event_emitter = EventEmitter()
         self._channel.on(
             "loadstate",
             lambda params: self._on_load_state(params.get("add"), params.get("remove")),
