@@ -27,7 +27,7 @@ setuptools.setup(
     url="https://github.com/Microsoft/playwright-python",
     packages=["playwright"],
     include_package_data=True,
-    install_requires=["greenlet==0.4.17", "pyee==8.0.1", "typing-extensions"],
+    install_requires=["greenlet>=0.4.17", "pyee>=8.0.1", "typing-extensions"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
