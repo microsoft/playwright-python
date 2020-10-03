@@ -18,14 +18,14 @@ import traceback
 from typing import Any, Callable, Dict, Optional, Union
 
 from greenlet import greenlet
-from pyee import BaseEventEmitter
+from pyee import EventEmitter
 
 from playwright.helper import ParsedMessagePayload, parse_error
 from playwright.sync_base import dispatcher_fiber
 from playwright.transport import Transport
 
 
-class Channel(BaseEventEmitter):
+class Channel(EventEmitter):
     def __init__(self, connection: "Connection", guid: str) -> None:
         super().__init__()
         self._connection: Connection = connection
@@ -54,7 +54,7 @@ class Channel(BaseEventEmitter):
         self._connection._send_message_to_server(self._guid, method, params)
 
 
-class ChannelOwner(BaseEventEmitter):
+class ChannelOwner(EventEmitter):
     def __init__(
         self,
         parent: Union["ChannelOwner", "Connection"],
