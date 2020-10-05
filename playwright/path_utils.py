@@ -1,6 +1,6 @@
 import inspect
-from pathlib import Path
 import stat
+from pathlib import Path
 
 
 def get_file_dirname() -> Path:
