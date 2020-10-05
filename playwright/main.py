@@ -27,7 +27,7 @@ from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
 from playwright.helper import Error
 from playwright.object_factory import create_remote_object
-from playwright.path_utils import get_file_dirname
+from playwright.path_utils import get_file_dirname, make_file_executable
 from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
 from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
@@ -37,15 +37,19 @@ def compute_driver_executable() -> Path:
     package_path = get_file_dirname()
     platform = sys.platform
     if platform == "darwin":
-        return package_path / "drivers" / "driver-darwin"
+        path = package_path / "drivers" / "driver-darwin"
+        return make_file_executable(path)
     elif platform == "linux":
-        return package_path / "drivers" / "driver-linux"
+        path = package_path / "drivers" / "driver-linux"
+        return make_file_executable(path)
     elif platform == "win32":
         result = package_path / "drivers" / "driver-win32-amd64.exe"
         if result.exists():
             return result
         return package_path / "drivers" / "driver-win32.exe"
-    return package_path / "drivers" / "driver-linux"
+
+    path = package_path / "drivers" / "driver-linux"
+    return make_file_executable(path)
 
 
 async def run_driver_async() -> Connection:
