@@ -1,5 +1,6 @@
 include playwright/drivers/browsers.json
 include playwright/*.py
+include playwright/py.typed
 include README.md
 include SECURITY.md
 include LICENSE
