@@ -14,8 +14,6 @@
 
 import asyncio
 import io
-import os
-import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -144,11 +142,7 @@ def main() -> None:
         print('Run "python -m playwright install" to complete installation')
         return
     driver_executable = compute_driver_executable()
-    # Fix the executable bit during the installation.
-    if not sys.platform == "win32":
-        st = os.stat(driver_executable)
-        if st.st_mode & stat.S_IEXEC == 0:
-            os.chmod(driver_executable, st.st_mode | stat.S_IEXEC)
+
     print("Installing the browsers...")
     subprocess.check_call([str(driver_executable), "install"])
 
