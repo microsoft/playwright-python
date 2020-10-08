@@ -49,7 +49,7 @@ class DocumentationProvider:
     def __init__(self) -> None:
         self.api: Any = {}
         self.printed_entries: List[str] = []
-        with open("api.json") as json_file:
+        with open("driver/node_modules/playwright/api.json") as json_file:
             self.api = json.load(json_file)
         self.errors: Set[str] = set()
 
@@ -76,7 +76,14 @@ class DocumentationProvider:
         self.printed_entries.append(f"{class_name}.{method_name}")
         if class_name == "JSHandle":
             self.printed_entries.append(f"ElementHandle.{method_name}")
-        clazz = self.api[class_name]
+        # ElementHandle inherits from JSHandle
+        if (
+            class_name == "ElementHandle"
+            and method_name not in self.api[class_name]["members"]
+        ):
+            clazz = self.api["JSHandle"]
+        else:
+            clazz = self.api[class_name]
         method = clazz["members"][method_name]
         fqname = f"{class_name}.{method_name}"
         indent = " " * 8
@@ -296,7 +303,7 @@ class DocumentationProvider:
 
         if type_name == "Object" or type_name == "?Object":
             intermediate = "Dict"
-            if doc_type and len(doc_type["properties"]):
+            if doc_type and "properties" in doc_type and len(doc_type["properties"]):
                 signature: List[str] = []
                 for [name, value] in doc_type["properties"].items():
                     value_type = self.serialize_doc_type(

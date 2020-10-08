@@ -3818,6 +3818,8 @@ class Page(SyncBase):
 
         An example of exposing page URL to all frames in a page:
 
+        An example of passing an element handle:
+
         Parameters
         ----------
         name : str
@@ -4268,6 +4270,9 @@ class Page(SyncBase):
 
         Routing provides the capability to modify network requests that are made by a page.
         Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
+
+        **NOTE** The handler will only be called for the first url if the response is a redirect.
+
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
         Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.
@@ -4340,7 +4345,7 @@ class Page(SyncBase):
         omitBackground : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
         fullPage : Optional[bool]
-            When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
+            When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to `false`.
         clip : Optional[{"x": float, "y": float, "width": float, "height": float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
 
@@ -4378,6 +4383,8 @@ class Page(SyncBase):
     def close(self, runBeforeUnload: bool = None) -> NoneType:
         """Page.close
 
+        If `runBeforeUnload` is `false` the result will resolve only after the page has been closed.
+        If `runBeforeUnload` is `true` the method will **not** wait for the page to close.
         By default, `page.close()` **does not** run beforeunload handlers.
 
         **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
@@ -5325,6 +5332,16 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_impl(self._sync(self._impl_obj.newPage()))
 
+    def browser(self) -> typing.Union["Browser", NoneType]:
+        """BrowserContext.browser
+
+        Returns
+        -------
+        Optional[Browser]
+            Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+        """
+        return mapping.from_impl_nullable(self._impl_obj.browser())
+
     def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
     ) -> typing.List[typing.Dict]:
@@ -5485,6 +5502,8 @@ class BrowserContext(SyncBase):
         `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
         See page.exposeBinding(name, playwrightBinding) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
+
+        An example of passing an element handle:
 
         Parameters
         ----------

@@ -19,6 +19,8 @@ const fs = require('fs');
 const os = require('os');
 const util = require('util');
 
+const driver = require('playwright/lib/driver');
+
 (async () => {
   if (os.platform() === 'win32') {
     const checkDbPath = path.join(__dirname, 'node_modules', 'playwright', 'bin', 'PrintDeps.exe')
@@ -31,9 +33,9 @@ const util = require('util');
   }
 
   if (process.argv.includes('install')) {
-    await require('playwright/lib/install/installer').installBrowsersWithProgressBar(path.dirname(process.argv[0]));
+    await driver.installWithProgressBar(path.dirname(process.argv[0]));
     return;
   }
 
-  require('playwright/lib/server');
+  driver.runServer()
 })();

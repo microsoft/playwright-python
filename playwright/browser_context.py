@@ -111,6 +111,9 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.newContext()")
         return from_channel(await self._channel.send("newPage"))
 
+    def browser(self) -> Optional["Browser"]:
+        return self._browser
+
     async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
         if urls is None:
             urls = []
