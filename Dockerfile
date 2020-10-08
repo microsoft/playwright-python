@@ -74,3 +74,7 @@ RUN su pwuser -c "mkdir /tmp/pw && cd /tmp/pw && \
     pip install /tmp/playwright-1.0-py3-none-manylinux1_x86_64.whl && \
     python -m playwright install" && \
     rm -rf /tmp/pw && rm /tmp/playwright-1.0-py3-none-manylinux1_x86_64.whl
+
+# 3. Symlink downloaded browsers for root user
+RUN mkdir /root/.cache/ && \
+    ln -s /home/pwuser/.cache/ms-playwright/ /root/.cache/ms-playwright

@@ -43,4 +43,5 @@ jobs:
       run: |
         CONTAINER_ID="$(docker run --rm -v $(pwd):/root/playwright --name playwright-docker-test -d -t playwright-python:localbuild /bin/bash)"
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -r local-requirements.txt
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -e .
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv
