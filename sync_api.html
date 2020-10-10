@@ -1768,6 +1768,18 @@ class Frame(SyncBase):
         super().__init__(obj)
 
     @property
+    def page(self) -&gt; &#34;Page&#34;:
+        &#34;&#34;&#34;Frame.page
+
+        Returns the page containing this frame.
+
+        Returns
+        -------
+        Page
+        &#34;&#34;&#34;
+        return mapping.from_impl(self._impl_obj.page)
+
+    @property
     def name(self) -&gt; str:
         &#34;&#34;&#34;Frame.name
 
@@ -1814,17 +1826,6 @@ class Frame(SyncBase):
         List[Frame]
         &#34;&#34;&#34;
         return mapping.from_impl_list(self._impl_obj.childFrames)
-
-    def page(self) -&gt; &#34;Page&#34;:
-        &#34;&#34;&#34;Frame.page
-
-        Returns the page containing this frame.
-
-        Returns
-        -------
-        Page
-        &#34;&#34;&#34;
-        return mapping.from_impl(self._impl_obj.page())
 
     def goto(
         self,
@@ -3846,6 +3847,8 @@ class Page(SyncBase):
 
         An example of exposing page URL to all frames in a page:
 
+        An example of passing an element handle:
+
         Parameters
         ----------
         name : str
@@ -4296,6 +4299,9 @@ class Page(SyncBase):
 
         Routing provides the capability to modify network requests that are made by a page.
         Once routing is enabled, every request matching the url pattern will stall unless it&#39;s continued, fulfilled or aborted.
+
+        **NOTE** The handler will only be called for the first url if the response is a redirect.
+
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
         Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.
@@ -4368,7 +4374,7 @@ class Page(SyncBase):
         omitBackground : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
         fullPage : Optional[bool]
-            When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
+            When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to `false`.
         clip : Optional[{&#34;x&#34;: float, &#34;y&#34;: float, &#34;width&#34;: float, &#34;height&#34;: float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
 
@@ -4406,6 +4412,8 @@ class Page(SyncBase):
     def close(self, runBeforeUnload: bool = None) -&gt; NoneType:
         &#34;&#34;&#34;Page.close
 
+        If `runBeforeUnload` is `false` the result will resolve only after the page has been closed.
+        If `runBeforeUnload` is `true` the method will **not** wait for the page to close.
         By default, `page.close()` **does not** run beforeunload handlers.
 
         **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
@@ -5303,6 +5311,17 @@ class BrowserContext(SyncBase):
         &#34;&#34;&#34;
         return mapping.from_impl_list(self._impl_obj.pages)
 
+    @property
+    def browser(self) -&gt; typing.Union[&#34;Browser&#34;, NoneType]:
+        &#34;&#34;&#34;BrowserContext.browser
+
+        Returns
+        -------
+        Optional[Browser]
+            Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+        &#34;&#34;&#34;
+        return mapping.from_impl_nullable(self._impl_obj.browser)
+
     def setDefaultNavigationTimeout(self, timeout: int) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.setDefaultNavigationTimeout
 
@@ -5513,6 +5532,8 @@ class BrowserContext(SyncBase):
         `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
         See page.exposeBinding(name, playwrightBinding) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
+
+        An example of passing an element handle:
 
         Parameters
         ----------
@@ -6069,7 +6090,7 @@ class BrowserType(SyncBase):
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         chromiumSandbox : Optional[bool]
-            Enable Chromium sandboxing. Defaults to `true`.
+            Enable Chromium sandboxing. Defaults to `false`.
 
         Returns
         -------
@@ -7148,6 +7169,17 @@ This is a convenience API that should only be used for the single-page scenarios
         &#34;&#34;&#34;
         return mapping.from_impl_list(self._impl_obj.pages)
 
+    @property
+    def browser(self) -&gt; typing.Union[&#34;Browser&#34;, NoneType]:
+        &#34;&#34;&#34;BrowserContext.browser
+
+        Returns
+        -------
+        Optional[Browser]
+            Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+        &#34;&#34;&#34;
+        return mapping.from_impl_nullable(self._impl_obj.browser)
+
     def setDefaultNavigationTimeout(self, timeout: int) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.setDefaultNavigationTimeout
 
@@ -7359,6 +7391,8 @@ This is a convenience API that should only be used for the single-page scenarios
         See page.exposeBinding(name, playwrightBinding) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
 
+        An example of passing an element handle:
+
         Parameters
         ----------
         name : str
@@ -7524,6 +7558,30 @@ This is a convenience API that should only be used for the single-page scenarios
 </ul>
 <h3>Instance variables</h3>
 <dl>
+<dt id="playwright.sync_api.BrowserContext.browser"><code class="name">var <span class="ident">browser</span> : Union[<a title="playwright.async_api.Browser" href="async_api.html#playwright.async_api.Browser">Browser</a>, NoneType]</code></dt>
+<dd>
+<div class="desc"><p>BrowserContext.browser</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[<a title="playwright.sync_api.Browser" href="#playwright.sync_api.Browser">Browser</a>]</code></dt>
+<dd>Returns the browser instance of the context. If it was launched as a persistent context null gets returned.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def browser(self) -&gt; typing.Union[&#34;Browser&#34;, NoneType]:
+    &#34;&#34;&#34;BrowserContext.browser
+
+    Returns
+    -------
+    Optional[Browser]
+        Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+    &#34;&#34;&#34;
+    return mapping.from_impl_nullable(self._impl_obj.browser)</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.BrowserContext.pages"><code class="name">var <span class="ident">pages</span> : List[<a title="playwright.async_api.Page" href="async_api.html#playwright.async_api.Page">Page</a>]</code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.pages</p>
@@ -7775,6 +7833,7 @@ The first argument of the <code>playwrightBinding</code> function contains infor
 <code>{ browserContext: BrowserContext, page: Page, frame: Frame }</code>.
 See page.exposeBinding(name, playwrightBinding) for page-only version.
 An example of exposing page URL to all frames in all pages in the context:</p>
+<p>An example of passing an element handle:</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
@@ -7796,6 +7855,8 @@ An example of exposing page URL to all frames in all pages in the context:</p>
     `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
     See page.exposeBinding(name, playwrightBinding) for page-only version.
     An example of exposing page URL to all frames in all pages in the context:
+
+    An example of passing an element handle:
 
     Parameters
     ----------
@@ -8373,7 +8434,7 @@ is fired.</p>
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         chromiumSandbox : Optional[bool]
-            Enable Chromium sandboxing. Defaults to `true`.
+            Enable Chromium sandboxing. Defaults to `false`.
 
         Returns
         -------
@@ -8730,7 +8791,7 @@ See <code>this article</code> for a description of the differences between Chrom
 <dt><strong><code>slowMo</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.</dd>
 <dt><strong><code>chromiumSandbox</code></strong> :&ensp;<code>Optional[bool]</code></dt>
-<dd>Enable Chromium sandboxing. Defaults to <code>true</code>.</dd>
+<dd>Enable Chromium sandboxing. Defaults to <code>false</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -8796,7 +8857,7 @@ See <code>this article</code> for a description of the differences between Chrom
     slowMo : Optional[int]
         Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
     chromiumSandbox : Optional[bool]
-        Enable Chromium sandboxing. Defaults to `true`.
+        Enable Chromium sandboxing. Defaults to `false`.
 
     Returns
     -------
@@ -9325,6 +9386,7 @@ to send messages.</p></div>
 <ul class="hlist">
 <li><code><a title="playwright.sync_api.BrowserContext.addCookies" href="#playwright.sync_api.BrowserContext.addCookies">addCookies</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.addInitScript" href="#playwright.sync_api.BrowserContext.addInitScript">addInitScript</a></code></li>
+<li><code><a title="playwright.sync_api.BrowserContext.browser" href="#playwright.sync_api.BrowserContext.browser">browser</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.clearCookies" href="#playwright.sync_api.BrowserContext.clearCookies">clearCookies</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.clearPermissions" href="#playwright.sync_api.BrowserContext.clearPermissions">clearPermissions</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.close" href="#playwright.sync_api.BrowserContext.close">close</a></code></li>
@@ -11208,7 +11270,7 @@ Examples:</p>
 <p>The method finds all elements matching the specified selector in the <code><a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a></code>'s subtree and passes an array of matched elements as a first argument to <code>pageFunction</code>. See Working with selectors for more details.
 If <code>pageFunction</code> returns a Promise, then <code>frame.$$eval</code> would wait for the promise to resolve and return its value.
 Examples:</p>
-<pre><code class="html">&lt;div class=&quot;feed&quot;&gt;
+<pre><code class="language-html">&lt;div class=&quot;feed&quot;&gt;
   &lt;div class=&quot;tweet&quot;&gt;Hello!&lt;/div&gt;
   &lt;div class=&quot;tweet&quot;&gt;Hi!&lt;/div&gt;
 &lt;/div&gt;
@@ -12455,6 +12517,18 @@ def page(self) -&gt; &#34;Page&#34;:
         super().__init__(obj)
 
     @property
+    def page(self) -&gt; &#34;Page&#34;:
+        &#34;&#34;&#34;Frame.page
+
+        Returns the page containing this frame.
+
+        Returns
+        -------
+        Page
+        &#34;&#34;&#34;
+        return mapping.from_impl(self._impl_obj.page)
+
+    @property
     def name(self) -&gt; str:
         &#34;&#34;&#34;Frame.name
 
@@ -12501,17 +12575,6 @@ def page(self) -&gt; &#34;Page&#34;:
         List[Frame]
         &#34;&#34;&#34;
         return mapping.from_impl_list(self._impl_obj.childFrames)
-
-    def page(self) -&gt; &#34;Page&#34;:
-        &#34;&#34;&#34;Frame.page
-
-        Returns the page containing this frame.
-
-        Returns
-        -------
-        Page
-        &#34;&#34;&#34;
-        return mapping.from_impl(self._impl_obj.page())
 
     def goto(
         self,
@@ -13724,6 +13787,32 @@ def name(self) -&gt; str:
     return mapping.from_maybe_impl(self._impl_obj.name)</code></pre>
 </details>
 </dd>
+<dt id="playwright.sync_api.Frame.page"><code class="name">var <span class="ident">page</span> : <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></code></dt>
+<dd>
+<div class="desc"><p>Frame.page</p>
+<p>Returns the page containing this frame.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def page(self) -&gt; &#34;Page&#34;:
+    &#34;&#34;&#34;Frame.page
+
+    Returns the page containing this frame.
+
+    Returns
+    -------
+    Page
+    &#34;&#34;&#34;
+    return mapping.from_impl(self._impl_obj.page)</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.Frame.parentFrame"><code class="name">var <span class="ident">parentFrame</span> : Union[<a title="playwright.async_api.Frame" href="async_api.html#playwright.async_api.Frame">Frame</a>, NoneType]</code></dt>
 <dd>
 <div class="desc"><p>Frame.parentFrame</p>
@@ -13782,23 +13871,7 @@ def url(self) -&gt; str:
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.addScriptTag</p>
-<p>Adds a <code>&lt;script&gt;</code> tag into the page with the desired url or content.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>URL of a script to be added.</dd>
-<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
-<dd>Path to the JavaScript file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
-<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>Raw JavaScript content to be injected into frame.</dd>
-<dt><strong><code>type</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>Script type. Use 'module' in order to load a Javascript ES6 module. See script for more details.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a></code></dt>
-<dd>which resolves to the added tag when the script's onload fires or when the script content was injected into frame.</dd>
-</dl></div>
+<p>Adds a `<script></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -13844,21 +13917,7 @@ def url(self) -&gt; str:
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.addStyleTag</p>
-<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a <code>&lt;style type="text/css"&gt;</code> tag with the content.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>URL of the <code>&lt;link&gt;</code> tag.</dd>
-<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
-<dd>Path to the CSS file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
-<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>Raw CSS content to be injected into frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a></code></dt>
-<dd>which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.</dd>
-</dl></div>
+<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a `<style type="text/css"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -15016,33 +15075,6 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
     bool
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._impl_obj.isDetached())</code></pre>
-</details>
-</dd>
-<dt id="playwright.sync_api.Frame.page"><code class="name flex">
-<span>def <span class="ident">page</span></span>(<span>self) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Frame.page</p>
-<p>Returns the page containing this frame.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def page(self) -&gt; &#34;Page&#34;:
-    &#34;&#34;&#34;Frame.page
-
-    Returns the page containing this frame.
-
-    Returns
-    -------
-    Page
-    &#34;&#34;&#34;
-    return mapping.from_impl(self._impl_obj.page())</code></pre>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.press"><code class="name flex">
@@ -17502,6 +17534,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         An example of exposing page URL to all frames in a page:
 
+        An example of passing an element handle:
+
         Parameters
         ----------
         name : str
@@ -17952,6 +17986,9 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         Routing provides the capability to modify network requests that are made by a page.
         Once routing is enabled, every request matching the url pattern will stall unless it&#39;s continued, fulfilled or aborted.
+
+        **NOTE** The handler will only be called for the first url if the response is a redirect.
+
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
         Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.
@@ -18024,7 +18061,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         omitBackground : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
         fullPage : Optional[bool]
-            When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
+            When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to `false`.
         clip : Optional[{&#34;x&#34;: float, &#34;y&#34;: float, &#34;width&#34;: float, &#34;height&#34;: float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
 
@@ -18062,6 +18099,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
     def close(self, runBeforeUnload: bool = None) -&gt; NoneType:
         &#34;&#34;&#34;Page.close
 
+        If `runBeforeUnload` is `false` the result will resolve only after the page has been closed.
+        If `runBeforeUnload` is `true` the method will **not** wait for the page to close.
         By default, `page.close()` **does not** run beforeunload handlers.
 
         **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
@@ -19200,24 +19239,7 @@ An example of overriding <code>Math.random</code> before the page loads:</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.addScriptTag</p>
-<p>Adds a <code>&lt;script&gt;</code> tag into the page with the desired url or content.
-Shortcut for page.mainFrame().addScriptTag(options).</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>URL of a script to be added.</dd>
-<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
-<dd>Path to the JavaScript file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
-<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>Raw JavaScript content to be injected into frame.</dd>
-<dt><strong><code>type</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>Script type. Use 'module' in order to load a Javascript ES6 module. See script for more details.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a></code></dt>
-<dd>which resolves to the added tag when the script's onload fires or when the script content was injected into frame.</dd>
-</dl></div>
+<p>Adds a `<script></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -19264,22 +19286,7 @@ Shortcut for page.mainFrame().addScriptTag(options).</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.addStyleTag</p>
-<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a <code>&lt;style type="text/css"&gt;</code> tag with the content.
-Shortcut for page.mainFrame().addStyleTag(options).</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>URL of the <code>&lt;link&gt;</code> tag.</dd>
-<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
-<dd>Path to the CSS file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
-<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>Raw CSS content to be injected into frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a></code></dt>
-<dd>which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.</dd>
-</dl></div>
+<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a `<style type="text/css"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -19515,7 +19522,9 @@ Shortcut for page.mainFrame().click(selector[, options]).</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.close</p>
-<p>By default, <code>page.close()</code> <strong>does not</strong> run beforeunload handlers.</p>
+<p>If <code>runBeforeUnload</code> is <code>false</code> the result will resolve only after the page has been closed.
+If <code>runBeforeUnload</code> is <code>true</code> the method will <strong>not</strong> wait for the page to close.
+By default, <code>page.close()</code> <strong>does not</strong> run beforeunload handlers.</p>
 <p><strong>NOTE</strong> if <code>runBeforeUnload</code> is passed as true, a <code>beforeunload</code> dialog might be summoned
 and should be handled manually via page's 'dialog' event.</p>
 <h2 id="parameters">Parameters</h2>
@@ -19532,6 +19541,8 @@ page handlers.</dd>
 <pre><code class="python">def close(self, runBeforeUnload: bool = None) -&gt; NoneType:
     &#34;&#34;&#34;Page.close
 
+    If `runBeforeUnload` is `false` the result will resolve only after the page has been closed.
+    If `runBeforeUnload` is `true` the method will **not** wait for the page to close.
     By default, `page.close()` **does not** run beforeunload handlers.
 
     **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
@@ -20286,6 +20297,7 @@ The first argument of the <code>playwrightBinding</code> function contains infor
 See browserContext.exposeBinding(name, playwrightBinding) for the context-wide version.</p>
 <p><strong>NOTE</strong> Functions installed via <code>page.exposeBinding</code> survive navigations.</p>
 <p>An example of exposing page URL to all frames in a page:</p>
+<p>An example of passing an element handle:</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
@@ -20310,6 +20322,8 @@ See browserContext.exposeBinding(name, playwrightBinding) for the context-wide v
     **NOTE** Functions installed via `page.exposeBinding` survive navigations.
 
     An example of exposing page URL to all frames in a page:
+
+    An example of passing an element handle:
 
     Parameters
     ----------
@@ -21419,8 +21433,9 @@ Shortcut for page.mainFrame().$$(selector).</p>
 <dd>
 <div class="desc"><p>Page.route</p>
 <p>Routing provides the capability to modify network requests that are made by a page.
-Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
-An example of a naïve handler that aborts all image requests:
+Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.</p>
+<p><strong>NOTE</strong> The handler will only be called for the first url if the response is a redirect.</p>
+<p>An example of a naïve handler that aborts all image requests:
 or the same snippet using a regex pattern instead:
 Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.</p>
 <p><strong>NOTE</strong> Enabling routing disables http cache.</p>
@@ -21444,6 +21459,9 @@ Page routes take precedence over browser context routes (set up with browserCont
 
     Routing provides the capability to modify network requests that are made by a page.
     Once routing is enabled, every request matching the url pattern will stall unless it&#39;s continued, fulfilled or aborted.
+
+    **NOTE** The handler will only be called for the first url if the response is a redirect.
+
     An example of a naïve handler that aborts all image requests:
     or the same snippet using a regex pattern instead:
     Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.
@@ -21485,7 +21503,7 @@ Page routes take precedence over browser context routes (set up with browserCont
 <dt><strong><code>omitBackground</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Hides default white background and allows capturing screenshots with transparency. Not applicable to <code>jpeg</code> images. Defaults to <code>false</code>.</dd>
 <dt><strong><code>fullPage</code></strong> :&ensp;<code>Optional[bool]</code></dt>
-<dd>When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to <code>false</code>.</dd>
+<dd>When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to <code>false</code>.</dd>
 <dt><strong><code>clip</code></strong> :&ensp;<code>Optional[{"x": float, "y": float, "width": float, "height": float}]</code></dt>
 <dd>An object which specifies clipping of the resulting image. Should have the following fields:</dd>
 </dl>
@@ -21525,7 +21543,7 @@ Page routes take precedence over browser context routes (set up with browserCont
     omitBackground : Optional[bool]
         Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
     fullPage : Optional[bool]
-        When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
+        When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to `false`.
     clip : Optional[{&#34;x&#34;: float, &#34;y&#34;: float, &#34;width&#34;: float, &#34;height&#34;: float}]
         An object which specifies clipping of the resulting image. Should have the following fields:
 
@@ -24404,6 +24422,7 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <ul class="">
 <li><code><a title="playwright.sync_api.BrowserContext.addCookies" href="#playwright.sync_api.BrowserContext.addCookies">addCookies</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.addInitScript" href="#playwright.sync_api.BrowserContext.addInitScript">addInitScript</a></code></li>
+<li><code><a title="playwright.sync_api.BrowserContext.browser" href="#playwright.sync_api.BrowserContext.browser">browser</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.clearCookies" href="#playwright.sync_api.BrowserContext.clearCookies">clearCookies</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.clearPermissions" href="#playwright.sync_api.BrowserContext.clearPermissions">clearPermissions</a></code></li>
 <li><code><a title="playwright.sync_api.BrowserContext.close" href="#playwright.sync_api.BrowserContext.close">close</a></code></li>
