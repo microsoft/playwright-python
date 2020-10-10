@@ -2323,6 +2323,7 @@ class Frame(AsyncBase):
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;Frame.dblclick
 
@@ -2354,6 +2355,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
@@ -2364,6 +2367,7 @@ class Frame(AsyncBase):
                 button=button,
                 timeout=timeout,
                 force=force,
+                noWaitAfter=noWaitAfter,
             )
         )
 
@@ -4342,6 +4346,7 @@ class Page(AsyncBase):
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;Page.dblclick
 
@@ -4375,6 +4380,8 @@ class Page(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
@@ -4385,6 +4392,7 @@ class Page(AsyncBase):
                 button=button,
                 timeout=timeout,
                 force=force,
+                noWaitAfter=noWaitAfter,
             )
         )
 
@@ -5604,6 +5612,8 @@ class Browser(AsyncBase):
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -5644,6 +5654,10 @@ class Browser(AsyncBase):
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -5669,6 +5683,8 @@ class Browser(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -5692,6 +5708,8 @@ class Browser(AsyncBase):
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -5733,6 +5751,10 @@ class Browser(AsyncBase):
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -5758,6 +5780,8 @@ class Browser(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -5817,6 +5841,9 @@ class BrowserType(AsyncBase):
         downloadsPath: typing.Union[str, pathlib.Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
+        firefoxUserPrefs: typing.Union[
+            typing.Dict[str, typing.Union[str, int, bool]]
+        ] = None,
     ) -&gt; &#34;Browser&#34;:
         &#34;&#34;&#34;BrowserType.launch
 
@@ -5857,6 +5884,8 @@ class BrowserType(AsyncBase):
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `false`.
+        firefoxUserPrefs : Optional[Dict[str, Union[str, int, bool]]]
+            Firefox user preferences. Learn more about the Firefox user preferences at `about:config`.
 
         Returns
         -------
@@ -5879,6 +5908,7 @@ class BrowserType(AsyncBase):
                 downloadsPath=downloadsPath,
                 slowMo=slowMo,
                 chromiumSandbox=chromiumSandbox,
+                firefoxUserPrefs=mapping.to_impl(firefoxUserPrefs),
             )
         )
 
@@ -5916,6 +5946,8 @@ class BrowserType(AsyncBase):
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;BrowserType.launchPersistentContext
 
@@ -5986,6 +6018,10 @@ class BrowserType(AsyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -6026,6 +6062,8 @@ class BrowserType(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 chromiumSandbox=chromiumSandbox,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -6327,6 +6365,8 @@ An example of logging the focused node's name:</p>
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -6367,6 +6407,10 @@ An example of logging the focused node's name:</p>
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -6392,6 +6436,8 @@ An example of logging the focused node's name:</p>
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -6415,6 +6461,8 @@ An example of logging the focused node's name:</p>
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6456,6 +6504,10 @@ An example of logging the focused node's name:</p>
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -6481,6 +6533,8 @@ An example of logging the focused node's name:</p>
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -6607,7 +6661,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newContext"><code class="name flex">
-<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -6648,6 +6702,10 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dd>Emulates <code>'prefers-colors-scheme'</code> media feature, supported values are <code>'light'</code>, <code>'dark'</code>, <code>'no-preference'</code>. See page.emulateMedia(options) for more details. Defaults to '<code>light</code>'.</dd>
 <dt><strong><code>acceptDownloads</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
+<dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded.</dd>
+<dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
+<dd>Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -6678,6 +6736,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     acceptDownloads: bool = None,
     defaultBrowserType: str = None,
+    videosPath: str = None,
+    videoSize: IntSize = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;Browser.newContext
 
@@ -6718,6 +6778,10 @@ The Browser object itself is considered to be disposed and cannot be used anymor
         Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
     acceptDownloads : Optional[bool]
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+    videosPath : Optional[str]
+        Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+    videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+        Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
     Returns
     -------
@@ -6743,12 +6807,14 @@ The Browser object itself is considered to be disposed and cannot be used anymor
             colorScheme=colorScheme,
             acceptDownloads=acceptDownloads,
             defaultBrowserType=defaultBrowserType,
+            videosPath=videosPath,
+            videoSize=videoSize,
         )
     )</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newPage"><code class="name flex">
-<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
+<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -6790,6 +6856,10 @@ This is a convenience API that should only be used for the single-page scenarios
 <dd>Emulates <code>'prefers-colors-scheme'</code> media feature, supported values are <code>'light'</code>, <code>'dark'</code>, <code>'no-preference'</code>. See page.emulateMedia(options) for more details. Defaults to '<code>light</code>'.</dd>
 <dt><strong><code>acceptDownloads</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
+<dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded.</dd>
+<dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
+<dd>Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -6820,6 +6890,8 @@ This is a convenience API that should only be used for the single-page scenarios
     colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     acceptDownloads: bool = None,
     defaultBrowserType: str = None,
+    videosPath: str = None,
+    videoSize: IntSize = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.newPage
 
@@ -6861,6 +6933,10 @@ This is a convenience API that should only be used for the single-page scenarios
         Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
     acceptDownloads : Optional[bool]
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+    videosPath : Optional[str]
+        Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+    videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+        Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
     Returns
     -------
@@ -6886,6 +6962,8 @@ This is a convenience API that should only be used for the single-page scenarios
             colorScheme=colorScheme,
             acceptDownloads=acceptDownloads,
             defaultBrowserType=defaultBrowserType,
+            videosPath=videosPath,
+            videoSize=videoSize,
         )
     )</code></pre>
 </details>
@@ -8111,6 +8189,9 @@ is fired.</p>
         downloadsPath: typing.Union[str, pathlib.Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
+        firefoxUserPrefs: typing.Union[
+            typing.Dict[str, typing.Union[str, int, bool]]
+        ] = None,
     ) -&gt; &#34;Browser&#34;:
         &#34;&#34;&#34;BrowserType.launch
 
@@ -8151,6 +8232,8 @@ is fired.</p>
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `false`.
+        firefoxUserPrefs : Optional[Dict[str, Union[str, int, bool]]]
+            Firefox user preferences. Learn more about the Firefox user preferences at `about:config`.
 
         Returns
         -------
@@ -8173,6 +8256,7 @@ is fired.</p>
                 downloadsPath=downloadsPath,
                 slowMo=slowMo,
                 chromiumSandbox=chromiumSandbox,
+                firefoxUserPrefs=mapping.to_impl(firefoxUserPrefs),
             )
         )
 
@@ -8210,6 +8294,8 @@ is fired.</p>
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;BrowserType.launchPersistentContext
 
@@ -8280,6 +8366,10 @@ is fired.</p>
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -8320,6 +8410,8 @@ is fired.</p>
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 chromiumSandbox=chromiumSandbox,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -8461,7 +8553,7 @@ def name(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserType.launch"><code class="name flex">
-<span>async def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None) ‑> <a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></span>
+<span>async def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None, firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None) ‑> <a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launch</p>
@@ -8500,6 +8592,8 @@ See <code>this article</code> for a description of the differences between Chrom
 <dd>Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.</dd>
 <dt><strong><code>chromiumSandbox</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Enable Chromium sandboxing. Defaults to <code>false</code>.</dd>
+<dt><strong><code>firefoxUserPrefs</code></strong> :&ensp;<code>Optional[Dict[str, Union[str, int, bool]]]</code></dt>
+<dd>Firefox user preferences. Learn more about the Firefox user preferences at <code>about:config</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -8526,6 +8620,9 @@ See <code>this article</code> for a description of the differences between Chrom
     downloadsPath: typing.Union[str, pathlib.Path] = None,
     slowMo: int = None,
     chromiumSandbox: bool = None,
+    firefoxUserPrefs: typing.Union[
+        typing.Dict[str, typing.Union[str, int, bool]]
+    ] = None,
 ) -&gt; &#34;Browser&#34;:
     &#34;&#34;&#34;BrowserType.launch
 
@@ -8566,6 +8663,8 @@ See <code>this article</code> for a description of the differences between Chrom
         Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
     chromiumSandbox : Optional[bool]
         Enable Chromium sandboxing. Defaults to `false`.
+    firefoxUserPrefs : Optional[Dict[str, Union[str, int, bool]]]
+        Firefox user preferences. Learn more about the Firefox user preferences at `about:config`.
 
     Returns
     -------
@@ -8588,12 +8687,13 @@ See <code>this article</code> for a description of the differences between Chrom
             downloadsPath=downloadsPath,
             slowMo=slowMo,
             chromiumSandbox=chromiumSandbox,
+            firefoxUserPrefs=mapping.to_impl(firefoxUserPrefs),
         )
     )</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserType.launchPersistentContext"><code class="name flex">
-<span>async def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: playwright.helper.IntSize = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: playwright.helper.IntSize = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launchPersistentContext</p>
@@ -8664,6 +8764,10 @@ See <code>this article</code> for a description of the differences between Chrom
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
 <dt><strong><code>chromiumSandbox</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Enable Chromium sandboxing. Defaults to <code>true</code>.</dd>
+<dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded.</dd>
+<dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
+<dd>Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -8708,6 +8812,8 @@ See <code>this article</code> for a description of the differences between Chrom
     colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     acceptDownloads: bool = None,
     chromiumSandbox: bool = None,
+    videosPath: str = None,
+    videoSize: IntSize = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;BrowserType.launchPersistentContext
 
@@ -8778,6 +8884,10 @@ See <code>this article</code> for a description of the differences between Chrom
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
     chromiumSandbox : Optional[bool]
         Enable Chromium sandboxing. Defaults to `true`.
+    videosPath : Optional[str]
+        Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+    videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
+        Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
     Returns
     -------
@@ -8818,6 +8928,8 @@ See <code>this article</code> for a description of the differences between Chrom
             colorScheme=colorScheme,
             acceptDownloads=acceptDownloads,
             chromiumSandbox=chromiumSandbox,
+            videosPath=videosPath,
+            videoSize=videoSize,
         )
     )</code></pre>
 </details>
@@ -12758,6 +12870,7 @@ def page(self) -&gt; &#34;Page&#34;:
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;Frame.dblclick
 
@@ -12789,6 +12902,8 @@ def page(self) -&gt; &#34;Page&#34;:
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
@@ -12799,6 +12914,7 @@ def page(self) -&gt; &#34;Page&#34;:
                 button=button,
                 timeout=timeout,
                 force=force,
+                noWaitAfter=noWaitAfter,
             )
         )
 
@@ -13712,7 +13828,7 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.dblclick"><code class="name flex">
-<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.dblclick</p>
@@ -13740,6 +13856,8 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
 <dt><strong><code>force</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to bypass the actionability checks. Defaults to <code>false</code>.</dd>
+<dt><strong><code>noWaitAfter</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to <code>false</code>.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -13756,6 +13874,7 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     timeout: int = None,
     force: bool = None,
+    noWaitAfter: bool = None,
 ) -&gt; NoneType:
     &#34;&#34;&#34;Frame.dblclick
 
@@ -13787,6 +13906,8 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
     force : Optional[bool]
         Whether to bypass the actionability checks. Defaults to `false`.
+    noWaitAfter : Optional[bool]
+        Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
         await self._impl_obj.dblclick(
@@ -13797,6 +13918,7 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
             button=button,
             timeout=timeout,
             force=force,
+            noWaitAfter=noWaitAfter,
         )
     )</code></pre>
 </details>
@@ -17637,6 +17759,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;Page.dblclick
 
@@ -17670,6 +17793,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
@@ -17680,6 +17805,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
                 button=button,
                 timeout=timeout,
                 force=force,
+                noWaitAfter=noWaitAfter,
             )
         )
 
@@ -18975,7 +19101,7 @@ page handlers.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.dblclick"><code class="name flex">
-<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.dblclick</p>
@@ -19004,6 +19130,8 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
 <dt><strong><code>force</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to bypass the actionability checks. Defaults to <code>false</code>.</dd>
+<dt><strong><code>noWaitAfter</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to <code>false</code>.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -19020,6 +19148,7 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     timeout: int = None,
     force: bool = None,
+    noWaitAfter: bool = None,
 ) -&gt; NoneType:
     &#34;&#34;&#34;Page.dblclick
 
@@ -19053,6 +19182,8 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
     force : Optional[bool]
         Whether to bypass the actionability checks. Defaults to `false`.
+    noWaitAfter : Optional[bool]
+        Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
         await self._impl_obj.dblclick(
@@ -19063,6 +19194,7 @@ Wait for initiated navigations to either succeed or fail, unless <code>noWaitAft
             button=button,
             timeout=timeout,
             force=force,
+            noWaitAfter=noWaitAfter,
         )
     )</code></pre>
 </details>
