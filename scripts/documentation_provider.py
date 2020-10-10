@@ -77,7 +77,10 @@ class DocumentationProvider:
         if class_name == "JSHandle":
             self.printed_entries.append(f"ElementHandle.{method_name}")
         clazz = self.api[class_name]
-        method = clazz["members"][method_name]
+        super_clazz = self.api.get(clazz.get("extends"))
+        method = clazz["members"].get(method_name) or super_clazz["members"].get(
+            method_name
+        )
         fqname = f"{class_name}.{method_name}"
         indent = " " * 8
         print(f'{indent}"""{class_name}.{original_method_name}')
@@ -296,7 +299,7 @@ class DocumentationProvider:
 
         if type_name == "Object" or type_name == "?Object":
             intermediate = "Dict"
-            if doc_type and len(doc_type["properties"]):
+            if doc_type and "properties" in doc_type and len(doc_type["properties"]):
                 signature: List[str] = []
                 for [name, value] in doc_type["properties"].items():
                     value_type = self.serialize_doc_type(

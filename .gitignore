@@ -1,9 +1,6 @@
 playwright/__pycache__/
-playwright/drivers/driver*
-playwright/driver-*
-driver/node_modules/
-driver/out/
-driver/package-lock.json
+driver/
+playwright/driver/
 playwright.egg-info/
 build/
 dist/

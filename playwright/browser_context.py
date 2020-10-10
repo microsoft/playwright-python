@@ -106,6 +106,10 @@ class BrowserContext(ChannelOwner):
     def pages(self) -> List[Page]:
         return self._pages.copy()
 
+    @property
+    def browser(self) -> Optional["Browser"]:
+        return self._browser
+
     async def newPage(self) -> Page:
         if self._owner_page:
             raise Error("Please use browser.newContext()")
