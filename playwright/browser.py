@@ -86,6 +86,8 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
@@ -123,6 +125,8 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this

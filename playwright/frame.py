@@ -372,6 +372,7 @@ class Frame(ChannelOwner):
         button: MouseButton = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("dblclick", locals_to_params(locals()))
 

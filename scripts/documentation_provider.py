@@ -89,6 +89,31 @@ class DocumentationProvider:
         signature_no_return = {**signature} if signature else None
         if signature_no_return and "return" in signature_no_return:
             del signature_no_return["return"]
+
+        # Collect a list of all names, flatten options.
+        args = method["args"]
+        args_with_expanded_options: Dict[str, Any] = dict()
+        for name, value in args.items():
+            if name == "options":
+                for opt_name, opt_value in args["options"]["type"][
+                    "properties"
+                ].items():
+                    args_with_expanded_options[opt_name] = opt_value
+            else:
+                args_with_expanded_options[name] = value
+        if fqname == "Route.fulfill":
+            for name, value in args["response"]["type"]["properties"].items():
+                args_with_expanded_options[name] = value
+            del args_with_expanded_options["response"]
+        if fqname == "Route.continue":
+            for name, value in args["overrides"]["type"]["properties"].items():
+                args_with_expanded_options[name] = value
+            del args_with_expanded_options["overrides"]
+        if fqname == "Page.setViewportSize":
+            for name, value in args["viewportSize"]["type"]["properties"].items():
+                args_with_expanded_options[name] = value
+            del args_with_expanded_options["viewportSize"]
+
         if signature and signature_no_return:
             print("")
             print("        Parameters")
@@ -96,29 +121,15 @@ class DocumentationProvider:
             for [name, value] in signature.items():
                 if name == "return":
                     continue
-                del signature_no_return[name]
                 if name == "force_expr":
                     continue
                 original_name = name
                 name = self.rewrite_param_name(fqname, method_name, name)
-                args = method["args"]
-                doc_value = args.get(name)
-                if not doc_value and "options" in args:
-                    args = args["options"]["type"]["properties"]
-                    doc_value = args.get(name)
-                elif not doc_value and fqname == "Route.fulfill":
-                    args = args["response"]["type"]["properties"]
-                    doc_value = args.get(name)
-                elif not doc_value and fqname == "Route.continue":
-                    args = args["overrides"]["type"]["properties"]
-                    doc_value = args.get(name)
-                elif not doc_value and fqname == "Page.setViewportSize":
-                    args = args["viewportSize"]["type"]["properties"]
-                    doc_value = args.get(name)
+                doc_value = args_with_expanded_options.get(name)
+                if name in args_with_expanded_options:
+                    del args_with_expanded_options[name]
                 if not doc_value:
-                    self.errors.add(
-                        f"Missing parameter documentation: {fqname}({name}=)"
-                    )
+                    self.errors.add(f"Parameter not documented: {fqname}({name}=)")
                 else:
                     code_type = self.serialize_python_type(value)
 
@@ -151,11 +162,10 @@ class DocumentationProvider:
                 )
         print(f'{indent}"""')
 
-        if signature_no_return:
-            for name in signature_no_return:
-                self.errors.add(
-                    f"Parameter not implemented: {class_name}.{method_name}({name}=)"
-                )
+        for name in args_with_expanded_options:
+            self.errors.add(
+                f"Parameter not implemented: {class_name}.{method_name}({name}=)"
+            )
 
     def indent_paragraph(self, p: str, indent: str) -> str:
         lines = p.split("\n")

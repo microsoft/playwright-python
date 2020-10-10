@@ -21,13 +21,13 @@ Method not implemented: Logger.log
 Method not implemented: Page.coverage
 
 # Parameter overloads
-Missing parameter documentation: BrowserContext.waitForEvent(predicate=)
-Missing parameter documentation: BrowserContext.waitForEvent(timeout=)
-Missing parameter documentation: Page.waitForEvent(predicate=)
-Missing parameter documentation: Page.waitForEvent(timeout=)
-Missing parameter documentation: Page.waitForRequest(predicate=)
-Missing parameter documentation: Page.waitForResponse(predicate=)
-Missing parameter documentation: Selectors.register(path=)
+Parameter not documented: BrowserContext.waitForEvent(predicate=)
+Parameter not documented: BrowserContext.waitForEvent(timeout=)
+Parameter not documented: Page.waitForEvent(predicate=)
+Parameter not documented: Page.waitForEvent(timeout=)
+Parameter not documented: Page.waitForRequest(predicate=)
+Parameter not documented: Page.waitForResponse(predicate=)
+Parameter not documented: Selectors.register(path=)
 
 # Documented as Dict / Any
 Parameter type mismatch in BrowserContext.setGeolocation(geolocation=): documented as Optional[Dict], code has Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
@@ -70,8 +70,8 @@ Parameter type mismatch in Page.waitForResponse(urlOrPredicate=): documented as 
 # Add init script
 Parameter type mismatch in Page.addInitScript(script=): documented as Union[Callable, str, Dict], code has Optional[str]
 Parameter type mismatch in BrowserContext.addInitScript(script=): documented as Union[Callable, str, Dict], code has Optional[str]
-Missing parameter documentation: BrowserContext.addInitScript(path=)
-Missing parameter documentation: Page.addInitScript(path=)
+Parameter not documented: BrowserContext.addInitScript(path=)
+Parameter not documented: Page.addInitScript(path=)
 
 # File payload
 Parameter type mismatch in FileChooser.setFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
@@ -99,5 +99,24 @@ Parameter type mismatch in Page.unroute(handler=): documented as Optional[functi
 Parameter type mismatch in Selectors.register(script=): documented as Union[Callable, str, Dict], code has Optional[str]
 
 # Device support
-Missing parameter documentation: Browser.newContext(defaultBrowserType=)
-Missing parameter documentation: Browser.newPage(defaultBrowserType=)
+Parameter not documented: Browser.newContext(defaultBrowserType=)
+Parameter not documented: Browser.newPage(defaultBrowserType=)
+
+# Logger
+Parameter not implemented: Browser.newContext(logger=)
+Parameter not implemented: BrowserType.launch(logger=)
+Parameter not implemented: BrowserType.connect(logger=)
+Parameter not implemented: BrowserType.launchPersistentContext(logger=)
+Parameter not implemented: Browser.newPage(logger=)
+
+# Deprecated
+Parameter not implemented: Page.addInitScript(arg=)
+Parameter not implemented: BrowserContext.addInitScript(arg=)
+
+# OptionsOr
+Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)
+Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
+
+# FIXME, 1.5 blockers
+Parameter not implemented: Page.exposeBinding(handle=)
+Parameter not implemented: BrowserContext.exposeBinding(handle=)

@@ -615,6 +615,7 @@ class Page(ChannelOwner):
         button: MouseButton = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -> None:
         return await self._main_frame.dblclick(**locals_to_params(locals()))
 

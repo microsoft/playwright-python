@@ -61,6 +61,7 @@ class BrowserType(ChannelOwner):
         downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
+        firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         normalize_launch_params(params)
@@ -105,6 +106,8 @@ class BrowserType(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
