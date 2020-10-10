@@ -99,6 +99,7 @@ class Frame(ChannelOwner):
         if "error" not in event and hasattr(self, "_page") and self._page:
             self._page.emit("framenavigated", self)
 
+    @property
     def page(self) -> "Page":
         return self._page
 

@@ -15,11 +15,26 @@
 import glob
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import zipfile
 
 from playwright.path_utils import get_file_dirname
+
+driver_version = "0.5.2"
+
+if not os.path.exists("driver"):
+    os.makedirs("driver")
+if not os.path.exists("playwright/driver"):
+    os.makedirs("playwright/driver")
+
+for platform in ["mac", "linux", "win32", "win32_x64"]:
+    zip_file = f"playwright-cli-{driver_version}-{platform}.zip"
+    if not os.path.exists("driver/" + zip_file):
+        url = "https://playwright.azureedge.net/builds/cli/" + zip_file
+        print("Fetching ", url)
+        subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
 
 _dirname = get_file_dirname()
 _build_dir = _dirname / "build"
@@ -37,24 +52,46 @@ subprocess.check_call("python setup.py sdist bdist_wheel", shell=True)
 base_wheel_location = glob.glob("dist/*.whl")[0]
 without_platform = base_wheel_location[:-7]
 
-pack_wheel_drivers = []
-if sys.platform == "linux":
-    pack_wheel_drivers.append(("driver-linux", "manylinux1_x86_64.whl"))
-if sys.platform == "darwin":
-    pack_wheel_drivers.append(("driver-darwin", "macosx_10_13_x86_64.whl"))
-if sys.platform == "win32":
-    # Windows is the only one that can build all drivers (x86 and x64),
-    # so we publish from it
-    pack_wheel_drivers.append(("driver-linux", "manylinux1_x86_64.whl"))
-    pack_wheel_drivers.append(("driver-darwin", "macosx_10_13_x86_64.whl"))
-    pack_wheel_drivers.append(("driver-win32.exe", "win32.whl"))
-    pack_wheel_drivers.append(("driver-win32-amd64.exe", "win_amd64.whl"))
+platform_map = {
+    "darwin": "mac",
+    "linux": "linux",
+    "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
+}
 
-for driver, wheel in pack_wheel_drivers:
+for platform in ["mac", "linux", "win32", "win32_x64"]:
+    zip_file = f"driver/playwright-cli-{driver_version}-{platform}.zip"
+    with zipfile.ZipFile(zip_file, "r") as zip:
+        zip.extractall(f"driver/{platform}")
+    if platform_map[sys.platform] == platform:
+        with zipfile.ZipFile(zip_file, "r") as zip:
+            zip.extractall("playwright/driver")
+        for file in os.listdir("playwright/driver"):
+            if file == "playwright-cli" or file.startswith("ffmpeg"):
+                print(f"playwright/driver/{file}")
+                os.chmod(
+                    f"playwright/driver/{file}",
+                    os.stat(f"playwright/driver/{file}").st_mode | stat.S_IEXEC,
+                )
+
+    wheel = ""
+    if platform == "mac":
+        wheel = "macosx_10_13_x86_64.whl"
+    if platform == "linux":
+        wheel = "manylinux1_x86_64.whl"
+    if platform == "win32":
+        wheel = "win32.whl"
+    if platform == "win32_x64":
+        wheel = "win_amd64.whl"
     wheel_location = without_platform + wheel
     shutil.copy(base_wheel_location, wheel_location)
-    from_location = f"driver/out/{driver}"
-    to_location = f"playwright/drivers/{driver}"
-    with zipfile.ZipFile(wheel_location, "a") as zipf:
-        zipf.write(from_location, to_location)
+    with zipfile.ZipFile(wheel_location, "a") as zip:
+        for file in os.listdir(f"driver/{platform}"):
+            from_location = f"driver/{platform}/{file}"
+            to_location = f"playwright/driver/{file}"
+            if file == "playwright-cli" or file.startswith("ffmpeg"):
+                os.chmod(from_location, os.stat(from_location).st_mode | stat.S_IEXEC)
+            zip.write(from_location, to_location)
+
 os.remove(base_wheel_location)
+
+subprocess.check_call("python -m playwright print-api-json > api.json", shell=True)

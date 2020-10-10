@@ -14,6 +14,7 @@
 
 import asyncio
 import io
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -25,7 +26,7 @@ from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
 from playwright.helper import Error
 from playwright.object_factory import create_remote_object
-from playwright.path_utils import get_file_dirname, make_file_executable
+from playwright.path_utils import get_file_dirname
 from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
 from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
@@ -34,20 +35,9 @@ from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
 def compute_driver_executable() -> Path:
     package_path = get_file_dirname()
     platform = sys.platform
-    if platform == "darwin":
-        path = package_path / "drivers" / "driver-darwin"
-        return make_file_executable(path)
-    elif platform == "linux":
-        path = package_path / "drivers" / "driver-linux"
-        return make_file_executable(path)
-    elif platform == "win32":
-        result = package_path / "drivers" / "driver-win32-amd64.exe"
-        if result.exists():
-            return result
-        return package_path / "drivers" / "driver-win32.exe"
-
-    path = package_path / "drivers" / "driver-linux"
-    return make_file_executable(path)
+    if platform == "win32":
+        return package_path / "driver" / "playwright-cli.exe"
+    return package_path / "driver" / "playwright-cli"
 
 
 async def run_driver_async() -> Connection:
@@ -65,6 +55,7 @@ async def run_driver_async() -> Connection:
 
     proc = await asyncio.create_subprocess_exec(
         str(driver_executable),
+        "run-driver",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=_get_stderr_fileno(),
@@ -138,12 +129,7 @@ if sys.platform == "win32":
 
 
 def main() -> None:
-    if "install" not in sys.argv:
-        print('Run "python -m playwright install" to complete installation')
-        return
     driver_executable = compute_driver_executable()
-
-    print("Installing the browsers...")
-    subprocess.check_call([str(driver_executable), "install"])
-
-    print("Playwright is now ready for use")
+    my_env = os.environ.copy()
+    my_env["PLAYWRIGHT_CLI_TARGET_LANG"] = "python"
+    subprocess.run([str(driver_executable), *sys.argv[1:]], env=my_env)
