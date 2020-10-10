@@ -131,5 +131,5 @@ if sys.platform == "win32":
 def main() -> None:
     driver_executable = compute_driver_executable()
     my_env = os.environ.copy()
-    my_env["PLAYWRIGHT_CLI_TARGET_LANG"] = "python"
+    my_env["PW_CLI_TARGET_LANG"] = "python"
     subprocess.run([str(driver_executable), *sys.argv[1:]], env=my_env)
