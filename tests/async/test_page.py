@@ -385,6 +385,19 @@ async def test_expose_function_should_work_with_complex_objects(page, server):
     assert result["x"] == 7
 
 
+async def test_exposebindinghandle_should_work(page, server):
+    targets = []
+
+    def logme(t):
+        targets.append(t)
+        return 17
+
+    await page.exposeBinding("logme", lambda source, t: logme(t), handle=True)
+    result = await page.evaluate("logme({ foo: 42 })")
+    assert (await targets[0].evaluate("x => x.foo")) == 42
+    assert result == 17
+
+
 async def test_page_error_should_fire(page, server, is_webkit):
     [error, _] = await asyncio.gather(
         page.waitForEvent("pageerror"),

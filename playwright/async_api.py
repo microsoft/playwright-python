@@ -3663,7 +3663,9 @@ class Page(AsyncBase):
             )
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -> NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -> NoneType:
         """Page.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in this page.
@@ -3685,10 +3687,12 @@ class Page(AsyncBase):
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright's context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -5286,7 +5290,9 @@ class BrowserContext(AsyncBase):
             await self._impl_obj.addInitScript(source=source, path=path)
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -> NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -> NoneType:
         """BrowserContext.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -5305,10 +5311,12 @@ class BrowserContext(AsyncBase):
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright's context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 

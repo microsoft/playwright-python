@@ -373,7 +373,9 @@ class Page(ChannelOwner):
     async def exposeFunction(self, name: str, binding: Callable) -> None:
         await self.exposeBinding(name, lambda source, *args: binding(*args))
 
-    async def exposeBinding(self, name: str, binding: Callable) -> None:
+    async def exposeBinding(
+        self, name: str, binding: Callable, handle: bool = None
+    ) -> None:
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         if name in self._browser_context._bindings:
@@ -381,7 +383,9 @@ class Page(ChannelOwner):
                 f'Function "{name}" has been already registered in the browser context'
             )
         self._bindings[name] = binding
-        await self._channel.send("exposeBinding", dict(name=name))
+        await self._channel.send(
+            "exposeBinding", dict(name=name, needsHandle=handle or False)
+        )
 
     async def setExtraHTTPHeaders(self, headers: Dict[str, str]) -> None:
         await self._channel.send(
@@ -920,8 +924,11 @@ class BindingCall(ChannelOwner):
         try:
             frame = from_channel(self._initializer["frame"])
             source = dict(context=frame._page.context, page=frame._page, frame=frame)
-            func_args = list(map(parse_result, self._initializer["args"]))
-            result = func(source, *func_args)
+            if self._initializer.get("handle"):
+                result = func(source, from_channel(self._initializer["handle"]))
+            else:
+                func_args = list(map(parse_result, self._initializer["args"]))
+                result = func(source, *func_args)
             if asyncio.isfuture(result):
                 result = await result
             await self._channel.send("resolve", dict(result=serialize_argument(result)))

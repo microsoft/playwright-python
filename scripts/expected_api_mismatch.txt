@@ -116,7 +116,3 @@ Parameter not implemented: BrowserContext.addInitScript(arg=)
 # OptionsOr
 Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)
 Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
-
-# FIXME, 1.5 blockers
-Parameter not implemented: Page.exposeBinding(handle=)
-Parameter not implemented: BrowserContext.exposeBinding(handle=)
