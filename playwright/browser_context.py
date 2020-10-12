@@ -157,7 +157,9 @@ class BrowserContext(ChannelOwner):
             raise Error("Either path or source parameter must be specified")
         await self._channel.send("addInitScript", dict(source=source))
 
-    async def exposeBinding(self, name: str, binding: Callable) -> None:
+    async def exposeBinding(
+        self, name: str, binding: Callable, handle: bool = None
+    ) -> None:
         for page in self._pages:
             if name in page._bindings:
                 raise Error(
@@ -166,7 +168,9 @@ class BrowserContext(ChannelOwner):
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         self._bindings[name] = binding
-        await self._channel.send("exposeBinding", dict(name=name))
+        await self._channel.send(
+            "exposeBinding", dict(name=name, needsHandle=handle or False)
+        )
 
     async def exposeFunction(self, name: str, binding: Callable) -> None:
         await self.exposeBinding(name, lambda source, *args: binding(*args))

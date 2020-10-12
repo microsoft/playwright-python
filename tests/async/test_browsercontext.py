@@ -426,6 +426,20 @@ async def test_expose_function_should_be_callable_from_inside_addInitScript(
     assert args == ["context", "page"]
 
 
+async def test_exposebindinghandle_should_work(context):
+    targets = []
+
+    def logme(t):
+        targets.append(t)
+        return 17
+
+    page = await context.newPage()
+    await page.exposeBinding("logme", lambda source, t: logme(t), handle=True)
+    result = await page.evaluate("logme({ foo: 42 })")
+    assert (await targets[0].evaluate("x => x.foo")) == 42
+    assert result == 17
+
+
 async def test_route_should_intercept(context, server):
     intercepted = []
 
