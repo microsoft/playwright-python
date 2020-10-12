@@ -3691,7 +3691,9 @@ class Page(AsyncBase):
             )
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -&gt; NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -&gt; NoneType:
         &#34;&#34;&#34;Page.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in this page.
@@ -3713,10 +3715,12 @@ class Page(AsyncBase):
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright&#39;s context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -5314,7 +5318,9 @@ class BrowserContext(AsyncBase):
             await self._impl_obj.addInitScript(source=source, path=path)
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -&gt; NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -5333,10 +5339,12 @@ class BrowserContext(AsyncBase):
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright&#39;s context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -7202,7 +7210,9 @@ This is a convenience API that should only be used for the single-page scenarios
             await self._impl_obj.addInitScript(source=source, path=path)
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -&gt; NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -7221,10 +7231,12 @@ This is a convenience API that should only be used for the single-page scenarios
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright&#39;s context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -7632,7 +7644,7 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.exposeBinding"><code class="name flex">
-<span>async def <span class="ident">exposeBinding</span></span>(<span>self, name: str, binding: Callable) ‑> NoneType</span>
+<span>async def <span class="ident">exposeBinding</span></span>(<span>self, name: str, binding: Callable, handle: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.exposeBinding</p>
@@ -7650,12 +7662,16 @@ An example of exposing page URL to all frames in all pages in the context:</p>
 <dd>Name of the function on the window object.</dd>
 <dt><strong><code>binding</code></strong> :&ensp;<code>Callable</code></dt>
 <dd>Callback function that will be called in the Playwright's context.</dd>
+<dt><strong><code>handle</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def exposeBinding(self, name: str, binding: typing.Callable) -&gt; NoneType:
+<pre><code class="python">async def exposeBinding(
+    self, name: str, binding: typing.Callable, handle: bool = None
+) -&gt; NoneType:
     &#34;&#34;&#34;BrowserContext.exposeBinding
 
     The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -7674,10 +7690,12 @@ An example of exposing page URL to all frames in all pages in the context:</p>
         Name of the function on the window object.
     binding : Callable
         Callback function that will be called in the Playwright&#39;s context.
+    handle : Optional[bool]
+        Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
         await self._impl_obj.exposeBinding(
-            name=name, binding=self._wrap_handler(binding)
+            name=name, binding=self._wrap_handler(binding), handle=handle
         )
     )</code></pre>
 </details>
@@ -13555,7 +13573,23 @@ def url(self) -&gt; str:
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.addScriptTag</p>
-<p>Adds a `<script></p></div>
+<p>Adds a <code>&lt;script&gt;</code> tag into the page with the desired url or content.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>URL of a script to be added.</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
+<dd>Path to the JavaScript file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
+<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Raw JavaScript content to be injected into frame.</dd>
+<dt><strong><code>type</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Script type. Use 'module' in order to load a Javascript ES6 module. See script for more details.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a></code></dt>
+<dd>which resolves to the added tag when the script's onload fires or when the script content was injected into frame.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -13599,7 +13633,21 @@ def url(self) -&gt; str:
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.addStyleTag</p>
-<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a `<style type="text/css"></p></div>
+<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a <code>&lt;style type="text/css"&gt;</code> tag with the content.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>URL of the <code>&lt;link&gt;</code> tag.</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
+<dd>Path to the CSS file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
+<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Raw CSS content to be injected into frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a></code></dt>
+<dd>which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -17104,7 +17152,9 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             )
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -&gt; NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -&gt; NoneType:
         &#34;&#34;&#34;Page.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in this page.
@@ -17126,10 +17176,12 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright&#39;s context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -18761,7 +18813,24 @@ An example of overriding <code>Math.random</code> before the page loads:</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.addScriptTag</p>
-<p>Adds a `<script></p></div>
+<p>Adds a <code>&lt;script&gt;</code> tag into the page with the desired url or content.
+Shortcut for page.mainFrame().addScriptTag(options).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>URL of a script to be added.</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
+<dd>Path to the JavaScript file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
+<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Raw JavaScript content to be injected into frame.</dd>
+<dt><strong><code>type</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Script type. Use 'module' in order to load a Javascript ES6 module. See script for more details.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a></code></dt>
+<dd>which resolves to the added tag when the script's onload fires or when the script content was injected into frame.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -18806,7 +18875,22 @@ An example of overriding <code>Math.random</code> before the page loads:</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.addStyleTag</p>
-<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a `<style type="text/css"></p></div>
+<p>Adds a <code>&lt;link rel="stylesheet"&gt;</code> tag into the page with the desired url or a <code>&lt;style type="text/css"&gt;</code> tag with the content.
+Shortcut for page.mainFrame().addStyleTag(options).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>URL of the <code>&lt;link&gt;</code> tag.</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
+<dd>Path to the CSS file to be injected into frame. If <code>path</code> is a relative path, then it is resolved relative to current working directory.</dd>
+<dt><strong><code>content</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>Raw CSS content to be injected into frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a></code></dt>
+<dd>which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -19784,7 +19868,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.async_api.Page.exposeBinding"><code class="name flex">
-<span>async def <span class="ident">exposeBinding</span></span>(<span>self, name: str, binding: Callable) ‑> NoneType</span>
+<span>async def <span class="ident">exposeBinding</span></span>(<span>self, name: str, binding: Callable, handle: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.exposeBinding</p>
@@ -19803,12 +19887,16 @@ See browserContext.exposeBinding(name, playwrightBinding) for the context-wide v
 <dd>Name of the function on the window object.</dd>
 <dt><strong><code>binding</code></strong> :&ensp;<code>Callable</code></dt>
 <dd>Callback function that will be called in the Playwright's context.</dd>
+<dt><strong><code>handle</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def exposeBinding(self, name: str, binding: typing.Callable) -&gt; NoneType:
+<pre><code class="python">async def exposeBinding(
+    self, name: str, binding: typing.Callable, handle: bool = None
+) -&gt; NoneType:
     &#34;&#34;&#34;Page.exposeBinding
 
     The method adds a function called `name` on the `window` object of every frame in this page.
@@ -19830,10 +19918,12 @@ See browserContext.exposeBinding(name, playwrightBinding) for the context-wide v
         Name of the function on the window object.
     binding : Callable
         Callback function that will be called in the Playwright&#39;s context.
+    handle : Optional[bool]
+        Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
         await self._impl_obj.exposeBinding(
-            name=name, binding=self._wrap_handler(binding)
+            name=name, binding=self._wrap_handler(binding), handle=handle
         )
     )</code></pre>
 </details>
