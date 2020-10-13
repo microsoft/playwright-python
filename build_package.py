@@ -22,7 +22,7 @@ import zipfile
 
 from playwright.path_utils import get_file_dirname
 
-driver_version = "0.5.2"
+driver_version = "0.5.3"
 
 if not os.path.exists("driver"):
     os.makedirs("driver")
