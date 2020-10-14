@@ -88,7 +88,7 @@ async def test_browser_type_launch_server_should_fire_close_event(
 async def test_browser_type_executable_path_should_work(browser_type):
     executable_path = browser_type.executablePath
     assert os.path.exists(executable_path)
-    assert os.path.realpath(executable_path) == executable_path
+    assert os.path.realpath(executable_path) == os.path.realpath(executable_path)
 
 
 async def test_browser_type_name_should_work(

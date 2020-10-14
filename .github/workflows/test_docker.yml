@@ -1,0 +1,45 @@
+name: Test Docker
+on:
+  push:
+    paths:
+      - '.github/workflows/test_docker.yml'
+      - 'driver/**'
+    branches:
+      - master
+  pull_request:
+    paths:
+      - '.github/workflows/test_docker.yml'
+      - 'driver/**'
+    branches:
+      - master
+jobs:
+  build:
+    timeout-minutes: 60
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r local-requirements.txt
+        pip install -e .
+    - name: Build package
+      run: python build_package.py
+    - name: Install
+      run: python -m playwright install
+    - name: Build Docker image
+      run: docker build -t playwright-python:localbuild .
+    - name: Test
+      run: |
+        CONTAINER_ID="$(docker run --rm -v $(pwd):/root/playwright --name playwright-docker-test -d -t playwright-python:localbuild /bin/bash)"
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -r local-requirements.txt
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -e .
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv
