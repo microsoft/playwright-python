@@ -59,6 +59,7 @@ from playwright.js_handle import (
     serialize_argument,
 )
 from playwright.network import Request, Response, Route, serialize_headers
+from playwright.video import Video
 from playwright.wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -115,6 +116,7 @@ class Page(ChannelOwner):
         self._routes: List[RouteHandlerEntry] = []
         self._owned_context: Optional["BrowserContext"] = None
         self._timeout_settings: TimeoutSettings = TimeoutSettings(None)
+        self._video: Optional[Video] = None
 
         self._channel.on(
             "bindingCall",
@@ -199,6 +201,12 @@ class Page(ChannelOwner):
             "route",
             lambda params: self._on_route(
                 from_channel(params["route"]), from_channel(params["request"])
+            ),
+        )
+        self._channel.on(
+            "video",
+            lambda params: cast(Video, self.video)._set_relative_path(
+                params["relativePath"]
             ),
         )
         self._channel.on(
@@ -774,6 +782,16 @@ class Page(ChannelOwner):
             with open(path, "wb") as fd:
                 fd.write(decoded_binary)
         return decoded_binary
+
+    @property
+    def video(
+        self,
+    ) -> Optional[Video]:
+        if not self._browser_context._options.get("videosPath"):
+            return None
+        if not self._video:
+            self._video = Video(self)
+        return self._video
 
     def expect_event(
         self,

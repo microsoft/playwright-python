@@ -115,9 +115,11 @@ class BrowserType(ChannelOwner):
             params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
         normalize_launch_params(params)
         try:
-            return from_channel(
+            context = from_channel(
                 await self._channel.send("launchPersistentContext", params)
             )
+            context._options = params
+            return context
         except Exception as e:
             if f"{self.name}-" in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')

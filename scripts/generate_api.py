@@ -43,6 +43,7 @@ from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
+from playwright.video import Video
 
 
 def process_type(value: Any, param: bool = False) -> str:
@@ -169,6 +170,7 @@ from playwright.network import Request as RequestImpl, Response as ResponseImpl,
 from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
+from playwright.video import Video as VideoImpl
 """
 
 all_types = [
@@ -187,6 +189,7 @@ all_types = [
     ConsoleMessage,
     Dialog,
     Download,
+    Video,
     BindingCall,
     Page,
     BrowserContext,
