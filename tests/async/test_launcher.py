@@ -238,7 +238,9 @@ async def test_browser_close_should_terminate_network_waiters(
     asyncio.create_task(handle_waitForResponse())
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     results = await asyncio.gather(
-        wait_for_request_future, wait_for_response_future, browser_server.close(),
+        wait_for_request_future,
+        wait_for_response_future,
+        browser_server.close(),
     )
     for i in range(2):
         message = results[i].message
@@ -260,7 +262,8 @@ async def test_browser_close_should_fire_close_event_for_all_contexts(
 async def test_browser_close_should_be_callable_twice(browser_type, launch_arguments):
     browser = await browser_type.launch(**launch_arguments)
     await asyncio.gather(
-        browser.close(), browser.close(),
+        browser.close(),
+        browser.close(),
     )
     await browser.close()
 
@@ -294,7 +297,8 @@ async def test_browser_type_launch_server_should_fire_disconnected_when_closing_
 
     await browser_server.kill()
     await asyncio.gather(
-        disconnected_promise, closed_promise,
+        disconnected_promise,
+        closed_promise,
     )
 
 

@@ -14,8 +14,10 @@
 
 import asyncio
 import io
+import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 from greenlet import greenlet
@@ -30,21 +32,16 @@ from playwright.sync_api import Playwright as SyncPlaywright
 from playwright.sync_base import dispatcher_fiber, set_dispatcher_fiber
 
 
-def compute_driver_name() -> str:
+def compute_driver_executable() -> Path:
+    package_path = get_file_dirname()
     platform = sys.platform
-    if platform == "darwin":
-        result = "driver-macos"
-    elif platform == "linux":
-        result = "driver-linux"
-    elif platform == "win32":
-        result = "driver-win.exe"
-    return result
+    if platform == "win32":
+        return package_path / "driver" / "playwright-cli.exe"
+    return package_path / "driver" / "playwright-cli"
 
 
 async def run_driver_async() -> Connection:
-    package_path = get_file_dirname()
-    driver_name = compute_driver_name()
-    driver_executable = package_path / "drivers" / driver_name
+    driver_executable = compute_driver_executable()
 
     # Sourced from: https://github.com/pytest-dev/pytest/blob/49827adcb9256c9c9c06a25729421dcc3c385edc/src/_pytest/faulthandler.py#L73-L80
     def _get_stderr_fileno() -> int:
@@ -58,6 +55,7 @@ async def run_driver_async() -> Connection:
 
     proc = await asyncio.create_subprocess_exec(
         str(driver_executable),
+        "run-driver",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=_get_stderr_fileno(),
@@ -131,13 +129,7 @@ if sys.platform == "win32":
 
 
 def main() -> None:
-    if "install" not in sys.argv:
-        print('Run "python -m playwright install" to complete installation')
-        return
-    package_path = get_file_dirname()
-    driver_name = compute_driver_name()
-    driver_executable = package_path / "drivers" / driver_name
-    print("Installing the browsers...")
-    subprocess.check_call(f"{driver_executable} install", shell=True)
-
-    print("Playwright is now ready for use")
+    driver_executable = compute_driver_executable()
+    my_env = os.environ.copy()
+    my_env["PW_CLI_TARGET_LANG"] = "python"
+    subprocess.run([str(driver_executable), *sys.argv[1:]], env=my_env)

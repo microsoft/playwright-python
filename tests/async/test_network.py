@@ -308,14 +308,20 @@ async def test_response_json_should_work(page, server):
 
 async def test_response_body_should_work(page, server, assetdir):
     response = await page.goto(server.PREFIX + "/pptr.png")
-    with open(assetdir / "pptr.png", "rb",) as fd:
+    with open(
+        assetdir / "pptr.png",
+        "rb",
+    ) as fd:
         assert fd.read() == await response.body()
 
 
 async def test_response_body_should_work_with_compression(page, server, assetdir):
     server.enable_gzip("/pptr.png")
     response = await page.goto(server.PREFIX + "/pptr.png")
-    with open(assetdir / "pptr.png", "rb",) as fd:
+    with open(
+        assetdir / "pptr.png",
+        "rb",
+    ) as fd:
         assert fd.read() == await response.body()
 
 
@@ -501,7 +507,8 @@ async def test_set_extra_http_headers_should_work(page, server):
 
     request = (
         await asyncio.gather(
-            server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+            server.wait_for_request("/empty.html"),
+            page.goto(server.EMPTY_PAGE),
         )
     )[0]
     assert request.getHeader("foo") == "bar"
@@ -529,7 +536,8 @@ async def test_set_extra_http_headers_should_work_with_extra_headers_from_browse
     page = await context.newPage()
     request = (
         await asyncio.gather(
-            server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+            server.wait_for_request("/empty.html"),
+            page.goto(server.EMPTY_PAGE),
         )
     )[0]
     await context.close()
@@ -546,7 +554,8 @@ async def test_set_extra_http_headers_should_override_extra_headers_from_browser
 
     request = (
         await asyncio.gather(
-            server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+            server.wait_for_request("/empty.html"),
+            page.goto(server.EMPTY_PAGE),
         )
     )[0]
     await context.close()

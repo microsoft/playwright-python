@@ -146,7 +146,8 @@ async def test_close_should_abort_wait_for_event(browser):
 async def test_close_should_be_callable_twice(browser):
     context = await browser.newContext()
     await asyncio.gather(
-        context.close(), context.close(),
+        context.close(),
+        context.close(),
     )
     await context.close()
 
@@ -164,7 +165,8 @@ async def test_user_agent_should_work(browser, server):
         context = await browser.newContext(userAgent="foobar")
         page = await context.newPage()
         [request, _] = await asyncio.gather(
-            server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+            server.wait_for_request("/empty.html"),
+            page.goto(server.EMPTY_PAGE),
         )
         assert request.getHeader("user-agent") == "foobar"
         await context.close()
@@ -199,7 +201,8 @@ async def test_user_agent_should_make_a_copy_of_default_options(browser, server)
     options["userAgent"] = "wrong"
     page = await context.newPage()
     [request, _] = await asyncio.gather(
-        server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+        server.wait_for_request("/empty.html"),
+        page.goto(server.EMPTY_PAGE),
     )
     assert request.getHeader("user-agent") == "foobar"
     await context.close()
@@ -421,6 +424,20 @@ async def test_expose_function_should_be_callable_from_inside_addInitScript(
     args = []
     await page.reload()
     assert args == ["context", "page"]
+
+
+async def test_exposebindinghandle_should_work(context):
+    targets = []
+
+    def logme(t):
+        targets.append(t)
+        return 17
+
+    page = await context.newPage()
+    await page.exposeBinding("logme", lambda source, t: logme(t), handle=True)
+    result = await page.evaluate("logme({ foo: 42 })")
+    assert (await targets[0].evaluate("x => x.foo")) == 42
+    assert result == 17
 
 
 async def test_route_should_intercept(context, server):

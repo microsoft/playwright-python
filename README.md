@@ -13,6 +13,7 @@ Playwright is a Python library to automate [Chromium](https://www.chromium.org/H
 Headless execution is supported for all browsers on all platforms.
 
 * [Usage](#usage)
+  - [Record and generate code](#record-and-generate-code)
   - [Sync API](#sync-api)
   - [Async API](#async-api)
   - [With pytest](#with-pytest)
@@ -25,12 +26,21 @@ Headless execution is supported for all browsers on all platforms.
 
 ## Usage
 
-```
+```sh
 pip install playwright
 python -m playwright install
 ```
 
 This installs Playwright and browser binaries for Chromium, Firefox and WebKit. Playwright requires Python 3.7+.
+
+#### Record and generate code
+
+Playwright can record user interactions in a browser and generate code. [See demo](https://user-images.githubusercontent.com/284612/95930164-ad52fb80-0d7a-11eb-852d-04bfd19de800.gif).
+
+```sh
+# Pass --help to see all options
+python -m playwright codegen
+```
 
 Playwright offers both sync (blocking) API and async API. They are identical in terms of capabilities and only differ in how one consumes the API.
 

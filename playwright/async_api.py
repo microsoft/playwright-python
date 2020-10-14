@@ -1682,6 +1682,18 @@ class Frame(AsyncBase):
         super().__init__(obj)
 
     @property
+    def page(self) -> "Page":
+        """Frame.page
+
+        Returns the page containing this frame.
+
+        Returns
+        -------
+        Page
+        """
+        return mapping.from_impl(self._impl_obj.page)
+
+    @property
     def name(self) -> str:
         """Frame.name
 
@@ -1728,17 +1740,6 @@ class Frame(AsyncBase):
         List[Frame]
         """
         return mapping.from_impl_list(self._impl_obj.childFrames)
-
-    def page(self) -> "Page":
-        """Frame.page
-
-        Returns the page containing this frame.
-
-        Returns
-        -------
-        Page
-        """
-        return mapping.from_impl(self._impl_obj.page())
 
     async def goto(
         self,
@@ -2294,6 +2295,7 @@ class Frame(AsyncBase):
         button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -> NoneType:
         """Frame.dblclick
 
@@ -2325,6 +2327,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
@@ -2335,6 +2339,7 @@ class Frame(AsyncBase):
                 button=button,
                 timeout=timeout,
                 force=force,
+                noWaitAfter=noWaitAfter,
             )
         )
 
@@ -3042,8 +3047,7 @@ class Dialog(AsyncBase):
         )
 
     async def dismiss(self) -> NoneType:
-        """Dialog.dismiss
-        """
+        """Dialog.dismiss"""
         return mapping.from_maybe_impl(await self._impl_obj.dismiss())
 
 
@@ -3659,7 +3663,9 @@ class Page(AsyncBase):
             )
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -> NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -> NoneType:
         """Page.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in this page.
@@ -3673,16 +3679,20 @@ class Page(AsyncBase):
 
         An example of exposing page URL to all frames in a page:
 
+        An example of passing an element handle:
+
         Parameters
         ----------
         name : str
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright's context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -4103,6 +4113,9 @@ class Page(AsyncBase):
 
         Routing provides the capability to modify network requests that are made by a page.
         Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
+
+        **NOTE** The handler will only be called for the first url if the response is a redirect.
+
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
         Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.
@@ -4171,7 +4184,7 @@ class Page(AsyncBase):
         omitBackground : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
         fullPage : Optional[bool]
-            When true, takes a screenshot of the full scrollable page, instead of the currently visibvle viewport. Defaults to `false`.
+            When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to `false`.
         clip : Optional[{"x": float, "y": float, "width": float, "height": float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
 
@@ -4207,6 +4220,8 @@ class Page(AsyncBase):
     async def close(self, runBeforeUnload: bool = None) -> NoneType:
         """Page.close
 
+        If `runBeforeUnload` is `false` the result will resolve only after the page has been closed.
+        If `runBeforeUnload` is `true` the method will **not** wait for the page to close.
         By default, `page.close()` **does not** run beforeunload handlers.
 
         **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
@@ -4307,6 +4322,7 @@ class Page(AsyncBase):
         button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -> NoneType:
         """Page.dblclick
 
@@ -4340,6 +4356,8 @@ class Page(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.dblclick(
@@ -4350,6 +4368,7 @@ class Page(AsyncBase):
                 button=button,
                 timeout=timeout,
                 force=force,
+                noWaitAfter=noWaitAfter,
             )
         )
 
@@ -5064,6 +5083,17 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_impl_list(self._impl_obj.pages)
 
+    @property
+    def browser(self) -> typing.Union["Browser", NoneType]:
+        """BrowserContext.browser
+
+        Returns
+        -------
+        Optional[Browser]
+            Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+        """
+        return mapping.from_impl_nullable(self._impl_obj.browser)
+
     def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
         """BrowserContext.setDefaultNavigationTimeout
 
@@ -5260,7 +5290,9 @@ class BrowserContext(AsyncBase):
             await self._impl_obj.addInitScript(source=source, path=path)
         )
 
-    async def exposeBinding(self, name: str, binding: typing.Callable) -> NoneType:
+    async def exposeBinding(
+        self, name: str, binding: typing.Callable, handle: bool = None
+    ) -> NoneType:
         """BrowserContext.exposeBinding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context.
@@ -5271,16 +5303,20 @@ class BrowserContext(AsyncBase):
         See page.exposeBinding(name, playwrightBinding) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
 
+        An example of passing an element handle:
+
         Parameters
         ----------
         name : str
             Name of the function on the window object.
         binding : Callable
             Callback function that will be called in the Playwright's context.
+        handle : Optional[bool]
+            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is supported. When passing by value, multiple arguments are supported.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.exposeBinding(
-                name=name, binding=self._wrap_handler(binding)
+                name=name, binding=self._wrap_handler(binding), handle=handle
             )
         )
 
@@ -5556,6 +5592,8 @@ class Browser(AsyncBase):
         colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -5596,6 +5634,10 @@ class Browser(AsyncBase):
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{"width": int, "height": int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -5621,6 +5663,8 @@ class Browser(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -5644,6 +5688,8 @@ class Browser(AsyncBase):
         colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -5685,6 +5731,10 @@ class Browser(AsyncBase):
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{"width": int, "height": int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -5710,6 +5760,8 @@ class Browser(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 
@@ -5769,6 +5821,9 @@ class BrowserType(AsyncBase):
         downloadsPath: typing.Union[str, pathlib.Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
+        firefoxUserPrefs: typing.Union[
+            typing.Dict[str, typing.Union[str, int, bool]]
+        ] = None,
     ) -> "Browser":
         """BrowserType.launch
 
@@ -5808,7 +5863,9 @@ class BrowserType(AsyncBase):
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         chromiumSandbox : Optional[bool]
-            Enable Chromium sandboxing. Defaults to `true`.
+            Enable Chromium sandboxing. Defaults to `false`.
+        firefoxUserPrefs : Optional[Dict[str, Union[str, int, bool]]]
+            Firefox user preferences. Learn more about the Firefox user preferences at `about:config`.
 
         Returns
         -------
@@ -5831,6 +5888,7 @@ class BrowserType(AsyncBase):
                 downloadsPath=downloadsPath,
                 slowMo=slowMo,
                 chromiumSandbox=chromiumSandbox,
+                firefoxUserPrefs=mapping.to_impl(firefoxUserPrefs),
             )
         )
 
@@ -5868,6 +5926,8 @@ class BrowserType(AsyncBase):
         colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> "BrowserContext":
         """BrowserType.launchPersistentContext
 
@@ -5938,6 +5998,10 @@ class BrowserType(AsyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
+        videosPath : Optional[str]
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+        videoSize : Optional[{"width": int, "height": int}]
+            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
         Returns
         -------
@@ -5978,6 +6042,8 @@ class BrowserType(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 chromiumSandbox=chromiumSandbox,
+                videosPath=videosPath,
+                videoSize=videoSize,
             )
         )
 

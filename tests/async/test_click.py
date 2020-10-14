@@ -71,7 +71,8 @@ async def test_click_not_throw_when_page_closes(browser, server):
     page = await context.newPage()
     try:
         await asyncio.gather(
-            page.close(), page.mouse.click(1, 2),
+            page.close(),
+            page.mouse.click(1, 2),
         )
     except Error:
         pass

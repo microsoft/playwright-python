@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
-from pyee import BaseEventEmitter
+from pyee import EventEmitter
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.element_handle import (
@@ -73,13 +73,14 @@ class Frame(ChannelOwner):
         self._child_frames: List[Frame] = []
         self._page: "Page"
         self._load_states: Set[str] = set(initializer["loadStates"])
-        self._event_emitter = BaseEventEmitter()
+        self._event_emitter = EventEmitter()
         self._channel.on(
             "loadstate",
             lambda params: self._on_load_state(params.get("add"), params.get("remove")),
         )
         self._channel.on(
-            "navigated", lambda params: self._on_frame_navigated(params),
+            "navigated",
+            lambda params: self._on_frame_navigated(params),
         )
 
     def _on_load_state(
@@ -98,6 +99,7 @@ class Frame(ChannelOwner):
         if "error" not in event and hasattr(self, "_page") and self._page:
             self._page.emit("framenavigated", self)
 
+    @property
     def page(self) -> "Page":
         return self._page
 
@@ -156,7 +158,9 @@ class Frame(ChannelOwner):
             return not matcher or matcher.matches(event["url"])
 
         event = await wait_helper.wait_for_event(
-            self._event_emitter, "navigated", predicate=predicate,
+            self._event_emitter,
+            "navigated",
+            predicate=predicate,
         )
         if "error" in event:
             raise Error(event["error"])
@@ -293,7 +297,10 @@ class Frame(ChannelOwner):
         return await self._channel.send("content")
 
     async def setContent(
-        self, html: str, timeout: int = None, waitUntil: DocumentLoadState = None,
+        self,
+        html: str,
+        timeout: int = None,
+        waitUntil: DocumentLoadState = None,
     ) -> None:
         await self._channel.send("setContent", locals_to_params(locals()))
 
@@ -365,6 +372,7 @@ class Frame(ChannelOwner):
         button: MouseButton = None,
         timeout: int = None,
         force: bool = None,
+        noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("dblclick", locals_to_params(locals()))
 
@@ -484,7 +492,9 @@ class Frame(ChannelOwner):
         return await self._channel.send("title")
 
     def expect_load_state(
-        self, state: DocumentLoadState = None, timeout: int = None,
+        self,
+        state: DocumentLoadState = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
         return EventContextManagerImpl(self.waitForLoadState(state, timeout))
 

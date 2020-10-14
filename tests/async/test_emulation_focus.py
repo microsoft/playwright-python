@@ -42,14 +42,19 @@ async def test_should_provide_target_for_keyboard_events(page, server):
         page2.goto(server.PREFIX + "/input/textarea.html"),
     )
     await asyncio.gather(
-        page.focus("input"), page2.focus("input"),
+        page.focus("input"),
+        page2.focus("input"),
     )
     text = "first"
     text2 = "second"
     await asyncio.gather(
-        page.keyboard.type(text), page2.keyboard.type(text2),
+        page.keyboard.type(text),
+        page2.keyboard.type(text2),
     )
-    results = await asyncio.gather(page.evaluate("result"), page2.evaluate("result"),)
+    results = await asyncio.gather(
+        page.evaluate("result"),
+        page2.evaluate("result"),
+    )
     assert results == [text, text2]
 
 
@@ -65,10 +70,12 @@ async def test_should_not_affect_mouse_event_target_page(page, server):
         page2.focus("body"),
     )
     await asyncio.gather(
-        page.mouse.click(1, 1), page2.mouse.click(1, 1),
+        page.mouse.click(1, 1),
+        page2.mouse.click(1, 1),
     )
     counters = await asyncio.gather(
-        page.evaluate("window.clickCount"), page2.evaluate("window.clickCount"),
+        page.evaluate("window.clickCount"),
+        page2.evaluate("window.clickCount"),
     )
     assert counters == [1, 1]
 
@@ -80,7 +87,8 @@ async def test_should_change_document_activeElement(page, server):
         page2.goto(server.PREFIX + "/input/textarea.html"),
     )
     await asyncio.gather(
-        page.focus("input"), page2.focus("textarea"),
+        page.focus("input"),
+        page2.focus("textarea"),
     )
     active = await asyncio.gather(
         page.evaluate("document.activeElement.tagName"),
@@ -99,9 +107,13 @@ async def test_should_not_affect_screenshots(page, server, assert_to_be_golden):
         page2.goto(server.PREFIX + "/grid.html"),
     )
     await asyncio.gather(
-        page.focus("body"), page2.focus("body"),
+        page.focus("body"),
+        page2.focus("body"),
     )
-    screenshots = await asyncio.gather(page.screenshot(), page2.screenshot(),)
+    screenshots = await asyncio.gather(
+        page.screenshot(),
+        page2.screenshot(),
+    )
     assert_to_be_golden(screenshots[0], "screenshot-sanity.png")
     assert_to_be_golden(screenshots[1], "grid-cell-0.png")
 
@@ -118,27 +130,33 @@ async def test_should_change_focused_iframe(page, server, utils):
         element.onfocus = element.onblur = (e) => self._events.push(e.type);
     }"""
     await asyncio.gather(
-        frame1.evaluate(logger), frame2.evaluate(logger),
+        frame1.evaluate(logger),
+        frame2.evaluate(logger),
     )
     focused = await asyncio.gather(
-        frame1.evaluate("document.hasFocus()"), frame2.evaluate("document.hasFocus()"),
+        frame1.evaluate("document.hasFocus()"),
+        frame2.evaluate("document.hasFocus()"),
     )
     assert focused == [False, False]
     await frame1.focus("input")
     events = await asyncio.gather(
-        frame1.evaluate("self._events"), frame2.evaluate("self._events"),
+        frame1.evaluate("self._events"),
+        frame2.evaluate("self._events"),
     )
     assert events == [["focus"], []]
     focused = await asyncio.gather(
-        frame1.evaluate("document.hasFocus()"), frame2.evaluate("document.hasFocus()"),
+        frame1.evaluate("document.hasFocus()"),
+        frame2.evaluate("document.hasFocus()"),
     )
     assert focused == [True, False]
     await frame2.focus("input")
     events = await asyncio.gather(
-        frame1.evaluate("self._events"), frame2.evaluate("self._events"),
+        frame1.evaluate("self._events"),
+        frame2.evaluate("self._events"),
     )
     assert events == [["focus", "blur"], ["focus"]]
     focused = await asyncio.gather(
-        frame1.evaluate("document.hasFocus()"), frame2.evaluate("document.hasFocus()"),
+        frame1.evaluate("document.hasFocus()"),
+        frame2.evaluate("document.hasFocus()"),
     )
     assert focused == [False, True]

@@ -39,7 +39,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class Browser(ChannelOwner):
 
-    Events = SimpleNamespace(Disconnected="disconnected",)
+    Events = SimpleNamespace(
+        Disconnected="disconnected",
+    )
 
     def __init__(
         self, parent: "BrowserType", type: str, guid: str, initializer: Dict
@@ -84,6 +86,8 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
@@ -121,6 +125,8 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        videosPath: str = None,
+        videoSize: IntSize = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this

@@ -41,7 +41,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class BrowserContext(ChannelOwner):
 
-    Events = SimpleNamespace(Close="close", Page="page",)
+    Events = SimpleNamespace(
+        Close="close",
+        Page="page",
+    )
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
@@ -103,6 +106,10 @@ class BrowserContext(ChannelOwner):
     def pages(self) -> List[Page]:
         return self._pages.copy()
 
+    @property
+    def browser(self) -> Optional["Browser"]:
+        return self._browser
+
     async def newPage(self) -> Page:
         if self._owner_page:
             raise Error("Please use browser.newContext()")
@@ -150,7 +157,9 @@ class BrowserContext(ChannelOwner):
             raise Error("Either path or source parameter must be specified")
         await self._channel.send("addInitScript", dict(source=source))
 
-    async def exposeBinding(self, name: str, binding: Callable) -> None:
+    async def exposeBinding(
+        self, name: str, binding: Callable, handle: bool = None
+    ) -> None:
         for page in self._pages:
             if name in page._bindings:
                 raise Error(
@@ -159,7 +168,9 @@ class BrowserContext(ChannelOwner):
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         self._bindings[name] = binding
-        await self._channel.send("exposeBinding", dict(name=name))
+        await self._channel.send(
+            "exposeBinding", dict(name=name, needsHandle=handle or False)
+        )
 
     async def exposeFunction(self, name: str, binding: Callable) -> None:
         await self.exposeBinding(name, lambda source, *args: binding(*args))
@@ -219,11 +230,16 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("close")
 
     def expect_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None,
+        self,
+        event: str,
+        predicate: Callable[[Any], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def expect_page(
-        self, predicate: Callable[[Page], bool] = None, timeout: int = None,
+        self,
+        predicate: Callable[[Page], bool] = None,
+        timeout: int = None,
     ) -> EventContextManagerImpl[Page]:
         return EventContextManagerImpl(self.waitForEvent("page", predicate, timeout))

@@ -160,7 +160,8 @@ async def test_should_support_user_agent_option(launch_persistent, server):
     (page, context) = await launch_persistent(userAgent="foobar")
     assert await page.evaluate("() => navigator.userAgent") == "foobar"
     [request, _] = await asyncio.gather(
-        server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+        server.wait_for_request("/empty.html"),
+        page.goto(server.EMPTY_PAGE),
     )
     assert request.getHeader("user-agent") == "foobar"
 
@@ -264,7 +265,8 @@ async def test_should_support_ignore_https_errors_option(
 async def test_should_support_extra_http_headers_option(server, launch_persistent):
     (page, context) = await launch_persistent(extraHTTPHeaders={"foo": "bar"})
     [request, _] = await asyncio.gather(
-        server.wait_for_request("/empty.html"), page.goto(server.EMPTY_PAGE),
+        server.wait_for_request("/empty.html"),
+        page.goto(server.EMPTY_PAGE),
     )
     assert request.getHeader("foo") == "bar"
 

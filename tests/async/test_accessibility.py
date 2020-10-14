@@ -203,7 +203,8 @@ async def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable
 # WebKit rich text accessibility is iffy
 @pytest.mark.skip_browser("webkit")
 async def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_fields_with_role_should_have_children(
-    page, is_firefox,
+    page,
+    is_firefox,
 ):
     await page.setContent(
         """
