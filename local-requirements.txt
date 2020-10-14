@@ -5,7 +5,7 @@ pytest-sugar==0.9.4
 pytest-xdist==2.1.0
 pytest-timeout==1.4.2
 pixelmatch==0.2.1
-Pillow==7.2.0
+Pillow==8.0.0
 mypy==0.782
 setuptools==50.3.0
 twisted==20.3.0
