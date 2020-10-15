@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
-<title>playwright API documentation</title>
-<meta name="description" content="Python package `playwright` is a Python library to automate Chromium,
-Firefox and WebKit with a single API. Playwright is built to enable …" />
+<title>playwright.video API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,14 +19,9 @@ Firefox and WebKit with a single API. Playwright is built to enable …" />
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>playwright</code></h1>
+<h1 class="title">Module <code>playwright.video</code></h1>
 </header>
 <section id="section-intro">
-<p>Python package <code><a title="playwright" href="#playwright">playwright</a></code> is a Python library to automate Chromium,
-Firefox and WebKit with a single API. Playwright is built to enable cross-browser
-web automation that is ever-green, capable, reliable and fast.
-For more information you'll find the documentation for the sync API <a href="sync_api.html">here</a>
-and for the async API <a href="async_api.html">here</a>.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -45,87 +39,33 @@ and for the async API <a href="async_api.html">here</a>.</p>
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-&#34;&#34;&#34;
-Python package `playwright` is a Python library to automate Chromium,
-Firefox and WebKit with a single API. Playwright is built to enable cross-browser
-web automation that is ever-green, capable, reliable and fast.
-For more information you&#39;ll find the documentation for the sync API [here](sync_api.html)
-and for the async API [here](async_api.html).
-&#34;&#34;&#34;
 
-import playwright.helper as helper
-from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
+import os
+from typing import TYPE_CHECKING, cast
 
-Error = helper.Error
-TimeoutError = helper.TimeoutError
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright.page import Page
 
 
-def async_playwright() -&gt; AsyncPlaywrightContextManager:
-    return AsyncPlaywrightContextManager()
+class Video:
+    def __init__(self, page: &#34;Page&#34;) -&gt; None:
+        self._loop = page._loop
+        self._page = page
+        self._path_future = page._loop.create_future()
 
+    async def path(self) -&gt; str:
+        return await self._path_future
 
-def sync_playwright() -&gt; SyncPlaywrightContextManager:
-    return SyncPlaywrightContextManager()
-
-
-__all__ = [
-    &#34;async_playwright&#34;,
-    &#34;sync_playwright&#34;,
-    &#34;Error&#34;,
-    &#34;TimeoutError&#34;,
-]
-
-__pdoc__ = {
-    &#34;accessibility&#34;: False,
-    &#34;async_base&#34;: False,
-    &#34;browser&#34;: False,
-    &#34;browser_context&#34;: False,
-    &#34;browser_type&#34;: False,
-    &#34;cdp_session&#34;: False,
-    &#34;chromium_browser_context&#34;: False,
-    &#34;connection&#34;: False,
-    &#34;console_message&#34;: False,
-    &#34;dialog&#34;: False,
-    &#34;download&#34;: False,
-    &#34;element_handle&#34;: False,
-    &#34;event_context_manager&#34;: False,
-    &#34;file_chooser&#34;: False,
-    &#34;frame&#34;: False,
-    &#34;helper&#34;: False,
-    &#34;impl_to_api_mapping&#34;: False,
-    &#34;input&#34;: False,
-    &#34;js_handle&#34;: False,
-    &#34;main&#34;: False,
-    &#34;network&#34;: False,
-    &#34;object_factory&#34;: False,
-    &#34;page&#34;: False,
-    &#34;path_utils&#34;: False,
-    &#34;playwright&#34;: False,
-    &#34;selectors&#34;: False,
-    &#34;sync_base&#34;: False,
-    &#34;transport&#34;: False,
-    &#34;wait_helper&#34;: False,
-    &#34;async_playwright&#34;: False,
-    &#34;sync_playwright&#34;: False,
-}</code></pre>
+    def _set_relative_path(self, relative_path: str) -&gt; None:
+        self._path_future.set_result(
+            os.path.join(
+                cast(str, self._page._browser_context._options.get(&#34;videosPath&#34;)),
+                relative_path,
+            )
+        )</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="playwright.async_api" href="async_api.html">playwright.async_api</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.sync_api" href="sync_api.html">playwright.sync_api</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.video" href="video.html">playwright.video</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -134,56 +74,76 @@ __pdoc__ = {
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="playwright.Error"><code class="flex name class">
-<span>class <span class="ident">Error</span></span>
-<span>(</span><span>message: str, stack: str = None)</span>
+<dt id="playwright.video.Video"><code class="flex name class">
+<span>class <span class="ident">Video</span></span>
+<span>(</span><span>page: Page)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Error(Exception):
-    def __init__(self, message: str, stack: str = None) -&gt; None:
-        self.message = message
-        self.stack = stack
-        super().__init__(message)</code></pre>
+<pre><code class="python">class Video:
+    def __init__(self, page: &#34;Page&#34;) -&gt; None:
+        self._loop = page._loop
+        self._page = page
+        self._path_future = page._loop.create_future()
+
+    async def path(self) -&gt; str:
+        return await self._path_future
+
+    def _set_relative_path(self, relative_path: str) -&gt; None:
+        self._path_future.set_result(
+            os.path.join(
+                cast(str, self._page._browser_context._options.get(&#34;videosPath&#34;)),
+                relative_path,
+            )
+        )</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li>playwright.helper.TimeoutError</li>
-</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="playwright.video.Video.path"><code class="name flex">
+<span>async def <span class="ident">path</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def path(self) -&gt; str:
+    return await self._path_future</code></pre>
+</details>
 </dd>
-<dt id="playwright.TimeoutError"><code class="flex name class">
-<span>class <span class="ident">TimeoutError</span></span>
-<span>(</span><span>message: str, stack: str = None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class TimeoutError(Error):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>playwright.helper.Error</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
+</dl>
 </dd>
 </dl>
 </section>
 </article>
-
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="playwright" href="index.html">playwright</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="playwright.video.Video" href="#playwright.video.Video">Video</a></code></h4>
+<ul class="">
+<li><code><a title="playwright.video.Video.path" href="#playwright.video.Video.path">path</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
 </main>
 <footer id="footer">
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>

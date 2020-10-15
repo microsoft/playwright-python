@@ -92,6 +92,7 @@ from playwright.page import Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
 from playwright.sync_base import EventContextManager, SyncBase, mapping
+from playwright.video import Video as VideoImpl
 
 NoneType = type(None)
 
@@ -3283,6 +3284,25 @@ class Download(SyncBase):
 mapping.register(DownloadImpl, Download)
 
 
+class Video(SyncBase):
+    def __init__(self, obj: VideoImpl):
+        super().__init__(obj)
+
+    def path(self) -&gt; str:
+        &#34;&#34;&#34;Video.path
+
+        Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem upon closing the browser context.
+
+        Returns
+        -------
+        str
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
+
+
+mapping.register(VideoImpl, Video)
+
+
 class BindingCall(SyncBase):
     def __init__(self, obj: BindingCallImpl):
         super().__init__(obj)
@@ -3390,6 +3410,18 @@ class Page(SyncBase):
             This method returns all of the dedicated WebWorkers associated with the page.
         &#34;&#34;&#34;
         return mapping.from_impl_list(self._impl_obj.workers)
+
+    @property
+    def video(self) -&gt; typing.Union[&#34;Video&#34;, NoneType]:
+        &#34;&#34;&#34;Page.video
+
+        Video object associated with this page.
+
+        Returns
+        -------
+        Optional[Video]
+        &#34;&#34;&#34;
+        return mapping.from_impl_nullable(self._impl_obj.video)
 
     def remove_listener(self, event: str, f: typing.Any) -&gt; NoneType:
         return mapping.from_maybe_impl(
@@ -17244,6 +17276,18 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         return mapping.from_impl_list(self._impl_obj.workers)
 
+    @property
+    def video(self) -&gt; typing.Union[&#34;Video&#34;, NoneType]:
+        &#34;&#34;&#34;Page.video
+
+        Video object associated with this page.
+
+        Returns
+        -------
+        Optional[Video]
+        &#34;&#34;&#34;
+        return mapping.from_impl_nullable(self._impl_obj.video)
+
     def remove_listener(self, event: str, f: typing.Any) -&gt; NoneType:
         return mapping.from_maybe_impl(
             self._impl_obj.remove_listener(event=event, f=mapping.to_impl(f))
@@ -19334,6 +19378,32 @@ def url(self) -&gt; str:
     str
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._impl_obj.url)</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.video"><code class="name">var <span class="ident">video</span> : Union[<a title="playwright.async_api.Video" href="async_api.html#playwright.async_api.Video">Video</a>, NoneType]</code></dt>
+<dd>
+<div class="desc"><p>Page.video</p>
+<p>Video object associated with this page.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[<a title="playwright.sync_api.Video" href="#playwright.sync_api.Video">Video</a>]</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def video(self) -&gt; typing.Union[&#34;Video&#34;, NoneType]:
+    &#34;&#34;&#34;Page.video
+
+    Video object associated with this page.
+
+    Returns
+    -------
+    Optional[Video]
+    &#34;&#34;&#34;
+    return mapping.from_impl_nullable(self._impl_obj.video)</code></pre>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.workers"><code class="name">var <span class="ident">workers</span> : List[<a title="playwright.async_api.Worker" href="async_api.html#playwright.async_api.Worker">Worker</a>]</code></dt>
@@ -24361,6 +24431,67 @@ An example of serving static file:</p>
 </dd>
 </dl>
 </dd>
+<dt id="playwright.sync_api.Video"><code class="flex name class">
+<span>class <span class="ident">Video</span></span>
+<span>(</span><span>obj: <a title="playwright.video.Video" href="video.html#playwright.video.Video">Video</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Video(SyncBase):
+    def __init__(self, obj: VideoImpl):
+        super().__init__(obj)
+
+    def path(self) -&gt; str:
+        &#34;&#34;&#34;Video.path
+
+        Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem upon closing the browser context.
+
+        Returns
+        -------
+        str
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="playwright.sync_api.Video.path"><code class="name flex">
+<span>def <span class="ident">path</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Video.path</p>
+<p>Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem upon closing the browser context.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def path(self) -&gt; str:
+    &#34;&#34;&#34;Video.path
+
+    Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem upon closing the browser context.
+
+    Returns
+    -------
+    str
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="playwright.sync_api.Worker"><code class="flex name class">
 <span>class <span class="ident">Worker</span></span>
 <span>(</span><span>obj: playwright.page.Worker)</span>
@@ -24914,6 +25045,7 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.Page.uncheck" href="#playwright.sync_api.Page.uncheck">uncheck</a></code></li>
 <li><code><a title="playwright.sync_api.Page.unroute" href="#playwright.sync_api.Page.unroute">unroute</a></code></li>
 <li><code><a title="playwright.sync_api.Page.url" href="#playwright.sync_api.Page.url">url</a></code></li>
+<li><code><a title="playwright.sync_api.Page.video" href="#playwright.sync_api.Page.video">video</a></code></li>
 <li><code><a title="playwright.sync_api.Page.viewportSize" href="#playwright.sync_api.Page.viewportSize">viewportSize</a></code></li>
 <li><code><a title="playwright.sync_api.Page.waitForEvent" href="#playwright.sync_api.Page.waitForEvent">waitForEvent</a></code></li>
 <li><code><a title="playwright.sync_api.Page.waitForFunction" href="#playwright.sync_api.Page.waitForFunction">waitForFunction</a></code></li>
@@ -24984,6 +25116,12 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <h4><code><a title="playwright.sync_api.Selectors" href="#playwright.sync_api.Selectors">Selectors</a></code></h4>
 <ul class="">
 <li><code><a title="playwright.sync_api.Selectors.register" href="#playwright.sync_api.Selectors.register">register</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="playwright.sync_api.Video" href="#playwright.sync_api.Video">Video</a></code></h4>
+<ul class="">
+<li><code><a title="playwright.sync_api.Video.path" href="#playwright.sync_api.Video.path">path</a></code></li>
 </ul>
 </li>
 <li>
