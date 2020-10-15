@@ -58,6 +58,7 @@ class BrowserContext(ChannelOwner):
         self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
         self._is_closed_or_closing = False
+        self._options: Dict[str, Any] = {}
 
         self._channel.on(
             "bindingCall",

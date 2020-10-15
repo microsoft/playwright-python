@@ -103,6 +103,7 @@ class Browser(ChannelOwner):
         context = from_channel(channel)
         self._contexts.append(context)
         context._browser = self
+        context._options = params
         return context
 
     async def newPage(

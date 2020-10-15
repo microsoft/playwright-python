@@ -64,6 +64,7 @@ from playwright.page import Page as PageImpl
 from playwright.page import Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
+from playwright.video import Video as VideoImpl
 
 NoneType = type(None)
 
@@ -3127,6 +3128,25 @@ class Download(AsyncBase):
 mapping.register(DownloadImpl, Download)
 
 
+class Video(AsyncBase):
+    def __init__(self, obj: VideoImpl):
+        super().__init__(obj)
+
+    async def path(self) -> str:
+        """Video.path
+
+        Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem upon closing the browser context.
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(await self._impl_obj.path())
+
+
+mapping.register(VideoImpl, Video)
+
+
 class BindingCall(AsyncBase):
     def __init__(self, obj: BindingCallImpl):
         super().__init__(obj)
@@ -3234,6 +3254,18 @@ class Page(AsyncBase):
             This method returns all of the dedicated WebWorkers associated with the page.
         """
         return mapping.from_impl_list(self._impl_obj.workers)
+
+    @property
+    def video(self) -> typing.Union["Video", NoneType]:
+        """Page.video
+
+        Video object associated with this page.
+
+        Returns
+        -------
+        Optional[Video]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.video)
 
     def remove_listener(self, event: str, f: typing.Any) -> NoneType:
         return mapping.from_maybe_impl(
