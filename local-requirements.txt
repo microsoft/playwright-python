@@ -4,6 +4,7 @@ pytest-cov==2.10.1
 pytest-sugar==0.9.4
 pytest-xdist==2.1.0
 pytest-timeout==1.4.2
+flaky==3.7.0
 pixelmatch==0.2.1
 Pillow==8.0.0
 mypy==0.782

@@ -16,6 +16,7 @@
 import asyncio
 
 import pytest
+from flaky import flaky
 
 
 async def test_should_have_default_url_when_launching_browser(
@@ -179,6 +180,7 @@ async def test_should_not_override_viewport_size_when_passed_null(
     await browser.close()
 
 
+@flaky
 async def test_page_bring_to_front_should_work(browser_type, launch_arguments):
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page1 = await browser.newPage()
