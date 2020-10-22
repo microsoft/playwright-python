@@ -16,6 +16,7 @@ import asyncio
 import os
 
 import pytest
+from flaky import flaky
 
 from playwright.helper import Error
 
@@ -279,6 +280,7 @@ async def test_should_accept_user_data_dir(server, tmpdir, launch_persistent):
     assert len(os.listdir(tmpdir)) > 0
 
 
+@flaky
 async def test_should_restore_state_from_userDataDir(
     browser_type, launch_arguments, server, tmp_path_factory
 ):
