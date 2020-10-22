@@ -43,11 +43,11 @@ def compute_driver_executable() -> Path:
 async def run_driver_async() -> Connection:
     driver_executable = compute_driver_executable()
 
-    # Sourced from: https://github.com/pytest-dev/pytest/blob/49827adcb9256c9c9c06a25729421dcc3c385edc/src/_pytest/faulthandler.py#L73-L80
+    # Sourced from: https://github.com/pytest-dev/pytest/blob/824e9cf67abcfc47df25a59bf32ebd8c25fbd02a/src/_pytest/faulthandler.py#L70-L77
     def _get_stderr_fileno() -> int:
         try:
             return sys.stderr.fileno()
-        except io.UnsupportedOperation:
+        except (AttributeError, io.UnsupportedOperation):
             # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
             # https://docs.python.org/3/library/faulthandler.html#issue-with-file-descriptors
             # This is potentially dangerous, but the best we can do.
