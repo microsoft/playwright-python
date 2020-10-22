@@ -5,10 +5,11 @@ pytest-sugar==0.9.4
 pytest-xdist==2.1.0
 pytest-timeout==1.4.2
 pixelmatch==0.2.1
-Pillow==7.2.0
+Pillow==8.0.0
 mypy==0.782
 setuptools==50.3.0
-twisted==20.3.0
+# TODO: use PyPi version after >20.3.0 is released
+git+https://github.com/twisted/twisted.git@4ff22287cab3b54f51cee41ea2619e72d1bff2e4
 wheel==0.35.1
 black==20.8b1
 pre-commit==2.7.1
