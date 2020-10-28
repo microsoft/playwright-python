@@ -1186,7 +1186,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -1662,7 +1662,7 @@ class FileChooser(AsyncBase):
 
         Parameters
         ----------
-        files : Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+        files : Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -2588,7 +2588,7 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -4648,7 +4648,7 @@ class Page(AsyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+        files : Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]

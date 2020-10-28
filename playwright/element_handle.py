@@ -27,6 +27,7 @@ from playwright.helper import (
     MouseButton,
     MousePosition,
     SelectOption,
+    SetFilePayload,
     locals_to_params,
 )
 from playwright.js_handle import (
@@ -291,22 +292,27 @@ def convert_select_option_values(arg: ValuesToSelect) -> Any:
 
 def normalize_file_payloads(
     files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]]
-) -> List[FilePayload]:
+) -> List[SetFilePayload]:
     file_list = files if isinstance(files, list) else [files]
-    file_payloads: List[FilePayload] = []
+    file_payloads: List[SetFilePayload] = []
     for item in file_list:
         if isinstance(item, str) or isinstance(item, Path):
             with open(item, mode="rb") as fd:
-                file: FilePayload = {
-                    "name": os.path.basename(item),
-                    "mimeType": mimetypes.guess_type(str(Path(item)))[0]
-                    or "application/octet-stream",
-                    "buffer": base64.b64encode(fd.read()).decode(),
-                }
-                file_payloads.append(file)
+                file_payloads.append(
+                    {
+                        "name": os.path.basename(item),
+                        "mimeType": mimetypes.guess_type(str(Path(item)))[0]
+                        or "application/octet-stream",
+                        "buffer": base64.b64encode(fd.read()).decode(),
+                    }
+                )
         else:
-            if isinstance(item["buffer"], bytes):
-                item["buffer"] = base64.b64encode(item["buffer"]).decode()
-            file_payloads.append(item)
+            file_payloads.append(
+                {
+                    "name": item["name"],
+                    "mimeType": item["mimeType"],
+                    "buffer": base64.b64encode(item["buffer"]).decode(),
+                }
+            )
 
     return file_payloads

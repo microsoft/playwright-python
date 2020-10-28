@@ -809,13 +809,10 @@ async def test_fail_when_element_detaches_after_animation(page, server):
     promise = asyncio.create_task(handle.click())
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("stopButton(true)")
-    error = None
-    try:
-        error = await promise
-    except Error as e:
-        error = e
+    with pytest.raises(Error) as exc_info:
+        await promise
     assert await page.evaluate("window.clicked") is None
-    assert "Element is not attached to the DOM" in error.message
+    assert "Element is not attached to the DOM" in exc_info.value.message
 
 
 async def test_retry_when_element_detaches_after_animation(page, server):
@@ -950,16 +947,12 @@ async def test_click_the_button_when_window_inner_width_is_corrupted(page, serve
 
 
 async def test_timeout_when_click_opens_alert(page, server):
-    dialog_promise = asyncio.create_task(page.waitForEvent("dialog"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.setContent('<div onclick="window.alert(123)">Click me</div>')
-    error = None
-    try:
-        await page.click("div", timeout=3000)
-    except TimeoutError as e:
-        error = e
-    assert "Timeout 3000ms exceeded" in error.message
-    dialog = await dialog_promise
+    async with page.expect_event("dialog") as dialog_info:
+        with pytest.raises(Error) as exc_info:
+            await page.click("div", timeout=3000)
+        assert "Timeout 3000ms exceeded" in exc_info.value.message
+    dialog = await dialog_info.value
     await dialog.dismiss()
 
 

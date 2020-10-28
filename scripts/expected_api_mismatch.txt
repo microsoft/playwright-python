@@ -74,10 +74,10 @@ Parameter not documented: BrowserContext.addInitScript(path=)
 Parameter not documented: Page.addInitScript(path=)
 
 # File payload
-Parameter type mismatch in FileChooser.setFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
-Parameter type mismatch in Page.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
-Parameter type mismatch in ElementHandle.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
-Parameter type mismatch in Frame.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]
+Parameter type mismatch in FileChooser.setFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+Parameter type mismatch in Page.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+Parameter type mismatch in ElementHandle.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+Parameter type mismatch in Frame.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
 
 # Select option
 Parameter type mismatch in ElementHandle.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]

@@ -59,7 +59,13 @@ class MousePosition(TypedDict):
 class FilePayload(TypedDict):
     name: str
     mimeType: str
-    buffer: Union[bytes, str]
+    buffer: bytes
+
+
+class SetFilePayload(TypedDict):
+    name: str
+    mimeType: str
+    buffer: str
 
 
 class SelectOption(TypedDict):
