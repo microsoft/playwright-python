@@ -1252,7 +1252,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -1746,7 +1746,7 @@ class FileChooser(SyncBase):
 
         Parameters
         ----------
-        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -2711,7 +2711,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -4863,7 +4863,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -10565,7 +10565,7 @@ def url(self) -&gt; str:
 
         Parameters
         ----------
-        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -12100,7 +12100,7 @@ If element is not a <code>&lt;select&gt;</code> element, the method throws an er
 Sets the value of the file input to these file paths or files. If some of the <code>filePaths</code> are relative paths, then they are resolved relative to the current working directory. For empty array, clears the selected files.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]</code></dt>
+<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
@@ -12131,7 +12131,7 @@ Sets the value of the file input to these file paths or files. If some of the <c
 
     Parameters
     ----------
-    files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+    files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
     timeout : Optional[int]
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
     noWaitAfter : Optional[bool]
@@ -12512,7 +12512,7 @@ When all steps combined have not finished during the specified <code>timeout</co
 
         Parameters
         ----------
-        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -12622,7 +12622,7 @@ def page(self) -&gt; &#34;Page&#34;:
 <p>Sets the value of the file input this chooser is associated with. If some of the <code>filePaths</code> are relative paths, then they are resolved relative to the current working directory. For empty array, clears the selected files.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]</code></dt>
+<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
@@ -12647,7 +12647,7 @@ def page(self) -&gt; &#34;Page&#34;:
 
     Parameters
     ----------
-    files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+    files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
     timeout : Optional[int]
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
     noWaitAfter : Optional[bool]
@@ -13621,7 +13621,7 @@ def page(self) -&gt; &#34;Page&#34;:
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -15565,7 +15565,7 @@ Sets the value of the file input to these file paths or files. If some of the <c
 <dl>
 <dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
 <dd>A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.</dd>
-<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]</code></dt>
+<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
@@ -15599,7 +15599,7 @@ Sets the value of the file input to these file paths or files. If some of the <c
     ----------
     selector : str
         A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-    files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+    files : Union[str, pathlib.Path, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[pathlib.Path], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
     timeout : Optional[int]
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
     noWaitAfter : Optional[bool]
@@ -18728,7 +18728,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         ----------
         selector : str
             A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+        files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         noWaitAfter : Optional[bool]
@@ -22111,7 +22111,7 @@ Sets the value of the file input to these file paths or files. If some of the <c
 <dl>
 <dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
 <dd>A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.</dd>
-<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, {"name": str, "mimeType": str, "buffer": Union[bytes, str]}, List[str], List[{"name": str, "mimeType": str, "buffer": Union[bytes, str]}]]</code></dt>
+<dt><strong><code>files</code></strong> :&ensp;<code>Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
@@ -22140,7 +22140,7 @@ Sets the value of the file input to these file paths or files. If some of the <c
     ----------
     selector : str
         A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
-    files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: Union[bytes, str]}]]
+    files : Union[str, {&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}, List[str], List[{&#34;name&#34;: str, &#34;mimeType&#34;: str, &#34;buffer&#34;: bytes}]]
     timeout : Optional[int]
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
     noWaitAfter : Optional[bool]
