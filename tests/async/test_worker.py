@@ -38,12 +38,12 @@ async def test_workers_page_workers(page, server):
 
 
 async def test_workers_should_emit_created_and_destroyed_events(page: Page):
-    worker_createdpromise = asyncio.create_task(page.waitForEvent("worker"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    worker_obj = await page.evaluateHandle(
-        "() => new Worker(URL.createObjectURL(new Blob(['1'], {type: 'application/javascript'})))"
-    )
-    worker = await worker_createdpromise
+    worker_obj = None
+    async with page.expect_event("worker") as event_info:
+        worker_obj = await page.evaluateHandle(
+            "() => new Worker(URL.createObjectURL(new Blob(['1'], {type: 'application/javascript'})))"
+        )
+    worker = await event_info.value
     worker_this_obj = await worker.evaluateHandle("() => this")
     worker_destroyed_promise: Future[Worker] = asyncio.Future()
     worker.once("close", lambda w: worker_destroyed_promise.set_result(w))
@@ -78,12 +78,11 @@ async def test_workers_should_have_JSHandles_for_console_logs(page):
 
 
 async def test_workers_should_evaluate(page):
-    worker_createdpromise = asyncio.create_task(page.waitForEvent("worker"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.evaluate(
-        "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
-    )
-    worker = await worker_createdpromise
+    async with page.expect_event("worker") as event_info:
+        await page.evaluate(
+            "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
+        )
+    worker = await event_info.value
     assert await worker.evaluate("1+1") == 2
 
 
@@ -105,12 +104,11 @@ async def test_workers_should_report_errors(page):
 
 async def test_workers_should_clear_upon_navigation(server, page):
     await page.goto(server.EMPTY_PAGE)
-    worker_createdpromise = asyncio.create_task(page.waitForEvent("worker"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.evaluate(
-        '() => new Worker(URL.createObjectURL(new Blob(["console.log(1)"], {type: "application/javascript"})))'
-    )
-    worker = await worker_createdpromise
+    async with page.expect_event("worker") as event_info:
+        await page.evaluate(
+            '() => new Worker(URL.createObjectURL(new Blob(["console.log(1)"], {type: "application/javascript"})))'
+        )
+    worker = await event_info.value
     assert len(page.workers) == 1
     destroyed = []
     worker.once("close", lambda _: destroyed.append(True))
@@ -121,12 +119,11 @@ async def test_workers_should_clear_upon_navigation(server, page):
 
 async def test_workers_should_clear_upon_cross_process_navigation(server, page):
     await page.goto(server.EMPTY_PAGE)
-    worker_createdpromise = asyncio.create_task(page.waitForEvent("worker"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.evaluate(
-        "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
-    )
-    worker = await worker_createdpromise
+    async with page.expect_event("worker") as event_info:
+        await page.evaluate(
+            "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
+        )
+    worker = await event_info.value
     assert len(page.workers) == 1
     destroyed = []
     worker.once("close", lambda _: destroyed.append(True))
@@ -141,14 +138,14 @@ async def test_workers_should_report_network_activity(page, server):
         page.goto(server.PREFIX + "/worker/worker.html"),
     )
     url = server.PREFIX + "/one-style.css"
-    request_promise = asyncio.create_task(page.waitForRequest(url))
-    response_promise = asyncio.create_task(page.waitForResponse(url))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await worker.evaluate(
-        "url => fetch(url).then(response => response.text()).then(console.log)", url
-    )
-    request = await request_promise
-    response = await response_promise
+    async with page.expect_request(url) as request_info, page.expect_response(
+        url
+    ) as response_info:
+        await worker.evaluate(
+            "url => fetch(url).then(response => response.text()).then(console.log)", url
+        )
+    request = await request_info.value
+    response = await response_info.value
     assert request.url == url
     assert response.request == request
     assert response.ok
@@ -158,17 +155,17 @@ async def test_workers_should_report_network_activity_on_worker_creation(page, s
     # Chromium needs waitForDebugger enabled for this one.
     await page.goto(server.EMPTY_PAGE)
     url = server.PREFIX + "/one-style.css"
-    request_promise = asyncio.create_task(page.waitForRequest(url))
-    response_promise = asyncio.create_task(page.waitForResponse(url))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.evaluate(
-        """url => new Worker(URL.createObjectURL(new Blob([`
-      fetch("${url}").then(response => response.text()).then(console.log);
-    `], {type: 'application/javascript'})))""",
-        url,
-    )
-    request = await request_promise
-    response = await response_promise
+    async with page.expect_request(url) as request_info, page.expect_response(
+        url
+    ) as response_info:
+        await page.evaluate(
+            """url => new Worker(URL.createObjectURL(new Blob([`
+        fetch("${url}").then(response => response.text()).then(console.log);
+        `], {type: 'application/javascript'})))""",
+            url,
+        )
+    request = await request_info.value
+    response = await response_info.value
     assert request.url == url
     assert response.request == request
     assert response.ok

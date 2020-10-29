@@ -77,10 +77,10 @@ async def test_should_emit_event(page: Page, server):
 
 async def test_should_work_when_file_input_is_attached_to_DOM(page: Page, server):
     await page.setContent("<input type=file>")
-    file_chooser = asyncio.create_task(page.waitForEvent("filechooser"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.click("input")
-    assert await file_chooser
+    async with page.expect_event("filechooser") as fc_info:
+        await page.click("input")
+    file_chooser = await fc_info.value
+    assert file_chooser
 
 
 async def test_should_work_when_file_input_is_not_attached_to_DOM(page, server):

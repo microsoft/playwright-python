@@ -224,7 +224,7 @@ async def test_wait_for_request_should_work_with_url_match(page, server):
     assert request.url == server.PREFIX + "/digits/1.png"
 
 
-async def test_wait_for_event_should_fail_with_error_upon_disconnect(page, server):
+async def test_wait_for_event_should_fail_with_error_upon_disconnect(page):
     future = asyncio.create_task(page.waitForEvent("download"))
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.close()
