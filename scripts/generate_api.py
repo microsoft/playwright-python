@@ -39,7 +39,7 @@ from playwright.file_chooser import FileChooser
 from playwright.frame import Frame
 from playwright.input import Keyboard, Mouse, Touchscreen
 from playwright.js_handle import JSHandle, Serializable
-from playwright.network import Request, Response, Route
+from playwright.network import Request, Response, Route, WebSocket
 from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
@@ -166,7 +166,7 @@ from playwright.frame import Frame as FrameImpl
 from playwright.helper import ConsoleMessageLocation, Credentials, MousePosition, Error, FilePayload, SelectOption, RequestFailure, Viewport, DeviceDescriptor, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins, ResourceTiming, RecordHarOptions
 from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright.js_handle import JSHandle as JSHandleImpl
-from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl
+from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
 from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
 from playwright.playwright import Playwright as PlaywrightImpl
 from playwright.selectors import Selectors as SelectorsImpl
@@ -177,6 +177,7 @@ all_types = [
     Request,
     Response,
     Route,
+    WebSocket,
     Keyboard,
     Mouse,
     Touchscreen,

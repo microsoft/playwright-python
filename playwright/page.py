@@ -91,6 +91,7 @@ class Page(ChannelOwner):
         FrameNavigated="framenavigated",
         Load="load",
         Popup="popup",
+        WebSocket="websocket",
         Worker="worker",
     )
     accessibility: Accessibility
@@ -211,6 +212,12 @@ class Page(ChannelOwner):
             "video",
             lambda params: cast(Video, self.video)._set_relative_path(
                 params["relativePath"]
+            ),
+        )
+        self._channel.on(
+            "webSocket",
+            lambda params: self.emit(
+                Page.Events.WebSocket, from_channel(params["webSocket"])
             ),
         )
         self._channel.on(
