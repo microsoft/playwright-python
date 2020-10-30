@@ -77,6 +77,7 @@ from playwright.helper import (
     PdfMargins,
     ProxyServer,
     RequestFailure,
+    ResourceTiming,
     SelectOption,
     Viewport,
 )
@@ -236,6 +237,18 @@ class Request(SyncBase):
             Object describing request failure, if any
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._impl_obj.failure)
+
+    @property
+    def timing(self) -&gt; ResourceTiming:
+        &#34;&#34;&#34;Request.timing
+
+        Returns resource timing information for given request. Most of the timing values become available upon the response, `responseEnd` becomes available when request finishes. Find more information at Resource Timing API.
+
+        Returns
+        -------
+        {&#34;startTime&#34;: float, &#34;domainLookupStart&#34;: float, &#34;domainLookupEnd&#34;: float, &#34;connectStart&#34;: float, &#34;secureConnectionStart&#34;: float, &#34;connectEnd&#34;: float, &#34;requestStart&#34;: float, &#34;responseStart&#34;: float, &#34;responseEnd&#34;: float}
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.timing)
 
     def response(self) -&gt; typing.Union[&#34;Response&#34;, NoneType]:
         &#34;&#34;&#34;Request.response
@@ -23829,6 +23842,18 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
+    @property
+    def timing(self) -&gt; ResourceTiming:
+        &#34;&#34;&#34;Request.timing
+
+        Returns resource timing information for given request. Most of the timing values become available upon the response, `responseEnd` becomes available when request finishes. Find more information at Resource Timing API.
+
+        Returns
+        -------
+        {&#34;startTime&#34;: float, &#34;domainLookupStart&#34;: float, &#34;domainLookupEnd&#34;: float, &#34;connectStart&#34;: float, &#34;secureConnectionStart&#34;: float, &#34;connectEnd&#34;: float, &#34;requestStart&#34;: float, &#34;responseStart&#34;: float, &#34;responseEnd&#34;: float}
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.timing)
+
     def response(self) -&gt; typing.Union[&#34;Response&#34;, NoneType]:
         &#34;&#34;&#34;Request.response
 
@@ -24119,6 +24144,29 @@ def resourceType(self) -&gt; str:
     str
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._impl_obj.resourceType)</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Request.timing"><code class="name">var <span class="ident">timing</span> : playwright.helper.ResourceTiming</code></dt>
+<dd>
+<div class="desc"><p>Request.timing</p>
+<p>Returns resource timing information for given request. Most of the timing values become available upon the response, <code>responseEnd</code> becomes available when request finishes. Find more information at Resource Timing API.</p>
+<h2 id="returns">Returns</h2>
+<p>{"startTime": float, "domainLookupStart": float, "domainLookupEnd": float, "connectStart": float, "secureConnectionStart": float, "connectEnd": float, "requestStart": float, "responseStart": float, "responseEnd": float}</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def timing(self) -&gt; ResourceTiming:
+    &#34;&#34;&#34;Request.timing
+
+    Returns resource timing information for given request. Most of the timing values become available upon the response, `responseEnd` becomes available when request finishes. Find more information at Resource Timing API.
+
+    Returns
+    -------
+    {&#34;startTime&#34;: float, &#34;domainLookupStart&#34;: float, &#34;domainLookupEnd&#34;: float, &#34;connectStart&#34;: float, &#34;secureConnectionStart&#34;: float, &#34;connectEnd&#34;: float, &#34;requestStart&#34;: float, &#34;responseStart&#34;: float, &#34;responseEnd&#34;: float}
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(self._impl_obj.timing)</code></pre>
 </details>
 </dd>
 <dt id="playwright.sync_api.Request.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
@@ -25782,6 +25830,7 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.Request.redirectedTo" href="#playwright.sync_api.Request.redirectedTo">redirectedTo</a></code></li>
 <li><code><a title="playwright.sync_api.Request.resourceType" href="#playwright.sync_api.Request.resourceType">resourceType</a></code></li>
 <li><code><a title="playwright.sync_api.Request.response" href="#playwright.sync_api.Request.response">response</a></code></li>
+<li><code><a title="playwright.sync_api.Request.timing" href="#playwright.sync_api.Request.timing">timing</a></code></li>
 <li><code><a title="playwright.sync_api.Request.url" href="#playwright.sync_api.Request.url">url</a></code></li>
 </ul>
 </li>
