@@ -102,6 +102,7 @@ async def test_workers_should_report_errors(page):
     assert "this is my error" in error_log.message
 
 
+@pytest.mark.skip_browser("firefox")  # TODO: fails upstream
 async def test_workers_should_clear_upon_navigation(server, page):
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:
@@ -117,6 +118,7 @@ async def test_workers_should_clear_upon_navigation(server, page):
     assert len(page.workers) == 0
 
 
+@pytest.mark.skip_browser("firefox")  # TODO: fails upstream
 async def test_workers_should_clear_upon_cross_process_navigation(server, page):
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:

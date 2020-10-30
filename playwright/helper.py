@@ -56,6 +56,23 @@ class MousePosition(TypedDict):
     y: float
 
 
+class FrameTapParams(TypedDict):
+    selector: str
+    force: Optional[bool]
+    noWaitAfter: bool
+    modifiers: Optional[List[KeyboardModifier]]
+    position: Optional[MousePosition]
+    timeout: int
+
+
+class FrameTapOptions(TypedDict):
+    force: Optional[bool]
+    noWaitAfter: bool
+    modifiers: Optional[List[KeyboardModifier]]
+    position: Optional[MousePosition]
+    timeout: int
+
+
 class FilePayload(TypedDict):
     name: str
     mimeType: str

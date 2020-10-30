@@ -51,7 +51,7 @@ from playwright.helper import (
     parse_error,
     serialize_error,
 )
-from playwright.input import Keyboard, Mouse
+from playwright.input import Keyboard, Mouse, Touchscreen
 from playwright.js_handle import (
     JSHandle,
     Serializable,
@@ -96,6 +96,7 @@ class Page(ChannelOwner):
     accessibility: Accessibility
     keyboard: Keyboard
     mouse: Mouse
+    touchscreen: Touchscreen
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
@@ -104,6 +105,7 @@ class Page(ChannelOwner):
         self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)
+        self.touchscreen = Touchscreen(self._channel)
 
         self._main_frame: Frame = from_channel(initializer["mainFrame"])
         self._main_frame._page = self
@@ -630,6 +632,17 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
     ) -> None:
         return await self._main_frame.dblclick(**locals_to_params(locals()))
+
+    async def tap(
+        self,
+        selector: str,
+        modifiers: List[KeyboardModifier] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -> None:
+        return await self._main_frame.tap(**locals_to_params(locals()))
 
     async def fill(
         self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None

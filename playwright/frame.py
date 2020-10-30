@@ -376,6 +376,17 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("dblclick", locals_to_params(locals()))
 
+    async def tap(
+        self,
+        selector: str,
+        modifiers: List[KeyboardModifier] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -> None:
+        await self._channel.send("tap", locals_to_params(locals()))
+
     async def fill(
         self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None
     ) -> None:

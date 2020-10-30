@@ -37,7 +37,7 @@ from playwright.download import Download
 from playwright.element_handle import ElementHandle, ValuesToSelect
 from playwright.file_chooser import FileChooser
 from playwright.frame import Frame
-from playwright.input import Keyboard, Mouse
+from playwright.input import Keyboard, Mouse, Touchscreen
 from playwright.js_handle import JSHandle, Serializable
 from playwright.network import Request, Response, Route
 from playwright.page import BindingCall, Page, Worker
@@ -164,7 +164,7 @@ from playwright.element_handle import ElementHandle as ElementHandleImpl
 from playwright.file_chooser import FileChooser as FileChooserImpl
 from playwright.frame import Frame as FrameImpl
 from playwright.helper import ConsoleMessageLocation, Credentials, MousePosition, Error, FilePayload, SelectOption, RequestFailure, Viewport, DeviceDescriptor, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins
-from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl
+from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl
 from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
@@ -179,6 +179,7 @@ all_types = [
     Route,
     Keyboard,
     Mouse,
+    Touchscreen,
     JSHandle,
     ElementHandle,
     Accessibility,
