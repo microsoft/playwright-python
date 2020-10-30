@@ -23,6 +23,7 @@ from playwright.helper import (
     Credentials,
     Geolocation,
     IntSize,
+    RecordHarOptions,
     locals_to_params,
 )
 from playwright.network import serialize_headers
@@ -88,6 +89,7 @@ class Browser(ChannelOwner):
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
@@ -128,6 +130,7 @@ class Browser(ChannelOwner):
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this

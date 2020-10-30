@@ -121,7 +121,4 @@ Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
 # 1.6 Todo
 Parameter not implemented: Browser.newPage(proxy=)
 Parameter not implemented: Browser.newContext(proxy=)
-Parameter not implemented: Browser.newPage(recordHar=)
-Parameter not implemented: Browser.newContext(recordHar=)
 Method not implemented: WebSocket.url
-Parameter not implemented: BrowserType.launchPersistentContext(recordHar=)

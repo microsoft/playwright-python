@@ -185,6 +185,11 @@ class PdfMargins(TypedDict):
     left: Optional[Union[str, int]]
 
 
+class RecordHarOptions(TypedDict):
+    omitContent: Optional[bool]
+    path: str
+
+
 DeviceDescriptor = TypedDict(
     "DeviceDescriptor",
     {

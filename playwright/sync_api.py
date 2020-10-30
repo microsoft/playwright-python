@@ -48,6 +48,7 @@ from playwright.helper import (
     MousePosition,
     PdfMargins,
     ProxyServer,
+    RecordHarOptions,
     RequestFailure,
     ResourceTiming,
     SelectOption,
@@ -6056,6 +6057,7 @@ class Browser(SyncBase):
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -6100,6 +6102,8 @@ class Browser(SyncBase):
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
+            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
 
         Returns
         -------
@@ -6128,6 +6132,7 @@ class Browser(SyncBase):
                     defaultBrowserType=defaultBrowserType,
                     videosPath=videosPath,
                     videoSize=videoSize,
+                    recordHar=recordHar,
                 )
             )
         )
@@ -6154,6 +6159,7 @@ class Browser(SyncBase):
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -6199,6 +6205,8 @@ class Browser(SyncBase):
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
+            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
 
         Returns
         -------
@@ -6227,6 +6235,7 @@ class Browser(SyncBase):
                     defaultBrowserType=defaultBrowserType,
                     videosPath=videosPath,
                     videoSize=videoSize,
+                    recordHar=recordHar,
                 )
             )
         )
@@ -6396,6 +6405,7 @@ class BrowserType(SyncBase):
         chromiumSandbox: bool = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -> "BrowserContext":
         """BrowserType.launchPersistentContext
 
@@ -6470,6 +6480,8 @@ class BrowserType(SyncBase):
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
+            Enables HAR recording for all the pages into `har.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
 
         Returns
         -------
@@ -6513,6 +6525,7 @@ class BrowserType(SyncBase):
                     chromiumSandbox=chromiumSandbox,
                     videosPath=videosPath,
                     videoSize=videoSize,
+                    recordHar=recordHar,
                 )
             )
         )
