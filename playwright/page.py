@@ -791,6 +791,8 @@ class Page(ChannelOwner):
             return None
         if not self._video:
             self._video = Video(self)
+            if "videoRelativePath" in self._initializer:
+                self._video._set_relative_path(self._initializer["videoRelativePath"])
         return self._video
 
     def expect_event(

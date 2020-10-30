@@ -30,3 +30,16 @@ async def test_short_video_should_exist(browser, tmpdir, server):
     assert str(tmpdir) in path
     await page.context.close()
     assert os.path.exists(path)
+
+
+async def test_short_video_should_exist_persistent_context(browser_type, tmpdir):
+    context = await browser_type.launchPersistentContext(
+        str(tmpdir),
+        viewport={"width": 320, "height": 240},
+        videosPath=str(tmpdir) + "1",
+    )
+    page = context.pages[0]
+    await context.close()
+    path = await page.video.path()
+    assert str(tmpdir) in path
+    assert os.path.exists(path)

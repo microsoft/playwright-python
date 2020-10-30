@@ -22,7 +22,13 @@ import zipfile
 
 from playwright.path_utils import get_file_dirname
 
-driver_version = "0.152.0"
+driver_version_64 = "0.160.0-next.1604019206789"
+driver_version_32 = "0.160.0-next.1604019246361"
+
+
+def driver_version(platform: str) -> str:
+    return driver_version_32 if platform == "win32" else driver_version_64
+
 
 if not os.path.exists("driver"):
     os.makedirs("driver")
@@ -30,9 +36,9 @@ if not os.path.exists("playwright/driver"):
     os.makedirs("playwright/driver")
 
 for platform in ["mac", "linux", "win32", "win32_x64"]:
-    zip_file = f"playwright-cli-{driver_version}-{platform}.zip"
+    zip_file = f"playwright-cli-{driver_version(platform)}-{platform}.zip"
     if not os.path.exists("driver/" + zip_file):
-        url = "https://playwright.azureedge.net/builds/cli/" + zip_file
+        url = "https://playwright.azureedge.net/builds/cli/next/" + zip_file
         print("Fetching ", url)
         subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
 
@@ -59,7 +65,7 @@ platform_map = {
 }
 
 for platform in ["mac", "linux", "win32", "win32_x64"]:
-    zip_file = f"driver/playwright-cli-{driver_version}-{platform}.zip"
+    zip_file = f"driver/playwright-cli-{driver_version(platform)}-{platform}.zip"
     with zipfile.ZipFile(zip_file, "r") as zip:
         zip.extractall(f"driver/{platform}")
     if platform_map[sys.platform] == platform:

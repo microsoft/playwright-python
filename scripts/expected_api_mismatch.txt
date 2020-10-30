@@ -116,3 +116,18 @@ Parameter not implemented: BrowserContext.addInitScript(arg=)
 # OptionsOr
 Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)
 Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
+
+
+# 1.6 Todo
+Method not implemented: Page.tap
+Parameter not implemented: Browser.newPage(proxy=)
+Method not implemented: Frame.tap
+Method not implemented: Touchscreen.tap
+Method not implemented: ElementHandle.tap
+Parameter not implemented: Browser.newContext(proxy=)
+Parameter not implemented: Browser.newPage(recordHar=)
+Method not implemented: Page.touchscreen
+Parameter not implemented: Browser.newContext(recordHar=)
+Method not implemented: WebSocket.url
+Parameter not implemented: BrowserType.launchPersistentContext(recordHar=)
+Method not implemented: Request.timing
