@@ -82,6 +82,7 @@ from playwright.helper import (
 )
 from playwright.input import Keyboard as KeyboardImpl
 from playwright.input import Mouse as MouseImpl
+from playwright.input import Touchscreen as TouchscreenImpl
 from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl
 from playwright.network import Response as ResponseImpl
@@ -718,6 +719,26 @@ class Mouse(SyncBase):
 mapping.register(MouseImpl, Mouse)
 
 
+class Touchscreen(SyncBase):
+    def __init__(self, obj: TouchscreenImpl):
+        super().__init__(obj)
+
+    def tap(self, x: float, y: float) -&gt; NoneType:
+        &#34;&#34;&#34;Touchscreen.tap
+
+        Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+
+        Parameters
+        ----------
+        x : float
+        y : float
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.tap(x=x, y=y)))
+
+
+mapping.register(TouchscreenImpl, Touchscreen)
+
+
 class JSHandle(SyncBase):
     def __init__(self, obj: JSHandleImpl):
         super().__init__(obj)
@@ -1187,6 +1208,55 @@ class ElementHandle(JSHandle):
                 self._impl_obj.selectOption(
                     values=mapping.to_impl(values),
                     timeout=timeout,
+                    noWaitAfter=noWaitAfter,
+                )
+            )
+        )
+
+    def tap(
+        self,
+        modifiers: typing.Union[
+            typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+        ] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -&gt; NoneType:
+        &#34;&#34;&#34;ElementHandle.tap
+
+        This method taps the element by performing the following steps:
+
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.touchscreen to tap in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+        **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Parameters
+        ----------
+        modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        force : Optional[bool]
+            Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.tap(
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
                     noWaitAfter=noWaitAfter,
                 )
             )
@@ -2456,6 +2526,59 @@ class Frame(SyncBase):
             )
         )
 
+    def tap(
+        self,
+        selector: str,
+        modifiers: typing.Union[
+            typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+        ] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -&gt; NoneType:
+        &#34;&#34;&#34;Frame.tap
+
+        This method taps an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.touchscreen to tap the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+        **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+        modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        force : Optional[bool]
+            Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=noWaitAfter,
+                )
+            )
+        )
+
     def fill(
         self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None
     ) -&gt; NoneType:
@@ -3349,6 +3472,16 @@ class Page(SyncBase):
         Mouse
         &#34;&#34;&#34;
         return mapping.from_impl(self._impl_obj.mouse)
+
+    @property
+    def touchscreen(self) -&gt; &#34;Touchscreen&#34;:
+        &#34;&#34;&#34;Page.touchscreen
+
+        Returns
+        -------
+        Touchscreen
+        &#34;&#34;&#34;
+        return mapping.from_impl(self._impl_obj.touchscreen)
 
     @property
     def context(self) -&gt; &#34;BrowserContext&#34;:
@@ -4601,6 +4734,61 @@ class Page(SyncBase):
                     position=position,
                     delay=delay,
                     button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=noWaitAfter,
+                )
+            )
+        )
+
+    def tap(
+        self,
+        selector: str,
+        modifiers: typing.Union[
+            typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+        ] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -&gt; NoneType:
+        &#34;&#34;&#34;Page.tap
+
+        This method taps an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.touchscreen to tap the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+        **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Shortcut for page.mainFrame().tap().
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+        modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        force : Optional[bool]
+            Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
                     timeout=timeout,
                     force=force,
                     noWaitAfter=noWaitAfter,
@@ -10501,6 +10689,55 @@ def url(self) -&gt; str:
             )
         )
 
+    def tap(
+        self,
+        modifiers: typing.Union[
+            typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+        ] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -&gt; NoneType:
+        &#34;&#34;&#34;ElementHandle.tap
+
+        This method taps the element by performing the following steps:
+
+        Wait for actionability checks on the element, unless `force` option is set.
+        Scroll the element into view if needed.
+        Use page.touchscreen to tap in the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method rejects.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+        **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Parameters
+        ----------
+        modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        force : Optional[bool]
+            Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.tap(
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=noWaitAfter,
+                )
+            )
+        )
+
     def fill(
         self, value: str, timeout: int = None, noWaitAfter: bool = None
     ) -&gt; NoneType:
@@ -12142,6 +12379,86 @@ Sets the value of the file input to these file paths or files. If some of the <c
     )</code></pre>
 </details>
 </dd>
+<dt id="playwright.sync_api.ElementHandle.tap"><code class="name flex">
+<span>def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.tap</p>
+<p>This method taps the element by performing the following steps:</p>
+<p>Wait for actionability checks on the element, unless <code>force</code> option is set.
+Scroll the element into view if needed.
+Use page.touchscreen to tap in the center of the element, or the specified <code>position</code>.
+Wait for initiated navigations to either succeed or fail, unless <code>noWaitAfter</code> option is set.</p>
+<p>If the element is detached from the DOM at any moment during the action, this method rejects.
+When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a TimeoutError. Passing zero timeout disables this.</p>
+<p><strong>NOTE</strong> <code>elementHandle.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>modifiers</code></strong> :&ensp;<code>Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]</code></dt>
+<dd>Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.</dd>
+<dt><strong><code>position</code></strong> :&ensp;<code>Optional[{"x": float, "y": float}]</code></dt>
+<dd>A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
+<dt><strong><code>force</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Whether to bypass the actionability checks. Defaults to <code>false</code>.</dd>
+<dt><strong><code>noWaitAfter</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to <code>false</code>.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tap(
+    self,
+    modifiers: typing.Union[
+        typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+    ] = None,
+    position: MousePosition = None,
+    timeout: int = None,
+    force: bool = None,
+    noWaitAfter: bool = None,
+) -&gt; NoneType:
+    &#34;&#34;&#34;ElementHandle.tap
+
+    This method taps the element by performing the following steps:
+
+    Wait for actionability checks on the element, unless `force` option is set.
+    Scroll the element into view if needed.
+    Use page.touchscreen to tap in the center of the element, or the specified `position`.
+    Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+    If the element is detached from the DOM at any moment during the action, this method rejects.
+    When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+    **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+    Parameters
+    ----------
+    modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+        Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+    position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+        A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+    timeout : Optional[int]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+    force : Optional[bool]
+        Whether to bypass the actionability checks. Defaults to `false`.
+    noWaitAfter : Optional[bool]
+        Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(
+        self._sync(
+            self._impl_obj.tap(
+                modifiers=modifiers,
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+            )
+        )
+    )</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.ElementHandle.textContent"><code class="name flex">
 <span>def <span class="ident">textContent</span></span>(<span>self) ‑> Union[str, NoneType]</span>
 </code></dt>
@@ -13355,6 +13672,59 @@ def page(self) -&gt; &#34;Page&#34;:
                     position=position,
                     delay=delay,
                     button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=noWaitAfter,
+                )
+            )
+        )
+
+    def tap(
+        self,
+        selector: str,
+        modifiers: typing.Union[
+            typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+        ] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -&gt; NoneType:
+        &#34;&#34;&#34;Frame.tap
+
+        This method taps an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.touchscreen to tap the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+        **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+        modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        force : Optional[bool]
+            Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
                     timeout=timeout,
                     force=force,
                     noWaitAfter=noWaitAfter,
@@ -15613,6 +15983,92 @@ Sets the value of the file input to these file paths or files. If some of the <c
     )</code></pre>
 </details>
 </dd>
+<dt id="playwright.sync_api.Frame.tap"><code class="name flex">
+<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.tap</p>
+<p>This method taps an element matching <code>selector</code> by performing the following steps:</p>
+<p>Find an element match matching <code>selector</code>. If there is none, wait until a matching element is attached to the DOM.
+Wait for actionability checks on the matched element, unless <code>force</code> option is set. If the element is detached during the checks, the whole action is retried.
+Scroll the element into view if needed.
+Use page.touchscreen to tap the center of the element, or the specified <code>position</code>.
+Wait for initiated navigations to either succeed or fail, unless <code>noWaitAfter</code> option is set.</p>
+<p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a TimeoutError. Passing zero timeout disables this.</p>
+<p><strong>NOTE</strong> <code>frame.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.</dd>
+<dt><strong><code>modifiers</code></strong> :&ensp;<code>Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]</code></dt>
+<dd>Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.</dd>
+<dt><strong><code>position</code></strong> :&ensp;<code>Optional[{"x": float, "y": float}]</code></dt>
+<dd>A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
+<dt><strong><code>force</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Whether to bypass the actionability checks. Defaults to <code>false</code>.</dd>
+<dt><strong><code>noWaitAfter</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to <code>false</code>.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tap(
+    self,
+    selector: str,
+    modifiers: typing.Union[
+        typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+    ] = None,
+    position: MousePosition = None,
+    timeout: int = None,
+    force: bool = None,
+    noWaitAfter: bool = None,
+) -&gt; NoneType:
+    &#34;&#34;&#34;Frame.tap
+
+    This method taps an element matching `selector` by performing the following steps:
+
+    Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+    Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+    Scroll the element into view if needed.
+    Use page.touchscreen to tap the center of the element, or the specified `position`.
+    Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+    When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+    **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+    modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+        Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+    position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+        A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+    timeout : Optional[int]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+    force : Optional[bool]
+        Whether to bypass the actionability checks. Defaults to `false`.
+    noWaitAfter : Optional[bool]
+        Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(
+        self._sync(
+            self._impl_obj.tap(
+                selector=selector,
+                modifiers=modifiers,
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+            )
+        )
+    )</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.Frame.textContent"><code class="name flex">
 <span>def <span class="ident">textContent</span></span>(<span>self, selector: str, timeout: int = None) ‑> Union[str, NoneType]</span>
 </code></dt>
@@ -17212,6 +17668,16 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         return mapping.from_impl(self._impl_obj.mouse)
 
     @property
+    def touchscreen(self) -&gt; &#34;Touchscreen&#34;:
+        &#34;&#34;&#34;Page.touchscreen
+
+        Returns
+        -------
+        Touchscreen
+        &#34;&#34;&#34;
+        return mapping.from_impl(self._impl_obj.touchscreen)
+
+    @property
     def context(self) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Page.context
 
@@ -18469,6 +18935,61 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             )
         )
 
+    def tap(
+        self,
+        selector: str,
+        modifiers: typing.Union[
+            typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+        ] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -&gt; NoneType:
+        &#34;&#34;&#34;Page.tap
+
+        This method taps an element matching `selector` by performing the following steps:
+
+        Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+        Scroll the element into view if needed.
+        Use page.touchscreen to tap the center of the element, or the specified `position`.
+        Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+        **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Shortcut for page.mainFrame().tap().
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+        modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+        position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+        timeout : Optional[int]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+        force : Optional[bool]
+            Whether to bypass the actionability checks. Defaults to `false`.
+        noWaitAfter : Optional[bool]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=noWaitAfter,
+                )
+            )
+        )
+
     def fill(
         self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None
     ) -&gt; NoneType:
@@ -19348,6 +19869,29 @@ def mouse(self) -&gt; &#34;Mouse&#34;:
     Mouse
     &#34;&#34;&#34;
     return mapping.from_impl(self._impl_obj.mouse)</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.touchscreen"><code class="name">var <span class="ident">touchscreen</span> : <a title="playwright.sync_api.Touchscreen" href="#playwright.sync_api.Touchscreen">Touchscreen</a></code></dt>
+<dd>
+<div class="desc"><p>Page.touchscreen</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="playwright.sync_api.Touchscreen" href="#playwright.sync_api.Touchscreen">Touchscreen</a></code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def touchscreen(self) -&gt; &#34;Touchscreen&#34;:
+    &#34;&#34;&#34;Page.touchscreen
+
+    Returns
+    -------
+    Touchscreen
+    &#34;&#34;&#34;
+    return mapping.from_impl(self._impl_obj.touchscreen)</code></pre>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
@@ -22190,6 +22734,95 @@ Sets the value of the file input to these file paths or files. If some of the <c
     )</code></pre>
 </details>
 </dd>
+<dt id="playwright.sync_api.Page.tap"><code class="name flex">
+<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.tap</p>
+<p>This method taps an element matching <code>selector</code> by performing the following steps:</p>
+<p>Find an element match matching <code>selector</code>. If there is none, wait until a matching element is attached to the DOM.
+Wait for actionability checks on the matched element, unless <code>force</code> option is set. If the element is detached during the checks, the whole action is retried.
+Scroll the element into view if needed.
+Use page.touchscreen to tap the center of the element, or the specified <code>position</code>.
+Wait for initiated navigations to either succeed or fail, unless <code>noWaitAfter</code> option is set.</p>
+<p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a TimeoutError. Passing zero timeout disables this.</p>
+<p><strong>NOTE</strong> <code>page.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
+<p>Shortcut for page.mainFrame().tap().</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.</dd>
+<dt><strong><code>modifiers</code></strong> :&ensp;<code>Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]</code></dt>
+<dd>Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.</dd>
+<dt><strong><code>position</code></strong> :&ensp;<code>Optional[{"x": float, "y": float}]</code></dt>
+<dd>A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
+<dt><strong><code>force</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Whether to bypass the actionability checks. Defaults to <code>false</code>.</dd>
+<dt><strong><code>noWaitAfter</code></strong> :&ensp;<code>Optional[bool]</code></dt>
+<dd>Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to <code>false</code>.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tap(
+    self,
+    selector: str,
+    modifiers: typing.Union[
+        typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
+    ] = None,
+    position: MousePosition = None,
+    timeout: int = None,
+    force: bool = None,
+    noWaitAfter: bool = None,
+) -&gt; NoneType:
+    &#34;&#34;&#34;Page.tap
+
+    This method taps an element matching `selector` by performing the following steps:
+
+    Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+    Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+    Scroll the element into view if needed.
+    Use page.touchscreen to tap the center of the element, or the specified `position`.
+    Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+    When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+
+    **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+    Shortcut for page.mainFrame().tap().
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+    modifiers : Optional[List[Literal[&#39;Alt&#39;, &#39;Control&#39;, &#39;Meta&#39;, &#39;Shift&#39;]]]
+        Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+    position : Optional[{&#34;x&#34;: float, &#34;y&#34;: float}]
+        A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+    timeout : Optional[int]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+    force : Optional[bool]
+        Whether to bypass the actionability checks. Defaults to `false`.
+    noWaitAfter : Optional[bool]
+        Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(
+        self._sync(
+            self._impl_obj.tap(
+                selector=selector,
+                modifiers=modifiers,
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+            )
+        )
+    )</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.Page.textContent"><code class="name flex">
 <span>def <span class="ident">textContent</span></span>(<span>self, selector: str, timeout: int = None) ‑> Union[str, NoneType]</span>
 </code></dt>
@@ -24427,6 +25060,71 @@ An example of serving static file:</p>
 </dd>
 </dl>
 </dd>
+<dt id="playwright.sync_api.Touchscreen"><code class="flex name class">
+<span>class <span class="ident">Touchscreen</span></span>
+<span>(</span><span>obj: playwright.input.Touchscreen)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Touchscreen(SyncBase):
+    def __init__(self, obj: TouchscreenImpl):
+        super().__init__(obj)
+
+    def tap(self, x: float, y: float) -&gt; NoneType:
+        &#34;&#34;&#34;Touchscreen.tap
+
+        Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+
+        Parameters
+        ----------
+        x : float
+        y : float
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.tap(x=x, y=y)))</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>playwright.sync_base.SyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="playwright.sync_api.Touchscreen.tap"><code class="name flex">
+<span>def <span class="ident">tap</span></span>(<span>self, x: float, y: float) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Touchscreen.tap</p>
+<p>Dispatches a <code>touchstart</code> and <code>touchend</code> event with a single touch at the position (<code>x</code>,<code>y</code>).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>float</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>y</code></strong> :&ensp;<code>float</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tap(self, x: float, y: float) -&gt; NoneType:
+    &#34;&#34;&#34;Touchscreen.tap
+
+    Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+
+    Parameters
+    ----------
+    x : float
+    y : float
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(self._sync(self._impl_obj.tap(x=x, y=y)))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="playwright.sync_api.Video"><code class="flex name class">
 <span>class <span class="ident">Video</span></span>
 <span>(</span><span>obj: <a title="playwright.video.Video" href="video.html#playwright.video.Video">Video</a>)</span>
@@ -24875,6 +25573,7 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.ElementHandle.selectOption" href="#playwright.sync_api.ElementHandle.selectOption">selectOption</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.selectText" href="#playwright.sync_api.ElementHandle.selectText">selectText</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.setInputFiles" href="#playwright.sync_api.ElementHandle.setInputFiles">setInputFiles</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.tap" href="#playwright.sync_api.ElementHandle.tap">tap</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.textContent" href="#playwright.sync_api.ElementHandle.textContent">textContent</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.toString" href="#playwright.sync_api.ElementHandle.toString">toString</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.type" href="#playwright.sync_api.ElementHandle.type">type</a></code></li>
@@ -24927,6 +25626,7 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.Frame.selectOption" href="#playwright.sync_api.Frame.selectOption">selectOption</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.setContent" href="#playwright.sync_api.Frame.setContent">setContent</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.setInputFiles" href="#playwright.sync_api.Frame.setInputFiles">setInputFiles</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.tap" href="#playwright.sync_api.Frame.tap">tap</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.textContent" href="#playwright.sync_api.Frame.textContent">textContent</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.title" href="#playwright.sync_api.Frame.title">title</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.type" href="#playwright.sync_api.Frame.type">type</a></code></li>
@@ -25035,8 +25735,10 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.Page.setExtraHTTPHeaders" href="#playwright.sync_api.Page.setExtraHTTPHeaders">setExtraHTTPHeaders</a></code></li>
 <li><code><a title="playwright.sync_api.Page.setInputFiles" href="#playwright.sync_api.Page.setInputFiles">setInputFiles</a></code></li>
 <li><code><a title="playwright.sync_api.Page.setViewportSize" href="#playwright.sync_api.Page.setViewportSize">setViewportSize</a></code></li>
+<li><code><a title="playwright.sync_api.Page.tap" href="#playwright.sync_api.Page.tap">tap</a></code></li>
 <li><code><a title="playwright.sync_api.Page.textContent" href="#playwright.sync_api.Page.textContent">textContent</a></code></li>
 <li><code><a title="playwright.sync_api.Page.title" href="#playwright.sync_api.Page.title">title</a></code></li>
+<li><code><a title="playwright.sync_api.Page.touchscreen" href="#playwright.sync_api.Page.touchscreen">touchscreen</a></code></li>
 <li><code><a title="playwright.sync_api.Page.type" href="#playwright.sync_api.Page.type">type</a></code></li>
 <li><code><a title="playwright.sync_api.Page.uncheck" href="#playwright.sync_api.Page.uncheck">uncheck</a></code></li>
 <li><code><a title="playwright.sync_api.Page.unroute" href="#playwright.sync_api.Page.unroute">unroute</a></code></li>
@@ -25112,6 +25814,12 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <h4><code><a title="playwright.sync_api.Selectors" href="#playwright.sync_api.Selectors">Selectors</a></code></h4>
 <ul class="">
 <li><code><a title="playwright.sync_api.Selectors.register" href="#playwright.sync_api.Selectors.register">register</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="playwright.sync_api.Touchscreen" href="#playwright.sync_api.Touchscreen">Touchscreen</a></code></h4>
+<ul class="">
+<li><code><a title="playwright.sync_api.Touchscreen.tap" href="#playwright.sync_api.Touchscreen.tap">tap</a></code></li>
 </ul>
 </li>
 <li>
