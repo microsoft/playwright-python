@@ -77,6 +77,7 @@ from playwright.helper import (
     MousePosition,
     PdfMargins,
     ProxyServer,
+    RecordHarOptions,
     RequestFailure,
     ResourceTiming,
     SelectOption,
@@ -5848,6 +5849,7 @@ class Browser(AsyncBase):
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -5892,6 +5894,8 @@ class Browser(AsyncBase):
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
 
         Returns
         -------
@@ -5919,6 +5923,7 @@ class Browser(AsyncBase):
                 defaultBrowserType=defaultBrowserType,
                 videosPath=videosPath,
                 videoSize=videoSize,
+                recordHar=recordHar,
             )
         )
 
@@ -5944,6 +5949,7 @@ class Browser(AsyncBase):
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -5989,6 +5995,8 @@ class Browser(AsyncBase):
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
 
         Returns
         -------
@@ -6016,6 +6024,7 @@ class Browser(AsyncBase):
                 defaultBrowserType=defaultBrowserType,
                 videosPath=videosPath,
                 videoSize=videoSize,
+                recordHar=recordHar,
             )
         )
 
@@ -6182,6 +6191,7 @@ class BrowserType(AsyncBase):
         chromiumSandbox: bool = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;BrowserType.launchPersistentContext
 
@@ -6256,6 +6266,8 @@ class BrowserType(AsyncBase):
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+            Enables HAR recording for all the pages into `har.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
 
         Returns
         -------
@@ -6298,6 +6310,7 @@ class BrowserType(AsyncBase):
                 chromiumSandbox=chromiumSandbox,
                 videosPath=videosPath,
                 videoSize=videoSize,
+                recordHar=recordHar,
             )
         )
 
@@ -6601,6 +6614,7 @@ An example of logging the focused node's name:</p>
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -6645,6 +6659,8 @@ An example of logging the focused node's name:</p>
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
 
         Returns
         -------
@@ -6672,6 +6688,7 @@ An example of logging the focused node's name:</p>
                 defaultBrowserType=defaultBrowserType,
                 videosPath=videosPath,
                 videoSize=videoSize,
+                recordHar=recordHar,
             )
         )
 
@@ -6697,6 +6714,7 @@ An example of logging the focused node's name:</p>
         defaultBrowserType: str = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6742,6 +6760,8 @@ An example of logging the focused node's name:</p>
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
 
         Returns
         -------
@@ -6769,6 +6789,7 @@ An example of logging the focused node's name:</p>
                 defaultBrowserType=defaultBrowserType,
                 videosPath=videosPath,
                 videoSize=videoSize,
+                recordHar=recordHar,
             )
         )
 
@@ -6895,7 +6916,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newContext"><code class="name flex">
-<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -6940,6 +6961,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>browserContext.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
 <dd>Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
+<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": str}]</code></dt>
+<dd>Enables HAR recording for all pages into <code>har.path</code> file. If not specified, the HAR is not recorded. Make sure to await <code>browserContext.close</code> for the HAR to be saved.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -6972,6 +6995,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     defaultBrowserType: str = None,
     videosPath: str = None,
     videoSize: IntSize = None,
+    recordHar: RecordHarOptions = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;Browser.newContext
 
@@ -7016,6 +7040,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
         Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
 
     Returns
     -------
@@ -7043,12 +7069,13 @@ The Browser object itself is considered to be disposed and cannot be used anymor
             defaultBrowserType=defaultBrowserType,
             videosPath=videosPath,
             videoSize=videoSize,
+            recordHar=recordHar,
         )
     )</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newPage"><code class="name flex">
-<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
+<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -7094,6 +7121,8 @@ This is a convenience API that should only be used for the single-page scenarios
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>page.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
 <dd>Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
+<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": str}]</code></dt>
+<dd>Enables HAR recording for all pages into <code>har.path</code> file. If not specified, the HAR is not recorded. Make sure to await <code>page.close</code> for the HAR to be saved.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -7126,6 +7155,7 @@ This is a convenience API that should only be used for the single-page scenarios
     defaultBrowserType: str = None,
     videosPath: str = None,
     videoSize: IntSize = None,
+    recordHar: RecordHarOptions = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.newPage
 
@@ -7171,6 +7201,8 @@ This is a convenience API that should only be used for the single-page scenarios
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
         Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
 
     Returns
     -------
@@ -7198,6 +7230,7 @@ This is a convenience API that should only be used for the single-page scenarios
             defaultBrowserType=defaultBrowserType,
             videosPath=videosPath,
             videoSize=videoSize,
+            recordHar=recordHar,
         )
     )</code></pre>
 </details>
@@ -8537,6 +8570,7 @@ is fired.</p>
         chromiumSandbox: bool = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;BrowserType.launchPersistentContext
 
@@ -8611,6 +8645,8 @@ is fired.</p>
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+            Enables HAR recording for all the pages into `har.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
 
         Returns
         -------
@@ -8653,6 +8689,7 @@ is fired.</p>
                 chromiumSandbox=chromiumSandbox,
                 videosPath=videosPath,
                 videoSize=videoSize,
+                recordHar=recordHar,
             )
         )
 
@@ -8934,7 +8971,7 @@ See <code>this article</code> for a description of the differences between Chrom
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserType.launchPersistentContext"><code class="name flex">
-<span>async def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: playwright.helper.IntSize = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: playwright.helper.IntSize = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launchPersistentContext</p>
@@ -9009,6 +9046,8 @@ See <code>this article</code> for a description of the differences between Chrom
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>browserContext.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
 <dd>Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
+<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": str}]</code></dt>
+<dd>Enables HAR recording for all the pages into <code>har.path</code> file. If not specified, HAR is not recorded. Make sure to await <code>page.close</code> for HAR to be saved.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -9055,6 +9094,7 @@ See <code>this article</code> for a description of the differences between Chrom
     chromiumSandbox: bool = None,
     videosPath: str = None,
     videoSize: IntSize = None,
+    recordHar: RecordHarOptions = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;BrowserType.launchPersistentContext
 
@@ -9129,6 +9169,8 @@ See <code>this article</code> for a description of the differences between Chrom
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
         Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        Enables HAR recording for all the pages into `har.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
 
     Returns
     -------
@@ -9171,6 +9213,7 @@ See <code>this article</code> for a description of the differences between Chrom
             chromiumSandbox=chromiumSandbox,
             videosPath=videosPath,
             videoSize=videoSize,
+            recordHar=recordHar,
         )
     )</code></pre>
 </details>
