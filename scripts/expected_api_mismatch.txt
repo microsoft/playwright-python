@@ -116,8 +116,3 @@ Parameter not implemented: BrowserContext.addInitScript(arg=)
 # OptionsOr
 Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)
 Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
-
-
-# 1.6 Todo
-Parameter not implemented: Browser.newPage(proxy=)
-Parameter not implemented: Browser.newContext(proxy=)
