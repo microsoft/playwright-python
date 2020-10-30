@@ -5840,6 +5840,7 @@ class Browser(AsyncBase):
         colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -5883,6 +5884,8 @@ class Browser(AsyncBase):
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-proxy' } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
@@ -5914,6 +5917,7 @@ class Browser(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                proxy=proxy,
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,
@@ -5940,6 +5944,7 @@ class Browser(AsyncBase):
         colorScheme: Literal["dark", "light", "no-preference"] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -5984,6 +5989,8 @@ class Browser(AsyncBase):
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-proxy' } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
@@ -6015,6 +6022,7 @@ class Browser(AsyncBase):
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                proxy=proxy,
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,

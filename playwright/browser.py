@@ -23,6 +23,7 @@ from playwright.helper import (
     Credentials,
     Geolocation,
     IntSize,
+    ProxyServer,
     RecordHarOptions,
     locals_to_params,
 )
@@ -87,6 +88,7 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -128,6 +130,7 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
