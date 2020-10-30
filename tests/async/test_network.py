@@ -15,12 +15,12 @@
 import asyncio
 import json
 from asyncio.futures import Future
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import pytest
 
 from playwright import Error
-from playwright.async_api import Page, Request
+from playwright.async_api import Page, Request, Response
 
 
 async def test_request_fulfill(page, server):
@@ -148,9 +148,32 @@ async def test_request_headers_should_work(
         assert "WebKit" in response.request.headers["user-agent"]
 
 
-@pytest.mark.only_browser("firefox")
 async def test_request_headers_should_get_the_same_headers_as_the_server(
-    page: Page, server
+    page: Page, server, is_webkit, is_win
+):
+    server_request_headers_future: Future[Dict[str, str]] = asyncio.Future()
+
+    def handle(request):
+        normalized_headers = {
+            key.decode().lower(): value[0].decode()
+            for key, value in request.requestHeaders.getAllRawHeaders()
+        }
+        server_request_headers_future.set_result(normalized_headers)
+        request.write(b"done")
+        request.finish()
+
+    server.set_route("/empty.html", handle)
+    response = await page.goto(server.EMPTY_PAGE)
+    server_headers = await server_request_headers_future
+    if is_webkit and is_win:
+        # Curl does not show accept-encoding and accept-language
+        server_headers.pop("accept-encoding")
+        server_headers.pop("accept-language")
+    assert cast(Response, response).request.headers == server_headers
+
+
+async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
+    page: Page, server, is_webkit, is_win
 ):
     await page.goto(server.PREFIX + "/empty.html")
     server_request_headers_future: Future[Dict[str, str]] = asyncio.Future()
@@ -178,6 +201,10 @@ async def test_request_headers_should_get_the_same_headers_as_the_server(
     request: Request = await requestPromise
     assert text == "done"
     server_headers = await server_request_headers_future
+    if is_webkit and is_win:
+        # Curl does not show accept-encoding and accept-language
+        server_headers.pop("accept-encoding")
+        server_headers.pop("accept-language")
     assert request.headers == server_headers
 
 
