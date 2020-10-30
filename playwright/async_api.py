@@ -62,6 +62,7 @@ from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl
 from playwright.network import Response as ResponseImpl
 from playwright.network import Route as RouteImpl
+from playwright.network import WebSocket as WebSocketImpl
 from playwright.page import BindingCall as BindingCallImpl
 from playwright.page import Page as PageImpl
 from playwright.page import Worker as WorkerImpl
@@ -486,6 +487,26 @@ class Route(AsyncBase):
 
 
 mapping.register(RouteImpl, Route)
+
+
+class WebSocket(AsyncBase):
+    def __init__(self, obj: WebSocketImpl):
+        super().__init__(obj)
+
+    @property
+    def url(self) -> str:
+        """WebSocket.url
+
+        Contains the URL of the WebSocket.
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.url)
+
+
+mapping.register(WebSocketImpl, WebSocket)
 
 
 class Keyboard(AsyncBase):

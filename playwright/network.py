@@ -16,6 +16,7 @@ import base64
 import json
 import mimetypes
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from urllib import parse
 
@@ -255,6 +256,49 @@ class Response(ChannelOwner):
     @property
     def frame(self) -> "Frame":
         return self._request.frame
+
+
+class WebSocket(ChannelOwner):
+
+    Events = SimpleNamespace(
+        Close="close",
+        FrameReceived="framereceived",
+        FrameSent="framesent",
+        Error="socketerror",
+    )
+
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
+        self._channel.on(
+            "frameSent",
+            lambda params: self._on_frame_sent(params["opcode"], params["data"]),
+        )
+        self._channel.on(
+            "frameReceived",
+            lambda params: self._on_frame_received(params["opcode"], params["data"]),
+        )
+        self._channel.on(
+            "error", lambda params: self.emit(WebSocket.Events.Error, params["error"])
+        )
+        self._channel.on("close", lambda params: self.emit(WebSocket.Events.Close))
+
+    @property
+    def url(self) -> str:
+        return self._initializer["url"]
+
+    def _on_frame_sent(self, opcode: int, data: str) -> None:
+        if opcode == 2:
+            self.emit(WebSocket.Events.FrameSent, base64.b64decode(data))
+        else:
+            self.emit(WebSocket.Events.FrameSent, data)
+
+    def _on_frame_received(self, opcode: int, data: str) -> None:
+        if opcode == 2:
+            self.emit(WebSocket.Events.FrameReceived, base64.b64decode(data))
+        else:
+            self.emit(WebSocket.Events.FrameReceived, data)
 
 
 def serialize_headers(headers: Dict[str, str]) -> List[Header]:

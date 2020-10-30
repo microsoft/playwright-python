@@ -26,7 +26,7 @@ from playwright.download import Download
 from playwright.element_handle import ElementHandle
 from playwright.frame import Frame
 from playwright.js_handle import JSHandle
-from playwright.network import Request, Response, Route
+from playwright.network import Request, Response, Route, WebSocket
 from playwright.page import BindingCall, Page, Worker
 from playwright.playwright import Playwright
 from playwright.selectors import Selectors
@@ -81,6 +81,8 @@ def create_remote_object(
         return Response(parent, type, guid, initializer)
     if type == "Route":
         return Route(parent, type, guid, initializer)
+    if type == "WebSocket":
+        return WebSocket(parent, type, guid, initializer)
     if type == "Worker":
         return Worker(parent, type, guid, initializer)
     if type == "Selectors":
