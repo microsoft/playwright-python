@@ -90,6 +90,7 @@ from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl
 from playwright.network import Response as ResponseImpl
 from playwright.network import Route as RouteImpl
+from playwright.network import WebSocket as WebSocketImpl
 from playwright.page import BindingCall as BindingCallImpl
 from playwright.page import Page as PageImpl
 from playwright.page import Worker as WorkerImpl
@@ -514,6 +515,26 @@ class Route(AsyncBase):
 
 
 mapping.register(RouteImpl, Route)
+
+
+class WebSocket(AsyncBase):
+    def __init__(self, obj: WebSocketImpl):
+        super().__init__(obj)
+
+    @property
+    def url(self) -&gt; str:
+        &#34;&#34;&#34;WebSocket.url
+
+        Contains the URL of the WebSocket.
+
+        Returns
+        -------
+        str
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.url)
+
+
+mapping.register(WebSocketImpl, WebSocket)
 
 
 class Keyboard(AsyncBase):
@@ -24555,6 +24576,67 @@ An example of serving static file:</p>
 </dd>
 </dl>
 </dd>
+<dt id="playwright.async_api.WebSocket"><code class="flex name class">
+<span>class <span class="ident">WebSocket</span></span>
+<span>(</span><span>obj: playwright.network.WebSocket)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WebSocket(AsyncBase):
+    def __init__(self, obj: WebSocketImpl):
+        super().__init__(obj)
+
+    @property
+    def url(self) -&gt; str:
+        &#34;&#34;&#34;WebSocket.url
+
+        Contains the URL of the WebSocket.
+
+        Returns
+        -------
+        str
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.url)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>playwright.async_base.AsyncBase</li>
+<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="playwright.async_api.WebSocket.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
+<dd>
+<div class="desc"><p>WebSocket.url</p>
+<p>Contains the URL of the WebSocket.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def url(self) -&gt; str:
+    &#34;&#34;&#34;WebSocket.url
+
+    Contains the URL of the WebSocket.
+
+    Returns
+    -------
+    str
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(self._impl_obj.url)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="playwright.async_api.Worker"><code class="flex name class">
 <span>class <span class="ident">Worker</span></span>
 <span>(</span><span>obj: playwright.page.Worker)</span>
@@ -25180,6 +25262,12 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <h4><code><a title="playwright.async_api.Video" href="#playwright.async_api.Video">Video</a></code></h4>
 <ul class="">
 <li><code><a title="playwright.async_api.Video.path" href="#playwright.async_api.Video.path">path</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="playwright.async_api.WebSocket" href="#playwright.async_api.WebSocket">WebSocket</a></code></h4>
+<ul class="">
+<li><code><a title="playwright.async_api.WebSocket.url" href="#playwright.async_api.WebSocket.url">url</a></code></li>
 </ul>
 </li>
 <li>
