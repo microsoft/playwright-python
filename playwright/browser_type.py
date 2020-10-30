@@ -25,6 +25,7 @@ from playwright.helper import (
     Geolocation,
     IntSize,
     ProxyServer,
+    RecordHarOptions,
     locals_to_params,
     not_installed_error,
 )
@@ -108,6 +109,7 @@ class BrowserType(ChannelOwner):
         chromiumSandbox: bool = None,
         videosPath: str = None,
         videoSize: IntSize = None,
+        recordHar: RecordHarOptions = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
