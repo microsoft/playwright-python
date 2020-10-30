@@ -56,6 +56,7 @@ class Request(ChannelOwner):
             "responseStart": -1,
             "responseEnd": -1,
         }
+        self._headers: Dict[str, str] = parse_headers(self._initializer["headers"])
 
     @property
     def url(self) -> str:
@@ -97,7 +98,7 @@ class Request(ChannelOwner):
 
     @property
     def headers(self) -> Dict[str, str]:
-        return parse_headers(self._initializer["headers"])
+        return self._headers
 
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
@@ -209,6 +210,7 @@ class Response(ChannelOwner):
         self._request._timing["connectEnd"] = timing["connectEnd"]
         self._request._timing["requestStart"] = timing["requestStart"]
         self._request._timing["responseStart"] = timing["responseStart"]
+        self._request._headers = parse_headers(self._initializer["requestHeaders"])
 
     @property
     def url(self) -> str:
