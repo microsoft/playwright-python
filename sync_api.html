@@ -6104,6 +6104,7 @@ class Browser(SyncBase):
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -6147,6 +6148,8 @@ class Browser(SyncBase):
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6179,6 +6182,7 @@ class Browser(SyncBase):
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
                     defaultBrowserType=defaultBrowserType,
+                    proxy=proxy,
                     videosPath=videosPath,
                     videoSize=videoSize,
                     recordHar=recordHar,
@@ -6206,6 +6210,7 @@ class Browser(SyncBase):
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -6250,6 +6255,8 @@ class Browser(SyncBase):
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6282,6 +6289,7 @@ class Browser(SyncBase):
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
                     defaultBrowserType=defaultBrowserType,
+                    proxy=proxy,
                     videosPath=videosPath,
                     videoSize=videoSize,
                     recordHar=recordHar,
@@ -6883,6 +6891,7 @@ An example of logging the focused node's name:</p>
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -6926,6 +6935,8 @@ An example of logging the focused node's name:</p>
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6958,6 +6969,7 @@ An example of logging the focused node's name:</p>
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
                     defaultBrowserType=defaultBrowserType,
+                    proxy=proxy,
                     videosPath=videosPath,
                     videoSize=videoSize,
                     recordHar=recordHar,
@@ -6985,6 +6997,7 @@ An example of logging the focused node's name:</p>
         colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
+        proxy: ProxyServer = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -7029,6 +7042,8 @@ An example of logging the focused node's name:</p>
             Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -7061,6 +7076,7 @@ An example of logging the focused node's name:</p>
                     colorScheme=colorScheme,
                     acceptDownloads=acceptDownloads,
                     defaultBrowserType=defaultBrowserType,
+                    proxy=proxy,
                     videosPath=videosPath,
                     videoSize=videoSize,
                     recordHar=recordHar,
@@ -7191,7 +7207,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newContext"><code class="name flex">
-<span>def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
+<span>def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -7232,6 +7248,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dd>Emulates <code>'prefers-colors-scheme'</code> media feature, supported values are <code>'light'</code>, <code>'dark'</code>, <code>'no-preference'</code>. See page.emulateMedia(options) for more details. Defaults to '<code>light</code>'.</dd>
 <dt><strong><code>acceptDownloads</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
+<dt><strong><code>proxy</code></strong> :&ensp;<code>Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]</code></dt>
+<dd>Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example <code>launch({ proxy: { server: 'per-proxy' } })</code>.</dd>
 <dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>browserContext.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
@@ -7268,6 +7286,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     acceptDownloads: bool = None,
     defaultBrowserType: str = None,
+    proxy: ProxyServer = None,
     videosPath: str = None,
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
@@ -7311,6 +7330,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
         Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
     acceptDownloads : Optional[bool]
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+    proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
+        Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
     videosPath : Optional[str]
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -7343,6 +7364,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                proxy=proxy,
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,
@@ -7352,7 +7374,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newPage"><code class="name flex">
-<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
+<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -7394,6 +7416,8 @@ This is a convenience API that should only be used for the single-page scenarios
 <dd>Emulates <code>'prefers-colors-scheme'</code> media feature, supported values are <code>'light'</code>, <code>'dark'</code>, <code>'no-preference'</code>. See page.emulateMedia(options) for more details. Defaults to '<code>light</code>'.</dd>
 <dt><strong><code>acceptDownloads</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
+<dt><strong><code>proxy</code></strong> :&ensp;<code>Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]</code></dt>
+<dd>Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example <code>launch({ proxy: { server: 'per-proxy' } })</code>.</dd>
 <dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>page.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
@@ -7430,6 +7454,7 @@ This is a convenience API that should only be used for the single-page scenarios
     colorScheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     acceptDownloads: bool = None,
     defaultBrowserType: str = None,
+    proxy: ProxyServer = None,
     videosPath: str = None,
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
@@ -7474,6 +7499,8 @@ This is a convenience API that should only be used for the single-page scenarios
         Emulates `&#39;prefers-colors-scheme&#39;` media feature, supported values are `&#39;light&#39;`, `&#39;dark&#39;`, `&#39;no-preference&#39;`. See page.emulateMedia(options) for more details. Defaults to &#39;`light`&#39;.
     acceptDownloads : Optional[bool]
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+    proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
+        Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
     videosPath : Optional[str]
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -7506,6 +7533,7 @@ This is a convenience API that should only be used for the single-page scenarios
                 colorScheme=colorScheme,
                 acceptDownloads=acceptDownloads,
                 defaultBrowserType=defaultBrowserType,
+                proxy=proxy,
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,
