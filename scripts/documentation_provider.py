@@ -290,6 +290,8 @@ class DocumentationProvider:
             return "bool"
 
         if type_name == "number":
+            if fqname == "Request.timing(return=)" or "ResourceTiming" in fqname:
+                return "float"
             if ("Mouse" in fqname or "Touchscreen" in fqname) and (
                 "(x=)" in fqname or "(y=)" in fqname
             ):

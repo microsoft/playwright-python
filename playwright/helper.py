@@ -56,21 +56,16 @@ class MousePosition(TypedDict):
     y: float
 
 
-class FrameTapParams(TypedDict):
-    selector: str
-    force: Optional[bool]
-    noWaitAfter: bool
-    modifiers: Optional[List[KeyboardModifier]]
-    position: Optional[MousePosition]
-    timeout: int
-
-
-class FrameTapOptions(TypedDict):
-    force: Optional[bool]
-    noWaitAfter: bool
-    modifiers: Optional[List[KeyboardModifier]]
-    position: Optional[MousePosition]
-    timeout: int
+class ResourceTiming(TypedDict):
+    startTime: float
+    domainLookupStart: float
+    domainLookupEnd: float
+    connectStart: float
+    secureConnectionStart: float
+    connectEnd: float
+    requestStart: float
+    responseStart: float
+    responseEnd: float
 
 
 class FilePayload(TypedDict):

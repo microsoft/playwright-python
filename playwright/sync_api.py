@@ -49,6 +49,7 @@ from playwright.helper import (
     PdfMargins,
     ProxyServer,
     RequestFailure,
+    ResourceTiming,
     SelectOption,
     Viewport,
 )
@@ -208,6 +209,18 @@ class Request(SyncBase):
             Object describing request failure, if any
         """
         return mapping.from_maybe_impl(self._impl_obj.failure)
+
+    @property
+    def timing(self) -> ResourceTiming:
+        """Request.timing
+
+        Returns resource timing information for given request. Most of the timing values become available upon the response, `responseEnd` becomes available when request finishes. Find more information at Resource Timing API.
+
+        Returns
+        -------
+        {"startTime": float, "domainLookupStart": float, "domainLookupEnd": float, "connectStart": float, "secureConnectionStart": float, "connectEnd": float, "requestStart": float, "responseStart": float, "responseEnd": float}
+        """
+        return mapping.from_maybe_impl(self._impl_obj.timing)
 
     def response(self) -> typing.Union["Response", NoneType]:
         """Request.response

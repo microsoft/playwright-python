@@ -25,6 +25,7 @@ from playwright.helper import (
     Error,
     Header,
     RequestFailure,
+    ResourceTiming,
     locals_to_params,
 )
 
@@ -44,6 +45,17 @@ class Request(ChannelOwner):
         if self._redirected_from:
             self._redirected_from._redirected_to = self
         self._failure_text: Optional[str] = None
+        self._timing: ResourceTiming = {
+            "startTime": 0,
+            "domainLookupStart": -1,
+            "domainLookupEnd": -1,
+            "connectStart": -1,
+            "secureConnectionStart": -1,
+            "connectEnd": -1,
+            "requestStart": -1,
+            "responseStart": -1,
+            "responseEnd": -1,
+        }
 
     @property
     def url(self) -> str:
@@ -108,6 +120,10 @@ class Request(ChannelOwner):
     @property
     def failure(self) -> Optional[RequestFailure]:
         return {"errorText": self._failure_text} if self._failure_text else None
+
+    @property
+    def timing(self) -> ResourceTiming:
+        return self._timing
 
 
 class Route(ChannelOwner):
@@ -183,6 +199,16 @@ class Response(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._request: Request = from_channel(self._initializer["request"])
+        timing = self._initializer["timing"]
+        self._request._timing["startTime"] = timing["startTime"]
+        self._request._timing["domainLookupStart"] = timing["domainLookupStart"]
+        self._request._timing["domainLookupEnd"] = timing["domainLookupEnd"]
+        self._request._timing["connectStart"] = timing["connectStart"]
+        self._request._timing["secureConnectionStart"] = timing["secureConnectionStart"]
+        self._request._timing["connectEnd"] = timing["connectEnd"]
+        self._request._timing["requestStart"] = timing["requestStart"]
+        self._request._timing["responseStart"] = timing["responseStart"]
 
     @property
     def url(self) -> str:
@@ -222,11 +248,11 @@ class Response(ChannelOwner):
 
     @property
     def request(self) -> Request:
-        return from_channel(self._initializer["request"])
+        return self._request
 
     @property
     def frame(self) -> "Frame":
-        return self.request.frame
+        return self._request.frame
 
 
 def serialize_headers(headers: Dict[str, str]) -> List[Header]:
