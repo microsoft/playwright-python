@@ -130,6 +130,16 @@ class ElementHandle(JSHandle):
             params = {**params, **convert_select_option_values(values)}
         return await self._channel.send("selectOption", params)
 
+    async def tap(
+        self,
+        modifiers: List[KeyboardModifier] = None,
+        position: MousePosition = None,
+        timeout: int = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+    ) -> None:
+        await self._channel.send("tap", locals_to_params(locals()))
+
     async def fill(
         self, value: str, timeout: int = None, noWaitAfter: bool = None
     ) -> None:

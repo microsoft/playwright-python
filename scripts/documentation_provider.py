@@ -290,7 +290,9 @@ class DocumentationProvider:
             return "bool"
 
         if type_name == "number":
-            if "Mouse" in fqname and ("(x=)" in fqname or "(y=)" in fqname):
+            if ("Mouse" in fqname or "Touchscreen" in fqname) and (
+                "(x=)" in fqname or "(y=)" in fqname
+            ):
                 return "float"
             if (
                 "(position=)" in fqname

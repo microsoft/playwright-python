@@ -77,3 +77,12 @@ class Mouse:
         button: MouseButton = None,
     ) -> None:
         await self.click(x, y, delay=delay, button=button, clickCount=2)
+
+
+class Touchscreen:
+    def __init__(self, channel: Channel) -> None:
+        self._channel = channel
+        self._loop = channel._connection._loop
+
+    async def tap(self, x: float, y: float) -> None:
+        await self._channel.send("touchscreenTap", locals_to_params(locals()))
