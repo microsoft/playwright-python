@@ -5436,7 +5436,6 @@ class BrowserContext(SyncBase):
         ----------
         permissions : List[str]
             A permission or an array of permissions to grant. Permissions can be one of the following values:
-             - `'*'`
              - `'geolocation'`
              - `'midi'`
              - `'midi-sysex'` (system-exclusive midi)
@@ -5897,7 +5896,7 @@ class Browser(SyncBase):
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         videosPath : Optional[str]
-            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
@@ -5996,7 +5995,7 @@ class Browser(SyncBase):
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         videosPath : Optional[str]
-            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
@@ -6267,7 +6266,7 @@ class BrowserType(SyncBase):
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
         videosPath : Optional[str]
-            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded.
+            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
 
