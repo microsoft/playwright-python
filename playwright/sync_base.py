@@ -118,7 +118,7 @@ class SyncBase(ImplWrapper):
         self._impl_obj.once(event_name, self._wrap_handler(handler))
 
     def remove_listener(self, event_name: str, handler: Any) -> None:
-        self._impl_obj.remove_listener(event_name, handler)
+        self._impl_obj.remove_listener(event_name, self._wrap_handler(handler))
 
     def _gather(self, *actions: Callable) -> List[Any]:
         g_self = greenlet.getcurrent()

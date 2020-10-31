@@ -3431,11 +3431,6 @@ class Page(AsyncBase):
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
 
-    def remove_listener(self, event: str, f: typing.Any) -> NoneType:
-        return mapping.from_maybe_impl(
-            self._impl_obj.remove_listener(event=event, f=mapping.to_impl(f))
-        )
-
     async def opener(self) -> typing.Union["Page", NoneType]:
         """Page.opener
 

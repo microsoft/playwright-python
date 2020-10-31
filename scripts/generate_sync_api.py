@@ -78,6 +78,7 @@ def generate(t: Any) -> None:
             not name.startswith("_")
             and isinstance(value, FunctionType)
             and "expect_" not in name
+            and "remove_listener" != name
         ):
             print("")
             print(
