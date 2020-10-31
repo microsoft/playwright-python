@@ -294,10 +294,6 @@ class Page(ChannelOwner):
             self._channel.send_no_reply(
                 "setFileChooserInterceptedNoReply", {"intercepted": True}
             )
-        if event == Page.Events.WebSocket and len(self.listeners(event)) == 0:
-            self._channel.send_no_reply(
-                "setWebSocketFramesReportingEnabledNoReply", {"enabled": True}
-            )
         super()._add_event_handler(event, k, v)
 
     def remove_listener(self, event: str, f: Any) -> None:
@@ -306,9 +302,6 @@ class Page(ChannelOwner):
             self._channel.send_no_reply(
                 "setFileChooserInterceptedNoReply", {"intercepted": False}
             )
-        # Note: we do not stop reporting web socket frames, since
-        # user might not listen to 'websocket' anymore, but still have
-        # a functioning WebSocket object.
 
     @property
     def context(self) -> "BrowserContext":

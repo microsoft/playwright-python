@@ -506,6 +506,54 @@ class WebSocket(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
+    async def waitForEvent(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -> typing.Any:
+        """WebSocket.waitForEvent
+
+        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the webSocket is closed before the event
+        is fired.
+
+        Parameters
+        ----------
+        event : str
+            Event name, same one would pass into `webSocket.on(event)`.
+
+        Returns
+        -------
+        Any
+            Promise which resolves to the event data value.
+        """
+        return mapping.from_maybe_impl(
+            await self._impl_obj.waitForEvent(
+                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            )
+        )
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -> AsyncEventContextManager:
+        return AsyncEventContextManager(
+            self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
+
+    def isClosed(self) -> bool:
+        """WebSocket.isClosed
+
+        Indicates that the web socket has been closed.
+
+        Returns
+        -------
+        bool
+        """
+        return mapping.from_maybe_impl(self._impl_obj.isClosed())
+
 
 mapping.register(WebSocketImpl, WebSocket)
 

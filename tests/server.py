@@ -23,6 +23,7 @@ from contextlib import closing
 from http import HTTPStatus
 
 import greenlet
+from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
 from twisted.internet import reactor, ssl
 from twisted.web import http
@@ -212,14 +213,48 @@ class HTTPSServer(Server):
         reactor.listenSSL(self.PORT, factory, contextFactory)
 
 
+class WebSocketServerServer(WebSocketServerProtocol):
+    def __init__(self) -> None:
+        super().__init__()
+        self.PORT = _find_free_port()
+
+    def start(self):
+        ws = WebSocketServerFactory("ws://127.0.0.1:" + str(self.PORT))
+        ws.protocol = WebSocketProtocol
+        reactor.listenTCP(self.PORT, ws)
+
+
+class WebSocketProtocol(WebSocketServerProtocol):
+    def onConnect(self, request):
+        pass
+
+    def onOpen(self):
+        self.sendMessage(b"incoming")
+
+    def onMessage(self, payload, isBinary):
+        if payload == b"echo-bin":
+            self.sendMessage(b"\x04\x02", True)
+            self.sendClose()
+        if payload == b"echo-text":
+            self.sendMessage(b"text", False)
+            self.sendClose()
+        if payload == b"close":
+            self.sendClose()
+
+    def onClose(self, wasClean, code, reason):
+        pass
+
+
 class TestServer:
     def __init__(self) -> None:
         self.server = HTTPServer()
         self.https_server = HTTPSServer()
+        self.ws_server = WebSocketServerServer()
 
     def start(self) -> None:
         self.server.start()
         self.https_server.start()
+        self.ws_server.start()
         self.thread = threading.Thread(
             target=lambda: reactor.run(installSignalHandlers=0)
         )

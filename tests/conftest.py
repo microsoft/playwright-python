@@ -66,6 +66,11 @@ def https_server():
 
 
 @pytest.fixture
+def ws_server():
+    yield test_server.ws_server
+
+
+@pytest.fixture
 def utils():
     yield utils_object
 

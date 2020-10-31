@@ -89,6 +89,11 @@ class DocumentationProvider:
             or super_clazz["methods"].get(method_name)
         )
         fqname = f"{class_name}.{method_name}"
+
+        if not method:
+            self.errors.add(f"Method not documented: {fqname}")
+            return
+
         indent = " " * 8
         print(f'{indent}"""{class_name}.{original_method_name}')
         if method.get("comment"):
