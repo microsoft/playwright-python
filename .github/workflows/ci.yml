@@ -60,19 +60,19 @@ jobs:
       run: python build_package.py
     - name: Install
       run: python -m playwright install
-    - name: Test
+    - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --timeout 90
-    - name: Test
+      run: pytest -vv tests/sync --browser=${{ matrix.browser }} --timeout 90
+    - name: Test Sync API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest -vv --browser=${{ matrix.browser }} --junitxml=junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml --timeout 90
-    - name: Upload pytest test results
-      uses: actions/upload-artifact@v1
-      with:
-        name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml
-        path: junit/test-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.browser }}.xml
-      # Use always() to always run this step to publish test results when there are test failures
-      if: ${{ always() }}
+      run: xvfb-run pytest -vv tests/sync --browser=${{ matrix.browser }} --timeout 90
+    - name: Test Async API
+      if: matrix.os != 'ubuntu-latest'
+      run: pytest -vv tests/async --browser=${{ matrix.browser }} --timeout 90
+    - name: Test Async API
+      if: matrix.os == 'ubuntu-latest'
+      run: xvfb-run pytest -vv tests/async --browser=${{ matrix.browser }} --timeout 90
+
   test-package-installations:
     name: Test package installations
     runs-on: ubuntu-latest

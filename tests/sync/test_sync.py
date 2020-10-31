@@ -174,12 +174,10 @@ def test_sync_workers_page_workers(page: Page, server):
 
 
 def test_sync_playwright_multiple_times():
-    with sync_playwright() as pw1:
-        assert pw1.chromium
-        with pytest.raises(Error) as exc:
-            with sync_playwright() as pw2:
-                assert pw1.chromium == pw2.chromium
-        assert "Can only run one Playwright at a time." in exc.value.message
+    with pytest.raises(Error) as exc:
+        with sync_playwright() as pw:
+            assert pw.chromium
+    assert "Can only run one Playwright at a time." in exc.value.message
 
 
 def test_sync_set_default_timeout(page):

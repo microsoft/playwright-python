@@ -18,13 +18,13 @@ import pytest
 from playwright import sync_playwright
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def playwright():
     with sync_playwright() as p:
         yield p
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def browser(playwright, browser_name, launch_arguments):
     browser_type = None
     if browser_name == "chromium":
