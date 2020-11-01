@@ -3591,11 +3591,6 @@ class Page(SyncBase):
         &#34;&#34;&#34;
         return mapping.from_impl_nullable(self._impl_obj.video)
 
-    def remove_listener(self, event: str, f: typing.Any) -&gt; NoneType:
-        return mapping.from_maybe_impl(
-            self._impl_obj.remove_listener(event=event, f=mapping.to_impl(f))
-        )
-
     def opener(self) -&gt; typing.Union[&#34;Page&#34;, NoneType]:
         &#34;&#34;&#34;Page.opener
 
@@ -17855,11 +17850,6 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         return mapping.from_impl_nullable(self._impl_obj.video)
 
-    def remove_listener(self, event: str, f: typing.Any) -&gt; NoneType:
-        return mapping.from_maybe_impl(
-            self._impl_obj.remove_listener(event=event, f=mapping.to_impl(f))
-        )
-
     def opener(self) -&gt; typing.Union[&#34;Page&#34;, NoneType]:
         &#34;&#34;&#34;Page.opener
 
@@ -22349,21 +22339,6 @@ Shortcut for page.mainFrame().$$(selector).</p>
     )</code></pre>
 </details>
 </dd>
-<dt id="playwright.sync_api.Page.remove_listener"><code class="name flex">
-<span>def <span class="ident">remove_listener</span></span>(<span>self, event: str, f: Any) ‑> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def remove_listener(self, event: str, f: typing.Any) -&gt; NoneType:
-    return mapping.from_maybe_impl(
-        self._impl_obj.remove_listener(event=event, f=mapping.to_impl(f))
-    )</code></pre>
-</details>
-</dd>
 <dt id="playwright.sync_api.Page.route"><code class="name flex">
 <span>def <span class="ident">route</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Callable[[ForwardRef('<a title="playwright.sync_api.Route" href="#playwright.sync_api.Route">Route</a>'), ForwardRef('<a title="playwright.sync_api.Request" href="#playwright.sync_api.Request">Request</a>')], Any]) ‑> NoneType</span>
 </code></dt>
@@ -25926,7 +25901,6 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.Page.querySelector" href="#playwright.sync_api.Page.querySelector">querySelector</a></code></li>
 <li><code><a title="playwright.sync_api.Page.querySelectorAll" href="#playwright.sync_api.Page.querySelectorAll">querySelectorAll</a></code></li>
 <li><code><a title="playwright.sync_api.Page.reload" href="#playwright.sync_api.Page.reload">reload</a></code></li>
-<li><code><a title="playwright.sync_api.Page.remove_listener" href="#playwright.sync_api.Page.remove_listener">remove_listener</a></code></li>
 <li><code><a title="playwright.sync_api.Page.route" href="#playwright.sync_api.Page.route">route</a></code></li>
 <li><code><a title="playwright.sync_api.Page.screenshot" href="#playwright.sync_api.Page.screenshot">screenshot</a></code></li>
 <li><code><a title="playwright.sync_api.Page.selectOption" href="#playwright.sync_api.Page.selectOption">selectOption</a></code></li>
