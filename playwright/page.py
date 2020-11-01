@@ -777,22 +777,6 @@ class Page(ChannelOwner):
     def workers(self) -> List["Worker"]:
         return self._workers.copy()
 
-    # on(event: str | symbol, listener: Listener): self {
-    #   if (event === Page.Events.FileChooser) {
-    #     if (!self.listenerCount(event))
-    #       self._channel.setFileChooserInterceptedNoReply({ intercepted: True });
-    #   }
-    #   super.on(event, listener);
-    #   return self;
-    # }
-
-    # removeListener(event: str | symbol, listener: Listener): self {
-    #   super.removeListener(event, listener);
-    #   if (event === Page.Events.FileChooser && !self.listenerCount(event))
-    #     self._channel.setFileChooserInterceptedNoReply({ intercepted: False });
-    #   return self;
-    # }
-
     async def pdf(
         self,
         scale: int = None,
