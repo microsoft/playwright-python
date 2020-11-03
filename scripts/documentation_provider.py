@@ -158,7 +158,7 @@ class DocumentationProvider:
             print("        Returns")
             print("        -------")
             print(f"        {self.serialize_python_type(value)}")
-            if "returnComment" in method and method["returnComment"]:
+            if method.get("returnComment"):
                 print(
                     f"            {self.indent_paragraph(method['returnComment'], '              ')}"
                 )
