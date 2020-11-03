@@ -54,7 +54,7 @@ async def test_should_be_able_to_detach_session(page):
         await client.send(
             "Runtime.evaluate", {"expression": "3 + 1", "returnByValue": True}
         )
-    assert "Target browser or context has been closed" in exc_info.value.message
+    assert "Target page, context or browser has been closed" in exc_info.value.message
 
 
 @pytest.mark.only_browser("chromium")

@@ -78,13 +78,15 @@ class DocumentationProvider:
             self.printed_entries.append(f"ElementHandle.{method_name}")
         clazz = self.api[class_name]
         super_clazz = self.api.get(clazz.get("extends"))
-        method = clazz["members"].get(method_name) or super_clazz["members"].get(
-            method_name
+        method = (
+            clazz["methods"].get(method_name)
+            or clazz["properties"].get(method_name)
+            or super_clazz["methods"].get(method_name)
         )
         fqname = f"{class_name}.{method_name}"
         indent = " " * 8
         print(f'{indent}"""{class_name}.{original_method_name}')
-        if method["comment"]:
+        if method.get("comment"):
             print(f"{indent}{self.beautify_method_comment(method['comment'], indent)}")
         signature_no_return = {**signature} if signature else None
         if signature_no_return and "return" in signature_no_return:
@@ -134,7 +136,7 @@ class DocumentationProvider:
                     code_type = self.serialize_python_type(value)
 
                     print(f"{indent}{original_name} : {code_type}")
-                    if doc_value["comment"]:
+                    if doc_value.get("comment"):
                         print(
                             f"{indent}    {self.indent_paragraph(doc_value['comment'], f'{indent}    ')}"
                         )
@@ -156,7 +158,7 @@ class DocumentationProvider:
             print("        Returns")
             print("        -------")
             print(f"        {self.serialize_python_type(value)}")
-            if method["returnComment"]:
+            if method.get("returnComment"):
                 print(
                     f"            {self.indent_paragraph(method['returnComment'], '              ')}"
                 )
@@ -393,9 +395,9 @@ class DocumentationProvider:
             class_name = re.sub(r"Chromium(.*)", r"\1", class_name)
             class_name = re.sub(r"WebKit(.*)", r"\1", class_name)
             class_name = re.sub(r"Firefox(.*)", r"\1", class_name)
-            for [method_name, method] in value["members"].items():
-                if method["kind"] == "event":
-                    continue
+            for [method_name, method] in list(value["methods"].items()) + list(
+                value["properties"].items()
+            ):
                 entry = f"{class_name}.{method_name}"
                 if entry not in self.printed_entries:
                     self.errors.add(f"Method not implemented: {entry}")

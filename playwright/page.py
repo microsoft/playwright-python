@@ -47,6 +47,7 @@ from playwright.helper import (
     URLMatcher,
     Viewport,
     is_function_body,
+    is_safe_close_error,
     locals_to_params,
     parse_error,
     serialize_error,
@@ -622,9 +623,13 @@ class Page(ChannelOwner):
         return await self._main_frame.title()
 
     async def close(self, runBeforeUnload: bool = None) -> None:
-        await self._channel.send("close", locals_to_params(locals()))
-        if self._owned_context:
-            await self._owned_context.close()
+        try:
+            await self._channel.send("close", locals_to_params(locals()))
+            if self._owned_context:
+                await self._owned_context.close()
+        except Exception as e:
+            if not is_safe_close_error(e):
+                raise e
 
     def isClosed(self) -> bool:
         return self._is_closed

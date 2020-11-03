@@ -25,6 +25,7 @@ from playwright.helper import (
     IntSize,
     ProxyServer,
     RecordHarOptions,
+    is_safe_close_error,
     locals_to_params,
 )
 from playwright.network import serialize_headers
@@ -150,7 +151,11 @@ class Browser(ChannelOwner):
         if self._is_closed_or_closing:
             return
         self._is_closed_or_closing = True
-        await self._channel.send("close")
+        try:
+            await self._channel.send("close")
+        except Exception as e:
+            if not is_safe_close_error(e):
+                raise e
 
     @property
     def version(self) -> str:

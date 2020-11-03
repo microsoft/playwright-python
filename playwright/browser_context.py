@@ -29,6 +29,7 @@ from playwright.helper import (
     TimeoutSettings,
     URLMatch,
     URLMatcher,
+    is_safe_close_error,
     locals_to_params,
 )
 from playwright.network import Request, Route, serialize_headers
@@ -228,7 +229,11 @@ class BrowserContext(ChannelOwner):
         if self._is_closed_or_closing:
             return
         self._is_closed_or_closing = True
-        await self._channel.send("close")
+        try:
+            await self._channel.send("close")
+        except Exception as e:
+            if not is_safe_close_error(e):
+                raise e
 
     def expect_event(
         self,

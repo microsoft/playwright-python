@@ -19,6 +19,8 @@ Method not implemented: Download.createReadStream
 Method not implemented: Logger.isEnabled
 Method not implemented: Logger.log
 Method not implemented: Page.coverage
+Method not implemented: WebSocket.isClosed
+Method not implemented: WebSocket.waitForEvent
 
 # Parameter overloads
 Parameter not documented: BrowserContext.waitForEvent(predicate=)
