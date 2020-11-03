@@ -30,7 +30,7 @@ from playwright.helper import (
     URLMatch,
     URLMatcher,
     is_safe_close_error,
-    locals_to_params
+    locals_to_params,
 )
 from playwright.network import Request, Route, serialize_headers
 from playwright.page import BindingCall, Page
