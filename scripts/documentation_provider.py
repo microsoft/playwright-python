@@ -86,7 +86,7 @@ class DocumentationProvider:
         fqname = f"{class_name}.{method_name}"
         indent = " " * 8
         print(f'{indent}"""{class_name}.{original_method_name}')
-        if "comment" in method and method["comment"]:
+        if method.get("comment"):
             print(f"{indent}{self.beautify_method_comment(method['comment'], indent)}")
         signature_no_return = {**signature} if signature else None
         if signature_no_return and "return" in signature_no_return:
