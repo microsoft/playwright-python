@@ -5908,7 +5908,7 @@ class Browser(AsyncBase):
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
-            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-context&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6013,7 +6013,7 @@ class Browser(AsyncBase):
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
-            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-context&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6681,7 +6681,7 @@ An example of logging the focused node's name:</p>
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
-            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-context&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6786,7 +6786,7 @@ An example of logging the focused node's name:</p>
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
-            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
+            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-context&#39; } })`.
         videosPath : Optional[str]
             Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -6990,7 +6990,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dt><strong><code>acceptDownloads</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
 <dt><strong><code>proxy</code></strong> :&ensp;<code>Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]</code></dt>
-<dd>Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example <code>launch({ proxy: { server: 'per-proxy' } })</code>.</dd>
+<dd>Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example <code>launch({ proxy: { server: 'per-context' } })</code>.</dd>
 <dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>browserContext.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
@@ -7072,7 +7072,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     acceptDownloads : Optional[bool]
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
     proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
-        Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
+        Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-context&#39; } })`.
     videosPath : Optional[str]
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
@@ -7156,7 +7156,7 @@ This is a convenience API that should only be used for the single-page scenarios
 <dt><strong><code>acceptDownloads</code></strong> :&ensp;<code>Optional[bool]</code></dt>
 <dd>Whether to automatically download all the attachments. Defaults to <code>false</code> where all the downloads are canceled.</dd>
 <dt><strong><code>proxy</code></strong> :&ensp;<code>Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]</code></dt>
-<dd>Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example <code>launch({ proxy: { server: 'per-proxy' } })</code>.</dd>
+<dd>Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example <code>launch({ proxy: { server: 'per-context' } })</code>.</dd>
 <dt><strong><code>videosPath</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>Enables video recording for all pages to <code>videosPath</code> folder. If not specified, videos are not recorded. Make sure to await <code>page.close</code> for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
@@ -7239,7 +7239,7 @@ This is a convenience API that should only be used for the single-page scenarios
     acceptDownloads : Optional[bool]
         Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
     proxy : Optional[{&#34;server&#34;: str, &#34;bypass&#34;: Optional[str], &#34;username&#34;: Optional[str], &#34;password&#34;: Optional[str]}]
-        Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-proxy&#39; } })`.
+        Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: &#39;per-context&#39; } })`.
     videosPath : Optional[str]
         Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
