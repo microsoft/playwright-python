@@ -321,6 +321,11 @@ class RouteHandlerEntry:
         self.handler = handler
 
 
+def is_safe_close_error(error: Exception):
+    message = str(error)
+    return message.endswith('Browser has been closed') or message.endswith('Target page, context or browser has been closed')
+
+
 def not_installed_error(message: str) -> Exception:
     return Exception(
         f"""
