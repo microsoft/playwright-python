@@ -136,7 +136,7 @@ class DocumentationProvider:
                     code_type = self.serialize_python_type(value)
 
                     print(f"{indent}{original_name} : {code_type}")
-                    if "comment" in doc_value and doc_value["comment"]:
+                    if doc_value.get("comment"):
                         print(
                             f"{indent}    {self.indent_paragraph(doc_value['comment'], f'{indent}    ')}"
                         )
