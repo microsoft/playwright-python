@@ -114,15 +114,14 @@ class Server:
                     ).read_bytes()
                     request.setHeader(b"Content-Type", mimetypes.guess_type(uri)[0])
                     request.setHeader(b"Cache-Control", "no-cache, no-store")
-                except (FileNotFoundError, IsADirectoryError):
-                    request.setResponseCode(HTTPStatus.NOT_FOUND)
-                if file_content:
                     if uri in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")
                         request.write(gzip.compress(file_content))
                     else:
                         request.write(file_content)
                     self.setResponseCode(HTTPStatus.OK)
+                except (FileNotFoundError, IsADirectoryError):
+                    request.setResponseCode(HTTPStatus.NOT_FOUND)
                 self.finish()
 
         class MyHttp(http.HTTPChannel):
