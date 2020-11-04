@@ -112,10 +112,10 @@ class Server:
                     file_content = (
                         static_path / request.path.decode()[1:]
                     ).read_bytes()
+                    request.setHeader(b"Content-Type", mimetypes.guess_type(uri)[0])
+                    request.setHeader(b"Cache-Control", "no-cache, no-store")
                 except (FileNotFoundError, IsADirectoryError):
                     request.setResponseCode(HTTPStatus.NOT_FOUND)
-                request.setHeader(b"Content-Type", mimetypes.guess_type(uri)[0])
-                request.setHeader(b"Cache-Control", "no-cache, no-store")
                 if file_content:
                     if uri in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")
