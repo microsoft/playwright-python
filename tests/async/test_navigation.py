@@ -864,7 +864,6 @@ async def test_wait_for_load_state_should_resolve_after_popup_load(context, serv
     assert popup.url == server.PREFIX + "/one-style.html"
 
 
-@pytest.mark.skip_browser("firefox")
 async def test_go_back_should_work(page, server):
     assert await page.goBack() is None
 

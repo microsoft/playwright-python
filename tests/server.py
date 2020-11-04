@@ -114,8 +114,9 @@ class Server:
                     ).read_bytes()
                 except (FileNotFoundError, IsADirectoryError):
                     request.setResponseCode(HTTPStatus.NOT_FOUND)
+                request.setHeader("Content-Type", mimetypes.guess_type(uri)[0])
+                request.setHeader("Cache-Control", "no-cache, no-store")
                 if file_content:
-                    request.setHeader("Content-Type", mimetypes.guess_type(uri)[0])
                     if uri in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")
                         request.write(gzip.compress(file_content))
