@@ -20,6 +20,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
+    - name: Build package
+      run: python build_package.py
+    - name: Install browsers
+      run: python -m playwright install
     - name: Lint
       run: pre-commit run --all-files
     - name: Test Sync generation script
@@ -58,7 +62,7 @@ jobs:
         pip install -e .
     - name: Build package
       run: python build_package.py
-    - name: Install
+    - name: Install browsers
       run: python -m playwright install
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'

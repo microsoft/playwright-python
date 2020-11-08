@@ -99,5 +99,3 @@ for platform in ["mac", "linux", "win32", "win32_x64"]:
             zip.write(from_location, to_location)
 
 os.remove(base_wheel_location)
-
-subprocess.check_call("python -m playwright print-api-json > api.json", shell=True)
