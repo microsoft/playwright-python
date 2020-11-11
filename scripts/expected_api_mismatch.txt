@@ -107,7 +107,6 @@ Parameter not documented: Browser.newPage(defaultBrowserType=)
 # Logger
 Parameter not implemented: Browser.newContext(logger=)
 Parameter not implemented: BrowserType.launch(logger=)
-Parameter not implemented: BrowserType.connect(logger=)
 Parameter not implemented: BrowserType.launchPersistentContext(logger=)
 Parameter not implemented: Browser.newPage(logger=)
 
