@@ -1,3 +1,33 @@
+# Contributing
+
+## How to Contribute
+
+### Configuring python environment
+
+The project requires python version 3.8+. To set it as default in the environment run the following commands:
+
+```bash
+python3.8 -m venv env
+source ./env/bin/activate
+```
+
+Install required dependencies:
+
+```bash
+python -m pip install --upgrade pip wheel
+pip install -r local-requirements.txt
+pip install -e .
+```
+
+For more details look at the [CI configuration](./blob/master/.github/workflows/ci.yml).
+
+### Regenerating APIs
+
+```bash
+./scripts/update_api.sh
+pre-commit run --all-files
+```
+
 ## Contributor License Agreement
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

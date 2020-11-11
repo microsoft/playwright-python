@@ -127,13 +127,6 @@ class BrowserType(ChannelOwner):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
 
-    async def connect(
-        self, wsEndpoint: str, slowMo: int = None, timeout: int = None
-    ) -> Browser:
-        return from_channel(
-            await self._channel.send("connect", locals_to_params(locals()))
-        )
-
 
 def normalize_launch_params(params: Dict) -> None:
     if "env" in params:
