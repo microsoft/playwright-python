@@ -4,7 +4,7 @@
 
 ### Configuring python environment
 
-The project required python version 3.8+. To set it as default in the environment run the following commands:
+The project requires python version 3.8+. To set it as default in the environment run the following commands:
 
 ```bash
 python3.8 -m venv env
@@ -19,7 +19,7 @@ pip install -r local-requirements.txt
 pip install -e .
 ```
 
-For more details look at the [CI configuration](https://github.com/microsoft/playwright-python/blob/master/.github/workflows/ci.yml).
+For more details look at the [CI configuration](./blob/master/.github/workflows/ci.yml).
 
 ### Regenerating APIs
 
