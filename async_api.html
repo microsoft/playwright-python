@@ -6338,32 +6338,6 @@ class BrowserType(AsyncBase):
             )
         )
 
-    async def connect(
-        self, wsEndpoint: str, slowMo: int = None, timeout: int = None
-    ) -&gt; &#34;Browser&#34;:
-        &#34;&#34;&#34;BrowserType.connect
-
-        This methods attaches Playwright to an existing browser instance.
-
-        Parameters
-        ----------
-        wsEndpoint : str
-            A browser websocket endpoint to connect to. **required**
-        slowMo : Optional[int]
-            Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-        timeout : Optional[int]
-            Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-
-        Returns
-        -------
-        Browser
-        &#34;&#34;&#34;
-        return mapping.from_impl(
-            await self._impl_obj.connect(
-                wsEndpoint=wsEndpoint, slowMo=slowMo, timeout=timeout
-            )
-        )
-
 
 mapping.register(BrowserTypeImpl, BrowserType)
 
@@ -8735,32 +8709,6 @@ is fired.</p>
                 videoSize=videoSize,
                 recordHar=recordHar,
             )
-        )
-
-    async def connect(
-        self, wsEndpoint: str, slowMo: int = None, timeout: int = None
-    ) -&gt; &#34;Browser&#34;:
-        &#34;&#34;&#34;BrowserType.connect
-
-        This methods attaches Playwright to an existing browser instance.
-
-        Parameters
-        ----------
-        wsEndpoint : str
-            A browser websocket endpoint to connect to. **required**
-        slowMo : Optional[int]
-            Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-        timeout : Optional[int]
-            Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-
-        Returns
-        -------
-        Browser
-        &#34;&#34;&#34;
-        return mapping.from_impl(
-            await self._impl_obj.connect(
-                wsEndpoint=wsEndpoint, slowMo=slowMo, timeout=timeout
-            )
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -8823,57 +8771,6 @@ def name(self) -&gt; str:
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="playwright.async_api.BrowserType.connect"><code class="name flex">
-<span>async def <span class="ident">connect</span></span>(<span>self, wsEndpoint: str, slowMo: int = None, timeout: int = None) ‑> <a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>BrowserType.connect</p>
-<p>This methods attaches Playwright to an existing browser instance.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>wsEndpoint</code></strong> :&ensp;<code>str</code></dt>
-<dd>A browser websocket endpoint to connect to. <strong>required</strong></dd>
-<dt><strong><code>slowMo</code></strong> :&ensp;<code>Optional[int]</code></dt>
-<dd>Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.</dd>
-<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
-<dd>Maximum time in milliseconds to wait for the connection to be established. Defaults to <code>30000</code> (30 seconds). Pass <code>0</code> to disable timeout.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def connect(
-    self, wsEndpoint: str, slowMo: int = None, timeout: int = None
-) -&gt; &#34;Browser&#34;:
-    &#34;&#34;&#34;BrowserType.connect
-
-    This methods attaches Playwright to an existing browser instance.
-
-    Parameters
-    ----------
-    wsEndpoint : str
-        A browser websocket endpoint to connect to. **required**
-    slowMo : Optional[int]
-        Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-    timeout : Optional[int]
-        Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-
-    Returns
-    -------
-    Browser
-    &#34;&#34;&#34;
-    return mapping.from_impl(
-        await self._impl_obj.connect(
-            wsEndpoint=wsEndpoint, slowMo=slowMo, timeout=timeout
-        )
-    )</code></pre>
-</details>
-</dd>
 <dt id="playwright.async_api.BrowserType.launch"><code class="name flex">
 <span>async def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None, firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None) ‑> <a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></span>
 </code></dt>
@@ -24932,7 +24829,6 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li>
 <h4><code><a title="playwright.async_api.BrowserType" href="#playwright.async_api.BrowserType">BrowserType</a></code></h4>
 <ul class="">
-<li><code><a title="playwright.async_api.BrowserType.connect" href="#playwright.async_api.BrowserType.connect">connect</a></code></li>
 <li><code><a title="playwright.async_api.BrowserType.executablePath" href="#playwright.async_api.BrowserType.executablePath">executablePath</a></code></li>
 <li><code><a title="playwright.async_api.BrowserType.launch" href="#playwright.async_api.BrowserType.launch">launch</a></code></li>
 <li><code><a title="playwright.async_api.BrowserType.launchPersistentContext" href="#playwright.async_api.BrowserType.launchPersistentContext">launchPersistentContext</a></code></li>
