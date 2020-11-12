@@ -14,6 +14,7 @@
 
 import json
 import re
+import subprocess
 from sys import stderr
 from typing import (  # type: ignore
     Any,
@@ -49,8 +50,12 @@ class DocumentationProvider:
     def __init__(self) -> None:
         self.api: Any = {}
         self.printed_entries: List[str] = []
-        with open("api.json") as json_file:
-            self.api = json.load(json_file)
+        process_output = subprocess.run(
+            ["python", "-m", "playwright", "print-api-json"],
+            check=True,
+            capture_output=True,
+        )
+        self.api = json.loads(process_output.stdout)
         self.errors: Set[str] = set()
 
     method_name_rewrites: Dict[str, str] = {
