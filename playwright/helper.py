@@ -190,6 +190,11 @@ class RecordHarOptions(TypedDict):
     path: str
 
 
+class RecordVideoOptions(TypedDict):
+    dir: str
+    size: Optional[Viewport]
+
+
 DeviceDescriptor = TypedDict(
     "DeviceDescriptor",
     {
