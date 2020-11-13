@@ -17,10 +17,11 @@ import json
 import mimetypes
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
+from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     ContinueParameters,
     Error,
@@ -29,6 +30,7 @@ from playwright.helper import (
     ResourceTiming,
     locals_to_params,
 )
+from playwright.wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.frame import Frame
@@ -271,6 +273,7 @@ class WebSocket(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._is_closed = False
         self._channel.on(
             "frameSent",
             lambda params: self._on_frame_sent(params["opcode"], params["data"]),
@@ -282,11 +285,39 @@ class WebSocket(ChannelOwner):
         self._channel.on(
             "error", lambda params: self.emit(WebSocket.Events.Error, params["error"])
         )
-        self._channel.on("close", lambda params: self.emit(WebSocket.Events.Close))
+        self._channel.on("close", lambda params: self._on_close())
 
     @property
     def url(self) -> str:
         return self._initializer["url"]
+
+    async def waitForEvent(
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
+    ) -> Any:
+        if timeout is None:
+            timeout = cast(Any, self._parent)._timeout_settings.timeout()
+        wait_helper = WaitHelper(self._loop)
+        wait_helper.reject_on_timeout(
+            timeout, f'Timeout while waiting for event "${event}"'
+        )
+        if event != WebSocket.Events.Close:
+            wait_helper.reject_on_event(
+                self, WebSocket.Events.Close, Error("Socket closed")
+            )
+        if event != WebSocket.Events.Error:
+            wait_helper.reject_on_event(
+                self, WebSocket.Events.Error, Error("Socket error")
+            )
+        wait_helper.reject_on_event(self._parent, "close", Error("Page closed"))
+        return await wait_helper.wait_for_event(self, event, predicate)
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: Callable[[Any], bool] = None,
+        timeout: int = None,
+    ) -> EventContextManagerImpl:
+        return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def _on_frame_sent(self, opcode: int, data: str) -> None:
         if opcode == 2:
@@ -299,6 +330,13 @@ class WebSocket(ChannelOwner):
             self.emit(WebSocket.Events.FrameReceived, base64.b64decode(data))
         else:
             self.emit(WebSocket.Events.FrameReceived, data)
+
+    def isClosed(self) -> bool:
+        return self._is_closed
+
+    def _on_close(self) -> None:
+        self._is_closed = True
+        self.emit(WebSocket.Events.Close)
 
 
 def serialize_headers(headers: Dict[str, str]) -> List[Header]:

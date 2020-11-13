@@ -19,8 +19,6 @@ Method not implemented: Download.createReadStream
 Method not implemented: Logger.isEnabled
 Method not implemented: Logger.log
 Method not implemented: Page.coverage
-Method not implemented: WebSocket.isClosed
-Method not implemented: WebSocket.waitForEvent
 
 # Parameter overloads
 Parameter not documented: BrowserContext.waitForEvent(predicate=)
@@ -30,6 +28,8 @@ Parameter not documented: Page.waitForEvent(timeout=)
 Parameter not documented: Page.waitForRequest(predicate=)
 Parameter not documented: Page.waitForResponse(predicate=)
 Parameter not documented: Selectors.register(path=)
+Parameter not documented: WebSocket.waitForEvent(timeout=)
+Parameter not documented: WebSocket.waitForEvent(predicate=)
 
 # Documented as Dict / Any
 Parameter type mismatch in BrowserContext.setGeolocation(geolocation=): documented as Optional[Dict], code has Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
@@ -42,6 +42,7 @@ Parameter type mismatch in Page.viewportSize(return=): documented as Optional[Di
 Parameter type mismatch in Page.waitForEvent(return=): documented as Dict, code has Any
 Parameter type mismatch in Request.failure(return=): documented as Optional[Dict], code has Optional[{"errorText": str}]
 Parameter type mismatch in Response.json(return=): documented as Any, code has Union[Dict, List]
+Parameter type mismatch in WebSocket.waitForEvent(return=): documented as Dict, code has Any
 
 # Pathlib
 Parameter type mismatch in BrowserType.launch(executablePath=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
@@ -118,3 +119,4 @@ Method not implemented: BrowserType.connect
 # OptionsOr
 Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)
 Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
+Parameter not implemented: WebSocket.waitForEvent(optionsOrPredicate=)
