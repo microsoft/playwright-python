@@ -47,6 +47,15 @@ jobs:
         - os: macos-latest
           python-version: 3.9
           browser: chromium
+        - os: macos-11.0
+          python-version: 3.9
+          browser: chromium
+        - os: macos-11.0
+          python-version: 3.9
+          browser: firefox
+        - os: macos-11.0
+          python-version: 3.9
+          browser: webkit
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
