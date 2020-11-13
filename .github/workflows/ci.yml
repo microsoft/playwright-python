@@ -56,8 +56,7 @@ jobs:
         - os: macos-11.0
           python-version: 3.9
           browser: webkit
-
-runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
     - uses: microsoft/playwright-github-action@v1
