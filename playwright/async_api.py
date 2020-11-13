@@ -50,6 +50,7 @@ from playwright.helper import (
     PdfMargins,
     ProxyServer,
     RecordHarOptions,
+    RecordVideoOptions,
     RequestFailure,
     ResourceTiming,
     SelectOption,
@@ -5839,6 +5840,7 @@ class Browser(AsyncBase):
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
+        recordVideo: RecordVideoOptions = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -5882,11 +5884,13 @@ class Browser(AsyncBase):
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
         videosPath : Optional[str]
-            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
-            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
         recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
-            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
+            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
+        recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
+            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
 
         Returns
         -------
@@ -5916,6 +5920,7 @@ class Browser(AsyncBase):
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,
+                recordVideo=recordVideo,
             )
         )
 
@@ -5943,6 +5948,7 @@ class Browser(AsyncBase):
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
+        recordVideo: RecordVideoOptions = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -5987,11 +5993,13 @@ class Browser(AsyncBase):
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
         videosPath : Optional[str]
-            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
-            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
         recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
-            Enables HAR recording for all pages into `har.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
+            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
+        recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
+            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `page.close` for videos to be saved.
 
         Returns
         -------
@@ -6021,6 +6029,7 @@ class Browser(AsyncBase):
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,
+                recordVideo=recordVideo,
             )
         )
 
@@ -6118,7 +6127,7 @@ class BrowserType(AsyncBase):
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
         downloadsPath : Union[str, pathlib.Path, NoneType]
-            If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
+            If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         chromiumSandbox : Optional[bool]
@@ -6167,7 +6176,7 @@ class BrowserType(AsyncBase):
         proxy: ProxyServer = None,
         downloadsPath: typing.Union[str, pathlib.Path] = None,
         slowMo: int = None,
-        viewport: IntSize = None,
+        viewport: typing.Union[IntSize, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -6188,6 +6197,7 @@ class BrowserType(AsyncBase):
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
+        recordVideo: RecordVideoOptions = None,
     ) -> "BrowserContext":
         """BrowserType.launchPersistentContext
 
@@ -6220,10 +6230,10 @@ class BrowserType(AsyncBase):
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
         downloadsPath : Union[str, pathlib.Path, NoneType]
-            If specified, accepted downloads are downloaded into this folder. Otherwise, temporary folder is created and is deleted when browser is closed.
+            If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
         slowMo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-        viewport : Optional[{"width": int, "height": int}]
+        viewport : Union[{"width": int, "height": int}, '0', NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
         ignoreHTTPSErrors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
@@ -6259,11 +6269,13 @@ class BrowserType(AsyncBase):
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
         videosPath : Optional[str]
-            Enables video recording for all pages to `videosPath` folder. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
-            Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
         recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
-            Enables HAR recording for all the pages into `har.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
+            Enables HAR recording for all the pages into `recordHar.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
+        recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
+            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
 
         Returns
         -------
@@ -6307,6 +6319,7 @@ class BrowserType(AsyncBase):
                 videosPath=videosPath,
                 videoSize=videoSize,
                 recordHar=recordHar,
+                recordVideo=recordVideo,
             )
         )
 

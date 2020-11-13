@@ -25,6 +25,7 @@ from playwright.helper import (
     IntSize,
     ProxyServer,
     RecordHarOptions,
+    RecordVideoOptions,
     is_safe_close_error,
     locals_to_params,
 )
@@ -93,6 +94,7 @@ class Browser(ChannelOwner):
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
+        recordVideo: RecordVideoOptions = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
@@ -104,6 +106,11 @@ class Browser(ChannelOwner):
             params["noDefaultViewport"] = True
         if extraHTTPHeaders:
             params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
+        if not recordVideo and videosPath:
+            params["recordVideo"] = {"dir": videosPath}
+            if videoSize:
+                params["recordVideo"]["size"] = videoSize
+
         channel = await self._channel.send("newContext", params)
         context = from_channel(channel)
         self._contexts.append(context)
@@ -135,6 +142,7 @@ class Browser(ChannelOwner):
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
+        recordVideo: RecordVideoOptions = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this

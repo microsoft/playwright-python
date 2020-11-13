@@ -36,7 +36,7 @@ Parameter type mismatch in BrowserContext.setGeolocation(geolocation=): document
 Parameter type mismatch in BrowserContext.waitForEvent(return=): documented as Dict, code has Any
 Parameter type mismatch in Browser.newContext(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
 Parameter type mismatch in Browser.newPage(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
-Parameter type mismatch in BrowserType.launchPersistentContext(viewport=): documented as Optional[Dict], code has Optional[{"width": int, "height": int}]
+Parameter type mismatch in BrowserType.launchPersistentContext(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
 Parameter type mismatch in ElementHandle.boundingBox(return=): documented as Optional[Dict], code has Optional[{"x": float, "y": float, "width": float, "height": float}]
 Parameter type mismatch in Page.viewportSize(return=): documented as Optional[Dict], code has Optional[{"width": int, "height": int}]
 Parameter type mismatch in Page.waitForEvent(return=): documented as Dict, code has Any
@@ -113,6 +113,7 @@ Parameter not implemented: Browser.newPage(logger=)
 # Deprecated
 Parameter not implemented: Page.addInitScript(arg=)
 Parameter not implemented: BrowserContext.addInitScript(arg=)
+Method not implemented: BrowserType.connect
 
 # OptionsOr
 Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)

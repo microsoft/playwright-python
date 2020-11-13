@@ -5,14 +5,15 @@ function assert_script {
     oldfile="playwright/$2"
     echo "Testing $newfile against $oldfile"
 
-    python $1 > $newfile
+    if ! python $1 > $newfile; then
+      exit 1
+    fi
 
     pre-commit run --files $newfile
 
     cmp $oldfile $newfile
     exit_code=$?
     rm $newfile
-    return $exit_code
 }
 
 assert_script "scripts/generate_sync_api.py" "sync_api.py"

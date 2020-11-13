@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -26,10 +27,16 @@ from playwright.helper import (
     IntSize,
     ProxyServer,
     RecordHarOptions,
+    RecordVideoOptions,
     locals_to_params,
     not_installed_error,
 )
 from playwright.network import serialize_headers
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import Literal
+else:  # pragma: no cover
+    from typing_extensions import Literal
 
 
 class BrowserType(ChannelOwner):
@@ -89,7 +96,7 @@ class BrowserType(ChannelOwner):
         proxy: ProxyServer = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
-        viewport: IntSize = None,
+        viewport: Union[IntSize, Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -110,11 +117,19 @@ class BrowserType(ChannelOwner):
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
+        recordVideo: RecordVideoOptions = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
+        if viewport == 0:
+            del params["viewport"]
+            params["noDefaultViewport"] = True
         if extraHTTPHeaders:
             params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
+        if not recordVideo and videosPath:
+            params["recordVideo"] = {"dir": videosPath}
+            if videoSize:
+                params["recordVideo"]["size"] = videoSize
         normalize_launch_params(params)
         try:
             context = from_channel(
