@@ -22,8 +22,8 @@ import zipfile
 
 from playwright.path_utils import get_file_dirname
 
-driver_version_64 = "0.160.0-next.1605227932803"
-driver_version_32 = "0.160.0-next.1605227936643"
+driver_version_64 = "0.161.0"
+driver_version_32 = "0.161.0"
 
 
 def driver_version(platform: str) -> str:
@@ -38,7 +38,7 @@ if not os.path.exists("playwright/driver"):
 for platform in ["mac", "linux", "win32", "win32_x64"]:
     zip_file = f"playwright-cli-{driver_version(platform)}-{platform}.zip"
     if not os.path.exists("driver/" + zip_file):
-        url = "https://playwright.azureedge.net/builds/cli/next/" + zip_file
+        url = "https://playwright.azureedge.net/builds/cli/" + zip_file
         print("Fetching ", url)
         subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
 
