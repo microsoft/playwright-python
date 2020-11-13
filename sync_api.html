@@ -540,6 +540,58 @@ class WebSocket(SyncBase):
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._impl_obj.url)
 
+    def waitForEvent(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -&gt; typing.Any:
+        &#34;&#34;&#34;WebSocket.waitForEvent
+
+        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the webSocket is closed before the event
+        is fired.
+
+        Parameters
+        ----------
+        event : str
+            Event name, same one would pass into `webSocket.on(event)`.
+
+        Returns
+        -------
+        Any
+            Promise which resolves to the event data value.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.waitForEvent(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                )
+            )
+        )
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -&gt; EventContextManager:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
+
+    def isClosed(self) -&gt; bool:
+        &#34;&#34;&#34;WebSocket.isClosed
+
+        Indicates that the web socket has been closed.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.isClosed())
+
 
 mapping.register(WebSocketImpl, WebSocket)
 
@@ -25259,7 +25311,59 @@ An example of serving static file:</p>
         -------
         str
         &#34;&#34;&#34;
-        return mapping.from_maybe_impl(self._impl_obj.url)</code></pre>
+        return mapping.from_maybe_impl(self._impl_obj.url)
+
+    def waitForEvent(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -&gt; typing.Any:
+        &#34;&#34;&#34;WebSocket.waitForEvent
+
+        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the webSocket is closed before the event
+        is fired.
+
+        Parameters
+        ----------
+        event : str
+            Event name, same one would pass into `webSocket.on(event)`.
+
+        Returns
+        -------
+        Any
+            Promise which resolves to the event data value.
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.waitForEvent(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                )
+            )
+        )
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+        timeout: int = None,
+    ) -&gt; EventContextManager:
+        return EventContextManager(
+            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        )
+
+    def isClosed(self) -&gt; bool:
+        &#34;&#34;&#34;WebSocket.isClosed
+
+        Indicates that the web socket has been closed.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.isClosed())</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -25292,6 +25396,109 @@ def url(self) -&gt; str:
     str
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._impl_obj.url)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="playwright.sync_api.WebSocket.expect_event"><code class="name flex">
+<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def expect_event(
+    self,
+    event: str,
+    predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+    timeout: int = None,
+) -&gt; EventContextManager:
+    return EventContextManager(
+        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+    )</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.WebSocket.isClosed"><code class="name flex">
+<span>def <span class="ident">isClosed</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>WebSocket.isClosed</p>
+<p>Indicates that the web socket has been closed.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isClosed(self) -&gt; bool:
+    &#34;&#34;&#34;WebSocket.isClosed
+
+    Indicates that the web socket has been closed.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(self._impl_obj.isClosed())</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.WebSocket.waitForEvent"><code class="name flex">
+<span>def <span class="ident">waitForEvent</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>WebSocket.waitForEvent</p>
+<p>Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the webSocket is closed before the event
+is fired.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>event</code></strong> :&ensp;<code>str</code></dt>
+<dd>Event name, same one would pass into <code>webSocket.on(event)</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>Promise which resolves to the event data value.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def waitForEvent(
+    self,
+    event: str,
+    predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
+    timeout: int = None,
+) -&gt; typing.Any:
+    &#34;&#34;&#34;WebSocket.waitForEvent
+
+    Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the webSocket is closed before the event
+    is fired.
+
+    Parameters
+    ----------
+    event : str
+        Event name, same one would pass into `webSocket.on(event)`.
+
+    Returns
+    -------
+    Any
+        Promise which resolves to the event data value.
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(
+        self._sync(
+            self._impl_obj.waitForEvent(
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=timeout,
+            )
+        )
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -25940,7 +26147,10 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li>
 <h4><code><a title="playwright.sync_api.WebSocket" href="#playwright.sync_api.WebSocket">WebSocket</a></code></h4>
 <ul class="">
+<li><code><a title="playwright.sync_api.WebSocket.expect_event" href="#playwright.sync_api.WebSocket.expect_event">expect_event</a></code></li>
+<li><code><a title="playwright.sync_api.WebSocket.isClosed" href="#playwright.sync_api.WebSocket.isClosed">isClosed</a></code></li>
 <li><code><a title="playwright.sync_api.WebSocket.url" href="#playwright.sync_api.WebSocket.url">url</a></code></li>
+<li><code><a title="playwright.sync_api.WebSocket.waitForEvent" href="#playwright.sync_api.WebSocket.waitForEvent">waitForEvent</a></code></li>
 </ul>
 </li>
 <li>
