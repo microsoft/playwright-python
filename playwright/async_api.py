@@ -54,6 +54,8 @@ from playwright.helper import (
     RequestFailure,
     ResourceTiming,
     SelectOption,
+    SetStorageState,
+    StorageState,
     Viewport,
 )
 from playwright.input import Keyboard as KeyboardImpl
@@ -463,6 +465,7 @@ class Route(AsyncBase):
 
     async def continue_(
         self,
+        url: str = None,
         method: str = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
         postData: typing.Union[str, bytes] = None,
@@ -473,6 +476,8 @@ class Route(AsyncBase):
 
         Parameters
         ----------
+        url : Optional[str]
+            If set changes the request URL. New URL must have same protocol as original one.
         method : Optional[str]
             If set changes the request method (e.g. GET or POST)
         headers : Optional[Dict[str, str]]
@@ -482,7 +487,10 @@ class Route(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.continue_(
-                method=method, headers=mapping.to_impl(headers), postData=postData
+                url=url,
+                method=method,
+                headers=mapping.to_impl(headers),
+                postData=postData,
             )
         )
 
@@ -5721,6 +5729,17 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.close())
 
+    async def storageState(self) -> StorageState:
+        """BrowserContext.storageState
+
+        Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+        Returns
+        -------
+        {"cookies": List[Dict], "origins": List[Dict]}
+        """
+        return mapping.from_maybe_impl(await self._impl_obj.storageState())
+
     def expect_event(
         self,
         event: str,
@@ -5889,6 +5908,7 @@ class Browser(AsyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -5939,6 +5959,8 @@ class Browser(AsyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+        storageState : Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
         -------
@@ -5969,6 +5991,7 @@ class Browser(AsyncBase):
                 videoSize=videoSize,
                 recordHar=recordHar,
                 recordVideo=recordVideo,
+                storageState=storageState,
             )
         )
 
@@ -5997,6 +6020,7 @@ class Browser(AsyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -6048,6 +6072,8 @@ class Browser(AsyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `page.close` for videos to be saved.
+        storageState : Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
         -------
@@ -6078,6 +6104,7 @@ class Browser(AsyncBase):
                 videoSize=videoSize,
                 recordHar=recordHar,
                 recordVideo=recordVideo,
+                storageState=storageState,
             )
         )
 

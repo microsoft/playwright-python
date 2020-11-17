@@ -26,6 +26,7 @@ from playwright.helper import (
     ProxyServer,
     RecordHarOptions,
     RecordVideoOptions,
+    SetStorageState,
     is_safe_close_error,
     locals_to_params,
 )
@@ -95,6 +96,7 @@ class Browser(ChannelOwner):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
@@ -143,6 +145,7 @@ class Browser(ChannelOwner):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this

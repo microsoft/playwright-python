@@ -670,68 +670,6 @@ async def test_page_route_should_support_cors_for_different_methods(page, server
     assert resp == ["DELETE", "electric", "gas"]
 
 
-async def test_request_continue_should_work(page, server):
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
-    await page.goto(server.EMPTY_PAGE)
-
-
-async def test_request_continue_should_amend_HTTP_headers(page, server):
-    await page.route(
-        "**/*",
-        lambda route, _: asyncio.create_task(
-            route.continue_(headers={**route.request.headers, "FOO": "bar"})
-        ),
-    )
-
-    await page.goto(server.EMPTY_PAGE)
-    [request, _] = await asyncio.gather(
-        server.wait_for_request("/sleep.zzz"),
-        page.evaluate('() => fetch("/sleep.zzz")'),
-    )
-    assert request.getHeader("foo") == "bar"
-
-
-async def test_request_continue_should_amend_method(page, server):
-    server_request = asyncio.create_task(server.wait_for_request("/sleep.zzz"))
-    await page.goto(server.EMPTY_PAGE)
-    await page.route(
-        "**/*", lambda route, _: asyncio.create_task(route.continue_(method="POST"))
-    )
-    [request, _] = await asyncio.gather(
-        server.wait_for_request("/sleep.zzz"),
-        page.evaluate('() => fetch("/sleep.zzz")'),
-    )
-    assert request.method.decode() == "POST"
-    assert (await server_request).method.decode() == "POST"
-
-
-async def test_request_continue_should_amend_method_on_main_request(page, server):
-    request = asyncio.create_task(server.wait_for_request("/empty.html"))
-    await page.route(
-        "**/*", lambda route, _: asyncio.create_task(route.continue_(method="POST"))
-    )
-    await page.goto(server.EMPTY_PAGE)
-    assert (await request).method.decode() == "POST"
-
-
-async def test_request_continue_should_amend_post_data(page, server):
-    await page.goto(server.EMPTY_PAGE)
-    await page.route(
-        "**/*",
-        lambda route, _: asyncio.create_task(route.continue_(postData=b"doggo")),
-    )
-
-    [serverRequest, _] = await asyncio.gather(
-        server.wait_for_request("/sleep.zzz"),
-        page.evaluate(
-            """
-        () => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })
-      """
-        ),
-    )
-    assert serverRequest.post_body.decode() == "doggo"
-
-
 async def test_request_fulfill_should_work_a(page, server):
     await page.route(
         "**/*",
