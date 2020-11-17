@@ -22,8 +22,8 @@ import zipfile
 
 from playwright.path_utils import get_file_dirname
 
-driver_version_64 = "0.161.0"
-driver_version_32 = "0.161.0"
+driver_version_64 = "0.162.1"
+driver_version_32 = "0.162.1"
 
 
 def driver_version(platform: str) -> str:
