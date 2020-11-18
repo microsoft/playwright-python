@@ -33,7 +33,7 @@ jobs:
     - name: Lint
       run: pre-commit run --all-files
     - name: Test Sync generation script
-      run: bash buildbots/test-sync-generation.sh
+      run: bash scripts/verify_api.sh
   build:
     name: Build
     timeout-minutes: 30

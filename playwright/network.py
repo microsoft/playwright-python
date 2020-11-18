@@ -182,11 +182,14 @@ class Route(ChannelOwner):
 
     async def continue_(
         self,
+        url: str = None,
         method: str = None,
         headers: Dict[str, str] = None,
         postData: Union[str, bytes] = None,
     ) -> None:
         overrides: ContinueParameters = {}
+        if url:
+            overrides["url"] = url
         if method:
             overrides["method"] = method
         if headers:

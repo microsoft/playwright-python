@@ -15,7 +15,9 @@
 import pytest
 
 
-async def test_should_work(page, server):
+async def test_should_work(page, server, is_webkit, is_mac):
+    if is_webkit and is_mac:
+        pytest.skip()
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(server.EMPTY_PAGE)
     request = await request_info.value
@@ -31,7 +33,9 @@ async def test_should_work(page, server):
     assert timing["responseEnd"] < 10000
 
 
-async def test_should_work_for_subresource(page, server, is_win, is_webkit):
+async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
+    if is_webkit and is_win:
+        pytest.skip()
     requests = []
     page.on("requestfinished", lambda request: requests.append(request))
     await page.goto(server.PREFIX + "/one-style.html")
@@ -58,6 +62,8 @@ async def test_should_work_for_subresource(page, server, is_win, is_webkit):
 
 
 async def test_should_work_for_ssl(browser, https_server, is_mac, is_webkit):
+    if is_webkit and is_mac:
+        pytest.skip()
     page = await browser.newPage(ignoreHTTPSErrors=True)
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(https_server.EMPTY_PAGE)

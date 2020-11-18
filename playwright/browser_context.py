@@ -26,6 +26,7 @@ from playwright.helper import (
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
+    StorageState,
     TimeoutSettings,
     URLMatch,
     URLMatcher,
@@ -234,6 +235,9 @@ class BrowserContext(ChannelOwner):
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
+
+    async def storageState(self) -> StorageState:
+        return await self._channel.send_return_as_dict("storageState")
 
     def expect_event(
         self,
