@@ -82,6 +82,8 @@ from playwright.helper import (
     RequestFailure,
     ResourceTiming,
     SelectOption,
+    SetStorageState,
+    StorageState,
     Viewport,
 )
 from playwright.input import Keyboard as KeyboardImpl
@@ -491,6 +493,7 @@ class Route(AsyncBase):
 
     async def continue_(
         self,
+        url: str = None,
         method: str = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
         postData: typing.Union[str, bytes] = None,
@@ -501,6 +504,8 @@ class Route(AsyncBase):
 
         Parameters
         ----------
+        url : Optional[str]
+            If set changes the request URL. New URL must have same protocol as original one.
         method : Optional[str]
             If set changes the request method (e.g. GET or POST)
         headers : Optional[Dict[str, str]]
@@ -510,7 +515,10 @@ class Route(AsyncBase):
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.continue_(
-                method=method, headers=mapping.to_impl(headers), postData=postData
+                url=url,
+                method=method,
+                headers=mapping.to_impl(headers),
+                postData=postData,
             )
         )
 
@@ -5749,6 +5757,17 @@ class BrowserContext(AsyncBase):
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(await self._impl_obj.close())
 
+    async def storageState(self) -&gt; StorageState:
+        &#34;&#34;&#34;BrowserContext.storageState
+
+        Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+        Returns
+        -------
+        {&#34;cookies&#34;: List[Dict], &#34;origins&#34;: List[Dict]}
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(await self._impl_obj.storageState())
+
     def expect_event(
         self,
         event: str,
@@ -5917,6 +5936,7 @@ class Browser(AsyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -5967,6 +5987,8 @@ class Browser(AsyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
         -------
@@ -5997,6 +6019,7 @@ class Browser(AsyncBase):
                 videoSize=videoSize,
                 recordHar=recordHar,
                 recordVideo=recordVideo,
+                storageState=storageState,
             )
         )
 
@@ -6025,6 +6048,7 @@ class Browser(AsyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6076,6 +6100,8 @@ class Browser(AsyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `page.close` for videos to be saved.
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
         -------
@@ -6106,6 +6132,7 @@ class Browser(AsyncBase):
                 videoSize=videoSize,
                 recordHar=recordHar,
                 recordVideo=recordVideo,
+                storageState=storageState,
             )
         )
 
@@ -6676,6 +6703,7 @@ An example of logging the focused node's name:</p>
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -6726,6 +6754,8 @@ An example of logging the focused node's name:</p>
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
         -------
@@ -6756,6 +6786,7 @@ An example of logging the focused node's name:</p>
                 videoSize=videoSize,
                 recordHar=recordHar,
                 recordVideo=recordVideo,
+                storageState=storageState,
             )
         )
 
@@ -6784,6 +6815,7 @@ An example of logging the focused node's name:</p>
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
+        storageState: SetStorageState = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6835,6 +6867,8 @@ An example of logging the focused node's name:</p>
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `page.close` for videos to be saved.
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
         -------
@@ -6865,6 +6899,7 @@ An example of logging the focused node's name:</p>
                 videoSize=videoSize,
                 recordHar=recordHar,
                 recordVideo=recordVideo,
+                storageState=storageState,
             )
         )
 
@@ -6991,7 +7026,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newContext"><code class="name flex">
-<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None, storageState: playwright.helper.SetStorageState = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -7042,6 +7077,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await <code>browserContext.close</code> for the HAR to be saved.</dd>
 <dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await <code>browserContext.close</code> for videos to be saved.</dd>
+<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]</code></dt>
+<dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -7077,6 +7114,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
     recordVideo: RecordVideoOptions = None,
+    storageState: SetStorageState = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;Browser.newContext
 
@@ -7127,6 +7165,8 @@ The Browser object itself is considered to be disposed and cannot be used anymor
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
     recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+    storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+        Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
     Returns
     -------
@@ -7157,12 +7197,13 @@ The Browser object itself is considered to be disposed and cannot be used anymor
             videoSize=videoSize,
             recordHar=recordHar,
             recordVideo=recordVideo,
+            storageState=storageState,
         )
     )</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newPage"><code class="name flex">
-<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
+<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None, storageState: playwright.helper.SetStorageState = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -7214,6 +7255,8 @@ This is a convenience API that should only be used for the single-page scenarios
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await <code>page.close</code> for the HAR to be saved.</dd>
 <dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await <code>page.close</code> for videos to be saved.</dd>
+<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]</code></dt>
+<dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -7249,6 +7292,7 @@ This is a convenience API that should only be used for the single-page scenarios
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
     recordVideo: RecordVideoOptions = None,
+    storageState: SetStorageState = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.newPage
 
@@ -7300,6 +7344,8 @@ This is a convenience API that should only be used for the single-page scenarios
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
     recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `page.close` for videos to be saved.
+    storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+        Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
     Returns
     -------
@@ -7330,6 +7376,7 @@ This is a convenience API that should only be used for the single-page scenarios
             videoSize=videoSize,
             recordHar=recordHar,
             recordVideo=recordVideo,
+            storageState=storageState,
         )
     )</code></pre>
 </details>
@@ -7705,6 +7752,17 @@ This is a convenience API that should only be used for the single-page scenarios
         **NOTE** the default browser context cannot be closed.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(await self._impl_obj.close())
+
+    async def storageState(self) -&gt; StorageState:
+        &#34;&#34;&#34;BrowserContext.storageState
+
+        Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+        Returns
+        -------
+        {&#34;cookies&#34;: List[Dict], &#34;origins&#34;: List[Dict]}
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(await self._impl_obj.storageState())
 
     def expect_event(
         self,
@@ -8416,6 +8474,30 @@ page.waitForNavigation([options])</p>
         Whether to emulate network being offline for the browser context.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(await self._impl_obj.setOffline(offline=offline))</code></pre>
+</details>
+</dd>
+<dt id="playwright.async_api.BrowserContext.storageState"><code class="name flex">
+<span>async def <span class="ident">storageState</span></span>(<span>self) ‑> playwright.helper.StorageState</span>
+</code></dt>
+<dd>
+<div class="desc"><p>BrowserContext.storageState</p>
+<p>Returns storage state for this browser context, contains current cookies and local storage snapshot.</p>
+<h2 id="returns">Returns</h2>
+<p>{"cookies": List[Dict], "origins": List[Dict]}</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def storageState(self) -&gt; StorageState:
+    &#34;&#34;&#34;BrowserContext.storageState
+
+    Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+    Returns
+    -------
+    {&#34;cookies&#34;: List[Dict], &#34;origins&#34;: List[Dict]}
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(await self._impl_obj.storageState())</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.unroute"><code class="name flex">
@@ -9530,6 +9612,7 @@ to send messages.</p></div>
 <li><code><a title="playwright.async_api.BrowserContext.setExtraHTTPHeaders" href="#playwright.async_api.BrowserContext.setExtraHTTPHeaders">setExtraHTTPHeaders</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.setGeolocation" href="#playwright.async_api.BrowserContext.setGeolocation">setGeolocation</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.setOffline" href="#playwright.async_api.BrowserContext.setOffline">setOffline</a></code></li>
+<li><code><a title="playwright.async_api.BrowserContext.storageState" href="#playwright.async_api.BrowserContext.storageState">storageState</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.unroute" href="#playwright.async_api.BrowserContext.unroute">unroute</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.waitForEvent" href="#playwright.async_api.BrowserContext.waitForEvent">waitForEvent</a></code></li>
 </ul>
@@ -24119,6 +24202,7 @@ def url(self) -&gt; str:
 
     async def continue_(
         self,
+        url: str = None,
         method: str = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
         postData: typing.Union[str, bytes] = None,
@@ -24129,6 +24213,8 @@ def url(self) -&gt; str:
 
         Parameters
         ----------
+        url : Optional[str]
+            If set changes the request URL. New URL must have same protocol as original one.
         method : Optional[str]
             If set changes the request method (e.g. GET or POST)
         headers : Optional[Dict[str, str]]
@@ -24138,7 +24224,10 @@ def url(self) -&gt; str:
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
             await self._impl_obj.continue_(
-                method=method, headers=mapping.to_impl(headers), postData=postData
+                url=url,
+                method=method,
+                headers=mapping.to_impl(headers),
+                postData=postData,
             )
         )</code></pre>
 </details>
@@ -24237,13 +24326,15 @@ one of the following:
 </details>
 </dd>
 <dt id="playwright.async_api.Route.continue_"><code class="name flex">
-<span>async def <span class="ident">continue_</span></span>(<span>self, method: str = None, headers: Dict[str, str] = None, postData: Union[str, bytes] = None) ‑> NoneType</span>
+<span>async def <span class="ident">continue_</span></span>(<span>self, url: str = None, method: str = None, headers: Dict[str, str] = None, postData: Union[str, bytes] = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Route.continue_</p>
 <p>Continues route's request with optional overrides.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>If set changes the request URL. New URL must have same protocol as original one.</dd>
 <dt><strong><code>method</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>If set changes the request method (e.g. GET or POST)</dd>
 <dt><strong><code>headers</code></strong> :&ensp;<code>Optional[Dict[str, str]]</code></dt>
@@ -24257,6 +24348,7 @@ one of the following:
 </summary>
 <pre><code class="python">async def continue_(
     self,
+    url: str = None,
     method: str = None,
     headers: typing.Union[typing.Dict[str, str]] = None,
     postData: typing.Union[str, bytes] = None,
@@ -24267,6 +24359,8 @@ one of the following:
 
     Parameters
     ----------
+    url : Optional[str]
+        If set changes the request URL. New URL must have same protocol as original one.
     method : Optional[str]
         If set changes the request method (e.g. GET or POST)
     headers : Optional[Dict[str, str]]
@@ -24276,7 +24370,10 @@ one of the following:
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
         await self._impl_obj.continue_(
-            method=method, headers=mapping.to_impl(headers), postData=postData
+            url=url,
+            method=method,
+            headers=mapping.to_impl(headers),
+            postData=postData,
         )
     )</code></pre>
 </details>
@@ -25060,6 +25157,7 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.async_api.BrowserContext.setExtraHTTPHeaders" href="#playwright.async_api.BrowserContext.setExtraHTTPHeaders">setExtraHTTPHeaders</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.setGeolocation" href="#playwright.async_api.BrowserContext.setGeolocation">setGeolocation</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.setOffline" href="#playwright.async_api.BrowserContext.setOffline">setOffline</a></code></li>
+<li><code><a title="playwright.async_api.BrowserContext.storageState" href="#playwright.async_api.BrowserContext.storageState">storageState</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.unroute" href="#playwright.async_api.BrowserContext.unroute">unroute</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.waitForEvent" href="#playwright.async_api.BrowserContext.waitForEvent">waitForEvent</a></code></li>
 </ul>
