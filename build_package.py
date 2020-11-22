@@ -87,6 +87,7 @@ for platform in ["mac", "linux", "win32", "win32_x64"]:
         wheel_location = without_platform + wheel
         shutil.copy(base_wheel_location, wheel_location)
         with zipfile.ZipFile(wheel_location, "a") as zip:
+            zip.writestr("playwright/driver/platform.txt", wheel)
             for file in os.listdir(f"driver/{platform}"):
                 from_location = f"driver/{platform}/{file}"
                 to_location = f"playwright/driver/{file}"
