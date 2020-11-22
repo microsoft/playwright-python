@@ -76,7 +76,7 @@ for platform in ["mac", "linux", "win32", "win32_x64"]:
 
     wheel = ""
     if platform == "mac":
-        wheel = "macosx_10_13_x86_64.whl"
+        wheel = "macosx_10_15_x86_64.whl"
     if platform == "linux":
         wheel = "manylinux1_x86_64.whl"
     if platform == "win32":

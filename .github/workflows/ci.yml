@@ -81,16 +81,16 @@ jobs:
       run: python -m playwright install
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest -vv tests/sync --browser=${{ matrix.browser }} --timeout 90
+      run: pytest -vv tests/sync --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest -vv tests/sync --browser=${{ matrix.browser }} --timeout 90
+      run: xvfb-run pytest -vv tests/sync --browser=${{ matrix.browser }}
     - name: Test Async API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest -vv tests/async --browser=${{ matrix.browser }} --timeout 90
+      run: pytest -vv tests/async --browser=${{ matrix.browser }}
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest -vv tests/async --browser=${{ matrix.browser }} --timeout 90
+      run: xvfb-run pytest -vv tests/async --browser=${{ matrix.browser }}
 
   test-package-installations:
     name: Test package installations
