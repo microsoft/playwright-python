@@ -74,27 +74,23 @@ for platform in ["mac", "linux", "win32", "win32_x64"]:
                     os.stat(f"playwright/driver/{file}").st_mode | stat.S_IEXEC,
                 )
 
-    wheels = []
+    wheel = ""
     if platform == "mac":
-        wheels = ["macosx_10_13_x86_64.whl", "macosx_11_0_x86_64.whl"]
+        wheel = "macosx_10_13_x86_64.whl"
     if platform == "linux":
-        wheels = ["manylinux1_x86_64.whl"]
+        wheel = "manylinux1_x86_64.whl"
     if platform == "win32":
-        wheels = ["win32.whl"]
+        wheel = "win32.whl"
     if platform == "win32_x64":
-        wheels = ["win_amd64.whl"]
-    for wheel in wheels:
-        wheel_location = without_platform + wheel
-        shutil.copy(base_wheel_location, wheel_location)
-        with zipfile.ZipFile(wheel_location, "a") as zip:
-            zip.writestr("playwright/driver/platform.txt", wheel)
-            for file in os.listdir(f"driver/{platform}"):
-                from_location = f"driver/{platform}/{file}"
-                to_location = f"playwright/driver/{file}"
-                if file == "playwright-cli" or file.startswith("ffmpeg"):
-                    os.chmod(
-                        from_location, os.stat(from_location).st_mode | stat.S_IEXEC
-                    )
-                zip.write(from_location, to_location)
+        wheel = "win_amd64.whl"
+    wheel_location = without_platform + wheel
+    shutil.copy(base_wheel_location, wheel_location)
+    with zipfile.ZipFile(wheel_location, "a") as zip:
+        for file in os.listdir(f"driver/{platform}"):
+            from_location = f"driver/{platform}/{file}"
+            to_location = f"playwright/driver/{file}"
+            if file == "playwright-cli" or file.startswith("ffmpeg"):
+                os.chmod(from_location, os.stat(from_location).st_mode | stat.S_IEXEC)
+            zip.write(from_location, to_location)
 
 os.remove(base_wheel_location)
