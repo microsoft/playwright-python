@@ -35,7 +35,7 @@ for platform in ["mac", "linux", "win32", "win32_x64"]:
     if not os.path.exists("driver/" + zip_file):
         url = "https://playwright.azureedge.net/builds/cli/next/" + zip_file
         print("Fetching ", url)
-        subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+        subprocess.check_call(["curl", "--http1.1", url, "-o", "driver/" + zip_file])
 
 _dirname = get_file_dirname()
 _build_dir = _dirname / "build"
