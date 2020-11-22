@@ -75,6 +75,8 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r local-requirements.txt
         pip install -e .
+    - name: Debug
+      run: pip debug -v
     - name: Build package
       run: python build_package.py
     - name: Install browsers
