@@ -51,6 +51,16 @@ KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
 
 
+class StorageState(TypedDict):
+    cookies: List[Cookie]
+    origins: List[Dict]
+
+
+class SetStorageState(TypedDict):
+    cookies: Optional[List[Cookie]]
+    origins: Optional[List[Dict]]
+
+
 class MousePosition(TypedDict):
     x: float
     y: float
@@ -105,9 +115,10 @@ class Header(TypedDict):
 
 
 class ContinueParameters(TypedDict, total=False):
-    method: str
-    headers: List[Header]
-    postData: str
+    url: Optional[str]
+    method: Optional[str]
+    headers: Optional[List[Header]]
+    postData: Optional[str]
 
 
 class ParsedMessageParams(TypedDict):
