@@ -116,7 +116,26 @@ def generate(t: Any) -> None:
             event_name = re.sub(r"consolemessage", "console", event_name)
 
             print(
-                f"    def {name}({signature(value, len(name) + 9)}) -> Async{return_type_value}:"
+                f"""    def {name}({signature(value, len(name) + 9)}) -> Async{return_type_value}:
+        \"\"\"{class_name}.{name}
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_{event_name}() as event_info:
+            await page.click("button")
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        \"\"\""""
             )
 
             wait_for_method = "waitForEvent(event, predicate, timeout)"
