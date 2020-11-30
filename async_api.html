@@ -575,6 +575,25 @@ class WebSocket(AsyncBase):
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager:
+        &#34;&#34;&#34;WebSocket.expect_event
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_event() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
@@ -3063,6 +3082,25 @@ class Frame(AsyncBase):
         state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Frame.expect_load_state
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_loadstate() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
 
     def expect_navigation(
@@ -3071,6 +3109,25 @@ class Frame(AsyncBase):
         waitUntil: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Frame.expect_navigation
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_navigation() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
@@ -5292,6 +5349,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager:
+        &#34;&#34;&#34;Page.expect_event
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_event() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
@@ -5301,6 +5377,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;ConsoleMessage&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;ConsoleMessage&#34;]:
+        &#34;&#34;&#34;Page.expect_console_message
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_console() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;console&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -5311,6 +5406,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Dialog&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Dialog&#34;]:
+        &#34;&#34;&#34;Page.expect_dialog
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_dialog() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;dialog&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -5321,6 +5435,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Download&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Download&#34;]:
+        &#34;&#34;&#34;Page.expect_download
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_download() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;download&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -5331,6 +5464,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;FileChooser&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;FileChooser&#34;]:
+        &#34;&#34;&#34;Page.expect_file_chooser
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_filechooser() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;filechooser&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -5341,6 +5493,25 @@ class Page(AsyncBase):
         state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Page.expect_load_state
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_loadstate() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
 
     def expect_navigation(
@@ -5349,6 +5520,25 @@ class Page(AsyncBase):
         waitUntil: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Page.expect_navigation
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_navigation() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
@@ -5358,6 +5548,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Page&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Page&#34;]:
+        &#34;&#34;&#34;Page.expect_popup
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_popup() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;popup&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -5369,6 +5578,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Request&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Request&#34;]:
+        &#34;&#34;&#34;Page.expect_request
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_request() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForRequest(url, predicate, timeout)
         )
@@ -5379,6 +5607,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Request&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Response&#34;]:
+        &#34;&#34;&#34;Page.expect_response
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_response() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForResponse(url, predicate, timeout)
         )
@@ -5388,6 +5635,25 @@ class Page(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Worker&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Worker&#34;]:
+        &#34;&#34;&#34;Page.expect_worker
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_worker() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;worker&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -5774,6 +6040,25 @@ class BrowserContext(AsyncBase):
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager:
+        &#34;&#34;&#34;BrowserContext.expect_event
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_event() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
@@ -5783,6 +6068,25 @@ class BrowserContext(AsyncBase):
         predicate: typing.Union[typing.Callable[[&#34;Page&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Page&#34;]:
+        &#34;&#34;&#34;BrowserContext.expect_page
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_page() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;page&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -7770,6 +8074,25 @@ This is a convenience API that should only be used for the single-page scenarios
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager:
+        &#34;&#34;&#34;BrowserContext.expect_event
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_event() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
@@ -7779,6 +8102,25 @@ This is a convenience API that should only be used for the single-page scenarios
         predicate: typing.Union[typing.Callable[[&#34;Page&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Page&#34;]:
+        &#34;&#34;&#34;BrowserContext.expect_page
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_page() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;page&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -8022,7 +8364,22 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
 <span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BrowserContext.expect_event</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_event() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8033,6 +8390,25 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
     predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager:
+    &#34;&#34;&#34;BrowserContext.expect_event
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_event() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
@@ -8042,7 +8418,22 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
 <span>def <span class="ident">expect_page</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BrowserContext.expect_page</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_page() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8052,6 +8443,25 @@ If URLs are specified, only cookies that affect those URLs are returned.</p>
     predicate: typing.Union[typing.Callable[[&#34;Page&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Page&#34;]:
+    &#34;&#34;&#34;BrowserContext.expect_page
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_page() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;page&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -9601,6 +10011,8 @@ to send messages.</p></div>
 <li><code><a title="playwright.async_api.BrowserContext.clearPermissions" href="#playwright.async_api.BrowserContext.clearPermissions">clearPermissions</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.close" href="#playwright.async_api.BrowserContext.close">close</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.cookies" href="#playwright.async_api.BrowserContext.cookies">cookies</a></code></li>
+<li><code><a title="playwright.async_api.BrowserContext.expect_event" href="#playwright.async_api.BrowserContext.expect_event">expect_event</a></code></li>
+<li><code><a title="playwright.async_api.BrowserContext.expect_page" href="#playwright.async_api.BrowserContext.expect_page">expect_page</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.exposeBinding" href="#playwright.async_api.BrowserContext.exposeBinding">exposeBinding</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.exposeFunction" href="#playwright.async_api.BrowserContext.exposeFunction">exposeFunction</a></code></li>
 <li><code><a title="playwright.async_api.BrowserContext.grantPermissions" href="#playwright.async_api.BrowserContext.grantPermissions">grantPermissions</a></code></li>
@@ -13973,6 +14385,25 @@ def page(self) -&gt; &#34;Page&#34;:
         state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Frame.expect_load_state
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_loadstate() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
 
     def expect_navigation(
@@ -13981,6 +14412,25 @@ def page(self) -&gt; &#34;Page&#34;:
         waitUntil: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Frame.expect_navigation
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_navigation() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )</code></pre>
@@ -14857,7 +15307,22 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
 <span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Frame.expect_load_state</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_loadstate() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -14867,6 +15332,25 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
     state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+    &#34;&#34;&#34;Frame.expect_load_state
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_loadstate() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))</code></pre>
 </details>
 </dd>
@@ -14874,7 +15358,22 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
 <span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Frame.expect_navigation</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_navigation() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -14885,6 +15384,25 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
     waitUntil: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+    &#34;&#34;&#34;Frame.expect_navigation
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_navigation() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForNavigation(url, waitUntil, timeout)
     )</code></pre>
@@ -19163,6 +19681,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager:
+        &#34;&#34;&#34;Page.expect_event
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_event() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
@@ -19172,6 +19709,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;ConsoleMessage&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;ConsoleMessage&#34;]:
+        &#34;&#34;&#34;Page.expect_console_message
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_console() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;console&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -19182,6 +19738,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;Dialog&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Dialog&#34;]:
+        &#34;&#34;&#34;Page.expect_dialog
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_dialog() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;dialog&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -19192,6 +19767,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;Download&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Download&#34;]:
+        &#34;&#34;&#34;Page.expect_download
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_download() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;download&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -19202,6 +19796,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;FileChooser&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;FileChooser&#34;]:
+        &#34;&#34;&#34;Page.expect_file_chooser
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_filechooser() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;filechooser&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -19212,6 +19825,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Page.expect_load_state
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_loadstate() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
 
     def expect_navigation(
@@ -19220,6 +19852,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         waitUntil: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+        &#34;&#34;&#34;Page.expect_navigation
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_navigation() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
@@ -19229,6 +19880,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;Page&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Page&#34;]:
+        &#34;&#34;&#34;Page.expect_popup
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_popup() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;popup&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -19240,6 +19910,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;Request&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Request&#34;]:
+        &#34;&#34;&#34;Page.expect_request
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_request() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForRequest(url, predicate, timeout)
         )
@@ -19250,6 +19939,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;Request&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Response&#34;]:
+        &#34;&#34;&#34;Page.expect_response
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_response() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForResponse(url, predicate, timeout)
         )
@@ -19259,6 +19967,25 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         predicate: typing.Union[typing.Callable[[&#34;Worker&#34;], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager[&#34;Worker&#34;]:
+        &#34;&#34;&#34;Page.expect_worker
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_worker() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         event = &#34;worker&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -20414,7 +21141,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_console_message</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.ConsoleMessage" href="#playwright.async_api.ConsoleMessage">ConsoleMessage</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.ConsoleMessage" href="#playwright.async_api.ConsoleMessage">ConsoleMessage</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_console_message</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_console() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20424,6 +21166,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;ConsoleMessage&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;ConsoleMessage&#34;]:
+    &#34;&#34;&#34;Page.expect_console_message
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_console() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;console&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -20434,7 +21195,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_dialog</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Dialog" href="#playwright.async_api.Dialog">Dialog</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Dialog" href="#playwright.async_api.Dialog">Dialog</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_dialog</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_dialog() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20444,6 +21220,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;Dialog&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Dialog&#34;]:
+    &#34;&#34;&#34;Page.expect_dialog
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_dialog() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;dialog&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -20454,7 +21249,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_download</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Download" href="#playwright.async_api.Download">Download</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Download" href="#playwright.async_api.Download">Download</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_download</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_download() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20464,6 +21274,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;Download&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Download&#34;]:
+    &#34;&#34;&#34;Page.expect_download
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_download() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;download&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -20474,7 +21303,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_event</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_event() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20485,6 +21329,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager:
+    &#34;&#34;&#34;Page.expect_event
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_event() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
@@ -20494,7 +21357,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_file_chooser</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.FileChooser" href="#playwright.async_api.FileChooser">FileChooser</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.FileChooser" href="#playwright.async_api.FileChooser">FileChooser</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_file_chooser</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_filechooser() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20504,6 +21382,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;FileChooser&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;FileChooser&#34;]:
+    &#34;&#34;&#34;Page.expect_file_chooser
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_filechooser() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;filechooser&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -20514,7 +21411,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_load_state</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_loadstate() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20524,6 +21436,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+    &#34;&#34;&#34;Page.expect_load_state
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_loadstate() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))</code></pre>
 </details>
 </dd>
@@ -20531,7 +21462,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_navigation</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_navigation() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20542,6 +21488,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     waitUntil: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[typing.Union[&#34;Response&#34;, NoneType]]:
+    &#34;&#34;&#34;Page.expect_navigation
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_navigation() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForNavigation(url, waitUntil, timeout)
     )</code></pre>
@@ -20551,7 +21516,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_popup</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_popup</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_popup() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20561,6 +21541,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;Page&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Page&#34;]:
+    &#34;&#34;&#34;Page.expect_popup
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_popup() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;popup&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -20571,7 +21570,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_request</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_request</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_request() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20582,6 +21596,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;Request&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Request&#34;]:
+    &#34;&#34;&#34;Page.expect_request
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_request() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForRequest(url, predicate, timeout)
     )</code></pre>
@@ -20591,7 +21624,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_response</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_response</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_response() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20602,6 +21650,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;Request&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Response&#34;]:
+    &#34;&#34;&#34;Page.expect_response
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_response() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForResponse(url, predicate, timeout)
     )</code></pre>
@@ -20611,7 +21678,22 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 <span>def <span class="ident">expect_worker</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Page.expect_worker</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_worker() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -20621,6 +21703,25 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     predicate: typing.Union[typing.Callable[[&#34;Worker&#34;], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager[&#34;Worker&#34;]:
+    &#34;&#34;&#34;Page.expect_worker
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_worker() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     event = &#34;worker&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
@@ -24723,6 +25824,25 @@ An example of serving static file:</p>
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -&gt; AsyncEventContextManager:
+        &#34;&#34;&#34;WebSocket.expect_event
+
+        Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+        an error if the page is closed before the ``event`` is fired.
+
+        async with page.expect_event() as event_info:
+            await page.click(&#34;button&#34;)
+        value = event_info.value
+
+        Parameters
+        ----------
+        predicate : Optional[typing.Callable[[Any], bool]]
+            Predicate receiving event data.
+        timeout : Optional[int]
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+            page.setDefaultTimeout(timeout) methods.
+        &#34;&#34;&#34;
         return AsyncEventContextManager(
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
@@ -24778,7 +25898,22 @@ def url(self) -&gt; str:
 <span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>WebSocket.expect_event</p>
+<p>Returns context manager that waits for <code>event</code> to fire upon exit. It passes event's value
+into the <code>predicate</code> function and waits for the predicate to return a truthy value. Will throw
+an error if the page is closed before the <code>event</code> is fired.</p>
+<p>async with page.expect_event() as event_info:
+await page.click("button")
+value = event_info.value</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>predicate</code></strong> :&ensp;<code>Optional[typing.Callable[[Any], bool]]</code></dt>
+<dd>Predicate receiving event data.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout.
+The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+page.setDefaultTimeout(timeout) methods.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -24789,6 +25924,25 @@ def url(self) -&gt; str:
     predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
     timeout: int = None,
 ) -&gt; AsyncEventContextManager:
+    &#34;&#34;&#34;WebSocket.expect_event
+
+    Returns context manager that waits for ``event`` to fire upon exit. It passes event&#39;s value
+    into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
+    an error if the page is closed before the ``event`` is fired.
+
+    async with page.expect_event() as event_info:
+        await page.click(&#34;button&#34;)
+    value = event_info.value
+
+    Parameters
+    ----------
+    predicate : Optional[typing.Callable[[Any], bool]]
+        Predicate receiving event data.
+    timeout : Optional[int]
+        Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
+        The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
+        page.setDefaultTimeout(timeout) methods.
+    &#34;&#34;&#34;
     return AsyncEventContextManager(
         self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
