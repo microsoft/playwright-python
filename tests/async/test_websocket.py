@@ -108,6 +108,7 @@ async def test_should_emit_binary_frame_events(page, ws_server):
     assert received == ["incoming", b"\x04\x02"]
 
 
+@pytest.mark.skip_browser("webkit")  # Flakes on bots
 async def test_should_reject_wait_for_event_on_close_and_error(page, ws_server):
     async with page.expect_event("websocket") as ws_info:
         await page.evaluate(
