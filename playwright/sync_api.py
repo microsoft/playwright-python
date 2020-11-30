@@ -5498,16 +5498,6 @@ class Page(SyncBase):
             self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
-    def expect_dialog(
-        self,
-        predicate: typing.Union[typing.Callable[["Dialog"], bool]] = None,
-        timeout: int = None,
-    ) -> EventContextManager["Dialog"]:
-        event = "dialog"
-        return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
-        )
-
     def expect_download(
         self,
         predicate: typing.Union[typing.Callable[["Download"], bool]] = None,

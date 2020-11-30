@@ -74,6 +74,8 @@ def generate(t: Any) -> None:
             prefix = "        return " + prefix + f"self._impl_obj.{name}"
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
     for [name, value] in t.__dict__.items():
+        if name in ["expect_dialog"]:
+            continue
         if (
             not name.startswith("_")
             and isinstance(value, FunctionType)
