@@ -5526,16 +5526,6 @@ class Page(SyncBase):
             self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
-    def expect_dialog(
-        self,
-        predicate: typing.Union[typing.Callable[[&#34;Dialog&#34;], bool]] = None,
-        timeout: int = None,
-    ) -&gt; EventContextManager[&#34;Dialog&#34;]:
-        event = &#34;dialog&#34;
-        return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
-        )
-
     def expect_download(
         self,
         predicate: typing.Union[typing.Callable[[&#34;Download&#34;], bool]] = None,
@@ -19793,16 +19783,6 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
-    def expect_dialog(
-        self,
-        predicate: typing.Union[typing.Callable[[&#34;Dialog&#34;], bool]] = None,
-        timeout: int = None,
-    ) -&gt; EventContextManager[&#34;Dialog&#34;]:
-        event = &#34;dialog&#34;
-        return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
-        )
-
     def expect_download(
         self,
         predicate: typing.Union[typing.Callable[[&#34;Download&#34;], bool]] = None,
@@ -21070,26 +21050,6 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
     timeout: int = None,
 ) -&gt; EventContextManager[&#34;ConsoleMessage&#34;]:
     event = &#34;console&#34;
-    return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
-    )</code></pre>
-</details>
-</dd>
-<dt id="playwright.sync_api.Page.expect_dialog"><code class="name flex">
-<span>def <span class="ident">expect_dialog</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.sync_api.Dialog" href="#playwright.sync_api.Dialog">Dialog</a>')], bool] = None, timeout: int = None) ‑> playwright.sync_base.EventContextManager[<a title="playwright.sync_api.Dialog" href="#playwright.sync_api.Dialog">Dialog</a>]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def expect_dialog(
-    self,
-    predicate: typing.Union[typing.Callable[[&#34;Dialog&#34;], bool]] = None,
-    timeout: int = None,
-) -&gt; EventContextManager[&#34;Dialog&#34;]:
-    event = &#34;dialog&#34;
     return EventContextManager(
         self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
@@ -26106,7 +26066,6 @@ If the function passed to the <code>worker.evaluateHandle</code> returns a Promi
 <li><code><a title="playwright.sync_api.Page.evaluate" href="#playwright.sync_api.Page.evaluate">evaluate</a></code></li>
 <li><code><a title="playwright.sync_api.Page.evaluateHandle" href="#playwright.sync_api.Page.evaluateHandle">evaluateHandle</a></code></li>
 <li><code><a title="playwright.sync_api.Page.expect_console_message" href="#playwright.sync_api.Page.expect_console_message">expect_console_message</a></code></li>
-<li><code><a title="playwright.sync_api.Page.expect_dialog" href="#playwright.sync_api.Page.expect_dialog">expect_dialog</a></code></li>
 <li><code><a title="playwright.sync_api.Page.expect_download" href="#playwright.sync_api.Page.expect_download">expect_download</a></code></li>
 <li><code><a title="playwright.sync_api.Page.expect_event" href="#playwright.sync_api.Page.expect_event">expect_event</a></code></li>
 <li><code><a title="playwright.sync_api.Page.expect_file_chooser" href="#playwright.sync_api.Page.expect_file_chooser">expect_file_chooser</a></code></li>
