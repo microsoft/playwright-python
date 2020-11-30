@@ -3,13 +3,13 @@ on:
   push:
     paths:
       - '.github/workflows/test_docker.yml'
-      - 'driver/**'
+      - 'build_package.py'
     branches:
       - master
   pull_request:
     paths:
       - '.github/workflows/test_docker.yml'
-      - 'driver/**'
+      - 'build_package.py'
     branches:
       - master
 jobs:
@@ -18,10 +18,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -42,4 +38,6 @@ jobs:
         CONTAINER_ID="$(docker run --rm -v $(pwd):/root/playwright --name playwright-docker-test -d -t playwright-python:localbuild /bin/bash)"
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -r local-requirements.txt
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -e .
-        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" python build_package.py
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/sync/
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/async/
