@@ -30,3 +30,24 @@ def test_video_should_exist(browser, tmpdir, server):
     assert str(tmpdir) in path
     page.context.close()
     assert os.path.exists(path)
+
+
+def test_record_video_to_path(browser, tmpdir, server):
+    page = browser.newPage(recordVideo={"dir": str(tmpdir)})
+    page.goto(server.PREFIX + "/grid.html")
+    path = page.video.path()
+    assert str(tmpdir) in path
+    page.context.close()
+    assert os.path.exists(path)
+
+
+def test_record_video_to_path_persistent(browser_type, tmpdir, server):
+    context = browser_type.launchPersistentContext(
+        tmpdir, recordVideo={"dir": str(tmpdir)}
+    )
+    page = context.pages[0]
+    page.goto(server.PREFIX + "/grid.html")
+    path = page.video.path()
+    assert str(tmpdir) in path
+    context.close()
+    assert os.path.exists(path)
