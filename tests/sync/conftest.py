@@ -25,7 +25,7 @@ def playwright():
 
 
 @pytest.fixture(scope="session")
-def browser(playwright, browser_name, launch_arguments):
+def browser_type(playwright, browser_name):
     browser_type = None
     if browser_name == "chromium":
         browser_type = playwright.chromium
@@ -33,6 +33,11 @@ def browser(playwright, browser_name, launch_arguments):
         browser_type = playwright.firefox
     elif browser_name == "webkit":
         browser_type = playwright.webkit
+    yield browser_type
+
+
+@pytest.fixture(scope="session")
+def browser(browser_type, launch_arguments):
     browser = browser_type.launch(**launch_arguments)
     yield browser
     browser.close()
