@@ -59,7 +59,7 @@ class Video:
     def _set_relative_path(self, relative_path: str) -&gt; None:
         self._path_future.set_result(
             os.path.join(
-                cast(str, self._page._browser_context._options.get(&#34;videosPath&#34;)),
+                cast(str, self._page._browser_context._options[&#34;recordVideo&#34;][&#34;dir&#34;]),
                 relative_path,
             )
         )</code></pre>
@@ -96,7 +96,7 @@ class Video:
     def _set_relative_path(self, relative_path: str) -&gt; None:
         self._path_future.set_result(
             os.path.join(
-                cast(str, self._page._browser_context._options.get(&#34;videosPath&#34;)),
+                cast(str, self._page._browser_context._options[&#34;recordVideo&#34;][&#34;dir&#34;]),
                 relative_path,
             )
         )</code></pre>
