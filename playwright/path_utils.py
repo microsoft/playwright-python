@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import inspect
+import sys
 from pathlib import Path
 
 
 def get_file_dirname() -> Path:
     """Returns the callee (`__file__`) directory name"""
-    frame = inspect.stack()[1]
-    module = inspect.getmodule(frame[0])
+    module = sys.modules[__name__]
     assert module
     return Path(module.__file__).parent.absolute()
