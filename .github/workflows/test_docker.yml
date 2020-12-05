@@ -3,13 +3,11 @@ on:
   push:
     paths:
       - '.github/workflows/test_docker.yml'
-      - 'build_package.py'
     branches:
       - master
   pull_request:
     paths:
       - '.github/workflows/test_docker.yml'
-      - 'build_package.py'
     branches:
       - master
 jobs:
@@ -28,7 +26,7 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build package
-      run: python build_package.py
+      run: python setup.py bdist_wheel
     - name: Install
       run: python -m playwright install
     - name: Build Docker image
@@ -38,6 +36,6 @@ jobs:
         CONTAINER_ID="$(docker run --rm -v $(pwd):/root/playwright --name playwright-docker-test -d -t playwright-python:localbuild /bin/bash)"
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -r local-requirements.txt
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -e .
-        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" python build_package.py
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" python setup.py bdist_wheel
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/sync/
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/async/

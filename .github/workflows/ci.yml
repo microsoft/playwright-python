@@ -27,7 +27,7 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build package
-      run: python build_package.py
+      run: python setup.py bdist_wheel
     - name: Install browsers
       run: python -m playwright install
     - name: Lint
@@ -76,7 +76,7 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build package
-      run: python build_package.py
+      run: python setup.py bdist_wheel
     - name: Install browsers
       run: python -m playwright install
     - name: Test Sync API
@@ -113,6 +113,6 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build package
-      run: python build_package.py
+      run: python setup.py bdist_wheel
     - name: Test package installation
       run: bash buildbots/test-package-installations.sh
