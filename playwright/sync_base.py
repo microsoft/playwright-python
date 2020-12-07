@@ -34,24 +34,13 @@ mapping = ImplToApiMapping()
 
 T = TypeVar("T")
 
-dispatcher_fiber_: greenlet
-
-
-def set_dispatcher_fiber(fiber: greenlet) -> None:
-    global dispatcher_fiber_
-    dispatcher_fiber_ = fiber
-
-
-def dispatcher_fiber() -> greenlet:
-    return dispatcher_fiber_
-
 
 class EventInfo(Generic[T]):
-    def __init__(self, loop: asyncio.AbstractEventLoop, coroutine: Coroutine) -> None:
-        self._loop = loop
+    def __init__(self, sync_base: "SyncBase", coroutine: Coroutine) -> None:
+        self._sync_base = sync_base
         self._value: Optional[T] = None
         self._exception = None
-        self._future = loop.create_task(coroutine)
+        self._future = sync_base._loop.create_task(coroutine)
         g_self = greenlet.getcurrent()
 
         def done_callback(task: Any) -> None:
@@ -67,16 +56,16 @@ class EventInfo(Generic[T]):
     @property
     def value(self) -> T:
         while not self._future.done():
-            dispatcher_fiber_.switch()
-        asyncio._set_running_loop(self._loop)
+            self._sync_base._dispatcher_fiber.switch()
+        asyncio._set_running_loop(self._sync_base._loop)
         if self._exception:
             raise self._exception
         return cast(T, self._value)
 
 
 class EventContextManager(Generic[T]):
-    def __init__(self, loop: asyncio.AbstractEventLoop, coroutine: Coroutine) -> None:
-        self._event: EventInfo = EventInfo(loop, coroutine)
+    def __init__(self, sync_base: "SyncBase", coroutine: Coroutine) -> None:
+        self._event: EventInfo = EventInfo(sync_base, coroutine)
 
     def __enter__(self) -> EventInfo[T]:
         return self._event
@@ -89,6 +78,7 @@ class SyncBase(ImplWrapper):
     def __init__(self, impl_obj: Any) -> None:
         super().__init__(impl_obj)
         self._loop = impl_obj._loop
+        self._dispatcher_fiber = impl_obj._dispatcher_fiber
 
     def __str__(self) -> str:
         return self._impl_obj.__str__()
@@ -102,7 +92,7 @@ class SyncBase(ImplWrapper):
 
         future.add_done_callback(callback)
         while not future.done():
-            dispatcher_fiber_.switch()
+            self._dispatcher_fiber.switch()
         asyncio._set_running_loop(self._loop)
         return future.result()
 
@@ -149,7 +139,7 @@ class SyncBase(ImplWrapper):
         self._loop.create_task(task())
 
         while len(results) < len(actions):
-            dispatcher_fiber_.switch()
+            self._dispatcher_fiber.switch()
 
         asyncio._set_running_loop(self._loop)
         if exceptions:

@@ -577,7 +577,7 @@ class WebSocket(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def isClosed(self) -> bool:
@@ -3198,7 +3198,7 @@ class Frame(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+            self, self._impl_obj.waitForLoadState(state, timeout)
         )
 
     def expect_navigation(
@@ -3227,7 +3227,7 @@ class Frame(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
 
 
@@ -5561,7 +5561,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_console_message(
@@ -5590,7 +5590,7 @@ class Page(SyncBase):
         """
         event = "console"
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_download(
@@ -5619,7 +5619,7 @@ class Page(SyncBase):
         """
         event = "download"
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_file_chooser(
@@ -5648,7 +5648,7 @@ class Page(SyncBase):
         """
         event = "filechooser"
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_load_state(
@@ -5676,7 +5676,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+            self, self._impl_obj.waitForLoadState(state, timeout)
         )
 
     def expect_navigation(
@@ -5705,7 +5705,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
 
     def expect_popup(
@@ -5734,7 +5734,7 @@ class Page(SyncBase):
         """
         event = "popup"
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_request(
@@ -5763,7 +5763,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForRequest(url, predicate, timeout)
+            self, self._impl_obj.waitForRequest(url, predicate, timeout)
         )
 
     def expect_response(
@@ -5792,7 +5792,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForResponse(url, predicate, timeout)
+            self, self._impl_obj.waitForResponse(url, predicate, timeout)
         )
 
     def expect_worker(
@@ -5821,7 +5821,7 @@ class Page(SyncBase):
         """
         event = "worker"
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
 
@@ -6241,7 +6241,7 @@ class BrowserContext(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_page(
@@ -6270,7 +6270,7 @@ class BrowserContext(SyncBase):
         """
         event = "page"
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
 

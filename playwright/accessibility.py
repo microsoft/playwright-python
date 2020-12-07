@@ -57,6 +57,7 @@ class Accessibility:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
         self._loop = channel._connection._loop
+        self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def snapshot(
         self, interestingOnly: bool = None, root: ElementHandle = None

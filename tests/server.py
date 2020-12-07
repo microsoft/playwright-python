@@ -14,7 +14,6 @@
 
 import abc
 import asyncio
-import contextlib
 import gzip
 import mimetypes
 import socket
@@ -22,14 +21,12 @@ import threading
 from contextlib import closing
 from http import HTTPStatus
 
-import greenlet
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
 from twisted.internet import reactor, ssl
 from twisted.web import http
 
 from playwright.path_utils import get_file_dirname
-from playwright.sync_base import dispatcher_fiber
 
 _dirname = get_file_dirname()
 
@@ -139,30 +136,6 @@ class Server:
         future = asyncio.Future()
         self.request_subscribers[path] = future
         return await future
-
-    @contextlib.contextmanager
-    def expect_request(self, path):
-        future = asyncio.create_task(self.wait_for_request(path))
-
-        class CallbackValue:
-            def __init__(self) -> None:
-                self._value = None
-
-            @property
-            def value(self):
-                return self._value
-
-        g_self = greenlet.getcurrent()
-        cb_wrapper = CallbackValue()
-
-        def done_cb(task):
-            cb_wrapper._value = future.result()
-            g_self.switch()
-
-        future.add_done_callback(done_cb)
-        yield cb_wrapper
-        while not future.done():
-            dispatcher_fiber.switch()
 
     def set_auth(self, path: str, username: str, password: str):
         self.auth[path] = (username, password)
