@@ -18,14 +18,14 @@ import traceback
 from typing import Any, Callable, Dict, Optional, Union
 
 from greenlet import greenlet
-from pyee import EventEmitter
+from pyee import AsyncIOEventEmitter
 
 from playwright.helper import ParsedMessagePayload, parse_error
 from playwright.sync_base import dispatcher_fiber
 from playwright.transport import Transport
 
 
-class Channel(EventEmitter):
+class Channel(AsyncIOEventEmitter):
     def __init__(self, connection: "Connection", guid: str) -> None:
         super().__init__()
         self._connection: Connection = connection
@@ -64,7 +64,7 @@ class Channel(EventEmitter):
         self._connection._send_message_to_server(self._guid, method, params)
 
 
-class ChannelOwner(EventEmitter):
+class ChannelOwner(AsyncIOEventEmitter):
     def __init__(
         self,
         parent: Union["ChannelOwner", "Connection"],
@@ -72,7 +72,7 @@ class ChannelOwner(EventEmitter):
         guid: str,
         initializer: Dict,
     ) -> None:
-        super().__init__()
+        super().__init__(loop=parent._loop)
         self._loop: asyncio.AbstractEventLoop = parent._loop
         self._type = type
         self._guid = guid
