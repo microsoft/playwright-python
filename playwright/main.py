@@ -117,9 +117,7 @@ class AsyncPlaywrightContextManager:
 
 
 if sys.platform == "win32":
-    # Use ProactorEventLoop in 3.7, which is default in 3.8
-    loop = asyncio.ProactorEventLoop()
-    asyncio.set_event_loop(loop)
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 
 def main() -> None:
