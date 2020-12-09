@@ -22,12 +22,12 @@ from playwright.async_api import Dialog, Page
 async def test_should_fire(page: Page, server):
     result = []
 
-    def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog):
         result.append(True)
         assert dialog.type == "alert"
         assert dialog.defaultValue == ""
         assert dialog.message == "yo"
-        asyncio.create_task(dialog.accept())
+        await dialog.accept()
 
     page.on("dialog", on_dialog)
     await page.evaluate("alert('yo')")
@@ -37,12 +37,12 @@ async def test_should_fire(page: Page, server):
 async def test_should_allow_accepting_prompts(page: Page, server):
     result = []
 
-    def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog):
         result.append(True)
         assert dialog.type == "prompt"
         assert dialog.defaultValue == "yes."
         assert dialog.message == "question?"
-        asyncio.create_task(dialog.accept("answer!"))
+        await dialog.accept("answer!")
 
     page.on("dialog", on_dialog)
     assert await page.evaluate("prompt('question?', 'yes.')") == "answer!"
@@ -52,9 +52,9 @@ async def test_should_allow_accepting_prompts(page: Page, server):
 async def test_should_dismiss_the_prompt(page: Page, server):
     result = []
 
-    def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog):
         result.append(True)
-        asyncio.create_task(dialog.dismiss())
+        await dialog.dismiss()
 
     page.on("dialog", on_dialog)
     assert await page.evaluate("prompt('question?')") is None
@@ -64,9 +64,9 @@ async def test_should_dismiss_the_prompt(page: Page, server):
 async def test_should_accept_the_confirm_prompt(page: Page, server):
     result = []
 
-    def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog):
         result.append(True)
-        asyncio.create_task(dialog.accept())
+        await dialog.accept()
 
     page.on("dialog", on_dialog)
     assert await page.evaluate("confirm('boolean?')") is True
@@ -76,9 +76,9 @@ async def test_should_accept_the_confirm_prompt(page: Page, server):
 async def test_should_dismiss_the_confirm_prompt(page: Page, server):
     result = []
 
-    def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog):
         result.append(True)
-        asyncio.create_task(dialog.dismiss())
+        await dialog.dismiss()
 
     page.on("dialog", on_dialog)
     assert await page.evaluate("confirm('boolean?')") is False

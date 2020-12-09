@@ -728,7 +728,7 @@ async def test_page_event_should_fire_page_lifecycle_events(context, server):
         events.append("CREATED: " + page.url)
         page.on("close", lambda: events.append("DESTROYED: " + page.url))
 
-    context.on("page", lambda page: handle_page(page))
+    context.on("page", handle_page)
 
     page = await context.newPage()
     await page.goto(server.EMPTY_PAGE)
