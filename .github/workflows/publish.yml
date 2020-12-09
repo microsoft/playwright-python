@@ -22,7 +22,7 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build package
-      run: python build_package.py
+      run: python setup.py bdist_wheel
     - name: Publish package
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -50,7 +50,7 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - name: Build package
-      run: python build_package.py
+      run: python setup.py bdist_wheel
     - name: Install
       run: python -m playwright install
     - name: Build Docker image

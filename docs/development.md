@@ -4,7 +4,7 @@
 
 ```sh
 pip install -e .
-python ./build_driver.py
+python setup.py bdist_wheel
 ```
 
 ## Run tests:
@@ -23,9 +23,8 @@ open htmlcov/index.html
 ## Deploy:
 
 ```sh
-python ./build_package.py
-... check
-python ./upload_package.py
+python setup.py bdist_wheel
+python setup.py upload
 ```
 
 ## Checking for typing errors

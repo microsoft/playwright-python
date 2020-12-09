@@ -17,6 +17,7 @@ Install required dependencies:
 python -m pip install --upgrade pip wheel
 pip install -r local-requirements.txt
 pip install -e .
+python setup.py bdist_wheel
 ```
 
 For more details look at the [CI configuration](./blob/master/.github/workflows/ci.yml).
