@@ -145,7 +145,7 @@ def generate(t: Any) -> None:
                 print(f'        event = "{event_name}"')
 
             print(
-                f"        return EventContextManager(self._loop, self._impl_obj.{wait_for_method})"
+                f"        return EventContextManager(self, self._impl_obj.{wait_for_method})"
             )
 
     print("")

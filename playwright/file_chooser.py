@@ -27,6 +27,7 @@ class FileChooser:
     ) -> None:
         self._page = page
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
         self._element_handle = element_handle
         self._is_multiple = is_multiple
 

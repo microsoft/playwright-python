@@ -15,13 +15,13 @@
 import asyncio
 import sys
 import traceback
+from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
 from playwright.helper import ParsedMessagePayload, parse_error
-from playwright.sync_base import dispatcher_fiber
 from playwright.transport import Transport
 
 
@@ -74,6 +74,7 @@ class ChannelOwner(AsyncIOEventEmitter):
     ) -> None:
         super().__init__(loop=parent._loop)
         self._loop: asyncio.AbstractEventLoop = parent._loop
+        self._dispatcher_fiber: Any = parent._dispatcher_fiber
         self._type = type
         self._guid = guid
         self._connection: Connection = (
@@ -116,33 +117,30 @@ class RootChannelOwner(ChannelOwner):
 
 class Connection:
     def __init__(
-        self,
-        input: asyncio.StreamReader,
-        output: asyncio.StreamWriter,
-        object_factory: Any,
-        loop: asyncio.AbstractEventLoop,
+        self, dispatcher_fiber: Any, object_factory: Any, driver_executable: Path
     ) -> None:
-        self._transport = Transport(input, output, loop)
+        self._dispatcher_fiber: Any = dispatcher_fiber
+        self._transport = Transport(driver_executable)
         self._transport.on_message = lambda msg: self._dispatch(msg)
         self._waiting_for_object: Dict[str, Any] = {}
         self._last_id = 0
-        self._loop = loop
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
-        self._root_object = RootChannelOwner(self)
         self._object_factory = object_factory
         self._is_sync = False
 
-    def run_sync(self) -> None:
+    async def run_as_sync(self) -> None:
         self._is_sync = True
-        self._transport.run_sync()
+        await self.run()
 
-    def run_async(self) -> None:
-        self._transport.run_async()
+    async def run(self) -> None:
+        self._loop = asyncio.get_running_loop()
+        self._root_object = RootChannelOwner(self)
+        await self._transport.run()
 
     def stop_sync(self) -> None:
         self._transport.stop()
-        dispatcher_fiber().switch()
+        self._dispatcher_fiber.switch()
 
     def stop_async(self) -> None:
         self._transport.stop()

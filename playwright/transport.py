@@ -15,42 +15,47 @@
 import asyncio
 import json
 import os
+import sys
+from pathlib import Path
 from typing import Dict
 
 
 class Transport:
-    def __init__(
-        self,
-        input: asyncio.StreamReader,
-        output: asyncio.StreamWriter,
-        loop: asyncio.AbstractEventLoop,
-    ) -> None:
+    def __init__(self, driver_executable: Path) -> None:
         super().__init__()
-        self._input: asyncio.StreamReader = input
-        self._output: asyncio.StreamWriter = output
-        self.loop: asyncio.AbstractEventLoop = loop
         self.on_message = lambda _: None
         self._stopped = False
-
-    def run_sync(self) -> None:
-        self.loop.run_until_complete(self._run())
-
-    def run_async(self) -> None:
-        self.loop.create_task(self._run())
+        self._driver_executable = driver_executable
+        self._loop: asyncio.AbstractEventLoop
 
     def stop(self) -> None:
         self._stopped = True
         self._output.close()
 
-    async def _run(self) -> None:
+    async def run(self) -> None:
+        self._loop = asyncio.get_running_loop()
+        driver_executable = self._driver_executable
+
+        proc = await asyncio.create_subprocess_exec(
+            str(driver_executable),
+            "run-driver",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=sys.stderr,
+            limit=32768,
+        )
+        assert proc.stdout
+        assert proc.stdin
+        self._output = proc.stdin
+
         while not self._stopped:
             try:
-                buffer = await self._input.readexactly(4)
+                buffer = await proc.stdout.readexactly(4)
                 length = int.from_bytes(buffer, byteorder="little", signed=False)
                 buffer = bytes(0)
                 while length:
                     to_read = min(length, 32768)
-                    data = await self._input.readexactly(to_read)
+                    data = await proc.stdout.readexactly(to_read)
                     length -= to_read
                     if len(buffer):
                         buffer = buffer + data
