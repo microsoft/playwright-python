@@ -50,6 +50,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Video:
     def __init__(self, page: &#34;Page&#34;) -&gt; None:
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
         self._page = page
         self._path_future = page._loop.create_future()
 
@@ -87,6 +88,7 @@ class Video:
 <pre><code class="python">class Video:
     def __init__(self, page: &#34;Page&#34;) -&gt; None:
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
         self._page = page
         self._path_future = page._loop.create_future()
 

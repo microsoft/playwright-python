@@ -605,7 +605,7 @@ class WebSocket(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def isClosed(self) -&gt; bool:
@@ -3226,7 +3226,7 @@ class Frame(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+            self, self._impl_obj.waitForLoadState(state, timeout)
         )
 
     def expect_navigation(
@@ -3255,7 +3255,7 @@ class Frame(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
 
 
@@ -5589,7 +5589,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_console_message(
@@ -5618,7 +5618,7 @@ class Page(SyncBase):
         &#34;&#34;&#34;
         event = &#34;console&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_download(
@@ -5647,7 +5647,7 @@ class Page(SyncBase):
         &#34;&#34;&#34;
         event = &#34;download&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_file_chooser(
@@ -5676,7 +5676,7 @@ class Page(SyncBase):
         &#34;&#34;&#34;
         event = &#34;filechooser&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_load_state(
@@ -5704,7 +5704,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+            self, self._impl_obj.waitForLoadState(state, timeout)
         )
 
     def expect_navigation(
@@ -5733,7 +5733,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
 
     def expect_popup(
@@ -5762,7 +5762,7 @@ class Page(SyncBase):
         &#34;&#34;&#34;
         event = &#34;popup&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_request(
@@ -5791,7 +5791,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForRequest(url, predicate, timeout)
+            self, self._impl_obj.waitForRequest(url, predicate, timeout)
         )
 
     def expect_response(
@@ -5820,7 +5820,7 @@ class Page(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForResponse(url, predicate, timeout)
+            self, self._impl_obj.waitForResponse(url, predicate, timeout)
         )
 
     def expect_worker(
@@ -5849,7 +5849,7 @@ class Page(SyncBase):
         &#34;&#34;&#34;
         event = &#34;worker&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
 
@@ -6269,7 +6269,7 @@ class BrowserContext(SyncBase):
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_page(
@@ -6298,7 +6298,7 @@ class BrowserContext(SyncBase):
         &#34;&#34;&#34;
         event = &#34;page&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
 
@@ -8341,7 +8341,7 @@ This is a convenience API that should only be used for the single-page scenarios
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_page(
@@ -8370,7 +8370,7 @@ This is a convenience API that should only be used for the single-page scenarios
         &#34;&#34;&#34;
         event = &#34;page&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -8657,7 +8657,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -8711,7 +8711,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
     &#34;&#34;&#34;
     event = &#34;page&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -14816,7 +14816,7 @@ def page(self) -&gt; &#34;Page&#34;:
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+            self, self._impl_obj.waitForLoadState(state, timeout)
         )
 
     def expect_navigation(
@@ -14845,7 +14845,7 @@ def page(self) -&gt; &#34;Page&#34;:
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -15790,7 +15790,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForLoadState(state, timeout)
+        self, self._impl_obj.waitForLoadState(state, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -15844,7 +15844,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+        self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -20288,7 +20288,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_console_message(
@@ -20317,7 +20317,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         event = &#34;console&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_download(
@@ -20346,7 +20346,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         event = &#34;download&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_file_chooser(
@@ -20375,7 +20375,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         event = &#34;filechooser&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_load_state(
@@ -20403,7 +20403,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForLoadState(state, timeout)
+            self, self._impl_obj.waitForLoadState(state, timeout)
         )
 
     def expect_navigation(
@@ -20432,7 +20432,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
         )
 
     def expect_popup(
@@ -20461,7 +20461,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         event = &#34;popup&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def expect_request(
@@ -20490,7 +20490,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForRequest(url, predicate, timeout)
+            self, self._impl_obj.waitForRequest(url, predicate, timeout)
         )
 
     def expect_response(
@@ -20519,7 +20519,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForResponse(url, predicate, timeout)
+            self, self._impl_obj.waitForResponse(url, predicate, timeout)
         )
 
     def expect_worker(
@@ -20548,7 +20548,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         &#34;&#34;&#34;
         event = &#34;worker&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -21774,7 +21774,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
     &#34;&#34;&#34;
     event = &#34;console&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -21828,7 +21828,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
     &#34;&#34;&#34;
     event = &#34;download&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -21882,7 +21882,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -21936,7 +21936,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
     &#34;&#34;&#34;
     event = &#34;filechooser&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -21989,7 +21989,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForLoadState(state, timeout)
+        self, self._impl_obj.waitForLoadState(state, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -22043,7 +22043,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+        self, self._impl_obj.waitForNavigation(url, waitUntil, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -22097,7 +22097,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
     &#34;&#34;&#34;
     event = &#34;popup&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -22151,7 +22151,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForRequest(url, predicate, timeout)
+        self, self._impl_obj.waitForRequest(url, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -22205,7 +22205,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForResponse(url, predicate, timeout)
+        self, self._impl_obj.waitForResponse(url, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -22259,7 +22259,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
     &#34;&#34;&#34;
     event = &#34;worker&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
@@ -26456,7 +26456,7 @@ An example of serving static file:</p>
             page.setDefaultTimeout(timeout) methods.
         &#34;&#34;&#34;
         return EventContextManager(
-            self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+            self, self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
     def isClosed(self) -&gt; bool:
@@ -26556,7 +26556,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
         page.setDefaultTimeout(timeout) methods.
     &#34;&#34;&#34;
     return EventContextManager(
-        self._loop, self._impl_obj.waitForEvent(event, predicate, timeout)
+        self, self._impl_obj.waitForEvent(event, predicate, timeout)
     )</code></pre>
 </details>
 </dd>
