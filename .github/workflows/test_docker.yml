@@ -37,5 +37,6 @@ jobs:
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -r local-requirements.txt
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" pip install -e .
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" python setup.py bdist_wheel
+        docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/common/
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/sync/
         docker exec --workdir /root/playwright/ "${CONTAINER_ID}" xvfb-run pytest -vv tests/async/
