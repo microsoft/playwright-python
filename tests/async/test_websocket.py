@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+
 import pytest
 
 from playwright import Error
@@ -108,18 +110,43 @@ async def test_should_emit_binary_frame_events(page, ws_server):
     assert received == ["incoming", b"\x04\x02"]
 
 
-@pytest.mark.skip_browser("webkit")  # Flakes on bots
-async def test_should_reject_wait_for_event_on_close_and_error(page, ws_server):
-    async with page.expect_event("websocket") as ws_info:
-        await page.evaluate(
-            """port => {
-            window.ws = new WebSocket('ws://localhost:' + port + '/ws');
-        }""",
-            ws_server.PORT,
-        )
-    ws = await ws_info.value
-    await ws.waitForEvent("framereceived")
+async def test_should_reject_wait_for_event_on_socket_close(page, ws_server):
+    ws_future = asyncio.Future()
+
+    def on_web_socket(ws):
+        ws.on("framereceived", lambda _: ws_future.set_result(ws))
+
+    page.on("websocket", on_web_socket)
+
+    await page.evaluate(
+        """port => {
+        window.ws = new WebSocket('ws://localhost:' + port + '/ws');
+    }""",
+        ws_server.PORT,
+    )
+    ws = await ws_future
     with pytest.raises(Error) as exc_info:
         async with ws.expect_event("framesent"):
             await page.evaluate("window.ws.close()")
     assert exc_info.value.message == "Socket closed"
+
+
+async def test_should_reject_wait_for_event_on_page_close(page, ws_server):
+    ws_future = asyncio.Future()
+
+    def on_web_socket(ws):
+        ws.on("framereceived", lambda _: ws_future.set_result(ws))
+
+    page.on("websocket", on_web_socket)
+
+    await page.evaluate(
+        """port => {
+        window.ws = new WebSocket('ws://localhost:' + port + '/ws');
+    }""",
+        ws_server.PORT,
+    )
+    ws = await ws_future
+    with pytest.raises(Error) as exc_info:
+        async with ws.expect_event("framesent"):
+            await page.close()
+    assert exc_info.value.message == "Page closed"
