@@ -79,6 +79,8 @@ jobs:
       run: python setup.py bdist_wheel
     - name: Install browsers
       run: python -m playwright install
+    - name: Common Tests
+      run: pytest -vv tests/common --browser=${{ matrix.browser }} --timeout 90
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
       run: pytest -vv tests/sync --browser=${{ matrix.browser }} --timeout 90

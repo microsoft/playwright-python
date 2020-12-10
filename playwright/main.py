@@ -110,9 +110,15 @@ class AsyncPlaywrightContextManager:
         self._connection.stop_async()
 
 
-if sys.platform == "win32":
-    # Use ProactorEventLoop in 3.7, which is default in 3.8
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+if sys.version_info.major == 3 and sys.version_info.minor == 7:
+    if sys.platform == "win32":
+        # Use ProactorEventLoop in 3.7, which is default in 3.8
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    else:
+        # Prevent Python 3.7 from throwing on Linux:
+        # RuntimeError: Cannot add child handler, the child watcher does not have a loop attached
+        asyncio.get_event_loop()
+        asyncio.get_child_watcher()
 
 
 def main() -> None:
