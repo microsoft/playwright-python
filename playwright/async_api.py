@@ -84,10 +84,11 @@ class Request(AsyncBase):
     def url(self) -> str:
         """Request.url
 
+        URL of the request.
+
         Returns
         -------
         str
-            URL of the request.
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
@@ -95,8 +96,9 @@ class Request(AsyncBase):
     def resourceType(self) -> str:
         """Request.resourceType
 
-        Contains the request's resource type as it was perceived by the rendering engine.
-        ResourceType will be one of the following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`, `websocket`, `manifest`, `other`.
+        Contains the request's resource type as it was perceived by the rendering engine. ResourceType will be one of the
+        following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`,
+        `websocket`, `manifest`, `other`.
 
         Returns
         -------
@@ -108,10 +110,11 @@ class Request(AsyncBase):
     def method(self) -> str:
         """Request.method
 
+        Request's method (GET, POST, etc.)
+
         Returns
         -------
         str
-            Request's method (GET, POST, etc.)
         """
         return mapping.from_maybe_impl(self._impl_obj.method)
 
@@ -119,10 +122,11 @@ class Request(AsyncBase):
     def postData(self) -> typing.Union[str, NoneType]:
         """Request.postData
 
+        Request's post body, if any.
+
         Returns
         -------
         Optional[str]
-            Request's post body, if any.
         """
         return mapping.from_maybe_impl(self._impl_obj.postData)
 
@@ -130,12 +134,13 @@ class Request(AsyncBase):
     def postDataJSON(self) -> typing.Union[typing.Dict, NoneType]:
         """Request.postDataJSON
 
-        When the response is `application/x-www-form-urlencoded` then a key/value object of the values will be returned. Otherwise it will be parsed as JSON.
+        Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
+        When the response is `application/x-www-form-urlencoded` then a key/value object of the values will be returned.
+        Otherwise it will be parsed as JSON.
 
         Returns
         -------
         Optional[Dict]
-            Parsed request's body for `form-urlencoded` and JSON as a fallback if any.
         """
         return mapping.from_maybe_impl(self._impl_obj.postDataJSON)
 
@@ -143,10 +148,11 @@ class Request(AsyncBase):
     def postDataBuffer(self) -> typing.Union[bytes, NoneType]:
         """Request.postDataBuffer
 
+        Request's post body in a binary form, if any.
+
         Returns
         -------
         Optional[bytes]
-            Request's post body in a binary form, if any.
         """
         return mapping.from_maybe_impl(self._impl_obj.postDataBuffer)
 
@@ -154,10 +160,11 @@ class Request(AsyncBase):
     def headers(self) -> typing.Dict[str, str]:
         """Request.headers
 
+        An object with HTTP headers associated with the request. All header names are lower-case.
+
         Returns
         -------
         Dict[str, str]
-            An object with HTTP headers associated with the request. All header names are lower-case.
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
@@ -165,10 +172,11 @@ class Request(AsyncBase):
     def frame(self) -> "Frame":
         """Request.frame
 
+        Returns the Frame that initiated this request.
+
         Returns
         -------
         Frame
-            A Frame that initiated this request.
         """
         return mapping.from_impl(self._impl_obj.frame)
 
@@ -176,14 +184,16 @@ class Request(AsyncBase):
     def redirectedFrom(self) -> typing.Union["Request", NoneType]:
         """Request.redirectedFrom
 
-        When the server responds with a redirect, Playwright creates a new Request object. The two requests are connected by `redirectedFrom()` and `redirectedTo()` methods. When multiple server redirects has happened, it is possible to construct the whole redirect chain by repeatedly calling `redirectedFrom()`.
+        Request that was redirected by the server to this one, if any.
+        When the server responds with a redirect, Playwright creates a new Request object. The two requests are connected by
+        `redirectedFrom()` and `redirectedTo()` methods. When multiple server redirects has happened, it is possible to
+        construct the whole redirect chain by repeatedly calling `redirectedFrom()`.
         For example, if the website `http://example.com` redirects to `https://example.com`:
         If the website `https://google.com` has no redirects:
 
         Returns
         -------
         Optional[Request]
-            Request that was redirected by the server to this one, if any.
         """
         return mapping.from_impl_nullable(self._impl_obj.redirectedFrom)
 
@@ -191,12 +201,12 @@ class Request(AsyncBase):
     def redirectedTo(self) -> typing.Union["Request", NoneType]:
         """Request.redirectedTo
 
+        New request issued by the browser if the server responded with redirect.
         This method is the opposite of request.redirectedFrom():
 
         Returns
         -------
         Optional[Request]
-            New request issued by the browser if the server responded with redirect.
         """
         return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
 
@@ -204,14 +214,12 @@ class Request(AsyncBase):
     def failure(self) -> typing.Union[RequestFailure, NoneType]:
         """Request.failure
 
-        The method returns `null` unless this request has failed, as reported by
-        `requestfailed` event.
+        The method returns `null` unless this request has failed, as reported by `requestfailed` event.
         Example of logging of all the failed requests:
 
         Returns
         -------
         Optional[{"errorText": str}]
-            Object describing request failure, if any
         """
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
@@ -219,7 +227,9 @@ class Request(AsyncBase):
     def timing(self) -> ResourceTiming:
         """Request.timing
 
-        Returns resource timing information for given request. Most of the timing values become available upon the response, `responseEnd` becomes available when request finishes. Find more information at Resource Timing API.
+        Returns resource timing information for given request. Most of the timing values become available upon the response,
+        `responseEnd` becomes available when request finishes. Find more information at Resource Timing
+        API.
 
         Returns
         -------
@@ -230,10 +240,11 @@ class Request(AsyncBase):
     async def response(self) -> typing.Union["Response", NoneType]:
         """Request.response
 
+        Returns the matching Response object, or `null` if the response was not received due to error.
+
         Returns
         -------
         Optional[Response]
-            A matching Response object, or `null` if the response was not received due to error.
         """
         return mapping.from_impl_nullable(await self._impl_obj.response())
 
@@ -308,10 +319,11 @@ class Response(AsyncBase):
     def headers(self) -> typing.Dict[str, str]:
         """Response.headers
 
+        Returns the object with HTTP headers associated with the response. All header names are lower-case.
+
         Returns
         -------
         Dict[str, str]
-            An object with HTTP headers associated with the response. All header names are lower-case.
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
@@ -319,10 +331,11 @@ class Response(AsyncBase):
     def request(self) -> "Request":
         """Response.request
 
+        Returns the matching Request object.
+
         Returns
         -------
         Request
-            A matching Request object.
         """
         return mapping.from_impl(self._impl_obj.request)
 
@@ -330,52 +343,56 @@ class Response(AsyncBase):
     def frame(self) -> "Frame":
         """Response.frame
 
+        Returns the Frame that initiated this response.
+
         Returns
         -------
         Frame
-            A Frame that initiated this response.
         """
         return mapping.from_impl(self._impl_obj.frame)
 
     async def finished(self) -> typing.Union[Error, NoneType]:
         """Response.finished
 
+        Waits for this response to finish, returns failure error if request failed.
+
         Returns
         -------
         Optional[Error]
-            Waits for this response to finish, returns failure error if request failed.
         """
         return mapping.from_maybe_impl(await self._impl_obj.finished())
 
     async def body(self) -> bytes:
         """Response.body
 
+        Returns the buffer with response body.
+
         Returns
         -------
         bytes
-            Promise which resolves to a buffer with response body.
         """
         return mapping.from_maybe_impl(await self._impl_obj.body())
 
     async def text(self) -> str:
         """Response.text
 
+        Returns the text representation of response body.
+
         Returns
         -------
         str
-            Promise which resolves to a text representation of response body.
         """
         return mapping.from_maybe_impl(await self._impl_obj.text())
 
     async def json(self) -> typing.Union[typing.Dict, typing.List]:
         """Response.json
 
+        Returns the JSON representation of response body.
         This method will throw if the response body is not parsable via `JSON.parse`.
 
         Returns
         -------
         Union[Dict, List]
-            Promise which resolves to a JSON representation of response body.
         """
         return mapping.from_maybe_impl(await self._impl_obj.json())
 
@@ -391,10 +408,11 @@ class Route(AsyncBase):
     def request(self) -> "Request":
         """Route.request
 
+        A request to be routed.
+
         Returns
         -------
         Request
-            A request to be routed.
         """
         return mapping.from_impl(self._impl_obj.request)
 
@@ -406,12 +424,10 @@ class Route(AsyncBase):
         Parameters
         ----------
         errorCode : Optional[str]
-            Optional error code. Defaults to `failed`, could be
-            one of the following:
+            Optional error code. Defaults to `failed`, could be one of the following:
              - `'aborted'` - An operation was aborted (due to user action)
              - `'accessdenied'` - Permission to access a resource, other than the network, was denied
-             - `'addressunreachable'` - The IP address is unreachable. This usually means
-             - that there is no route to the specified host or network.
+             - `'addressunreachable'` - The IP address is unreachable. This usually means that there is no route to the specified host or network.
              - `'blockedbyclient'` - The client chose to block the request.
              - `'blockedbyresponse'` - The request failed because the response was delivered along with requirements which are not met ('X-Frame-Options' and 'Content-Security-Policy' ancestor checks, for instance).
              - `'connectionaborted'` - A connection timed out as a result of not receiving an ACK for data sent.
@@ -522,8 +538,9 @@ class WebSocket(AsyncBase):
     ) -> typing.Any:
         """WebSocket.waitForEvent
 
-        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the webSocket is closed before the event
-        is fired.
+        Returns the event data value.
+        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
+        value. Will throw an error if the webSocket is closed before the event is fired.
 
         Parameters
         ----------
@@ -533,7 +550,6 @@ class WebSocket(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the event data value.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.waitForEvent(
@@ -593,13 +609,20 @@ class Keyboard(AsyncBase):
         """Keyboard.down
 
         Dispatches a `keydown` event.
-        `key` can specify the intended keyboardEvent.key value or a single character to generate the text for. A superset of the `key` values can be found here. Examples of the keys are:
-        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
+        `key` can specify the intended keyboardEvent.key
+        value or a single character to generate the text for. A superset of the `key` values can be found
+        here. Examples of the keys are:
+        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+        `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-        If `key` is a modifier key, `Shift`, `Meta`, `Control`, or `Alt`, subsequent key presses will be sent with that modifier active. To release the modifier key, use `keyboard.up`.
-        After the key is pressed once, subsequent calls to `keyboard.down` will have repeat set to true. To release the key, use `keyboard.up`.
+        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+        texts.
+        If `key` is a modifier key, `Shift`, `Meta`, `Control`, or `Alt`, subsequent key presses will be sent with that modifier
+        active. To release the modifier key, use keyboard.up(key).
+        After the key is pressed once, subsequent calls to keyboard.down(key) will have
+        repeat set to true. To release the key, use
+        keyboard.up(key).
 
         **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 
@@ -640,7 +663,7 @@ class Keyboard(AsyncBase):
         """Keyboard.type
 
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
-        To press a special key, like `Control` or `ArrowDown`, use `keyboard.press`.
+        To press a special key, like `Control` or `ArrowDown`, use keyboard.press(key[, options]).
 
         **NOTE** Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 
@@ -658,13 +681,18 @@ class Keyboard(AsyncBase):
     async def press(self, key: str, delay: int = None) -> NoneType:
         """Keyboard.press
 
-        `key` can specify the intended keyboardEvent.key value or a single character to generate the text for. A superset of the `key` values can be found here. Examples of the keys are:
-        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
+        `key` can specify the intended keyboardEvent.key
+        value or a single character to generate the text for. A superset of the `key` values can be found
+        here. Examples of the keys are:
+        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+        `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
-        Shortcut for `keyboard.down` and `keyboard.up`.
+        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+        texts.
+        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        Shortcut for keyboard.down(key) and keyboard.up(key).
 
         Parameters
         ----------
@@ -743,7 +771,7 @@ class Mouse(AsyncBase):
     ) -> NoneType:
         """Mouse.click
 
-        Shortcut for `mouse.move`, `mouse.down` and `mouse.up`.
+        Shortcut for mouse.move(x, y[, options]), mouse.down([options]), mouse.up([options]).
 
         Parameters
         ----------
@@ -771,7 +799,7 @@ class Mouse(AsyncBase):
     ) -> NoneType:
         """Mouse.dblclick
 
-        Shortcut for `mouse.move`, `mouse.down`, `mouse.up`, `mouse.down` and `mouse.up`.
+        Shortcut for mouse.move(x, y[, options]), mouse.down([options]), mouse.up([options]), mouse.down([options]) and mouse.up([options]).
 
         Parameters
         ----------
@@ -819,8 +847,10 @@ class JSHandle(AsyncBase):
     ) -> typing.Any:
         """JSHandle.evaluate
 
+        Returns the return value of `pageFunction`
         This method passes this handle as the first argument to `pageFunction`.
-        If `pageFunction` returns a Promise, then `handle.evaluate` would wait for the promise to resolve and return its value.
+        If `pageFunction` returns a Promise, then `handle.evaluate` would wait for the promise to resolve and return its
+        value.
         Examples:
 
         Parameters
@@ -835,7 +865,6 @@ class JSHandle(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evaluate(
@@ -848,10 +877,13 @@ class JSHandle(AsyncBase):
     ) -> "JSHandle":
         """JSHandle.evaluateHandle
 
+        Returns the return value of `pageFunction` as in-page object (JSHandle).
         This method passes this handle as the first argument to `pageFunction`.
-        The only difference between `jsHandle.evaluate` and `jsHandle.evaluateHandle` is that `jsHandle.evaluateHandle` returns in-page object (JSHandle).
-        If the function passed to the `jsHandle.evaluateHandle` returns a Promise, then `jsHandle.evaluateHandle` would wait for the promise to resolve and return its value.
-        See page.evaluateHandle() for more details.
+        The only difference between `jsHandle.evaluate` and `jsHandle.evaluateHandle` is that `jsHandle.evaluateHandle` returns
+        in-page object (JSHandle).
+        If the function passed to the `jsHandle.evaluateHandle` returns a Promise, then `jsHandle.evaluateHandle` would wait
+        for the promise to resolve and return its value.
+        See page.evaluateHandle(pageFunction[, arg]) for more details.
 
         Parameters
         ----------
@@ -865,7 +897,6 @@ class JSHandle(AsyncBase):
         Returns
         -------
         JSHandle
-            Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
         """
         return mapping.from_impl(
             await self._impl_obj.evaluateHandle(
@@ -927,7 +958,8 @@ class JSHandle(AsyncBase):
         `toJSON`
         function, it **will not be called**.
 
-        **NOTE** The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an error if the object has circular references.
+        **NOTE** The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
+        error if the object has circular references.
 
         Returns
         -------
@@ -966,20 +998,22 @@ class ElementHandle(JSHandle):
     async def ownerFrame(self) -> typing.Union["Frame", NoneType]:
         """ElementHandle.ownerFrame
 
+        Returns the frame containing the given element.
+
         Returns
         -------
         Optional[Frame]
-            Returns the frame containing the given element.
         """
         return mapping.from_impl_nullable(await self._impl_obj.ownerFrame())
 
     async def contentFrame(self) -> typing.Union["Frame", NoneType]:
         """ElementHandle.contentFrame
 
+        Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
+
         Returns
         -------
         Optional[Frame]
-            Resolves to the content frame for element handles referencing iframe nodes, or `null` otherwise
         """
         return mapping.from_impl_nullable(await self._impl_obj.contentFrame())
 
@@ -1002,38 +1036,44 @@ class ElementHandle(JSHandle):
     async def textContent(self) -> typing.Union[str, NoneType]:
         """ElementHandle.textContent
 
+        Returns the `node.textContent`.
+
         Returns
         -------
         Optional[str]
-            Resolves to the `node.textContent`.
         """
         return mapping.from_maybe_impl(await self._impl_obj.textContent())
 
     async def innerText(self) -> str:
         """ElementHandle.innerText
 
+        Returns the `element.innerText`.
+
         Returns
         -------
         str
-            Resolves to the `element.innerText`.
         """
         return mapping.from_maybe_impl(await self._impl_obj.innerText())
 
     async def innerHTML(self) -> str:
         """ElementHandle.innerHTML
 
+        Returns the `element.innerHTML`.
+
         Returns
         -------
         str
-            Resolves to the `element.innerHTML`.
         """
         return mapping.from_maybe_impl(await self._impl_obj.innerHTML())
 
     async def dispatchEvent(self, type: str, eventInit: typing.Dict = None) -> NoneType:
         """ElementHandle.dispatchEvent
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling `element.click()`.
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
+        is dispatched. This is equivalend to calling
+        element.click().
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
+        and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
 
         DragEvent
@@ -1051,7 +1091,7 @@ class ElementHandle(JSHandle):
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         eventInit : Optional[Dict]
-            event-specific initialization properties.
+            Optional event-specific initialization properties.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.dispatchEvent(
@@ -1062,8 +1102,11 @@ class ElementHandle(JSHandle):
     async def scrollIntoViewIfNeeded(self, timeout: int = None) -> NoneType:
         """ElementHandle.scrollIntoViewIfNeeded
 
-        This method waits for actionability checks, then tries to scroll element into view, unless it is completely visible as defined by IntersectionObserver's `ratio`.
-        Throws when `elementHandle` does not point to an element connected to a Document or a ShadowRoot.
+        This method waits for actionability checks, then tries to scroll element into view, unless it is
+        completely visible as defined by
+        IntersectionObserver's `ratio`.
+        Throws when `elementHandle` does not point to an element
+        connected to a Document or a ShadowRoot.
 
         Parameters
         ----------
@@ -1093,14 +1136,15 @@ class ElementHandle(JSHandle):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method rejects.
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -1135,14 +1179,15 @@ class ElementHandle(JSHandle):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method rejects.
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
@@ -1191,16 +1236,17 @@ class ElementHandle(JSHandle):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the first click of the `dblclick()` triggers a navigation event, this method will reject.
 
         If the element is detached from the DOM at any moment during the action, this method rejects.
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
@@ -1239,8 +1285,9 @@ class ElementHandle(JSHandle):
     ) -> typing.List[str]:
         """ElementHandle.selectOption
 
-        Triggers a `change` and `input` event once all the provided options have been selected.
-        If element is not a `<select>` element, the method throws an error.
+        Returns the array of option values that have been successfully selected.
+        Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
+        element, the method throws an error.
 
         Parameters
         ----------
@@ -1254,7 +1301,6 @@ class ElementHandle(JSHandle):
         Returns
         -------
         List[str]
-            An array of option values that have been successfully selected.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
@@ -1282,16 +1328,17 @@ class ElementHandle(JSHandle):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method rejects.
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -1314,9 +1361,9 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.fill
 
-        This method waits for actionability checks, focuses the element, fills it and triggers an `input` event after filling.
-        If the element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
-        Note that you can pass an empty string to clear the input field.
+        This method waits for actionability checks, focuses the element, fills it and triggers an `input`
+        event after filling. If the element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws
+        an error. Note that you can pass an empty string to clear the input field.
 
         Parameters
         ----------
@@ -1336,7 +1383,8 @@ class ElementHandle(JSHandle):
     async def selectText(self, timeout: int = None) -> NoneType:
         """ElementHandle.selectText
 
-        This method waits for actionability checks, then focuses the element and selects all its text content.
+        This method waits for actionability checks, then focuses the element and selects all its text
+        content.
 
         Parameters
         ----------
@@ -1360,8 +1408,11 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.setInputFiles
 
-        This method expects `elementHandle` to point to an input element.
-        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they are resolved relative to the current working directory. For empty array, clears the selected files.
+        This method expects `elementHandle` to point to an input
+        element.
+        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
+        are resolved relative to the current working directory. For
+        empty array, clears the selected files.
 
         Parameters
         ----------
@@ -1394,7 +1445,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.type
 
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
-        To press a special key, like `Control` or `ArrowDown`, use `elementHandle.press`.
+        To press a special key, like `Control` or `ArrowDown`, use elementHandle.press(key[, options]).
         An example of typing into a text field and then submitting the form:
 
         Parameters
@@ -1419,13 +1470,18 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.press
 
-        Focuses the element, and then uses `keyboard.down` and `keyboard.up`.
-        `key` can specify the intended keyboardEvent.key value or a single character to generate the text for. A superset of the `key` values can be found here. Examples of the keys are:
-        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
+        Focuses the element, and then uses keyboard.down(key) and keyboard.up(key).
+        `key` can specify the intended keyboardEvent.key
+        value or a single character to generate the text for. A superset of the `key` values can be found
+        here. Examples of the keys are:
+        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+        `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+        texts.
+        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
         ----------
@@ -1459,7 +1515,8 @@ class ElementHandle(JSHandle):
         Ensure that the element is now checked. If not, this method rejects.
 
         If the element is detached from the DOM at any moment during the action, this method rejects.
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -1491,7 +1548,8 @@ class ElementHandle(JSHandle):
         Ensure that the element is now unchecked. If not, this method rejects.
 
         If the element is detached from the DOM at any moment during the action, this method rejects.
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
@@ -1511,7 +1569,15 @@ class ElementHandle(JSHandle):
     async def boundingBox(self) -> typing.Union[FloatRect, NoneType]:
         """ElementHandle.boundingBox
 
-        This method returns the bounding box of the element (relative to the main frame), or `null` if the element is not visible.
+        This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
+        calculated relative to the main frame viewport - which is usually the same as the browser window.
+        Scrolling affects the returned bonding box, similarly to
+        Element.getBoundingClientRect. That
+        means `x` and/or `y` may be negative.
+        Elements from child frames return the bounding box relative to the main frame, unlike the
+        Element.getBoundingClientRect.
+        Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
+        snippet should click the center of the element.
 
         Returns
         -------
@@ -1529,7 +1595,9 @@ class ElementHandle(JSHandle):
     ) -> bytes:
         """ElementHandle.screenshot
 
-        This method waits for the actionability checks, then scrolls element into view before taking a screenshot. If the element is detached from DOM, the method throws an error.
+        Returns the buffer with the captured screenshot.
+        This method waits for the actionability checks, then scrolls element into view before taking a
+        screenshot. If the element is detached from DOM, the method throws an error.
 
         Parameters
         ----------
@@ -1547,7 +1615,6 @@ class ElementHandle(JSHandle):
         Returns
         -------
         bytes
-            Promise which resolves to buffer with the captured screenshot.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.screenshot(
@@ -1564,12 +1631,14 @@ class ElementHandle(JSHandle):
     ) -> typing.Union["ElementHandle", NoneType]:
         """ElementHandle.querySelector
 
-        The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See Working with selectors for more details. If no elements match the selector, the return value resolves to `null`.
+        The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See Working with
+        selectors for more details. If no elements match the selector, the return value resolves to
+        `null`.
 
         Parameters
         ----------
         selector : str
-            A selector to query element for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
 
         Returns
         -------
@@ -1582,12 +1651,14 @@ class ElementHandle(JSHandle):
     async def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
         """ElementHandle.querySelectorAll
 
-        The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See Working with selectors for more details. If no elements match the selector, the return value resolves to `[]`.
+        The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See Working with
+        selectors for more details. If no elements match the selector, the return value resolves to
+        `[]`.
 
         Parameters
         ----------
         selector : str
-            A selector to query element for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
 
         Returns
         -------
@@ -1606,14 +1677,17 @@ class ElementHandle(JSHandle):
     ) -> typing.Any:
         """ElementHandle.evalOnSelector
 
-        The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first argument to `pageFunction`. See Working with selectors for more details. If no elements match the selector, the method throws an error.
+        Returns the return value of `pageFunction`
+        The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
+        argument to `pageFunction`. See Working with selectors for more details. If no elements match
+        the selector, the method throws an error.
         If `pageFunction` returns a Promise, then `frame.$eval` would wait for the promise to resolve and return its value.
         Examples:
 
         Parameters
         ----------
         selector : str
-            A selector to query element for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         expression : str
             Function to be evaluated in browser context
         force_expr : bool
@@ -1624,7 +1698,6 @@ class ElementHandle(JSHandle):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evalOnSelector(
@@ -1644,7 +1717,10 @@ class ElementHandle(JSHandle):
     ) -> typing.Any:
         """ElementHandle.evalOnSelectorAll
 
-        The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of matched elements as a first argument to `pageFunction`. See Working with selectors for more details.
+        Returns the return value of `pageFunction`
+        The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
+        matched elements as a first argument to `pageFunction`. See Working with selectors for more
+        details.
         If `pageFunction` returns a Promise, then `frame.$$eval` would wait for the promise to resolve and return its value.
         Examples:
         ```html
@@ -1657,7 +1733,7 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query element for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         expression : str
             Function to be evaluated in browser context
         force_expr : bool
@@ -1668,7 +1744,6 @@ class ElementHandle(JSHandle):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evalOnSelectorAll(
@@ -1686,7 +1761,9 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.waitForElementState
 
-        Depending on the `state` parameter, this method waits for one of the actionability checks to pass. This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
+        Returns the element satisfies the `state`.
+        Depending on the `state` parameter, this method waits for one of the actionability checks to pass.
+        This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
 
         `"visible"` Wait until the element is visible.
         `"hidden"` Wait until the element is not visible or not attached. Note that waiting for hidden does not throw when the element detaches.
@@ -1715,14 +1792,19 @@ class ElementHandle(JSHandle):
     ) -> typing.Union["ElementHandle", NoneType]:
         """ElementHandle.waitForSelector
 
-        Wait for the `selector` relative to the element handle to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
+        Returns element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or
+        `detached`.
+        Wait for the `selector` relative to the element handle to satisfy `state` option (either appear/disappear from dom, or
+        become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method
+        will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
+        throw.
 
         **NOTE** This method does not work across navigations, use page.waitForSelector(selector[, options]) instead.
 
         Parameters
         ----------
         selector : str
-            A selector of an element to wait for, relative to the element handle. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         state : Optional[Literal['attached', 'detached', 'hidden', 'visible']]
             Defaults to `'visible'`. Can be either:
              - `'attached'` - wait for element to be present in DOM.
@@ -1735,7 +1817,6 @@ class ElementHandle(JSHandle):
         Returns
         -------
         Optional[ElementHandle]
-            Promise that resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForSelector(
@@ -1756,11 +1837,11 @@ class Accessibility(AsyncBase):
     ) -> typing.Union[typing.Dict, NoneType]:
         """Accessibility.snapshot
 
-        Captures the current state of the accessibility tree. The returned object represents the root accessible node of the page.
+        Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
+        page.
 
-        **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by
-        most screen readers. Playwright will discard them as well for an easier to process tree,
-        unless `interestingOnly` is set to `false`.
+        **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
+        Playwright will discard them as well for an easier to process tree, unless `interestingOnly` is set to `false`.
 
         An example of dumping the entire accessibility tree:
         An example of logging the focused node's name:
@@ -1775,7 +1856,6 @@ class Accessibility(AsyncBase):
         Returns
         -------
         Optional[Dict]
-            An AXNode object with the following properties:
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.snapshot(
@@ -1837,7 +1917,9 @@ class FileChooser(AsyncBase):
     ) -> NoneType:
         """FileChooser.setFiles
 
-        Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then they are resolved relative to the current working directory. For empty array, clears the selected files.
+        Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then
+        they are resolved relative to the current working directory.
+        For empty array, clears the selected files.
 
         Parameters
         ----------
@@ -1880,7 +1962,8 @@ class Frame(AsyncBase):
         Returns frame's name attribute as specified in the tag.
         If the name is empty, returns the id attribute instead.
 
-        **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed later.
+        **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed
+        later.
 
         Returns
         -------
@@ -1904,10 +1987,11 @@ class Frame(AsyncBase):
     def parentFrame(self) -> typing.Union["Frame", NoneType]:
         """Frame.parentFrame
 
+        Parent frame, if any. Detached frames and main frames return `null`.
+
         Returns
         -------
         Optional[Frame]
-            Parent frame, if any. Detached frames and main frames return `null`.
         """
         return mapping.from_impl_nullable(self._impl_obj.parentFrame)
 
@@ -1930,6 +2014,8 @@ class Frame(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Frame.goto
 
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect.
         `frame.goto` will throw an error if:
 
         there's an SSL error (e.g. in case of self-signed certificates).
@@ -1938,30 +2024,32 @@ class Frame(AsyncBase):
         the remote server does not respond or is unreachable.
         the main resource failed to load.
 
-        `frame.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling response.status().
+        `frame.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404
+        "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
+        response.status().
 
-        **NOTE** `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-
-        **NOTE** Headless mode doesn't support navigation to a PDF document. See the upstream issue.
+        **NOTE** `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation
+        to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
+        **NOTE** Headless mode doesn't support navigation to a PDF document. See the upstream
+        issue.
 
         Parameters
         ----------
         url : str
             URL to navigate frame to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         referer : Optional[str]
-            Referer header value. If provided it will take preference over the referer header value set by page.setExtraHTTPHeaders().
+            Referer header value. If provided it will take preference over the referer header value set by page.setExtraHTTPHeaders(headers).
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.goto(
@@ -1977,26 +2065,29 @@ class Frame(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Frame.waitForNavigation
 
-        This resolves when the frame navigates to a new URL. It is useful for when you run code
-        which will indirectly cause the frame to navigate. Consider this example:
-        **NOTE** Usage of the History API to change the URL is considered a navigation.
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
+        resolve with `null`.
+        This resolves when the frame navigates to a new URL. It is useful for when you run code which will indirectly cause the
+        frame to navigate. Consider this example:
+        **NOTE** Usage of the History API to change the URL is
+        considered a navigation.
 
         Parameters
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForNavigation(
@@ -2011,17 +2102,19 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.waitForLoadState
 
-        This resolves when the frame reaches a required load state, `load` by default. The navigation must have been committed when this method is called. If current document has already reached the required state, resolves immediately.
+        Returns when the required load state has been reached.
+        This resolves when the frame reaches a required load state, `load` by default. The navigation must have been committed
+        when this method is called. If current document has already reached the required state, resolves immediately.
 
         Parameters
         ----------
         state : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately.
+            Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately. Optional.
              - `'load'` - wait for the `load` event to be fired.
              - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
              - `'networkidle'` - wait until there are no network connections for at least `500` ms.
         timeout : Optional[int]
-            Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.waitForLoadState(state=state, timeout=timeout)
@@ -2030,13 +2123,13 @@ class Frame(AsyncBase):
     async def frameElement(self) -> "ElementHandle":
         """Frame.frameElement
 
+        Returns the `frame` or `iframe` element handle which corresponds to this frame.
         This is an inverse of elementHandle.contentFrame(). Note that returned handle actually belongs to the parent frame.
         This method throws an error if the frame has been detached before `frameElement()` returns.
 
         Returns
         -------
         ElementHandle
-            Promise that resolves with a `frame` or `iframe` element handle which corresponds to this frame.
         """
         return mapping.from_impl(await self._impl_obj.frameElement())
 
@@ -2045,8 +2138,12 @@ class Frame(AsyncBase):
     ) -> typing.Any:
         """Frame.evaluate
 
-        If the function passed to the `frame.evaluate` returns a Promise, then `frame.evaluate` would wait for the promise to resolve and return its value.
-        If the function passed to the `frame.evaluate` returns a non-Serializable value, then `frame.evaluate` resolves to `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        Returns the return value of `pageFunction`
+        If the function passed to the `frame.evaluate` returns a Promise, then `frame.evaluate` would wait for the promise to
+        resolve and return its value.
+        If the function passed to the `frame.evaluate` returns a non-Serializable value, then `frame.evaluate` resolves to
+        `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
+        `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
         A string can also be passed in instead of a function.
         ElementHandle instances can be passed as an argument to the `frame.evaluate`:
 
@@ -2062,7 +2159,6 @@ class Frame(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evaluate(
@@ -2075,8 +2171,11 @@ class Frame(AsyncBase):
     ) -> "JSHandle":
         """Frame.evaluateHandle
 
-        The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page object (JSHandle).
-        If the function, passed to the `frame.evaluateHandle`, returns a Promise, then `frame.evaluateHandle` would wait for the promise to resolve and return its value.
+        Returns the return value of `pageFunction` as in-page object (JSHandle).
+        The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page
+        object (JSHandle).
+        If the function, passed to the `frame.evaluateHandle`, returns a Promise, then `frame.evaluateHandle` would wait for
+        the promise to resolve and return its value.
         A string can also be passed in instead of a function.
         JSHandle instances can be passed as an argument to the `frame.evaluateHandle`:
 
@@ -2092,7 +2191,6 @@ class Frame(AsyncBase):
         Returns
         -------
         JSHandle
-            Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
         """
         return mapping.from_impl(
             await self._impl_obj.evaluateHandle(
@@ -2105,17 +2203,19 @@ class Frame(AsyncBase):
     ) -> typing.Union["ElementHandle", NoneType]:
         """Frame.querySelector
 
-        The method finds an element matching the specified selector within the frame. See Working with selectors for more details. If no elements match the selector, the return value resolves to `null`.
+        Returns the ElementHandle pointing to the frame element.
+        The method finds an element matching the specified selector within the frame. See Working with
+        selectors for more details. If no elements match the selector, the return value resolves to
+        `null`.
 
         Parameters
         ----------
         selector : str
-            A selector to query frame for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
 
         Returns
         -------
         Optional[ElementHandle]
-            Promise which resolves to ElementHandle pointing to the frame element.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.querySelector(selector=selector)
@@ -2124,17 +2224,19 @@ class Frame(AsyncBase):
     async def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
         """Frame.querySelectorAll
 
-        The method finds all elements matching the specified selector within the frame. See Working with selectors for more details. If no elements match the selector, the return value resolves to `[]`.
+        Returns the ElementHandles pointing to the frame elements.
+        The method finds all elements matching the specified selector within the frame. See Working with
+        selectors for more details. If no elements match the selector, the return value resolves to
+        `[]`.
 
         Parameters
         ----------
         selector : str
-            A selector to query frame for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
 
         Returns
         -------
         List[ElementHandle]
-            Promise which resolves to ElementHandles pointing to the frame elements.
         """
         return mapping.from_impl_list(
             await self._impl_obj.querySelectorAll(selector=selector)
@@ -2148,13 +2250,17 @@ class Frame(AsyncBase):
     ) -> typing.Union["ElementHandle", NoneType]:
         """Frame.waitForSelector
 
-        Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
+        Returns when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or
+        `detached`.
+        Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
+        the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
+        selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
         This method works across navigations:
 
         Parameters
         ----------
         selector : str
-            A selector of an element to wait for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         state : Optional[Literal['attached', 'detached', 'hidden', 'visible']]
@@ -2167,7 +2273,6 @@ class Frame(AsyncBase):
         Returns
         -------
         Optional[ElementHandle]
-            Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForSelector(
@@ -2184,8 +2289,11 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.dispatchEvent
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling `element.click()`.
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
+        is dispatched. This is equivalend to calling
+        element.click().
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
+        and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
 
         DragEvent
@@ -2201,11 +2309,11 @@ class Frame(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element to use. If there are multiple elements satisfying the selector, the first will be double clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         eventInit : Optional[Dict]
-            event-specific initialization properties.
+            Optional event-specific initialization properties.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         """
@@ -2227,14 +2335,17 @@ class Frame(AsyncBase):
     ) -> typing.Any:
         """Frame.evalOnSelector
 
-        The method finds an element matching the specified selector within the frame and passes it as a first argument to `pageFunction`. See Working with selectors for more details. If no elements match the selector, the method throws an error.
+        Returns the return value of `pageFunction`
+        The method finds an element matching the specified selector within the frame and passes it as a first argument to
+        `pageFunction`. See Working with selectors for more details. If no elements match the
+        selector, the method throws an error.
         If `pageFunction` returns a Promise, then `frame.$eval` would wait for the promise to resolve and return its value.
         Examples:
 
         Parameters
         ----------
         selector : str
-            A selector to query frame for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         expression : str
             Function to be evaluated in browser context
         force_expr : bool
@@ -2245,7 +2356,6 @@ class Frame(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evalOnSelector(
@@ -2265,14 +2375,16 @@ class Frame(AsyncBase):
     ) -> typing.Any:
         """Frame.evalOnSelectorAll
 
-        The method finds all elements matching the specified selector within the frame and passes an array of matched elements as a first argument to `pageFunction`. See Working with selectors for more details.
+        Returns the return value of `pageFunction`
+        The method finds all elements matching the specified selector within the frame and passes an array of matched elements
+        as a first argument to `pageFunction`. See Working with selectors for more details.
         If `pageFunction` returns a Promise, then `frame.$$eval` would wait for the promise to resolve and return its value.
         Examples:
 
         Parameters
         ----------
         selector : str
-            A selector to query frame for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         expression : str
             Function to be evaluated in browser context
         force_expr : bool
@@ -2283,7 +2395,6 @@ class Frame(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evalOnSelectorAll(
@@ -2318,12 +2429,12 @@ class Frame(AsyncBase):
         html : str
             HTML markup to assign to the page.
         timeout : Optional[int]
-            Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider setting content to be finished when the `load` event is fired.
-             - `'networkidle'` - consider setting content to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setContent(
@@ -2351,6 +2462,7 @@ class Frame(AsyncBase):
     ) -> "ElementHandle":
         """Frame.addScriptTag
 
+        Returns the added tag when the script's onload fires or when the script content was injected into frame.
         Adds a `<script>` tag into the page with the desired url or content.
 
         Parameters
@@ -2367,7 +2479,6 @@ class Frame(AsyncBase):
         Returns
         -------
         ElementHandle
-            which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
         """
         return mapping.from_impl(
             await self._impl_obj.addScriptTag(
@@ -2383,7 +2494,9 @@ class Frame(AsyncBase):
     ) -> "ElementHandle":
         """Frame.addStyleTag
 
-        Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the content.
+        Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
+        Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
+        content.
 
         Parameters
         ----------
@@ -2397,7 +2510,6 @@ class Frame(AsyncBase):
         Returns
         -------
         ElementHandle
-            which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
         """
         return mapping.from_impl(
             await self._impl_obj.addStyleTag(url=url, path=path, content=content)
@@ -2427,16 +2539,17 @@ class Frame(AsyncBase):
         Use page.mouse to click in the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
@@ -2487,18 +2600,19 @@ class Frame(AsyncBase):
         Use page.mouse to double click in the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the first click of the `dblclick()` triggers a navigation event, this method will reject.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to double click. If there are multiple elements satisfying the selector, the first will be double clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
@@ -2544,18 +2658,19 @@ class Frame(AsyncBase):
         Use page.touchscreen to tap the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -2579,15 +2694,16 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.fill
 
-        This method waits for an element matching `selector`, waits for actionability checks, focuses the element, fills it and triggers an `input` event after filling.
-        If the element matching `selector` is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
-        Note that you can pass an empty string to clear the input field.
-        To send fine-grained keyboard events, use `frame.type`.
+        This method waits for an element matching `selector`, waits for actionability checks, focuses the
+        element, fills it and triggers an `input` event after filling. If the element matching `selector` is not an `<input>`,
+        `<textarea>` or `[contenteditable]` element, this method throws an error. Note that you can pass an empty string to
+        clear the input field.
+        To send fine-grained keyboard events, use frame.type(selector, text[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Optional[int]
@@ -2604,13 +2720,13 @@ class Frame(AsyncBase):
     async def focus(self, selector: str, timeout: int = None) -> NoneType:
         """Frame.focus
 
-        This method fetches an element with `selector` and focuses it.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM.
+        This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
+        waits until a matching element appears in the DOM.
 
         Parameters
         ----------
         selector : str
-            A selector of an element to focus. If there are multiple elements satisfying the selector, the first will be focused. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         """
@@ -2628,7 +2744,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -2648,7 +2764,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -2668,7 +2784,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -2690,7 +2806,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         name : str
             Attribute name to get the value for.
         timeout : Optional[int]
@@ -2726,16 +2842,17 @@ class Frame(AsyncBase):
         Use page.mouse to hover over the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to hover. If there are multiple elements satisfying the selector, the first will be hovered. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -2767,13 +2884,14 @@ class Frame(AsyncBase):
     ) -> typing.List[str]:
         """Frame.selectOption
 
-        Triggers a `change` and `input` event once all the provided options have been selected.
-        If there's no `<select>` element matching `selector`, the method throws an error.
+        Returns the array of option values that have been successfully selected.
+        Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
+        matching `selector`, the method throws an error.
 
         Parameters
         ----------
         selector : str
-            A selector to query frame for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
@@ -2784,7 +2902,6 @@ class Frame(AsyncBase):
         Returns
         -------
         List[str]
-            An array of option values that have been successfully selected.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
@@ -2811,13 +2928,16 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.setInputFiles
 
-        This method expects `selector` to point to an input element.
-        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they are resolved relative to the current working directory. For empty array, clears the selected files.
+        This method expects `selector` to point to an input
+        element.
+        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
+        are resolved relative to the current working directory. For
+        empty array, clears the selected files.
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2840,13 +2960,14 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.type
 
-        Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used to send fine-grained keyboard events. To fill values in form fields, use `frame.fill`.
-        To press a special key, like `Control` or `ArrowDown`, use `keyboard.press`.
+        Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used to
+        send fine-grained keyboard events. To fill values in form fields, use frame.fill(selector, value[, options]).
+        To press a special key, like `Control` or `ArrowDown`, use keyboard.press(key[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         text : str
             A text to type into a focused element.
         delay : Optional[int]
@@ -2876,17 +2997,22 @@ class Frame(AsyncBase):
     ) -> NoneType:
         """Frame.press
 
-        `key` can specify the intended keyboardEvent.key value or a single character to generate the text for. A superset of the `key` values can be found here. Examples of the keys are:
-        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
+        `key` can specify the intended keyboardEvent.key
+        value or a single character to generate the text for. A superset of the `key` values can be found
+        here. Examples of the keys are:
+        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+        `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+        texts.
+        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
         ----------
         selector : str
-            A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Optional[int]
@@ -2925,12 +3051,13 @@ class Frame(AsyncBase):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         Ensure that the element is now checked. If not, this method rejects.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
         selector : str
-            A selector to search for checkbox to check. If there are multiple elements satisfying the selector, the first will be checked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -2963,12 +3090,13 @@ class Frame(AsyncBase):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         Ensure that the element is now unchecked. If not, this method rejects.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         Parameters
         ----------
         selector : str
-            A selector to search for uncheckbox to check. If there are multiple elements satisfying the selector, the first will be checked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -2986,7 +3114,8 @@ class Frame(AsyncBase):
         """Frame.waitForTimeout
 
         Returns a promise that resolves after the timeout.
-        Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be flaky. Use signals such as network events, selectors becoming visible and others instead.
+        Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
+        be flaky. Use signals such as network events, selectors becoming visible and others instead.
 
         Parameters
         ----------
@@ -3007,6 +3136,7 @@ class Frame(AsyncBase):
     ) -> "JSHandle":
         """Frame.waitForFunction
 
+        Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
 
         To pass an argument from Node.js to the predicate of `frame.waitForFunction` function:
@@ -3020,14 +3150,13 @@ class Frame(AsyncBase):
         arg : Optional[Any]
             Optional argument to pass to `pageFunction`
         timeout : Optional[int]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout).
         polling : Union[int, 'raf', NoneType]
             If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
         Returns
         -------
         JSHandle
-            Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         """
         return mapping.from_impl(
             await self._impl_obj.waitForFunction(
@@ -3042,10 +3171,11 @@ class Frame(AsyncBase):
     async def title(self) -> str:
         """Frame.title
 
+        Returns the page title.
+
         Returns
         -------
         str
-            The page's title.
         """
         return mapping.from_maybe_impl(await self._impl_obj.title())
 
@@ -3127,8 +3257,12 @@ class Worker(AsyncBase):
     ) -> typing.Any:
         """Worker.evaluate
 
-        If the function passed to the `worker.evaluate` returns a Promise, then `worker.evaluate` would wait for the promise to resolve and return its value.
-        If the function passed to the `worker.evaluate` returns a non-Serializable value, then `worker.evaluate` resolves to `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        Returns the return value of `pageFunction`
+        If the function passed to the `worker.evaluate` returns a Promise, then `worker.evaluate` would wait for the promise
+        to resolve and return its value.
+        If the function passed to the `worker.evaluate` returns a non-Serializable value, then `worker.evaluate` resolves to
+        `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
+        `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
 
         Parameters
         ----------
@@ -3142,7 +3276,6 @@ class Worker(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evaluate(
@@ -3155,8 +3288,11 @@ class Worker(AsyncBase):
     ) -> "JSHandle":
         """Worker.evaluateHandle
 
-        The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns in-page object (JSHandle).
-        If the function passed to the `worker.evaluateHandle` returns a Promise, then `worker.evaluateHandle` would wait for the promise to resolve and return its value.
+        Returns the return value of `pageFunction` as in-page object (JSHandle).
+        The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns
+        in-page object (JSHandle).
+        If the function passed to the `worker.evaluateHandle` returns a Promise, then `worker.evaluateHandle` would wait for
+        the promise to resolve and return its value.
 
         Parameters
         ----------
@@ -3170,7 +3306,6 @@ class Worker(AsyncBase):
         Returns
         -------
         JSHandle
-            Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
         """
         return mapping.from_impl(
             await self._impl_obj.evaluateHandle(
@@ -3224,7 +3359,9 @@ class ConsoleMessage(AsyncBase):
     def type(self) -> str:
         """ConsoleMessage.type
 
-        One of the following values: `'log'`, `'debug'`, `'info'`, `'error'`, `'warning'`, `'dir'`, `'dirxml'`, `'table'`, `'trace'`, `'clear'`, `'startGroup'`, `'startGroupCollapsed'`, `'endGroup'`, `'assert'`, `'profile'`, `'profileEnd'`, `'count'`, `'timeEnd'`.
+        One of the following values: `'log'`, `'debug'`, `'info'`, `'error'`, `'warning'`, `'dir'`, `'dirxml'`, `'table'`,
+        `'trace'`, `'clear'`, `'startGroup'`, `'startGroupCollapsed'`, `'endGroup'`, `'assert'`, `'profile'`, `'profileEnd'`,
+        `'count'`, `'timeEnd'`.
 
         Returns
         -------
@@ -3274,10 +3411,11 @@ class Dialog(AsyncBase):
     def type(self) -> str:
         """Dialog.type
 
+        Returns dialog's type, can be one of `alert`, `beforeunload`, `confirm` or `prompt`.
+
         Returns
         -------
         str
-            Dialog's type, can be one of `alert`, `beforeunload`, `confirm` or `prompt`.
         """
         return mapping.from_maybe_impl(self._impl_obj.type)
 
@@ -3285,10 +3423,11 @@ class Dialog(AsyncBase):
     def message(self) -> str:
         """Dialog.message
 
+        A message displayed in the dialog.
+
         Returns
         -------
         str
-            A message displayed in the dialog.
         """
         return mapping.from_maybe_impl(self._impl_obj.message)
 
@@ -3296,27 +3435,33 @@ class Dialog(AsyncBase):
     def defaultValue(self) -> str:
         """Dialog.defaultValue
 
+        If dialog is prompt, returns default prompt value. Otherwise, returns empty string.
+
         Returns
         -------
         str
-            If dialog is prompt, returns default prompt value. Otherwise, returns empty string.
         """
         return mapping.from_maybe_impl(self._impl_obj.defaultValue)
 
     async def accept(self, promptText: str = None) -> NoneType:
         """Dialog.accept
 
+        Returns when the dialog has been accepted.
+
         Parameters
         ----------
         promptText : Optional[str]
-            A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt.
+            A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.accept(promptText=promptText)
         )
 
     async def dismiss(self) -> NoneType:
-        """Dialog.dismiss"""
+        """Dialog.dismiss
+
+        Returns when the dialog has been dismissed.
+        """
         return mapping.from_maybe_impl(await self._impl_obj.dismiss())
 
 
@@ -3343,7 +3488,10 @@ class Download(AsyncBase):
     def suggestedFilename(self) -> str:
         """Download.suggestedFilename
 
-        Returns suggested filename for this download. It is typically computed by the browser from the `Content-Disposition` response header or the `download` attribute. See the spec on whatwg. Different browsers can use different logic for computing it.
+        Returns suggested filename for this download. It is typically computed by the browser from the
+        `Content-Disposition` response header
+        or the `download` attribute. See the spec on whatwg. Different
+        browsers can use different logic for computing it.
 
         Returns
         -------
@@ -3403,7 +3551,8 @@ class Video(AsyncBase):
     async def path(self) -> str:
         """Video.path
 
-        Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem upon closing the browser context.
+        Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
+        upon closing the browser context.
 
         Returns
         -------
@@ -3488,12 +3637,11 @@ class Page(AsyncBase):
     def mainFrame(self) -> "Frame":
         """Page.mainFrame
 
-        Page is guaranteed to have a main frame which persists during navigations.
+        The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
 
         Returns
         -------
         Frame
-            The page's main frame.
         """
         return mapping.from_impl(self._impl_obj.mainFrame)
 
@@ -3501,10 +3649,11 @@ class Page(AsyncBase):
     def frames(self) -> typing.List["Frame"]:
         """Page.frames
 
+        An array of all frames attached to the page.
+
         Returns
         -------
         List[Frame]
-            An array of all frames attached to the page.
         """
         return mapping.from_impl_list(self._impl_obj.frames)
 
@@ -3512,7 +3661,7 @@ class Page(AsyncBase):
     def url(self) -> str:
         """Page.url
 
-        This is a shortcut for page.mainFrame().url()
+        Shortcut for main frame's frame.url().
 
         Returns
         -------
@@ -3524,12 +3673,14 @@ class Page(AsyncBase):
     def workers(self) -> typing.List["Worker"]:
         """Page.workers
 
+        This method returns all of the dedicated WebWorkers
+        associated with the page.
+
         **NOTE** This does not contain ServiceWorkers
 
         Returns
         -------
         List[Worker]
-            This method returns all of the dedicated WebWorkers associated with the page.
         """
         return mapping.from_impl_list(self._impl_obj.workers)
 
@@ -3548,10 +3699,12 @@ class Page(AsyncBase):
     async def opener(self) -> typing.Union["Page", NoneType]:
         """Page.opener
 
+        Returns the opener for popup pages and `null` for others. If the opener has been closed already the promise may resolve
+        to `null`.
+
         Returns
         -------
         Optional[Page]
-            Promise which resolves to the opener for popup pages and `null` for others. If the opener has been closed already the promise may resolve to `null`.
         """
         return mapping.from_impl_nullable(await self._impl_obj.opener())
 
@@ -3562,6 +3715,7 @@ class Page(AsyncBase):
     ) -> typing.Union["Frame", NoneType]:
         """Page.frame
 
+        Returns frame matching the criteria. Returns `null` if no frame matches.
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
         Parameters
@@ -3574,7 +3728,6 @@ class Page(AsyncBase):
         Returns
         -------
         Optional[Frame]
-            frame matching the criteria. Returns `null` if no frame matches.
         """
         return mapping.from_impl_nullable(
             self._impl_obj.frame(name=name, url=self._wrap_handler(url))
@@ -3592,7 +3745,8 @@ class Page(AsyncBase):
         page.setContent(html[, options])
         page.waitForNavigation([options])
 
-        **NOTE** `page.setDefaultNavigationTimeout` takes priority over `page.setDefaultTimeout`, `browserContext.setDefaultTimeout` and `browserContext.setDefaultNavigationTimeout`.
+        **NOTE** page.setDefaultNavigationTimeout(timeout) takes priority over page.setDefaultTimeout(timeout),
+        browserContext.setDefaultTimeout(timeout) and browserContext.setDefaultNavigationTimeout(timeout).
 
         Parameters
         ----------
@@ -3608,7 +3762,7 @@ class Page(AsyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        **NOTE** `page.setDefaultNavigationTimeout` takes priority over `page.setDefaultTimeout`.
+        **NOTE** page.setDefaultNavigationTimeout(timeout) takes priority over page.setDefaultTimeout(timeout).
 
         Parameters
         ----------
@@ -3624,13 +3778,14 @@ class Page(AsyncBase):
     ) -> typing.Union["ElementHandle", NoneType]:
         """Page.querySelector
 
-        The method finds an element matching the specified selector within the page. If no elements match the selector, the return value resolves to `null`.
-        Shortcut for page.mainFrame().$(selector).
+        The method finds an element matching the specified selector within the page. If no elements match the selector, the
+        return value resolves to `null`.
+        Shortcut for main frame's frame.$(selector).
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
 
         Returns
         -------
@@ -3643,13 +3798,14 @@ class Page(AsyncBase):
     async def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
         """Page.querySelectorAll
 
-        The method finds all elements matching the specified selector within the page. If no elements match the selector, the return value resolves to `[]`.
-        Shortcut for page.mainFrame().$$(selector).
+        The method finds all elements matching the specified selector within the page. If no elements match the selector, the
+        return value resolves to `[]`.
+        Shortcut for main frame's frame.$$(selector).
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
 
         Returns
         -------
@@ -3667,15 +3823,17 @@ class Page(AsyncBase):
     ) -> typing.Union["ElementHandle", NoneType]:
         """Page.waitForSelector
 
-        Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
+        Returns when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or
+        `detached`.
+        Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
+        the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
+        selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
         This method works across navigations:
-
-        Shortcut for page.mainFrame().waitForSelector(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector of an element to wait for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         state : Optional[Literal['attached', 'detached', 'hidden', 'visible']]
@@ -3688,7 +3846,6 @@ class Page(AsyncBase):
         Returns
         -------
         Optional[ElementHandle]
-            Promise which resolves when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or `detached`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForSelector(
@@ -3705,8 +3862,11 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.dispatchEvent
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click` is dispatched. This is equivalend to calling `element.click()`.
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
+        is dispatched. This is equivalend to calling
+        element.click().
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
+        and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
 
         DragEvent
@@ -3722,11 +3882,11 @@ class Page(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element to use. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         eventInit : Optional[Dict]
-            event-specific initialization properties.
+            Optional event-specific initialization properties.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         """
@@ -3744,12 +3904,16 @@ class Page(AsyncBase):
     ) -> typing.Any:
         """Page.evaluate
 
-        If the function passed to the `page.evaluate` returns a Promise, then `page.evaluate` would wait for the promise to resolve and return its value.
-        If the function passed to the `page.evaluate` returns a non-Serializable value, then `page.evaluate` resolves to `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        Returns the value of the `pageFunction` invacation.
+        If the function passed to the `page.evaluate` returns a Promise, then `page.evaluate` would wait for the promise to
+        resolve and return its value.
+        If the function passed to the `page.evaluate` returns a non-Serializable value, then `page.evaluate` resolves to
+        `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
+        `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
         Passing argument to `pageFunction`:
         A string can also be passed in instead of a function:
         ElementHandle instances can be passed as an argument to the `page.evaluate`:
-        Shortcut for page.mainFrame().evaluate(pageFunction[, arg]).
+        Shortcut for main frame's frame.evaluate(pageFunction[, arg]).
 
         Parameters
         ----------
@@ -3763,7 +3927,6 @@ class Page(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evaluate(
@@ -3776,8 +3939,11 @@ class Page(AsyncBase):
     ) -> "JSHandle":
         """Page.evaluateHandle
 
-        The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page object (JSHandle).
-        If the function passed to the `page.evaluateHandle` returns a Promise, then `page.evaluateHandle` would wait for the promise to resolve and return its value.
+        Returns the value of the `pageFunction` invacation as in-page object (JSHandle).
+        The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page
+        object (JSHandle).
+        If the function passed to the `page.evaluateHandle` returns a Promise, then `page.evaluateHandle` would wait for the
+        promise to resolve and return its value.
         A string can also be passed in instead of a function:
         JSHandle instances can be passed as an argument to the `page.evaluateHandle`:
 
@@ -3793,7 +3959,6 @@ class Page(AsyncBase):
         Returns
         -------
         JSHandle
-            Promise which resolves to the return value of `pageFunction` as in-page object (JSHandle)
         """
         return mapping.from_impl(
             await self._impl_obj.evaluateHandle(
@@ -3810,15 +3975,16 @@ class Page(AsyncBase):
     ) -> typing.Any:
         """Page.evalOnSelector
 
-        The method finds an element matching the specified selector within the page and passes it as a first argument to `pageFunction`. If no elements match the selector, the method throws an error.
+        The method finds an element matching the specified selector within the page and passes it as a first argument to
+        `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
         If `pageFunction` returns a Promise, then `page.$eval` would wait for the promise to resolve and return its value.
         Examples:
-        Shortcut for page.mainFrame().$eval(selector, pageFunction).
+        Shortcut for main frame's frame.$eval(selector, pageFunction[, arg]).
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         expression : str
             Function to be evaluated in browser context
         force_expr : bool
@@ -3829,7 +3995,6 @@ class Page(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evalOnSelector(
@@ -3849,14 +4014,15 @@ class Page(AsyncBase):
     ) -> typing.Any:
         """Page.evalOnSelectorAll
 
-        The method finds all elements matching the specified selector within the page and passes an array of matched elements as a first argument to `pageFunction`.
+        The method finds all elements matching the specified selector within the page and passes an array of matched elements as
+        a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
         If `pageFunction` returns a Promise, then `page.$$eval` would wait for the promise to resolve and return its value.
         Examples:
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to query for. See working with selectors for more details.
         expression : str
             Function to be evaluated in browser context
         force_expr : bool
@@ -3867,7 +4033,6 @@ class Page(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the return value of `pageFunction`
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.evalOnSelectorAll(
@@ -3887,8 +4052,9 @@ class Page(AsyncBase):
     ) -> "ElementHandle":
         """Page.addScriptTag
 
-        Adds a `<script>` tag into the page with the desired url or content.
-        Shortcut for page.mainFrame().addScriptTag(options).
+        Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
+        fires or when the script content was injected into frame.
+        Shortcut for main frame's frame.addScriptTag(script).
 
         Parameters
         ----------
@@ -3904,7 +4070,6 @@ class Page(AsyncBase):
         Returns
         -------
         ElementHandle
-            which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
         """
         return mapping.from_impl(
             await self._impl_obj.addScriptTag(
@@ -3920,8 +4085,9 @@ class Page(AsyncBase):
     ) -> "ElementHandle":
         """Page.addStyleTag
 
-        Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the content.
-        Shortcut for page.mainFrame().addStyleTag(options).
+        Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
+        content. Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
+        Shortcut for main frame's frame.addStyleTag(style).
 
         Parameters
         ----------
@@ -3935,7 +4101,6 @@ class Page(AsyncBase):
         Returns
         -------
         ElementHandle
-            which resolves to the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
         """
         return mapping.from_impl(
             await self._impl_obj.addStyleTag(url=url, path=path, content=content)
@@ -3944,8 +4109,9 @@ class Page(AsyncBase):
     async def exposeFunction(self, name: str, binding: typing.Callable) -> NoneType:
         """Page.exposeFunction
 
-        The method adds a function called `name` on the `window` object of every frame in the page.
-        When called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of `playwrightFunction`.
+        The method adds a function called `name` on the `window` object of every frame in the page. When called, the function
+        executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of
+        `playwrightFunction`.
         If the `playwrightFunction` returns a Promise, it will be awaited.
         See browserContext.exposeFunction(name, playwrightFunction) for context-wide exposed function.
 
@@ -3973,12 +4139,11 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.exposeBinding
 
-        The method adds a function called `name` on the `window` object of every frame in this page.
-        When called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of `playwrightBinding`.
-        If the `playwrightBinding` returns a Promise, it will be awaited.
-        The first argument of the `playwrightBinding` function contains information about the caller:
-        `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-        See browserContext.exposeBinding(name, playwrightBinding) for the context-wide version.
+        The method adds a function called `name` on the `window` object of every frame in this page. When called, the function
+        executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of
+        `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
+        The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
+        See browserContext.exposeBinding(name, playwrightBinding[, options]) for the context-wide version.
 
         **NOTE** Functions installed via `page.exposeBinding` survive navigations.
 
@@ -4041,12 +4206,12 @@ class Page(AsyncBase):
         html : str
             HTML markup to assign to the page.
         timeout : Optional[int]
-            Maximum time in milliseconds for resources to load, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider setting markup succeeded, defaults to `load`. Given an array of event strings, setting content is considered to be successful after all events have been fired. Events can be either:
-             - `'load'` - consider setting content to be finished when the `load` event is fired.
-             - `'domcontentloaded'` - consider setting content to be finished when the `DOMContentLoaded` event is fired.
-             - `'networkidle'` - consider setting content to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setContent(
@@ -4063,6 +4228,8 @@ class Page(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Page.goto
 
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect.
         `page.goto` will throw an error if:
 
         there's an SSL error (e.g. in case of self-signed certificates).
@@ -4071,32 +4238,34 @@ class Page(AsyncBase):
         the remote server does not respond or is unreachable.
         the main resource failed to load.
 
-        `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling response.status().
+        `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not
+        Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
+        response.status().
 
-        **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
+        **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
+        **NOTE** Headless mode doesn't support navigation to a PDF document. See the upstream
+        issue.
 
-        **NOTE** Headless mode doesn't support navigation to a PDF document. See the upstream issue.
-
-        Shortcut for page.mainFrame().goto(url[, options])
+        Shortcut for main frame's frame.goto(url[, options])
 
         Parameters
         ----------
         url : str
             URL to navigate page to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         referer : Optional[str]
-            Referer header value. If provided it will take preference over the referer header value set by page.setExtraHTTPHeaders().
+            Referer header value. If provided it will take preference over the referer header value set by page.setExtraHTTPHeaders(headers).
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.goto(
@@ -4111,20 +4280,22 @@ class Page(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Page.reload
 
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect.
+
         Parameters
         ----------
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.reload(timeout=timeout, waitUntil=waitUntil)
@@ -4137,18 +4308,20 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.waitForLoadState
 
-        This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed when this method is called. If current document has already reached the required state, resolves immediately.
-        Shortcut for page.mainFrame().waitForLoadState([options]).
+        Returns when the required load state has been reached.
+        This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
+        when this method is called. If current document has already reached the required state, resolves immediately.
+        Shortcut for main frame's frame.waitForLoadState([state, options]).
 
         Parameters
         ----------
         state : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately.
+            Load state to wait for, defaults to `load`. If the state has been already reached while loading current document, the method resolves immediately. Optional.
              - `'load'` - wait for the `load` event to be fired.
              - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
              - `'networkidle'` - wait until there are no network connections for at least `500` ms.
         timeout : Optional[int]
-            Maximum waiting time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.waitForLoadState(state=state, timeout=timeout)
@@ -4162,27 +4335,31 @@ class Page(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Page.waitForNavigation
 
-        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code
-        which will indirectly cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`. Consider this example:
-        **NOTE** Usage of the History API to change the URL is considered a navigation.
-        Shortcut for page.mainFrame().waitForNavigation(options).
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
+        resolve with `null`.
+        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
+        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
+        Consider this example:
+        **NOTE** Usage of the History API to change the URL is
+        considered a navigation.
+        Shortcut for main frame's frame.waitForNavigation([options]).
 
         Parameters
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will resolve with `null`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForNavigation(
@@ -4198,6 +4375,7 @@ class Page(AsyncBase):
     ) -> "Request":
         """Page.waitForRequest
 
+        Returns promise that resolves to the matched request.
 
         Parameters
         ----------
@@ -4209,7 +4387,6 @@ class Page(AsyncBase):
         Returns
         -------
         Request
-            Promise which resolves to the matched request.
         """
         return mapping.from_impl(
             await self._impl_obj.waitForRequest(
@@ -4227,6 +4404,7 @@ class Page(AsyncBase):
     ) -> "Response":
         """Page.waitForResponse
 
+        Returns the matched response.
 
         Parameters
         ----------
@@ -4238,7 +4416,6 @@ class Page(AsyncBase):
         Returns
         -------
         Response
-            Promise which resolves to the matched response.
         """
         return mapping.from_impl(
             await self._impl_obj.waitForResponse(
@@ -4256,8 +4433,9 @@ class Page(AsyncBase):
     ) -> typing.Any:
         """Page.waitForEvent
 
-        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the page is closed before the event
-        is fired.
+        Returns the event data value.
+        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
+        value. Will throw an error if the page is closed before the event is fired.
 
         Parameters
         ----------
@@ -4267,7 +4445,6 @@ class Page(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the event data value.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.waitForEvent(
@@ -4282,23 +4459,23 @@ class Page(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Page.goBack
 
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect. If can not go back, resolves to `null`.
         Navigate to the previous page in history.
 
         Parameters
         ----------
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
-              can not go back, resolves to `null`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.goBack(timeout=timeout, waitUntil=waitUntil)
@@ -4311,23 +4488,23 @@ class Page(AsyncBase):
     ) -> typing.Union["Response", NoneType]:
         """Page.goForward
 
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect. If can not go forward, resolves to `null`.
         Navigate to the next page in history.
 
         Parameters
         ----------
         timeout : Optional[int]
-            Maximum navigation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
-            When to consider navigation succeeded, defaults to `load`. Events can be either:
-             - `'domcontentloaded'` - consider navigation to be finished when the `DOMContentLoaded` event is fired.
-             - `'load'` - consider navigation to be finished when the `load` event is fired.
-             - `'networkidle'` - consider navigation to be finished when there are no network connections for at least `500` ms.
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+             - `'load'` - consider operation to be finished when the `load` event is fired.
+             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
 
         Returns
         -------
         Optional[Response]
-            Promise which resolves to the main resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect. If
-              can not go forward, resolves to `null`.
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.goForward(timeout=timeout, waitUntil=waitUntil)
@@ -4355,8 +4532,10 @@ class Page(AsyncBase):
     async def setViewportSize(self, width: int, height: int) -> NoneType:
         """Page.setViewportSize
 
-        In the case of multiple pages in a single browser, each page can have its own viewport size. However, browser.newContext([options]) allows to set viewport size (and more) for all pages in the context at once.
-        `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the viewport size before navigating to the page.
+        In the case of multiple pages in a single browser, each page can have its own viewport size. However,
+        browser.newContext([options]) allows to set viewport size (and more) for all pages in the context at once.
+        `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
+        viewport size before navigating to the page.
 
         Parameters
         ----------
@@ -4395,10 +4574,12 @@ class Page(AsyncBase):
         Whenever the page is navigated.
         Whenever the child frame is attached or navigated. In this case, the script is evaluated in the context of the newly attached frame.
 
-        The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend  the JavaScript environment, e.g. to seed `Math.random`.
+        The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend
+        the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
 
-        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and page.addInitScript(script[, arg]) is not defined.
+        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and
+        page.addInitScript(script[, arg]) is not defined.
 
         Parameters
         ----------
@@ -4423,7 +4604,8 @@ class Page(AsyncBase):
 
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
-        Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches both handlers.
+        Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches
+        both handlers.
 
         **NOTE** Enabling routing disables http cache.
 
@@ -4454,7 +4636,7 @@ class Page(AsyncBase):
         url : Union[str, Pattern, typing.Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
         handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
-            Handler function to route the request.
+            Optional handler function to route the request.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.unroute(
@@ -4474,7 +4656,10 @@ class Page(AsyncBase):
     ) -> bytes:
         """Page.screenshot
 
-        **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for discussion.
+        Returns the buffer with the captured screenshot.
+
+        **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
+        discussion.
 
         Parameters
         ----------
@@ -4496,7 +4681,6 @@ class Page(AsyncBase):
         Returns
         -------
         bytes
-            Promise which resolves to buffer with the captured screenshot.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.screenshot(
@@ -4513,31 +4697,28 @@ class Page(AsyncBase):
     async def title(self) -> str:
         """Page.title
 
-        Shortcut for page.mainFrame().title().
+        Returns the page's title. Shortcut for main frame's frame.title().
 
         Returns
         -------
         str
-            The page's title.
         """
         return mapping.from_maybe_impl(await self._impl_obj.title())
 
     async def close(self, runBeforeUnload: bool = None) -> NoneType:
         """Page.close
 
-        If `runBeforeUnload` is `false` the result will resolve only after the page has been closed.
-        If `runBeforeUnload` is `true` the method will **not** wait for the page to close.
-        By default, `page.close()` **does not** run beforeunload handlers.
+        If `runBeforeUnload` is `false` the result will resolve only after the page has been closed. If `runBeforeUnload` is
+        `true` the method will **not** wait for the page to close. By default, `page.close()` **does not** run beforeunload
+        handlers.
 
         **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
-        and should be handled manually via page's 'dialog' event.
+        and should be handled manually via page.on('dialog') event.
 
         Parameters
         ----------
         runBeforeUnload : Optional[bool]
-            Defaults to `false`. Whether to run the
-            before unload
-            page handlers.
+            Defaults to `false`. Whether to run the before unload page handlers.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.close(runBeforeUnload=runBeforeUnload)
@@ -4578,17 +4759,18 @@ class Page(AsyncBase):
         Use page.mouse to click in the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
-        Shortcut for page.mainFrame().click(selector[, options]).
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
+        Shortcut for main frame's frame.click(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to click relative to the top-left corner of element padding box. If not specified, clicks to some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
@@ -4639,20 +4821,21 @@ class Page(AsyncBase):
         Use page.mouse to double click in the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the first click of the `dblclick()` triggers a navigation event, this method will reject.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
-        Shortcut for page.mainFrame().dblclick(selector[, options]).
+        Shortcut for main frame's frame.dblclick(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to double click. If there are multiple elements satisfying the selector, the first will be double clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the double click, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to double click relative to the top-left corner of element padding box. If not specified, double clicks to some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
@@ -4698,20 +4881,21 @@ class Page(AsyncBase):
         Use page.touchscreen to tap the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
 
         **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
-        Shortcut for page.mainFrame().tap().
+        Shortcut for main frame's frame.tap(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to tap. If there are multiple elements satisfying the selector, the first will be tapped. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the tap, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to tap relative to the top-left corner of element padding box. If not specified, taps some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -4735,16 +4919,17 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.fill
 
-        This method waits for an element matching `selector`, waits for actionability checks, focuses the element, fills it and triggers an `input` event after filling.
-        If the element matching `selector` is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
-        Note that you can pass an empty string to clear the input field.
-        To send fine-grained keyboard events, use `page.type`.
-        Shortcut for page.mainFrame().fill()
+        This method waits for an element matching `selector`, waits for actionability checks, focuses the
+        element, fills it and triggers an `input` event after filling. If the element matching `selector` is not an `<input>`,
+        `<textarea>` or `[contenteditable]` element, this method throws an error. Note that you can pass an empty string to
+        clear the input field.
+        To send fine-grained keyboard events, use page.type(selector, text[, options]).
+        Shortcut for main frame's frame.fill(selector, value[, options])
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Optional[int]
@@ -4761,14 +4946,14 @@ class Page(AsyncBase):
     async def focus(self, selector: str, timeout: int = None) -> NoneType:
         """Page.focus
 
-        This method fetches an element with `selector` and focuses it.
-        If there's no element matching `selector`, the method waits until a matching element appears in the DOM.
-        Shortcut for page.mainFrame().focus(selector).
+        This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
+        waits until a matching element appears in the DOM.
+        Shortcut for main frame's frame.focus(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector of an element to focus. If there are multiple elements satisfying the selector, the first will be focused. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         """
@@ -4781,12 +4966,12 @@ class Page(AsyncBase):
     ) -> typing.Union[str, NoneType]:
         """Page.textContent
 
-        Resolves to the `element.textContent`.
+        Returns `element.textContent`.
 
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -4801,12 +4986,12 @@ class Page(AsyncBase):
     async def innerText(self, selector: str, timeout: int = None) -> str:
         """Page.innerText
 
-        Resolves to the `element.innerText`.
+        Returns `element.innerText`.
 
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -4821,12 +5006,12 @@ class Page(AsyncBase):
     async def innerHTML(self, selector: str, timeout: int = None) -> str:
         """Page.innerHTML
 
-        Resolves to the `element.innerHTML`.
+        Returns `element.innerHTML`.
 
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
 
@@ -4848,7 +5033,7 @@ class Page(AsyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be picked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         name : str
             Attribute name to get the value for.
         timeout : Optional[int]
@@ -4884,17 +5069,18 @@ class Page(AsyncBase):
         Use page.mouse to hover over the center of the element, or the specified `position`.
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
-        Shortcut for page.mainFrame().hover(selector[, options]).
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
+        Shortcut for main frame's frame.hover(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to hover. If there are multiple elements satisfying the selector, the first will be hovered. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
-            Modifier keys to press. Ensures that only these modifiers are pressed during the hover, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
         position : Optional[{"x": float, "y": float}]
-            A point to hover relative to the top-left corner of element padding box. If not specified, hovers over some visible point of the element.
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -4926,15 +5112,16 @@ class Page(AsyncBase):
     ) -> typing.List[str]:
         """Page.selectOption
 
-        Triggers a `change` and `input` event once all the provided options have been selected.
-        If there's no `<select>` element matching `selector`, the method throws an error.
+        Returns the array of option values that have been successfully selected.
+        Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
+        matching `selector`, the method throws an error.
 
-        Shortcut for page.mainFrame().selectOption()
+        Shortcut for main frame's frame.selectOption(selector, values[, options])
 
         Parameters
         ----------
         selector : str
-            A selector to query page for. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
@@ -4945,7 +5132,6 @@ class Page(AsyncBase):
         Returns
         -------
         List[str]
-            An array of option values that have been successfully selected.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
@@ -4967,13 +5153,16 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.setInputFiles
 
-        This method expects `selector` to point to an input element.
-        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they are resolved relative to the current working directory. For empty array, clears the selected files.
+        This method expects `selector` to point to an input
+        element.
+        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
+        are resolved relative to the current working directory. For
+        empty array, clears the selected files.
 
         Parameters
         ----------
         selector : str
-            A selector to search for element to click. If there are multiple elements satisfying the selector, the first will be clicked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         files : Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4996,14 +5185,15 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.type
 
-        Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to send fine-grained keyboard events. To fill values in form fields, use `page.fill`.
-        To press a special key, like `Control` or `ArrowDown`, use `keyboard.press`.
-        Shortcut for page.mainFrame().type(selector, text[, options]).
+        Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to send
+        fine-grained keyboard events. To fill values in form fields, use page.fill(selector, value[, options]).
+        To press a special key, like `Control` or `ArrowDown`, use keyboard.press(key[, options]).
+        Shortcut for main frame's frame.type(selector, text[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         text : str
             A text to type into a focused element.
         delay : Optional[int]
@@ -5033,18 +5223,23 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.press
 
-        Focuses the element, and then uses `keyboard.down` and `keyboard.up`.
-        `key` can specify the intended keyboardEvent.key value or a single character to generate the text for. A superset of the `key` values can be found here. Examples of the keys are:
-        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`, `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
+        Focuses the element, and then uses keyboard.down(key) and keyboard.up(key).
+        `key` can specify the intended keyboardEvent.key
+        value or a single character to generate the text for. A superset of the `key` values can be found
+        here. Examples of the keys are:
+        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+        `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
         Following modification shortcuts are also suported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective texts.
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+        texts.
+        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
         ----------
         selector : str
-            A selector of an element to type into. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Optional[int]
@@ -5083,13 +5278,14 @@ class Page(AsyncBase):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         Ensure that the element is now checked. If not, this method rejects.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
-        Shortcut for page.mainFrame().check(selector[, options]).
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
+        Shortcut for main frame's frame.check(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to search for checkbox or radio button to check. If there are multiple elements satisfying the selector, the first will be checked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -5122,13 +5318,14 @@ class Page(AsyncBase):
         Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         Ensure that the element is now unchecked. If not, this method rejects.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError. Passing zero timeout disables this.
-        Shortcut for page.mainFrame().uncheck(selector[, options]).
+        When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+        Passing zero timeout disables this.
+        Shortcut for main frame's frame.uncheck(selector[, options]).
 
         Parameters
         ----------
         selector : str
-            A selector to search for uncheckbox to check. If there are multiple elements satisfying the selector, the first will be checked. See working with selectors for more details.
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
@@ -5146,8 +5343,9 @@ class Page(AsyncBase):
         """Page.waitForTimeout
 
         Returns a promise that resolves after the timeout.
-        Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be flaky. Use signals such as network events, selectors becoming visible and others instead.
-        Shortcut for page.mainFrame().waitForTimeout(timeout).
+        Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
+        flaky. Use signals such as network events, selectors becoming visible and others instead.
+        Shortcut for main frame's frame.waitForTimeout(timeout).
 
         Parameters
         ----------
@@ -5168,10 +5366,11 @@ class Page(AsyncBase):
     ) -> "JSHandle":
         """Page.waitForFunction
 
+        Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
 
         To pass an argument from Node.js to the predicate of `page.waitForFunction` function:
-        Shortcut for page.mainFrame().waitForFunction(pageFunction[, arg, options]).
+        Shortcut for main frame's frame.waitForFunction(pageFunction[, arg, options]).
 
         Parameters
         ----------
@@ -5182,14 +5381,13 @@ class Page(AsyncBase):
         arg : Optional[Any]
             Optional argument to pass to `pageFunction`
         timeout : Optional[int]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
+            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout).
         polling : Union[int, 'raf', NoneType]
             If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
         Returns
         -------
         JSHandle
-            Promise which resolves when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         """
         return mapping.from_impl(
             await self._impl_obj.waitForFunction(
@@ -5219,11 +5417,16 @@ class Page(AsyncBase):
     ) -> bytes:
         """Page.pdf
 
+        Returns the PDF buffer.
+
         **NOTE** Generating a pdf is currently only supported in Chromium headless.
 
-        `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call page.emulateMedia({ media: 'screen' }) before calling `page.pdf()`:
+        `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
+        page.emulateMedia(params) before calling `page.pdf()`:
 
-        **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the `-webkit-print-color-adjust` property to force rendering of exact colors.
+        **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
+        `-webkit-print-color-adjust` property to
+        force rendering of exact colors.
 
         The `width`, `height`, and `margin` options accept values labeled with units. Unlabeled values are treated as pixels.
         A few examples:
@@ -5295,7 +5498,6 @@ class Page(AsyncBase):
         Returns
         -------
         bytes
-            Promise which resolves with PDF buffer.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.pdf(
@@ -5643,10 +5845,12 @@ class BrowserContext(AsyncBase):
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
 
+        Returns all open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can
+        find them using chromiumBrowserContext.backgroundPages().
+
         Returns
         -------
         List[Page]
-            All open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can find them using chromiumBrowserContext.backgroundPages().
         """
         return mapping.from_impl_list(self._impl_obj.pages)
 
@@ -5654,10 +5858,11 @@ class BrowserContext(AsyncBase):
     def browser(self) -> typing.Union["Browser", NoneType]:
         """BrowserContext.browser
 
+        Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+
         Returns
         -------
         Optional[Browser]
-            Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
         """
         return mapping.from_impl_nullable(self._impl_obj.browser)
 
@@ -5673,7 +5878,8 @@ class BrowserContext(AsyncBase):
         page.setContent(html[, options])
         page.waitForNavigation([options])
 
-        **NOTE** `page.setDefaultNavigationTimeout` and `page.setDefaultTimeout` take priority over `browserContext.setDefaultNavigationTimeout`.
+        **NOTE** page.setDefaultNavigationTimeout(timeout) and page.setDefaultTimeout(timeout) take priority over
+        browserContext.setDefaultNavigationTimeout(timeout).
 
         Parameters
         ----------
@@ -5689,7 +5895,8 @@ class BrowserContext(AsyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        **NOTE** `page.setDefaultNavigationTimeout`, `page.setDefaultTimeout` and `browserContext.setDefaultNavigationTimeout` take priority over `browserContext.setDefaultTimeout`.
+        **NOTE** page.setDefaultNavigationTimeout(timeout), page.setDefaultTimeout(timeout) and
+        browserContext.setDefaultNavigationTimeout(timeout) take priority over browserContext.setDefaultTimeout(timeout).
 
         Parameters
         ----------
@@ -5716,12 +5923,13 @@ class BrowserContext(AsyncBase):
     ) -> typing.List[typing.Dict]:
         """BrowserContext.cookies
 
-        If no URLs are specified, this method returns all cookies.
-        If URLs are specified, only cookies that affect those URLs are returned.
+        If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
+        are returned.
 
         Parameters
         ----------
         urls : Union[str, List[str], NoneType]
+            Optional list of URLs.
 
         Returns
         -------
@@ -5732,6 +5940,8 @@ class BrowserContext(AsyncBase):
     async def addCookies(self, cookies: typing.List[typing.Dict]) -> NoneType:
         """BrowserContext.addCookies
 
+        Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
+        obtained via browserContext.cookies([urls]).
 
         Parameters
         ----------
@@ -5753,7 +5963,8 @@ class BrowserContext(AsyncBase):
     ) -> NoneType:
         """BrowserContext.grantPermissions
 
-        Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if specified.
+        Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
+        specified.
 
         Parameters
         ----------
@@ -5796,7 +6007,8 @@ class BrowserContext(AsyncBase):
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 
-        **NOTE** Consider using browserContext.grantPermissions to grant permissions for the browser context pages to read its geolocation.
+        **NOTE** Consider using browserContext.grantPermissions(permissions[, options]) to grant permissions for the browser context pages to
+        read its geolocation.
 
         Parameters
         ----------
@@ -5809,7 +6021,9 @@ class BrowserContext(AsyncBase):
     async def setExtraHTTPHeaders(self, headers: typing.Dict[str, str]) -> NoneType:
         """BrowserContext.setExtraHTTPHeaders
 
-        The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged with page-specific extra HTTP headers set with page.setExtraHTTPHeaders(). If page overrides a particular header, page-specific header value will be used instead of the browser context header value.
+        The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged
+        with page-specific extra HTTP headers set with page.setExtraHTTPHeaders(headers). If page overrides a particular header,
+        page-specific header value will be used instead of the browser context header value.
 
         **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
 
@@ -5842,10 +6056,12 @@ class BrowserContext(AsyncBase):
         Whenever a page is created in the browser context or is navigated.
         Whenever a child frame is attached or navigated in any page in the browser context. In this case, the script is evaluated in the context of the newly attached frame.
 
-        The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend  the JavaScript environment, e.g. to seed `Math.random`.
+        The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend
+        the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
 
-        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and page.addInitScript(script[, arg]) is not defined.
+        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and
+        page.addInitScript(script[, arg]) is not defined.
 
         Parameters
         ----------
@@ -5861,12 +6077,11 @@ class BrowserContext(AsyncBase):
     ) -> NoneType:
         """BrowserContext.exposeBinding
 
-        The method adds a function called `name` on the `window` object of every frame in every page in the context.
-        When called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of `playwrightBinding`.
-        If the `playwrightBinding` returns a Promise, it will be awaited.
-        The first argument of the `playwrightBinding` function contains information about the caller:
-        `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-        See page.exposeBinding(name, playwrightBinding) for page-only version.
+        The method adds a function called `name` on the `window` object of every frame in every page in the context. When
+        called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value
+        of `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
+        The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
+        See page.exposeBinding(name, playwrightBinding[, options]) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
 
         An example of passing an element handle:
@@ -5889,8 +6104,9 @@ class BrowserContext(AsyncBase):
     async def exposeFunction(self, name: str, binding: typing.Callable) -> NoneType:
         """BrowserContext.exposeFunction
 
-        The method adds a function called `name` on the `window` object of every frame in every page in the context.
-        When called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of `playwrightFunction`.
+        The method adds a function called `name` on the `window` object of every frame in every page in the context. When
+        called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value
+        of `playwrightFunction`.
         If the `playwrightFunction` returns a Promise, it will be awaited.
         See page.exposeFunction(name, playwrightFunction) for page-only version.
         An example of adding an `md5` function to all pages in the context:
@@ -5915,11 +6131,12 @@ class BrowserContext(AsyncBase):
     ) -> NoneType:
         """BrowserContext.route
 
-        Routing provides the capability to modify network requests that are made by any page in the browser context.
-        Once route is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
+        Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
+        is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
-        Page routes (set up with page.route(url, handler)) take precedence over browser context routes when request matches both handlers.
+        Page routes (set up with page.route(url, handler)) take precedence over browser context routes when request matches both
+        handlers.
 
         **NOTE** Enabling routing disables http cache.
 
@@ -5943,14 +6160,15 @@ class BrowserContext(AsyncBase):
     ) -> NoneType:
         """BrowserContext.unroute
 
-        Removes a route created with browserContext.route(url, handler). When `handler` is not specified, removes all routes for the `url`.
+        Removes a route created with browserContext.route(url, handler). When `handler` is not specified, removes all routes for the
+        `url`.
 
         Parameters
         ----------
         url : Union[str, Pattern, typing.Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
         handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
-            Handler function used to register a routing with browserContext.route(url, handler).
+            Optional handler function used to register a routing with browserContext.route(url, handler).
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.unroute(
@@ -5966,8 +6184,8 @@ class BrowserContext(AsyncBase):
     ) -> typing.Any:
         """BrowserContext.waitForEvent
 
-        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy value. Will throw an error if the context closes before the event
-        is fired.
+        Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
+        value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 
         Parameters
         ----------
@@ -5977,7 +6195,6 @@ class BrowserContext(AsyncBase):
         Returns
         -------
         Any
-            Promise which resolves to the event data value.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.waitForEvent(
@@ -5988,8 +6205,7 @@ class BrowserContext(AsyncBase):
     async def close(self) -> NoneType:
         """BrowserContext.close
 
-        Closes the browser context. All the pages that belong to the browser context
-        will be closed.
+        Closes the browser context. All the pages that belong to the browser context will be closed.
 
         **NOTE** the default browser context cannot be closed.
         """
@@ -6093,8 +6309,8 @@ class CDPSession(AsyncBase):
     async def detach(self) -> NoneType:
         """CDPSession.detach
 
-        Detaches the CDPSession from the target. Once detached, the CDPSession object won't emit any events and can't be used
-        to send messages.
+        Detaches the CDPSession from the target. Once detached, the CDPSession object won't emit any events and can't be used to
+        send messages.
         """
         return mapping.from_maybe_impl(await self._impl_obj.detach())
 
@@ -6109,25 +6325,29 @@ class ChromiumBrowserContext(BrowserContext):
     def backgroundPages(self) -> typing.List["Page"]:
         """ChromiumBrowserContext.backgroundPages
 
+        All existing background pages in the context.
+
         Returns
         -------
         List[Page]
-            All existing background pages in the context.
         """
         return mapping.from_impl_list(self._impl_obj.backgroundPages())
 
     def serviceWorkers(self) -> typing.List["Worker"]:
         """ChromiumBrowserContext.serviceWorkers
 
+        All existing service workers in the context.
+
         Returns
         -------
         List[Worker]
-            All existing service workers in the context.
         """
         return mapping.from_impl_list(self._impl_obj.serviceWorkers())
 
     async def newCDPSession(self, page: "Page") -> "CDPSession":
         """ChromiumBrowserContext.newCDPSession
+
+        Returns the newly created session.
 
         Parameters
         ----------
@@ -6137,7 +6357,6 @@ class ChromiumBrowserContext(BrowserContext):
         Returns
         -------
         CDPSession
-            Promise that resolves to the newly created session.
         """
         return mapping.from_impl(
             await self._impl_obj.newCDPSession(page=page._impl_obj)
@@ -6155,8 +6374,7 @@ class Browser(AsyncBase):
     def contexts(self) -> typing.List["BrowserContext"]:
         """Browser.contexts
 
-        Returns an array of all open browser contexts. In a newly created browser, this will return zero
-        browser contexts.
+        Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
 
         Returns
         -------
@@ -6225,7 +6443,7 @@ class Browser(AsyncBase):
         ignoreHTTPSErrors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         javaScriptEnabled : Optional[bool]
-            Whether or not to enable JavaScript in the context. Defaults to true.
+            Whether or not to enable JavaScript in the context. Defaults to `true`.
         bypassCSP : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
         userAgent : Optional[str]
@@ -6236,7 +6454,7 @@ class Browser(AsyncBase):
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
         geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         permissions : Optional[List[str]]
-            A list of permissions to grant to all pages in this context. See browserContext.grantPermissions for more details.
+            A list of permissions to grant to all pages in this context. See browserContext.grantPermissions(permissions[, options]) for more details.
         extraHTTPHeaders : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
@@ -6250,19 +6468,19 @@ class Browser(AsyncBase):
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
         colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
+            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(params) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
         videosPath : Optional[str]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
         recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `browserContext.close` for the HAR to be saved.
+            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         storageState : Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
@@ -6329,7 +6547,9 @@ class Browser(AsyncBase):
         """Browser.newPage
 
         Creates a new page in a new browser context. Closing this page will close the context as well.
-        This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and testing frameworks should explicitly create browser.newContext followed by the browserContext.newPage to control their exact life times.
+        This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
+        testing frameworks should explicitly create browser.newContext([options]) followed by the browserContext.newPage() to
+        control their exact life times.
 
         Parameters
         ----------
@@ -6349,7 +6569,7 @@ class Browser(AsyncBase):
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
         geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         permissions : Optional[List[str]]
-            A list of permissions to grant to all pages in this context. See browserContext.grantPermissions for more details.
+            A list of permissions to grant to all pages in this context. See browserContext.grantPermissions(permissions[, options]) for more details.
         extraHTTPHeaders : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
@@ -6363,19 +6583,19 @@ class Browser(AsyncBase):
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
         colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
+            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(params) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
         videosPath : Optional[str]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await `page.close` for videos to be saved.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
         recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await `page.close` for the HAR to be saved.
+            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `page.close` for videos to be saved.
+            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         storageState : Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
@@ -6415,8 +6635,10 @@ class Browser(AsyncBase):
     async def close(self) -> NoneType:
         """Browser.close
 
-        In case this browser is obtained using browserType.launch, closes the browser and all of its pages (if any were opened).
-        In case this browser is obtained using browserType.connect, clears all created contexts belonging to this browser and disconnects from the browser server.
+        In case this browser is obtained using browserType.launch([options]), closes the browser and all of its pages (if any were
+        opened).
+        In case this browser is obtained using browserType.connect(params), clears all created contexts belonging to this browser
+        and disconnects from the browser server.
         The Browser object itself is considered to be disposed and cannot be used anymore.
         """
         return mapping.from_maybe_impl(await self._impl_obj.close())
@@ -6445,10 +6667,11 @@ class BrowserType(AsyncBase):
     def executablePath(self) -> str:
         """BrowserType.executablePath
 
+        A path where Playwright expects to find a bundled browser executable.
+
         Returns
         -------
         str
-            A path where Playwright expects to find a bundled browser executable.
         """
         return mapping.from_maybe_impl(self._impl_obj.executablePath)
 
@@ -6474,12 +6697,19 @@ class BrowserType(AsyncBase):
     ) -> "Browser":
         """BrowserType.launch
 
+        Returns the browser instance.
         You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
 
-        **Chromium-only** Playwright can also be used to control the Chrome browser, but it works best with the version of Chromium it is bundled with. There is no guarantee it will work with any other version. Use `executablePath` option with extreme caution.
-        If Google Chrome (rather than Chromium) is preferred, a Chrome Canary or Dev Channel build is suggested.
+        **Chromium-only** Playwright can also be used to control the Chrome browser, but it works best with the version of
+        Chromium it is bundled with. There is no guarantee it will work with any other version. Use `executablePath` option with
+        extreme caution.
+        If Google Chrome (rather than Chromium) is preferred, a Chrome
+        Canary or Dev
+        Channel build is suggested.
         In browserType.launch([options]) above, any mention of Chromium also applies to Chrome.
-        See `this article` for a description of the differences between Chromium and Chrome. `This article` describes some differences for Linux users.
+        See `this article` for
+        a description of the differences between Chromium and Chrome. `This article` describes
+        some differences for Linux users.
 
         Parameters
         ----------
@@ -6517,7 +6747,6 @@ class BrowserType(AsyncBase):
         Returns
         -------
         Browser
-            Promise which resolves to browser instance.
         """
         return mapping.from_impl(
             await self._impl_obj.launch(
@@ -6580,7 +6809,9 @@ class BrowserType(AsyncBase):
     ) -> "BrowserContext":
         """BrowserType.launchPersistentContext
 
-        Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this context will automatically close the browser.
+        Returns the persistent browser context instance.
+        Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this
+        context will automatically close the browser.
 
         Parameters
         ----------
@@ -6617,7 +6848,7 @@ class BrowserType(AsyncBase):
         ignoreHTTPSErrors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         javaScriptEnabled : Optional[bool]
-            Whether or not to enable JavaScript in the context. Defaults to true.
+            Whether or not to enable JavaScript in the context. Defaults to `true`.
         bypassCSP : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
         userAgent : Optional[str]
@@ -6628,7 +6859,7 @@ class BrowserType(AsyncBase):
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
         geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         permissions : Optional[List[str]]
-            A list of permissions to grant to all pages in this context. See browserContext.grantPermissions for more details.
+            A list of permissions to grant to all pages in this context. See browserContext.grantPermissions(permissions[, options]) for more details.
         extraHTTPHeaders : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
@@ -6642,24 +6873,23 @@ class BrowserType(AsyncBase):
         hasTouch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
         colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(options) for more details. Defaults to '`light`'.
+            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(params) for more details. Defaults to '`light`'.
         acceptDownloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromiumSandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
         videosPath : Optional[str]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
         recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
-            Enables HAR recording for all the pages into `recordHar.path` file. If not specified, HAR is not recorded. Make sure to await `page.close` for HAR to be saved.
+            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await `browserContext.close` for videos to be saved.
+            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
 
         Returns
         -------
         BrowserContext
-            Promise that resolves to the persistent browser context instance.
         """
         return mapping.from_impl(
             await self._impl_obj.launchPersistentContext(

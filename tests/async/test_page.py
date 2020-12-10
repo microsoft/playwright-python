@@ -954,7 +954,16 @@ async def test_fill_should_fill_input(page, server):
 
 async def test_fill_should_throw_on_unsupported_inputs(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
-    for type in ["color", "file"]:
+    for type in [
+        "button",
+        "checkbox",
+        "file",
+        "image",
+        "radio",
+        "range",
+        "reset",
+        "submit",
+    ]:
         await page.evalOnSelector(
             "input", "(input, type) => input.setAttribute('type', type)", type
         )

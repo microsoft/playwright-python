@@ -533,6 +533,7 @@ async def test_page_route_should_intercept_main_resource_during_cross_process_na
     assert len(intercepted) == 1
 
 
+@pytest.mark.skip_browser("webkit")
 async def test_page_route_should_create_a_redirect(page, server):
     await page.goto(server.PREFIX + "/empty.html")
 

@@ -106,25 +106,28 @@ class DocumentationProvider:
         args = method["args"]
         args_with_expanded_options: Dict[str, Any] = dict()
         for name, value in args.items():
+            expand = False
             if name == "options":
-                for opt_name, opt_value in args["options"]["type"][
-                    "properties"
-                ].items():
+                expand = True
+            if fqname == "Page.frame" and name == "frameSelector":
+                expand = True
+            if ".addStyleTag" in fqname and name == "style":
+                expand = True
+            if ".addScriptTag" in fqname and name == "script":
+                expand = True
+            if fqname == "Page.emulateMedia" and name == "params":
+                expand = True
+            if fqname == "Route.fulfill" and name == "response":
+                expand = True
+            if fqname == "Route.continue" and name == "overrides":
+                expand = True
+            if fqname == "Page.setViewportSize" and name == "viewportSize":
+                expand = True
+            if expand:
+                for opt_name, opt_value in args[name]["type"]["properties"].items():
                     args_with_expanded_options[opt_name] = opt_value
             else:
                 args_with_expanded_options[name] = value
-        if fqname == "Route.fulfill":
-            for name, value in args["response"]["type"]["properties"].items():
-                args_with_expanded_options[name] = value
-            del args_with_expanded_options["response"]
-        if fqname == "Route.continue":
-            for name, value in args["overrides"]["type"]["properties"].items():
-                args_with_expanded_options[name] = value
-            del args_with_expanded_options["overrides"]
-        if fqname == "Page.setViewportSize":
-            for name, value in args["viewportSize"]["type"]["properties"].items():
-                args_with_expanded_options[name] = value
-            del args_with_expanded_options["viewportSize"]
 
         if signature and signature_no_return:
             print("")

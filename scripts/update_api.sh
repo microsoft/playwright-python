@@ -8,13 +8,14 @@ function update_api {
     generate_script="$2"
     git checkout HEAD -- "$file_name"
 
-    python "$generate_script" > .x
-
-    mv .x "$file_name"
-    pre-commit run --files $file_name
+    if python "$generate_script" > .x; then
+        mv .x "$file_name"
+        pre-commit run --files $file_name
+        echo "Regenerated APIs"
+    else
+        echo "Exited due to errors"
+    fi
 }
 
 update_api "playwright/sync_api.py" "scripts/generate_sync_api.py"
 update_api "playwright/async_api.py" "scripts/generate_async_api.py"
-
-echo "Regenerated APIs"

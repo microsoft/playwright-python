@@ -68,7 +68,7 @@ Parameter type mismatch in Page.route(url=): documented as Union[str, RegExp, fu
 Parameter type mismatch in Page.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
 Parameter type mismatch in Page.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
 Parameter type mismatch in Page.waitForRequest(urlOrPredicate=): documented as Union[str, RegExp, Function], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
-Parameter type mismatch in Page.waitForResponse(urlOrPredicate=): documented as Union[str, RegExp, Function], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.waitForResponse(urlOrPredicate=): documented as Union[str, RegExp, function(Response):boolean], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
 
 # Add init script
 Parameter type mismatch in Page.addInitScript(script=): documented as Union[Callable, str, Dict], code has Optional[str]
