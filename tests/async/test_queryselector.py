@@ -1,38 +1,47 @@
-from typing import Any, cast
-
 import pytest
 
 from playwright import Error
 from playwright.async_api import Page
 
 
-async def test_selectors_register_should_work(selectors, page: Page, utils):
-    await utils.register_selector_engine(
-        selectors,
-        "tag",
-        """{
-      create(root, target) {
-        return target.nodeName;
-      },
-      query(root, selector) {
-        return root.querySelector(selector);
-      },
-      queryAll(root, selector) {
-        return Array.from(root.querySelectorAll(selector));
-      }
-    }""",
-    )
+async def test_selectors_register_should_work(selectors, browser):
+    tag_selector = """
+        {
+            create(root, target) {
+                return target.nodeName;
+            },
+            query(root, selector) {
+                return root.querySelector(selector);
+            },
+            queryAll(root, selector) {
+                return Array.from(root.querySelectorAll(selector));
+            }
+        }"""
+
+    # Register one engine before creating context.
+    await selectors.register("tag", tag_selector)
+
+    context = await browser.newContext()
+    # Register another engine after creating context.
+    await selectors.register("tag2", tag_selector)
+
+    page = await context.newPage()
     await page.setContent("<div><span></span></div><div></div>")
-    element_handle_impl = cast(Any, (await page.querySelector("div")))._impl_obj
-    assert await element_handle_impl._createSelectorForTest("tag") == "DIV"
+
     assert await page.evalOnSelector("tag=DIV", "e => e.nodeName") == "DIV"
     assert await page.evalOnSelector("tag=SPAN", "e => e.nodeName") == "SPAN"
     assert await page.evalOnSelectorAll("tag=DIV", "es => es.length") == 2
+
+    assert await page.evalOnSelector("tag2=DIV", "e => e.nodeName") == "DIV"
+    assert await page.evalOnSelector("tag2=SPAN", "e => e.nodeName") == "SPAN"
+    assert await page.evalOnSelectorAll("tag2=DIV", "es => es.length") == 2
 
     # Selector names are case-sensitive.
     with pytest.raises(Error) as exc:
         await page.querySelector("tAG=DIV")
     assert 'Unknown engine "tAG" while parsing selector tAG=DIV' in exc.value.message
+
+    await context.close()
 
 
 async def test_selectors_register_should_work_with_path(
@@ -54,7 +63,7 @@ async def test_selectors_register_should_work_in_main_and_isolated_world(
         return window.__answer;
       },
       queryAll(root, selector) {
-        return [document.body, document.documentElement, window.__answer];
+        return window['__answer'] ? [window['__answer'], document.body, document.documentElement] : [];
       }
     }"""
 
