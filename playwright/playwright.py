@@ -16,8 +16,8 @@ from typing import Dict
 
 from playwright.browser_type import BrowserType
 from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import Devices
 from playwright.selectors import Selectors
+from playwright.types import DeviceDescriptor
 
 
 class Playwright(ChannelOwner):
@@ -25,7 +25,7 @@ class Playwright(ChannelOwner):
     firefox: BrowserType
     webkit: BrowserType
     selectors: Selectors
-    devices: Devices
+    devices: Dict[str, DeviceDescriptor]
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict

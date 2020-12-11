@@ -21,12 +21,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, ca
 
 from playwright.connection import ChannelOwner, from_nullable_channel
 from playwright.helper import (
-    FilePayload,
-    FloatRect,
     KeyboardModifier,
     MouseButton,
-    MousePosition,
-    SelectOption,
     SetFilePayload,
     locals_to_params,
 )
@@ -36,6 +32,7 @@ from playwright.js_handle import (
     parse_result,
     serialize_argument,
 )
+from playwright.types import FilePayload, FloatRect, MousePosition, SelectOption
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

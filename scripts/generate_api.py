@@ -49,8 +49,8 @@ from playwright.video import Video
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
-    if "playwright.helper" in value:
-        value = re.sub(r"playwright\.helper\.", "", value)
+    if "playwright.types" in value:
+        value = re.sub(r"playwright\.types\.", "", value)
     value = re.sub(r"playwright\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
@@ -111,7 +111,7 @@ def short_name(t: Any) -> str:
 
 
 def return_value(value: Any) -> List[str]:
-    if "playwright" not in str(value) or "playwright.helper" in str(value):
+    if "playwright" not in str(value) or "playwright.types" in str(value):
         return ["mapping.from_maybe_impl(", ")"]
     if (
         get_origin(value) == Union
@@ -163,7 +163,7 @@ from playwright.download import Download as DownloadImpl
 from playwright.element_handle import ElementHandle as ElementHandleImpl
 from playwright.file_chooser import FileChooser as FileChooserImpl
 from playwright.frame import Frame as FrameImpl
-from playwright.helper import ConsoleMessageLocation, Credentials, MousePosition, Error, FilePayload, SelectOption, RequestFailure, Viewport, DeviceDescriptor, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins, ResourceTiming, RecordHarOptions, RecordVideoOptions, StorageState, SetStorageState
+from playwright.types import ConsoleMessageLocation, Cookie, Credentials, DeviceDescriptor, MousePosition, Error, FilePayload, SelectOption, RequestFailure, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins, ResourceTiming, RecordHarOptions, RecordVideoOptions, StorageState
 from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright.js_handle import JSHandle as JSHandleImpl
 from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl

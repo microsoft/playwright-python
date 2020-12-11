@@ -241,13 +241,13 @@ class DocumentationProvider:
 
     def serialize_python_type(self, value: Any) -> str:
         str_value = str(value)
-        if str_value == "<class 'playwright.helper.Error'>":
+        if str_value == "<class 'playwright.types.Error'>":
             return "Error"
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
         match = re.match(r"^<class 'playwright\.[\w]+\.([\w]+)'>$", str_value)
-        if match and "helper" not in str_value:
+        if match and "types" not in str_value:
             return match.group(1)
 
         match = re.match(r"^typing\.(\w+)$", str_value)
@@ -420,7 +420,10 @@ class DocumentationProvider:
                 sline = line.strip()
                 if not len(sline) or sline.startswith("#"):
                     continue
-                self.errors.remove(sline)
+                if sline in self.errors:
+                    self.errors.remove(sline)
+                else:
+                    print("No longer there: " + sline, file=stderr)
 
         if len(self.errors) > 0:
             for error in self.errors:

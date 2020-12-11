@@ -18,20 +18,18 @@ from typing import TYPE_CHECKING, Dict, List, Union
 
 from playwright.browser_context import BrowserContext
 from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import (
-    ColorScheme,
+from playwright.helper import ColorScheme, is_safe_close_error, locals_to_params
+from playwright.network import serialize_headers
+from playwright.page import Page
+from playwright.types import (
     Credentials,
     Geolocation,
     IntSize,
     ProxyServer,
     RecordHarOptions,
     RecordVideoOptions,
-    SetStorageState,
-    is_safe_close_error,
-    locals_to_params,
+    StorageState,
 )
-from playwright.network import serialize_headers
-from playwright.page import Page
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -96,7 +94,7 @@ class Browser(ChannelOwner):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
@@ -145,7 +143,7 @@ class Browser(ChannelOwner):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this

@@ -17,7 +17,7 @@ import base64
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright.accessibility import Accessibility
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
@@ -31,21 +31,14 @@ from playwright.frame import Frame
 from playwright.helper import (
     ColorScheme,
     DocumentLoadState,
-    Error,
-    FilePayload,
-    FloatRect,
     KeyboardModifier,
     MouseButton,
-    MousePosition,
-    Optional,
-    PdfMargins,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
     URLMatch,
     URLMatcher,
-    Viewport,
     is_function_body,
     is_safe_close_error,
     locals_to_params,
@@ -60,6 +53,14 @@ from playwright.js_handle import (
     serialize_argument,
 )
 from playwright.network import Request, Response, Route, serialize_headers
+from playwright.types import (
+    Error,
+    FilePayload,
+    FloatRect,
+    IntSize,
+    MousePosition,
+    PdfMargins,
+)
 from playwright.video import Video
 from playwright.wait_helper import WaitHelper
 
@@ -562,7 +563,7 @@ class Page(ChannelOwner):
             "setViewportSize", dict(viewportSize=locals_to_params(locals()))
         )
 
-    def viewportSize(self) -> Optional[Viewport]:
+    def viewportSize(self) -> Optional[IntSize]:
         return self._viewport_size
 
     async def bringToFront(self) -> None:

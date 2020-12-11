@@ -17,7 +17,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import Error, is_function_body
+from playwright.helper import is_function_body
+from playwright.types import Error
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.element_handle import ElementHandle

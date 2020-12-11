@@ -17,9 +17,9 @@ from typing import List, cast
 
 from playwright.element_handle import ElementHandle
 from playwright.frame import Frame
-from playwright.helper import Error, Viewport
 from playwright.page import Page
 from playwright.selectors import Selectors
+from playwright.types import Error, IntSize
 
 
 class Utils:
@@ -56,8 +56,8 @@ class Utils:
         return result
 
     async def verify_viewport(self, page: Page, width: int, height: int):
-        assert cast(Viewport, page.viewportSize())["width"] == width
-        assert cast(Viewport, page.viewportSize())["height"] == height
+        assert cast(IntSize, page.viewportSize())["width"] == width
+        assert cast(IntSize, page.viewportSize())["height"] == height
         assert await page.evaluate("window.innerWidth") == width
         assert await page.evaluate("window.innerHeight") == height
 

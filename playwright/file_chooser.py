@@ -14,7 +14,7 @@
 
 from typing import TYPE_CHECKING, List, Union
 
-from playwright.helper import FilePayload
+from playwright.types import FilePayload
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.element_handle import ElementHandle

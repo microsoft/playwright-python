@@ -19,11 +19,11 @@ For more information you'll find the documentation for the sync API [here](sync_
 and for the async API [here](async_api.html).
 """
 
-import playwright.helper as helper
+import playwright.types as types
 from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
-Error = helper.Error
-TimeoutError = helper.TimeoutError
+Error = types.Error
+TimeoutError = types.TimeoutError
 
 
 def async_playwright() -> AsyncPlaywrightContextManager:

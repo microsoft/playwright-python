@@ -29,12 +29,9 @@ from playwright.element_handle import (
 from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
     DocumentLoadState,
-    Error,
-    FilePayload,
     FrameNavigatedEvent,
     KeyboardModifier,
     MouseButton,
-    MousePosition,
     URLMatch,
     URLMatcher,
     is_function_body,
@@ -48,6 +45,7 @@ from playwright.js_handle import (
     serialize_argument,
 )
 from playwright.network import Response
+from playwright.types import Error, FilePayload, MousePosition
 from playwright.wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover

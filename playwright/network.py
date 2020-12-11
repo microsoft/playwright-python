@@ -22,14 +22,8 @@ from urllib import parse
 
 from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright.event_context_manager import EventContextManagerImpl
-from playwright.helper import (
-    ContinueParameters,
-    Error,
-    Header,
-    RequestFailure,
-    ResourceTiming,
-    locals_to_params,
-)
+from playwright.helper import ContinueParameters, Header, locals_to_params
+from playwright.types import Error, RequestFailure, ResourceTiming
 from playwright.wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
