@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import os
 import subprocess
 import sys
@@ -21,17 +22,17 @@ from typing import Any
 
 from greenlet import greenlet
 
+import playwright
 from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
 from playwright.helper import Error
 from playwright.object_factory import create_remote_object
-from playwright.path_utils import get_file_dirname
 from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
 
 
 def compute_driver_executable() -> Path:
-    package_path = get_file_dirname()
+    package_path = Path(inspect.getfile(playwright)).parent
     platform = sys.platform
     if platform == "win32":
         return package_path / "driver" / "playwright-cli.exe"
