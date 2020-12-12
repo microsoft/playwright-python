@@ -50,35 +50,35 @@ if sys.version_info &gt;= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal
 
-from playwright.accessibility import Accessibility as AccessibilityImpl
-from playwright.async_base import AsyncBase, AsyncEventContextManager, mapping
-from playwright.browser import Browser as BrowserImpl
-from playwright.browser_context import BrowserContext as BrowserContextImpl
-from playwright.browser_type import BrowserType as BrowserTypeImpl
-from playwright.cdp_session import CDPSession as CDPSessionImpl
-from playwright.chromium_browser_context import (
+from playwright._accessibility import Accessibility as AccessibilityImpl
+from playwright._async_base import AsyncBase, AsyncEventContextManager, mapping
+from playwright._browser import Browser as BrowserImpl
+from playwright._browser_context import BrowserContext as BrowserContextImpl
+from playwright._browser_type import BrowserType as BrowserTypeImpl
+from playwright._cdp_session import CDPSession as CDPSessionImpl
+from playwright._chromium_browser_context import (
     ChromiumBrowserContext as ChromiumBrowserContextImpl,
 )
-from playwright.console_message import ConsoleMessage as ConsoleMessageImpl
-from playwright.dialog import Dialog as DialogImpl
-from playwright.download import Download as DownloadImpl
-from playwright.element_handle import ElementHandle as ElementHandleImpl
-from playwright.file_chooser import FileChooser as FileChooserImpl
-from playwright.frame import Frame as FrameImpl
-from playwright.input import Keyboard as KeyboardImpl
-from playwright.input import Mouse as MouseImpl
-from playwright.input import Touchscreen as TouchscreenImpl
-from playwright.js_handle import JSHandle as JSHandleImpl
-from playwright.network import Request as RequestImpl
-from playwright.network import Response as ResponseImpl
-from playwright.network import Route as RouteImpl
-from playwright.network import WebSocket as WebSocketImpl
-from playwright.page import BindingCall as BindingCallImpl
-from playwright.page import Page as PageImpl
-from playwright.page import Worker as WorkerImpl
-from playwright.playwright import Playwright as PlaywrightImpl
-from playwright.selectors import Selectors as SelectorsImpl
-from playwright.types import (
+from playwright._console_message import ConsoleMessage as ConsoleMessageImpl
+from playwright._dialog import Dialog as DialogImpl
+from playwright._download import Download as DownloadImpl
+from playwright._element_handle import ElementHandle as ElementHandleImpl
+from playwright._file_chooser import FileChooser as FileChooserImpl
+from playwright._frame import Frame as FrameImpl
+from playwright._input import Keyboard as KeyboardImpl
+from playwright._input import Mouse as MouseImpl
+from playwright._input import Touchscreen as TouchscreenImpl
+from playwright._js_handle import JSHandle as JSHandleImpl
+from playwright._network import Request as RequestImpl
+from playwright._network import Response as ResponseImpl
+from playwright._network import Route as RouteImpl
+from playwright._network import WebSocket as WebSocketImpl
+from playwright._page import BindingCall as BindingCallImpl
+from playwright._page import Page as PageImpl
+from playwright._page import Worker as WorkerImpl
+from playwright._playwright import Playwright as PlaywrightImpl
+from playwright._selectors import Selectors as SelectorsImpl
+from playwright._types import (
     ConsoleMessageLocation,
     Cookie,
     Credentials,
@@ -98,7 +98,7 @@ from playwright.types import (
     SelectOption,
     StorageState,
 )
-from playwright.video import Video as VideoImpl
+from playwright._video import Video as VideoImpl
 
 NoneType = type(None)
 
@@ -7003,7 +7003,7 @@ mapping.register(PlaywrightImpl, Playwright)</code></pre>
 <dl>
 <dt id="playwright.async_api.Accessibility"><code class="flex name class">
 <span>class <span class="ident">Accessibility</span></span>
-<span>(</span><span>obj: playwright.accessibility.Accessibility)</span>
+<span>(</span><span>obj: playwright._accessibility.Accessibility)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -7048,8 +7048,8 @@ mapping.register(PlaywrightImpl, Playwright)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -7116,7 +7116,7 @@ An example of logging the focused node's name:</p>
 </dd>
 <dt id="playwright.async_api.BindingCall"><code class="flex name class">
 <span>class <span class="ident">BindingCall</span></span>
-<span>(</span><span>obj: playwright.page.BindingCall)</span>
+<span>(</span><span>obj: playwright._page.BindingCall)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -7135,8 +7135,8 @@ An example of logging the focused node's name:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -7159,7 +7159,7 @@ An example of logging the focused node's name:</p>
 </dd>
 <dt id="playwright.async_api.Browser"><code class="flex name class">
 <span>class <span class="ident">Browser</span></span>
-<span>(</span><span>obj: playwright.browser.Browser)</span>
+<span>(</span><span>obj: playwright._browser.Browser)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -7446,8 +7446,8 @@ An example of logging the focused node's name:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -7560,7 +7560,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newContext"><code class="name flex">
-<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.types.Credentials" href="types.html#playwright.types.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, videosPath: str = None, videoSize: <a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a> = None, recordHar: <a title="playwright.types.RecordHarOptions" href="types.html#playwright.types.RecordHarOptions">RecordHarOptions</a> = None, recordVideo: <a title="playwright.types.RecordVideoOptions" href="types.html#playwright.types.RecordVideoOptions">RecordVideoOptions</a> = None, storageState: <a title="playwright.types.StorageState" href="types.html#playwright.types.StorageState">StorageState</a> = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright._types.ProxyServer = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None, storageState: playwright._types.StorageState = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -7737,7 +7737,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newPage"><code class="name flex">
-<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.types.Credentials" href="types.html#playwright.types.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, videosPath: str = None, videoSize: <a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a> = None, recordHar: <a title="playwright.types.RecordHarOptions" href="types.html#playwright.types.RecordHarOptions">RecordHarOptions</a> = None, recordVideo: <a title="playwright.types.RecordVideoOptions" href="types.html#playwright.types.RecordVideoOptions">RecordVideoOptions</a> = None, storageState: <a title="playwright.types.StorageState" href="types.html#playwright.types.StorageState">StorageState</a> = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
+<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright._types.ProxyServer = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None, storageState: playwright._types.StorageState = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -7923,7 +7923,7 @@ control their exact life times.</p>
 </dd>
 <dt id="playwright.async_api.BrowserContext"><code class="flex name class">
 <span>class <span class="ident">BrowserContext</span></span>
-<span>(</span><span>obj: playwright.browser_context.BrowserContext)</span>
+<span>(</span><span>obj: playwright._browser_context.BrowserContext)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -8374,8 +8374,8 @@ control their exact life times.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -8441,7 +8441,7 @@ def pages(self) -&gt; typing.List[&#34;Page&#34;]:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.async_api.BrowserContext.addCookies"><code class="name flex">
-<span>async def <span class="ident">addCookies</span></span>(<span>self, cookies: List[<a title="playwright.types.Cookie" href="types.html#playwright.types.Cookie">Cookie</a>]) ‑> NoneType</span>
+<span>async def <span class="ident">addCookies</span></span>(<span>self, cookies: List[playwright._types.Cookie]) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.addCookies</p>
@@ -8576,7 +8576,7 @@ page.addInitScript(script[, arg]) is not defined.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.cookies"><code class="name flex">
-<span>async def <span class="ident">cookies</span></span>(<span>self, urls: Union[str, List[str]] = None) ‑> List[<a title="playwright.types.Cookie" href="types.html#playwright.types.Cookie">Cookie</a>]</span>
+<span>async def <span class="ident">cookies</span></span>(<span>self, urls: Union[str, List[str]] = None) ‑> List[playwright._types.Cookie]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.cookies</p>
@@ -8617,7 +8617,7 @@ are returned.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.expect_event"><code class="name flex">
-<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager</span>
+<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.expect_event</p>
@@ -8671,7 +8671,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.expect_page"><code class="name flex">
-<span>def <span class="ident">expect_page</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>]</span>
+<span>def <span class="ident">expect_page</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.expect_page</p>
@@ -9098,7 +9098,7 @@ page-specific header value will be used instead of the browser context header va
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.setGeolocation"><code class="name flex">
-<span>async def <span class="ident">setGeolocation</span></span>(<span>self, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None) ‑> NoneType</span>
+<span>async def <span class="ident">setGeolocation</span></span>(<span>self, geolocation: playwright._types.Geolocation = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.setGeolocation</p>
@@ -9157,7 +9157,7 @@ read its geolocation.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.storageState"><code class="name flex">
-<span>async def <span class="ident">storageState</span></span>(<span>self) ‑> <a title="playwright.types.StorageState" href="types.html#playwright.types.StorageState">StorageState</a></span>
+<span>async def <span class="ident">storageState</span></span>(<span>self) ‑> playwright._types.StorageState</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.storageState</p>
@@ -9274,7 +9274,7 @@ value. Will throw an error if the context closes before the event is fired. Retu
 </dd>
 <dt id="playwright.async_api.BrowserType"><code class="flex name class">
 <span>class <span class="ident">BrowserType</span></span>
-<span>(</span><span>obj: playwright.browser_type.BrowserType)</span>
+<span>(</span><span>obj: playwright._browser_type.BrowserType)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -9569,8 +9569,8 @@ value. Will throw an error if the context closes before the event is fired. Retu
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -9630,7 +9630,7 @@ def name(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.async_api.BrowserType.launch"><code class="name flex">
-<span>async def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None, firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None) ‑> <a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></span>
+<span>async def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright._types.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None, firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None) ‑> <a title="playwright.async_api.Browser" href="#playwright.async_api.Browser">Browser</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launch</p>
@@ -9783,7 +9783,7 @@ some differences for Linux users.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserType.launchPersistentContext"><code class="name flex">
-<span>async def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.types.Credentials" href="types.html#playwright.types.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: <a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a> = None, recordHar: <a title="playwright.types.RecordHarOptions" href="types.html#playwright.types.RecordHarOptions">RecordHarOptions</a> = None, recordVideo: <a title="playwright.types.RecordVideoOptions" href="types.html#playwright.types.RecordVideoOptions">RecordVideoOptions</a> = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright._types.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launchPersistentContext</p>
@@ -10043,7 +10043,7 @@ context will automatically close the browser.</p>
 </dd>
 <dt id="playwright.async_api.CDPSession"><code class="flex name class">
 <span>class <span class="ident">CDPSession</span></span>
-<span>(</span><span>obj: playwright.cdp_session.CDPSession)</span>
+<span>(</span><span>obj: playwright._cdp_session.CDPSession)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -10083,8 +10083,8 @@ context will automatically close the browser.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -10152,7 +10152,7 @@ send messages.</p></div>
 </dd>
 <dt id="playwright.async_api.ChromiumBrowserContext"><code class="flex name class">
 <span>class <span class="ident">ChromiumBrowserContext</span></span>
-<span>(</span><span>obj: playwright.chromium_browser_context.ChromiumBrowserContext)</span>
+<span>(</span><span>obj: playwright._chromium_browser_context.ChromiumBrowserContext)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -10207,8 +10207,8 @@ send messages.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></li>
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -10339,7 +10339,7 @@ send messages.</p></div>
 </dd>
 <dt id="playwright.async_api.ConsoleMessage"><code class="flex name class">
 <span>class <span class="ident">ConsoleMessage</span></span>
-<span>(</span><span>obj: playwright.console_message.ConsoleMessage)</span>
+<span>(</span><span>obj: playwright._console_message.ConsoleMessage)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -10397,8 +10397,8 @@ send messages.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -10425,7 +10425,7 @@ def args(self) -&gt; typing.List[&#34;JSHandle&#34;]:
     return mapping.from_impl_list(self._impl_obj.args)</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.ConsoleMessage.location"><code class="name">var <span class="ident">location</span> : <a title="playwright.types.ConsoleMessageLocation" href="types.html#playwright.types.ConsoleMessageLocation">ConsoleMessageLocation</a></code></dt>
+<dt id="playwright.async_api.ConsoleMessage.location"><code class="name">var <span class="ident">location</span> : playwright._types.ConsoleMessageLocation</code></dt>
 <dd>
 <div class="desc"><p>ConsoleMessage.location</p>
 <h2 id="returns">Returns</h2>
@@ -10502,7 +10502,7 @@ def type(self) -&gt; str:
 </dd>
 <dt id="playwright.async_api.Dialog"><code class="flex name class">
 <span>class <span class="ident">Dialog</span></span>
-<span>(</span><span>obj: playwright.dialog.Dialog)</span>
+<span>(</span><span>obj: playwright._dialog.Dialog)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -10573,8 +10573,8 @@ def type(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -10711,7 +10711,7 @@ def type(self) -&gt; str:
 </dd>
 <dt id="playwright.async_api.Download"><code class="flex name class">
 <span>class <span class="ident">Download</span></span>
-<span>(</span><span>obj: playwright.download.Download)</span>
+<span>(</span><span>obj: playwright._download.Download)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -10793,8 +10793,8 @@ def type(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -10963,7 +10963,7 @@ def url(self) -&gt; str:
 </dd>
 <dt id="playwright.async_api.ElementHandle"><code class="flex name class">
 <span>class <span class="ident">ElementHandle</span></span>
-<span>(</span><span>obj: playwright.element_handle.ElementHandle)</span>
+<span>(</span><span>obj: playwright._element_handle.ElementHandle)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -11827,8 +11827,8 @@ def url(self) -&gt; str:
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="playwright.async_api.JSHandle" href="#playwright.async_api.JSHandle">JSHandle</a></li>
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -11860,7 +11860,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.boundingBox"><code class="name flex">
-<span>async def <span class="ident">boundingBox</span></span>(<span>self) ‑> Union[<a title="playwright.types.FloatRect" href="types.html#playwright.types.FloatRect">FloatRect</a>, NoneType]</span>
+<span>async def <span class="ident">boundingBox</span></span>(<span>self) ‑> Union[playwright._types.FloatRect, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.boundingBox</p>
@@ -11965,7 +11965,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.click"><code class="name flex">
-<span>async def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.click</p>
@@ -12087,7 +12087,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.dblclick"><code class="name flex">
-<span>async def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.dblclick</p>
@@ -12499,7 +12499,7 @@ an error. Note that you can pass an empty string to clear the input field.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.hover"><code class="name flex">
-<span>async def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.hover</p>
@@ -12914,7 +12914,7 @@ connected to a Document or a ShadowRoot.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.selectOption"><code class="name flex">
-<span>async def <span class="ident">selectOption</span></span>(<span>self, values: Union[str, ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>'), <a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>async def <span class="ident">selectOption</span></span>(<span>self, values: Union[str, ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>'), playwright._types.SelectOption, List[str], List[ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>')], List[playwright._types.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.selectOption</p>
@@ -13009,7 +13009,7 @@ content.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.setInputFiles"><code class="name flex">
-<span>async def <span class="ident">setInputFiles</span></span>(<span>self, files: Union[str, pathlib.Path, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[pathlib.Path], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">setInputFiles</span></span>(<span>self, files: Union[str, pathlib.Path, playwright._types.FilePayload, List[str], List[pathlib.Path], List[playwright._types.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.setInputFiles</p>
@@ -13068,7 +13068,7 @@ empty array, clears the selected files.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.ElementHandle.tap"><code class="name flex">
-<span>async def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.tap</p>
@@ -13462,7 +13462,7 @@ throw.</p>
 </dd>
 <dt id="playwright.async_api.FileChooser"><code class="flex name class">
 <span>class <span class="ident">FileChooser</span></span>
-<span>(</span><span>obj: playwright.file_chooser.FileChooser)</span>
+<span>(</span><span>obj: playwright._file_chooser.FileChooser)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -13540,8 +13540,8 @@ throw.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -13627,7 +13627,7 @@ def page(self) -&gt; &#34;Page&#34;:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.async_api.FileChooser.setFiles"><code class="name flex">
-<span>async def <span class="ident">setFiles</span></span>(<span>self, files: Union[str, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">setFiles</span></span>(<span>self, files: Union[str, playwright._types.FilePayload, List[str], List[playwright._types.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>FileChooser.setFiles</p>
@@ -13680,7 +13680,7 @@ For empty array, clears the selected files.</p>
 </dd>
 <dt id="playwright.async_api.Frame"><code class="flex name class">
 <span>class <span class="ident">Frame</span></span>
-<span>(</span><span>obj: playwright.frame.Frame)</span>
+<span>(</span><span>obj: playwright._frame.Frame)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -14985,8 +14985,8 @@ For empty array, clears the selected files.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -15315,7 +15315,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.click"><code class="name flex">
-<span>async def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.click</p>
@@ -15443,7 +15443,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.dblclick"><code class="name flex">
-<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.dblclick</p>
@@ -15892,7 +15892,7 @@ JSHandle instances can be passed as an argument to the <code>frame.evaluateHandl
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.expect_load_state"><code class="name flex">
-<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.expect_load_state</p>
@@ -15943,7 +15943,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.expect_navigation"><code class="name flex">
-<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.expect_navigation</p>
@@ -16266,7 +16266,7 @@ issue.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.hover"><code class="name flex">
-<span>async def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.hover</p>
@@ -16627,7 +16627,7 @@ selectors for more details. If no elements match the selector, the return value 
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.selectOption"><code class="name flex">
-<span>async def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>'), <a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>async def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>'), playwright._types.SelectOption, List[str], List[ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>')], List[playwright._types.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.selectOption</p>
@@ -16748,7 +16748,7 @@ matching <code>selector</code>, the method throws an error.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.setInputFiles"><code class="name flex">
-<span>async def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[pathlib.Path], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, playwright._types.FilePayload, List[str], List[pathlib.Path], List[playwright._types.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.setInputFiles</p>
@@ -16812,7 +16812,7 @@ empty array, clears the selected files.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Frame.tap"><code class="name flex">
-<span>async def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.tap</p>
@@ -17405,7 +17405,7 @@ be flaky. Use signals such as network events, selectors becoming visible and oth
 </dd>
 <dt id="playwright.async_api.JSHandle"><code class="flex name class">
 <span>class <span class="ident">JSHandle</span></span>
-<span>(</span><span>obj: playwright.js_handle.JSHandle)</span>
+<span>(</span><span>obj: playwright._js_handle.JSHandle)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -17544,8 +17544,8 @@ be flaky. Use signals such as network events, selectors becoming visible and oth
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -17826,7 +17826,7 @@ error if the object has circular references.</p>
 </dd>
 <dt id="playwright.async_api.Keyboard"><code class="flex name class">
 <span>class <span class="ident">Keyboard</span></span>
-<span>(</span><span>obj: playwright.input.Keyboard)</span>
+<span>(</span><span>obj: playwright._input.Keyboard)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -17938,8 +17938,8 @@ error if the object has circular references.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -18158,7 +18158,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </dd>
 <dt id="playwright.async_api.Mouse"><code class="flex name class">
 <span>class <span class="ident">Mouse</span></span>
-<span>(</span><span>obj: playwright.input.Mouse)</span>
+<span>(</span><span>obj: playwright._input.Mouse)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -18275,8 +18275,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -18489,7 +18489,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </dd>
 <dt id="playwright.async_api.Page"><code class="flex name class">
 <span>class <span class="ident">Page</span></span>
-<span>(</span><span>obj: playwright.page.Page)</span>
+<span>(</span><span>obj: playwright._page.Page)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -20755,8 +20755,8 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -21275,7 +21275,7 @@ Shortcut for main frame's frame.check(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.click"><code class="name flex">
-<span>async def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.click</p>
@@ -21444,7 +21444,7 @@ and should be handled manually via page.on('dialog') event.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.dblclick"><code class="name flex">
-<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.dblclick</p>
@@ -21932,7 +21932,7 @@ JSHandle instances can be passed as an argument to the <code>page.evaluateHandle
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_console_message"><code class="name flex">
-<span>def <span class="ident">expect_console_message</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.ConsoleMessage" href="#playwright.async_api.ConsoleMessage">ConsoleMessage</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.ConsoleMessage" href="#playwright.async_api.ConsoleMessage">ConsoleMessage</a>]</span>
+<span>def <span class="ident">expect_console_message</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.ConsoleMessage" href="#playwright.async_api.ConsoleMessage">ConsoleMessage</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.ConsoleMessage" href="#playwright.async_api.ConsoleMessage">ConsoleMessage</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_console_message</p>
@@ -21986,7 +21986,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_dialog"><code class="name flex">
-<span>def <span class="ident">expect_dialog</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Dialog" href="#playwright.async_api.Dialog">Dialog</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Dialog" href="#playwright.async_api.Dialog">Dialog</a>]</span>
+<span>def <span class="ident">expect_dialog</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Dialog" href="#playwright.async_api.Dialog">Dialog</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Dialog" href="#playwright.async_api.Dialog">Dialog</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_dialog</p>
@@ -22040,7 +22040,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_download"><code class="name flex">
-<span>def <span class="ident">expect_download</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Download" href="#playwright.async_api.Download">Download</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Download" href="#playwright.async_api.Download">Download</a>]</span>
+<span>def <span class="ident">expect_download</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Download" href="#playwright.async_api.Download">Download</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Download" href="#playwright.async_api.Download">Download</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_download</p>
@@ -22094,7 +22094,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_event"><code class="name flex">
-<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager</span>
+<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_event</p>
@@ -22148,7 +22148,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_file_chooser"><code class="name flex">
-<span>def <span class="ident">expect_file_chooser</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.FileChooser" href="#playwright.async_api.FileChooser">FileChooser</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.FileChooser" href="#playwright.async_api.FileChooser">FileChooser</a>]</span>
+<span>def <span class="ident">expect_file_chooser</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.FileChooser" href="#playwright.async_api.FileChooser">FileChooser</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.FileChooser" href="#playwright.async_api.FileChooser">FileChooser</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_file_chooser</p>
@@ -22202,7 +22202,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_load_state"><code class="name flex">
-<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_load_state</p>
@@ -22253,7 +22253,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_navigation"><code class="name flex">
-<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
+<span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, waitUntil: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[typing.Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_navigation</p>
@@ -22307,7 +22307,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_popup"><code class="name flex">
-<span>def <span class="ident">expect_popup</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>]</span>
+<span>def <span class="ident">expect_popup</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_popup</p>
@@ -22361,7 +22361,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_request"><code class="name flex">
-<span>def <span class="ident">expect_request</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>]</span>
+<span>def <span class="ident">expect_request</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_request</p>
@@ -22415,7 +22415,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_response"><code class="name flex">
-<span>def <span class="ident">expect_response</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>]</span>
+<span>def <span class="ident">expect_response</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_response</p>
@@ -22469,7 +22469,7 @@ page.setDefaultTimeout(timeout) methods.</dd>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.expect_worker"><code class="name flex">
-<span>def <span class="ident">expect_worker</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>')], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager[<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>]</span>
+<span>def <span class="ident">expect_worker</span></span>(<span>self, predicate: Callable[[ForwardRef('<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>')], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager[<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_worker</p>
@@ -23043,7 +23043,7 @@ issue.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.hover"><code class="name flex">
-<span>async def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.hover</p>
@@ -23264,7 +23264,7 @@ to <code>null</code>.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.pdf"><code class="name flex">
-<span>async def <span class="ident">pdf</span></span>(<span>self, scale: int = None, displayHeaderFooter: bool = None, headerTemplate: str = None, footerTemplate: str = None, printBackground: bool = None, landscape: bool = None, pageRanges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, preferCSSPageSize: bool = None, margin: <a title="playwright.types.PdfMargins" href="types.html#playwright.types.PdfMargins">PdfMargins</a> = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
+<span>async def <span class="ident">pdf</span></span>(<span>self, scale: int = None, displayHeaderFooter: bool = None, headerTemplate: str = None, footerTemplate: str = None, printBackground: bool = None, landscape: bool = None, pageRanges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, preferCSSPageSize: bool = None, margin: playwright._types.PdfMargins = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.pdf</p>
@@ -23744,7 +23744,7 @@ both handlers.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.screenshot"><code class="name flex">
-<span>async def <span class="ident">screenshot</span></span>(<span>self, timeout: int = None, type: Literal['jpeg', 'png'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omitBackground: bool = None, fullPage: bool = None, clip: <a title="playwright.types.FloatRect" href="types.html#playwright.types.FloatRect">FloatRect</a> = None) ‑> bytes</span>
+<span>async def <span class="ident">screenshot</span></span>(<span>self, timeout: int = None, type: Literal['jpeg', 'png'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omitBackground: bool = None, fullPage: bool = None, clip: playwright._types.FloatRect = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.screenshot</p>
@@ -23829,7 +23829,7 @@ discussion.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.selectOption"><code class="name flex">
-<span>async def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>'), <a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>async def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>'), playwright._types.SelectOption, List[str], List[ForwardRef('<a title="playwright.async_api.ElementHandle" href="#playwright.async_api.ElementHandle">ElementHandle</a>')], List[playwright._types.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.selectOption</p>
@@ -24067,7 +24067,7 @@ browserContext.setDefaultTimeout(timeout) and browserContext.setDefaultNavigatio
 </details>
 </dd>
 <dt id="playwright.async_api.Page.setInputFiles"><code class="name flex">
-<span>async def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, playwright._types.FilePayload, List[str], List[playwright._types.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.setInputFiles</p>
@@ -24166,7 +24166,7 @@ viewport size before navigating to the page.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.tap"><code class="name flex">
-<span>async def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>async def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._types.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.tap</p>
@@ -24504,7 +24504,7 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.viewportSize"><code class="name flex">
-<span>def <span class="ident">viewportSize</span></span>(<span>self) ‑> Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, NoneType]</span>
+<span>def <span class="ident">viewportSize</span></span>(<span>self) ‑> Union[playwright._types.IntSize, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.viewportSize</p>
@@ -24994,7 +24994,7 @@ Shortcut for main frame's frame.waitForTimeout(timeout).</p>
 </dd>
 <dt id="playwright.async_api.Playwright"><code class="flex name class">
 <span>class <span class="ident">Playwright</span></span>
-<span>(</span><span>obj: playwright.playwright.Playwright)</span>
+<span>(</span><span>obj: playwright._playwright.Playwright)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -25031,8 +25031,8 @@ Shortcut for main frame's frame.waitForTimeout(timeout).</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -25048,7 +25048,7 @@ def chromium(self) -&gt; &#34;BrowserType&#34;:
     return mapping.from_impl(self._impl_obj.chromium)</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict[str, <a title="playwright.types.DeviceDescriptor" href="types.html#playwright.types.DeviceDescriptor">DeviceDescriptor</a>]</code></dt>
+<dt id="playwright.async_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict[str, playwright._types.DeviceDescriptor]</code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -25116,7 +25116,7 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
 </dd>
 <dt id="playwright.async_api.Request"><code class="flex name class">
 <span>class <span class="ident">Request</span></span>
-<span>(</span><span>obj: playwright.network.Request)</span>
+<span>(</span><span>obj: playwright._network.Request)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -25309,12 +25309,12 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="playwright.async_api.Request.failure"><code class="name">var <span class="ident">failure</span> : Union[<a title="playwright.types.RequestFailure" href="types.html#playwright.types.RequestFailure">RequestFailure</a>, NoneType]</code></dt>
+<dt id="playwright.async_api.Request.failure"><code class="name">var <span class="ident">failure</span> : Union[playwright._types.RequestFailure, NoneType]</code></dt>
 <dd>
 <div class="desc"><p>Request.failure</p>
 <p>The method returns <code>null</code> unless this request has failed, as reported by <code>requestfailed</code> event.
@@ -25596,7 +25596,7 @@ def resourceType(self) -&gt; str:
     return mapping.from_maybe_impl(self._impl_obj.resourceType)</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.Request.timing"><code class="name">var <span class="ident">timing</span> : <a title="playwright.types.ResourceTiming" href="types.html#playwright.types.ResourceTiming">ResourceTiming</a></code></dt>
+<dt id="playwright.async_api.Request.timing"><code class="name">var <span class="ident">timing</span> : playwright._types.ResourceTiming</code></dt>
 <dd>
 <div class="desc"><p>Request.timing</p>
 <p>Returns resource timing information for given request. Most of the timing values become available upon the response,
@@ -25710,7 +25710,7 @@ def url(self) -&gt; str:
 </dd>
 <dt id="playwright.async_api.Response"><code class="flex name class">
 <span>class <span class="ident">Response</span></span>
-<span>(</span><span>obj: playwright.network.Response)</span>
+<span>(</span><span>obj: playwright._network.Response)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -25853,8 +25853,8 @@ def url(self) -&gt; str:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -26071,7 +26071,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.async_api.Response.finished"><code class="name flex">
-<span>async def <span class="ident">finished</span></span>(<span>self) ‑> Union[<a title="playwright.types.Error" href="types.html#playwright.types.Error">Error</a>, NoneType]</span>
+<span>async def <span class="ident">finished</span></span>(<span>self) ‑> Union[playwright._types.Error, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Response.finished</p>
@@ -26157,7 +26157,7 @@ This method will throw if the response body is not parsable via <code>JSON.parse
 </dd>
 <dt id="playwright.async_api.Route"><code class="flex name class">
 <span>class <span class="ident">Route</span></span>
-<span>(</span><span>obj: playwright.network.Route)</span>
+<span>(</span><span>obj: playwright._network.Route)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -26277,8 +26277,8 @@ This method will throw if the response body is not parsable via <code>JSON.parse
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -26487,7 +26487,7 @@ An example of serving static file:</p>
 </dd>
 <dt id="playwright.async_api.Selectors"><code class="flex name class">
 <span>class <span class="ident">Selectors</span></span>
-<span>(</span><span>obj: playwright.selectors.Selectors)</span>
+<span>(</span><span>obj: playwright._selectors.Selectors)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -26527,8 +26527,8 @@ An example of serving static file:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -26582,7 +26582,7 @@ An example of serving static file:</p>
 </dd>
 <dt id="playwright.async_api.Touchscreen"><code class="flex name class">
 <span>class <span class="ident">Touchscreen</span></span>
-<span>(</span><span>obj: playwright.input.Touchscreen)</span>
+<span>(</span><span>obj: playwright._input.Touchscreen)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -26608,8 +26608,8 @@ An example of serving static file:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -26647,7 +26647,7 @@ An example of serving static file:</p>
 </dd>
 <dt id="playwright.async_api.Video"><code class="flex name class">
 <span>class <span class="ident">Video</span></span>
-<span>(</span><span>obj: <a title="playwright.video.Video" href="video.html#playwright.video.Video">Video</a>)</span>
+<span>(</span><span>obj: playwright._video.Video)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -26673,8 +26673,8 @@ An example of serving static file:</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -26711,7 +26711,7 @@ upon closing the browser context.</p>
 </dd>
 <dt id="playwright.async_api.WebSocket"><code class="flex name class">
 <span>class <span class="ident">WebSocket</span></span>
-<span>(</span><span>obj: playwright.network.WebSocket)</span>
+<span>(</span><span>obj: playwright._network.WebSocket)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -26804,8 +26804,8 @@ upon closing the browser context.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -26839,7 +26839,7 @@ def url(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.async_api.WebSocket.expect_event"><code class="name flex">
-<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright.async_base.AsyncEventContextManager</span>
+<span>def <span class="ident">expect_event</span></span>(<span>self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None) ‑> playwright._async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"><p>WebSocket.expect_event</p>
@@ -26973,7 +26973,7 @@ value. Will throw an error if the webSocket is closed before the event is fired.
 </dd>
 <dt id="playwright.async_api.Worker"><code class="flex name class">
 <span>class <span class="ident">Worker</span></span>
-<span>(</span><span>obj: playwright.page.Worker)</span>
+<span>(</span><span>obj: playwright._page.Worker)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -27058,8 +27058,8 @@ value. Will throw an error if the webSocket is closed before the event is fired.
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.async_base.AsyncBase</li>
-<li>playwright.impl_to_api_mapping.ImplWrapper</li>
+<li>playwright._async_base.AsyncBase</li>
+<li>playwright._impl_to_api_mapping.ImplWrapper</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>

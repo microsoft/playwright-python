@@ -53,10 +53,27 @@ For more information you&#39;ll find the documentation for the sync API [here](s
 and for the async API [here](async_api.html).
 &#34;&#34;&#34;
 
-import playwright.types as types
-from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
+import playwright._types as types
+from playwright._main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
+ConsoleMessageLocation = types.ConsoleMessageLocation
+Cookie = types.Cookie
+Credentials = types.Credentials
+DeviceDescriptor = types.DeviceDescriptor
 Error = types.Error
+FilePayload = types.FilePayload
+FloatRect = types.FloatRect
+Geolocation = types.Geolocation
+IntSize = types.IntSize
+MousePosition = types.MousePosition
+PdfMargins = types.PdfMargins
+ProxyServer = types.ProxyServer
+RecordHarOptions = types.RecordHarOptions
+RecordVideoOptions = types.RecordVideoOptions
+RequestFailure = types.RequestFailure
+ResourceTiming = types.ResourceTiming
+SelectOption = types.SelectOption
+StorageState = types.StorageState
 TimeoutError = types.TimeoutError
 
 
@@ -76,37 +93,37 @@ __all__ = [
 ]
 
 __pdoc__ = {
-    &#34;accessibility&#34;: False,
-    &#34;async_base&#34;: False,
-    &#34;browser&#34;: False,
-    &#34;browser_context&#34;: False,
-    &#34;browser_type&#34;: False,
-    &#34;cdp_session&#34;: False,
-    &#34;chromium_browser_context&#34;: False,
-    &#34;connection&#34;: False,
-    &#34;console_message&#34;: False,
-    &#34;dialog&#34;: False,
-    &#34;download&#34;: False,
-    &#34;element_handle&#34;: False,
-    &#34;event_context_manager&#34;: False,
-    &#34;file_chooser&#34;: False,
-    &#34;frame&#34;: False,
-    &#34;helper&#34;: False,
-    &#34;impl_to_api_mapping&#34;: False,
-    &#34;input&#34;: False,
-    &#34;js_handle&#34;: False,
-    &#34;main&#34;: False,
-    &#34;network&#34;: False,
-    &#34;object_factory&#34;: False,
-    &#34;page&#34;: False,
-    &#34;path_utils&#34;: False,
-    &#34;playwright&#34;: False,
-    &#34;selectors&#34;: False,
-    &#34;sync_base&#34;: False,
-    &#34;transport&#34;: False,
-    &#34;wait_helper&#34;: False,
-    &#34;async_playwright&#34;: False,
-    &#34;sync_playwright&#34;: False,
+    &#34;_accessibility&#34;: False,
+    &#34;_async_base&#34;: False,
+    &#34;_browser&#34;: False,
+    &#34;_browser_context&#34;: False,
+    &#34;_browser_type&#34;: False,
+    &#34;_cdp_session&#34;: False,
+    &#34;_chromium_browser_context&#34;: False,
+    &#34;_connection&#34;: False,
+    &#34;_console_message&#34;: False,
+    &#34;_dialog&#34;: False,
+    &#34;_download&#34;: False,
+    &#34;_element_handle&#34;: False,
+    &#34;_event_context_manager&#34;: False,
+    &#34;_file_chooser&#34;: False,
+    &#34;_frame&#34;: False,
+    &#34;_helper&#34;: False,
+    &#34;_impl_to_api_mapping&#34;: False,
+    &#34;_input&#34;: False,
+    &#34;_js_handle&#34;: False,
+    &#34;_main&#34;: False,
+    &#34;_network&#34;: False,
+    &#34;_object_factory&#34;: False,
+    &#34;_page&#34;: False,
+    &#34;_path_utils&#34;: False,
+    &#34;_playwright&#34;: False,
+    &#34;_selectors&#34;: False,
+    &#34;_sync_base&#34;: False,
+    &#34;_transport&#34;: False,
+    &#34;_wait_helper&#34;: False,
+    &#34;_async_playwright&#34;: False,
+    &#34;_sync_playwright&#34;: False,
 }</code></pre>
 </details>
 </section>
@@ -121,19 +138,40 @@ __pdoc__ = {
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="playwright.types" href="types.html">playwright.types</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="playwright.video" href="video.html">playwright.video</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 </dl>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="playwright.async_playwright"><code class="name flex">
+<span>def <span class="ident">async_playwright</span></span>(<span>) ‑> playwright._main.AsyncPlaywrightContextManager</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def async_playwright() -&gt; AsyncPlaywrightContextManager:
+    return AsyncPlaywrightContextManager()</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_playwright"><code class="name flex">
+<span>def <span class="ident">sync_playwright</span></span>(<span>) ‑> playwright._main.SyncPlaywrightContextManager</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sync_playwright() -&gt; SyncPlaywrightContextManager:
+    return SyncPlaywrightContextManager()</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -161,7 +199,7 @@ __pdoc__ = {
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="playwright.types.TimeoutError" href="types.html#playwright.types.TimeoutError">TimeoutError</a></li>
+<li>playwright._types.TimeoutError</li>
 </ul>
 </dd>
 <dt id="playwright.TimeoutError"><code class="flex name class">
@@ -179,7 +217,7 @@ __pdoc__ = {
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="playwright.types.Error" href="types.html#playwright.types.Error">Error</a></li>
+<li>playwright._types.Error</li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
