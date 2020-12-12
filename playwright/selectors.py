@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Dict, Union
 
 from playwright.connection import ChannelOwner
-from playwright.helper import Error
+from playwright.types import Error
 
 
 class Selectors(ChannelOwner):

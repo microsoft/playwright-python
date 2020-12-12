@@ -15,8 +15,8 @@
 from typing import Dict, List
 
 from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import ConsoleMessageLocation
 from playwright.js_handle import JSHandle
+from playwright.types import ConsoleMessageLocation
 
 
 class ConsoleMessage(ChannelOwner):

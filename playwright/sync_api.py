@@ -36,8 +36,23 @@ from playwright.download import Download as DownloadImpl
 from playwright.element_handle import ElementHandle as ElementHandleImpl
 from playwright.file_chooser import FileChooser as FileChooserImpl
 from playwright.frame import Frame as FrameImpl
-from playwright.helper import (
+from playwright.input import Keyboard as KeyboardImpl
+from playwright.input import Mouse as MouseImpl
+from playwright.input import Touchscreen as TouchscreenImpl
+from playwright.js_handle import JSHandle as JSHandleImpl
+from playwright.network import Request as RequestImpl
+from playwright.network import Response as ResponseImpl
+from playwright.network import Route as RouteImpl
+from playwright.network import WebSocket as WebSocketImpl
+from playwright.page import BindingCall as BindingCallImpl
+from playwright.page import Page as PageImpl
+from playwright.page import Worker as WorkerImpl
+from playwright.playwright import Playwright as PlaywrightImpl
+from playwright.selectors import Selectors as SelectorsImpl
+from playwright.sync_base import EventContextManager, SyncBase, mapping
+from playwright.types import (
     ConsoleMessageLocation,
+    Cookie,
     Credentials,
     DeviceDescriptor,
     Error,
@@ -53,24 +68,8 @@ from playwright.helper import (
     RequestFailure,
     ResourceTiming,
     SelectOption,
-    SetStorageState,
     StorageState,
-    Viewport,
 )
-from playwright.input import Keyboard as KeyboardImpl
-from playwright.input import Mouse as MouseImpl
-from playwright.input import Touchscreen as TouchscreenImpl
-from playwright.js_handle import JSHandle as JSHandleImpl
-from playwright.network import Request as RequestImpl
-from playwright.network import Response as ResponseImpl
-from playwright.network import Route as RouteImpl
-from playwright.network import WebSocket as WebSocketImpl
-from playwright.page import BindingCall as BindingCallImpl
-from playwright.page import Page as PageImpl
-from playwright.page import Worker as WorkerImpl
-from playwright.playwright import Playwright as PlaywrightImpl
-from playwright.selectors import Selectors as SelectorsImpl
-from playwright.sync_base import EventContextManager, SyncBase, mapping
 from playwright.video import Video as VideoImpl
 
 NoneType = type(None)
@@ -4722,7 +4721,7 @@ class Page(SyncBase):
             self._sync(self._impl_obj.setViewportSize(width=width, height=height))
         )
 
-    def viewportSize(self) -> typing.Union[Viewport, NoneType]:
+    def viewportSize(self) -> typing.Union[IntSize, NoneType]:
         """Page.viewportSize
 
         Returns
@@ -6113,7 +6112,7 @@ class BrowserContext(SyncBase):
 
     def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
-    ) -> typing.List[typing.Dict]:
+    ) -> typing.List[Cookie]:
         """BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -6126,11 +6125,11 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        List[Dict]
+        List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.cookies(urls=urls)))
 
-    def addCookies(self, cookies: typing.List[typing.Dict]) -> NoneType:
+    def addCookies(self, cookies: typing.List[Cookie]) -> NoneType:
         """BrowserContext.addCookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -6138,10 +6137,10 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        cookies : List[Dict]
+        cookies : List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.addCookies(cookies=mapping.to_impl(cookies)))
+            self._sync(self._impl_obj.addCookies(cookies=cookies))
         )
 
     def clearCookies(self) -> NoneType:
@@ -6427,7 +6426,7 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        {"cookies": List[Dict], "origins": List[Dict]}
+        {"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.storageState()))
 
@@ -6641,7 +6640,7 @@ class Browser(SyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -6692,7 +6691,7 @@ class Browser(SyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]
+        storageState : Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
@@ -6755,7 +6754,7 @@ class Browser(SyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -6809,7 +6808,7 @@ class Browser(SyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]
+        storageState : Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns

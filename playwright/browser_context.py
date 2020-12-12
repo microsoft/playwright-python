@@ -20,13 +20,9 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from playwright.connection import ChannelOwner, from_channel
 from playwright.event_context_manager import EventContextManagerImpl
 from playwright.helper import (
-    Cookie,
-    Error,
-    Geolocation,
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
-    StorageState,
     TimeoutSettings,
     URLMatch,
     URLMatcher,
@@ -35,6 +31,7 @@ from playwright.helper import (
 )
 from playwright.network import Request, Route, serialize_headers
 from playwright.page import BindingCall, Page
+from playwright.types import Cookie, Error, Geolocation, StorageState
 from playwright.wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover

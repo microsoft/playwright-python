@@ -25,10 +25,10 @@ from greenlet import greenlet
 import playwright
 from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.connection import Connection
-from playwright.helper import Error
 from playwright.object_factory import create_remote_object
 from playwright.playwright import Playwright
 from playwright.sync_api import Playwright as SyncPlaywright
+from playwright.types import Error
 
 
 def compute_driver_executable() -> Path:

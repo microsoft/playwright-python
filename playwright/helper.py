@@ -32,6 +32,8 @@ from typing import (
     cast,
 )
 
+from playwright.types import Error, TimeoutError
+
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
 else:  # pragma: no cover
@@ -41,7 +43,6 @@ else:  # pragma: no cover
 if TYPE_CHECKING:  # pragma: no cover
     from playwright.network import Request, Route
 
-Cookie = Dict
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], Any]
 
@@ -51,55 +52,10 @@ KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
 
 
-class StorageState(TypedDict):
-    cookies: List[Cookie]
-    origins: List[Dict]
-
-
-class SetStorageState(TypedDict):
-    cookies: Optional[List[Cookie]]
-    origins: Optional[List[Dict]]
-
-
-class MousePosition(TypedDict):
-    x: float
-    y: float
-
-
-class ResourceTiming(TypedDict):
-    startTime: float
-    domainLookupStart: float
-    domainLookupEnd: float
-    connectStart: float
-    secureConnectionStart: float
-    connectEnd: float
-    requestStart: float
-    responseStart: float
-    responseEnd: float
-
-
-class FilePayload(TypedDict):
-    name: str
-    mimeType: str
-    buffer: bytes
-
-
 class SetFilePayload(TypedDict):
     name: str
     mimeType: str
     buffer: str
-
-
-class SelectOption(TypedDict):
-    value: Optional[str]
-    label: Optional[str]
-    index: Optional[str]
-
-
-class ConsoleMessageLocation(TypedDict):
-    url: str
-    lineNumber: int
-    columnNumber: int
 
 
 class ErrorPayload(TypedDict, total=False):
@@ -127,11 +83,6 @@ class ParsedMessageParams(TypedDict):
     initializer: Dict
 
 
-class Viewport(TypedDict):
-    width: int
-    height: int
-
-
 class ParsedMessagePayload(TypedDict, total=False):
     id: int
     guid: str
@@ -152,71 +103,7 @@ class FrameNavigatedEvent(TypedDict):
     error: Optional[str]
 
 
-class RequestFailure(TypedDict):
-    errorText: str
-
-
-class Credentials(TypedDict):
-    username: str
-    password: str
-
-
-class IntSize(TypedDict):
-    width: int
-    height: int
-
-
-class FloatRect(TypedDict):
-    x: float
-    y: float
-    width: float
-    height: float
-
-
-class Geolocation(TypedDict, total=False):
-    latitude: float
-    longitude: float
-    accuracy: Optional[float]
-
-
 Env = Dict[str, Union[str, int, bool]]
-
-
-class ProxyServer(TypedDict):
-    server: str
-    bypass: Optional[str]
-    username: Optional[str]
-    password: Optional[str]
-
-
-class PdfMargins(TypedDict):
-    top: Optional[Union[str, int]]
-    right: Optional[Union[str, int]]
-    bottom: Optional[Union[str, int]]
-    left: Optional[Union[str, int]]
-
-
-class RecordHarOptions(TypedDict):
-    omitContent: Optional[bool]
-    path: str
-
-
-class RecordVideoOptions(TypedDict):
-    dir: str
-    size: Optional[Viewport]
-
-
-DeviceDescriptor = TypedDict(
-    "DeviceDescriptor",
-    {
-        "userAgent": str,
-        "viewport": IntSize,
-        "deviceScaleFactor": int,
-        "isMobile": bool,
-        "hasTouch": bool,
-    },
-)
-Devices = Dict[str, DeviceDescriptor]
 
 
 class URLMatcher:
@@ -265,17 +152,6 @@ class TimeoutSettings:
         if self._parent:
             return self._parent.navigation_timeout()
         return 30000
-
-
-class Error(Exception):
-    def __init__(self, message: str, stack: str = None) -> None:
-        self.message = message
-        self.stack = stack
-        super().__init__(message)
-
-
-class TimeoutError(Error):
-    pass
 
 
 def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:

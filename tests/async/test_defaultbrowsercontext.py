@@ -18,7 +18,7 @@ import os
 import pytest
 from flaky import flaky
 
-from playwright.helper import Error
+from playwright.types import Error
 
 
 @pytest.fixture()

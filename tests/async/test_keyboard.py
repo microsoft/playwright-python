@@ -14,7 +14,7 @@
 import pytest
 
 from playwright.async_api import Page
-from playwright.helper import Error
+from playwright.types import Error
 
 
 async def captureLastKeydown(page):
