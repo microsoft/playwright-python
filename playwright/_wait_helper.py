@@ -17,7 +17,7 @@ from typing import Any, Callable, List
 
 from pyee import EventEmitter
 
-from playwright.types import Error, TimeoutError
+from playwright._types import Error, TimeoutError
 
 
 class WaitHelper:

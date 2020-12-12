@@ -12,32 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Optional, Union
 
-from playwright.connection import ChannelOwner
-from playwright.helper import locals_to_params
+from playwright._connection import ChannelOwner
 
 
-class Dialog(ChannelOwner):
+class Download(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
     @property
-    def type(self) -> str:
-        return self._initializer["type"]
+    def url(self) -> str:
+        return self._initializer["url"]
 
     @property
-    def message(self) -> str:
-        return self._initializer["message"]
+    def suggestedFilename(self) -> str:
+        return self._initializer["suggestedFilename"]
 
-    @property
-    def defaultValue(self) -> str:
-        return self._initializer["defaultValue"]
+    async def delete(self) -> None:
+        await self._channel.send("delete")
 
-    async def accept(self, promptText: str = None) -> None:
-        await self._channel.send("accept", locals_to_params(locals()))
+    async def failure(self) -> Optional[str]:
+        return await self._channel.send("failure")
 
-    async def dismiss(self) -> None:
-        await self._channel.send("dismiss")
+    async def path(self) -> Optional[str]:
+        return await self._channel.send("path")
+
+    async def saveAs(self, path: Union[str, Path]) -> None:
+        path = str(Path(path))
+        return await self._channel.send("saveAs", dict(path=path))

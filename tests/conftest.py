@@ -21,7 +21,7 @@ from PIL import Image
 from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
-from playwright.path_utils import get_file_dirname
+from playwright._path_utils import get_file_dirname
 
 from .server import test_server
 from .utils import utils as utils_object

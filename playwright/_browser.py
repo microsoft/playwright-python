@@ -16,12 +16,12 @@ import sys
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from playwright.browser_context import BrowserContext
-from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import ColorScheme, is_safe_close_error, locals_to_params
-from playwright.network import serialize_headers
-from playwright.page import Page
-from playwright.types import (
+from playwright._browser_context import BrowserContext
+from playwright._connection import ChannelOwner, from_channel
+from playwright._helper import ColorScheme, is_safe_close_error, locals_to_params
+from playwright._network import serialize_headers
+from playwright._page import Page
+from playwright._types import (
     Credentials,
     Geolocation,
     IntSize,
@@ -37,7 +37,7 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.browser_type import BrowserType
+    from playwright._browser_type import BrowserType
 
 
 class Browser(ChannelOwner):

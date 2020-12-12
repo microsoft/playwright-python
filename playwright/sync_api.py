@@ -22,35 +22,35 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal
 
-from playwright.accessibility import Accessibility as AccessibilityImpl
-from playwright.browser import Browser as BrowserImpl
-from playwright.browser_context import BrowserContext as BrowserContextImpl
-from playwright.browser_type import BrowserType as BrowserTypeImpl
-from playwright.cdp_session import CDPSession as CDPSessionImpl
-from playwright.chromium_browser_context import (
+from playwright._accessibility import Accessibility as AccessibilityImpl
+from playwright._browser import Browser as BrowserImpl
+from playwright._browser_context import BrowserContext as BrowserContextImpl
+from playwright._browser_type import BrowserType as BrowserTypeImpl
+from playwright._cdp_session import CDPSession as CDPSessionImpl
+from playwright._chromium_browser_context import (
     ChromiumBrowserContext as ChromiumBrowserContextImpl,
 )
-from playwright.console_message import ConsoleMessage as ConsoleMessageImpl
-from playwright.dialog import Dialog as DialogImpl
-from playwright.download import Download as DownloadImpl
-from playwright.element_handle import ElementHandle as ElementHandleImpl
-from playwright.file_chooser import FileChooser as FileChooserImpl
-from playwright.frame import Frame as FrameImpl
-from playwright.input import Keyboard as KeyboardImpl
-from playwright.input import Mouse as MouseImpl
-from playwright.input import Touchscreen as TouchscreenImpl
-from playwright.js_handle import JSHandle as JSHandleImpl
-from playwright.network import Request as RequestImpl
-from playwright.network import Response as ResponseImpl
-from playwright.network import Route as RouteImpl
-from playwright.network import WebSocket as WebSocketImpl
-from playwright.page import BindingCall as BindingCallImpl
-from playwright.page import Page as PageImpl
-from playwright.page import Worker as WorkerImpl
-from playwright.playwright import Playwright as PlaywrightImpl
-from playwright.selectors import Selectors as SelectorsImpl
-from playwright.sync_base import EventContextManager, SyncBase, mapping
-from playwright.types import (
+from playwright._console_message import ConsoleMessage as ConsoleMessageImpl
+from playwright._dialog import Dialog as DialogImpl
+from playwright._download import Download as DownloadImpl
+from playwright._element_handle import ElementHandle as ElementHandleImpl
+from playwright._file_chooser import FileChooser as FileChooserImpl
+from playwright._frame import Frame as FrameImpl
+from playwright._input import Keyboard as KeyboardImpl
+from playwright._input import Mouse as MouseImpl
+from playwright._input import Touchscreen as TouchscreenImpl
+from playwright._js_handle import JSHandle as JSHandleImpl
+from playwright._network import Request as RequestImpl
+from playwright._network import Response as ResponseImpl
+from playwright._network import Route as RouteImpl
+from playwright._network import WebSocket as WebSocketImpl
+from playwright._page import BindingCall as BindingCallImpl
+from playwright._page import Page as PageImpl
+from playwright._page import Worker as WorkerImpl
+from playwright._playwright import Playwright as PlaywrightImpl
+from playwright._selectors import Selectors as SelectorsImpl
+from playwright._sync_base import EventContextManager, SyncBase, mapping
+from playwright._types import (
     ConsoleMessageLocation,
     Cookie,
     Credentials,
@@ -70,7 +70,7 @@ from playwright.types import (
     SelectOption,
     StorageState,
 )
-from playwright.video import Video as VideoImpl
+from playwright._video import Video as VideoImpl
 
 NoneType = type(None)
 

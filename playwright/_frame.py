@@ -19,15 +19,15 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
 from pyee import EventEmitter
 
-from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
-from playwright.element_handle import (
+from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
+from playwright._element_handle import (
     ElementHandle,
     ValuesToSelect,
     convert_select_option_values,
     normalize_file_payloads,
 )
-from playwright.event_context_manager import EventContextManagerImpl
-from playwright.helper import (
+from playwright._event_context_manager import EventContextManagerImpl
+from playwright._helper import (
     DocumentLoadState,
     FrameNavigatedEvent,
     KeyboardModifier,
@@ -38,15 +38,15 @@ from playwright.helper import (
     locals_to_params,
     monotonic_time,
 )
-from playwright.js_handle import (
+from playwright._js_handle import (
     JSHandle,
     Serializable,
     parse_result,
     serialize_argument,
 )
-from playwright.network import Response
-from playwright.types import Error, FilePayload, MousePosition
-from playwright.wait_helper import WaitHelper
+from playwright._network import Response
+from playwright._types import Error, FilePayload, MousePosition
+from playwright._wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -54,7 +54,7 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.page import Page
+    from playwright._page import Page
 
 
 class Frame(ChannelOwner):

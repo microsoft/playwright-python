@@ -25,32 +25,32 @@ from typing import (  # type: ignore
     get_type_hints,
 )
 
-from playwright.accessibility import Accessibility
-from playwright.browser import Browser
-from playwright.browser_context import BrowserContext
-from playwright.browser_type import BrowserType
-from playwright.cdp_session import CDPSession
-from playwright.chromium_browser_context import ChromiumBrowserContext
-from playwright.console_message import ConsoleMessage
-from playwright.dialog import Dialog
-from playwright.download import Download
-from playwright.element_handle import ElementHandle, ValuesToSelect
-from playwright.file_chooser import FileChooser
-from playwright.frame import Frame
-from playwright.input import Keyboard, Mouse, Touchscreen
-from playwright.js_handle import JSHandle, Serializable
-from playwright.network import Request, Response, Route, WebSocket
-from playwright.page import BindingCall, Page, Worker
-from playwright.playwright import Playwright
-from playwright.selectors import Selectors
-from playwright.video import Video
+from playwright._accessibility import Accessibility
+from playwright._browser import Browser
+from playwright._browser_context import BrowserContext
+from playwright._browser_type import BrowserType
+from playwright._cdp_session import CDPSession
+from playwright._chromium_browser_context import ChromiumBrowserContext
+from playwright._console_message import ConsoleMessage
+from playwright._dialog import Dialog
+from playwright._download import Download
+from playwright._element_handle import ElementHandle, ValuesToSelect
+from playwright._file_chooser import FileChooser
+from playwright._frame import Frame
+from playwright._input import Keyboard, Mouse, Touchscreen
+from playwright._js_handle import JSHandle, Serializable
+from playwright._network import Request, Response, Route, WebSocket
+from playwright._page import BindingCall, Page, Worker
+from playwright._playwright import Playwright
+from playwright._selectors import Selectors
+from playwright._video import Video
 
 
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
-    if "playwright.types" in value:
-        value = re.sub(r"playwright\.types\.", "", value)
+    if "playwright._types" in value:
+        value = re.sub(r"playwright\._types\.", "", value)
     value = re.sub(r"playwright\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
@@ -111,7 +111,7 @@ def short_name(t: Any) -> str:
 
 
 def return_value(value: Any) -> List[str]:
-    if "playwright" not in str(value) or "playwright.types" in str(value):
+    if "playwright" not in str(value) or "playwright._types" in str(value):
         return ["mapping.from_maybe_impl(", ")"]
     if (
         get_origin(value) == Union
@@ -151,26 +151,26 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal
 
-from playwright.accessibility import Accessibility as AccessibilityImpl
-from playwright.browser import Browser as BrowserImpl
-from playwright.browser_context import BrowserContext as BrowserContextImpl
-from playwright.browser_type import BrowserType as BrowserTypeImpl
-from playwright.cdp_session import CDPSession as CDPSessionImpl
-from playwright.chromium_browser_context import ChromiumBrowserContext as ChromiumBrowserContextImpl
-from playwright.console_message import ConsoleMessage as ConsoleMessageImpl
-from playwright.dialog import Dialog as DialogImpl
-from playwright.download import Download as DownloadImpl
-from playwright.element_handle import ElementHandle as ElementHandleImpl
-from playwright.file_chooser import FileChooser as FileChooserImpl
-from playwright.frame import Frame as FrameImpl
-from playwright.types import ConsoleMessageLocation, Cookie, Credentials, DeviceDescriptor, MousePosition, Error, FilePayload, SelectOption, RequestFailure, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins, ResourceTiming, RecordHarOptions, RecordVideoOptions, StorageState
-from playwright.input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
-from playwright.js_handle import JSHandle as JSHandleImpl
-from playwright.network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
-from playwright.page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
-from playwright.playwright import Playwright as PlaywrightImpl
-from playwright.selectors import Selectors as SelectorsImpl
-from playwright.video import Video as VideoImpl
+from playwright._accessibility import Accessibility as AccessibilityImpl
+from playwright._browser import Browser as BrowserImpl
+from playwright._browser_context import BrowserContext as BrowserContextImpl
+from playwright._browser_type import BrowserType as BrowserTypeImpl
+from playwright._cdp_session import CDPSession as CDPSessionImpl
+from playwright._chromium_browser_context import ChromiumBrowserContext as ChromiumBrowserContextImpl
+from playwright._console_message import ConsoleMessage as ConsoleMessageImpl
+from playwright._dialog import Dialog as DialogImpl
+from playwright._download import Download as DownloadImpl
+from playwright._element_handle import ElementHandle as ElementHandleImpl
+from playwright._file_chooser import FileChooser as FileChooserImpl
+from playwright._frame import Frame as FrameImpl
+from playwright._types import ConsoleMessageLocation, Cookie, Credentials, DeviceDescriptor, MousePosition, Error, FilePayload, SelectOption, RequestFailure, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins, ResourceTiming, RecordHarOptions, RecordVideoOptions, StorageState
+from playwright._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
+from playwright._js_handle import JSHandle as JSHandleImpl
+from playwright._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
+from playwright._page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
+from playwright._playwright import Playwright as PlaywrightImpl
+from playwright._selectors import Selectors as SelectorsImpl
+from playwright._video import Video as VideoImpl
 """
 
 all_types = [

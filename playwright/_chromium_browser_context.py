@@ -15,10 +15,10 @@
 from types import SimpleNamespace
 from typing import Dict, List, Set
 
-from playwright.browser_context import BrowserContext
-from playwright.cdp_session import CDPSession
-from playwright.connection import ChannelOwner, from_channel
-from playwright.page import Page, Worker
+from playwright._browser_context import BrowserContext
+from playwright._cdp_session import CDPSession
+from playwright._connection import ChannelOwner, from_channel
+from playwright._page import Page, Worker
 
 
 class ChromiumBrowserContext(BrowserContext):

@@ -20,14 +20,14 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 
-from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
-from playwright.event_context_manager import EventContextManagerImpl
-from playwright.helper import ContinueParameters, Header, locals_to_params
-from playwright.types import Error, RequestFailure, ResourceTiming
-from playwright.wait_helper import WaitHelper
+from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
+from playwright._event_context_manager import EventContextManagerImpl
+from playwright._helper import ContinueParameters, Header, locals_to_params
+from playwright._types import Error, RequestFailure, ResourceTiming
+from playwright._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.frame import Frame
+    from playwright._frame import Frame
 
 
 class Request(ChannelOwner):

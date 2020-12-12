@@ -19,10 +19,27 @@ For more information you'll find the documentation for the sync API [here](sync_
 and for the async API [here](async_api.html).
 """
 
-import playwright.types as types
-from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
+import playwright._types as types
+from playwright._main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
+ConsoleMessageLocation = types.ConsoleMessageLocation
+Cookie = types.Cookie
+Credentials = types.Credentials
+DeviceDescriptor = types.DeviceDescriptor
 Error = types.Error
+FilePayload = types.FilePayload
+FloatRect = types.FloatRect
+Geolocation = types.Geolocation
+IntSize = types.IntSize
+MousePosition = types.MousePosition
+PdfMargins = types.PdfMargins
+ProxyServer = types.ProxyServer
+RecordHarOptions = types.RecordHarOptions
+RecordVideoOptions = types.RecordVideoOptions
+RequestFailure = types.RequestFailure
+ResourceTiming = types.ResourceTiming
+SelectOption = types.SelectOption
+StorageState = types.StorageState
 TimeoutError = types.TimeoutError
 
 
@@ -42,35 +59,35 @@ __all__ = [
 ]
 
 __pdoc__ = {
-    "accessibility": False,
-    "async_base": False,
-    "browser": False,
-    "browser_context": False,
-    "browser_type": False,
-    "cdp_session": False,
-    "chromium_browser_context": False,
-    "connection": False,
-    "console_message": False,
-    "dialog": False,
-    "download": False,
-    "element_handle": False,
-    "event_context_manager": False,
-    "file_chooser": False,
-    "frame": False,
-    "helper": False,
-    "impl_to_api_mapping": False,
-    "input": False,
-    "js_handle": False,
-    "main": False,
-    "network": False,
-    "object_factory": False,
-    "page": False,
-    "path_utils": False,
-    "playwright": False,
-    "selectors": False,
-    "sync_base": False,
-    "transport": False,
-    "wait_helper": False,
-    "async_playwright": False,
-    "sync_playwright": False,
+    "_accessibility": False,
+    "_async_base": False,
+    "_browser": False,
+    "_browser_context": False,
+    "_browser_type": False,
+    "_cdp_session": False,
+    "_chromium_browser_context": False,
+    "_connection": False,
+    "_console_message": False,
+    "_dialog": False,
+    "_download": False,
+    "_element_handle": False,
+    "_event_context_manager": False,
+    "_file_chooser": False,
+    "_frame": False,
+    "_helper": False,
+    "_impl_to_api_mapping": False,
+    "_input": False,
+    "_js_handle": False,
+    "_main": False,
+    "_network": False,
+    "_object_factory": False,
+    "_page": False,
+    "_path_utils": False,
+    "_playwright": False,
+    "_selectors": False,
+    "_sync_base": False,
+    "_transport": False,
+    "_wait_helper": False,
+    "_async_playwright": False,
+    "_sync_playwright": False,
 }

@@ -14,11 +14,11 @@
 
 from typing import TYPE_CHECKING, List, Union
 
-from playwright.types import FilePayload
+from playwright._types import FilePayload
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.element_handle import ElementHandle
-    from playwright.page import Page
+    from playwright._element_handle import ElementHandle
+    from playwright._page import Page
 
 
 class FileChooser:

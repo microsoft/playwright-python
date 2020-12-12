@@ -17,9 +17,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-from playwright.connection import ChannelOwner, from_channel
-from playwright.event_context_manager import EventContextManagerImpl
-from playwright.helper import (
+from playwright._connection import ChannelOwner, from_channel
+from playwright._event_context_manager import EventContextManagerImpl
+from playwright._helper import (
     PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
@@ -29,13 +29,13 @@ from playwright.helper import (
     is_safe_close_error,
     locals_to_params,
 )
-from playwright.network import Request, Route, serialize_headers
-from playwright.page import BindingCall, Page
-from playwright.types import Cookie, Error, Geolocation, StorageState
-from playwright.wait_helper import WaitHelper
+from playwright._network import Request, Route, serialize_headers
+from playwright._page import BindingCall, Page
+from playwright._types import Cookie, Error, Geolocation, StorageState
+from playwright._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.browser import Browser
+    from playwright._browser import Browser
 
 
 class BrowserContext(ChannelOwner):

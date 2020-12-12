@@ -14,10 +14,10 @@
 
 from typing import Dict
 
-from playwright.browser_type import BrowserType
-from playwright.connection import ChannelOwner, from_channel
-from playwright.selectors import Selectors
-from playwright.types import DeviceDescriptor
+from playwright._browser_type import BrowserType
+from playwright._connection import ChannelOwner, from_channel
+from playwright._selectors import Selectors
+from playwright._types import DeviceDescriptor
 
 
 class Playwright(ChannelOwner):

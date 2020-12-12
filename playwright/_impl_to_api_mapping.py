@@ -16,7 +16,7 @@ import inspect
 from typing import Any, Callable, Dict, List, Optional
 from weakref import WeakKeyDictionary
 
-from playwright.types import Error
+from playwright._types import Error
 
 
 class ImplWrapper:

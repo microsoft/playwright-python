@@ -241,13 +241,15 @@ class DocumentationProvider:
 
     def serialize_python_type(self, value: Any) -> str:
         str_value = str(value)
-        if str_value == "<class 'playwright.types.Error'>":
+        if isinstance(value, list):
+            return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a), value)))}]"
+        if str_value == "<class 'playwright._types.Error'>":
             return "Error"
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
-        match = re.match(r"^<class 'playwright\.[\w]+\.([\w]+)'>$", str_value)
-        if match and "types" not in str_value:
+        match = re.match(r"^<class 'playwright\.[\w_]+\.([\w]+)'>$", str_value)
+        if match and "_types" not in str_value:
             return match.group(1)
 
         match = re.match(r"^typing\.(\w+)$", str_value)
@@ -277,6 +279,9 @@ class DocumentationProvider:
         if str(origin) == "<class 'list'>":
             args = get_args(value)
             return f"List[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+        if str(origin) == "<class 'collections.abc.Callable'>":
+            args = get_args(value)
+            return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
         if str(origin) == "typing.Literal":
             args = get_args(value)
             if len(args) == 1:
