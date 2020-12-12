@@ -16,12 +16,12 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Union
 
-from playwright.browser import Browser
-from playwright.browser_context import BrowserContext
-from playwright.connection import ChannelOwner, from_channel
-from playwright.helper import ColorScheme, Env, locals_to_params, not_installed_error
-from playwright.network import serialize_headers
-from playwright.types import (
+from playwright._browser import Browser
+from playwright._browser_context import BrowserContext
+from playwright._connection import ChannelOwner, from_channel
+from playwright._helper import ColorScheme, Env, locals_to_params, not_installed_error
+from playwright._network import serialize_headers
+from playwright._types import (
     Credentials,
     Geolocation,
     IntSize,

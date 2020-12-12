@@ -12,32 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
-from typing import Dict, Union
+from typing import Any, Dict
 
-from playwright.connection import ChannelOwner
-from playwright.types import Error
+from playwright._connection import ChannelOwner
+from playwright._helper import locals_to_params
+from playwright._js_handle import parse_result
 
 
-class Selectors(ChannelOwner):
+class CDPSession(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._channel.on("event", lambda params: self._on_event(params))
 
-    async def register(
-        self,
-        name: str,
-        source: str = None,
-        path: Union[str, Path] = None,
-        contentScript: bool = None,
-    ) -> None:
-        if not source and not path:
-            raise Error("Either source or path should be specified")
-        if path:
-            with open(path, "r") as file:
-                source = file.read()
-        params: Dict = dict(name=name, source=source)
-        if contentScript:
-            params["contentScript"] = True
-        await self._channel.send("register", params)
+    def _on_event(self, params: Any) -> None:
+        self.emit(params["method"], parse_result(params["params"]))
+
+    async def send(self, method: str, params: Dict = None) -> Dict:
+        result = await self._channel.send("send", locals_to_params(locals()))
+        return parse_result(result)
+
+    async def detach(self) -> None:
+        await self._channel.send("detach")

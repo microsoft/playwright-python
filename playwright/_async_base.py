@@ -15,7 +15,7 @@
 import asyncio
 from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar, cast
 
-from playwright.impl_to_api_mapping import ImplToApiMapping, ImplWrapper
+from playwright._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
 mapping = ImplToApiMapping()
 

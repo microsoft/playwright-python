@@ -15,11 +15,11 @@
 import re
 from typing import List, cast
 
-from playwright.element_handle import ElementHandle
-from playwright.frame import Frame
-from playwright.page import Page
-from playwright.selectors import Selectors
-from playwright.types import Error, IntSize
+from playwright._element_handle import ElementHandle
+from playwright._frame import Frame
+from playwright._page import Page
+from playwright._selectors import Selectors
+from playwright._types import Error, IntSize
 
 
 class Utils:

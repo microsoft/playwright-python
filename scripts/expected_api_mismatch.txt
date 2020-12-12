@@ -60,15 +60,15 @@ Parameter type mismatch in Page.screenshot(path=): documented as Optional[str], 
 Parameter type mismatch in Page.pdf(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
 
 # Pattern
-Parameter type mismatch in BrowserContext.route(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
-Parameter type mismatch in BrowserContext.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
-Parameter type mismatch in Frame.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
-Parameter type mismatch in Page.frame(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
-Parameter type mismatch in Page.route(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
-Parameter type mismatch in Page.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, typing.Callable[[str], bool]]
-Parameter type mismatch in Page.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
-Parameter type mismatch in Page.waitForRequest(urlOrPredicate=): documented as Union[str, RegExp, Function], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
-Parameter type mismatch in Page.waitForResponse(urlOrPredicate=): documented as Union[str, RegExp, function(Response):boolean], code has Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+Parameter type mismatch in BrowserContext.route(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, Callable[[str], bool]]
+Parameter type mismatch in BrowserContext.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, Callable[[str], bool]]
+Parameter type mismatch in Frame.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.frame(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.route(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, Callable[[str], bool]]
+Parameter type mismatch in Page.unroute(url=): documented as Union[str, RegExp, function(URL):boolean], code has Union[str, Pattern, Callable[[str], bool]]
+Parameter type mismatch in Page.waitForNavigation(url=): documented as Union[str, RegExp, Function, NoneType], code has Union[str, Pattern, Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.waitForRequest(urlOrPredicate=): documented as Union[str, RegExp, Function], code has Union[str, Pattern, Callable[[str], bool], NoneType]
+Parameter type mismatch in Page.waitForResponse(urlOrPredicate=): documented as Union[str, RegExp, function(Response):boolean], code has Union[str, Pattern, Callable[[str], bool], NoneType]
 
 # Add init script
 Parameter type mismatch in Page.addInitScript(script=): documented as Union[Callable, str, Dict], code has Optional[str]
@@ -93,10 +93,10 @@ Parameter type mismatch in Frame.dispatchEvent(eventInit=): documented as Option
 Parameter type mismatch in Page.dispatchEvent(eventInit=): documented as Optional[EvaluationArgument], code has Optional[Dict]
 
 # Route
-Parameter type mismatch in BrowserContext.route(handler=): documented as function(Route, Request), code has typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
-Parameter type mismatch in BrowserContext.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
-Parameter type mismatch in Page.route(handler=): documented as function(Route, Request), code has typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
-Parameter type mismatch in Page.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+Parameter type mismatch in Page.route(handler=): documented as function(Route, Request), code has Callable[[Route, Request], Any]
+Parameter type mismatch in Page.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[Callable[[Route, Request], Any]]
+Parameter type mismatch in BrowserContext.route(handler=): documented as function(Route, Request), code has Callable[[Route, Request], Any]
+Parameter type mismatch in BrowserContext.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[Callable[[Route, Request], Any]]
 
 # Selectors
 Parameter type mismatch in Selectors.register(script=): documented as Union[Callable, str, Dict], code has Optional[str]

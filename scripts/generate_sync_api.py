@@ -154,7 +154,7 @@ def generate(t: Any) -> None:
 
 def main() -> None:
     print(header)
-    print("from playwright.sync_base import EventContextManager, SyncBase, mapping")
+    print("from playwright._sync_base import EventContextManager, SyncBase, mapping")
     print("NoneType = type(None)")
 
     for t in all_types:

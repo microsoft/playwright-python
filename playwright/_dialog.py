@@ -12,34 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List
+from typing import Dict
 
-from playwright.connection import ChannelOwner, from_channel
-from playwright.js_handle import JSHandle
-from playwright.types import ConsoleMessageLocation
+from playwright._connection import ChannelOwner
+from playwright._helper import locals_to_params
 
 
-class ConsoleMessage(ChannelOwner):
+class Dialog(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-
-    def __str__(self) -> str:
-        return self.text
 
     @property
     def type(self) -> str:
         return self._initializer["type"]
 
     @property
-    def text(self) -> str:
-        return self._initializer["text"]
+    def message(self) -> str:
+        return self._initializer["message"]
 
     @property
-    def args(self) -> List[JSHandle]:
-        return list(map(from_channel, self._initializer["args"]))
+    def defaultValue(self) -> str:
+        return self._initializer["defaultValue"]
 
-    @property
-    def location(self) -> ConsoleMessageLocation:
-        return self._initializer["location"]
+    async def accept(self, promptText: str = None) -> None:
+        await self._channel.send("accept", locals_to_params(locals()))
+
+    async def dismiss(self) -> None:
+        await self._channel.send("dismiss")

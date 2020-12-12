@@ -21,8 +21,8 @@ from typing import Any, Callable, Dict, Optional, Union
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
-from playwright.helper import ParsedMessagePayload, parse_error
-from playwright.transport import Transport
+from playwright._helper import ParsedMessagePayload, parse_error
+from playwright._transport import Transport
 
 
 class Channel(AsyncIOEventEmitter):

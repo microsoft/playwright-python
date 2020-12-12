@@ -26,7 +26,7 @@ from OpenSSL import crypto
 from twisted.internet import reactor, ssl
 from twisted.web import http
 
-from playwright.path_utils import get_file_dirname
+from playwright._path_utils import get_file_dirname
 
 _dirname = get_file_dirname()
 

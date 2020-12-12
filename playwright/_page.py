@@ -19,16 +19,16 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
-from playwright.accessibility import Accessibility
-from playwright.connection import ChannelOwner, from_channel, from_nullable_channel
-from playwright.console_message import ConsoleMessage
-from playwright.dialog import Dialog
-from playwright.download import Download
-from playwright.element_handle import ElementHandle, ValuesToSelect
-from playwright.event_context_manager import EventContextManagerImpl
-from playwright.file_chooser import FileChooser
-from playwright.frame import Frame
-from playwright.helper import (
+from playwright._accessibility import Accessibility
+from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
+from playwright._console_message import ConsoleMessage
+from playwright._dialog import Dialog
+from playwright._download import Download
+from playwright._element_handle import ElementHandle, ValuesToSelect
+from playwright._event_context_manager import EventContextManagerImpl
+from playwright._file_chooser import FileChooser
+from playwright._frame import Frame
+from playwright._helper import (
     ColorScheme,
     DocumentLoadState,
     KeyboardModifier,
@@ -45,15 +45,15 @@ from playwright.helper import (
     parse_error,
     serialize_error,
 )
-from playwright.input import Keyboard, Mouse, Touchscreen
-from playwright.js_handle import (
+from playwright._input import Keyboard, Mouse, Touchscreen
+from playwright._js_handle import (
     JSHandle,
     Serializable,
     parse_result,
     serialize_argument,
 )
-from playwright.network import Request, Response, Route, serialize_headers
-from playwright.types import (
+from playwright._network import Request, Response, Route, serialize_headers
+from playwright._types import (
     Error,
     FilePayload,
     FloatRect,
@@ -61,8 +61,8 @@ from playwright.types import (
     MousePosition,
     PdfMargins,
 )
-from playwright.video import Video
-from playwright.wait_helper import WaitHelper
+from playwright._video import Video
+from playwright._wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -70,7 +70,7 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.browser_context import BrowserContext
+    from playwright._browser_context import BrowserContext
 
 
 class Page(ChannelOwner):

@@ -12,35 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List
 
-from playwright.connection import ChannelOwner
+from playwright._connection import ChannelOwner, from_channel
+from playwright._js_handle import JSHandle
+from playwright._types import ConsoleMessageLocation
 
 
-class Download(ChannelOwner):
+class ConsoleMessage(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
-    @property
-    def url(self) -> str:
-        return self._initializer["url"]
+    def __str__(self) -> str:
+        return self.text
 
     @property
-    def suggestedFilename(self) -> str:
-        return self._initializer["suggestedFilename"]
+    def type(self) -> str:
+        return self._initializer["type"]
 
-    async def delete(self) -> None:
-        await self._channel.send("delete")
+    @property
+    def text(self) -> str:
+        return self._initializer["text"]
 
-    async def failure(self) -> Optional[str]:
-        return await self._channel.send("failure")
+    @property
+    def args(self) -> List[JSHandle]:
+        return list(map(from_channel, self._initializer["args"]))
 
-    async def path(self) -> Optional[str]:
-        return await self._channel.send("path")
-
-    async def saveAs(self, path: Union[str, Path]) -> None:
-        path = str(Path(path))
-        return await self._channel.send("saveAs", dict(path=path))
+    @property
+    def location(self) -> ConsoleMessageLocation:
+        return self._initializer["location"]

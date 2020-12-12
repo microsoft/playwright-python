@@ -161,7 +161,7 @@ def generate(t: Any) -> None:
 def main() -> None:
     print(header)
     print(
-        "from playwright.async_base import AsyncEventContextManager, AsyncBase, mapping"
+        "from playwright._async_base import AsyncEventContextManager, AsyncBase, mapping"
     )
     print("NoneType = type(None)")
 

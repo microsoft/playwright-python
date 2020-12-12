@@ -16,7 +16,7 @@ import os
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.page import Page
+    from playwright._page import Page
 
 
 class Video:

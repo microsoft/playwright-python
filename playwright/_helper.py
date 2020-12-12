@@ -32,7 +32,7 @@ from typing import (
     cast,
 )
 
-from playwright.types import Error, TimeoutError
+from playwright._types import Error, TimeoutError
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -41,7 +41,7 @@ else:  # pragma: no cover
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.network import Request, Route
+    from playwright._network import Request, Route
 
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
 RouteHandler = Callable[["Route", "Request"], Any]

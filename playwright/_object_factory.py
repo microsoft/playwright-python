@@ -14,22 +14,22 @@
 
 from typing import Any, Dict, cast
 
-from playwright.browser import Browser
-from playwright.browser_context import BrowserContext
-from playwright.browser_type import BrowserType
-from playwright.cdp_session import CDPSession
-from playwright.chromium_browser_context import ChromiumBrowserContext
-from playwright.connection import ChannelOwner
-from playwright.console_message import ConsoleMessage
-from playwright.dialog import Dialog
-from playwright.download import Download
-from playwright.element_handle import ElementHandle
-from playwright.frame import Frame
-from playwright.js_handle import JSHandle
-from playwright.network import Request, Response, Route, WebSocket
-from playwright.page import BindingCall, Page, Worker
-from playwright.playwright import Playwright
-from playwright.selectors import Selectors
+from playwright._browser import Browser
+from playwright._browser_context import BrowserContext
+from playwright._browser_type import BrowserType
+from playwright._cdp_session import CDPSession
+from playwright._chromium_browser_context import ChromiumBrowserContext
+from playwright._connection import ChannelOwner
+from playwright._console_message import ConsoleMessage
+from playwright._dialog import Dialog
+from playwright._download import Download
+from playwright._element_handle import ElementHandle
+from playwright._frame import Frame
+from playwright._js_handle import JSHandle
+from playwright._network import Request, Response, Route, WebSocket
+from playwright._page import BindingCall, Page, Worker
+from playwright._playwright import Playwright
+from playwright._selectors import Selectors
 
 
 class DummyObject(ChannelOwner):

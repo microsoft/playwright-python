@@ -27,7 +27,7 @@ from typing import (
 
 import greenlet
 
-from playwright.impl_to_api_mapping import ImplToApiMapping, ImplWrapper
+from playwright._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
 mapping = ImplToApiMapping()
 

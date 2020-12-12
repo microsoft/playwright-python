@@ -19,20 +19,20 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
-from playwright.connection import ChannelOwner, from_nullable_channel
-from playwright.helper import (
+from playwright._connection import ChannelOwner, from_nullable_channel
+from playwright._helper import (
     KeyboardModifier,
     MouseButton,
     SetFilePayload,
     locals_to_params,
 )
-from playwright.js_handle import (
+from playwright._js_handle import (
     JSHandle,
     Serializable,
     parse_result,
     serialize_argument,
 )
-from playwright.types import FilePayload, FloatRect, MousePosition, SelectOption
+from playwright._types import FilePayload, FloatRect, MousePosition, SelectOption
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -40,7 +40,7 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright.frame import Frame
+    from playwright._frame import Frame
 
 
 class ElementHandle(JSHandle):

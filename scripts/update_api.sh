@@ -17,5 +17,5 @@ function update_api {
     fi
 }
 
-update_api "playwright/sync_api.py" "scripts/generate_sync_api.py"
-update_api "playwright/async_api.py" "scripts/generate_async_api.py"
+update_api "playwright/_sync_api.py" "scripts/generate_sync_api.py"
+update_api "playwright/_async_api.py" "scripts/generate_async_api.py"
