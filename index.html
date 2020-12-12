@@ -53,11 +53,11 @@ For more information you&#39;ll find the documentation for the sync API [here](s
 and for the async API [here](async_api.html).
 &#34;&#34;&#34;
 
-import playwright.helper as helper
+import playwright.types as types
 from playwright.main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
-Error = helper.Error
-TimeoutError = helper.TimeoutError
+Error = types.Error
+TimeoutError = types.TimeoutError
 
 
 def async_playwright() -&gt; AsyncPlaywrightContextManager:
@@ -121,6 +121,10 @@ __pdoc__ = {
 <dd>
 <div class="desc"></div>
 </dd>
+<dt><code class="name"><a title="playwright.types" href="types.html">playwright.types</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt><code class="name"><a title="playwright.video" href="video.html">playwright.video</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -157,7 +161,7 @@ __pdoc__ = {
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>playwright.helper.TimeoutError</li>
+<li><a title="playwright.types.TimeoutError" href="types.html#playwright.types.TimeoutError">TimeoutError</a></li>
 </ul>
 </dd>
 <dt id="playwright.TimeoutError"><code class="flex name class">
@@ -175,7 +179,7 @@ __pdoc__ = {
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright.helper.Error</li>
+<li><a title="playwright.types.Error" href="types.html#playwright.types.Error">Error</a></li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>

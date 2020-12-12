@@ -64,8 +64,23 @@ from playwright.download import Download as DownloadImpl
 from playwright.element_handle import ElementHandle as ElementHandleImpl
 from playwright.file_chooser import FileChooser as FileChooserImpl
 from playwright.frame import Frame as FrameImpl
-from playwright.helper import (
+from playwright.input import Keyboard as KeyboardImpl
+from playwright.input import Mouse as MouseImpl
+from playwright.input import Touchscreen as TouchscreenImpl
+from playwright.js_handle import JSHandle as JSHandleImpl
+from playwright.network import Request as RequestImpl
+from playwright.network import Response as ResponseImpl
+from playwright.network import Route as RouteImpl
+from playwright.network import WebSocket as WebSocketImpl
+from playwright.page import BindingCall as BindingCallImpl
+from playwright.page import Page as PageImpl
+from playwright.page import Worker as WorkerImpl
+from playwright.playwright import Playwright as PlaywrightImpl
+from playwright.selectors import Selectors as SelectorsImpl
+from playwright.sync_base import EventContextManager, SyncBase, mapping
+from playwright.types import (
     ConsoleMessageLocation,
+    Cookie,
     Credentials,
     DeviceDescriptor,
     Error,
@@ -81,24 +96,8 @@ from playwright.helper import (
     RequestFailure,
     ResourceTiming,
     SelectOption,
-    SetStorageState,
     StorageState,
-    Viewport,
 )
-from playwright.input import Keyboard as KeyboardImpl
-from playwright.input import Mouse as MouseImpl
-from playwright.input import Touchscreen as TouchscreenImpl
-from playwright.js_handle import JSHandle as JSHandleImpl
-from playwright.network import Request as RequestImpl
-from playwright.network import Response as ResponseImpl
-from playwright.network import Route as RouteImpl
-from playwright.network import WebSocket as WebSocketImpl
-from playwright.page import BindingCall as BindingCallImpl
-from playwright.page import Page as PageImpl
-from playwright.page import Worker as WorkerImpl
-from playwright.playwright import Playwright as PlaywrightImpl
-from playwright.selectors import Selectors as SelectorsImpl
-from playwright.sync_base import EventContextManager, SyncBase, mapping
 from playwright.video import Video as VideoImpl
 
 NoneType = type(None)
@@ -4750,7 +4749,7 @@ class Page(SyncBase):
             self._sync(self._impl_obj.setViewportSize(width=width, height=height))
         )
 
-    def viewportSize(self) -&gt; typing.Union[Viewport, NoneType]:
+    def viewportSize(self) -&gt; typing.Union[IntSize, NoneType]:
         &#34;&#34;&#34;Page.viewportSize
 
         Returns
@@ -6141,7 +6140,7 @@ class BrowserContext(SyncBase):
 
     def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
-    ) -&gt; typing.List[typing.Dict]:
+    ) -&gt; typing.List[Cookie]:
         &#34;&#34;&#34;BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -6154,11 +6153,11 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        List[Dict]
+        List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._sync(self._impl_obj.cookies(urls=urls)))
 
-    def addCookies(self, cookies: typing.List[typing.Dict]) -&gt; NoneType:
+    def addCookies(self, cookies: typing.List[Cookie]) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.addCookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -6166,10 +6165,10 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        cookies : List[Dict]
+        cookies : List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.addCookies(cookies=mapping.to_impl(cookies)))
+            self._sync(self._impl_obj.addCookies(cookies=cookies))
         )
 
     def clearCookies(self) -&gt; NoneType:
@@ -6455,7 +6454,7 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        {&#34;cookies&#34;: List[Dict], &#34;origins&#34;: List[Dict]}
+        {&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._sync(self._impl_obj.storageState()))
 
@@ -6669,7 +6668,7 @@ class Browser(SyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -6720,7 +6719,7 @@ class Browser(SyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
@@ -6783,7 +6782,7 @@ class Browser(SyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6837,7 +6836,7 @@ class Browser(SyncBase):
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
@@ -7457,7 +7456,7 @@ An example of logging the focused node's name:</p>
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -7508,7 +7507,7 @@ An example of logging the focused node's name:</p>
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
@@ -7571,7 +7570,7 @@ An example of logging the focused node's name:</p>
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: SetStorageState = None,
+        storageState: StorageState = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -7625,7 +7624,7 @@ An example of logging the focused node's name:</p>
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
         recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
         Returns
@@ -7790,7 +7789,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newContext"><code class="name flex">
-<span>def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None, storageState: playwright.helper.SetStorageState = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
+<span>def <span class="ident">newContext</span></span>(<span>self, viewport: Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.types.Credentials" href="types.html#playwright.types.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, videosPath: str = None, videoSize: <a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a> = None, recordHar: <a title="playwright.types.RecordHarOptions" href="types.html#playwright.types.RecordHarOptions">RecordHarOptions</a> = None, recordVideo: <a title="playwright.types.RecordVideoOptions" href="types.html#playwright.types.RecordVideoOptions">RecordVideoOptions</a> = None, storageState: <a title="playwright.types.StorageState" href="types.html#playwright.types.StorageState">StorageState</a> = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -7841,7 +7840,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.</dd>
 <dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
-<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]</code></dt>
+<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]</code></dt>
 <dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -7878,7 +7877,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
     recordVideo: RecordVideoOptions = None,
-    storageState: SetStorageState = None,
+    storageState: StorageState = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;Browser.newContext
 
@@ -7929,7 +7928,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
     recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-    storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+    storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
         Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
     Returns
@@ -7969,7 +7968,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.newPage"><code class="name flex">
-<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright.helper.ProxyServer = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None, storageState: playwright.helper.SetStorageState = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
+<span>def <span class="ident">newPage</span></span>(<span>self, viewport: Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.types.Credentials" href="types.html#playwright.types.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, videosPath: str = None, videoSize: <a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a> = None, recordHar: <a title="playwright.types.RecordHarOptions" href="types.html#playwright.types.RecordHarOptions">RecordHarOptions</a> = None, recordVideo: <a title="playwright.types.RecordVideoOptions" href="types.html#playwright.types.RecordVideoOptions">RecordVideoOptions</a> = None, storageState: <a title="playwright.types.StorageState" href="types.html#playwright.types.StorageState">StorageState</a> = None) ‑> <a title="playwright.sync_api.Page" href="#playwright.sync_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -8023,7 +8022,7 @@ control their exact life times.</p>
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.</dd>
 <dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
-<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[Dict]], "origins": Optional[List[Dict]]}]</code></dt>
+<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]</code></dt>
 <dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -8060,7 +8059,7 @@ control their exact life times.</p>
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
     recordVideo: RecordVideoOptions = None,
-    storageState: SetStorageState = None,
+    storageState: StorageState = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.newPage
 
@@ -8114,7 +8113,7 @@ control their exact life times.</p>
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
     recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-    storageState : Optional[{&#34;cookies&#34;: Optional[List[Dict]], &#34;origins&#34;: Optional[List[Dict]]}]
+    storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
         Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
 
     Returns
@@ -8248,7 +8247,7 @@ control their exact life times.</p>
 
     def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
-    ) -&gt; typing.List[typing.Dict]:
+    ) -&gt; typing.List[Cookie]:
         &#34;&#34;&#34;BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -8261,11 +8260,11 @@ control their exact life times.</p>
 
         Returns
         -------
-        List[Dict]
+        List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._sync(self._impl_obj.cookies(urls=urls)))
 
-    def addCookies(self, cookies: typing.List[typing.Dict]) -&gt; NoneType:
+    def addCookies(self, cookies: typing.List[Cookie]) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.addCookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -8273,10 +8272,10 @@ control their exact life times.</p>
 
         Parameters
         ----------
-        cookies : List[Dict]
+        cookies : List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.addCookies(cookies=mapping.to_impl(cookies)))
+            self._sync(self._impl_obj.addCookies(cookies=cookies))
         )
 
     def clearCookies(self) -&gt; NoneType:
@@ -8562,7 +8561,7 @@ control their exact life times.</p>
 
         Returns
         -------
-        {&#34;cookies&#34;: List[Dict], &#34;origins&#34;: List[Dict]}
+        {&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(self._sync(self._impl_obj.storageState()))
 
@@ -8693,7 +8692,7 @@ def pages(self) -&gt; typing.List[&#34;Page&#34;]:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.BrowserContext.addCookies"><code class="name flex">
-<span>def <span class="ident">addCookies</span></span>(<span>self, cookies: List[Dict]) ‑> NoneType</span>
+<span>def <span class="ident">addCookies</span></span>(<span>self, cookies: List[<a title="playwright.types.Cookie" href="types.html#playwright.types.Cookie">Cookie</a>]) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.addCookies</p>
@@ -8701,14 +8700,14 @@ def pages(self) -&gt; typing.List[&#34;Page&#34;]:
 obtained via browserContext.cookies([urls]).</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>cookies</code></strong> :&ensp;<code>List[Dict]</code></dt>
+<dt><strong><code>cookies</code></strong> :&ensp;<code>List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def addCookies(self, cookies: typing.List[typing.Dict]) -&gt; NoneType:
+<pre><code class="python">def addCookies(self, cookies: typing.List[Cookie]) -&gt; NoneType:
     &#34;&#34;&#34;BrowserContext.addCookies
 
     Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -8716,10 +8715,10 @@ obtained via browserContext.cookies([urls]).</p>
 
     Parameters
     ----------
-    cookies : List[Dict]
+    cookies : List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
-        self._sync(self._impl_obj.addCookies(cookies=mapping.to_impl(cookies)))
+        self._sync(self._impl_obj.addCookies(cookies=cookies))
     )</code></pre>
 </details>
 </dd>
@@ -8830,7 +8829,7 @@ page.addInitScript(script[, arg]) is not defined.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.cookies"><code class="name flex">
-<span>def <span class="ident">cookies</span></span>(<span>self, urls: Union[str, List[str]] = None) ‑> List[Dict]</span>
+<span>def <span class="ident">cookies</span></span>(<span>self, urls: Union[str, List[str]] = None) ‑> List[<a title="playwright.types.Cookie" href="types.html#playwright.types.Cookie">Cookie</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.cookies</p>
@@ -8843,7 +8842,7 @@ are returned.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>List[Dict]</code></dt>
+<dt><code>List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
@@ -8852,7 +8851,7 @@ are returned.</p>
 </summary>
 <pre><code class="python">def cookies(
     self, urls: typing.Union[str, typing.List[str]] = None
-) -&gt; typing.List[typing.Dict]:
+) -&gt; typing.List[Cookie]:
     &#34;&#34;&#34;BrowserContext.cookies
 
     If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -8865,7 +8864,7 @@ are returned.</p>
 
     Returns
     -------
-    List[Dict]
+    List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._sync(self._impl_obj.cookies(urls=urls)))</code></pre>
 </details>
@@ -9360,7 +9359,7 @@ page-specific header value will be used instead of the browser context header va
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.setGeolocation"><code class="name flex">
-<span>def <span class="ident">setGeolocation</span></span>(<span>self, geolocation: playwright.helper.Geolocation = None) ‑> NoneType</span>
+<span>def <span class="ident">setGeolocation</span></span>(<span>self, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.setGeolocation</p>
@@ -9421,13 +9420,13 @@ read its geolocation.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.storageState"><code class="name flex">
-<span>def <span class="ident">storageState</span></span>(<span>self) ‑> playwright.helper.StorageState</span>
+<span>def <span class="ident">storageState</span></span>(<span>self) ‑> <a title="playwright.types.StorageState" href="types.html#playwright.types.StorageState">StorageState</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.storageState</p>
 <p>Returns storage state for this browser context, contains current cookies and local storage snapshot.</p>
 <h2 id="returns">Returns</h2>
-<p>{"cookies": List[Dict], "origins": List[Dict]}</p></div>
+<p>{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9439,7 +9438,7 @@ read its geolocation.</p>
 
     Returns
     -------
-    {&#34;cookies&#34;: List[Dict], &#34;origins&#34;: List[Dict]}
+    {&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._sync(self._impl_obj.storageState()))</code></pre>
 </details>
@@ -9904,7 +9903,7 @@ def name(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.BrowserType.launch"><code class="name flex">
-<span>def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None, firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None) ‑> <a title="playwright.sync_api.Browser" href="#playwright.sync_api.Browser">Browser</a></span>
+<span>def <span class="ident">launch</span></span>(<span>self, executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, chromiumSandbox: bool = None, firefoxUserPrefs: Dict[str, Union[str, int, bool]] = None) ‑> <a title="playwright.sync_api.Browser" href="#playwright.sync_api.Browser">Browser</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launch</p>
@@ -10059,7 +10058,7 @@ some differences for Linux users.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserType.launchPersistentContext"><code class="name flex">
-<span>def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright.helper.ProxyServer = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: Union[playwright.helper.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright.helper.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright.helper.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: playwright.helper.IntSize = None, recordHar: playwright.helper.RecordHarOptions = None, recordVideo: playwright.helper.RecordVideoOptions = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
+<span>def <span class="ident">launchPersistentContext</span></span>(<span>self, userDataDir: Union[str, pathlib.Path], executablePath: Union[str, pathlib.Path] = None, args: List[str] = None, ignoreDefaultArgs: Union[bool, List[str]] = None, handleSIGINT: bool = None, handleSIGTERM: bool = None, handleSIGHUP: bool = None, timeout: int = None, env: Dict[str, Union[str, int, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.types.ProxyServer" href="types.html#playwright.types.ProxyServer">ProxyServer</a> = None, downloadsPath: Union[str, pathlib.Path] = None, slowMo: int = None, viewport: Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: <a title="playwright.types.Geolocation" href="types.html#playwright.types.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: <a title="playwright.types.Credentials" href="types.html#playwright.types.Credentials">Credentials</a> = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, chromiumSandbox: bool = None, videosPath: str = None, videoSize: <a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a> = None, recordHar: <a title="playwright.types.RecordHarOptions" href="types.html#playwright.types.RecordHarOptions">RecordHarOptions</a> = None, recordVideo: <a title="playwright.types.RecordVideoOptions" href="types.html#playwright.types.RecordVideoOptions">RecordVideoOptions</a> = None) ‑> <a title="playwright.sync_api.BrowserContext" href="#playwright.sync_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launchPersistentContext</p>
@@ -10707,7 +10706,7 @@ def args(self) -&gt; typing.List[&#34;JSHandle&#34;]:
     return mapping.from_impl_list(self._impl_obj.args)</code></pre>
 </details>
 </dd>
-<dt id="playwright.sync_api.ConsoleMessage.location"><code class="name">var <span class="ident">location</span> : playwright.helper.ConsoleMessageLocation</code></dt>
+<dt id="playwright.sync_api.ConsoleMessage.location"><code class="name">var <span class="ident">location</span> : <a title="playwright.types.ConsoleMessageLocation" href="types.html#playwright.types.ConsoleMessageLocation">ConsoleMessageLocation</a></code></dt>
 <dd>
 <div class="desc"><p>ConsoleMessage.location</p>
 <h2 id="returns">Returns</h2>
@@ -12178,7 +12177,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.boundingBox"><code class="name flex">
-<span>def <span class="ident">boundingBox</span></span>(<span>self) ‑> Union[playwright.helper.FloatRect, NoneType]</span>
+<span>def <span class="ident">boundingBox</span></span>(<span>self) ‑> Union[<a title="playwright.types.FloatRect" href="types.html#playwright.types.FloatRect">FloatRect</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.boundingBox</p>
@@ -12285,7 +12284,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.click</p>
@@ -12409,7 +12408,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.dblclick</p>
@@ -12833,7 +12832,7 @@ an error. Note that you can pass an empty string to clear the input field.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.hover</p>
@@ -13252,7 +13251,7 @@ connected to a Document or a ShadowRoot.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.selectOption"><code class="name flex">
-<span>def <span class="ident">selectOption</span></span>(<span>self, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), playwright.helper.SelectOption, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[playwright.helper.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>def <span class="ident">selectOption</span></span>(<span>self, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), <a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.selectOption</p>
@@ -13353,7 +13352,7 @@ content.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.setInputFiles"><code class="name flex">
-<span>def <span class="ident">setInputFiles</span></span>(<span>self, files: Union[str, pathlib.Path, playwright.helper.FilePayload, List[str], List[pathlib.Path], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setInputFiles</span></span>(<span>self, files: Union[str, pathlib.Path, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[pathlib.Path], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.setInputFiles</p>
@@ -13414,7 +13413,7 @@ empty array, clears the selected files.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.tap"><code class="name flex">
-<span>def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.tap</p>
@@ -13983,7 +13982,7 @@ def page(self) -&gt; &#34;Page&#34;:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.FileChooser.setFiles"><code class="name flex">
-<span>def <span class="ident">setFiles</span></span>(<span>self, files: Union[str, playwright.helper.FilePayload, List[str], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setFiles</span></span>(<span>self, files: Union[str, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>FileChooser.setFiles</p>
@@ -15742,7 +15741,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.click</p>
@@ -15872,7 +15871,7 @@ Passing zero timeout disables this.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.dblclick</p>
@@ -16722,7 +16721,7 @@ issue.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.hover</p>
@@ -17085,7 +17084,7 @@ selectors for more details. If no elements match the selector, the return value 
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.selectOption"><code class="name flex">
-<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), playwright.helper.SelectOption, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[playwright.helper.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), <a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.selectOption</p>
@@ -17210,7 +17209,7 @@ matching <code>selector</code>, the method throws an error.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.setInputFiles"><code class="name flex">
-<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, playwright.helper.FilePayload, List[str], List[pathlib.Path], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[pathlib.Path], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.setInputFiles</p>
@@ -17279,7 +17278,7 @@ empty array, clears the selected files.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.tap"><code class="name flex">
-<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.tap</p>
@@ -20016,7 +20015,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
             self._sync(self._impl_obj.setViewportSize(width=width, height=height))
         )
 
-    def viewportSize(self) -&gt; typing.Union[Viewport, NoneType]:
+    def viewportSize(self) -&gt; typing.Union[IntSize, NoneType]:
         &#34;&#34;&#34;Page.viewportSize
 
         Returns
@@ -21849,7 +21848,7 @@ Shortcut for main frame's frame.check(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, clickCount: int = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.click</p>
@@ -22020,7 +22019,7 @@ and should be handled manually via page.on('dialog') event.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, delay: int = None, button: Literal['left', 'middle', 'right'] = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.dblclick</p>
@@ -23598,7 +23597,7 @@ issue.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.hover</p>
@@ -23821,7 +23820,7 @@ to <code>null</code>.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.pdf"><code class="name flex">
-<span>def <span class="ident">pdf</span></span>(<span>self, scale: int = None, displayHeaderFooter: bool = None, headerTemplate: str = None, footerTemplate: str = None, printBackground: bool = None, landscape: bool = None, pageRanges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, preferCSSPageSize: bool = None, margin: playwright.helper.PdfMargins = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
+<span>def <span class="ident">pdf</span></span>(<span>self, scale: int = None, displayHeaderFooter: bool = None, headerTemplate: str = None, footerTemplate: str = None, printBackground: bool = None, landscape: bool = None, pageRanges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, preferCSSPageSize: bool = None, margin: <a title="playwright.types.PdfMargins" href="types.html#playwright.types.PdfMargins">PdfMargins</a> = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.pdf</p>
@@ -24305,7 +24304,7 @@ both handlers.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.screenshot"><code class="name flex">
-<span>def <span class="ident">screenshot</span></span>(<span>self, timeout: int = None, type: Literal['jpeg', 'png'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omitBackground: bool = None, fullPage: bool = None, clip: playwright.helper.FloatRect = None) ‑> bytes</span>
+<span>def <span class="ident">screenshot</span></span>(<span>self, timeout: int = None, type: Literal['jpeg', 'png'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omitBackground: bool = None, fullPage: bool = None, clip: <a title="playwright.types.FloatRect" href="types.html#playwright.types.FloatRect">FloatRect</a> = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.screenshot</p>
@@ -24392,7 +24391,7 @@ discussion.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.selectOption"><code class="name flex">
-<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), playwright.helper.SelectOption, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[playwright.helper.SelectOption]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
+<span>def <span class="ident">selectOption</span></span>(<span>self, selector: str, values: Union[str, ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>'), <a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>, List[str], List[ForwardRef('<a title="playwright.sync_api.ElementHandle" href="#playwright.sync_api.ElementHandle">ElementHandle</a>')], List[<a title="playwright.types.SelectOption" href="types.html#playwright.types.SelectOption">SelectOption</a>]] = None, timeout: int = None, noWaitAfter: bool = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.selectOption</p>
@@ -24636,7 +24635,7 @@ browserContext.setDefaultTimeout(timeout) and browserContext.setDefaultNavigatio
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.setInputFiles"><code class="name flex">
-<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, playwright.helper.FilePayload, List[str], List[playwright.helper.FilePayload]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">setInputFiles</span></span>(<span>self, selector: str, files: Union[str, <a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>, List[str], List[<a title="playwright.types.FilePayload" href="types.html#playwright.types.FilePayload">FilePayload</a>]], timeout: int = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.setInputFiles</p>
@@ -24740,7 +24739,7 @@ viewport size before navigating to the page.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.tap"><code class="name flex">
-<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright.helper.MousePosition = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.types.MousePosition" href="types.html#playwright.types.MousePosition">MousePosition</a> = None, timeout: int = None, force: bool = None, noWaitAfter: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.tap</p>
@@ -25089,7 +25088,7 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.viewportSize"><code class="name flex">
-<span>def <span class="ident">viewportSize</span></span>(<span>self) ‑> Union[playwright.helper.Viewport, NoneType]</span>
+<span>def <span class="ident">viewportSize</span></span>(<span>self) ‑> Union[<a title="playwright.types.IntSize" href="types.html#playwright.types.IntSize">IntSize</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.viewportSize</p>
@@ -25102,7 +25101,7 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def viewportSize(self) -&gt; typing.Union[Viewport, NoneType]:
+<pre><code class="python">def viewportSize(self) -&gt; typing.Union[IntSize, NoneType]:
     &#34;&#34;&#34;Page.viewportSize
 
     Returns
@@ -25647,7 +25646,7 @@ def chromium(self) -&gt; &#34;BrowserType&#34;:
     return mapping.from_impl(self._impl_obj.chromium)</code></pre>
 </details>
 </dd>
-<dt id="playwright.sync_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict[str, playwright.helper.DeviceDescriptor]</code></dt>
+<dt id="playwright.sync_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict[str, <a title="playwright.types.DeviceDescriptor" href="types.html#playwright.types.DeviceDescriptor">DeviceDescriptor</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -25913,7 +25912,7 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="playwright.sync_api.Request.failure"><code class="name">var <span class="ident">failure</span> : Union[playwright.helper.RequestFailure, NoneType]</code></dt>
+<dt id="playwright.sync_api.Request.failure"><code class="name">var <span class="ident">failure</span> : Union[<a title="playwright.types.RequestFailure" href="types.html#playwright.types.RequestFailure">RequestFailure</a>, NoneType]</code></dt>
 <dd>
 <div class="desc"><p>Request.failure</p>
 <p>The method returns <code>null</code> unless this request has failed, as reported by <code>requestfailed</code> event.
@@ -26195,7 +26194,7 @@ def resourceType(self) -&gt; str:
     return mapping.from_maybe_impl(self._impl_obj.resourceType)</code></pre>
 </details>
 </dd>
-<dt id="playwright.sync_api.Request.timing"><code class="name">var <span class="ident">timing</span> : playwright.helper.ResourceTiming</code></dt>
+<dt id="playwright.sync_api.Request.timing"><code class="name">var <span class="ident">timing</span> : <a title="playwright.types.ResourceTiming" href="types.html#playwright.types.ResourceTiming">ResourceTiming</a></code></dt>
 <dd>
 <div class="desc"><p>Request.timing</p>
 <p>Returns resource timing information for given request. Most of the timing values become available upon the response,
@@ -26670,7 +26669,7 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.sync_api.Response.finished"><code class="name flex">
-<span>def <span class="ident">finished</span></span>(<span>self) ‑> Union[playwright.helper.Error, NoneType]</span>
+<span>def <span class="ident">finished</span></span>(<span>self) ‑> Union[<a title="playwright.types.Error" href="types.html#playwright.types.Error">Error</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Response.finished</p>
