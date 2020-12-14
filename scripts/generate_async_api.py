@@ -18,6 +18,7 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
+from playwright._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -50,7 +51,7 @@ def generate(t: Any) -> None:
     for [name, type] in get_type_hints(t, api_globals).items():
         print("")
         print("    @property")
-        print(f"    def {name}(self) -> {process_type(type)}:")
+        print(f"    def {to_snake_case(name)}(self) -> {process_type(type)}:")
         documentation_provider.print_entry(class_name, name, {"return": type})
         [prefix, suffix] = return_value(type)
         prefix = "        return " + prefix + f"self._impl_obj.{name}"
@@ -63,7 +64,7 @@ def generate(t: Any) -> None:
             print("")
             print("    @property")
             print(
-                f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                f"    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
             )
             documentation_provider.print_entry(
                 class_name, name, get_type_hints(value, api_globals)
@@ -83,7 +84,7 @@ def generate(t: Any) -> None:
             print("")
             if inspect.iscoroutinefunction(value):
                 print(
-                    f"    async def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                    f"    async def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
                 )
                 documentation_provider.print_entry(
                     class_name, name, get_type_hints(value, api_globals)
@@ -96,7 +97,7 @@ def generate(t: Any) -> None:
                 print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
             else:
                 print(
-                    f"    def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                    f"    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
                 )
                 documentation_provider.print_entry(
                     class_name, name, get_type_hints(value, api_globals)
@@ -116,7 +117,7 @@ def generate(t: Any) -> None:
             event_name = re.sub(r"consolemessage", "console", event_name)
 
             print(
-                f"""    def {name}({signature(value, len(name) + 9)}) -> Async{return_type_value}:
+                f"""    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> Async{return_type_value}:
         \"\"\"{class_name}.{name}
 
         Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
@@ -146,7 +147,7 @@ def generate(t: Any) -> None:
             elif event_name == "loadstate":
                 wait_for_method = "waitForLoadState(state, timeout)"
             elif event_name == "navigation":
-                wait_for_method = "waitForNavigation(url, waitUntil, timeout)"
+                wait_for_method = "waitForNavigation(url, wait_until, timeout)"
             elif event_name != "event":
                 print(f'        event = "{event_name}"')
 

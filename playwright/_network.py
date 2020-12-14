@@ -20,10 +20,11 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 
+from playwright._api_structures import ResourceTiming
+from playwright._api_types import Error, RequestFailure
 from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright._event_context_manager import EventContextManagerImpl
 from playwright._helper import ContinueParameters, Header, locals_to_params
-from playwright._types import Error, RequestFailure, ResourceTiming
 from playwright._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -117,7 +118,7 @@ class Request(ChannelOwner):
 
     @property
     def failure(self) -> Optional[RequestFailure]:
-        return {"errorText": self._failure_text} if self._failure_text else None
+        return RequestFailure(self._failure_text) if self._failure_text else None
 
     @property
     def timing(self) -> ResourceTiming:
@@ -234,7 +235,7 @@ class Response(ChannelOwner):
     def headers(self) -> Dict[str, str]:
         return parse_headers(self._initializer["headers"])
 
-    async def finished(self) -> Optional[Error]:
+    async def finished(self) -> Optional[str]:
         return await self._channel.send("finished")
 
     async def body(self) -> bytes:

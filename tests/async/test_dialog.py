@@ -25,7 +25,7 @@ async def test_should_fire(page: Page, server):
     async def on_dialog(dialog: Dialog):
         result.append(True)
         assert dialog.type == "alert"
-        assert dialog.defaultValue == ""
+        assert dialog.default_value == ""
         assert dialog.message == "yo"
         await dialog.accept()
 
@@ -40,7 +40,7 @@ async def test_should_allow_accepting_prompts(page: Page, server):
     async def on_dialog(dialog: Dialog):
         result.append(True)
         assert dialog.type == "prompt"
-        assert dialog.defaultValue == "yes."
+        assert dialog.default_value == "yes."
         assert dialog.message == "question?"
         await dialog.accept("answer!")
 
@@ -88,15 +88,15 @@ async def test_should_dismiss_the_confirm_prompt(page: Page, server):
 # TODO: Logger support not yet here
 # //   it.fail(CHANNEL)('should log prompt actions', async({browser}) => {
 # //     const messages = [];
-# //     const context = await browser.newContext({
+# //     const context = await browser.new_context({
 # //       logger: {
 # //         isEnabled: () => true,
 # //         log: (name, severity, message) => messages.push(message),
 # //       }
 # //     });
-# //     const page = await context.newPage();
+# //     const page = await context.new_page();
 # //     const promise = page.evaluate(() => confirm('01234567890123456789012345678901234567890123456789012345678901234567890123456789'));
-# //     const dialog = await page.waitForEvent('dialog');
+# //     const dialog = await page.wait_for_event('dialog');
 # //     expect(messages.join()).toContain('confirm "0123456789012345678901234567890123456789012345678…" was shown');
 # //     await dialog.accept('123');
 # //     await promise;
@@ -107,9 +107,9 @@ async def test_should_dismiss_the_confirm_prompt(page: Page, server):
 
 @pytest.mark.skip_browser("webkit")
 async def test_should_be_able_to_close_context_with_open_alert(browser):
-    context = await browser.newContext()
-    page = await context.newPage()
-    alertFuture = asyncio.create_task(page.waitForEvent("dialog"))
+    context = await browser.new_context()
+    page = await context.new_page()
+    alertFuture = asyncio.create_task(page.wait_for_event("dialog"))
     await page.evaluate("() => setTimeout(() => alert('hello'), 0)", None)
     await alertFuture
     await context.close()

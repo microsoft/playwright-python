@@ -14,31 +14,31 @@
 
 
 def test_check_the_box(page):
-    page.setContent('<input id="checkbox" type="checkbox"></input>')
+    page.set_content('<input id="checkbox" type="checkbox"></input>')
     page.check("input")
     assert page.evaluate("checkbox.checked")
 
 
 def test_not_check_the_checked_box(page):
-    page.setContent('<input id="checkbox" type="checkbox" checked></input>')
+    page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     page.check("input")
     assert page.evaluate("checkbox.checked")
 
 
 def test_uncheck_the_box(page):
-    page.setContent('<input id="checkbox" type="checkbox" checked></input>')
+    page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     page.uncheck("input")
     assert page.evaluate("checkbox.checked") is False
 
 
 def test_not_uncheck_the_unchecked_box(page):
-    page.setContent('<input id="checkbox" type="checkbox"></input>')
+    page.set_content('<input id="checkbox" type="checkbox"></input>')
     page.uncheck("input")
     assert page.evaluate("checkbox.checked") is False
 
 
 def test_check_the_box_by_label(page):
-    page.setContent(
+    page.set_content(
         '<label for="checkbox"><input id="checkbox" type="checkbox"></input></label>'
     )
     page.check("label")
@@ -46,7 +46,7 @@ def test_check_the_box_by_label(page):
 
 
 def test_check_the_box_outside_label(page):
-    page.setContent(
+    page.set_content(
         '<label for="checkbox">Text</label><div><input id="checkbox" type="checkbox"></input></div>'
     )
     page.check("label")
@@ -54,7 +54,7 @@ def test_check_the_box_outside_label(page):
 
 
 def test_check_the_box_inside_label_without_id(page):
-    page.setContent(
+    page.set_content(
         '<label>Text<span><input id="checkbox" type="checkbox"></input></span></label>'
     )
     page.check("label")
@@ -62,7 +62,7 @@ def test_check_the_box_inside_label_without_id(page):
 
 
 def test_check_radio(page):
-    page.setContent(
+    page.set_content(
         """
       <input type='radio'>one</input>
       <input id='two' type='radio'>two</input>
@@ -73,11 +73,11 @@ def test_check_radio(page):
 
 
 def test_check_the_box_by_aria_role(page):
-    page.setContent(
+    page.set_content(
         """<div role='checkbox' id='checkbox'>CHECKBOX</div>
       <script>
         checkbox.addEventListener('click', () => checkbox.setAttribute('aria-checked', 'true'))
       </script>"""
     )
     page.check("div")
-    assert page.evaluate("checkbox.getAttribute('aria-checked')")
+    assert page.evaluate("checkbox.getAttribute ('aria-checked')")

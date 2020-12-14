@@ -13,18 +13,18 @@
 # limitations under the License.
 
 import re
-from typing import List, cast
+from typing import List, Tuple, cast
 
+from playwright._api_types import Error
 from playwright._element_handle import ElementHandle
 from playwright._frame import Frame
 from playwright._page import Page
 from playwright._selectors import Selectors
-from playwright._types import Error, IntSize
 
 
 class Utils:
     async def attach_frame(self, page: Page, frame_id: str, url: str):
-        handle = await page.evaluateHandle(
+        handle = await page.evaluate_handle(
             """async ({ frame_id, url }) => {
                 const frame = document.createElement('iframe');
                 frame.src = url;
@@ -35,7 +35,7 @@ class Utils:
             }""",
             {"frame_id": frame_id, "url": url},
         )
-        return await cast(ElementHandle, handle.asElement()).contentFrame()
+        return await cast(ElementHandle, handle.as_element()).content_frame()
 
     async def detach_frame(self, page: Page, frame_id: str):
         await page.evaluate(
@@ -49,15 +49,15 @@ class Utils:
             description += " (" + frame.name + ")"
         result = [indentation + description]
         sorted_frames = sorted(
-            frame.childFrames, key=lambda frame: frame.url + frame.name
+            frame.child_frames, key=lambda frame: frame.url + frame.name
         )
         for child in sorted_frames:
             result = result + utils.dump_frames(child, "    " + indentation)
         return result
 
     async def verify_viewport(self, page: Page, width: int, height: int):
-        assert cast(IntSize, page.viewportSize())["width"] == width
-        assert cast(IntSize, page.viewportSize())["height"] == height
+        assert cast(Tuple[int, int], page.viewport_size())[0] == width
+        assert cast(Tuple[int, int], page.viewport_size())[1] == height
         assert await page.evaluate("window.innerWidth") == width
         assert await page.evaluate("window.innerHeight") == height
 

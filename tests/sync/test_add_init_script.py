@@ -16,19 +16,19 @@ from playwright import Error
 
 
 def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
-    page.addInitScript("window.injected = 123")
+    page.add_init_script("window.injected = 123")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
 def test_add_init_script_work_with_a_path(page, assetdir):
-    page.addInitScript(path=assetdir / "injectedfile.js")
+    page.add_init_script(path=assetdir / "injectedfile.js")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
 def test_add_init_script_work_with_content(page):
-    page.addInitScript("window.injected = 123")
+    page.add_init_script("window.injected = 123")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
@@ -36,16 +36,16 @@ def test_add_init_script_work_with_content(page):
 def test_add_init_script_throw_without_path_and_content(page):
     error = None
     try:
-        page.addInitScript({"foo": "bar"})
+        page.add_init_script({"foo": "bar"})
     except Error as e:
         error = e
     assert error.message == "Either path or source parameter must be specified"
 
 
 def test_add_init_script_work_with_browser_context_scripts(page, context):
-    context.addInitScript("window.temp = 123")
-    page = context.newPage()
-    page.addInitScript("window.injected = window.temp")
+    context.add_init_script("window.temp = 123")
+    page = context.new_page()
+    page.add_init_script("window.injected = window.temp")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
@@ -53,8 +53,8 @@ def test_add_init_script_work_with_browser_context_scripts(page, context):
 def test_add_init_script_work_with_browser_context_scripts_with_a_path(
     page, context, assetdir
 ):
-    context.addInitScript(path=assetdir / "injectedfile.js")
-    page = context.newPage()
+    context.add_init_script(path=assetdir / "injectedfile.js")
+    page = context.new_page()
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
@@ -62,15 +62,15 @@ def test_add_init_script_work_with_browser_context_scripts_with_a_path(
 def test_add_init_script_work_with_browser_context_scripts_for_already_created_pages(
     page, context
 ):
-    context.addInitScript("window.temp = 123")
-    page.addInitScript("window.injected = window.temp")
+    context.add_init_script("window.temp = 123")
+    page.add_init_script("window.injected = window.temp")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
 def test_add_init_script_support_multiple_scripts(page):
-    page.addInitScript("window.script1 = 1")
-    page.addInitScript("window.script2 = 2")
+    page.add_init_script("window.script1 = 1")
+    page.add_init_script("window.script2 = 2")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.script1") == 1
     assert page.evaluate("window.script2") == 2

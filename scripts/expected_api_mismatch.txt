@@ -31,14 +31,16 @@ Parameter not documented: Selectors.register(path=)
 Parameter not documented: WebSocket.waitForEvent(timeout=)
 Parameter not documented: WebSocket.waitForEvent(predicate=)
 
+# Viewport size
+Parameter type mismatch in Browser.newPage(viewport=): documented as Optional[Dict], code has Union[typing.Tuple[int, int], '0', NoneType]
+Parameter type mismatch in Browser.newContext(viewport=): documented as Optional[Dict], code has Union[typing.Tuple[int, int], '0', NoneType]
+Parameter type mismatch in BrowserType.launchPersistentContext(viewport=): documented as Optional[Dict], code has Union[typing.Tuple[int, int], '0', NoneType]
+Parameter type mismatch in Page.viewportSize(return=): documented as Optional[Dict], code has Optional[typing.Tuple[int, int]]
+
 # Documented as Dict / Any
 Parameter type mismatch in BrowserContext.setGeolocation(geolocation=): documented as Optional[Dict], code has Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
 Parameter type mismatch in BrowserContext.waitForEvent(return=): documented as Dict, code has Any
-Parameter type mismatch in Browser.newContext(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
-Parameter type mismatch in Browser.newPage(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
-Parameter type mismatch in BrowserType.launchPersistentContext(viewport=): documented as Optional[Dict], code has Union[{"width": int, "height": int}, '0', NoneType]
 Parameter type mismatch in ElementHandle.boundingBox(return=): documented as Optional[Dict], code has Optional[{"x": float, "y": float, "width": float, "height": float}]
-Parameter type mismatch in Page.viewportSize(return=): documented as Optional[Dict], code has Optional[{"width": int, "height": int}]
 Parameter type mismatch in Page.waitForEvent(return=): documented as Dict, code has Any
 Parameter type mismatch in Request.failure(return=): documented as Optional[Dict], code has Optional[{"errorText": str}]
 Parameter type mismatch in Response.json(return=): documented as Any, code has Union[Dict, List]
@@ -77,15 +79,15 @@ Parameter not documented: BrowserContext.addInitScript(path=)
 Parameter not documented: Page.addInitScript(path=)
 
 # File payload
-Parameter type mismatch in FileChooser.setFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
-Parameter type mismatch in Page.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
-Parameter type mismatch in ElementHandle.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
-Parameter type mismatch in Frame.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+Parameter type mismatch in ElementHandle.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, Dict, List[str], List[pathlib.Path], List[Dict]]
+Parameter type mismatch in Page.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, Dict, List[str], List[Dict]]
+Parameter type mismatch in FileChooser.setFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, Dict, List[str], List[Dict]]
+Parameter type mismatch in Frame.setInputFiles(files=): documented as Union[str, List[str], Dict, List[Dict]], code has Union[str, pathlib.Path, Dict, List[str], List[pathlib.Path], List[Dict]]
 
 # Select option
-Parameter type mismatch in ElementHandle.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
-Parameter type mismatch in Frame.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
-Parameter type mismatch in Page.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+Parameter type mismatch in ElementHandle.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
+Parameter type mismatch in Frame.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
+Parameter type mismatch in Page.selectOption(values=): documented as Union[str, ElementHandle, List[str], Dict, List[ElementHandle], List[Dict], NoneType], code has Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
 
 # Evaluation argument
 Parameter type mismatch in ElementHandle.dispatchEvent(eventInit=): documented as Optional[EvaluationArgument], code has Optional[Dict]
@@ -115,6 +117,12 @@ Parameter not implemented: Browser.newPage(logger=)
 Parameter not implemented: Page.addInitScript(arg=)
 Parameter not implemented: BrowserContext.addInitScript(arg=)
 Method not implemented: BrowserType.connect
+Parameter not implemented: Browser.newContext(videoSize=)
+Parameter not implemented: BrowserType.launchPersistentContext(videosPath=)
+Parameter not implemented: Browser.newPage(videosPath=)
+Parameter not implemented: Browser.newPage(videoSize=)
+Parameter not implemented: Browser.newContext(videosPath=)
+Parameter not implemented: BrowserType.launchPersistentContext(videoSize=)
 
 # OptionsOr
 Parameter not implemented: Page.waitForEvent(optionsOrPredicate=)
@@ -122,17 +130,33 @@ Parameter not implemented: BrowserContext.waitForEvent(optionsOrPredicate=)
 Parameter not implemented: WebSocket.waitForEvent(optionsOrPredicate=)
 
 # Cookies are documented as Array<Object> in md, so not parsed.
-Parameter type mismatch in BrowserContext.addCookies(cookies=): documented as List[Dict], code has List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
-Parameter type mismatch in BrowserContext.storageState(return=): documented as {"cookies": List[Dict], "origins": List[Dict]}, code has {"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}
-Parameter type mismatch in BrowserContext.cookies(return=): documented as List[Dict], code has List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
-Parameter type mismatch in Browser.newPage(storageState=): documented as Union[str, Dict, NoneType], code has Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
 Parameter type mismatch in Browser.newContext(storageState=): documented as Union[str, Dict, NoneType], code has Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+Parameter type mismatch in Browser.newPage(storageState=): documented as Union[str, Dict, NoneType], code has Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+Parameter type mismatch in BrowserContext.storageState(return=): documented as {"cookies": List[Dict], "origins": List[Dict]}, code has {"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}
+Parameter type mismatch in BrowserContext.addCookies(cookies=): documented as List[Dict], code has List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
+Parameter type mismatch in BrowserContext.cookies(return=): documented as List[Dict], code has List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
+Parameter type mismatch in Response.finished(return=): documented as Optional[Error], code has Optional[str]
 
-# Pathlib-related
-Parameter type mismatch in BrowserType.launchPersistentContext(recordHar=): documented as Optional[{"omitContent": Optional[bool], "path": str}], code has Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-Parameter type mismatch in BrowserType.launchPersistentContext(recordVideo=): documented as Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}], code has Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-Parameter type mismatch in Browser.newPage(recordVideo=): documented as Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}], code has Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-Parameter type mismatch in Browser.newContext(recordVideo=): documented as Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}], code has Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-Parameter type mismatch in BrowserContext.storageState(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+# Path
 Parameter type mismatch in Browser.newContext(recordHar=): documented as Optional[{"omitContent": Optional[bool], "path": str}], code has Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
+Parameter type mismatch in BrowserType.launchPersistentContext(recordHar=): documented as Optional[{"omitContent": Optional[bool], "path": str}], code has Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
 Parameter type mismatch in Browser.newPage(recordHar=): documented as Optional[{"omitContent": Optional[bool], "path": str}], code has Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
+Parameter type mismatch in Browser.newContext(recordVideo=): documented as Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}], code has Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
+Parameter type mismatch in Browser.newPage(recordVideo=): documented as Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}], code has Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
+Parameter type mismatch in BrowserType.launchPersistentContext(recordVideo=): documented as Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}], code has Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
+Parameter type mismatch in BrowserContext.storageState(path=): documented as Optional[str], code has Union[str, pathlib.Path, NoneType]
+
+
+# FloatPoint
+Parameter type mismatch in Frame.click(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in ElementHandle.hover(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Frame.tap(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in ElementHandle.click(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Frame.hover(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in ElementHandle.tap(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Page.click(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Page.tap(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Page.dblclick(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in ElementHandle.dblclick(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Frame.dblclick(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]
+Parameter type mismatch in Page.hover(position=): documented as Optional[{"x": float, "y": float}], code has Optional[typing.Tuple[float, float]]

@@ -46,9 +46,9 @@ async def test_should_emit_close_events(page, ws_server):
         )
     ws = await ws_info.value
     assert ws.url == f"ws://localhost:{ws_server.PORT}/ws"
-    if not ws.isClosed():
-        await ws.waitForEvent("close")
-    assert ws.isClosed()
+    if not ws.is_closed():
+        await ws.wait_for_event("close")
+    assert ws.is_closed()
 
 
 async def test_should_emit_frame_events(page, ws_server):
@@ -71,8 +71,8 @@ async def test_should_emit_frame_events(page, ws_server):
             ws_server.PORT,
         )
     ws = await ws_info.value
-    if not ws.isClosed():
-        await ws.waitForEvent("close")
+    if not ws.is_closed():
+        await ws.wait_for_event("close")
 
     assert sent == ["echo-text"]
     assert received == ["incoming", "text"]
@@ -102,8 +102,8 @@ async def test_should_emit_binary_frame_events(page, ws_server):
             ws_server.PORT,
         )
     ws = await ws_info.value
-    if not ws.isClosed():
-        await ws.waitForEvent("close")
+    if not ws.is_closed():
+        await ws.wait_for_event("close")
     assert sent == [b"\x00\x01\x02\x03\x04", "echo-bin"]
     assert received == ["incoming", b"\x04\x02"]
 
@@ -118,7 +118,7 @@ async def test_should_reject_wait_for_event_on_close_and_error(page, ws_server):
             ws_server.PORT,
         )
     ws = await ws_info.value
-    await ws.waitForEvent("framereceived")
+    await ws.wait_for_event("framereceived")
     with pytest.raises(Error) as exc_info:
         async with ws.expect_event("framesent"):
             await page.evaluate("window.ws.close()")

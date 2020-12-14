@@ -14,10 +14,10 @@
 
 from typing import Dict
 
+from playwright._api_types import DeviceDescriptor
 from playwright._browser_type import BrowserType
 from playwright._connection import ChannelOwner, from_channel
 from playwright._selectors import Selectors
-from playwright._types import DeviceDescriptor
 
 
 class Playwright(ChannelOwner):
@@ -35,8 +35,9 @@ class Playwright(ChannelOwner):
         self.firefox = from_channel(initializer["firefox"])
         self.webkit = from_channel(initializer["webkit"])
         self.selectors = from_channel(initializer["selectors"])
+        self.devices = {}
         self.devices = {
-            device["name"]: device["descriptor"]
+            device["name"]: DeviceDescriptor._parse(device["descriptor"])
             for device in initializer["deviceDescriptors"]
         }
 

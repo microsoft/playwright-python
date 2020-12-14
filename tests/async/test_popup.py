@@ -15,17 +15,18 @@
 import asyncio
 from typing import List, cast
 
+from playwright import HttpCredentials
 from playwright.async_api import Browser, Page, Request, Route
 
 
 async def test_link_navigation_inherit_user_agent_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.newContext(userAgent="hey")
+    context = await browser.new_context(user_agent="hey")
 
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent(
+    await page.set_content(
         '<a target=_blank rel=noopener href="/popup/popup.html">link</a>'
     )
     request_waitable = asyncio.create_task(server.wait_for_request("/popup/popup.html"))
@@ -34,12 +35,12 @@ async def test_link_navigation_inherit_user_agent_from_browser_context(
         Page,
         (
             await asyncio.gather(
-                context.waitForEvent("page"),
+                context.wait_for_event("page"),
                 page.click("a"),
             )
         )[0],
     )
-    await popup.waitForLoadState("domcontentloaded")
+    await popup.wait_for_load_state("domcontentloaded")
     user_agent = await popup.evaluate("window.initialUserAgent")
     request = await request_waitable
     assert user_agent == "hey"
@@ -48,9 +49,9 @@ async def test_link_navigation_inherit_user_agent_from_browser_context(
 
 
 async def test_link_navigation_respect_routes_from_browser_context(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a target=_blank rel=noopener href="empty.html">link</a>')
+    await page.set_content('<a target=_blank rel=noopener href="empty.html">link</a>')
 
     def handle_request(route: Route, request: Request, intercepted) -> None:
         asyncio.create_task(route.continue_())
@@ -62,7 +63,7 @@ async def test_link_navigation_respect_routes_from_browser_context(context, serv
         lambda route, request: handle_request(route, request, intercepted),
     )
     await asyncio.gather(
-        context.waitForEvent("page"),
+        context.wait_for_event("page"),
         page.click("a"),
     )
     assert intercepted == [True]
@@ -71,9 +72,9 @@ async def test_link_navigation_respect_routes_from_browser_context(context, serv
 async def test_window_open_inherit_user_agent_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.newContext(userAgent="hey")
+    context = await browser.new_context(user_agent="hey")
 
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     request_promise = asyncio.create_task(server.wait_for_request("/dummy.html"))
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
@@ -93,9 +94,9 @@ async def test_window_open_inherit_user_agent_from_browser_context(
 async def test_should_inherit_extra_headers_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.newContext(extraHTTPHeaders={"foo": "bar"})
+    context = await browser.new_context(extra_http_headers={"foo": "bar"})
 
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     request_promise = asyncio.create_task(server.wait_for_request("/dummy.html"))
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
@@ -108,9 +109,9 @@ async def test_should_inherit_extra_headers_from_browser_context(
 
 
 async def test_should_inherit_offline_from_browser_context(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await context.setOffline(True)
+    await context.set_offline(True)
     online = await page.evaluate(
         """url => {
             win = window.open(url)
@@ -125,20 +126,20 @@ async def test_should_inherit_http_credentials_from_browser_context(
     browser: Browser, server
 ):
     server.set_auth("/title.html", b"user", b"pass")
-    context = await browser.newContext(
-        httpCredentials={"username": "user", "password": "pass"}
+    context = await browser.new_context(
+        http_credentials=HttpCredentials("user", "pass")
     )
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 "url => window._popup = window.open(url)", server.PREFIX + "/title.html"
             ),
         )
     )[0]
-    await popup.waitForLoadState("domcontentloaded")
+    await popup.wait_for_load_state("domcontentloaded")
     assert await popup.title() == "Woof-Woof"
     await context.close()
 
@@ -146,11 +147,9 @@ async def test_should_inherit_http_credentials_from_browser_context(
 async def test_should_inherit_touch_support_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.newContext(
-        viewport={"width": 400, "height": 500}, hasTouch=True
-    )
+    context = await browser.new_context(viewport=(400, 500), has_touch=True)
 
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     has_touch = await page.evaluate(
         """() => {
@@ -166,9 +165,9 @@ async def test_should_inherit_touch_support_from_browser_context(
 async def test_should_inherit_viewport_size_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.newContext(viewport={"width": 400, "height": 500})
+    context = await browser.new_context(viewport=(400, 500))
 
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     size = await page.evaluate(
         """() => {
@@ -182,8 +181,8 @@ async def test_should_inherit_viewport_size_from_browser_context(
 
 
 async def test_should_use_viewport_size_from_window_features(browser: Browser, server):
-    context = await browser.newContext(viewport={"width": 700, "height": 700})
-    page = await context.newPage()
+    context = await browser.new_context(viewport=(700, 700))
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     [size, popup] = await asyncio.gather(
         page.evaluate(
@@ -192,10 +191,10 @@ async def test_should_use_viewport_size_from_window_features(browser: Browser, s
                 return { width: win.innerWidth, height: win.innerHeight }
             }"""
         ),
-        page.waitForEvent("popup"),
+        page.wait_for_event("popup"),
     )
-    await popup.setViewportSize(width=500, height=400)
-    await popup.waitForLoadState()
+    await popup.set_viewport_size(width=500, height=400)
+    await popup.wait_for_load_state()
     resized = await popup.evaluate(
         "() => ({ width: window.innerWidth, height: window.innerHeight })"
     )
@@ -205,7 +204,7 @@ async def test_should_use_viewport_size_from_window_features(browser: Browser, s
 
 
 async def test_should_respect_routes_from_browser_context(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
 
     def handle_request(route, request, intercepted):
@@ -219,7 +218,7 @@ async def test_should_respect_routes_from_browser_context(context, server):
     )
 
     await asyncio.gather(
-        page.waitForEvent("popup"),
+        page.wait_for_event("popup"),
         page.evaluate("url => window.__popup = window.open(url)", server.EMPTY_PAGE),
     )
     assert len(intercepted) == 1
@@ -228,8 +227,8 @@ async def test_should_respect_routes_from_browser_context(context, server):
 async def test_browser_context_add_init_script_should_apply_to_an_in_process_popup(
     context, server
 ):
-    await context.addInitScript("window.injected = 123")
-    page = await context.newPage()
+    await context.add_init_script("window.injected = 123")
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     injected = await page.evaluate(
         """() => {
@@ -244,12 +243,12 @@ async def test_browser_context_add_init_script_should_apply_to_an_in_process_pop
 async def test_browser_context_add_init_script_should_apply_to_a_cross_process_popup(
     context, server
 ):
-    await context.addInitScript("window.injected = 123")
-    page = await context.newPage()
+    await context.add_init_script("window.injected = 123")
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 "url => window.open(url)", server.CROSS_PROCESS_PREFIX + "/title.html"
             ),
@@ -261,8 +260,8 @@ async def test_browser_context_add_init_script_should_apply_to_a_cross_process_p
 
 
 async def test_should_expose_function_from_browser_context(context, server):
-    await context.exposeFunction("add", lambda a, b: a + b)
-    page = await context.newPage()
+    await context.expose_function("add", lambda a, b: a + b)
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     added = await page.evaluate(
         """async () => {
@@ -275,10 +274,10 @@ async def test_should_expose_function_from_browser_context(context, server):
 
 
 async def test_should_work(context):
-    page = await context.newPage()
+    page = await context.new_page()
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate('window.__popup = window.open("about:blank")'),
         )
     )[0]
@@ -287,11 +286,11 @@ async def test_should_work(context):
 
 
 async def test_should_work_with_window_features(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 'window.__popup = window.open(window.location.href, "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=780,height=200,top=0,left=0")'
             ),
@@ -302,10 +301,10 @@ async def test_should_work_with_window_features(context, server):
 
 
 async def test_window_open_emit_for_immediately_closed_popups(context):
-    page = await context.newPage()
+    page = await context.new_page()
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 """() => {
                     win = window.open('about:blank')
@@ -318,11 +317,11 @@ async def test_window_open_emit_for_immediately_closed_popups(context):
 
 
 async def test_should_emit_for_immediately_closed_popups(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 """() => {
                     win = window.open(window.location.href)
@@ -335,7 +334,7 @@ async def test_should_emit_for_immediately_closed_popups(context, server):
 
 
 async def test_should_be_able_to_capture_alert(context):
-    page = await context.newPage()
+    page = await context.new_page()
     evaluate_promise = asyncio.create_task(
         page.evaluate(
             """() => {
@@ -345,18 +344,18 @@ async def test_should_be_able_to_capture_alert(context):
         )
     )
 
-    popup = await page.waitForEvent("popup")
-    dialog = await popup.waitForEvent("dialog")
+    popup = await page.wait_for_event("popup")
+    dialog = await popup.wait_for_event("dialog")
     assert dialog.message == "hello"
     await dialog.dismiss()
     await evaluate_promise
 
 
 async def test_should_work_with_empty_url(context):
-    page = await context.newPage()
+    page = await context.new_page()
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate('() => window.__popup = window.open("")'),
         )
     )[0]
@@ -365,10 +364,10 @@ async def test_should_work_with_empty_url(context):
 
 
 async def test_should_work_with_noopener_and_no_url(context):
-    page = await context.newPage()
+    page = await context.new_page()
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 '() => window.__popup = window.open(undefined, null, "noopener")'
             ),
@@ -381,10 +380,10 @@ async def test_should_work_with_noopener_and_no_url(context):
 
 
 async def test_should_work_with_noopener_and_about_blank(context):
-    page = await context.newPage()
+    page = await context.new_page()
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 '() => window.__popup = window.open("about:blank", null, "noopener")'
             ),
@@ -395,11 +394,11 @@ async def test_should_work_with_noopener_and_about_blank(context):
 
 
 async def test_should_work_with_noopener_and_url(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.evaluate(
                 'url => window.__popup = window.open(url, null, "noopener")',
                 server.EMPTY_PAGE,
@@ -411,12 +410,14 @@ async def test_should_work_with_noopener_and_url(context, server):
 
 
 async def test_should_work_with_clicking_target__blank(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a target=_blank rel="opener" href="/one-style.html">yo</a>')
+    await page.set_content(
+        '<a target=_blank rel="opener" href="/one-style.html">yo</a>'
+    )
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.click("a"),
         )
     )[0]
@@ -427,13 +428,15 @@ async def test_should_work_with_clicking_target__blank(context, server):
 async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(
     context, server
 ):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
+    await page.set_content(
+        '<a target=_blank rel=noopener href="/one-style.html">yo</a>'
+    )
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
-            page.evalOnSelector("a", "a => a.click()"),
+            page.wait_for_event("popup"),
+            page.eval_on_selector("a", "a => a.click()"),
         )
     )[0]
     assert await page.evaluate("!!window.opener") is False
@@ -443,12 +446,14 @@ async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(
 async def test_should_work_with_clicking_target__blank_and_rel_noopener(
     context, server
 ):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
+    await page.set_content(
+        '<a target=_blank rel=noopener href="/one-style.html">yo</a>'
+    )
     popup = (
         await asyncio.gather(
-            page.waitForEvent("popup"),
+            page.wait_for_event("popup"),
             page.click("a"),
         )
     )[0]
@@ -457,10 +462,12 @@ async def test_should_work_with_clicking_target__blank_and_rel_noopener(
 
 
 async def test_should_not_treat_navigations_as_new_popups(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a target=_blank rel=noopener href="/one-style.html">yo</a>')
-    popup = (await asyncio.gather(page.waitForEvent("popup"), page.click("a")))[0]
+    await page.set_content(
+        '<a target=_blank rel=noopener href="/one-style.html">yo</a>'
+    )
+    popup = (await asyncio.gather(page.wait_for_event("popup"), page.click("a")))[0]
 
     handled_popups = []
     page.on(

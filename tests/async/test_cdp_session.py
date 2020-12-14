@@ -21,7 +21,7 @@ from playwright import Error
 
 @pytest.mark.only_browser("chromium")
 async def test_should_work(page):
-    client = await page.context.newCDPSession(page)
+    client = await page.context.new_cdp_session(page)
 
     await asyncio.gather(
         client.send("Runtime.enable"),
@@ -33,7 +33,7 @@ async def test_should_work(page):
 
 @pytest.mark.only_browser("chromium")
 async def test_should_send_events(page, server):
-    client = await page.context.newCDPSession(page)
+    client = await page.context.new_cdp_session(page)
     await client.send("Network.enable")
     events = []
     client.on("Network.requestWillBeSent", lambda event: events.append(event))
@@ -43,7 +43,7 @@ async def test_should_send_events(page, server):
 
 @pytest.mark.only_browser("chromium")
 async def test_should_be_able_to_detach_session(page):
-    client = await page.context.newCDPSession(page)
+    client = await page.context.new_cdp_session(page)
     await client.send("Runtime.enable")
     eval_response = await client.send(
         "Runtime.evaluate", {"expression": "1 + 2", "returnByValue": True}
@@ -59,9 +59,9 @@ async def test_should_be_able_to_detach_session(page):
 
 @pytest.mark.only_browser("chromium")
 async def test_should_not_break_page_close(browser):
-    context = await browser.newContext()
-    page = await context.newPage()
-    session = await page.context.newCDPSession(page)
+    context = await browser.new_context()
+    page = await context.new_page()
+    session = await page.context.new_cdp_session(page)
     await session.detach()
     await page.close()
     await context.close()
@@ -69,9 +69,9 @@ async def test_should_not_break_page_close(browser):
 
 @pytest.mark.only_browser("chromium")
 async def test_should_detach_when_page_closes(browser):
-    context = await browser.newContext()
-    page = await context.newPage()
-    session = await context.newCDPSession(page)
+    context = await browser.new_context()
+    page = await context.new_page()
+    session = await context.new_cdp_session(page)
     await page.close()
     with pytest.raises(Error):
         await session.detach()

@@ -15,33 +15,33 @@
 
 async def test_should_clear_cookies(context, page, server):
     await page.goto(server.EMPTY_PAGE)
-    await context.addCookies(
+    await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "cookie1", "value": "1"}]
     )
     assert await page.evaluate("document.cookie") == "cookie1=1"
-    await context.clearCookies()
+    await context.clear_cookies()
     assert await context.cookies() == []
     await page.reload()
     assert await page.evaluate("document.cookie") == ""
 
 
 async def test_should_isolate_cookies_when_clearing(context, server, browser):
-    another_context = await browser.newContext()
-    await context.addCookies(
+    another_context = await browser.new_context()
+    await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "page1cookie", "value": "page1value"}]
     )
-    await another_context.addCookies(
+    await another_context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "page2cookie", "value": "page2value"}]
     )
 
     assert len(await context.cookies()) == 1
     assert len(await another_context.cookies()) == 1
 
-    await context.clearCookies()
+    await context.clear_cookies()
     assert len(await context.cookies()) == 0
     assert len(await another_context.cookies()) == 1
 
-    await another_context.clearCookies()
+    await another_context.clear_cookies()
     assert len(await context.cookies()) == 0
     assert len(await another_context.cookies()) == 0
     await another_context.close()

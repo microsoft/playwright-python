@@ -21,7 +21,7 @@ import pytest
 async def test_should_capture_local_storage(context, is_webkit, is_win):
     if is_webkit and is_win:
         pytest.skip()
-    page1 = await context.newPage()
+    page1 = await context.new_page()
     await page1.route(
         "**/*", lambda route: asyncio.create_task(route.fulfill(body="<html></html>"))
     )
@@ -30,7 +30,7 @@ async def test_should_capture_local_storage(context, is_webkit, is_win):
     await page1.goto("https://www.domain.com")
     await page1.evaluate("localStorage['name2'] = 'value2'")
 
-    state = await context.storageState()
+    state = await context.storage_state()
     origins = state["origins"]
     assert len(origins) == 2
     assert origins[0] == {
@@ -46,8 +46,8 @@ async def test_should_capture_local_storage(context, is_webkit, is_win):
 async def test_should_set_local_storage(browser, is_webkit, is_win):
     if is_webkit and is_win:
         pytest.skip()
-    context = await browser.newContext(
-        storageState={
+    context = await browser.new_context(
+        storage_state={
             "origins": [
                 {
                     "origin": "https://www.example.com",
@@ -57,7 +57,7 @@ async def test_should_set_local_storage(browser, is_webkit, is_win):
         }
     )
 
-    page = await context.newPage()
+    page = await context.new_page()
     await page.route(
         "**/*", lambda route: asyncio.create_task(route.fulfill(body="<html></html>"))
     )
@@ -68,7 +68,7 @@ async def test_should_set_local_storage(browser, is_webkit, is_win):
 
 
 async def test_should_round_trip_through_the_file(browser, context, tmpdir):
-    page1 = await context.newPage()
+    page1 = await context.new_page()
     await page1.route(
         "**/*",
         lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
@@ -83,13 +83,13 @@ async def test_should_round_trip_through_the_file(browser, context, tmpdir):
     )
 
     path = tmpdir / "storage-state.json"
-    state = await context.storageState(path=path)
+    state = await context.storage_state(path=path)
     with open(path, "r") as f:
         written = json.load(f)
     assert state == written
 
-    context2 = await browser.newContext(storageState=path)
-    page2 = await context2.newPage()
+    context2 = await browser.new_context(storage_state=path)
+    page2 = await context2.new_page()
     await page2.route(
         "**/*",
         lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),

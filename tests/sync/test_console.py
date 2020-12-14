@@ -27,9 +27,9 @@ def test_console_should_work(page: Page, server):
     assert message.text == "hello 5 JSHandle@object"
     assert str(message) == "hello 5 JSHandle@object"
     assert message.type == "log"
-    assert message.args[0].jsonValue() == "hello"
-    assert message.args[1].jsonValue() == 5
-    assert message.args[2].jsonValue() == {"foo": "bar"}
+    assert message.args[0].json_value() == "hello"
+    assert message.args[1].json_value() == 5
+    assert message.args[2].json_value() == {"foo": "bar"}
 
 
 def test_console_should_emit_same_log_twice(page, server):
@@ -108,8 +108,8 @@ def test_console_should_have_location_for_console_api_calls(page, server):
     assert message.type == "log"
     location = message.location
     # Engines have different column notion.
-    del location["columnNumber"]
-    assert location == {"url": server.PREFIX + "/consolelog.html", "lineNumber": 7}
+    assert location.url == server.PREFIX + "/consolelog.html"
+    assert location.line == 7
 
 
 def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(

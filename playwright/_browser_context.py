@@ -18,6 +18,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
+from playwright._api_structures import Cookie, StorageState
+from playwright._api_types import Error, Geolocation
 from playwright._connection import ChannelOwner, from_channel
 from playwright._event_context_manager import EventContextManagerImpl
 from playwright._helper import (
@@ -32,7 +34,6 @@ from playwright._helper import (
 )
 from playwright._network import Request, Route, serialize_headers
 from playwright._page import BindingCall, Page
-from playwright._types import Cookie, Error, Geolocation, StorageState
 from playwright._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover

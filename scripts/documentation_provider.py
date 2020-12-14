@@ -27,6 +27,8 @@ from typing import (  # type: ignore
     get_type_hints,
 )
 
+from playwright._helper import to_snake_case
+
 enum_regex = r"^\"[^\"]+\"(?:\|\"[^\"]+\")+$"
 union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
 
@@ -95,7 +97,7 @@ class DocumentationProvider:
             return
 
         indent = " " * 8
-        print(f'{indent}"""{class_name}.{original_method_name}')
+        print(f'{indent}"""{class_name}.{to_snake_case(original_method_name)}')
         if method.get("comment"):
             print(f"{indent}{self.beautify_method_comment(method['comment'], indent)}")
         signature_no_return = {**signature} if signature else None
@@ -148,7 +150,7 @@ class DocumentationProvider:
                 else:
                     code_type = self.serialize_python_type(value)
 
-                    print(f"{indent}{original_name} : {code_type}")
+                    print(f"{indent}{to_snake_case(original_name)} : {code_type}")
                     if doc_value.get("comment"):
                         print(
                             f"{indent}    {self.indent_paragraph(doc_value['comment'], f'{indent}    ')}"
@@ -249,7 +251,32 @@ class DocumentationProvider:
         if match:
             return match.group(1)
         match = re.match(r"^<class 'playwright\.[\w_]+\.([\w]+)'>$", str_value)
-        if match and "_types" not in str_value:
+        if match and "_api_structures" not in str_value:
+            if match.group(1) == "FilePayload":
+                return "Dict"
+            if match.group(1) == "FloatRect":
+                return '{"x": float, "y": float, "width": float, "height": float}'
+            if match.group(1) == "Geolocation":
+                return '{"latitude": float, "longitude": float, "accuracy": Optional[float]}'
+            if match.group(1) == "HttpCredentials":
+                return '{"username": str, "password": str}'
+            if match.group(1) == "PdfMargins":
+                return '{"top": Union[str, int, NoneType], "right": Union[str, int, NoneType], "bottom": Union[str, int, NoneType], "left": Union[str, int, NoneType]}'
+            if match.group(1) == "ProxySettings":
+                return '{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}'
+            if match.group(1) == "RecordHarOptions":
+                return (
+                    '{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}'
+                )
+            if match.group(1) == "RecordVideoOptions":
+                return '{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}'
+            if match.group(1) == "RequestFailure":
+                return '{"errorText": str}'
+            if match.group(1) == "OptionSelector":
+                return '{"value": Optional[str], "label": Optional[str], "index": Optional[int]}'
+            if match.group(1) == "SourceLocation":
+                return '{"url": str, "lineNumber": int, "columnNumber": int}'
+
             return match.group(1)
 
         match = re.match(r"^typing\.(\w+)$", str_value)

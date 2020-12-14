@@ -21,24 +21,24 @@ async def test_selectors_register_should_work(selectors, browser):
     # Register one engine before creating context.
     await selectors.register("tag", tag_selector)
 
-    context = await browser.newContext()
+    context = await browser.new_context()
     # Register another engine after creating context.
     await selectors.register("tag2", tag_selector)
 
-    page = await context.newPage()
-    await page.setContent("<div><span></span></div><div></div>")
+    page = await context.new_page()
+    await page.set_content("<div><span></span></div><div></div>")
 
-    assert await page.evalOnSelector("tag=DIV", "e => e.nodeName") == "DIV"
-    assert await page.evalOnSelector("tag=SPAN", "e => e.nodeName") == "SPAN"
-    assert await page.evalOnSelectorAll("tag=DIV", "es => es.length") == 2
+    assert await page.eval_on_selector("tag=DIV", "e => e.nodeName") == "DIV"
+    assert await page.eval_on_selector("tag=SPAN", "e => e.nodeName") == "SPAN"
+    assert await page.eval_on_selector_all("tag=DIV", "es => es.length") == 2
 
-    assert await page.evalOnSelector("tag2=DIV", "e => e.nodeName") == "DIV"
-    assert await page.evalOnSelector("tag2=SPAN", "e => e.nodeName") == "SPAN"
-    assert await page.evalOnSelectorAll("tag2=DIV", "es => es.length") == 2
+    assert await page.eval_on_selector("tag2=DIV", "e => e.nodeName") == "DIV"
+    assert await page.eval_on_selector("tag2=SPAN", "e => e.nodeName") == "SPAN"
+    assert await page.eval_on_selector_all("tag2=DIV", "es => es.length") == 2
 
     # Selector names are case-sensitive.
     with pytest.raises(Error) as exc:
-        await page.querySelector("tAG=DIV")
+        await page.query_selector("tAG=DIV")
     assert 'Unknown engine "tAG" while parsing selector tAG=DIV' in exc.value.message
 
     await context.close()
@@ -50,8 +50,8 @@ async def test_selectors_register_should_work_with_path(
     await utils.register_selector_engine(
         selectors, "foo", path=assetdir / "sectionselectorengine.js"
     )
-    await page.setContent("<section></section>")
-    assert await page.evalOnSelector("foo=whatever", "e => e.nodeName") == "SECTION"
+    await page.set_content("<section></section>")
+    assert await page.eval_on_selector("foo=whatever", "e => e.nodeName") == "SECTION"
 
 
 async def test_selectors_register_should_work_in_main_and_isolated_world(
@@ -69,55 +69,61 @@ async def test_selectors_register_should_work_in_main_and_isolated_world(
 
     await utils.register_selector_engine(selectors, "main", dummy_selector_script)
     await utils.register_selector_engine(
-        selectors, "isolated", dummy_selector_script, contentScript=True
+        selectors, "isolated", dummy_selector_script, content_script=True
     )
-    await page.setContent("<div><span><section></section></span></div>")
+    await page.set_content("<div><span><section></section></span></div>")
     await page.evaluate('() => window.__answer = document.querySelector("span")')
     # Works in main if asked.
-    assert await page.evalOnSelector("main=ignored", "e => e.nodeName") == "SPAN"
+    assert await page.eval_on_selector("main=ignored", "e => e.nodeName") == "SPAN"
     assert (
-        await page.evalOnSelector("css=div >> main=ignored", "e => e.nodeName")
+        await page.eval_on_selector("css=div >> main=ignored", "e => e.nodeName")
         == "SPAN"
     )
-    assert await page.evalOnSelectorAll(
+    assert await page.eval_on_selector_all(
         "main=ignored", "es => window.__answer !== undefined"
     )
     assert (
-        await page.evalOnSelectorAll("main=ignored", "es => es.filter(e => e).length")
+        await page.eval_on_selector_all(
+            "main=ignored", "es => es.filter(e => e).length"
+        )
         == 3
     )
     # Works in isolated by default.
-    assert await page.querySelector("isolated=ignored") is None
-    assert await page.querySelector("css=div >> isolated=ignored") is None
+    assert await page.query_selector("isolated=ignored") is None
+    assert await page.query_selector("css=div >> isolated=ignored") is None
     # $$eval always works in main, to avoid adopting nodes one by one.
-    assert await page.evalOnSelectorAll(
+    assert await page.eval_on_selector_all(
         "isolated=ignored", "es => window.__answer !== undefined"
     )
     assert (
-        await page.evalOnSelectorAll(
+        await page.eval_on_selector_all(
             "isolated=ignored", "es => es.filter(e => e).length"
         )
         == 3
     )
     # At least one engine in main forces all to be in main.
     assert (
-        await page.evalOnSelector("main=ignored >> isolated=ignored", "e => e.nodeName")
+        await page.eval_on_selector(
+            "main=ignored >> isolated=ignored", "e => e.nodeName"
+        )
         == "SPAN"
     )
     assert (
-        await page.evalOnSelector("isolated=ignored >> main=ignored", "e => e.nodeName")
+        await page.eval_on_selector(
+            "isolated=ignored >> main=ignored", "e => e.nodeName"
+        )
         == "SPAN"
     )
     # Can be chained to css.
     assert (
-        await page.evalOnSelector("main=ignored >> css=section", "e => e.nodeName")
+        await page.eval_on_selector("main=ignored >> css=section", "e => e.nodeName")
         == "SECTION"
     )
 
 
 async def test_selectors_register_should_handle_errors(selectors, page: Page, utils):
     with pytest.raises(Error) as exc:
-        await page.querySelector("neverregister=ignored")
+        await page.query_selector("neverregister=ignored")
     assert (
         'Unknown engine "neverregister" while parsing selector neverregister=ignored'
         in exc.value.message
