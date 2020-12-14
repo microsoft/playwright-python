@@ -20,6 +20,14 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._accessibility import Accessibility
+from playwright._api_types import (
+    Error,
+    FilePayload,
+    FloatPoint,
+    FloatRect,
+    IntSize,
+    PdfMargins,
+)
 from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright._console_message import ConsoleMessage
 from playwright._dialog import Dialog
@@ -53,14 +61,6 @@ from playwright._js_handle import (
     serialize_argument,
 )
 from playwright._network import Request, Response, Route, serialize_headers
-from playwright._types import (
-    Error,
-    FilePayload,
-    FloatRect,
-    IntSize,
-    MousePosition,
-    PdfMargins,
-)
 from playwright._video import Video
 from playwright._wait_helper import WaitHelper
 
@@ -113,7 +113,10 @@ class Page(ChannelOwner):
         self._main_frame: Frame = from_channel(initializer["mainFrame"])
         self._main_frame._page = self
         self._frames = [self._main_frame]
-        self._viewport_size = initializer.get("viewportSize")
+        vs = initializer.get("viewportSize")
+        self._viewport_size: Optional[IntSize] = (
+            IntSize(vs["width"], vs["height"]) if vs else None
+        )
         self._is_closed = False
         self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
@@ -233,19 +236,17 @@ class Page(ChannelOwner):
     def _on_request_failed(
         self,
         request: Request,
-        response_end_timing: float,
+        responseEnd_timing: float,
         failure_text: str = None,
     ) -> None:
         request._failure_text = failure_text
         if request._timing:
-            request._timing["responseEnd"] = response_end_timing
+            request._timing["responseEnd"] = responseEnd_timing
         self.emit(Page.Events.RequestFailed, request)
 
-    def _on_request_finished(
-        self, request: Request, response_end_timing: float
-    ) -> None:
+    def _on_request_finished(self, request: Request, responseEnd_timing: float) -> None:
         if request._timing:
-            request._timing["responseEnd"] = response_end_timing
+            request._timing["responseEnd"] = responseEnd_timing
         self.emit(Page.Events.RequestFinished, request)
 
     def _on_frame_attached(self, frame: Frame) -> None:
@@ -558,7 +559,7 @@ class Page(ChannelOwner):
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
     async def setViewportSize(self, width: int, height: int) -> None:
-        self._viewport_size = dict(width=width, height=height)
+        self._viewport_size = IntSize(width, height)
         await self._channel.send(
             "setViewportSize", dict(viewportSize=locals_to_params(locals()))
         )
@@ -639,7 +640,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: FloatPoint = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -653,7 +654,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: FloatPoint = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -666,7 +667,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: FloatPoint = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -699,7 +700,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: FloatPoint = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:

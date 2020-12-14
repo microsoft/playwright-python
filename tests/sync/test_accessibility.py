@@ -16,7 +16,7 @@ import pytest
 
 
 def test_accessibility_should_work(page, is_firefox, is_chromium):
-    page.setContent(
+    page.set_content(
         """<head>
       <title>Accessibility Test</title>
     </head>
@@ -33,7 +33,7 @@ def test_accessibility_should_work(page, is_firefox, is_chromium):
     </body>"""
     )
     # autofocus happens after a delay in chrome these days
-    page.waitForFunction("document.activeElement.hasAttribute('autofocus')")
+    page.wait_for_function("document.activeElement.hasAttribute('autofocus')")
 
     if is_firefox:
         golden = {
@@ -102,7 +102,7 @@ def test_accessibility_should_work(page, is_firefox, is_chromium):
 
 
 def test_accessibility_should_work_with_regular_text(page, is_firefox):
-    page.setContent("<div>Hello World</div>")
+    page.set_content("<div>Hello World</div>")
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0] == {
         "role": "text leaf" if is_firefox else "text",
@@ -111,31 +111,31 @@ def test_accessibility_should_work_with_regular_text(page, is_firefox):
 
 
 def test_accessibility_roledescription(page):
-    page.setContent('<div tabIndex=-1 aria-roledescription="foo">Hi</div>')
+    page.set_content('<div tabIndex=-1 aria-roledescription="foo">Hi</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0]["roledescription"] == "foo"
 
 
 def test_accessibility_orientation(page):
-    page.setContent('<a href="" role="slider" aria-orientation="vertical">11</a>')
+    page.set_content('<a href="" role="slider" aria-orientation="vertical">11</a>')
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0]["orientation"] == "vertical"
 
 
 def test_accessibility_autocomplete(page):
-    page.setContent('<div role="textbox" aria-autocomplete="list">hi</div>')
+    page.set_content('<div role="textbox" aria-autocomplete="list">hi</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0]["autocomplete"] == "list"
 
 
 def test_accessibility_multiselectable(page):
-    page.setContent('<div role="grid" tabIndex=-1 aria-multiselectable=true>hey</div>')
+    page.set_content('<div role="grid" tabIndex=-1 aria-multiselectable=true>hey</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0]["multiselectable"]
 
 
 def test_accessibility_keyshortcuts(page):
-    page.setContent('<div role="grid" tabIndex=-1 aria-keyshortcuts="foo">hey</div>')
+    page.set_content('<div role="grid" tabIndex=-1 aria-keyshortcuts="foo">hey</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0]["keyshortcuts"] == "foo"
 
@@ -143,7 +143,7 @@ def test_accessibility_keyshortcuts(page):
 def test_accessibility_filtering_children_of_leaf_nodes_should_not_report_text_nodes_inside_controls(
     page, is_firefox
 ):
-    page.setContent(
+    page.set_content(
         """
     <div role="tablist">
     <div role="tab" aria-selected="true"><b>Tab1</b></div>
@@ -166,7 +166,7 @@ def test_accessibility_filtering_children_of_leaf_nodes_should_not_report_text_n
 def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_fields_should_have_children(
     page, is_firefox
 ):
-    page.setContent(
+    page.set_content(
         """
     <div contenteditable="true">
     Edit this image: <img src="fakeimage.png" alt="my fake image">
@@ -202,7 +202,7 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
     page,
     is_firefox,
 ):
-    page.setContent(
+    page.set_content(
         """
     <div contenteditable="true" role='textbox'>
     Edit this image: <img src="fakeimage.png" alt="my fake image">
@@ -233,7 +233,7 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
 # WebKit rich text accessibility is iffy
 @pytest.mark.only_browser("chromium")
 def test_accessibility_plain_text_field_with_role_should_not_have_children(page):
-    page.setContent(
+    page.set_content(
         """
     <div contenteditable="plaintext-only" role='textbox'>Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
     )
@@ -249,7 +249,7 @@ def test_accessibility_plain_text_field_with_role_should_not_have_children(page)
 def test_accessibility_plain_text_field_without_role_should_not_have_content(
     page,
 ):
-    page.setContent(
+    page.set_content(
         """
     <div contenteditable="plaintext-only">Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
     )
@@ -261,7 +261,7 @@ def test_accessibility_plain_text_field_without_role_should_not_have_content(
 def test_accessibility_plain_text_field_with_tabindex_and_without_role_should_not_have_content(
     page,
 ):
-    page.setContent(
+    page.set_content(
         """
     <div contenteditable="plaintext-only" tabIndex=0>Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
     )
@@ -272,7 +272,7 @@ def test_accessibility_plain_text_field_with_tabindex_and_without_role_should_no
 def test_accessibility_non_editable_textbox_with_role_and_tabIndex_and_label_should_not_have_children(
     page, is_chromium, is_firefox
 ):
-    page.setContent(
+    page.set_content(
         """
       <div role="textbox" tabIndex=0 aria-checked="true" aria-label="my favorite textbox">
         this is the inner content
@@ -304,7 +304,7 @@ def test_accessibility_non_editable_textbox_with_role_and_tabIndex_and_label_sho
 def test_accessibility_checkbox_with_and_tabIndex_and_label_should_not_have_children(
     page,
 ):
-    page.setContent(
+    page.set_content(
         """
     <div role="checkbox" tabIndex=0 aria-checked="true" aria-label="my favorite checkbox">
     this is the inner content
@@ -319,7 +319,7 @@ def test_accessibility_checkbox_with_and_tabIndex_and_label_should_not_have_chil
 def test_accessibility_checkbox_without_label_should_not_have_children(
     page, is_firefox
 ):
-    page.setContent(
+    page.set_content(
         """
       <div role="checkbox" aria-checked="true">
         this is the inner content
@@ -336,9 +336,9 @@ def test_accessibility_checkbox_without_label_should_not_have_children(
 
 
 def test_accessibility_should_work_a_button(page):
-    page.setContent("<button>My Button</button>")
+    page.set_content("<button>My Button</button>")
 
-    button = page.querySelector("button")
+    button = page.query_selector("button")
     assert page.accessibility.snapshot(root=button) == {
         "role": "button",
         "name": "My Button",
@@ -346,9 +346,9 @@ def test_accessibility_should_work_a_button(page):
 
 
 def test_accessibility_should_work_an_input(page):
-    page.setContent('<input title="My Input" value="My Value">')
+    page.set_content('<input title="My Input" value="My Value">')
 
-    input = page.querySelector("input")
+    input = page.query_selector("input")
     assert page.accessibility.snapshot(root=input) == {
         "role": "textbox",
         "name": "My Input",
@@ -357,7 +357,7 @@ def test_accessibility_should_work_an_input(page):
 
 
 def test_accessibility_should_work_on_a_menu(page, is_webkit):
-    page.setContent(
+    page.set_content(
         """
         <div role="menu" title="My Menu">
         <div role="menuitem">First Item</div>
@@ -367,7 +367,7 @@ def test_accessibility_should_work_on_a_menu(page, is_webkit):
     """
     )
 
-    menu = page.querySelector('div[role="menu"]')
+    menu = page.query_selector('div[role="menu"]')
     golden = {
         "role": "menu",
         "name": "My Menu",
@@ -385,14 +385,14 @@ def test_accessibility_should_work_on_a_menu(page, is_webkit):
 def test_accessibility_should_return_null_when_the_element_is_no_longer_in_DOM(
     page,
 ):
-    page.setContent("<button>My Button</button>")
-    button = page.querySelector("button")
-    page.evalOnSelector("button", "button => button.remove()")
+    page.set_content("<button>My Button</button>")
+    button = page.query_selector("button")
+    page.eval_on_selector("button", "button => button.remove()")
     assert page.accessibility.snapshot(root=button) is None
 
 
 def test_accessibility_should_show_uninteresting_nodes(page):
-    page.setContent(
+    page.set_content(
         """
         <div id="root" role="textbox">
         <div>
@@ -405,8 +405,8 @@ def test_accessibility_should_show_uninteresting_nodes(page):
     """
     )
 
-    root = page.querySelector("#root")
-    snapshot = page.accessibility.snapshot(root=root, interestingOnly=False)
+    root = page.query_selector("#root")
+    snapshot = page.accessibility.snapshot(root=root, interesting_only=False)
     assert snapshot["role"] == "textbox"
     assert "hello" in snapshot["value"]
     assert "world" in snapshot["value"]

@@ -18,20 +18,20 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Union
 
+from playwright._api_structures import StorageState
+from playwright._api_types import (
+    Geolocation,
+    HttpCredentials,
+    IntSize,
+    ProxySettings,
+    RecordHarOptions,
+    RecordVideoOptions,
+)
 from playwright._browser_context import BrowserContext
 from playwright._connection import ChannelOwner, from_channel
 from playwright._helper import ColorScheme, is_safe_close_error, locals_to_params
 from playwright._network import serialize_headers
 from playwright._page import Page
-from playwright._types import (
-    Credentials,
-    Geolocation,
-    IntSize,
-    ProxyServer,
-    RecordHarOptions,
-    RecordVideoOptions,
-    StorageState,
-)
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -84,14 +84,14 @@ class Browser(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
-        proxy: ProxyServer = None,
+        proxy: ProxySettings = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
@@ -137,14 +137,14 @@ class Browser(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
-        proxy: ProxyServer = None,
+        proxy: ProxySettings = None,
         videosPath: str = None,
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,

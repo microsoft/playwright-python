@@ -21,22 +21,22 @@ from playwright.async_api import ElementHandle, JSHandle
 
 @pytest.fixture
 async def context(browser):
-    context = await browser.newContext(hasTouch=True)
+    context = await browser.new_context(has_touch=True)
     yield context
     await context.close()
 
 
 async def test_should_send_all_of_the_correct_events(page):
-    await page.setContent(
+    await page.set_content(
         """
             <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
             <div id="b" style="background: pink; width: 50px; height: 50px">b</div>
         """
     )
     await page.tap("#a")
-    element_handle = await track_events(await page.querySelector("#b"))
+    element_handle = await track_events(await page.query_selector("#b"))
     await page.tap("#b")
-    assert await element_handle.jsonValue() == [
+    assert await element_handle.json_value() == [
         "pointerover",
         "pointerenter",
         "pointerdown",
@@ -55,16 +55,16 @@ async def test_should_send_all_of_the_correct_events(page):
 
 
 async def test_should_not_send_mouse_events_touchstart_is_canceled(page):
-    await page.setContent("hello world")
+    await page.set_content("hello world")
     await page.evaluate(
         """() => {
             // touchstart is not cancelable unless passive is false
             document.addEventListener('touchstart', t => t.preventDefault(), {passive: false});
         }"""
     )
-    events_handle = await track_events(await page.querySelector("body"))
+    events_handle = await track_events(await page.query_selector("body"))
     await page.tap("body")
-    assert await events_handle.jsonValue() == [
+    assert await events_handle.json_value() == [
         "pointerover",
         "pointerenter",
         "pointerdown",
@@ -77,16 +77,16 @@ async def test_should_not_send_mouse_events_touchstart_is_canceled(page):
 
 
 async def test_should_not_send_mouse_events_touchend_is_canceled(page):
-    await page.setContent("hello world")
+    await page.set_content("hello world")
     await page.evaluate(
         """() => {
             // touchstart is not cancelable unless passive is false
             document.addEventListener('touchend', t => t.preventDefault());
         }"""
     )
-    events_handle = await track_events(await page.querySelector("body"))
+    events_handle = await track_events(await page.query_selector("body"))
     await page.tap("body")
-    assert await events_handle.jsonValue() == [
+    assert await events_handle.json_value() == [
         "pointerover",
         "pointerenter",
         "pointerdown",
@@ -99,7 +99,7 @@ async def test_should_not_send_mouse_events_touchend_is_canceled(page):
 
 
 async def test_should_work_with_modifiers(page):
-    await page.setContent("hello world")
+    await page.set_content("hello world")
     alt_key_promise = asyncio.create_task(
         page.evaluate(
             """() => new Promise(resolve => {
@@ -173,7 +173,7 @@ async def test_should_send_well_formed_touch_points(page):
 
 
 async def test_should_wait_until_an_element_is_visible_to_tap_it(page):
-    div = await page.evaluateHandle(
+    div = await page.evaluate_handle(
         """() => {
             const button = document.createElement('button');
             button.textContent = 'not clicked';
@@ -187,11 +187,11 @@ async def test_should_wait_until_an_element_is_visible_to_tap_it(page):
     await div.evaluate("""div => div.onclick = () => div.textContent = 'clicked'""")
     await div.evaluate("""div => div.style.display = 'block'""")
     await tap_promise
-    assert await div.textContent() == "clicked"
+    assert await div.text_content() == "clicked"
 
 
 async def track_events(target: ElementHandle) -> JSHandle:
-    return await target.evaluateHandle(
+    return await target.evaluate_handle(
         """target => {
             const events = [];
             for (const event of [

@@ -13,12 +13,12 @@
 # limitations under the License.
 import pytest
 
-from playwright._types import Error
+from playwright._api_types import Error
 from playwright.async_api import Page
 
 
 async def captureLastKeydown(page):
-    lastEvent = await page.evaluateHandle(
+    lastEvent = await page.evaluate_handle(
         """() => {
         const lastEvent = {
         repeat: false,
@@ -83,7 +83,7 @@ async def test_keyboard_move_with_the_arrow_keys(page, server):
 
 async def test_keyboard_send_a_character_with_elementhandle_press(page, server):
     await page.goto(f"{server.PREFIX}/input/textarea.html")
-    textarea = await page.querySelector("textarea")
+    textarea = await page.query_selector("textarea")
     await textarea.press("a")
     assert await page.evaluate("document.querySelector('textarea').value") == "a"
     await page.evaluate(
@@ -96,12 +96,12 @@ async def test_keyboard_send_a_character_with_elementhandle_press(page, server):
 async def test_should_send_a_character_with_send_character(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
-    await page.keyboard.insertText("嗨")
+    await page.keyboard.insert_text("嗨")
     assert await page.evaluate('() => document.querySelector("textarea").value') == "嗨"
     await page.evaluate(
         '() => window.addEventListener("keydown", e => e.preventDefault(), true)'
     )
-    await page.keyboard.insertText("a")
+    await page.keyboard.insert_text("a")
     assert await page.evaluate('() => document.querySelector("textarea").value') == "嗨a"
 
 
@@ -109,7 +109,7 @@ async def test_should_only_emit_input_event(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
     page.on("console", "m => console.log(m.text())")
-    events = await page.evaluateHandle(
+    events = await page.evaluate_handle(
         """() => {
     const events = [];
     document.addEventListener('keydown', e => events.push(e.type));
@@ -120,8 +120,8 @@ async def test_should_only_emit_input_event(page, server):
   }"""
     )
 
-    await page.keyboard.insertText("hello world")
-    assert await events.jsonValue() == ["input"]
+    await page.keyboard.insert_text("hello world")
+    assert await events.json_value() == ["input"]
 
 
 async def test_should_report_shiftkey(page: Page, server, is_mac, is_firefox):
@@ -265,7 +265,8 @@ async def test_should_not_type_canceled_events(page: Page, server):
 
     await page.keyboard.type("Hello World!")
     assert (
-        await page.evalOnSelector("textarea", "textarea => textarea.value") == "He Wrd!"
+        await page.eval_on_selector("textarea", "textarea => textarea.value")
+        == "He Wrd!"
     )
 
 
@@ -362,13 +363,13 @@ async def test_should_type_all_kinds_of_characters(page: Page, server):
     await page.focus("textarea")
     text = "This text goes onto two lines.\nThis character is 嗨."
     await page.keyboard.type(text)
-    assert await page.evalOnSelector("textarea", "t => t.value") == text
+    assert await page.eval_on_selector("textarea", "t => t.value") == text
 
 
 async def test_should_specify_location(page: Page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     lastEvent = await captureLastKeydown(page)
-    textarea = await page.querySelector("textarea")
+    textarea = await page.query_selector("textarea")
     assert textarea
 
     await textarea.press("Digit5")
@@ -385,18 +386,18 @@ async def test_should_specify_location(page: Page, server):
 
 
 async def test_should_press_enter(page: Page, server):
-    await page.setContent("<textarea></textarea>")
+    await page.set_content("<textarea></textarea>")
     await page.focus("textarea")
     lastEventHandle = await captureLastKeydown(page)
 
     async def testEnterKey(key, expectedKey, expectedCode):
         await page.keyboard.press(key)
-        lastEvent = await lastEventHandle.jsonValue()
+        lastEvent = await lastEventHandle.json_value()
         assert lastEvent["key"] == expectedKey
         assert lastEvent["code"] == expectedCode
-        value = await page.evalOnSelector("textarea", "t => t.value")
+        value = await page.eval_on_selector("textarea", "t => t.value")
         assert value == "\n"
-        await page.evalOnSelector("textarea", "t => t.value = ''")
+        await page.eval_on_selector("textarea", "t => t.value = ''")
 
     await testEnterKey("Enter", "Enter", "Enter")
     await testEnterKey("NumpadEnter", "Enter", "NumpadEnter")
@@ -422,7 +423,7 @@ async def test_should_type_emoji(page: Page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.type("textarea", "👹 Tokyo street Japan 🇯🇵")
     assert (
-        await page.evalOnSelector("textarea", "textarea => textarea.value")
+        await page.eval_on_selector("textarea", "textarea => textarea.value")
         == "👹 Tokyo street Japan 🇯🇵"
     )
 
@@ -431,18 +432,18 @@ async def test_should_type_emoji_into_an_iframe(page: Page, server, utils):
     await page.goto(server.EMPTY_PAGE)
     await utils.attach_frame(page, "emoji-test", server.PREFIX + "/input/textarea.html")
     frame = page.frames[1]
-    textarea = await frame.querySelector("textarea")
+    textarea = await frame.query_selector("textarea")
     assert textarea
     await textarea.type("👹 Tokyo street Japan 🇯🇵")
     assert (
-        await frame.evalOnSelector("textarea", "textarea => textarea.value")
+        await frame.eval_on_selector("textarea", "textarea => textarea.value")
         == "👹 Tokyo street Japan 🇯🇵"
     )
 
 
 async def test_should_handle_select_all(page: Page, server, is_mac):
     await page.goto(server.PREFIX + "/input/textarea.html")
-    textarea = await page.querySelector("textarea")
+    textarea = await page.query_selector("textarea")
     assert textarea
     await textarea.type("some text")
     modifier = "Meta" if is_mac else "Control"
@@ -450,14 +451,14 @@ async def test_should_handle_select_all(page: Page, server, is_mac):
     await page.keyboard.press("a")
     await page.keyboard.up(modifier)
     await page.keyboard.press("Backspace")
-    assert await page.evalOnSelector("textarea", "textarea => textarea.value") == ""
+    assert await page.eval_on_selector("textarea", "textarea => textarea.value") == ""
 
 
 async def test_should_be_able_to_prevent_select_all(page, server, is_mac):
     await page.goto(server.PREFIX + "/input/textarea.html")
-    textarea = await page.querySelector("textarea")
+    textarea = await page.query_selector("textarea")
     await textarea.type("some text")
-    await page.evalOnSelector(
+    await page.eval_on_selector(
         "textarea",
         """textarea => {
     textarea.addEventListener('keydown', event => {
@@ -473,7 +474,7 @@ async def test_should_be_able_to_prevent_select_all(page, server, is_mac):
     await page.keyboard.up(modifier)
     await page.keyboard.press("Backspace")
     assert (
-        await page.evalOnSelector("textarea", "textarea => textarea.value")
+        await page.eval_on_selector("textarea", "textarea => textarea.value")
         == "some tex"
     )
 
@@ -481,20 +482,20 @@ async def test_should_be_able_to_prevent_select_all(page, server, is_mac):
 @pytest.mark.only_platform("darwin")
 async def test_should_support_macos_shortcuts(page, server, is_firefox, is_mac):
     await page.goto(server.PREFIX + "/input/textarea.html")
-    textarea = await page.querySelector("textarea")
+    textarea = await page.query_selector("textarea")
     await textarea.type("some text")
     # select one word backwards
     await page.keyboard.press("Shift+Control+Alt+KeyB")
     await page.keyboard.press("Backspace")
     assert (
-        await page.evalOnSelector("textarea", "textarea => textarea.value") == "some "
+        await page.eval_on_selector("textarea", "textarea => textarea.value") == "some "
     )
 
 
 async def test_should_press_the_meta_key(page, server, is_firefox, is_mac):
     lastEvent = await captureLastKeydown(page)
     await page.keyboard.press("Meta")
-    v = await lastEvent.jsonValue()
+    v = await lastEvent.json_value()
     metaKey = v["metaKey"]
     key = v["key"]
     code = v["code"]
@@ -549,4 +550,4 @@ async def test_should_scroll_with_pagedown(page: Page, server):
     await page.click("body")
     await page.keyboard.press("PageDown")
     # We can't wait for the scroll to finish, so just wait for it to start.
-    await page.waitForFunction("() => scrollY > 0")
+    await page.wait_for_function("() => scrollY > 0")

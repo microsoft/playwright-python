@@ -32,7 +32,7 @@ from typing import (
     cast,
 )
 
-from playwright._types import Error, TimeoutError
+from playwright._api_types import Error, TimeoutError
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -50,12 +50,6 @@ ColorScheme = Literal["dark", "light", "no-preference"]
 DocumentLoadState = Literal["domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
-
-
-class SetFilePayload(TypedDict):
-    name: str
-    mimeType: str
-    buffer: str
 
 
 class ErrorPayload(TypedDict, total=False):
@@ -162,7 +156,22 @@ def parse_error(error: ErrorPayload) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
-    return base_error_class(error["message"], error["stack"])
+    return base_error_class(
+        cast(str, patch_error_message(error.get("message"))), error["stack"]
+    )
+
+
+def patch_error_message(message: Optional[str]) -> Optional[str]:
+    if not message:
+        return None
+
+    match = re.match(r"(\w+)(: expected .*)", message)
+    if match:
+        message = to_snake_case(match.group(1)) + match.group(2)
+    message = message.replace(
+        "Pass { acceptDownloads: true }", "Pass { accept_downloads: True }"
+    )
+    return message
 
 
 def is_function_body(expression: str) -> bool:
@@ -232,3 +241,10 @@ Please complete Playwright installation via running
 ================================================================================
 """
     )
+
+
+to_snake_case_regex = re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
+
+
+def to_snake_case(name: str) -> str:
+    return to_snake_case_regex.sub(r"_\1", name).lower()

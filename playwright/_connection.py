@@ -21,6 +21,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
+from playwright._api_types import ApiType
 from playwright._helper import ParsedMessagePayload, parse_error
 from playwright._transport import Transport
 
@@ -233,6 +234,8 @@ class Connection:
             return payload
         if isinstance(payload, Path):
             return str(payload)
+        if isinstance(payload, ApiType):
+            return payload._to_json()
         if isinstance(payload, list):
             return list(map(lambda p: self._replace_channels_with_guids(p), payload))
         if isinstance(payload, Channel):

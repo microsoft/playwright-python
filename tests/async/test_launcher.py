@@ -25,7 +25,7 @@ async def test_browser_type_launch_should_reject_all_promises_when_browser_is_cl
     browser_type: BrowserType, launch_arguments
 ):
     browser = await browser_type.launch(**launch_arguments)
-    page = await (await browser.newContext()).newPage()
+    page = await (await browser.new_context()).new_page()
     never_resolves = asyncio.create_task(page.evaluate("() => new Promise(r => {})"))
     await page.close()
     with pytest.raises(Error) as exc:
@@ -49,7 +49,7 @@ async def test_browser_type_launch_should_reject_if_launched_browser_fails_immed
     with pytest.raises(Error):
         await browser_type.launch(
             **launch_arguments,
-            executablePath=assetdir / "dummy_bad_browser_executable.js"
+            executable_path=assetdir / "dummy_bad_browser_executable.js"
         )
 
 
@@ -61,7 +61,7 @@ async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
 ):
     with pytest.raises(Error) as exc:
         await browser_type.launch(
-            **launch_arguments, executablePath="random-invalid-path"
+            **launch_arguments, executable_path="random-invalid-path"
         )
     assert "Failed to launch" in exc.value.message
 
@@ -86,7 +86,7 @@ async def test_browser_type_launch_server_should_fire_close_event(
 
 
 async def test_browser_type_executable_path_should_work(browser_type):
-    executable_path = browser_type.executablePath
+    executable_path = browser_type.executable_path
     assert os.path.exists(executable_path)
     assert os.path.realpath(executable_path) == os.path.realpath(executable_path)
 
@@ -108,7 +108,7 @@ async def test_browser_close_should_fire_close_event_for_all_contexts(
     browser_type, launch_arguments
 ):
     browser = await browser_type.launch(**launch_arguments)
-    context = await browser.newContext()
+    context = await browser.new_context()
     closed = []
     context.on("close", lambda: closed.append(True))
     await browser.close()

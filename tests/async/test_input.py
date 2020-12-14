@@ -15,6 +15,7 @@
 import asyncio
 import os
 
+from playwright import FilePayload
 from playwright._path_utils import get_file_dirname
 from playwright.async_api import Page
 
@@ -25,8 +26,8 @@ FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
 async def test_should_upload_the_file(page, server):
     await page.goto(server.PREFIX + "/input/fileupload.html")
     file_path = os.path.relpath(FILE_TO_UPLOAD, os.getcwd())
-    input = await page.querySelector("input")
-    await input.setInputFiles(file_path)
+    input = await page.query_selector("input")
+    await input.set_input_files(file_path)
     assert await page.evaluate("e => e.files[0].name", input) == "file-to-upload.txt"
     assert (
         await page.evaluate(
@@ -43,31 +44,30 @@ async def test_should_upload_the_file(page, server):
 
 
 async def test_should_work(page, assetdir):
-    await page.setContent("<input type=file>")
-    await page.setInputFiles("input", assetdir / "file-to-upload.txt")
-    assert await page.evalOnSelector("input", "input => input.files.length") == 1
+    await page.set_content("<input type=file>")
+    await page.set_input_files("input", assetdir / "file-to-upload.txt")
+    assert await page.eval_on_selector("input", "input => input.files.length") == 1
     assert (
-        await page.evalOnSelector("input", "input => input.files[0].name")
+        await page.eval_on_selector("input", "input => input.files[0].name")
         == "file-to-upload.txt"
     )
 
 
 async def test_should_set_from_memory(page):
-    await page.setContent("<input type=file>")
-    await page.setInputFiles(
+    await page.set_content("<input type=file>")
+    await page.set_input_files(
         "input",
-        files=[
-            {"name": "test.txt", "mimeType": "text/plain", "buffer": b"this is a test"}
-        ],
+        files=[FilePayload("test.txt", "text/plain", b"this is a test")],
     )
-    assert await page.evalOnSelector("input", "input => input.files.length") == 1
+    assert await page.eval_on_selector("input", "input => input.files.length") == 1
     assert (
-        await page.evalOnSelector("input", "input => input.files[0].name") == "test.txt"
+        await page.eval_on_selector("input", "input => input.files[0].name")
+        == "test.txt"
     )
 
 
 async def test_should_emit_event(page: Page, server):
-    await page.setContent("<input type=file>")
+    await page.set_content("<input type=file>")
     fc_done: asyncio.Future = asyncio.Future()
     page.once("filechooser", lambda file_chooser: fc_done.set_result(file_chooser))
     await page.click("input")
@@ -76,7 +76,7 @@ async def test_should_emit_event(page: Page, server):
 
 
 async def test_should_work_when_file_input_is_attached_to_DOM(page: Page, server):
-    await page.setContent("<input type=file>")
+    await page.set_content("<input type=file>")
     async with page.expect_event("filechooser") as fc_info:
         await page.click("input")
     file_chooser = await fc_info.value
@@ -85,7 +85,7 @@ async def test_should_work_when_file_input_is_attached_to_DOM(page: Page, server
 
 async def test_should_work_when_file_input_is_not_attached_to_DOM(page, server):
     [file_chooser, _] = await asyncio.gather(
-        page.waitForEvent("filechooser"),
+        page.wait_for_event("filechooser"),
         page.evaluate(
             """() => {
         el = document.createElement('input')
@@ -100,29 +100,29 @@ async def test_should_work_when_file_input_is_not_attached_to_DOM(page, server):
 async def test_should_return_the_same_file_chooser_when_there_are_many_watchdogs_simultaneously(
     page: Page, server
 ):
-    await page.setContent("<input type=file>")
+    await page.set_content("<input type=file>")
     results = await asyncio.gather(
-        page.waitForEvent("filechooser"),
-        page.waitForEvent("filechooser"),
-        page.evalOnSelector("input", "input => input.click()"),
+        page.wait_for_event("filechooser"),
+        page.wait_for_event("filechooser"),
+        page.eval_on_selector("input", "input => input.click()"),
     )
     assert results[0] == results[1]
 
 
 async def test_should_accept_single_file(page: Page, server):
-    await page.setContent('<input type=file oninput="javascript:console.timeStamp()">')
+    await page.set_content('<input type=file oninput="javascript:console.timeStamp()">')
     file_chooser = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
+            page.wait_for_event("filechooser"),
             page.click("input"),
         )
     )[0]
     assert file_chooser.page == page
     assert file_chooser.element
-    await file_chooser.setFiles(FILE_TO_UPLOAD)
-    assert await page.evalOnSelector("input", "input => input.files.length") == 1
+    await file_chooser.set_files(FILE_TO_UPLOAD)
+    assert await page.eval_on_selector("input", "input => input.files.length") == 1
     assert (
-        await page.evalOnSelector("input", "input => input.files[0].name")
+        await page.eval_on_selector("input", "input => input.files[0].name")
         == "file-to-upload.txt"
     )
 
@@ -130,10 +130,12 @@ async def test_should_accept_single_file(page: Page, server):
 async def test_should_be_able_to_read_selected_file(page: Page, server):
     page.once(
         "filechooser",
-        lambda file_chooser: asyncio.create_task(file_chooser.setFiles(FILE_TO_UPLOAD)),
+        lambda file_chooser: asyncio.create_task(
+            file_chooser.set_files(FILE_TO_UPLOAD)
+        ),
     )
-    await page.setContent("<input type=file>")
-    content = await page.evalOnSelector(
+    await page.set_content("<input type=file>")
+    content = await page.eval_on_selector(
         "input",
         """async picker => {
             picker.click();
@@ -150,15 +152,17 @@ async def test_should_be_able_to_read_selected_file(page: Page, server):
 async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
     page: Page, server
 ):
-    await page.setContent("<input type=file>")
+    await page.set_content("<input type=file>")
     page.once(
         "filechooser",
-        lambda file_chooser: asyncio.create_task(file_chooser.setFiles(FILE_TO_UPLOAD)),
+        lambda file_chooser: asyncio.create_task(
+            file_chooser.set_files(FILE_TO_UPLOAD)
+        ),
     )
     file_length_1 = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
-            page.evalOnSelector(
+            page.wait_for_event("filechooser"),
+            page.eval_on_selector(
                 "input",
                 """async picker => {
                     picker.click();
@@ -172,12 +176,12 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
 
     page.once(
         "filechooser",
-        lambda file_chooser: asyncio.create_task(file_chooser.setFiles([])),
+        lambda file_chooser: asyncio.create_task(file_chooser.set_files([])),
     )
     file_length_2 = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
-            page.evalOnSelector(
+            page.wait_for_event("filechooser"),
+            page.eval_on_selector(
                 "input",
                 """async picker => {
                     picker.click()
@@ -193,16 +197,16 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
 async def test_should_not_accept_multiple_files_for_single_file_input(
     page, server, assetdir
 ):
-    await page.setContent("<input type=file>")
+    await page.set_content("<input type=file>")
     file_chooser = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
+            page.wait_for_event("filechooser"),
             page.click("input"),
         )
     )[0]
     error = None
     try:
-        await file_chooser.setFiles(
+        await file_chooser.set_files(
             [
                 os.path.realpath(assetdir / "file-to-upload.txt"),
                 os.path.realpath(assetdir / "pptr.png"),
@@ -215,8 +219,8 @@ async def test_should_not_accept_multiple_files_for_single_file_input(
 
 async def test_should_emit_input_and_change_events(page, server):
     events = []
-    await page.exposeFunction("eventHandled", lambda e: events.append(e))
-    await page.setContent(
+    await page.expose_function("eventHandled", lambda e: events.append(e))
+    await page.set_content(
         """
             <input id=input type=file></input>
             <script>
@@ -225,40 +229,40 @@ async def test_should_emit_input_and_change_events(page, server):
             </script>
         """
     )
-    await (await page.querySelector("input")).setInputFiles(FILE_TO_UPLOAD)
+    await (await page.query_selector("input")).set_input_files(FILE_TO_UPLOAD)
     assert len(events) == 2
     assert events[0]["type"] == "input"
     assert events[1]["type"] == "change"
 
 
 async def test_should_work_for_single_file_pick(page, server):
-    await page.setContent("<input type=file>")
+    await page.set_content("<input type=file>")
     file_chooser = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
+            page.wait_for_event("filechooser"),
             page.click("input"),
         )
     )[0]
-    assert file_chooser.isMultiple is False
+    assert file_chooser.is_multiple is False
 
 
 async def test_should_work_for_multiple(page, server):
-    await page.setContent("<input multiple type=file>")
+    await page.set_content("<input multiple type=file>")
     file_chooser = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
+            page.wait_for_event("filechooser"),
             page.click("input"),
         )
     )[0]
-    assert file_chooser.isMultiple
+    assert file_chooser.is_multiple
 
 
 async def test_should_work_for_webkitdirectory(page, server):
-    await page.setContent("<input multiple webkitdirectory type=file>")
+    await page.set_content("<input multiple webkitdirectory type=file>")
     file_chooser = (
         await asyncio.gather(
-            page.waitForEvent("filechooser"),
+            page.wait_for_event("filechooser"),
             page.click("input"),
         )
     )[0]
-    assert file_chooser.isMultiple
+    assert file_chooser.is_multiple

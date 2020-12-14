@@ -21,18 +21,19 @@ from playwright.sync_api import Browser, Page
 
 
 def test_sync_query_selector(page):
-    page.setContent(
+    page.set_content(
         """
     <h1 id="foo">Bar</h1>
     """
     )
     assert (
-        page.querySelector("#foo").innerText() == page.querySelector("h1").innerText()
+        page.query_selector("#foo").inner_text()
+        == page.query_selector("h1").inner_text()
     )
 
 
 def test_sync_click(page):
-    page.setContent(
+    page.set_content(
         """
     <button onclick="window.clicked=true">Bar</button>
     """
@@ -42,7 +43,7 @@ def test_sync_click(page):
 
 
 def test_sync_nested_query_selector(page):
-    page.setContent(
+    page.set_content(
         """
     <div id="one">
         <span class="two">
@@ -53,18 +54,18 @@ def test_sync_nested_query_selector(page):
     </div>
     """
     )
-    e1 = page.querySelector("#one")
-    e2 = e1.querySelector(".two")
-    e3 = e2.querySelector("label")
-    assert e3.innerText() == "MyValue"
+    e1 = page.query_selector("#one")
+    e2 = e1.query_selector(".two")
+    e3 = e2.query_selector("label")
+    assert e3.inner_text() == "MyValue"
 
 
 def test_sync_handle_multiple_pages(context):
-    page1 = context.newPage()
-    page2 = context.newPage()
+    page1 = context.new_page()
+    page2 = context.new_page()
     assert len(context.pages) == 2
-    page1.setContent("one")
-    page2.setContent("two")
+    page1.set_content("one")
+    page2.set_content("two")
     assert "one" in page1.content()
     assert "two" in page2.content()
     page1.close()
@@ -92,8 +93,8 @@ def test_sync_wait_for_event_raise(page):
 def test_sync_make_existing_page_sync(page):
     page = page
     assert page.evaluate("() => ({'playwright': true})") == {"playwright": True}
-    page.setContent("<h1>myElement</h1>")
-    page.waitForSelector("text=myElement")
+    page.set_content("<h1>myElement</h1>")
+    page.wait_for_selector("text=myElement")
 
 
 def test_sync_network_events(page, server):
@@ -131,9 +132,9 @@ def test_console_should_work(page):
     assert message.text == "hello 5 JSHandle@object"
     assert str(message) == "hello 5 JSHandle@object"
     assert message.type == "log"
-    assert message.args[0].jsonValue() == "hello"
-    assert message.args[1].jsonValue() == 5
-    assert message.args[2].jsonValue() == {"foo": "bar"}
+    assert message.args[0].json_value() == "hello"
+    assert message.args[1].json_value() == 5
+    assert message.args[2].json_value() == {"foo": "bar"}
 
 
 def test_sync_download(browser: Browser, server):
@@ -146,13 +147,13 @@ def test_sync_download(browser: Browser, server):
             request.finish(),
         ),
     )
-    page = browser.newPage(acceptDownloads=True)
-    page.setContent(f'<a href="{server.PREFIX}/downloadWithFilename">download</a>')
+    page = browser.new_page(accept_downloads=True)
+    page.set_content(f'<a href="{server.PREFIX}/downloadWithFilename">download</a>')
 
     with page.expect_event("download") as download:
         page.click("a")
     assert download.value
-    assert download.value.suggestedFilename == "file.txt"
+    assert download.value.suggested_filename == "file.txt"
     path = download.value.path()
     assert os.path.isfile(path)
     with open(path, "r") as fd:
@@ -181,14 +182,14 @@ def test_sync_playwright_multiple_times():
 
 
 def test_sync_set_default_timeout(page):
-    page.setDefaultTimeout(1)
+    page.set_default_timeout(1)
     with pytest.raises(TimeoutError) as exc:
-        page.waitForFunction("false")
+        page.wait_for_function("false")
     assert "Timeout 1ms exceeded." in exc.value.message
 
 
 def test_close_should_reject_all_promises(context):
-    new_page = context.newPage()
+    new_page = context.new_page()
     with pytest.raises(Error) as exc_info:
         new_page._gather(
             lambda: new_page.evaluate("() => new Promise(r => {})"),

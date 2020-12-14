@@ -23,10 +23,10 @@ from typing import Any
 from greenlet import greenlet
 
 import playwright
+from playwright._api_types import Error
 from playwright._connection import Connection
 from playwright._object_factory import create_remote_object
 from playwright._playwright import Playwright
-from playwright._types import Error
 from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.sync_api import Playwright as SyncPlaywright
 

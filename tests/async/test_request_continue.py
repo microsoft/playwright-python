@@ -63,7 +63,7 @@ async def test_request_continue_should_amend_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(route.continue_(postData=b"doggo")),
+        lambda route, _: asyncio.create_task(route.continue_(post_data=b"doggo")),
     )
 
     [server_request, _] = await asyncio.gather(
@@ -91,7 +91,8 @@ async def test_should_override_request_url(page, server):
 async def test_should_amend_utf8_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
-        "**/*", lambda route, _: asyncio.create_task(route.continue_(postData="пушкин"))
+        "**/*",
+        lambda route, _: asyncio.create_task(route.continue_(post_data="пушкин")),
     )
 
     [server_request, result] = await asyncio.gather(
@@ -107,7 +108,7 @@ async def test_should_amend_binary_post_data(page, server):
     await page.route(
         "**/*",
         lambda route, _: asyncio.create_task(
-            route.continue_(postData=b"\x00\x01\x02\x03\x04")
+            route.continue_(post_data=b"\x00\x01\x02\x03\x04")
         ),
     )
 

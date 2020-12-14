@@ -23,7 +23,7 @@ from playwright.async_api import Page, Worker
 
 async def test_workers_page_workers(page, server):
     await asyncio.gather(
-        page.waitForEvent("worker"), page.goto(server.PREFIX + "/worker/worker.html")
+        page.wait_for_event("worker"), page.goto(server.PREFIX + "/worker/worker.html")
     )
     worker = page.workers[0]
     assert "worker.js" in worker.url
@@ -40,23 +40,23 @@ async def test_workers_page_workers(page, server):
 async def test_workers_should_emit_created_and_destroyed_events(page: Page):
     worker_obj = None
     async with page.expect_event("worker") as event_info:
-        worker_obj = await page.evaluateHandle(
+        worker_obj = await page.evaluate_handle(
             "() => new Worker(URL.createObjectURL(new Blob(['1'], {type: 'application/javascript'})))"
         )
     worker = await event_info.value
-    worker_this_obj = await worker.evaluateHandle("() => this")
+    worker_this_obj = await worker.evaluate_handle("() => this")
     worker_destroyed_promise: Future[Worker] = asyncio.Future()
     worker.once("close", lambda w: worker_destroyed_promise.set_result(w))
     await page.evaluate("workerObj => workerObj.terminate()", worker_obj)
     assert await worker_destroyed_promise == worker
     with pytest.raises(Error) as exc:
-        await worker_this_obj.getProperty("self")
+        await worker_this_obj.get_property("self")
     assert "Most likely the worker has been closed." in exc.value.message
 
 
 async def test_workers_should_report_console_logs(page):
     [message, _] = await asyncio.gather(
-        page.waitForEvent("console"),
+        page.wait_for_event("console"),
         page.evaluate(
             '() => new Worker(URL.createObjectURL(new Blob(["console.log(1)"], {type: "application/javascript"})))'
         ),
@@ -74,7 +74,7 @@ async def test_workers_should_have_JSHandles_for_console_logs(page):
     log = await log_promise
     assert log.text == "1 2 3 JSHandle@object"
     assert len(log.args) == 4
-    assert await (await log.args[3].getProperty("origin")).jsonValue() == "null"
+    assert await (await log.args[3].get_property("origin")).json_value() == "null"
 
 
 async def test_workers_should_evaluate(page):
@@ -136,7 +136,7 @@ async def test_workers_should_clear_upon_cross_process_navigation(server, page):
 
 async def test_workers_should_report_network_activity(page, server):
     [worker, _] = await asyncio.gather(
-        page.waitForEvent("worker"),
+        page.wait_for_event("worker"),
         page.goto(server.PREFIX + "/worker/worker.html"),
     )
     url = server.PREFIX + "/one-style.css"
@@ -174,11 +174,11 @@ async def test_workers_should_report_network_activity_on_worker_creation(page, s
 
 
 async def test_workers_should_format_number_using_context_locale(browser, server):
-    context = await browser.newContext(locale="ru-RU")
-    page = await context.newPage()
+    context = await browser.new_context(locale="ru-RU")
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     [worker, _] = await asyncio.gather(
-        page.waitForEvent("worker"),
+        page.wait_for_event("worker"),
         page.evaluate(
             "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
         ),

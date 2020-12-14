@@ -45,13 +45,13 @@ def browser(browser_type, launch_arguments):
 
 @pytest.fixture
 def context(browser):
-    context = browser.newContext()
+    context = browser.new_context()
     yield context
     context.close()
 
 
 @pytest.fixture
 def page(context):
-    page = context.newPage()
+    page = context.new_page()
     yield page
     page.close()

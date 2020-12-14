@@ -17,32 +17,32 @@ import pytest
 
 async def test_should_dispatch_click_event(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     assert await page.evaluate("() => result") == "Clicked"
 
 
 async def test_should_dispatch_click_event_properties(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     assert await page.evaluate("() => bubbles")
     assert await page.evaluate("() => cancelable")
     assert await page.evaluate("() => composed")
 
 
 async def test_should_dispatch_click_svg(page):
-    await page.setContent(
+    await page.set_content(
         """
       <svg height="100" width="100">
         <circle onclick="javascript:window.__CLICKED=42" cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
       </svg>
     """
     )
-    await page.dispatchEvent("circle", "click")
+    await page.dispatch_event("circle", "click")
     assert await page.evaluate("() => window.__CLICKED") == 42
 
 
 async def test_should_dispatch_click_on_a_span_with_an_inline_element_inside(page):
-    await page.setContent(
+    await page.set_content(
         """
       <style>
       span::before {
@@ -52,28 +52,28 @@ async def test_should_dispatch_click_on_a_span_with_an_inline_element_inside(pag
       <span onclick='javascript:window.CLICKED=42'></span>
     """
     )
-    await page.dispatchEvent("span", "click")
+    await page.dispatch_event("span", "click")
     assert await page.evaluate("() => window.CLICKED") == 42
 
 
 async def test_should_dispatch_click_after_navigation(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     await page.goto(server.PREFIX + "/input/button.html")
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     assert await page.evaluate("() => result") == "Clicked"
 
 
 async def test_should_dispatch_click_after_a_cross_origin_navigation(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     await page.goto(server.CROSS_PROCESS_PREFIX + "/input/button.html")
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     assert await page.evaluate("() => result") == "Clicked"
 
 
 async def test_should_not_fail_when_element_is_blocked_on_hover(page, server):
-    await page.setContent(
+    await page.set_content(
         """<style>
       container { display: block; position: relative; width: 200px; height: 50px; }
       div, button { position: absolute; left: 0; top: 0; bottom: 0; right: 0; }
@@ -85,13 +85,13 @@ async def test_should_not_fail_when_element_is_blocked_on_hover(page, server):
       <div></div>
     </container>"""
     )
-    await page.dispatchEvent("button", "click")
+    await page.dispatch_event("button", "click")
     assert await page.evaluate("() => window.clicked")
 
 
 async def test_should_dispatch_click_when_node_is_added_in_shadow_dom(page, server):
     await page.goto(server.EMPTY_PAGE)
-    watchdog = page.dispatchEvent("span", "click")
+    watchdog = page.dispatch_event("span", "click")
     await page.evaluate(
         """() => {
       const div = document.createElement('div');
@@ -115,7 +115,7 @@ async def test_should_dispatch_click_when_node_is_added_in_shadow_dom(page, serv
 async def test_should_be_atomic(selectors, page, utils):
     await utils.register_selector_engine(
         selectors,
-        "dispatchEvent",
+        "dispatch_event",
         """{
             create(root, target) { },
             query(root, selector) {
@@ -132,17 +132,17 @@ async def test_should_be_atomic(selectors, page, utils):
             }
         }""",
     )
-    await page.setContent('<div onclick="window._clicked=true">Hello</div>')
-    await page.dispatchEvent("dispatchEvent=div", "click")
+    await page.set_content('<div onclick="window._clicked=true">Hello</div>')
+    await page.dispatch_event("dispatch_event=div", "click")
     assert await page.evaluate("() => window._clicked")
 
 
 @pytest.mark.skip_browser("webkit")
 async def test_should_dispatch_drag_drop_events(page, server):
     await page.goto(server.PREFIX + "/drag-n-drop.html")
-    dataTransfer = await page.evaluateHandle("() => new DataTransfer()")
-    await page.dispatchEvent("#source", "dragstart", {"dataTransfer": dataTransfer})
-    await page.dispatchEvent("#target", "drop", {"dataTransfer": dataTransfer})
+    dataTransfer = await page.evaluate_handle("() => new DataTransfer()")
+    await page.dispatch_event("#source", "dragstart", {"dataTransfer": dataTransfer})
+    await page.dispatch_event("#target", "drop", {"dataTransfer": dataTransfer})
     assert await page.evaluate(
         """() => {
       return source.parentElement === target;
@@ -153,11 +153,11 @@ async def test_should_dispatch_drag_drop_events(page, server):
 @pytest.mark.skip_browser("webkit")
 async def test_should_dispatch_drag_and_drop_events_element_handle(page, server):
     await page.goto(server.PREFIX + "/drag-n-drop.html")
-    dataTransfer = await page.evaluateHandle("() => new DataTransfer()")
-    source = await page.querySelector("#source")
-    await source.dispatchEvent("dragstart", {"dataTransfer": dataTransfer})
-    target = await page.querySelector("#target")
-    await target.dispatchEvent("drop", {"dataTransfer": dataTransfer})
+    dataTransfer = await page.evaluate_handle("() => new DataTransfer()")
+    source = await page.query_selector("#source")
+    await source.dispatch_event("dragstart", {"dataTransfer": dataTransfer})
+    target = await page.query_selector("#target")
+    await target.dispatch_event("drop", {"dataTransfer": dataTransfer})
     assert await page.evaluate(
         """() => {
       return source.parentElement === target;
@@ -167,6 +167,6 @@ async def test_should_dispatch_drag_and_drop_events_element_handle(page, server)
 
 async def test_should_dispatch_click_event_element_handle(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
-    button = await page.querySelector("button")
-    await button.dispatchEvent("click")
+    button = await page.query_selector("button")
+    await button.dispatch_event("click")
     assert await page.evaluate("() => result") == "Clicked"

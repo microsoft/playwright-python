@@ -16,9 +16,9 @@ import math
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from playwright._api_types import Error
 from playwright._connection import ChannelOwner, from_channel
 from playwright._helper import is_function_body
-from playwright._types import Error
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._element_handle import ElementHandle

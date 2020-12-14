@@ -16,19 +16,19 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Union
 
+from playwright._api_types import (
+    Geolocation,
+    HttpCredentials,
+    IntSize,
+    ProxySettings,
+    RecordHarOptions,
+    RecordVideoOptions,
+)
 from playwright._browser import Browser
 from playwright._browser_context import BrowserContext
 from playwright._connection import ChannelOwner, from_channel
 from playwright._helper import ColorScheme, Env, locals_to_params, not_installed_error
 from playwright._network import serialize_headers
-from playwright._types import (
-    Credentials,
-    Geolocation,
-    IntSize,
-    ProxyServer,
-    RecordHarOptions,
-    RecordVideoOptions,
-)
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -62,7 +62,7 @@ class BrowserType(ChannelOwner):
         env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: ProxyServer = None,
+        proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
@@ -90,7 +90,7 @@ class BrowserType(ChannelOwner):
         env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: ProxyServer = None,
+        proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
         viewport: Union[IntSize, Literal[0]] = None,
@@ -104,7 +104,7 @@ class BrowserType(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
