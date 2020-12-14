@@ -88,7 +88,24 @@ def sync_playwright() -&gt; SyncPlaywrightContextManager:
 __all__ = [
     &#34;async_playwright&#34;,
     &#34;sync_playwright&#34;,
+    &#34;ConsoleMessageLocation&#34;,
+    &#34;Cookie&#34;,
+    &#34;Credentials&#34;,
+    &#34;DeviceDescriptor&#34;,
     &#34;Error&#34;,
+    &#34;FilePayload&#34;,
+    &#34;FloatRect&#34;,
+    &#34;Geolocation&#34;,
+    &#34;IntSize&#34;,
+    &#34;MousePosition&#34;,
+    &#34;PdfMargins&#34;,
+    &#34;ProxyServer&#34;,
+    &#34;RecordHarOptions&#34;,
+    &#34;RecordVideoOptions&#34;,
+    &#34;RequestFailure&#34;,
+    &#34;ResourceTiming&#34;,
+    &#34;SelectOption&#34;,
+    &#34;StorageState&#34;,
     &#34;TimeoutError&#34;,
 ]
 
@@ -176,6 +193,221 @@ __pdoc__ = {
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="playwright.ConsoleMessageLocation"><code class="flex name class">
+<span>class <span class="ident">ConsoleMessageLocation</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ConsoleMessageLocation(TypedDict):
+    url: str
+    lineNumber: int
+    columnNumber: int</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.ConsoleMessageLocation.columnNumber"><code class="name">var <span class="ident">columnNumber</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ConsoleMessageLocation.lineNumber"><code class="name">var <span class="ident">lineNumber</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ConsoleMessageLocation.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.Cookie"><code class="flex name class">
+<span>class <span class="ident">Cookie</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Cookie(TypedDict, total=False):
+    name: str
+    value: str
+    url: Optional[str]
+    domain: Optional[str]
+    path: Optional[str]
+    expires: Optional[int]
+    httpOnly: Optional[bool]
+    secure: Optional[bool]
+    sameSite: Optional[Literal[&#34;Strict&#34;, &#34;Lax&#34;, &#34;None&#34;]]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.Cookie.domain"><code class="name">var <span class="ident">domain</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.expires"><code class="name">var <span class="ident">expires</span> : Union[int, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.httpOnly"><code class="name">var <span class="ident">httpOnly</span> : Union[bool, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.path"><code class="name">var <span class="ident">path</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.sameSite"><code class="name">var <span class="ident">sameSite</span> : Union[Literal['Strict', 'Lax', 'None'], NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.secure"><code class="name">var <span class="ident">secure</span> : Union[bool, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.url"><code class="name">var <span class="ident">url</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Cookie.value"><code class="name">var <span class="ident">value</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.Credentials"><code class="flex name class">
+<span>class <span class="ident">Credentials</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Credentials(TypedDict):
+    username: str
+    password: str</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.Credentials.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Credentials.username"><code class="name">var <span class="ident">username</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.DeviceDescriptor"><code class="flex name class">
+<span>class <span class="ident">DeviceDescriptor</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeviceDescriptor(TypedDict, total=False):
+    userAgent: Optional[str]
+    viewport: Optional[IntSize]
+    deviceScaleFactor: Optional[int]
+    isMobile: Optional[bool]
+    hasTouch: Optional[bool]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.DeviceDescriptor.deviceScaleFactor"><code class="name">var <span class="ident">deviceScaleFactor</span> : Union[int, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.DeviceDescriptor.hasTouch"><code class="name">var <span class="ident">hasTouch</span> : Union[bool, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.DeviceDescriptor.isMobile"><code class="name">var <span class="ident">isMobile</span> : Union[bool, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.DeviceDescriptor.userAgent"><code class="name">var <span class="ident">userAgent</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.DeviceDescriptor.viewport"><code class="name">var <span class="ident">viewport</span> : Union[playwright._types.IntSize, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="playwright.Error"><code class="flex name class">
 <span>class <span class="ident">Error</span></span>
 <span>(</span><span>message: str, stack: str = None)</span>
@@ -201,6 +433,601 @@ __pdoc__ = {
 <ul class="hlist">
 <li>playwright._types.TimeoutError</li>
 </ul>
+</dd>
+<dt id="playwright.FilePayload"><code class="flex name class">
+<span>class <span class="ident">FilePayload</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FilePayload(TypedDict):
+    name: str
+    mimeType: str
+    buffer: bytes</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.FilePayload.buffer"><code class="name">var <span class="ident">buffer</span> : bytes</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.FilePayload.mimeType"><code class="name">var <span class="ident">mimeType</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.FilePayload.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.FloatRect"><code class="flex name class">
+<span>class <span class="ident">FloatRect</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FloatRect(TypedDict):
+    x: float
+    y: float
+    width: float
+    height: float</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.FloatRect.height"><code class="name">var <span class="ident">height</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.FloatRect.width"><code class="name">var <span class="ident">width</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.FloatRect.x"><code class="name">var <span class="ident">x</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.FloatRect.y"><code class="name">var <span class="ident">y</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.Geolocation"><code class="flex name class">
+<span>class <span class="ident">Geolocation</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Geolocation(TypedDict, total=False):
+    latitude: float
+    longitude: float
+    accuracy: Optional[float]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.Geolocation.accuracy"><code class="name">var <span class="ident">accuracy</span> : Union[float, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Geolocation.latitude"><code class="name">var <span class="ident">latitude</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.Geolocation.longitude"><code class="name">var <span class="ident">longitude</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.IntSize"><code class="flex name class">
+<span>class <span class="ident">IntSize</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IntSize(TypedDict):
+    width: int
+    height: int</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.IntSize.height"><code class="name">var <span class="ident">height</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.IntSize.width"><code class="name">var <span class="ident">width</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.MousePosition"><code class="flex name class">
+<span>class <span class="ident">MousePosition</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MousePosition(TypedDict):
+    x: float
+    y: float</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.MousePosition.x"><code class="name">var <span class="ident">x</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.MousePosition.y"><code class="name">var <span class="ident">y</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.PdfMargins"><code class="flex name class">
+<span>class <span class="ident">PdfMargins</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PdfMargins(TypedDict, total=False):
+    top: Optional[Union[str, int]]
+    right: Optional[Union[str, int]]
+    bottom: Optional[Union[str, int]]
+    left: Optional[Union[str, int]]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.PdfMargins.bottom"><code class="name">var <span class="ident">bottom</span> : Union[str, int, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.PdfMargins.left"><code class="name">var <span class="ident">left</span> : Union[str, int, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.PdfMargins.right"><code class="name">var <span class="ident">right</span> : Union[str, int, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.PdfMargins.top"><code class="name">var <span class="ident">top</span> : Union[str, int, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.ProxyServer"><code class="flex name class">
+<span>class <span class="ident">ProxyServer</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ProxyServer(TypedDict, total=False):
+    server: str
+    bypass: Optional[str]
+    username: Optional[str]
+    password: Optional[str]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.ProxyServer.bypass"><code class="name">var <span class="ident">bypass</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ProxyServer.password"><code class="name">var <span class="ident">password</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ProxyServer.server"><code class="name">var <span class="ident">server</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ProxyServer.username"><code class="name">var <span class="ident">username</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.RecordHarOptions"><code class="flex name class">
+<span>class <span class="ident">RecordHarOptions</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RecordHarOptions(TypedDict, total=False):
+    omitContent: Optional[bool]
+    path: str</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.RecordHarOptions.omitContent"><code class="name">var <span class="ident">omitContent</span> : Union[bool, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.RecordHarOptions.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.RecordVideoOptions"><code class="flex name class">
+<span>class <span class="ident">RecordVideoOptions</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RecordVideoOptions(TypedDict, total=False):
+    dir: str
+    size: Optional[IntSize]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.RecordVideoOptions.dir"><code class="name">var <span class="ident">dir</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.RecordVideoOptions.size"><code class="name">var <span class="ident">size</span> : Union[playwright._types.IntSize, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.RequestFailure"><code class="flex name class">
+<span>class <span class="ident">RequestFailure</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RequestFailure(TypedDict):
+    errorText: str</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.RequestFailure.errorText"><code class="name">var <span class="ident">errorText</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.ResourceTiming"><code class="flex name class">
+<span>class <span class="ident">ResourceTiming</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResourceTiming(TypedDict):
+    startTime: float
+    domainLookupStart: float
+    domainLookupEnd: float
+    connectStart: float
+    secureConnectionStart: float
+    connectEnd: float
+    requestStart: float
+    responseStart: float
+    responseEnd: float</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.ResourceTiming.connectEnd"><code class="name">var <span class="ident">connectEnd</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.connectStart"><code class="name">var <span class="ident">connectStart</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.domainLookupEnd"><code class="name">var <span class="ident">domainLookupEnd</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.domainLookupStart"><code class="name">var <span class="ident">domainLookupStart</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.requestStart"><code class="name">var <span class="ident">requestStart</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.responseEnd"><code class="name">var <span class="ident">responseEnd</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.responseStart"><code class="name">var <span class="ident">responseStart</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.secureConnectionStart"><code class="name">var <span class="ident">secureConnectionStart</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.ResourceTiming.startTime"><code class="name">var <span class="ident">startTime</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.SelectOption"><code class="flex name class">
+<span>class <span class="ident">SelectOption</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SelectOption(TypedDict, total=False):
+    value: Optional[str]
+    label: Optional[str]
+    index: Optional[str]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.SelectOption.index"><code class="name">var <span class="ident">index</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.SelectOption.label"><code class="name">var <span class="ident">label</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.SelectOption.value"><code class="name">var <span class="ident">value</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="playwright.StorageState"><code class="flex name class">
+<span>class <span class="ident">StorageState</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class StorageState(TypedDict, total=False):
+    cookies: Optional[List[Cookie]]
+    origins: Optional[List[Dict]]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="playwright.StorageState.cookies"><code class="name">var <span class="ident">cookies</span> : Union[List[playwright._types.Cookie], NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.StorageState.origins"><code class="name">var <span class="ident">origins</span> : Union[List[Dict], NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="playwright.TimeoutError"><code class="flex name class">
 <span>class <span class="ident">TimeoutError</span></span>
