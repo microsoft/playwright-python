@@ -776,7 +776,7 @@ dict(one=1, two=2)</p></div>
 </summary>
 <pre><code class="python">class RecordHarOptions(TypedDict, total=False):
     omitContent: Optional[bool]
-    path: str</code></pre>
+    path: Union[str, Path]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -788,7 +788,7 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.RecordHarOptions.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dt id="playwright.RecordHarOptions.path"><code class="name">var <span class="ident">path</span> : Union[str, pathlib.Path]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -815,7 +815,7 @@ dict(one=1, two=2)</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RecordVideoOptions(TypedDict, total=False):
-    dir: str
+    dir: Union[str, Path]
     size: Optional[IntSize]</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -824,7 +824,7 @@ dict(one=1, two=2)</p></div>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.RecordVideoOptions.dir"><code class="name">var <span class="ident">dir</span> : str</code></dt>
+<dt id="playwright.RecordVideoOptions.dir"><code class="name">var <span class="ident">dir</span> : Union[str, pathlib.Path]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>

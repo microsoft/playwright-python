@@ -2102,7 +2102,7 @@ class Frame(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal[&#39;domcontentloaded&#39;, &#39;load&#39;, &#39;networkidle&#39;]]
             When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -3742,14 +3742,13 @@ class Page(AsyncBase):
     ) -&gt; typing.Union[&#34;Frame&#34;, NoneType]:
         &#34;&#34;&#34;Page.frame
 
-        Returns frame matching the criteria. Returns `null` if no frame matches.
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
         Parameters
         ----------
         name : Optional[str]
             frame name specified in the `iframe`&#39;s `name` attribute
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving frame&#39;s `url` as a URL object.
 
         Returns
@@ -4374,7 +4373,7 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal[&#39;domcontentloaded&#39;, &#39;load&#39;, &#39;networkidle&#39;]]
             When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -4406,7 +4405,7 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Request object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
@@ -4435,7 +4434,7 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Response object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4638,9 +4637,9 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+        handler : Callable[[Route, Request], Any]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -4660,9 +4659,9 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+        handler : Optional[Callable[[Route, Request], Any]]
             Optional handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -6167,9 +6166,9 @@ class BrowserContext(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+        handler : Callable[[Route, Request], Any]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -6190,9 +6189,9 @@ class BrowserContext(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
-        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+        handler : Optional[Callable[[Route, Request], Any]]
             Optional handler function used to register a routing with browserContext.route(url, handler).
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -6236,16 +6235,23 @@ class BrowserContext(AsyncBase):
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(await self._impl_obj.close())
 
-    async def storageState(self) -&gt; StorageState:
+    async def storageState(
+        self, path: typing.Union[str, pathlib.Path] = None
+    ) -&gt; StorageState:
         &#34;&#34;&#34;BrowserContext.storageState
 
         Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+        Parameters
+        ----------
+        path : Union[str, pathlib.Path, NoneType]
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won&#39;t be saved to the disk.
 
         Returns
         -------
         {&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}
         &#34;&#34;&#34;
-        return mapping.from_maybe_impl(await self._impl_obj.storageState())
+        return mapping.from_maybe_impl(await self._impl_obj.storageState(path=path))
 
     def expect_event(
         self,
@@ -6455,7 +6461,7 @@ class Browser(AsyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -6502,12 +6508,12 @@ class Browser(AsyncBase):
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+        recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+        storageState : Union[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
         -------
@@ -6567,7 +6573,7 @@ class Browser(AsyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -6617,12 +6623,12 @@ class Browser(AsyncBase):
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+        recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+        storageState : Union[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
         -------
@@ -6907,9 +6913,9 @@ class BrowserType(AsyncBase):
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+        recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
 
         Returns
@@ -7231,7 +7237,7 @@ An example of logging the focused node's name:</p>
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.newContext
 
@@ -7278,12 +7284,12 @@ An example of logging the focused node's name:</p>
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+        recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+        storageState : Union[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
         -------
@@ -7343,7 +7349,7 @@ An example of logging the focused node's name:</p>
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.newPage
 
@@ -7393,12 +7399,12 @@ An example of logging the focused node's name:</p>
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+        recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+        storageState : Union[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
         -------
@@ -7560,7 +7566,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newContext"><code class="name flex">
-<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright._types.ProxyServer = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None, storageState: playwright._types.StorageState = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
+<span>async def <span class="ident">newContext</span></span>(<span>self, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright._types.ProxyServer = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None, storageState: Union[playwright._types.StorageState, str, pathlib.Path] = None) ‑> <a title="playwright.async_api.BrowserContext" href="#playwright.async_api.BrowserContext">BrowserContext</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newContext</p>
@@ -7607,12 +7613,12 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 <dd><strong>NOTE</strong> Use <code>recordVideo</code> instead, it takes precedence over <code>videosPath</code>. Enables video recording for all pages to <code>videosPath</code> directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
 <dd><strong>NOTE</strong> Use <code>recordVideo</code> instead, it takes precedence over <code>videoSize</code>. Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
-<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": str}]</code></dt>
+<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]</code></dt>
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.</dd>
-<dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
+<dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
-<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]</code></dt>
-<dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().</dd>
+<dt><strong><code>storageState</code></strong> :&ensp;<code>Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]</code></dt>
+<dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -7648,7 +7654,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
     recordVideo: RecordVideoOptions = None,
-    storageState: StorageState = None,
+    storageState: typing.Union[StorageState, str, pathlib.Path] = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;Browser.newContext
 
@@ -7695,12 +7701,12 @@ The Browser object itself is considered to be disposed and cannot be used anymor
         **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
         **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-    recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+    recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-    storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
-        Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+    storageState : Union[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+        Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
     Returns
     -------
@@ -7737,7 +7743,7 @@ The Browser object itself is considered to be disposed and cannot be used anymor
 </details>
 </dd>
 <dt id="playwright.async_api.Browser.newPage"><code class="name flex">
-<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright._types.ProxyServer = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None, storageState: playwright._types.StorageState = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
+<span>async def <span class="ident">newPage</span></span>(<span>self, viewport: Union[playwright._types.IntSize, Literal[0]] = None, ignoreHTTPSErrors: bool = None, javaScriptEnabled: bool = None, bypassCSP: bool = None, userAgent: str = None, locale: str = None, timezoneId: str = None, geolocation: playwright._types.Geolocation = None, permissions: List[str] = None, extraHTTPHeaders: Dict[str, str] = None, offline: bool = None, httpCredentials: playwright._types.Credentials = None, deviceScaleFactor: int = None, isMobile: bool = None, hasTouch: bool = None, colorScheme: Literal['dark', 'light', 'no-preference'] = None, acceptDownloads: bool = None, defaultBrowserType: str = None, proxy: playwright._types.ProxyServer = None, videosPath: str = None, videoSize: playwright._types.IntSize = None, recordHar: playwright._types.RecordHarOptions = None, recordVideo: playwright._types.RecordVideoOptions = None, storageState: Union[playwright._types.StorageState, str, pathlib.Path] = None) ‑> <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.newPage</p>
@@ -7787,12 +7793,12 @@ control their exact life times.</p>
 <dd><strong>NOTE</strong> Use <code>recordVideo</code> instead, it takes precedence over <code>videosPath</code>. Enables video recording for all pages to <code>videosPath</code> directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
 <dd><strong>NOTE</strong> Use <code>recordVideo</code> instead, it takes precedence over <code>videoSize</code>. Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
-<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": str}]</code></dt>
+<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]</code></dt>
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.</dd>
-<dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
+<dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
-<dt><strong><code>storageState</code></strong> :&ensp;<code>Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]</code></dt>
-<dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().</dd>
+<dt><strong><code>storageState</code></strong> :&ensp;<code>Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]</code></dt>
+<dd>Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -7828,7 +7834,7 @@ control their exact life times.</p>
     videoSize: IntSize = None,
     recordHar: RecordHarOptions = None,
     recordVideo: RecordVideoOptions = None,
-    storageState: StorageState = None,
+    storageState: typing.Union[StorageState, str, pathlib.Path] = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.newPage
 
@@ -7878,12 +7884,12 @@ control their exact life times.</p>
         **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
         **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-    recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+    recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-    storageState : Optional[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}]
-        Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+    storageState : Union[{&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+        Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
     Returns
     -------
@@ -8234,9 +8240,9 @@ control their exact life times.</p>
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+        handler : Callable[[Route, Request], Any]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -8257,9 +8263,9 @@ control their exact life times.</p>
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
-        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+        handler : Optional[Callable[[Route, Request], Any]]
             Optional handler function used to register a routing with browserContext.route(url, handler).
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -8303,16 +8309,23 @@ control their exact life times.</p>
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(await self._impl_obj.close())
 
-    async def storageState(self) -&gt; StorageState:
+    async def storageState(
+        self, path: typing.Union[str, pathlib.Path] = None
+    ) -&gt; StorageState:
         &#34;&#34;&#34;BrowserContext.storageState
 
         Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+        Parameters
+        ----------
+        path : Union[str, pathlib.Path, NoneType]
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won&#39;t be saved to the disk.
 
         Returns
         -------
         {&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}
         &#34;&#34;&#34;
-        return mapping.from_maybe_impl(await self._impl_obj.storageState())
+        return mapping.from_maybe_impl(await self._impl_obj.storageState(path=path))
 
     def expect_event(
         self,
@@ -8938,9 +8951,9 @@ handlers.</p>
 <p><strong>NOTE</strong> Enabling routing disables http cache.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]</code></dt>
 <dd>handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -8965,9 +8978,9 @@ handlers.</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool]]
+    url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL to match while routing.
-    handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+    handler : Callable[[Route, Request], Any]
         handler function to route the request.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -9157,27 +9170,39 @@ read its geolocation.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.storageState"><code class="name flex">
-<span>async def <span class="ident">storageState</span></span>(<span>self) ‑> playwright._types.StorageState</span>
+<span>async def <span class="ident">storageState</span></span>(<span>self, path: Union[str, pathlib.Path] = None) ‑> playwright._types.StorageState</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.storageState</p>
 <p>Returns storage state for this browser context, contains current cookies and local storage snapshot.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>Union[str, pathlib.Path, NoneType]</code></dt>
+<dd>The file path to save the storage state to. If <code>path</code> is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.</dd>
+</dl>
 <h2 id="returns">Returns</h2>
 <p>{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def storageState(self) -&gt; StorageState:
+<pre><code class="python">async def storageState(
+    self, path: typing.Union[str, pathlib.Path] = None
+) -&gt; StorageState:
     &#34;&#34;&#34;BrowserContext.storageState
 
     Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+    Parameters
+    ----------
+    path : Union[str, pathlib.Path, NoneType]
+        The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won&#39;t be saved to the disk.
 
     Returns
     -------
     {&#34;cookies&#34;: Optional[List[{&#34;name&#34;: str, &#34;value&#34;: str, &#34;url&#34;: Optional[str], &#34;domain&#34;: Optional[str], &#34;path&#34;: Optional[str], &#34;expires&#34;: Optional[int], &#34;httpOnly&#34;: Optional[bool], &#34;secure&#34;: Optional[bool], &#34;sameSite&#34;: Optional[Literal[&#39;Strict&#39;, &#39;Lax&#39;, &#39;None&#39;]]}]], &#34;origins&#34;: Optional[List[Dict]]}
     &#34;&#34;&#34;
-    return mapping.from_maybe_impl(await self._impl_obj.storageState())</code></pre>
+    return mapping.from_maybe_impl(await self._impl_obj.storageState(path=path))</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.unroute"><code class="name flex">
@@ -9189,9 +9214,9 @@ read its geolocation.</p>
 <code>url</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]]</code></dt>
 <dd>Optional handler function used to register a routing with browserContext.route(url, handler).</dd>
 </dl></div>
 <details class="source">
@@ -9210,9 +9235,9 @@ read its geolocation.</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool]]
+    url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
-    handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+    handler : Optional[Callable[[Route, Request], Any]]
         Optional handler function used to register a routing with browserContext.route(url, handler).
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -9517,9 +9542,9 @@ value. Will throw an error if the context closes before the event is fired. Retu
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+        recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+        recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
 
         Returns
@@ -9860,9 +9885,9 @@ context will automatically close the browser.</p>
 <dd><strong>NOTE</strong> Use <code>recordVideo</code> instead, it takes precedence over <code>videosPath</code>. Enables video recording for all pages to <code>videosPath</code> directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
 <dt><strong><code>videoSize</code></strong> :&ensp;<code>Optional[{"width": int, "height": int}]</code></dt>
 <dd><strong>NOTE</strong> Use <code>recordVideo</code> instead, it takes precedence over <code>videoSize</code>. Specifies dimensions of the automatically recorded video. Can only be used if <code>videosPath</code> is set. If not specified the size will be equal to <code>viewport</code>. If <code>viewport</code> is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.</dd>
-<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": str}]</code></dt>
+<dt><strong><code>recordHar</code></strong> :&ensp;<code>Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]</code></dt>
 <dd>Enables HAR recording for all pages into <code>recordHar.path</code> file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.</dd>
-<dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]</code></dt>
+<dt><strong><code>recordVideo</code></strong> :&ensp;<code>Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]</code></dt>
 <dd>Enables video recording for all pages into <code>recordVideo.dir</code> directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -9988,9 +10013,9 @@ context will automatically close the browser.</p>
         **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
     videoSize : Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]
         **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: str}]
+    recordHar : Optional[{&#34;omitContent&#34;: Optional[bool], &#34;path&#34;: Union[str, pathlib.Path]}]
         Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-    recordVideo : Optional[{&#34;dir&#34;: str, &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
+    recordVideo : Optional[{&#34;dir&#34;: Union[str, pathlib.Path], &#34;size&#34;: Optional[{&#34;width&#34;: int, &#34;height&#34;: int}]}]
         Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
 
     Returns
@@ -13824,7 +13849,7 @@ For empty array, clears the selected files.</p>
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal[&#39;domcontentloaded&#39;, &#39;load&#39;, &#39;networkidle&#39;]]
             When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -17237,7 +17262,7 @@ frame to navigate. Consider this example:
 considered a navigation.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool], NoneType]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool], NoneType]</code></dt>
 <dd>URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.</dd>
 <dt><strong><code>waitUntil</code></strong> :&ensp;<code>Optional[Literal['domcontentloaded', 'load', 'networkidle']]</code></dt>
 <dd>When to consider operation succeeded, defaults to <code>load</code>. Events can be either:
@@ -17274,7 +17299,7 @@ considered a navigation.</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+    url : Union[str, Pattern, Callable[[str], bool], NoneType]
         URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
     waitUntil : Optional[Literal[&#39;domcontentloaded&#39;, &#39;load&#39;, &#39;networkidle&#39;]]
         When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -18635,14 +18660,13 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
     ) -&gt; typing.Union[&#34;Frame&#34;, NoneType]:
         &#34;&#34;&#34;Page.frame
 
-        Returns frame matching the criteria. Returns `null` if no frame matches.
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
         Parameters
         ----------
         name : Optional[str]
             frame name specified in the `iframe`&#39;s `name` attribute
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving frame&#39;s `url` as a URL object.
 
         Returns
@@ -19267,7 +19291,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal[&#39;domcontentloaded&#39;, &#39;load&#39;, &#39;networkidle&#39;]]
             When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -19299,7 +19323,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Request object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
@@ -19328,7 +19352,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Response object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -19531,9 +19555,9 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+        handler : Callable[[Route, Request], Any]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -19553,9 +19577,9 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+        handler : Optional[Callable[[Route, Request], Any]]
             Optional handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -22733,13 +22757,12 @@ Shortcut for main frame's frame.focus(selector[, options]).</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.frame</p>
-<p>Returns frame matching the criteria. Returns <code>null</code> if no frame matches.
-Returns frame matching the specified criteria. Either <code>name</code> or <code>url</code> must be specified.</p>
+<p>Returns frame matching the specified criteria. Either <code>name</code> or <code>url</code> must be specified.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>frame name specified in the <code>iframe</code>'s <code>name</code> attribute</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool], NoneType]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool], NoneType]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving frame's <code>url</code> as a URL object.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -22758,14 +22781,13 @@ Returns frame matching the specified criteria. Either <code>name</code> or <code
 ) -&gt; typing.Union[&#34;Frame&#34;, NoneType]:
     &#34;&#34;&#34;Page.frame
 
-    Returns frame matching the criteria. Returns `null` if no frame matches.
     Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
     Parameters
     ----------
     name : Optional[str]
         frame name specified in the `iframe`&#39;s `name` attribute
-    url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+    url : Union[str, Pattern, Callable[[str], bool], NoneType]
         A glob pattern, regex pattern or predicate receiving frame&#39;s `url` as a URL object.
 
     Returns
@@ -23701,9 +23723,9 @@ both handlers.</p>
 <p><strong>NOTE</strong> Enabling routing disables http cache.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]</code></dt>
 <dd>handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -23731,9 +23753,9 @@ both handlers.</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool]]
+    url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL to match while routing.
-    handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+    handler : Callable[[Route, Request], Any]
         handler function to route the request.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -24471,9 +24493,9 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 <p>Removes a route created with page.route(url, handler). When <code>handler</code> is not specified, removes all routes for the <code>url</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool]]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]]</code></dt>
 <dd>Optional handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -24491,9 +24513,9 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool]]
+    url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL to match while routing.
-    handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+    handler : Optional[Callable[[Route, Request], Any]]
         Optional handler function to route the request.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -24718,7 +24740,7 @@ considered a navigation.
 Shortcut for main frame's frame.waitForNavigation([options]).</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool], NoneType]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool], NoneType]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.</dd>
 <dt><strong><code>waitUntil</code></strong> :&ensp;<code>Optional[Literal['domcontentloaded', 'load', 'networkidle']]</code></dt>
 <dd>When to consider operation succeeded, defaults to <code>load</code>. Events can be either:
@@ -24757,7 +24779,7 @@ Shortcut for main frame's frame.waitForNavigation([options]).</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+    url : Union[str, Pattern, Callable[[str], bool], NoneType]
         A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
     waitUntil : Optional[Literal[&#39;domcontentloaded&#39;, &#39;load&#39;, &#39;networkidle&#39;]]
         When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -24786,7 +24808,7 @@ Shortcut for main frame's frame.waitForNavigation([options]).</p>
 <p>Returns promise that resolves to the matched request.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool], NoneType]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool], NoneType]</code></dt>
 <dd>Request URL string, regex or predicate receiving Request object.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.</dd>
@@ -24812,7 +24834,7 @@ Shortcut for main frame's frame.waitForNavigation([options]).</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+    url : Union[str, Pattern, Callable[[str], bool], NoneType]
         Request URL string, regex or predicate receiving Request object.
     timeout : Optional[int]
         Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
@@ -24838,7 +24860,7 @@ Shortcut for main frame's frame.waitForNavigation([options]).</p>
 <p>Returns the matched response.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, typing.Callable[[str], bool], NoneType]</code></dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool], NoneType]</code></dt>
 <dd>Request URL string, regex or predicate receiving Response object.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Optional[int]</code></dt>
 <dd>Maximum wait time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.</dd>
@@ -24864,7 +24886,7 @@ Shortcut for main frame's frame.waitForNavigation([options]).</p>
 
     Parameters
     ----------
-    url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+    url : Union[str, Pattern, Callable[[str], bool], NoneType]
         Request URL string, regex or predicate receiving Response object.
     timeout : Optional[int]
         Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
