@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import sys
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -119,11 +120,11 @@ class PdfMargins(TypedDict, total=False):
 
 class RecordHarOptions(TypedDict, total=False):
     omitContent: Optional[bool]
-    path: str
+    path: Union[str, Path]
 
 
 class RecordVideoOptions(TypedDict, total=False):
-    dir: str
+    dir: Union[str, Path]
     size: Optional[IntSize]
 
 

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import pytest
 
 
@@ -58,3 +60,38 @@ def test_should_set_local_storage(browser, is_webkit, is_win):
     local_storage = page.evaluate("window.localStorage")
     assert local_storage == {"name1": "value1"}
     context.close()
+
+
+def test_should_round_trip_through_the_file(browser, context, tmpdir):
+    page1 = context.newPage()
+    page1.route(
+        "**/*",
+        lambda route: route.fulfill(body="<html></html>"),
+    )
+    page1.goto("https://www.example.com")
+    page1.evaluate(
+        """() => {
+            localStorage["name1"] = "value1"
+            document.cookie = "username=John Doe"
+            return document.cookie
+        }"""
+    )
+
+    path = tmpdir / "storage-state.json"
+    state = context.storageState(path=path)
+    with open(path, "r") as f:
+        written = json.load(f)
+    assert state == written
+
+    context2 = browser.newContext(storageState=path)
+    page2 = context2.newPage()
+    page2.route(
+        "**/*",
+        lambda route: route.fulfill(body="<html></html>"),
+    )
+    page2.goto("https://www.example.com")
+    local_storage = page2.evaluate("window.localStorage")
+    assert local_storage == {"name1": "value1"}
+    cookie = page2.evaluate("document.cookie")
+    assert cookie == "username=John Doe"
+    context2.close()

@@ -23,7 +23,7 @@ import zipfile
 import setuptools
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "0.170.0-next.1607623793189"
+driver_version = "0.170.0-next.1608058598043"
 
 
 with open("README.md", "r", encoding="utf-8") as fh:

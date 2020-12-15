@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Union
 
@@ -94,13 +96,17 @@ class Browser(ChannelOwner):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: Union[StorageState, str, Path] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
         # value from the device descriptors, thats why we have to strip it out.
-        if "defaultBrowserType" in params:
+        if defaultBrowserType in params:
             del params["defaultBrowserType"]
+        if storageState:
+            if not isinstance(storageState, dict):
+                with open(storageState, "r") as f:
+                    params["storageState"] = json.load(f)
         if viewport == 0:
             del params["viewport"]
             params["noDefaultViewport"] = True
@@ -143,13 +149,17 @@ class Browser(ChannelOwner):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: Union[StorageState, str, Path] = None,
     ) -> Page:
         params = locals_to_params(locals())
         # Python is strict in which variables gets passed to methods. We get this
         # value from the device descriptors, thats why we have to strip it out.
-        if "defaultBrowserType" in params:
+        if defaultBrowserType:
             del params["defaultBrowserType"]
+        if storageState:
+            if not isinstance(storageState, dict):
+                with open(storageState, "r") as f:
+                    params["storageState"] = json.load(f)
         context = await self.newContext(**params)
         page = await context.newPage()
         page._owned_context = context
