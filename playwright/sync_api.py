@@ -2140,7 +2140,7 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -3850,14 +3850,13 @@ class Page(SyncBase):
     ) -> typing.Union["Frame", NoneType]:
         """Page.frame
 
-        Returns frame matching the criteria. Returns `null` if no frame matches.
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
         Parameters
         ----------
         name : Optional[str]
             frame name specified in the `iframe`'s `name` attribute
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving frame's `url` as a URL object.
 
         Returns
@@ -4508,7 +4507,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
         waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -4542,7 +4541,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Request object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the page.setDefaultTimeout(timeout) method.
@@ -4573,7 +4572,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool], NoneType]
+        url : Union[str, Pattern, Callable[[str], bool], NoneType]
             Request URL string, regex or predicate receiving Response object.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -4784,9 +4783,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+        handler : Callable[[Route, Request], Any]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -4808,9 +4807,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+        handler : Optional[Callable[[Route, Request], Any]]
             Optional handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -6342,9 +6341,9 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]
+        handler : Callable[[Route, Request], Any]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -6367,9 +6366,9 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, Pattern, typing.Callable[[str], bool]]
+        url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
-        handler : Optional[typing.Callable[[playwright.network.Route, playwright.network.Request], typing.Any]]
+        handler : Optional[Callable[[Route, Request], Any]]
             Optional handler function used to register a routing with browserContext.route(url, handler).
         """
         return mapping.from_maybe_impl(
@@ -6419,16 +6418,25 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
 
-    def storageState(self) -> StorageState:
+    def storageState(
+        self, path: typing.Union[str, pathlib.Path] = None
+    ) -> StorageState:
         """BrowserContext.storageState
 
         Returns storage state for this browser context, contains current cookies and local storage snapshot.
+
+        Parameters
+        ----------
+        path : Union[str, pathlib.Path, NoneType]
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 
         Returns
         -------
         {"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}
         """
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.storageState()))
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.storageState(path=path))
+        )
 
     def expect_event(
         self,
@@ -6640,7 +6648,7 @@ class Browser(SyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -> "BrowserContext":
         """Browser.newContext
 
@@ -6687,12 +6695,12 @@ class Browser(SyncBase):
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
+        recordHar : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
+        recordVideo : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+        storageState : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
         -------
@@ -6754,7 +6762,7 @@ class Browser(SyncBase):
         videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
-        storageState: StorageState = None,
+        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -> "Page":
         """Browser.newPage
 
@@ -6804,12 +6812,12 @@ class Browser(SyncBase):
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
+        recordHar : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
+        recordVideo : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Optional[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState().
+        storageState : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+            Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
         -------
@@ -7098,9 +7106,9 @@ class BrowserType(SyncBase):
             **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
         videoSize : Optional[{"width": int, "height": int}]
             **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{"omitContent": Optional[bool], "path": str}]
+        recordHar : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{"dir": str, "size": Optional[{"width": int, "height": int}]}]
+        recordVideo : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
 
         Returns

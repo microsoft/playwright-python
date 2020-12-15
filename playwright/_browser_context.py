@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -233,8 +234,12 @@ class BrowserContext(ChannelOwner):
             if not is_safe_close_error(e):
                 raise e
 
-    async def storageState(self) -> StorageState:
-        return await self._channel.send_return_as_dict("storageState")
+    async def storageState(self, path: Union[str, Path] = None) -> StorageState:
+        result = await self._channel.send_return_as_dict("storageState")
+        if path:
+            with open(path, "w") as f:
+                json.dump(result, f)
+        return result
 
     def expect_event(
         self,

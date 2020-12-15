@@ -231,6 +231,8 @@ class Connection:
     def _replace_channels_with_guids(self, payload: Any) -> Any:
         if payload is None:
             return payload
+        if isinstance(payload, Path):
+            return str(payload)
         if isinstance(payload, list):
             return list(map(lambda p: self._replace_channels_with_guids(p), payload))
         if isinstance(payload, Channel):
