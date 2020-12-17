@@ -52,7 +52,7 @@ from playwright import sync_playwright
 with sync_playwright() as p:
     for browser_type in [p.chromium, p.firefox, p.webkit]:
         browser = browser_type.launch()
-        page = browser.newPage()
+        page = browser.new_page()
         page.goto('http://whatsmyuseragent.org/')
         page.screenshot(path=f'example-{browser_type.name}.png')
         browser.close()
@@ -68,7 +68,7 @@ async def main():
     async with async_playwright() as p:
         for browser_type in [p.chromium, p.firefox, p.webkit]:
             browser = await browser_type.launch()
-            page = await browser.newPage()
+            page = await browser.new_page()
             await page.goto('http://whatsmyuseragent.org/')
             await page.screenshot(path=f'example-{browser_type.name}.png')
             await browser.close()
@@ -85,7 +85,7 @@ def test_playwright_is_visible_on_google(page):
     page.goto("https://www.google.com")
     page.type("input[name=q]", "Playwright GitHub")
     page.click("input[type=submit]")
-    page.waitForSelector("text=microsoft/Playwright")
+    page.wait_for_selector("text=microsoft/Playwright")
 ```
 
 #### Interactive mode (REPL)
@@ -97,7 +97,7 @@ def test_playwright_is_visible_on_google(page):
 # Use playwright.chromium, playwright.firefox or playwright.webkit
 # Pass headless=False to see the browser UI
 >>> browser = playwright.chromium.launch()
->>> page = browser.newPage()
+>>> page = browser.new_page()
 >>> page.goto("http://whatsmyuseragent.org/")
 >>> page.screenshot(path="example.png")
 >>> browser.close()
@@ -116,13 +116,13 @@ from playwright import sync_playwright
 with sync_playwright() as p:
     iphone_11 = p.devices['iPhone 11 Pro']
     browser = p.webkit.launch(headless=False)
-    context = browser.newContext(
+    context = browser.new_context(
         **iphone_11,
         locale='en-US',
         geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
         permissions=['geolocation']
     )
-    page = context.newPage()
+    page = context.new_page()
     page.goto('https://maps.google.com')
     page.click('text="Your location"')
     page.screenshot(path='colosseum-iphone.png')
@@ -140,13 +140,13 @@ async def main():
     async with async_playwright() as p:
         iphone_11 = p.devices['iPhone 11 Pro']
         browser = await p.webkit.launch(headless=False)
-        context = await browser.newContext(
+        context = await browser.new_context(
             **iphone_11,
             locale='en-US',
             geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
             permissions=['geolocation']
         )
-        page = await context.newPage()
+        page = await context.new_page()
         await page.goto('https://maps.google.com')
         await page.click('text="Your location"')
         await page.screenshot(path='colosseum-iphone.png')
@@ -165,7 +165,7 @@ from playwright import sync_playwright
 
 with sync_playwright() as p:
     browser = p.firefox.launch()
-    page = browser.newPage()
+    page = browser.new_page()
     page.goto('https://www.example.com/')
     dimensions = page.evaluate('''() => {
       return {
@@ -187,7 +187,7 @@ from playwright import async_playwright
 async def main():
     async with async_playwright() as p:
         browser = await p.firefox.launch()
-        page = await browser.newPage()
+        page = await browser.new_page()
         await page.goto('https://www.example.com/')
         dimensions = await page.evaluate('''() => {
           return {
@@ -212,7 +212,7 @@ from playwright import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
-    page = browser.newPage()
+    page = browser.new_page()
 
     def log_and_continue_request(route, request):
       print(request.url)
@@ -234,7 +234,7 @@ from playwright import async_playwright
 async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        page = await browser.newPage()
+        page = await browser.new_page()
 
         def log_and_continue_request(route, request):
             print(request.url)
@@ -252,7 +252,7 @@ asyncio.get_event_loop().run_until_complete(main())
 
 ## Documentation
 
-We are in the process of converting our [documentation](https://playwright.dev/) from the Node.js form to Python. You can go ahead and use the Node.js documentation since the API is pretty much the same. Playwright uses non-Python naming conventions (`camelCase` instead of `snake_case`) for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon Stack Overflow answers and existing documentation.
+We are in the process of converting our [documentation](https://playwright.dev/) from the Node.js form to Python. You can go ahead and use the Node.js documentation since the API is pretty much the same.
 
 ### Named arguments
 
