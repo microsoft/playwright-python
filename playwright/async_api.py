@@ -196,7 +196,7 @@ class Request(AsyncBase):
         """Request.redirected_to
 
         New request issued by the browser if the server responded with redirect.
-        This method is the opposite of request.redirectedFrom():
+        This method is the opposite of request.redirected_from():
 
         Returns
         -------
@@ -644,7 +644,7 @@ class Keyboard(AsyncBase):
 
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
-        **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
+        **NOTE** Modifier keys DO NOT effect `keyboard.insert_text`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
         ----------
@@ -877,7 +877,7 @@ class JSHandle(AsyncBase):
         in-page object (JSHandle).
         If the function passed to the `jsHandle.evaluateHandle` returns a Promise, then `jsHandle.evaluateHandle` would wait
         for the promise to resolve and return its value.
-        See page.evaluateHandle(pageFunction[, arg]) for more details.
+        See page.evaluate_handle(pageFunction[, arg]) for more details.
 
         Parameters
         ----------
@@ -1235,7 +1235,7 @@ class ElementHandle(JSHandle):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
         Passing zero timeout disables this.
 
-        **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        **NOTE** `element_handle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
@@ -1329,7 +1329,7 @@ class ElementHandle(JSHandle):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
         Passing zero timeout disables this.
 
-        **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        **NOTE** `element_handle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
@@ -1443,7 +1443,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.type
 
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
-        To press a special key, like `Control` or `ArrowDown`, use elementHandle.press(key[, options]).
+        To press a special key, like `Control` or `ArrowDown`, use element_handle.press(key[, options]).
         An example of typing into a text field and then submitting the form:
 
         Parameters
@@ -1801,7 +1801,7 @@ class ElementHandle(JSHandle):
         will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
         throw.
 
-        **NOTE** This method does not work across navigations, use page.waitForSelector(selector[, options]) instead.
+        **NOTE** This method does not work across navigations, use page.wait_for_selector(selector[, options]) instead.
 
         Parameters
         ----------
@@ -2126,7 +2126,7 @@ class Frame(AsyncBase):
         """Frame.frame_element
 
         Returns the `frame` or `iframe` element handle which corresponds to this frame.
-        This is an inverse of elementHandle.contentFrame(). Note that returned handle actually belongs to the parent frame.
+        This is an inverse of element_handle.content_frame(). Note that returned handle actually belongs to the parent frame.
         This method throws an error if the frame has been detached before `frameElement()` returns.
 
         Returns
@@ -2174,12 +2174,12 @@ class Frame(AsyncBase):
         """Frame.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
-        The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page
+        The only difference between `frame.evaluate` and `frame.evaluate_handle` is that `frame.evaluate_handle` returns in-page
         object (JSHandle).
-        If the function, passed to the `frame.evaluateHandle`, returns a Promise, then `frame.evaluateHandle` would wait for
+        If the function, passed to the `frame.evaluate_handle`, returns a Promise, then `frame.evaluate_handle` would wait for
         the promise to resolve and return its value.
         A string can also be passed in instead of a function.
-        JSHandle instances can be passed as an argument to the `frame.evaluateHandle`:
+        JSHandle instances can be passed as an argument to the `frame.evaluate_handle`:
 
         Parameters
         ----------
@@ -3128,7 +3128,7 @@ class Frame(AsyncBase):
         """Frame.wait_for_timeout
 
         Returns a promise that resolves after the timeout.
-        Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
+        Note that `frame.wait_for_timeout()` should only be used for debugging. Tests using the timer in production are going to
         be flaky. Use signals such as network events, selectors becoming visible and others instead.
 
         Parameters
@@ -3153,7 +3153,7 @@ class Frame(AsyncBase):
         Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
 
-        To pass an argument from Node.js to the predicate of `frame.waitForFunction` function:
+        To pass an argument from Node.js to the predicate of `frame.wait_for_function` function:
 
         Parameters
         ----------
@@ -3303,9 +3303,9 @@ class Worker(AsyncBase):
         """Worker.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
-        The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns
+        The only difference between `worker.evaluate` and `worker.evaluate_handle` is that `worker.evaluate_handle` returns
         in-page object (JSHandle).
-        If the function passed to the `worker.evaluateHandle` returns a Promise, then `worker.evaluateHandle` would wait for
+        If the function passed to the `worker.evaluate_handle` returns a Promise, then `worker.evaluate_handle` would wait for
         the promise to resolve and return its value.
 
         Parameters
@@ -3751,15 +3751,15 @@ class Page(AsyncBase):
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
 
-        page.goBack([options])
-        page.goForward([options])
+        page.go_back([options])
+        page.go_forward([options])
         page.goto(url[, options])
         page.reload([options])
-        page.setContent(html[, options])
-        page.waitForNavigation([options])
+        page.set_content(html[, options])
+        page.wait_for_navigation([options])
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout) takes priority over page.setDefaultTimeout(timeout),
-        browserContext.setDefaultTimeout(timeout) and browserContext.setDefaultNavigationTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout) takes priority over page.set_default_timeout(timeout),
+        browser_context.set_default_timeout(timeout) and browser_context.set_default_navigation_timeout(timeout).
 
         Parameters
         ----------
@@ -3775,7 +3775,7 @@ class Page(AsyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout) takes priority over page.setDefaultTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout) takes priority over page.set_default_timeout(timeout).
 
         Parameters
         ----------
@@ -3953,12 +3953,12 @@ class Page(AsyncBase):
         """Page.evaluate_handle
 
         Returns the value of the `pageFunction` invacation as in-page object (JSHandle).
-        The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page
+        The only difference between `page.evaluate` and `page.evaluate_handle` is that `page.evaluate_handle` returns in-page
         object (JSHandle).
-        If the function passed to the `page.evaluateHandle` returns a Promise, then `page.evaluateHandle` would wait for the
+        If the function passed to the `page.evaluate_handle` returns a Promise, then `page.evaluate_handle` would wait for the
         promise to resolve and return its value.
         A string can also be passed in instead of a function:
-        JSHandle instances can be passed as an argument to the `page.evaluateHandle`:
+        JSHandle instances can be passed as an argument to the `page.evaluate_handle`:
 
         Parameters
         ----------
@@ -4067,7 +4067,7 @@ class Page(AsyncBase):
 
         Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
         fires or when the script content was injected into frame.
-        Shortcut for main frame's frame.addScriptTag(script).
+        Shortcut for main frame's frame.add_script_tag(script).
 
         Parameters
         ----------
@@ -4100,7 +4100,7 @@ class Page(AsyncBase):
 
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
         content. Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
-        Shortcut for main frame's frame.addStyleTag(style).
+        Shortcut for main frame's frame.add_style_tag(style).
 
         Parameters
         ----------
@@ -4126,9 +4126,9 @@ class Page(AsyncBase):
         executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of
         `playwrightFunction`.
         If the `playwrightFunction` returns a Promise, it will be awaited.
-        See browserContext.exposeFunction(name, playwrightFunction) for context-wide exposed function.
+        See browser_context.expose_function(name, playwrightFunction) for context-wide exposed function.
 
-        **NOTE** Functions installed via `page.exposeFunction` survive navigations.
+        **NOTE** Functions installed via `page.expose_function` survive navigations.
 
         An example of adding an `md5` function to the page:
 
@@ -4156,9 +4156,9 @@ class Page(AsyncBase):
         executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of
         `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
         The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-        See browserContext.exposeBinding(name, playwrightBinding[, options]) for the context-wide version.
+        See browser_context.expose_binding(name, playwrightBinding[, options]) for the context-wide version.
 
-        **NOTE** Functions installed via `page.exposeBinding` survive navigations.
+        **NOTE** Functions installed via `page.expose_binding` survive navigations.
 
         An example of exposing page URL to all frames in a page:
 
@@ -4184,7 +4184,7 @@ class Page(AsyncBase):
 
         The extra HTTP headers will be sent with every request the page initiates.
 
-        **NOTE** page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.
+        **NOTE** page.set_extra_http_headers does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -4324,7 +4324,7 @@ class Page(AsyncBase):
         Returns when the required load state has been reached.
         This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
         when this method is called. If current document has already reached the required state, resolves immediately.
-        Shortcut for main frame's frame.waitForLoadState([state, options]).
+        Shortcut for main frame's frame.wait_for_load_state([state, options]).
 
         Parameters
         ----------
@@ -4356,7 +4356,7 @@ class Page(AsyncBase):
         Consider this example:
         **NOTE** Usage of the History API to change the URL is
         considered a navigation.
-        Shortcut for main frame's frame.waitForNavigation([options]).
+        Shortcut for main frame's frame.wait_for_navigation([options]).
 
         Parameters
         ----------
@@ -4546,8 +4546,8 @@ class Page(AsyncBase):
         """Page.set_viewport_size
 
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
-        browser.newContext([options]) allows to set viewport size (and more) for all pages in the context at once.
-        `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
+        browser.new_context([options]) allows to set viewport size (and more) for all pages in the context at once.
+        `page.set_viewport_size` will resize the page. A lot of websites don't expect phones to change size, so you should set the
         viewport size before navigating to the page.
 
         Parameters
@@ -4591,8 +4591,8 @@ class Page(AsyncBase):
         the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
 
-        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and
-        page.addInitScript(script[, arg]) is not defined.
+        **NOTE** The order of evaluation of multiple scripts installed via browser_context.add_init_script(script[, arg]) and
+        page.add_init_script(script[, arg]) is not defined.
 
         Parameters
         ----------
@@ -4617,7 +4617,7 @@ class Page(AsyncBase):
 
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
-        Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches
+        Page routes take precedence over browser context routes (set up with browser_context.route(url, handler)) when request matches
         both handlers.
 
         **NOTE** Enabling routing disables http cache.
@@ -5132,7 +5132,7 @@ class Page(AsyncBase):
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
         matching `selector`, the method throws an error.
 
-        Shortcut for main frame's frame.selectOption(selector, values[, options])
+        Shortcut for main frame's frame.select_option(selector, values[, options])
 
         Parameters
         ----------
@@ -5368,9 +5368,9 @@ class Page(AsyncBase):
         """Page.wait_for_timeout
 
         Returns a promise that resolves after the timeout.
-        Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
+        Note that `page.wait_for_timeout()` should only be used for debugging. Tests using the timer in production are going to be
         flaky. Use signals such as network events, selectors becoming visible and others instead.
-        Shortcut for main frame's frame.waitForTimeout(timeout).
+        Shortcut for main frame's frame.wait_for_timeout(timeout).
 
         Parameters
         ----------
@@ -5394,8 +5394,8 @@ class Page(AsyncBase):
         Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
 
-        To pass an argument from Node.js to the predicate of `page.waitForFunction` function:
-        Shortcut for main frame's frame.waitForFunction(pageFunction[, arg, options]).
+        To pass an argument from Node.js to the predicate of `page.wait_for_function` function:
+        Shortcut for main frame's frame.wait_for_function(pageFunction[, arg, options]).
 
         Parameters
         ----------
@@ -5447,7 +5447,7 @@ class Page(AsyncBase):
         **NOTE** Generating a pdf is currently only supported in Chromium headless.
 
         `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
-        page.emulateMedia(params) before calling `page.pdf()`:
+        page.emulate_media(params) before calling `page.pdf()`:
 
         **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
         `-webkit-print-color-adjust` property to
@@ -5871,7 +5871,7 @@ class BrowserContext(AsyncBase):
         """BrowserContext.pages
 
         Returns all open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can
-        find them using chromiumBrowserContext.backgroundPages().
+        find them using chromium_browser_context.background_pages().
 
         Returns
         -------
@@ -5896,15 +5896,15 @@ class BrowserContext(AsyncBase):
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
 
-        page.goBack([options])
-        page.goForward([options])
+        page.go_back([options])
+        page.go_forward([options])
         page.goto(url[, options])
         page.reload([options])
-        page.setContent(html[, options])
-        page.waitForNavigation([options])
+        page.set_content(html[, options])
+        page.wait_for_navigation([options])
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout) and page.setDefaultTimeout(timeout) take priority over
-        browserContext.setDefaultNavigationTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout) and page.set_default_timeout(timeout) take priority over
+        browser_context.set_default_navigation_timeout(timeout).
 
         Parameters
         ----------
@@ -5920,8 +5920,8 @@ class BrowserContext(AsyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout), page.setDefaultTimeout(timeout) and
-        browserContext.setDefaultNavigationTimeout(timeout) take priority over browserContext.setDefaultTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout), page.set_default_timeout(timeout) and
+        browser_context.set_default_navigation_timeout(timeout) take priority over browser_context.set_default_timeout(timeout).
 
         Parameters
         ----------
@@ -5966,7 +5966,7 @@ class BrowserContext(AsyncBase):
         """BrowserContext.add_cookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
-        obtained via browserContext.cookies([urls]).
+        obtained via browser_context.cookies([urls]).
 
         Parameters
         ----------
@@ -6030,7 +6030,7 @@ class BrowserContext(AsyncBase):
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 
-        **NOTE** Consider using browserContext.grantPermissions(permissions[, options]) to grant permissions for the browser context pages to
+        **NOTE** Consider using browser_context.grant_permissions(permissions[, options]) to grant permissions for the browser context pages to
         read its geolocation.
 
         Parameters
@@ -6045,10 +6045,10 @@ class BrowserContext(AsyncBase):
         """BrowserContext.set_extra_http_headers
 
         The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged
-        with page-specific extra HTTP headers set with page.setExtraHTTPHeaders(headers). If page overrides a particular header,
+        with page-specific extra HTTP headers set with page.set_extra_http_headers(headers). If page overrides a particular header,
         page-specific header value will be used instead of the browser context header value.
 
-        **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
+        **NOTE** `browser_context.set_extra_http_headers` does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -6083,8 +6083,8 @@ class BrowserContext(AsyncBase):
         the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
 
-        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and
-        page.addInitScript(script[, arg]) is not defined.
+        **NOTE** The order of evaluation of multiple scripts installed via browser_context.add_init_script(script[, arg]) and
+        page.add_init_script(script[, arg]) is not defined.
 
         Parameters
         ----------
@@ -6104,7 +6104,7 @@ class BrowserContext(AsyncBase):
         called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value
         of `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
         The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-        See page.exposeBinding(name, playwrightBinding[, options]) for page-only version.
+        See page.expose_binding(name, playwrightBinding[, options]) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
 
         An example of passing an element handle:
@@ -6131,7 +6131,7 @@ class BrowserContext(AsyncBase):
         called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value
         of `playwrightFunction`.
         If the `playwrightFunction` returns a Promise, it will be awaited.
-        See page.exposeFunction(name, playwrightFunction) for page-only version.
+        See page.expose_function(name, playwrightFunction) for page-only version.
         An example of adding an `md5` function to all pages in the context:
 
         Parameters
@@ -6183,15 +6183,15 @@ class BrowserContext(AsyncBase):
     ) -> NoneType:
         """BrowserContext.unroute
 
-        Removes a route created with browserContext.route(url, handler). When `handler` is not specified, removes all routes for the
+        Removes a route created with browser_context.route(url, handler). When `handler` is not specified, removes all routes for the
         `url`.
 
         Parameters
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
-            A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
+            A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).
         handler : Optional[Callable[[Route, Request], Any]]
-            Optional handler function used to register a routing with browserContext.route(url, handler).
+            Optional handler function used to register a routing with browser_context.route(url, handler).
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.unroute(
@@ -6568,7 +6568,7 @@ class Browser(AsyncBase):
 
         Creates a new page in a new browser context. Closing this page will close the context as well.
         This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
-        testing frameworks should explicitly create browser.newContext([options]) followed by the browserContext.newPage() to
+        testing frameworks should explicitly create browser.new_context([options]) followed by the browser_context.new_page() to
         control their exact life times.
 
         Parameters
@@ -6649,9 +6649,9 @@ class Browser(AsyncBase):
     async def close(self) -> NoneType:
         """Browser.close
 
-        In case this browser is obtained using browserType.launch([options]), closes the browser and all of its pages (if any were
+        In case this browser is obtained using browser_type.launch([options]), closes the browser and all of its pages (if any were
         opened).
-        In case this browser is obtained using browserType.connect(params), clears all created contexts belonging to this browser
+        In case this browser is obtained using browser_type.connect(params), clears all created contexts belonging to this browser
         and disconnects from the browser server.
         The Browser object itself is considered to be disposed and cannot be used anymore.
         """
@@ -6720,7 +6720,7 @@ class BrowserType(AsyncBase):
         If Google Chrome (rather than Chromium) is preferred, a Chrome
         Canary or Dev
         Channel build is suggested.
-        In browserType.launch([options]) above, any mention of Chromium also applies to Chrome.
+        In browser_type.launch([options]) above, any mention of Chromium also applies to Chrome.
         See `this article` for
         a description of the differences between Chromium and Chrome. `This article` describes
         some differences for Linux users.
