@@ -53,28 +53,28 @@ For more information you&#39;ll find the documentation for the sync API [here](s
 and for the async API [here](async_api.html).
 &#34;&#34;&#34;
 
-import playwright._types as types
+import playwright._api_structures as api_structures
+import playwright._api_types as api_types
 from playwright._main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
-ConsoleMessageLocation = types.ConsoleMessageLocation
-Cookie = types.Cookie
-Credentials = types.Credentials
-DeviceDescriptor = types.DeviceDescriptor
-Error = types.Error
-FilePayload = types.FilePayload
-FloatRect = types.FloatRect
-Geolocation = types.Geolocation
-IntSize = types.IntSize
-MousePosition = types.MousePosition
-PdfMargins = types.PdfMargins
-ProxyServer = types.ProxyServer
-RecordHarOptions = types.RecordHarOptions
-RecordVideoOptions = types.RecordVideoOptions
-RequestFailure = types.RequestFailure
-ResourceTiming = types.ResourceTiming
-SelectOption = types.SelectOption
-StorageState = types.StorageState
-TimeoutError = types.TimeoutError
+DeviceDescriptor = api_types.DeviceDescriptor
+Error = api_types.Error
+FilePayload = api_types.FilePayload
+FloatRect = api_types.FloatRect
+Geolocation = api_types.Geolocation
+HttpCredentials = api_types.HttpCredentials
+PdfMargins = api_types.PdfMargins
+ProxySettings = api_types.ProxySettings
+RecordHarOptions = api_types.RecordHarOptions
+RecordVideoOptions = api_types.RecordVideoOptions
+RequestFailure = api_types.RequestFailure
+OptionSelector = api_types.OptionSelector
+SourceLocation = api_types.SourceLocation
+TimeoutError = api_types.TimeoutError
+
+Cookie = api_structures.Cookie
+ResourceTiming = api_structures.ResourceTiming
+StorageState = api_structures.StorageState
 
 
 def async_playwright() -&gt; AsyncPlaywrightContextManager:
@@ -88,23 +88,21 @@ def sync_playwright() -&gt; SyncPlaywrightContextManager:
 __all__ = [
     &#34;async_playwright&#34;,
     &#34;sync_playwright&#34;,
-    &#34;ConsoleMessageLocation&#34;,
     &#34;Cookie&#34;,
-    &#34;Credentials&#34;,
+    &#34;HttpCredentials&#34;,
     &#34;DeviceDescriptor&#34;,
     &#34;Error&#34;,
     &#34;FilePayload&#34;,
     &#34;FloatRect&#34;,
     &#34;Geolocation&#34;,
-    &#34;IntSize&#34;,
-    &#34;MousePosition&#34;,
     &#34;PdfMargins&#34;,
-    &#34;ProxyServer&#34;,
+    &#34;ProxySettings&#34;,
     &#34;RecordHarOptions&#34;,
     &#34;RecordVideoOptions&#34;,
     &#34;RequestFailure&#34;,
     &#34;ResourceTiming&#34;,
-    &#34;SelectOption&#34;,
+    &#34;OptionSelector&#34;,
+    &#34;SourceLocation&#34;,
     &#34;StorageState&#34;,
     &#34;TimeoutError&#34;,
 ]
@@ -193,51 +191,6 @@ __pdoc__ = {
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="playwright.ConsoleMessageLocation"><code class="flex name class">
-<span>class <span class="ident">ConsoleMessageLocation</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ConsoleMessageLocation(TypedDict):
-    url: str
-    lineNumber: int
-    columnNumber: int</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.dict</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.ConsoleMessageLocation.columnNumber"><code class="name">var <span class="ident">columnNumber</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.ConsoleMessageLocation.lineNumber"><code class="name">var <span class="ident">lineNumber</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.ConsoleMessageLocation.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
 <dt id="playwright.Cookie"><code class="flex name class">
 <span>class <span class="ident">Cookie</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -313,96 +266,70 @@ dict(one=1, two=2)</p></div>
 </dd>
 </dl>
 </dd>
-<dt id="playwright.Credentials"><code class="flex name class">
-<span>class <span class="ident">Credentials</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Credentials(TypedDict):
-    username: str
-    password: str</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.dict</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.Credentials.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.Credentials.username"><code class="name">var <span class="ident">username</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
 <dt id="playwright.DeviceDescriptor"><code class="flex name class">
 <span>class <span class="ident">DeviceDescriptor</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>user_agent: str = None, viewport: Tuple[int, int] = None, device_scale_factor: int = None, is_mobile: bool = None, has_touch: bool = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class DeviceDescriptor(TypedDict, total=False):
-    userAgent: Optional[str]
-    viewport: Optional[IntSize]
-    deviceScaleFactor: Optional[int]
-    isMobile: Optional[bool]
-    hasTouch: Optional[bool]</code></pre>
+<pre><code class="python">class DeviceDescriptor(ApiType):
+    user_agent: Optional[str]
+    viewport: Optional[Tuple[int, int]]
+    device_scale_factor: Optional[int]
+    is_mobile: Optional[bool]
+    has_touch: Optional[bool]
+
+    @classmethod
+    def _parse(cls, dict: Dict) -&gt; &#34;DeviceDescriptor&#34;:
+        return DeviceDescriptor(
+            dict[&#34;userAgent&#34;],
+            dict[&#34;viewport&#34;],
+            dict[&#34;deviceScaleFactor&#34;],
+            dict[&#34;isMobile&#34;],
+            dict[&#34;hasTouch&#34;],
+        )
+
+    def __init__(
+        self,
+        user_agent: str = None,
+        viewport: Tuple[int, int] = None,
+        device_scale_factor: int = None,
+        is_mobile: bool = None,
+        has_touch: bool = None,
+    ):
+        self.user_agent = user_agent
+        self.viewport = viewport
+        self.device_scale_factor = device_scale_factor
+        self.is_mobile = is_mobile
+        self.has_touch = has_touch</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.DeviceDescriptor.deviceScaleFactor"><code class="name">var <span class="ident">deviceScaleFactor</span> : Union[int, NoneType]</code></dt>
+<dt id="playwright.DeviceDescriptor.device_scale_factor"><code class="name">var <span class="ident">device_scale_factor</span> : Union[int, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.DeviceDescriptor.hasTouch"><code class="name">var <span class="ident">hasTouch</span> : Union[bool, NoneType]</code></dt>
+<dt id="playwright.DeviceDescriptor.has_touch"><code class="name">var <span class="ident">has_touch</span> : Union[bool, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.DeviceDescriptor.isMobile"><code class="name">var <span class="ident">isMobile</span> : Union[bool, NoneType]</code></dt>
+<dt id="playwright.DeviceDescriptor.is_mobile"><code class="name">var <span class="ident">is_mobile</span> : Union[bool, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.DeviceDescriptor.userAgent"><code class="name">var <span class="ident">userAgent</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.DeviceDescriptor.user_agent"><code class="name">var <span class="ident">user_agent</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.DeviceDescriptor.viewport"><code class="name">var <span class="ident">viewport</span> : Union[playwright._types.IntSize, NoneType]</code></dt>
+<dt id="playwright.DeviceDescriptor.viewport"><code class="name">var <span class="ident">viewport</span> : Union[Tuple[int, int], NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -431,37 +358,32 @@ dict(one=1, two=2)</p></div>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>playwright._types.TimeoutError</li>
+<li>playwright._api_types.TimeoutError</li>
 </ul>
 </dd>
 <dt id="playwright.FilePayload"><code class="flex name class">
 <span>class <span class="ident">FilePayload</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>name: str, mime_type: str, buffer: bytes)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class FilePayload(TypedDict):
+<pre><code class="python">class FilePayload(ApiType):
     name: str
-    mimeType: str
-    buffer: bytes</code></pre>
+    mime_type: str
+    buffer: bytes
+
+    def __init__(self, name: str, mime_type: str, buffer: bytes):
+        self.name = name
+        self.mime_type = mime_type
+        self.buffer = buffer</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -469,7 +391,7 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.FilePayload.mimeType"><code class="name">var <span class="ident">mimeType</span> : str</code></dt>
+<dt id="playwright.FilePayload.mime_type"><code class="name">var <span class="ident">mime_type</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -481,33 +403,35 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.FloatRect"><code class="flex name class">
 <span>class <span class="ident">FloatRect</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>x: float, y: float, width: float, height: float)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class FloatRect(TypedDict):
+<pre><code class="python">class FloatRect(ApiType):
     x: float
     y: float
     width: float
-    height: float</code></pre>
+    height: float
+
+    @classmethod
+    def _parse(cls, dict: Optional[Dict]) -&gt; Optional[&#34;FloatRect&#34;]:
+        if not dict:
+            return None
+        return FloatRect(dict[&#34;x&#34;], dict[&#34;y&#34;], dict[&#34;width&#34;], dict[&#34;height&#34;])
+
+    def __init__(self, x: float, y: float, width: float, height: float):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -531,32 +455,27 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.Geolocation"><code class="flex name class">
 <span>class <span class="ident">Geolocation</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>latitude: float, longitude: float, accuracy: float = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Geolocation(TypedDict, total=False):
+<pre><code class="python">class Geolocation(ApiType):
     latitude: float
     longitude: float
-    accuracy: Optional[float]</code></pre>
+    accuracy: Optional[float]
+
+    def __init__(self, latitude: float, longitude: float, accuracy: float = None):
+        self.latitude = latitude
+        self.longitude = longitude
+        self.accuracy = accuracy</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -574,81 +493,75 @@ dict(one=1, two=2)</p></div>
 </dd>
 </dl>
 </dd>
-<dt id="playwright.IntSize"><code class="flex name class">
-<span>class <span class="ident">IntSize</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="playwright.HttpCredentials"><code class="flex name class">
+<span>class <span class="ident">HttpCredentials</span></span>
+<span>(</span><span>username: str, password: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class IntSize(TypedDict):
-    width: int
-    height: int</code></pre>
+<pre><code class="python">class HttpCredentials(ApiType):
+    username: str
+    password: str
+
+    def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.IntSize.height"><code class="name">var <span class="ident">height</span> : int</code></dt>
+<dt id="playwright.HttpCredentials.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.IntSize.width"><code class="name">var <span class="ident">width</span> : int</code></dt>
+<dt id="playwright.HttpCredentials.username"><code class="name">var <span class="ident">username</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 </dd>
-<dt id="playwright.MousePosition"><code class="flex name class">
-<span>class <span class="ident">MousePosition</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="playwright.OptionSelector"><code class="flex name class">
+<span>class <span class="ident">OptionSelector</span></span>
+<span>(</span><span>value: str = None, label: str = None, index: int = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class MousePosition(TypedDict):
-    x: float
-    y: float</code></pre>
+<pre><code class="python">class OptionSelector(ApiType):
+    value: Optional[str]
+    label: Optional[str]
+    index: Optional[int]
+
+    def __init__(self, value: str = None, label: str = None, index: int = None):
+        self.value = value
+        self.label = label
+        self.index = index</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.MousePosition.x"><code class="name">var <span class="ident">x</span> : float</code></dt>
+<dt id="playwright.OptionSelector.index"><code class="name">var <span class="ident">index</span> : Union[int, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.MousePosition.y"><code class="name">var <span class="ident">y</span> : float</code></dt>
+<dt id="playwright.OptionSelector.label"><code class="name">var <span class="ident">label</span> : Union[str, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="playwright.OptionSelector.value"><code class="name">var <span class="ident">value</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -656,33 +569,35 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.PdfMargins"><code class="flex name class">
 <span>class <span class="ident">PdfMargins</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>top: Union[str, int], right: Union[str, int], bottom: Union[str, int], left: Union[str, int])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class PdfMargins(TypedDict, total=False):
+<pre><code class="python">class PdfMargins(ApiType):
     top: Optional[Union[str, int]]
     right: Optional[Union[str, int]]
     bottom: Optional[Union[str, int]]
-    left: Optional[Union[str, int]]</code></pre>
+    left: Optional[Union[str, int]]
+
+    def __init__(
+        self,
+        top: Union[str, int],
+        right: Union[str, int],
+        bottom: Union[str, int],
+        left: Union[str, int],
+    ):
+        self.top = top
+        self.right = right
+        self.bottom = bottom
+        self.left = left</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -704,51 +619,53 @@ dict(one=1, two=2)</p></div>
 </dd>
 </dl>
 </dd>
-<dt id="playwright.ProxyServer"><code class="flex name class">
-<span>class <span class="ident">ProxyServer</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="playwright.ProxySettings"><code class="flex name class">
+<span>class <span class="ident">ProxySettings</span></span>
+<span>(</span><span>server: str, bypass: str = None, username: str = None, password: str = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ProxyServer(TypedDict, total=False):
+<pre><code class="python">class ProxySettings(ApiType):
     server: str
     bypass: Optional[str]
     username: Optional[str]
-    password: Optional[str]</code></pre>
+    password: Optional[str]
+
+    def __init__(
+        self,
+        server: str,
+        bypass: str = None,
+        username: str = None,
+        password: str = None,
+    ):
+        self.server = server
+        self.bypass = bypass
+        self.username = username
+        self.password = password</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.ProxyServer.bypass"><code class="name">var <span class="ident">bypass</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.ProxySettings.bypass"><code class="name">var <span class="ident">bypass</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.ProxyServer.password"><code class="name">var <span class="ident">password</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.ProxySettings.password"><code class="name">var <span class="ident">password</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.ProxyServer.server"><code class="name">var <span class="ident">server</span> : str</code></dt>
+<dt id="playwright.ProxySettings.server"><code class="name">var <span class="ident">server</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.ProxyServer.username"><code class="name">var <span class="ident">username</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.ProxySettings.username"><code class="name">var <span class="ident">username</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -756,39 +673,38 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.RecordHarOptions"><code class="flex name class">
 <span>class <span class="ident">RecordHarOptions</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>path: Union[str, pathlib.Path], omit_content: bool = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class RecordHarOptions(TypedDict, total=False):
-    omitContent: Optional[bool]
-    path: Union[str, Path]</code></pre>
+<pre><code class="python">class RecordHarOptions(ApiType):
+    omit_content: Optional[bool]
+    path: Union[Path, str]
+
+    def __init__(self, path: Union[str, Path], omit_content: bool = None):
+        self.path = path
+        self.omit_content = omit_content
+
+    def _to_json(self) -&gt; Dict:
+        return filter_out_none(
+            {&#34;omitContent&#34;: self.omit_content, &#34;path&#34;: str(self.path)}
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.RecordHarOptions.omitContent"><code class="name">var <span class="ident">omitContent</span> : Union[bool, NoneType]</code></dt>
+<dt id="playwright.RecordHarOptions.omit_content"><code class="name">var <span class="ident">omit_content</span> : Union[bool, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.RecordHarOptions.path"><code class="name">var <span class="ident">path</span> : Union[str, pathlib.Path]</code></dt>
+<dt id="playwright.RecordHarOptions.path"><code class="name">var <span class="ident">path</span> : Union[pathlib.Path, str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -796,39 +712,43 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.RecordVideoOptions"><code class="flex name class">
 <span>class <span class="ident">RecordVideoOptions</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>dir: Union[str, pathlib.Path], size: Tuple[int, int] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class RecordVideoOptions(TypedDict, total=False):
-    dir: Union[str, Path]
-    size: Optional[IntSize]</code></pre>
+<pre><code class="python">class RecordVideoOptions(ApiType):
+    dir: Union[Path, str]
+    size: Optional[Tuple[int, int]]
+
+    def __init__(self, dir: Union[str, Path], size: Tuple[int, int] = None):
+        self.dir = dir
+        self.size = size
+
+    def _to_json(self) -&gt; Dict:
+        return filter_out_none(
+            {
+                &#34;dir&#34;: str(self.dir),
+                &#34;size&#34;: {&#34;width&#34;: self.size[0], &#34;height&#34;: self.size[1]}
+                if self.size
+                else None,
+            }
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.RecordVideoOptions.dir"><code class="name">var <span class="ident">dir</span> : Union[str, pathlib.Path]</code></dt>
+<dt id="playwright.RecordVideoOptions.dir"><code class="name">var <span class="ident">dir</span> : Union[pathlib.Path, str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.RecordVideoOptions.size"><code class="name">var <span class="ident">size</span> : Union[playwright._types.IntSize, NoneType]</code></dt>
+<dt id="playwright.RecordVideoOptions.size"><code class="name">var <span class="ident">size</span> : Union[Tuple[int, int], NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -836,34 +756,33 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.RequestFailure"><code class="flex name class">
 <span>class <span class="ident">RequestFailure</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>error_text: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class RequestFailure(TypedDict):
-    errorText: str</code></pre>
+<pre><code class="python">class RequestFailure(ApiType):
+    error_text: str
+
+    @classmethod
+    def _parse(cls, dict: Optional[Dict]) -&gt; Optional[&#34;RequestFailure&#34;]:
+        if not dict:
+            return None
+        return RequestFailure(dict[&#34;errorText&#34;])
+
+    def __init__(self, error_text: str):
+        self.error_text = error_text</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.RequestFailure.errorText"><code class="name">var <span class="ident">errorText</span> : str</code></dt>
+<dt id="playwright.RequestFailure.error_text"><code class="name">var <span class="ident">error_text</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -944,46 +863,41 @@ dict(one=1, two=2)</p></div>
 </dd>
 </dl>
 </dd>
-<dt id="playwright.SelectOption"><code class="flex name class">
-<span>class <span class="ident">SelectOption</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="playwright.SourceLocation"><code class="flex name class">
+<span>class <span class="ident">SourceLocation</span></span>
+<span>(</span><span>url: str, line: int, column: int)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SelectOption(TypedDict, total=False):
-    value: Optional[str]
-    label: Optional[str]
-    index: Optional[str]</code></pre>
+<pre><code class="python">class SourceLocation(ApiType):
+    url: str
+    line: int
+    column: int
+
+    def __init__(self, url: str, line: int, column: int):
+        self.url = url
+        self.line = line
+        self.column = column</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.dict</li>
+<li>playwright._api_types.ApiType</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.SelectOption.index"><code class="name">var <span class="ident">index</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.SourceLocation.column"><code class="name">var <span class="ident">column</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.SelectOption.label"><code class="name">var <span class="ident">label</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.SourceLocation.line"><code class="name">var <span class="ident">line</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="playwright.SelectOption.value"><code class="name">var <span class="ident">value</span> : Union[str, NoneType]</code></dt>
+<dt id="playwright.SourceLocation.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1019,7 +933,7 @@ dict(one=1, two=2)</p></div>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="playwright.StorageState.cookies"><code class="name">var <span class="ident">cookies</span> : Union[List[playwright._types.Cookie], NoneType]</code></dt>
+<dt id="playwright.StorageState.cookies"><code class="name">var <span class="ident">cookies</span> : Union[List[playwright._api_structures.Cookie], NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1044,7 +958,7 @@ dict(one=1, two=2)</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright._types.Error</li>
+<li>playwright._api_types.Error</li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
