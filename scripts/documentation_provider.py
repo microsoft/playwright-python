@@ -59,6 +59,7 @@ class DocumentationProvider:
         )
         self.api = json.loads(process_output.stdout)
         self.errors: Set[str] = set()
+        self._patch_descriptions()
 
     method_name_rewrites: Dict[str, str] = {
         "continue_": "continue",
@@ -67,6 +68,36 @@ class DocumentationProvider:
         "querySelector": "$",
         "querySelectorAll": "$$",
     }
+
+    def _patch_descriptions(self) -> None:
+        map: Dict[str, str] = {}
+        for class_name in self.api:
+            clazz = self.api[class_name]
+            js_class = ""
+            if class_name.startswith("JS"):
+                js_class = "jsHandle"
+            if class_name.startswith("CDP"):
+                js_class = "cdpSession"
+            else:
+                js_class = class_name[0:1].lower() + class_name[1:]
+            for method_name in clazz["methods"]:
+                camel_case = js_class + "." + method_name
+                snake_case = (
+                    to_snake_case(class_name) + "." + to_snake_case(method_name)
+                )
+                map[camel_case] = snake_case
+
+        for [name, value] in map.items():
+            for class_name in self.api:
+                clazz = self.api[class_name]
+                for method_name in clazz["methods"]:
+                    method = clazz["methods"][method_name]
+                    if "comment" in method:
+                        method["comment"] = method["comment"].replace(name, value)
+                    if "args" in method:
+                        for _, arg in method["args"].items():
+                            if "comment" in arg:
+                                arg["comment"] = arg["comment"].replace(name, value)
 
     def print_entry(
         self, class_name: str, method_name: str, signature: Dict[str, Any] = None
