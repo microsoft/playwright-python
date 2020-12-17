@@ -14,21 +14,20 @@
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
+from playwright._api_types import (
+    Geolocation,
+    HttpCredentials,
+    ProxySettings,
+    RecordHarOptions,
+    RecordVideoOptions,
+)
 from playwright._browser import Browser
 from playwright._browser_context import BrowserContext
 from playwright._connection import ChannelOwner, from_channel
 from playwright._helper import ColorScheme, Env, locals_to_params, not_installed_error
 from playwright._network import serialize_headers
-from playwright._types import (
-    Credentials,
-    Geolocation,
-    IntSize,
-    ProxyServer,
-    RecordHarOptions,
-    RecordVideoOptions,
-)
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -62,7 +61,7 @@ class BrowserType(ChannelOwner):
         env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: ProxyServer = None,
+        proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
         chromiumSandbox: bool = None,
@@ -90,10 +89,10 @@ class BrowserType(ChannelOwner):
         env: Env = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: ProxyServer = None,
+        proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: int = None,
-        viewport: Union[IntSize, Literal[0]] = None,
+        viewport: Union[Tuple[int, int], Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -104,15 +103,13 @@ class BrowserType(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
-        videosPath: str = None,
-        videoSize: IntSize = None,
         recordHar: RecordHarOptions = None,
         recordVideo: RecordVideoOptions = None,
     ) -> BrowserContext:
@@ -123,10 +120,6 @@ class BrowserType(ChannelOwner):
             params["noDefaultViewport"] = True
         if extraHTTPHeaders:
             params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
-        if not recordVideo and videosPath:
-            params["recordVideo"] = {"dir": videosPath}
-            if videoSize:
-                params["recordVideo"]["size"] = videoSize
         normalize_launch_params(params)
         try:
             context = from_channel(

@@ -21,6 +21,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
+from playwright._api_types import ApiType
 from playwright._helper import ParsedMessagePayload, parse_error
 from playwright._transport import Transport
 
@@ -170,7 +171,7 @@ class Connection:
             id=id,
             guid=guid,
             method=method,
-            params=self._replace_channels_with_guids(params),
+            params=self._replace_channels_with_guids(params, "params"),
         )
         self._transport.send(message)
         callback = ProtocolCallback(self._loop)
@@ -228,19 +229,28 @@ class Connection:
             self._waiting_for_object.pop(guid)(result)
         return result
 
-    def _replace_channels_with_guids(self, payload: Any) -> Any:
+    def _replace_channels_with_guids(self, payload: Any, param_name: str) -> Any:
         if payload is None:
             return payload
+        if isinstance(payload, tuple):
+            if param_name == "position":
+                return {"x": payload[0], "y": payload[1]}
+            if param_name == "size" or param_name == "viewport":
+                return {"width": payload[0], "height": payload[1]}
         if isinstance(payload, Path):
             return str(payload)
+        if isinstance(payload, ApiType):
+            return payload._to_json()
         if isinstance(payload, list):
-            return list(map(lambda p: self._replace_channels_with_guids(p), payload))
+            return list(
+                map(lambda p: self._replace_channels_with_guids(p, "index"), payload)
+            )
         if isinstance(payload, Channel):
             return dict(guid=payload._guid)
         if isinstance(payload, dict):
             result = {}
             for key in payload:
-                result[key] = self._replace_channels_with_guids(payload[key])
+                result[key] = self._replace_channels_with_guids(payload[key], key)
             return result
         return payload
 

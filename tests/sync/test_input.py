@@ -14,10 +14,10 @@
 
 
 def test_expect_file_chooser(page, server):
-    page.setContent("<input type=file></input>")
+    page.set_content("<input type=file></input>")
     with page.expect_file_chooser() as fc_info:
         page.click('input[type="file"]')
     fc = fc_info.value
-    fc.setFiles(
+    fc.set_files(
         {"name": "test.txt", "mimeType": "text/plain", "buffer": b"Hello World"}
     )

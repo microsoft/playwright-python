@@ -19,7 +19,7 @@ async def test_should_think_that_it_is_focused_by_default(page):
 
 
 async def test_should_think_that_all_pages_are_focused(page):
-    page2 = await page.context.newPage()
+    page2 = await page.context.new_page()
     assert await page.evaluate("document.hasFocus()")
     assert await page2.evaluate("document.hasFocus()")
     await page2.close()
@@ -28,7 +28,7 @@ async def test_should_think_that_all_pages_are_focused(page):
 async def test_should_focus_popups_by_default(page, server):
     await page.goto(server.EMPTY_PAGE)
     [popup, _] = await asyncio.gather(
-        page.waitForEvent("popup"),
+        page.wait_for_event("popup"),
         page.evaluate("url => { window.open(url); }", server.EMPTY_PAGE),
     )
     assert await popup.evaluate("document.hasFocus()")
@@ -36,7 +36,7 @@ async def test_should_focus_popups_by_default(page, server):
 
 
 async def test_should_provide_target_for_keyboard_events(page, server):
-    page2 = await page.context.newPage()
+    page2 = await page.context.new_page()
     await asyncio.gather(
         page.goto(server.PREFIX + "/input/textarea.html"),
         page2.goto(server.PREFIX + "/input/textarea.html"),
@@ -59,13 +59,13 @@ async def test_should_provide_target_for_keyboard_events(page, server):
 
 
 async def test_should_not_affect_mouse_event_target_page(page, server):
-    page2 = await page.context.newPage()
-    clickcounter = """() {
-    document.onclick = () => window.clickCount  = (window.clickCount || 0) + 1;
+    page2 = await page.context.new_page()
+    click_counter = """() {
+    document.onclick = () => window.click_count  = (window.click_count || 0) + 1;
   }"""
     await asyncio.gather(
-        page.evaluate(clickcounter),
-        page2.evaluate(clickcounter),
+        page.evaluate(click_counter),
+        page2.evaluate(click_counter),
         page.focus("body"),
         page2.focus("body"),
     )
@@ -74,14 +74,14 @@ async def test_should_not_affect_mouse_event_target_page(page, server):
         page2.mouse.click(1, 1),
     )
     counters = await asyncio.gather(
-        page.evaluate("window.clickCount"),
-        page2.evaluate("window.clickCount"),
+        page.evaluate("window.click_count"),
+        page2.evaluate("window.click_count"),
     )
     assert counters == [1, 1]
 
 
 async def test_should_change_document_activeElement(page, server):
-    page2 = await page.context.newPage()
+    page2 = await page.context.new_page()
     await asyncio.gather(
         page.goto(server.PREFIX + "/input/textarea.html"),
         page2.goto(server.PREFIX + "/input/textarea.html"),
@@ -99,11 +99,11 @@ async def test_should_change_document_activeElement(page, server):
 
 async def test_should_not_affect_screenshots(page, server, assert_to_be_golden):
     # Firefox headful produces a different image.
-    page2 = await page.context.newPage()
+    page2 = await page.context.new_page()
     await asyncio.gather(
-        page.setViewportSize(width=500, height=500),
+        page.set_viewport_size(width=500, height=500),
         page.goto(server.PREFIX + "/grid.html"),
-        page2.setViewportSize(width=50, height=50),
+        page2.set_viewport_size(width=50, height=50),
         page2.goto(server.PREFIX + "/grid.html"),
     )
     await asyncio.gather(

@@ -14,9 +14,9 @@
 
 from typing import Dict, List
 
+from playwright._api_types import SourceLocation
 from playwright._connection import ChannelOwner, from_channel
 from playwright._js_handle import JSHandle
-from playwright._types import ConsoleMessageLocation
 
 
 class ConsoleMessage(ChannelOwner):
@@ -41,5 +41,6 @@ class ConsoleMessage(ChannelOwner):
         return list(map(from_channel, self._initializer["args"]))
 
     @property
-    def location(self) -> ConsoleMessageLocation:
-        return self._initializer["location"]
+    def location(self) -> SourceLocation:
+        loc = self._initializer["location"]
+        return SourceLocation(loc["url"], loc["lineNumber"], loc["columnNumber"])

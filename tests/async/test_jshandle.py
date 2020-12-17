@@ -20,38 +20,38 @@ from playwright import Error
 
 
 async def test_jshandle_evaluate_work(page):
-    window_handle = await page.evaluateHandle("window")
+    window_handle = await page.evaluate_handle("window")
     assert window_handle
 
 
 async def test_jshandle_evaluate_accept_object_handle_as_argument(page):
-    navigator_handle = await page.evaluateHandle("navigator")
+    navigator_handle = await page.evaluate_handle("navigator")
     text = await page.evaluate("e => e.userAgent", navigator_handle)
     assert "Mozilla" in text
 
 
 async def test_jshandle_evaluate_accept_handle_to_primitive_types(page):
-    handle = await page.evaluateHandle("5")
+    handle = await page.evaluate_handle("5")
     is_five = await page.evaluate("e => Object.is(e, 5)", handle)
     assert is_five
 
 
 async def test_jshandle_evaluate_accept_nested_handle(page):
-    foo = await page.evaluateHandle('({ x: 1, y: "foo" })')
+    foo = await page.evaluate_handle('({ x: 1, y: "foo" })')
     result = await page.evaluate("({ foo }) => foo", {"foo": foo})
     assert result == {"x": 1, "y": "foo"}
 
 
 async def test_jshandle_evaluate_accept_nested_window_handle(page):
-    foo = await page.evaluateHandle("window")
+    foo = await page.evaluate_handle("window")
     result = await page.evaluate("({ foo }) => foo === window", {"foo": foo})
     assert result
 
 
 async def test_jshandle_evaluate_accept_multiple_nested_handles(page):
-    foo = await page.evaluateHandle('({ x: 1, y: "foo" })')
-    bar = await page.evaluateHandle("5")
-    baz = await page.evaluateHandle('["baz"]')
+    foo = await page.evaluate_handle('({ x: 1, y: "foo" })')
+    bar = await page.evaluate_handle("5")
+    baz = await page.evaluate_handle('["baz"]')
     result = await page.evaluate(
         "x => JSON.stringify(x)",
         {"a1": {"foo": foo}, "a2": {"bar": bar, "arr": [{"baz": baz}]}},
@@ -81,7 +81,7 @@ async def test_jshandle_evaluate_accept_same_nested_object_multiple_times(page):
 
 
 async def test_jshandle_evaluate_accept_object_handle_to_unserializable_value(page):
-    handle = await page.evaluateHandle("() => Infinity")
+    handle = await page.evaluate_handle("() => Infinity")
     assert await page.evaluate("e => Object.is(e, Infinity)", handle)
 
 
@@ -104,34 +104,34 @@ async def test_jshandle_evaluate_pass_configurable_args(page):
 
 
 async def test_jshandle_properties_get_property(page):
-    handle1 = await page.evaluateHandle(
+    handle1 = await page.evaluate_handle(
         """() => ({
             one: 1,
             two: 2,
             three: 3
         })"""
     )
-    handle2 = await handle1.getProperty("two")
-    assert await handle2.jsonValue() == 2
+    handle2 = await handle1.get_property("two")
+    assert await handle2.json_value() == 2
 
 
 async def test_jshandle_properties_work_with_undefined_null_and_empty(page):
-    handle = await page.evaluateHandle(
+    handle = await page.evaluate_handle(
         """() => ({
             undefined: undefined,
             null: null,
         })"""
     )
-    undefined_handle = await handle.getProperty("undefined")
-    assert await undefined_handle.jsonValue() is None
-    null_handle = await handle.getProperty("null")
-    assert await null_handle.jsonValue() is None
-    empty_handle = await handle.getProperty("empty")
-    assert await empty_handle.jsonValue() is None
+    undefined_handle = await handle.get_property("undefined")
+    assert await undefined_handle.json_value() is None
+    null_handle = await handle.get_property("null")
+    assert await null_handle.json_value() is None
+    empty_handle = await handle.get_property("empty")
+    assert await empty_handle.json_value() is None
 
 
 async def test_jshandle_properties_work_with_unserializable_values(page):
-    handle = await page.evaluateHandle(
+    handle = await page.evaluate_handle(
         """() => ({
             infinity: Infinity,
             negInfinity: -Infinity,
@@ -139,77 +139,77 @@ async def test_jshandle_properties_work_with_unserializable_values(page):
             negZero: -0
         })"""
     )
-    infinity_handle = await handle.getProperty("infinity")
-    assert await infinity_handle.jsonValue() == float("inf")
-    neg_infinity_handle = await handle.getProperty("negInfinity")
-    assert await neg_infinity_handle.jsonValue() == float("-inf")
-    nan_handle = await handle.getProperty("nan")
-    assert math.isnan(await nan_handle.jsonValue()) is True
-    neg_zero_handle = await handle.getProperty("negZero")
-    assert await neg_zero_handle.jsonValue() == float("-0")
+    infinity_handle = await handle.get_property("infinity")
+    assert await infinity_handle.json_value() == float("inf")
+    neg_infinity_handle = await handle.get_property("negInfinity")
+    assert await neg_infinity_handle.json_value() == float("-inf")
+    nan_handle = await handle.get_property("nan")
+    assert math.isnan(await nan_handle.json_value()) is True
+    neg_zero_handle = await handle.get_property("negZero")
+    assert await neg_zero_handle.json_value() == float("-0")
 
 
 async def test_jshandle_properties_get_properties(page):
-    handle = await page.evaluateHandle('() => ({ foo: "bar" })')
-    properties = await handle.getProperties()
+    handle = await page.evaluate_handle('() => ({ foo: "bar" })')
+    properties = await handle.get_properties()
     assert "foo" in properties
     foo = properties["foo"]
-    assert await foo.jsonValue() == "bar"
+    assert await foo.json_value() == "bar"
 
 
 async def test_jshandle_properties_return_empty_map_for_non_objects(page):
-    handle = await page.evaluateHandle("123")
-    properties = await handle.getProperties()
+    handle = await page.evaluate_handle("123")
+    properties = await handle.get_properties()
     assert properties == {}
 
 
 async def test_jshandle_json_value_work(page):
-    handle = await page.evaluateHandle('() => ({foo: "bar"})')
-    json = await handle.jsonValue()
+    handle = await page.evaluate_handle('() => ({foo: "bar"})')
+    json = await handle.json_value()
     assert json == {"foo": "bar"}
 
 
 async def test_jshandle_json_value_work_with_dates(page):
-    handle = await page.evaluateHandle('() => new Date("2020-05-27T01:31:38.506Z")')
-    json = await handle.jsonValue()
+    handle = await page.evaluate_handle('() => new Date("2020-05-27T01:31:38.506Z")')
+    json = await handle.json_value()
     assert json == datetime.fromisoformat("2020-05-27T01:31:38.506")
 
 
 async def test_jshandle_json_value_throw_for_circular_object(page):
-    handle = await page.evaluateHandle("window")
+    handle = await page.evaluate_handle("window")
     error = None
     try:
-        await handle.jsonValue()
+        await handle.json_value()
     except Error as e:
         error = e
     assert "Argument is a circular structure" in error.message
 
 
 async def test_jshandle_as_element_work(page):
-    handle = await page.evaluateHandle("document.body")
-    element = handle.asElement()
+    handle = await page.evaluate_handle("document.body")
+    element = handle.as_element()
     assert element is not None
 
 
 async def test_jshandle_as_element_return_none_for_non_elements(page):
-    handle = await page.evaluateHandle("2")
-    element = handle.asElement()
+    handle = await page.evaluate_handle("2")
+    element = handle.as_element()
     assert element is None
 
 
 async def test_jshandle_to_string_work_for_primitives(page):
-    number_handle = await page.evaluateHandle("2")
+    number_handle = await page.evaluate_handle("2")
     assert str(number_handle) == "JSHandle@2"
-    string_handle = await page.evaluateHandle('"a"')
+    string_handle = await page.evaluate_handle('"a"')
     assert str(string_handle) == "JSHandle@a"
 
 
 async def test_jshandle_to_string_work_for_complicated_objects(page):
-    handle = await page.evaluateHandle("window")
+    handle = await page.evaluate_handle("window")
     assert str(handle) == "JSHandle@object"
 
 
 async def test_jshandle_to_string_work_for_promises(page):
-    handle = await page.evaluateHandle("({b: Promise.resolve(123)})")
-    b_handle = await handle.getProperty("b")
+    handle = await page.evaluate_handle("({b: Promise.resolve(123)})")
+    b_handle = await handle.get_property("b")
     assert str(b_handle) == "JSHandle@promise"

@@ -32,7 +32,7 @@ class Video:
     def _set_relative_path(self, relative_path: str) -> None:
         self._path_future.set_result(
             os.path.join(
-                cast(str, self._page._browser_context._options["recordVideo"]["dir"]),
+                cast(str, self._page._browser_context._options["recordVideo"].dir),
                 relative_path,
             )
         )

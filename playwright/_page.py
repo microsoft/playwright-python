@@ -17,9 +17,20 @@ import base64
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from playwright._accessibility import Accessibility
+from playwright._api_types import Error, FilePayload, FloatRect, PdfMargins
 from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright._console_message import ConsoleMessage
 from playwright._dialog import Dialog
@@ -53,14 +64,6 @@ from playwright._js_handle import (
     serialize_argument,
 )
 from playwright._network import Request, Response, Route, serialize_headers
-from playwright._types import (
-    Error,
-    FilePayload,
-    FloatRect,
-    IntSize,
-    MousePosition,
-    PdfMargins,
-)
 from playwright._video import Video
 from playwright._wait_helper import WaitHelper
 
@@ -113,7 +116,10 @@ class Page(ChannelOwner):
         self._main_frame: Frame = from_channel(initializer["mainFrame"])
         self._main_frame._page = self
         self._frames = [self._main_frame]
-        self._viewport_size = initializer.get("viewportSize")
+        vs = initializer.get("viewportSize")
+        self._viewport_size: Optional[Tuple[int, int]] = (
+            (vs["width"], vs["height"]) if vs else None
+        )
         self._is_closed = False
         self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
@@ -558,12 +564,12 @@ class Page(ChannelOwner):
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
     async def setViewportSize(self, width: int, height: int) -> None:
-        self._viewport_size = dict(width=width, height=height)
+        self._viewport_size = (width, height)
         await self._channel.send(
             "setViewportSize", dict(viewportSize=locals_to_params(locals()))
         )
 
-    def viewportSize(self) -> Optional[IntSize]:
+    def viewportSize(self) -> Optional[Tuple[int, int]]:
         return self._viewport_size
 
     async def bringToFront(self) -> None:
@@ -639,7 +645,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -653,7 +659,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -666,7 +672,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -699,7 +705,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:

@@ -14,31 +14,31 @@
 
 
 async def test_check_the_box(page):
-    await page.setContent('<input id="checkbox" type="checkbox"></input>')
+    await page.set_content('<input id="checkbox" type="checkbox"></input>')
     await page.check("input")
     assert await page.evaluate("checkbox.checked")
 
 
 async def test_not_check_the_checked_box(page):
-    await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
+    await page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     await page.check("input")
     assert await page.evaluate("checkbox.checked")
 
 
 async def test_uncheck_the_box(page):
-    await page.setContent('<input id="checkbox" type="checkbox" checked></input>')
+    await page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     await page.uncheck("input")
     assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_not_uncheck_the_unchecked_box(page):
-    await page.setContent('<input id="checkbox" type="checkbox"></input>')
+    await page.set_content('<input id="checkbox" type="checkbox"></input>')
     await page.uncheck("input")
     assert await page.evaluate("checkbox.checked") is False
 
 
 async def test_check_the_box_by_label(page):
-    await page.setContent(
+    await page.set_content(
         '<label for="checkbox"><input id="checkbox" type="checkbox"></input></label>'
     )
     await page.check("label")
@@ -46,7 +46,7 @@ async def test_check_the_box_by_label(page):
 
 
 async def test_check_the_box_outside_label(page):
-    await page.setContent(
+    await page.set_content(
         '<label for="checkbox">Text</label><div><input id="checkbox" type="checkbox"></input></div>'
     )
     await page.check("label")
@@ -54,7 +54,7 @@ async def test_check_the_box_outside_label(page):
 
 
 async def test_check_the_box_inside_label_without_id(page):
-    await page.setContent(
+    await page.set_content(
         '<label>Text<span><input id="checkbox" type="checkbox"></input></span></label>'
     )
     await page.check("label")
@@ -62,7 +62,7 @@ async def test_check_the_box_inside_label_without_id(page):
 
 
 async def test_check_radio(page):
-    await page.setContent(
+    await page.set_content(
         """
       <input type='radio'>one</input>
       <input id='two' type='radio'>two</input>
@@ -73,11 +73,11 @@ async def test_check_radio(page):
 
 
 async def test_check_the_box_by_aria_role(page):
-    await page.setContent(
+    await page.set_content(
         """<div role='checkbox' id='checkbox'>CHECKBOX</div>
       <script>
         checkbox.addEventListener('click', () => checkbox.setAttribute('aria-checked', 'true'))
       </script>"""
     )
     await page.check("div")
-    assert await page.evaluate("checkbox.getAttribute('aria-checked')")
+    assert await page.evaluate("checkbox.getAttribute ('aria-checked')")

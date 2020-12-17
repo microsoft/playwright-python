@@ -16,30 +16,30 @@ import pytest
 
 
 async def test_should_work(page):
-    await page.setContent("<div id=d1 tabIndex=0></div>")
+    await page.set_content("<div id=d1 tabIndex=0></div>")
     assert await page.evaluate("() => document.activeElement.nodeName") == "BODY"
     await page.focus("#d1")
     assert await page.evaluate("() => document.activeElement.id") == "d1"
 
 
 async def test_should_emit_focus_event(page):
-    await page.setContent("<div id=d1 tabIndex=0></div>")
+    await page.set_content("<div id=d1 tabIndex=0></div>")
     focused = []
-    await page.exposeFunction("focusEvent", lambda: focused.append(True))
+    await page.expose_function("focusEvent", lambda: focused.append(True))
     await page.evaluate("() => d1.addEventListener('focus', focusEvent)")
     await page.focus("#d1")
     assert focused == [True]
 
 
 async def test_should_emit_blur_event(page):
-    await page.setContent(
+    await page.set_content(
         "<div id=d1 tabIndex=0>DIV1</div><div id=d2 tabIndex=0>DIV2</div>"
     )
     await page.focus("#d1")
     focused = []
     blurred = []
-    await page.exposeFunction("focusEvent", lambda: focused.append(True))
-    await page.exposeFunction("blurEvent", lambda: blurred.append(True))
+    await page.expose_function("focusEvent", lambda: focused.append(True))
+    await page.expose_function("blurEvent", lambda: blurred.append(True))
     await page.evaluate("() => d1.addEventListener('blur', blurEvent)")
     await page.evaluate("() => d2.addEventListener('focus', focusEvent)")
     await page.focus("#d2")
@@ -48,9 +48,9 @@ async def test_should_emit_blur_event(page):
 
 
 async def test_should_traverse_focus(page):
-    await page.setContent('<input id="i1"><input id="i2">')
+    await page.set_content('<input id="i1"><input id="i2">')
     focused = []
-    await page.exposeFunction("focusEvent", lambda: focused.append(True))
+    await page.expose_function("focusEvent", lambda: focused.append(True))
     await page.evaluate("() => i2.addEventListener('focus', focusEvent)")
 
     await page.focus("#i1")
@@ -59,12 +59,12 @@ async def test_should_traverse_focus(page):
     await page.keyboard.type("Last")
 
     assert focused == [True]
-    assert await page.evalOnSelector("#i1", "e => e.value") == "First"
-    assert await page.evalOnSelector("#i2", "e => e.value") == "Last"
+    assert await page.eval_on_selector("#i1", "e => e.value") == "First"
+    assert await page.eval_on_selector("#i2", "e => e.value") == "Last"
 
 
 async def test_should_traverse_focus_in_all_directions(page):
-    await page.setContent('<input value="1"><input value="2"><input value="3">')
+    await page.set_content('<input value="1"><input value="2"><input value="3">')
     await page.keyboard.press("Tab")
     assert await page.evaluate("() => document.activeElement.value") == "1"
     await page.keyboard.press("Tab")
@@ -80,7 +80,7 @@ async def test_should_traverse_focus_in_all_directions(page):
 @pytest.mark.only_platform("darwin")
 @pytest.mark.only_browser("webkit")
 async def test_should_traverse_only_form_elements(page):
-    await page.setContent(
+    await page.set_content(
         """
       <input id="input-1">
       <button id="button">buttton</button>

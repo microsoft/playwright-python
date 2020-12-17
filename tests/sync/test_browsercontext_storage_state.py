@@ -20,14 +20,14 @@ import pytest
 def test_should_capture_local_storage(context, is_webkit, is_win):
     if is_webkit and is_win:
         pytest.skip()
-    page1 = context.newPage()
+    page1 = context.new_page()
     page1.route("**/*", lambda route: route.fulfill(body="<html></html>"))
     page1.goto("https://www.example.com")
     page1.evaluate("localStorage['name1'] = 'value1'")
     page1.goto("https://www.domain.com")
     page1.evaluate("localStorage['name2'] = 'value2'")
 
-    state = context.storageState()
+    state = context.storage_state()
     origins = state["origins"]
     assert len(origins) == 2
     assert origins[0] == {
@@ -43,8 +43,8 @@ def test_should_capture_local_storage(context, is_webkit, is_win):
 def test_should_set_local_storage(browser, is_webkit, is_win):
     if is_webkit and is_win:
         pytest.skip()
-    context = browser.newContext(
-        storageState={
+    context = browser.new_context(
+        storage_state={
             "origins": [
                 {
                     "origin": "https://www.example.com",
@@ -54,7 +54,7 @@ def test_should_set_local_storage(browser, is_webkit, is_win):
         }
     )
 
-    page = context.newPage()
+    page = context.new_page()
     page.route("**/*", lambda route: route.fulfill(body="<html></html>"))
     page.goto("https://www.example.com")
     local_storage = page.evaluate("window.localStorage")
@@ -63,7 +63,7 @@ def test_should_set_local_storage(browser, is_webkit, is_win):
 
 
 def test_should_round_trip_through_the_file(browser, context, tmpdir):
-    page1 = context.newPage()
+    page1 = context.new_page()
     page1.route(
         "**/*",
         lambda route: route.fulfill(body="<html></html>"),
@@ -78,13 +78,13 @@ def test_should_round_trip_through_the_file(browser, context, tmpdir):
     )
 
     path = tmpdir / "storage-state.json"
-    state = context.storageState(path=path)
+    state = context.storage_state(path=path)
     with open(path, "r") as f:
         written = json.load(f)
     assert state == written
 
-    context2 = browser.newContext(storageState=path)
-    page2 = context2.newPage()
+    context2 = browser.new_context(storage_state=path)
+    page2 = context2.new_page()
     page2.route(
         "**/*",
         lambda route: route.fulfill(body="<html></html>"),

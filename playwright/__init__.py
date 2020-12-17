@@ -19,28 +19,28 @@ For more information you'll find the documentation for the sync API [here](sync_
 and for the async API [here](async_api.html).
 """
 
-import playwright._types as types
+import playwright._api_structures as api_structures
+import playwright._api_types as api_types
 from playwright._main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
 
-ConsoleMessageLocation = types.ConsoleMessageLocation
-Cookie = types.Cookie
-Credentials = types.Credentials
-DeviceDescriptor = types.DeviceDescriptor
-Error = types.Error
-FilePayload = types.FilePayload
-FloatRect = types.FloatRect
-Geolocation = types.Geolocation
-IntSize = types.IntSize
-MousePosition = types.MousePosition
-PdfMargins = types.PdfMargins
-ProxyServer = types.ProxyServer
-RecordHarOptions = types.RecordHarOptions
-RecordVideoOptions = types.RecordVideoOptions
-RequestFailure = types.RequestFailure
-ResourceTiming = types.ResourceTiming
-SelectOption = types.SelectOption
-StorageState = types.StorageState
-TimeoutError = types.TimeoutError
+DeviceDescriptor = api_types.DeviceDescriptor
+Error = api_types.Error
+FilePayload = api_types.FilePayload
+FloatRect = api_types.FloatRect
+Geolocation = api_types.Geolocation
+HttpCredentials = api_types.HttpCredentials
+PdfMargins = api_types.PdfMargins
+ProxySettings = api_types.ProxySettings
+RecordHarOptions = api_types.RecordHarOptions
+RecordVideoOptions = api_types.RecordVideoOptions
+RequestFailure = api_types.RequestFailure
+OptionSelector = api_types.OptionSelector
+SourceLocation = api_types.SourceLocation
+TimeoutError = api_types.TimeoutError
+
+Cookie = api_structures.Cookie
+ResourceTiming = api_structures.ResourceTiming
+StorageState = api_structures.StorageState
 
 
 def async_playwright() -> AsyncPlaywrightContextManager:
@@ -54,23 +54,21 @@ def sync_playwright() -> SyncPlaywrightContextManager:
 __all__ = [
     "async_playwright",
     "sync_playwright",
-    "ConsoleMessageLocation",
     "Cookie",
-    "Credentials",
+    "HttpCredentials",
     "DeviceDescriptor",
     "Error",
     "FilePayload",
     "FloatRect",
     "Geolocation",
-    "IntSize",
-    "MousePosition",
     "PdfMargins",
-    "ProxyServer",
+    "ProxySettings",
     "RecordHarOptions",
     "RecordVideoOptions",
     "RequestFailure",
     "ResourceTiming",
-    "SelectOption",
+    "OptionSelector",
+    "SourceLocation",
     "StorageState",
     "TimeoutError",
 ]

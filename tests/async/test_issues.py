@@ -17,8 +17,8 @@ import pytest
 
 @pytest.mark.only_browser("chromium")
 async def test_issue_189(browser_type):
-    browser = await browser_type.launch(ignoreDefaultArgs=["--mute-audio"])
-    page = await browser.newPage()
+    browser = await browser_type.launch(ignore_default_args=["--mute-audio"])
+    page = await browser.new_page()
     assert await page.evaluate("1 + 1") == 2
     await browser.close()
 
@@ -26,5 +26,5 @@ async def test_issue_189(browser_type):
 @pytest.mark.only_browser("chromium")
 async def test_issue_195(playwright, browser):
     iphone_11 = playwright.devices["iPhone 11"]
-    context = await browser.newContext(**iphone_11)
+    context = await browser.new_context(**iphone_11.__dict__)
     await context.close()

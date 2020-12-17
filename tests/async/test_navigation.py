@@ -55,8 +55,8 @@ async def test_goto_should_work_cross_process(page, server):
 
     response = await page.goto(url)
     assert page.url == url
-    assert response.frame == page.mainFrame
-    assert request_frames[0] == page.mainFrame
+    assert response.frame == page.main_frame
+    assert request_frames[0] == page.main_frame
     assert response.url == url
 
 
@@ -74,7 +74,7 @@ async def test_goto_should_capture_iframe_navigation_request(page, server):
 
     response = await page.goto(server.PREFIX + "/frames/one-frame.html")
     assert page.url == server.PREFIX + "/frames/one-frame.html"
-    assert response.frame == page.mainFrame
+    assert response.frame == page.main_frame
     assert response.url == server.PREFIX + "/frames/one-frame.html"
 
     assert len(page.frames) == 2
@@ -97,7 +97,7 @@ async def test_goto_should_capture_cross_process_iframe_navigation_request(
 
     response = await page.goto(server.CROSS_PROCESS_PREFIX + "/frames/one-frame.html")
     assert page.url == server.CROSS_PROCESS_PREFIX + "/frames/one-frame.html"
-    assert response.frame == page.mainFrame
+    assert response.frame == page.main_frame
     assert response.url == server.CROSS_PROCESS_PREFIX + "/frames/one-frame.html"
 
     assert len(page.frames) == 2
@@ -166,7 +166,7 @@ async def test_goto_should_fail_when_server_returns_204(
 
 
 async def test_goto_should_navigate_to_empty_page_with_domcontentloaded(page, server):
-    response = await page.goto(server.EMPTY_PAGE, waitUntil="domcontentloaded")
+    response = await page.goto(server.EMPTY_PAGE, wait_until="domcontentloaded")
     assert response.status == 200
 
 
@@ -223,9 +223,9 @@ async def test_goto_should_not_crash_when_navigating_to_bad_ssl_after_a_cross_or
 
 async def test_goto_should_throw_if_networkidle2_is_passed_as_an_option(page, server):
     with pytest.raises(Error) as exc_info:
-        await page.goto(server.EMPTY_PAGE, waitUntil="networkidle2")
+        await page.goto(server.EMPTY_PAGE, wait_until="networkidle2")
     assert (
-        "waitUntil: expected one of (load|domcontentloaded|networkidle)"
+        "wait_until: expected one of (load|domcontentloaded|networkidle)"
         in exc_info.value.message
     )
 
@@ -260,8 +260,8 @@ async def test_goto_should_fail_when_exceeding_default_maximum_navigation_timeou
 ):
     # Hang for request to the empty.html
     server.set_route("/empty.html", lambda request: None)
-    page.context.setDefaultNavigationTimeout(2)
-    page.setDefaultNavigationTimeout(1)
+    page.context.set_default_navigation_timeout(2)
+    page.set_default_navigation_timeout(1)
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/empty.html")
     assert "Timeout 1ms exceeded" in exc_info.value.message
@@ -274,7 +274,7 @@ async def test_goto_should_fail_when_exceeding_browser_context_navigation_timeou
 ):
     # Hang for request to the empty.html
     server.set_route("/empty.html", lambda request: None)
-    page.context.setDefaultNavigationTimeout(2)
+    page.context.set_default_navigation_timeout(2)
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/empty.html")
     assert "Timeout 2ms exceeded" in exc_info.value.message
@@ -285,8 +285,8 @@ async def test_goto_should_fail_when_exceeding_browser_context_navigation_timeou
 async def test_goto_should_fail_when_exceeding_default_maximum_timeout(page, server):
     # Hang for request to the empty.html
     server.set_route("/empty.html", lambda request: None)
-    page.context.setDefaultTimeout(2)
-    page.setDefaultTimeout(1)
+    page.context.set_default_timeout(2)
+    page.set_default_timeout(1)
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/empty.html")
     assert "Timeout 1ms exceeded" in exc_info.value.message
@@ -297,7 +297,7 @@ async def test_goto_should_fail_when_exceeding_default_maximum_timeout(page, ser
 async def test_goto_should_fail_when_exceeding_browser_context_timeout(page, server):
     # Hang for request to the empty.html
     server.set_route("/empty.html", lambda request: None)
-    page.context.setDefaultTimeout(2)
+    page.context.set_default_timeout(2)
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/empty.html")
     assert "Timeout 2ms exceeded" in exc_info.value.message
@@ -310,8 +310,8 @@ async def test_goto_should_prioritize_default_navigation_timeout_over_default_ti
 ):
     # Hang for request to the empty.html
     server.set_route("/empty.html", lambda request: None)
-    page.setDefaultTimeout(0)
-    page.setDefaultNavigationTimeout(1)
+    page.set_default_timeout(0)
+    page.set_default_navigation_timeout(1)
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/empty.html")
     assert "Timeout 1ms exceeded" in exc_info.value.message
@@ -322,7 +322,7 @@ async def test_goto_should_prioritize_default_navigation_timeout_over_default_ti
 async def test_goto_should_disable_timeout_when_its_set_to_0(page, server):
     loaded = []
     page.once("load", lambda: loaded.append(True))
-    await page.goto(server.PREFIX + "/grid.html", timeout=0, waitUntil="load")
+    await page.goto(server.PREFIX + "/grid.html", timeout=0, wait_until="load")
     assert loaded == [True]
 
 
@@ -412,7 +412,7 @@ async def test_goto_should_send_referer(page, server):
 async def test_goto_should_reject_referer_option_when_set_extra_http_headers_provides_referer(
     page, server
 ):
-    await page.setExtraHTTPHeaders({"referer": "http://microsoft.com/"})
+    await page.set_extra_http_headers({"referer": "http://microsoft.com/"})
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/grid.html", referer="http://google.com/")
     assert (
@@ -424,14 +424,14 @@ async def test_goto_should_reject_referer_option_when_set_extra_http_headers_pro
 async def test_network_idle_should_navigate_to_empty_page_with_networkidle(
     page, server
 ):
-    response = await page.goto(server.EMPTY_PAGE, waitUntil="networkidle")
+    response = await page.goto(server.EMPTY_PAGE, wait_until="networkidle")
     assert response.status == 200
 
 
 async def test_wait_for_nav_should_work(page, server):
     await page.goto(server.EMPTY_PAGE)
     [response, _] = await asyncio.gather(
-        page.waitForNavigation(),
+        page.wait_for_navigation(),
         page.evaluate(
             "url => window.location.href = url", server.PREFIX + "/grid.html"
         ),
@@ -443,7 +443,7 @@ async def test_wait_for_nav_should_work(page, server):
 async def test_wait_for_nav_should_respect_timeout(page, server):
     asyncio.create_task(page.goto(server.EMPTY_PAGE))
     with pytest.raises(Error) as exc_info:
-        await page.waitForNavigation(url="**/frame.html", timeout=5000)
+        await page.wait_for_navigation(url="**/frame.html", timeout=5000)
     assert "Timeout 5000ms exceeded" in exc_info.value.message
     # TODO: implement logging
     # assert 'waiting for navigation to "**/frame.html" until "load"' in exc_info.value.message
@@ -462,12 +462,12 @@ async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
     server.set_route("/one-style.css", handle)
     navigation_task = asyncio.create_task(page.goto(server.PREFIX + "/one-style.html"))
     dom_content_loaded_task = asyncio.create_task(
-        page.waitForNavigation(waitUntil="domcontentloaded")
+        page.wait_for_navigation(wait_until="domcontentloaded")
     )
 
     both_fired = []
     both_fired_task = asyncio.gather(
-        page.waitForNavigation(waitUntil="load"), dom_content_loaded_task
+        page.wait_for_navigation(wait_until="load"), dom_content_loaded_task
     )
     both_fired_task.add_done_callback(lambda: both_fired.append(True))
 
@@ -480,9 +480,9 @@ async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
 
 async def test_wait_for_nav_should_work_with_clicking_on_anchor_links(page, server):
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a href="#foobar">foobar</a>')
+    await page.set_content('<a href="#foobar">foobar</a>')
     [response, _] = await asyncio.gather(
-        page.waitForNavigation(),
+        page.wait_for_navigation(),
         page.click("a"),
     )
     assert response is None
@@ -493,10 +493,10 @@ async def test_wait_for_nav_should_work_with_clicking_on_links_which_do_not_comm
     page, server, https_server, browser_name
 ):
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent(f"<a href='{https_server.EMPTY_PAGE}'>foobar</a>")
+    await page.set_content(f"<a href='{https_server.EMPTY_PAGE}'>foobar</a>")
     with pytest.raises(Error) as exc_info:
         await asyncio.gather(
-            page.waitForNavigation(),
+            page.wait_for_navigation(),
             page.click("a"),
         )
     expect_ssl_error(exc_info.value.message, browser_name)
@@ -504,7 +504,7 @@ async def test_wait_for_nav_should_work_with_clicking_on_links_which_do_not_comm
 
 async def test_wait_for_nav_should_work_with_history_push_state(page, server):
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent(
+    await page.set_content(
         """
         <a onclick='javascript:pushState()'>SPA</a>
         <script>
@@ -513,7 +513,7 @@ async def test_wait_for_nav_should_work_with_history_push_state(page, server):
     """
     )
     [response, _] = await asyncio.gather(
-        page.waitForNavigation(),
+        page.wait_for_navigation(),
         page.click("a"),
     )
     assert response is None
@@ -522,7 +522,7 @@ async def test_wait_for_nav_should_work_with_history_push_state(page, server):
 
 async def test_wait_for_nav_should_work_with_history_replace_state(page, server):
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent(
+    await page.set_content(
         """
         <a onclick='javascript:replaceState()'>SPA</a>
         <script>
@@ -531,7 +531,7 @@ async def test_wait_for_nav_should_work_with_history_replace_state(page, server)
     """
     )
     [response, _] = await asyncio.gather(
-        page.waitForNavigation(),
+        page.wait_for_navigation(),
         page.click("a"),
     )
     assert response is None
@@ -540,7 +540,7 @@ async def test_wait_for_nav_should_work_with_history_replace_state(page, server)
 
 async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, server):
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent(
+    await page.set_content(
         """
       <a id=back onclick='javascript:goBack()'>back</a>
       <a id=forward onclick='javascript:goForward()'>forward</a>
@@ -554,13 +554,13 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     )
     assert page.url == server.PREFIX + "/second.html"
     [back_response, _] = await asyncio.gather(
-        page.waitForNavigation(),
+        page.wait_for_navigation(),
         page.click("a#back"),
     )
     assert back_response is None
     assert page.url == server.PREFIX + "/first.html"
     [forward_response, _] = await asyncio.gather(
-        page.waitForNavigation(),
+        page.wait_for_navigation(),
         page.click("a#forward"),
     )
     assert forward_response is None
@@ -574,8 +574,8 @@ async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(page, s
         page.goto(server.PREFIX + "/frames/one-frame.html")
     )
     await asyncio.sleep(0)
-    frame = await page.waitForEvent("frameattached")
-    await page.waitForEvent("framenavigated", lambda f: f == frame)
+    frame = await page.wait_for_event("frameattached")
+    await page.wait_for_event("framenavigated", lambda f: f == frame)
     await asyncio.gather(frame.evaluate("() => window.stop()"), navigation_promise)
 
 
@@ -583,7 +583,7 @@ async def test_wait_for_nav_should_work_with_url_match(page, server):
     responses = [None, None, None]
 
     async def wait_for_nav(url: Any, index: int) -> None:
-        response = await page.waitForNavigation(url=url)
+        response = await page.wait_for_navigation(url=url)
         responses[index] = response
 
     response0_promise = asyncio.create_task(
@@ -625,7 +625,7 @@ async def test_wait_for_nav_should_work_with_url_match_for_same_document_navigat
     await page.goto(server.EMPTY_PAGE)
     resolved = []
     wait_task = asyncio.create_task(
-        page.waitForNavigation(url=re.compile(r"third\.html"))
+        page.wait_for_navigation(url=re.compile(r"third\.html"))
     )
     wait_task.add_done_callback(lambda _: resolved.append(True))
     assert resolved == []
@@ -645,7 +645,7 @@ async def test_wait_for_nav_should_work_with_url_match_for_same_document_navigat
 async def test_wait_for_nav_should_work_for_cross_process_navigations(page, server):
     await page.goto(server.EMPTY_PAGE)
     wait_task = asyncio.create_task(
-        page.waitForNavigation(waitUntil="domcontentloaded")
+        page.wait_for_navigation(wait_until="domcontentloaded")
     )
     await asyncio.sleep(0)
     url = server.CROSS_PROCESS_PREFIX + "/empty.html"
@@ -662,7 +662,7 @@ async def test_expect_navigation_should_work_for_cross_process_navigations(
 ):
     await page.goto(server.EMPTY_PAGE)
     url = server.CROSS_PROCESS_PREFIX + "/empty.html"
-    async with page.expect_navigation(waitUntil="domcontentloaded") as response_info:
+    async with page.expect_navigation(wait_until="domcontentloaded") as response_info:
         goto_task = asyncio.create_task(page.goto(url))
     response = await response_info.value
     assert response.url == url
@@ -682,7 +682,7 @@ async def test_wait_for_load_state_should_pick_up_ongoing_navigation(page, serve
 
     await asyncio.gather(
         server.wait_for_request("/one-style.css"),
-        page.goto(server.PREFIX + "/one-style.html", waitUntil="domcontentloaded"),
+        page.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded"),
     )
 
     async with page.expect_load_state():
@@ -698,21 +698,21 @@ async def test_wait_for_load_state_should_respect_timeout(page, server):
 
     server.set_route("/one-style.css", handler)
 
-    await page.goto(server.PREFIX + "/one-style.html", waitUntil="domcontentloaded")
+    await page.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded")
     with pytest.raises(Error) as exc_info:
-        await page.waitForLoadState("load", timeout=1)
+        await page.wait_for_load_state("load", timeout=1)
     assert "Timeout 1ms exceeded." in exc_info.value.message
 
 
 async def test_wait_for_load_state_should_resolve_immediately_if_loaded(page, server):
     await page.goto(server.PREFIX + "/one-style.html")
-    await page.waitForLoadState()
+    await page.wait_for_load_state()
 
 
 async def test_wait_for_load_state_should_throw_for_bad_state(page, server):
     await page.goto(server.PREFIX + "/one-style.html")
     with pytest.raises(Error) as exc_info:
-        await page.waitForLoadState("bad")
+        await page.wait_for_load_state("bad")
     assert (
         "state: expected one of (load|domcontentloaded|networkidle)"
         in exc_info.value.message
@@ -731,8 +731,8 @@ async def test_wait_for_load_state_should_resolve_immediately_if_load_state_matc
 
     server.set_route("/one-style.css", handler)
 
-    await page.goto(server.PREFIX + "/one-style.html", waitUntil="domcontentloaded")
-    await page.waitForLoadState("domcontentloaded")
+    await page.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded")
+    await page.wait_for_load_state("domcontentloaded")
 
 
 async def test_wait_for_load_state_should_work_with_pages_that_have_loaded_before_being_connected_to(
@@ -745,7 +745,7 @@ async def test_wait_for_load_state_should_work_with_pages_that_have_loaded_befor
     # The url is about:blank in FF.
     popup = await popup_info.value
     assert popup.url == server.EMPTY_PAGE
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert popup.url == server.EMPTY_PAGE
 
 
@@ -764,7 +764,7 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_empty_url_popup
         )
 
     popup = await popup_info.value
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert ready_state == ["uninitialized"] if is_firefox else ["complete"]
     assert await popup.evaluate("() => document.readyState") == ready_state[0]
 
@@ -775,7 +775,7 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_about_blank_pop
     async with page.expect_popup() as popup_info:
         await page.evaluate("window.open('about:blank') && 1")
     popup = await popup_info.value
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert await popup.evaluate("document.readyState") == "complete"
 
 
@@ -786,7 +786,7 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_about_blank_pop
         await page.evaluate("window.open('about:blank', null, 'noopener') && 1")
 
     popup = await popup_info.value
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert await popup.evaluate("document.readyState") == "complete"
 
 
@@ -798,7 +798,7 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_popup_with_netw
         await page.evaluate("url => window.open(url) && 1", server.EMPTY_PAGE)
 
     popup = await popup_info.value
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert await popup.evaluate("document.readyState") == "complete"
 
 
@@ -812,7 +812,7 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_popup_with_netw
         )
 
     popup = await popup_info.value
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert await popup.evaluate("document.readyState") == "complete"
 
 
@@ -820,11 +820,13 @@ async def test_wait_for_load_state_should_work_with_clicking_target__blank(
     browser, page, server
 ):
     await page.goto(server.EMPTY_PAGE)
-    await page.setContent('<a target=_blank rel="opener" href="/one-style.html">yo</a>')
+    await page.set_content(
+        '<a target=_blank rel="opener" href="/one-style.html">yo</a>'
+    )
     async with page.expect_popup() as popup_info:
         await page.click("a")
     popup = await popup_info.value
-    await popup.waitForLoadState()
+    await popup.wait_for_load_state()
     assert await popup.evaluate("document.readyState") == "complete"
 
 
@@ -832,21 +834,21 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_newPage(
     context, page, server
 ):
     async with context.expect_page() as page_info:
-        await context.newPage()
+        await context.new_page()
     new_page = await page_info.value
-    await new_page.waitForLoadState()
+    await new_page.wait_for_load_state()
     assert await new_page.evaluate("document.readyState") == "complete"
 
 
 async def test_wait_for_load_state_should_resolve_after_popup_load(context, server):
-    page = await context.newPage()
+    page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     # Stall the 'load' by delaying css.
     css_requests = []
     server.set_route("/one-style.css", lambda request: css_requests.append(request))
 
     [popup, _, _] = await asyncio.gather(
-        page.waitForEvent("popup"),
+        page.wait_for_event("popup"),
         server.wait_for_request("/one-style.css"),
         page.evaluate(
             "url => window.popup = window.open(url)", server.PREFIX + "/one-style.html"
@@ -854,7 +856,7 @@ async def test_wait_for_load_state_should_resolve_after_popup_load(context, serv
     )
 
     resolved = []
-    load_state_task = asyncio.create_task(popup.waitForLoadState())
+    load_state_task = asyncio.create_task(popup.wait_for_load_state())
     # Round trips!
     for _ in range(5):
         await page.evaluate("window")
@@ -865,20 +867,20 @@ async def test_wait_for_load_state_should_resolve_after_popup_load(context, serv
 
 
 async def test_go_back_should_work(page, server):
-    assert await page.goBack() is None
+    assert await page.go_back() is None
 
     await page.goto(server.EMPTY_PAGE)
     await page.goto(server.PREFIX + "/grid.html")
 
-    response = await page.goBack()
+    response = await page.go_back()
     assert response.ok
     assert server.EMPTY_PAGE in response.url
 
-    response = await page.goForward()
+    response = await page.go_forward()
     assert response.ok
     assert "/grid.html" in response.url
 
-    response = await page.goForward()
+    response = await page.go_forward()
     assert response is None
 
 
@@ -892,11 +894,11 @@ async def test_go_back_should_work_with_history_api(page, server):
     )
     assert page.url == server.PREFIX + "/second.html"
 
-    await page.goBack()
+    await page.go_back()
     assert page.url == server.PREFIX + "/first.html"
-    await page.goBack()
+    await page.go_back()
     assert page.url == server.EMPTY_PAGE
-    await page.goForward()
+    await page.go_forward()
     assert page.url == server.PREFIX + "/first.html"
 
 
@@ -915,7 +917,7 @@ async def test_frame_goto_should_reject_when_frame_detaches(page, server):
 
     await page.route("**/empty.html", lambda route, request: None)
     navigation_task = asyncio.create_task(page.frames[1].goto(server.EMPTY_PAGE))
-    asyncio.create_task(page.evalOnSelector("iframe", "frame => frame.remove()"))
+    asyncio.create_task(page.eval_on_selector("iframe", "frame => frame.remove()"))
     with pytest.raises(Error) as exc_info:
         await navigation_task
     assert "frame was detached" in exc_info.value.message
@@ -926,7 +928,7 @@ async def test_frame_goto_should_continue_after_client_redirect(page, server):
     url = server.PREFIX + "/frames/child-redirect.html"
 
     with pytest.raises(Error) as exc_info:
-        await page.goto(url, timeout=5000, waitUntil="networkidle")
+        await page.goto(url, timeout=5000, wait_until="networkidle")
 
     assert "Timeout 5000ms exceeded." in exc_info.value.message
     assert (
@@ -973,9 +975,9 @@ async def test_frame_wait_for_load_state_should_work(page, server):
         lambda route, request: request_future.set_result(route),
     )
 
-    await frame.goto(server.PREFIX + "/one-style.html", waitUntil="domcontentloaded")
+    await frame.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded")
     request = await request_future
-    load_task = asyncio.create_task(frame.waitForLoadState())
+    load_task = asyncio.create_task(frame.wait_for_load_state())
     # give the promise a chance to resolve, even though it shouldn't
     await page.evaluate("1")
     assert not load_task.done()

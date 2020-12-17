@@ -64,7 +64,7 @@ def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
 def test_should_work_for_ssl(browser, https_server, is_mac, is_webkit):
     if is_webkit and is_mac:
         pytest.skip()
-    page = browser.newPage(ignoreHTTPSErrors=True)
+    page = browser.new_page(ignore_https_errors=True)
     with page.expect_event("requestfinished") as request_info:
         page.goto(https_server.EMPTY_PAGE)
     request = request_info.value

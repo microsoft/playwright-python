@@ -19,22 +19,22 @@ from playwright.sync_api import ElementHandle, JSHandle
 
 @pytest.fixture
 def context(browser):
-    context = browser.newContext(hasTouch=True)
+    context = browser.new_context(has_touch=True)
     yield context
     context.close()
 
 
 def test_should_send_all_of_the_correct_events(page):
-    page.setContent(
+    page.set_content(
         """
             <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
             <div id="b" style="background: pink; width: 50px; height: 50px">b</div>
         """
     )
     page.tap("#a")
-    element_handle = track_events(page.querySelector("#b"))
+    element_handle = track_events(page.query_selector("#b"))
     page.tap("#b")
-    assert element_handle.jsonValue() == [
+    assert element_handle.json_value() == [
         "pointerover",
         "pointerenter",
         "pointerdown",
@@ -53,16 +53,16 @@ def test_should_send_all_of_the_correct_events(page):
 
 
 def test_should_not_send_mouse_events_touchstart_is_canceled(page):
-    page.setContent("hello world")
+    page.set_content("hello world")
     page.evaluate(
         """() => {
             // touchstart is not cancelable unless passive is false
             document.addEventListener('touchstart', t => t.preventDefault(), {passive: false});
         }"""
     )
-    events_handle = track_events(page.querySelector("body"))
+    events_handle = track_events(page.query_selector("body"))
     page.tap("body")
-    assert events_handle.jsonValue() == [
+    assert events_handle.json_value() == [
         "pointerover",
         "pointerenter",
         "pointerdown",
@@ -75,16 +75,16 @@ def test_should_not_send_mouse_events_touchstart_is_canceled(page):
 
 
 def test_should_not_send_mouse_events_touchend_is_canceled(page):
-    page.setContent("hello world")
+    page.set_content("hello world")
     page.evaluate(
         """() => {
             // touchstart is not cancelable unless passive is false
             document.addEventListener('touchend', t => t.preventDefault());
         }"""
     )
-    events_handle = track_events(page.querySelector("body"))
+    events_handle = track_events(page.query_selector("body"))
     page.tap("body")
-    assert events_handle.jsonValue() == [
+    assert events_handle.json_value() == [
         "pointerover",
         "pointerenter",
         "pointerdown",
@@ -97,7 +97,7 @@ def test_should_not_send_mouse_events_touchend_is_canceled(page):
 
 
 def track_events(target: ElementHandle) -> JSHandle:
-    return target.evaluateHandle(
+    return target.evaluate_handle(
         """target => {
             const events = [];
             for (const event of [

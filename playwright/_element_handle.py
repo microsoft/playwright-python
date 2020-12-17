@@ -13,26 +13,30 @@
 # limitations under the License.
 
 import base64
-import mimetypes
-import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
-
-from playwright._connection import ChannelOwner, from_nullable_channel
-from playwright._helper import (
-    KeyboardModifier,
-    MouseButton,
-    SetFilePayload,
-    locals_to_params,
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
 )
+
+from playwright._api_types import FilePayload, FloatRect, OptionSelector
+from playwright._connection import ChannelOwner, from_nullable_channel
+from playwright._file_chooser import normalize_file_payloads
+from playwright._helper import KeyboardModifier, MouseButton, locals_to_params
 from playwright._js_handle import (
     JSHandle,
     Serializable,
     parse_result,
     serialize_argument,
 )
-from playwright._types import FilePayload, FloatRect, MousePosition, SelectOption
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -87,7 +91,7 @@ class ElementHandle(JSHandle):
     async def hover(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:
@@ -96,7 +100,7 @@ class ElementHandle(JSHandle):
     async def click(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -109,7 +113,7 @@ class ElementHandle(JSHandle):
     async def dblclick(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -130,7 +134,7 @@ class ElementHandle(JSHandle):
     async def tap(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -183,7 +187,8 @@ class ElementHandle(JSHandle):
         await self._channel.send("uncheck", locals_to_params(locals()))
 
     async def boundingBox(self) -> Optional[FloatRect]:
-        return await self._channel.send("boundingBox")
+        bb = await self._channel.send("boundingBox")
+        return FloatRect._parse(bb)
 
     async def screenshot(
         self,
@@ -275,10 +280,10 @@ class ElementHandle(JSHandle):
 ValuesToSelect = Union[
     str,
     ElementHandle,
-    SelectOption,
+    OptionSelector,
     List[str],
     List[ElementHandle],
-    List[SelectOption],
+    List[OptionSelector],
     None,
 ]
 
@@ -289,37 +294,14 @@ def convert_select_option_values(arg: ValuesToSelect) -> Any:
     arg_list = arg if isinstance(arg, list) else [arg]
     if not len(arg_list):
         return {}
-    if isinstance(arg_list[0], ElementHandle):
+    first_arg = arg_list[0]
+    if isinstance(first_arg, ElementHandle):
         element_list = cast(List[ElementHandle], arg_list)
         return dict(elements=list(map(lambda e: e._channel, element_list)))
-    if isinstance(arg_list[0], str):
+    if isinstance(first_arg, str):
         return dict(options=list(map(lambda e: dict(value=e), arg_list)))
-    return dict(options=arg_list)
-
-
-def normalize_file_payloads(
-    files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]]
-) -> List[SetFilePayload]:
-    file_list = files if isinstance(files, list) else [files]
-    file_payloads: List[SetFilePayload] = []
-    for item in file_list:
-        if isinstance(item, str) or isinstance(item, Path):
-            with open(item, mode="rb") as fd:
-                file_payloads.append(
-                    {
-                        "name": os.path.basename(item),
-                        "mimeType": mimetypes.guess_type(str(Path(item)))[0]
-                        or "application/octet-stream",
-                        "buffer": base64.b64encode(fd.read()).decode(),
-                    }
-                )
-        else:
-            file_payloads.append(
-                {
-                    "name": item["name"],
-                    "mimeType": item["mimeType"],
-                    "buffer": base64.b64encode(item["buffer"]).decode(),
-                }
-            )
-
-    return file_payloads
+    if isinstance(first_arg, OptionSelector):
+        return dict(
+            options=list(map(lambda e: cast(OptionSelector, e)._to_json(), arg_list))
+        )
+    return None

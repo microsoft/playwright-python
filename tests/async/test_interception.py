@@ -29,10 +29,10 @@ async def test_page_route_should_intercept(page, server):
         assert "empty.html" in request.url
         assert request.headers["user-agent"]
         assert request.method == "GET"
-        assert request.postData is None
-        assert request.isNavigationRequest
-        assert request.resourceType == "document"
-        assert request.frame == page.mainFrame
+        assert request.post_data is None
+        assert request.is_navigation_request()
+        assert request.resource_type == "document"
+        assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
         await route.continue_()
         intercepted.append(True)
@@ -99,7 +99,7 @@ async def test_page_route_should_work_when_POST_is_redirected_with_302(page, ser
     server.set_redirect("/rredirect", "/empty.html")
     await page.goto(server.EMPTY_PAGE)
     await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
-    await page.setContent(
+    await page.set_content(
         """
       <form action='/rredirect' method='post'>
         <input type="hidden" id="foo" name="foo" value="FOOBAR">
@@ -107,7 +107,8 @@ async def test_page_route_should_work_when_POST_is_redirected_with_302(page, ser
     """
     )
     await asyncio.gather(
-        page.evalOnSelector("form", "form => form.submit()"), page.waitForNavigation()
+        page.eval_on_selector("form", "form => form.submit()"),
+        page.wait_for_navigation(),
     )
 
 
@@ -165,7 +166,7 @@ async def test_page_route_should_properly_return_navigation_response_when_URL_ha
 ):
     # Setup cookie.
     await page.goto(server.EMPTY_PAGE)
-    await context.addCookies(
+    await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "foo", "value": "bar"}]
     )
 
@@ -176,7 +177,7 @@ async def test_page_route_should_properly_return_navigation_response_when_URL_ha
 
 
 async def test_page_route_should_show_custom_HTTP_headers(page, server):
-    await page.setExtraHTTPHeaders({"foo": "bar"})
+    await page.set_extra_http_headers({"foo": "bar"})
 
     def assert_headers(request):
         assert request.headers["foo"] == "bar"
@@ -211,7 +212,7 @@ async def test_page_route_should_work_with_redirect_inside_sync_XHR(page, server
 
 
 async def test_page_route_should_work_with_custom_referer_headers(page, server):
-    await page.setExtraHTTPHeaders({"referer": server.EMPTY_PAGE})
+    await page.set_extra_http_headers({"referer": server.EMPTY_PAGE})
 
     def assert_headers(route):
         assert route.request.headers["referer"] == server.EMPTY_PAGE
@@ -258,15 +259,15 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
     assert len(failed_requests) == 1
     failed_request = failed_requests[0]
     if is_webkit:
-        assert failed_request.failure["errorText"] == "Request intercepted"
+        assert failed_request.failure.error_text == "Request intercepted"
     elif is_firefox:
-        assert failed_request.failure["errorText"] == "NS_ERROR_OFFLINE"
+        assert failed_request.failure.error_text == "NS_ERROR_OFFLINE"
     else:
-        assert failed_request.failure["errorText"] == "net::ERR_INTERNET_DISCONNECTED"
+        assert failed_request.failure.error_text == "net::ERR_INTERNET_DISCONNECTED"
 
 
 async def test_page_route_should_send_referer(page, server):
-    await page.setExtraHTTPHeaders({"referer": "http://google.com/"})
+    await page.set_extra_http_headers({"referer": "http://google.com/"})
 
     await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
     [request, _] = await asyncio.gather(
@@ -311,16 +312,16 @@ async def test_page_route_should_not_work_with_redirects(page, server):
     assert "empty.html" in response.url
 
     assert len(intercepted) == 1
-    assert intercepted[0].resourceType == "document"
-    assert intercepted[0].isNavigationRequest
+    assert intercepted[0].resource_type == "document"
+    assert intercepted[0].is_navigation_request()
     assert "/non-existing-page.html" in intercepted[0].url
 
     chain = []
     r = response.request
     while r:
         chain.append(r)
-        assert r.isNavigationRequest
-        r = r.redirectedFrom
+        assert r.is_navigation_request()
+        r = r.redirected_from
 
     assert len(chain) == 5
     assert "/empty.html" in chain[0].url
@@ -329,7 +330,7 @@ async def test_page_route_should_not_work_with_redirects(page, server):
     assert "/non-existing-page-2.html" in chain[3].url
     assert "/non-existing-page.html" in chain[4].url
     for idx, _ in enumerate(chain):
-        assert chain[idx].redirectedTo == (chain[idx - 1] if idx > 0 else None)
+        assert chain[idx].redirected_to == (chain[idx - 1] if idx > 0 else None)
 
 
 async def test_page_route_should_work_with_redirects_for_subresources(page, server):
@@ -355,7 +356,7 @@ async def test_page_route_should_work_with_redirects_for_subresources(page, serv
     assert "one-style.html" in response.url
 
     assert len(intercepted) == 2
-    assert intercepted[0].resourceType == "document"
+    assert intercepted[0].resource_type == "document"
     assert "one-style.html" in intercepted[0].url
 
     r = intercepted[1]
@@ -365,9 +366,9 @@ async def test_page_route_should_work_with_redirects_for_subresources(page, serv
         "/three-style.css",
         "/four-style.css",
     ]:
-        assert r.resourceType == "stylesheet"
+        assert r.resource_type == "stylesheet"
         assert url in r.url
-        r = r.redirectedTo
+        r = r.redirected_to
     assert r is None
 
 
@@ -499,18 +500,18 @@ async def test_page_route_should_work_with_encoded_server___2(page, server):
 async def test_page_route_should_not_throw_Invalid_Interception_Id_if_the_request_was_cancelled(
     page, server
 ):
-    await page.setContent("<iframe></iframe>")
+    await page.set_content("<iframe></iframe>")
     route_future = asyncio.Future()
     await page.route("**/*", lambda r, _: route_future.set_result(r))
 
     await asyncio.gather(
-        page.waitForEvent("request"),  # Wait for request interception.
-        page.evalOnSelector(
+        page.wait_for_event("request"),  # Wait for request interception.
+        page.eval_on_selector(
             "iframe", """(frame, url) => frame.src = url""", server.EMPTY_PAGE
         ),
     )
     # Delete frame to cause request to be canceled.
-    await page.evalOnSelector("iframe", "frame => frame.remove()")
+    await page.eval_on_selector("iframe", "frame => frame.remove()")
     route = await route_future
     await route.continue_()
 
@@ -567,7 +568,7 @@ async def test_page_route_should_support_cors_with_GET(page, server):
             else {}
         )
         await route.fulfill(
-            contentType="application/json",
+            content_type="application/json",
             headers=headers,
             status=200,
             body=json.dumps(["electric", "gas"]),
@@ -604,7 +605,7 @@ async def test_page_route_should_support_cors_with_POST(page, server):
         "**/cars",
         lambda route, _: asyncio.create_task(
             route.fulfill(
-                contentType="application/json",
+                content_type="application/json",
                 headers={"Access-Control-Allow-Origin": "*"},
                 status=200,
                 body=json.dumps(["electric", "gas"]),
@@ -633,7 +634,7 @@ async def test_page_route_should_support_cors_for_different_methods(page, server
         "**/cars",
         lambda route, request: asyncio.create_task(
             route.fulfill(
-                contentType="application/json",
+                content_type="application/json",
                 headers={"Access-Control-Allow-Origin": "*"},
                 status=200,
                 body=json.dumps([request.method, "electric", "gas"]),
@@ -678,7 +679,7 @@ async def test_request_fulfill_should_work_a(page, server):
             route.fulfill(
                 status=201,
                 headers={"foo": "bar"},
-                contentType="text/html",
+                content_type="text/html",
                 body="Yo, page!",
             )
         ),
@@ -700,7 +701,7 @@ async def test_request_fulfill_should_work_with_status_code_422(page, server):
 
     response = await page.goto(server.EMPTY_PAGE)
     assert response.status == 422
-    assert response.statusText == "Unprocessable Entity"
+    assert response.status_text == "Unprocessable Entity"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
 
 
@@ -711,7 +712,7 @@ async def test_request_fulfill_should_allow_mocking_binary_responses(
         "**/*",
         lambda route, request: asyncio.create_task(
             route.fulfill(
-                contentType="image/png",
+                content_type="image/png",
                 body=(assetdir / "pptr.png").read_bytes(),
             )
         ),
@@ -726,7 +727,7 @@ async def test_request_fulfill_should_allow_mocking_binary_responses(
     }""",
         server.PREFIX,
     )
-    img = await page.querySelector("img")
+    img = await page.query_selector("img")
     assert img
     assert_to_be_golden(await img.screenshot(), "mock-binary-response.png")
 
@@ -738,7 +739,7 @@ async def test_request_fulfill_should_allow_mocking_svg_with_charset(
         "**/*",
         lambda route: asyncio.create_task(
             route.fulfill(
-                contentType="image/svg+xml ; charset=utf-8",
+                content_type="image/svg+xml ; charset=utf-8",
                 body='<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="30" height="30" stroke="black" fill="transparent" stroke-width="5"/></svg>',
             )
         ),
@@ -753,7 +754,7 @@ async def test_request_fulfill_should_allow_mocking_svg_with_charset(
     }""",
         server.PREFIX,
     )
-    img = await page.querySelector("img")
+    img = await page.query_selector("img")
     assert_to_be_golden(await img.screenshot(), "mock-svg.png")
 
 
@@ -763,7 +764,7 @@ async def test_request_fulfill_should_work_with_file_path(
     await page.route(
         "**/*",
         lambda route, request: asyncio.create_task(
-            route.fulfill(contentType="shouldBeIgnored", path=assetdir / "pptr.png")
+            route.fulfill(content_type="shouldBeIgnored", path=assetdir / "pptr.png")
         ),
     )
     await page.evaluate(
@@ -775,7 +776,7 @@ async def test_request_fulfill_should_work_with_file_path(
     }""",
         server.PREFIX,
     )
-    img = await page.querySelector("img")
+    img = await page.query_selector("img")
     assert img
     assert_to_be_golden(await img.screenshot(), "mock-binary-response.png")
 
@@ -859,7 +860,7 @@ async def test_request_fulfill_should_include_the_origin_header(page, server):
             asyncio.create_task(
                 route.fulfill(
                     headers={"Access-Control-Allow-Origin": "*"},
-                    contentType="text/plain",
+                    content_type="text/plain",
                     body="done",
                 )
             ),
@@ -889,17 +890,17 @@ async def test_request_fulfill_should_work_with_request_interception(page, serve
 
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
     await page.goto(server.PREFIX + "/rrredirect")
-    assert requests["rrredirect"].isNavigationRequest()
-    assert requests["frame.html"].isNavigationRequest()
-    assert requests["script.js"].isNavigationRequest() is False
-    assert requests["style.css"].isNavigationRequest() is False
+    assert requests["rrredirect"].is_navigation_request()
+    assert requests["frame.html"].is_navigation_request()
+    assert requests["script.js"].is_navigation_request() is False
+    assert requests["style.css"].is_navigation_request() is False
 
 
 async def test_Interception_should_work_with_request_interception(
     browser: Browser, https_server
 ):
-    context = await browser.newContext(ignoreHTTPSErrors=True)
-    page = await context.newPage()
+    context = await browser.new_context(ignore_https_errors=True)
+    page = await context.new_page()
 
     await page.route(
         "**/*", lambda route, request: asyncio.ensure_future(route.continue_())
@@ -910,8 +911,8 @@ async def test_Interception_should_work_with_request_interception(
     await context.close()
 
 
-async def test_ignoreHTTPSErrors_service_worker_should_intercept_after_a_service_worker(
-    browser, page, server, context
+async def test_ignore_http_errors_service_worker_should_intercept_after_a_service_worker(
+    page, server
 ):
     await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
     await page.evaluate("() => window.activationPromise")
@@ -924,7 +925,7 @@ async def test_ignoreHTTPSErrors_service_worker_should_intercept_after_a_service
         asyncio.ensure_future(
             route.fulfill(
                 status=200,
-                contentType="text/css",
+                content_type="text/css",
                 body="responseFromInterception:" + route.request.url.split("/")[-1],
             )
         )
@@ -936,5 +937,5 @@ async def test_ignoreHTTPSErrors_service_worker_should_intercept_after_a_service
     assert sw_response2 == "responseFromServiceWorker:foo"
 
     # Page route is not applied to service worker initiated fetch.
-    nonInterceptedResponse = await page.evaluate('() => fetchDummy("passthrough")')
-    assert nonInterceptedResponse == "FAILURE: Not Found"
+    non_intercepted_response = await page.evaluate('() => fetchDummy("passthrough")')
+    assert non_intercepted_response == "FAILURE: Not Found"

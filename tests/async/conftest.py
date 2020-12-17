@@ -56,14 +56,14 @@ async def browser(browser_factory):
 
 @pytest.fixture
 async def context(browser):
-    context = await browser.newContext()
+    context = await browser.new_context()
     yield context
     await context.close()
 
 
 @pytest.fixture
 async def page(context):
-    page = await context.newPage()
+    page = await context.new_page()
     yield page
     await page.close()
 

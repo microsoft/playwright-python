@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from playwright._connection import ChannelOwner
+from playwright._helper import patch_error_message
 
 
 class Download(ChannelOwner):
@@ -36,7 +37,7 @@ class Download(ChannelOwner):
         await self._channel.send("delete")
 
     async def failure(self) -> Optional[str]:
-        return await self._channel.send("failure")
+        return patch_error_message(await self._channel.send("failure"))
 
     async def path(self) -> Optional[str]:
         return await self._channel.send("path")

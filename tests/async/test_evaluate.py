@@ -102,7 +102,7 @@ async def test_evaluate_throw_when_evaluation_triggers_reload(page):
 
 
 async def test_evaluate_work_with_exposed_function(page):
-    await page.exposeFunction("callController", lambda a, b: a * b)
+    await page.expose_function("callController", lambda a, b: a * b)
     result = await page.evaluate("callController(9, 3)")
     assert result == 27
 
@@ -171,15 +171,15 @@ async def test_evaluate_accept_string(page):
 
 
 async def test_evaluate_accept_element_handle_as_an_argument(page):
-    await page.setContent("<section>42</section>")
-    element = await page.querySelector("section")
+    await page.set_content("<section>42</section>")
+    element = await page.query_selector("section")
     text = await page.evaluate("e => e.textContent", element)
     assert text == "42"
 
 
 async def test_evaluate_throw_if_underlying_element_was_disposed(page):
-    await page.setContent("<section>39</section>")
-    element = await page.querySelector("section")
+    await page.set_content("<section>39</section>")
+    element = await page.query_selector("section")
     await element.dispose()
     error = None
     try:

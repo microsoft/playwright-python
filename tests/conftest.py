@@ -51,7 +51,7 @@ def assetdir():
 def launch_arguments(pytestconfig):
     return {
         "headless": not pytestconfig.getoption("--headful"),
-        "chromiumSandbox": False,
+        "chromium_sandbox": False,
     }
 
 

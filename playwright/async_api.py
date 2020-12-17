@@ -23,6 +23,21 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 from playwright._accessibility import Accessibility as AccessibilityImpl
+from playwright._api_structures import Cookie, ResourceTiming, StorageState
+from playwright._api_types import (
+    DeviceDescriptor,
+    FilePayload,
+    FloatRect,
+    Geolocation,
+    HttpCredentials,
+    OptionSelector,
+    PdfMargins,
+    ProxySettings,
+    RecordHarOptions,
+    RecordVideoOptions,
+    RequestFailure,
+    SourceLocation,
+)
 from playwright._async_base import AsyncBase, AsyncEventContextManager, mapping
 from playwright._browser import Browser as BrowserImpl
 from playwright._browser_context import BrowserContext as BrowserContextImpl
@@ -50,26 +65,6 @@ from playwright._page import Page as PageImpl
 from playwright._page import Worker as WorkerImpl
 from playwright._playwright import Playwright as PlaywrightImpl
 from playwright._selectors import Selectors as SelectorsImpl
-from playwright._types import (
-    ConsoleMessageLocation,
-    Cookie,
-    Credentials,
-    DeviceDescriptor,
-    Error,
-    FilePayload,
-    FloatRect,
-    Geolocation,
-    IntSize,
-    MousePosition,
-    PdfMargins,
-    ProxyServer,
-    RecordHarOptions,
-    RecordVideoOptions,
-    RequestFailure,
-    ResourceTiming,
-    SelectOption,
-    StorageState,
-)
 from playwright._video import Video as VideoImpl
 
 NoneType = type(None)
@@ -92,8 +87,8 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def resourceType(self) -> str:
-        """Request.resourceType
+    def resource_type(self) -> str:
+        """Request.resource_type
 
         Contains the request's resource type as it was perceived by the rendering engine. ResourceType will be one of the
         following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`,
@@ -118,8 +113,8 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.method)
 
     @property
-    def postData(self) -> typing.Union[str, NoneType]:
-        """Request.postData
+    def post_data(self) -> typing.Union[str, NoneType]:
+        """Request.post_data
 
         Request's post body, if any.
 
@@ -130,8 +125,8 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.postData)
 
     @property
-    def postDataJSON(self) -> typing.Union[typing.Dict, NoneType]:
-        """Request.postDataJSON
+    def post_data_json(self) -> typing.Union[typing.Dict, NoneType]:
+        """Request.post_data_json
 
         Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
         When the response is `application/x-www-form-urlencoded` then a key/value object of the values will be returned.
@@ -144,8 +139,8 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.postDataJSON)
 
     @property
-    def postDataBuffer(self) -> typing.Union[bytes, NoneType]:
-        """Request.postDataBuffer
+    def post_data_buffer(self) -> typing.Union[bytes, NoneType]:
+        """Request.post_data_buffer
 
         Request's post body in a binary form, if any.
 
@@ -180,8 +175,8 @@ class Request(AsyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
-    def redirectedFrom(self) -> typing.Union["Request", NoneType]:
-        """Request.redirectedFrom
+    def redirected_from(self) -> typing.Union["Request", NoneType]:
+        """Request.redirected_from
 
         Request that was redirected by the server to this one, if any.
         When the server responds with a redirect, Playwright creates a new Request object. The two requests are connected by
@@ -197,8 +192,8 @@ class Request(AsyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirectedFrom)
 
     @property
-    def redirectedTo(self) -> typing.Union["Request", NoneType]:
-        """Request.redirectedTo
+    def redirected_to(self) -> typing.Union["Request", NoneType]:
+        """Request.redirected_to
 
         New request issued by the browser if the server responded with redirect.
         This method is the opposite of request.redirectedFrom():
@@ -210,7 +205,7 @@ class Request(AsyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
 
     @property
-    def failure(self) -> typing.Union[RequestFailure, NoneType]:
+    def failure(self) -> typing.Union["RequestFailure", NoneType]:
         """Request.failure
 
         The method returns `null` unless this request has failed, as reported by `requestfailed` event.
@@ -220,10 +215,10 @@ class Request(AsyncBase):
         -------
         Optional[{"errorText": str}]
         """
-        return mapping.from_maybe_impl(self._impl_obj.failure)
+        return mapping.from_impl_nullable(self._impl_obj.failure)
 
     @property
-    def timing(self) -> ResourceTiming:
+    def timing(self) -> "ResourceTiming":
         """Request.timing
 
         Returns resource timing information for given request. Most of the timing values become available upon the response,
@@ -234,7 +229,7 @@ class Request(AsyncBase):
         -------
         {"startTime": float, "domainLookupStart": float, "domainLookupEnd": float, "connectStart": float, "secureConnectionStart": float, "connectEnd": float, "requestStart": float, "responseStart": float, "responseEnd": float}
         """
-        return mapping.from_maybe_impl(self._impl_obj.timing)
+        return mapping.from_impl(self._impl_obj.timing)
 
     async def response(self) -> typing.Union["Response", NoneType]:
         """Request.response
@@ -247,8 +242,8 @@ class Request(AsyncBase):
         """
         return mapping.from_impl_nullable(await self._impl_obj.response())
 
-    def isNavigationRequest(self) -> bool:
-        """Request.isNavigationRequest
+    def is_navigation_request(self) -> bool:
+        """Request.is_navigation_request
 
         Whether this request is driving frame's navigation.
 
@@ -303,8 +298,8 @@ class Response(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.status)
 
     @property
-    def statusText(self) -> str:
-        """Response.statusText
+    def status_text(self) -> str:
+        """Response.status_text
 
         Contains the status text of the response (e.g. usually an "OK" for a success).
 
@@ -350,14 +345,14 @@ class Response(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.frame)
 
-    async def finished(self) -> typing.Union[Error, NoneType]:
+    async def finished(self) -> typing.Union[str, NoneType]:
         """Response.finished
 
         Waits for this response to finish, returns failure error if request failed.
 
         Returns
         -------
-        Optional[Error]
+        Optional[str]
         """
         return mapping.from_maybe_impl(await self._impl_obj.finished())
 
@@ -415,14 +410,14 @@ class Route(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.request)
 
-    async def abort(self, errorCode: str = None) -> NoneType:
+    async def abort(self, error_code: str = None) -> NoneType:
         """Route.abort
 
         Aborts the route's request.
 
         Parameters
         ----------
-        errorCode : Optional[str]
+        error_code : Optional[str]
             Optional error code. Defaults to `failed`, could be one of the following:
              - `'aborted'` - An operation was aborted (due to user action)
              - `'accessdenied'` - Permission to access a resource, other than the network, was denied
@@ -439,7 +434,7 @@ class Route(AsyncBase):
              - `'timedout'` - An operation timed out.
              - `'failed'` - A generic failure occurred.
         """
-        return mapping.from_maybe_impl(await self._impl_obj.abort(errorCode=errorCode))
+        return mapping.from_maybe_impl(await self._impl_obj.abort(errorCode=error_code))
 
     async def fulfill(
         self,
@@ -447,7 +442,7 @@ class Route(AsyncBase):
         headers: typing.Union[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
         path: typing.Union[str, pathlib.Path] = None,
-        contentType: str = None,
+        content_type: str = None,
     ) -> NoneType:
         """Route.fulfill
 
@@ -465,7 +460,7 @@ class Route(AsyncBase):
             Optional response body.
         path : Union[str, pathlib.Path, NoneType]
             Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory.
-        contentType : Optional[str]
+        content_type : Optional[str]
             If set, equals to setting `Content-Type` response header.
         """
         return mapping.from_maybe_impl(
@@ -474,7 +469,7 @@ class Route(AsyncBase):
                 headers=mapping.to_impl(headers),
                 body=body,
                 path=path,
-                contentType=contentType,
+                contentType=content_type,
             )
         )
 
@@ -483,7 +478,7 @@ class Route(AsyncBase):
         url: str = None,
         method: str = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
-        postData: typing.Union[str, bytes] = None,
+        post_data: typing.Union[str, bytes] = None,
     ) -> NoneType:
         """Route.continue_
 
@@ -497,7 +492,7 @@ class Route(AsyncBase):
             If set changes the request method (e.g. GET or POST)
         headers : Optional[Dict[str, str]]
             If set changes the request HTTP headers. Header values will be converted to a string.
-        postData : Union[str, bytes, NoneType]
+        post_data : Union[str, bytes, NoneType]
             If set changes the post data of request
         """
         return mapping.from_maybe_impl(
@@ -505,7 +500,7 @@ class Route(AsyncBase):
                 url=url,
                 method=method,
                 headers=mapping.to_impl(headers),
-                postData=postData,
+                postData=post_data,
             )
         )
 
@@ -529,13 +524,13 @@ class WebSocket(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
-    async def waitForEvent(
+    async def wait_for_event(
         self,
         event: str,
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -> typing.Any:
-        """WebSocket.waitForEvent
+        """WebSocket.wait_for_event
 
         Returns the event data value.
         Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
@@ -585,8 +580,8 @@ class WebSocket(AsyncBase):
             self._impl_obj.waitForEvent(event, predicate, timeout)
         )
 
-    def isClosed(self) -> bool:
-        """WebSocket.isClosed
+    def is_closed(self) -> bool:
+        """WebSocket.is_closed
 
         Indicates that the web socket has been closed.
 
@@ -644,8 +639,8 @@ class Keyboard(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.up(key=key))
 
-    async def insertText(self, text: str) -> NoneType:
-        """Keyboard.insertText
+    async def insert_text(self, text: str) -> NoneType:
+        """Keyboard.insert_text
 
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
@@ -725,7 +720,7 @@ class Mouse(AsyncBase):
         return mapping.from_maybe_impl(await self._impl_obj.move(x=x, y=y, steps=steps))
 
     async def down(
-        self, button: Literal["left", "middle", "right"] = None, clickCount: int = None
+        self, button: Literal["left", "middle", "right"] = None, click_count: int = None
     ) -> NoneType:
         """Mouse.down
 
@@ -735,15 +730,15 @@ class Mouse(AsyncBase):
         ----------
         button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
-        clickCount : Optional[int]
+        click_count : Optional[int]
             defaults to 1. See UIEvent.detail.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.down(button=button, clickCount=clickCount)
+            await self._impl_obj.down(button=button, clickCount=click_count)
         )
 
     async def up(
-        self, button: Literal["left", "middle", "right"] = None, clickCount: int = None
+        self, button: Literal["left", "middle", "right"] = None, click_count: int = None
     ) -> NoneType:
         """Mouse.up
 
@@ -753,11 +748,11 @@ class Mouse(AsyncBase):
         ----------
         button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
-        clickCount : Optional[int]
+        click_count : Optional[int]
             defaults to 1. See UIEvent.detail.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.up(button=button, clickCount=clickCount)
+            await self._impl_obj.up(button=button, clickCount=click_count)
         )
 
     async def click(
@@ -766,7 +761,7 @@ class Mouse(AsyncBase):
         y: float,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
-        clickCount: int = None,
+        click_count: int = None,
     ) -> NoneType:
         """Mouse.click
 
@@ -780,12 +775,12 @@ class Mouse(AsyncBase):
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
-        clickCount : Optional[int]
+        click_count : Optional[int]
             defaults to 1. See UIEvent.detail.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.click(
-                x=x, y=y, delay=delay, button=button, clickCount=clickCount
+                x=x, y=y, delay=delay, button=button, clickCount=click_count
             )
         )
 
@@ -871,10 +866,10 @@ class JSHandle(AsyncBase):
             )
         )
 
-    async def evaluateHandle(
+    async def evaluate_handle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
-        """JSHandle.evaluateHandle
+        """JSHandle.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
         This method passes this handle as the first argument to `pageFunction`.
@@ -903,14 +898,14 @@ class JSHandle(AsyncBase):
             )
         )
 
-    async def getProperty(self, propertyName: str) -> "JSHandle":
-        """JSHandle.getProperty
+    async def get_property(self, property_name: str) -> "JSHandle":
+        """JSHandle.get_property
 
         Fetches a single property from the referenced object.
 
         Parameters
         ----------
-        propertyName : str
+        property_name : str
             property to get
 
         Returns
@@ -918,11 +913,11 @@ class JSHandle(AsyncBase):
         JSHandle
         """
         return mapping.from_impl(
-            await self._impl_obj.getProperty(propertyName=propertyName)
+            await self._impl_obj.getProperty(propertyName=property_name)
         )
 
-    async def getProperties(self) -> typing.Dict[str, "JSHandle"]:
-        """JSHandle.getProperties
+    async def get_properties(self) -> typing.Dict[str, "JSHandle"]:
+        """JSHandle.get_properties
 
         The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 
@@ -932,8 +927,8 @@ class JSHandle(AsyncBase):
         """
         return mapping.from_impl_dict(await self._impl_obj.getProperties())
 
-    def asElement(self) -> typing.Union["ElementHandle", NoneType]:
-        """JSHandle.asElement
+    def as_element(self) -> typing.Union["ElementHandle", NoneType]:
+        """JSHandle.as_element
 
         Returns either `null` or the object handle itself, if the object handle is an instance of ElementHandle.
 
@@ -950,8 +945,8 @@ class JSHandle(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.dispose())
 
-    async def jsonValue(self) -> typing.Any:
-        """JSHandle.jsonValue
+    async def json_value(self) -> typing.Any:
+        """JSHandle.json_value
 
         Returns a JSON representation of the object. If the object has a
         `toJSON`
@@ -974,8 +969,8 @@ class ElementHandle(JSHandle):
     def __init__(self, obj: ElementHandleImpl):
         super().__init__(obj)
 
-    def toString(self) -> str:
-        """ElementHandle.toString
+    def to_string(self) -> str:
+        """ElementHandle.to_string
 
         Returns
         -------
@@ -983,8 +978,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(self._impl_obj.toString())
 
-    def asElement(self) -> typing.Union["ElementHandle", NoneType]:
-        """ElementHandle.asElement
+    def as_element(self) -> typing.Union["ElementHandle", NoneType]:
+        """ElementHandle.as_element
 
         Returns either `null` or the object handle itself, if the object handle is an instance of ElementHandle.
 
@@ -994,8 +989,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_impl_nullable(self._impl_obj.asElement())
 
-    async def ownerFrame(self) -> typing.Union["Frame", NoneType]:
-        """ElementHandle.ownerFrame
+    async def owner_frame(self) -> typing.Union["Frame", NoneType]:
+        """ElementHandle.owner_frame
 
         Returns the frame containing the given element.
 
@@ -1005,8 +1000,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_impl_nullable(await self._impl_obj.ownerFrame())
 
-    async def contentFrame(self) -> typing.Union["Frame", NoneType]:
-        """ElementHandle.contentFrame
+    async def content_frame(self) -> typing.Union["Frame", NoneType]:
+        """ElementHandle.content_frame
 
         Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
 
@@ -1016,8 +1011,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_impl_nullable(await self._impl_obj.contentFrame())
 
-    async def getAttribute(self, name: str) -> typing.Union[str, NoneType]:
-        """ElementHandle.getAttribute
+    async def get_attribute(self, name: str) -> typing.Union[str, NoneType]:
+        """ElementHandle.get_attribute
 
         Returns element attribute value.
 
@@ -1032,8 +1027,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(await self._impl_obj.getAttribute(name=name))
 
-    async def textContent(self) -> typing.Union[str, NoneType]:
-        """ElementHandle.textContent
+    async def text_content(self) -> typing.Union[str, NoneType]:
+        """ElementHandle.text_content
 
         Returns the `node.textContent`.
 
@@ -1043,8 +1038,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(await self._impl_obj.textContent())
 
-    async def innerText(self) -> str:
-        """ElementHandle.innerText
+    async def inner_text(self) -> str:
+        """ElementHandle.inner_text
 
         Returns the `element.innerText`.
 
@@ -1054,8 +1049,8 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(await self._impl_obj.innerText())
 
-    async def innerHTML(self) -> str:
-        """ElementHandle.innerHTML
+    async def inner_html(self) -> str:
+        """ElementHandle.inner_html
 
         Returns the `element.innerHTML`.
 
@@ -1065,8 +1060,10 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(await self._impl_obj.innerHTML())
 
-    async def dispatchEvent(self, type: str, eventInit: typing.Dict = None) -> NoneType:
-        """ElementHandle.dispatchEvent
+    async def dispatch_event(
+        self, type: str, event_init: typing.Dict = None
+    ) -> NoneType:
+        """ElementHandle.dispatch_event
 
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
         is dispatched. This is equivalend to calling
@@ -1089,17 +1086,17 @@ class ElementHandle(JSHandle):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        eventInit : Optional[Dict]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.dispatchEvent(
-                type=type, eventInit=mapping.to_impl(eventInit)
+                type=type, eventInit=mapping.to_impl(event_init)
             )
         )
 
-    async def scrollIntoViewIfNeeded(self, timeout: int = None) -> NoneType:
-        """ElementHandle.scrollIntoViewIfNeeded
+    async def scroll_into_view_if_needed(self, timeout: int = None) -> NoneType:
+        """ElementHandle.scroll_into_view_if_needed
 
         This method waits for actionability checks, then tries to scroll element into view, unless it is
         completely visible as defined by
@@ -1121,7 +1118,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -1142,7 +1139,7 @@ class ElementHandle(JSHandle):
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -1160,13 +1157,13 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
-        clickCount: int = None,
+        click_count: int = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """ElementHandle.click
 
@@ -1185,19 +1182,19 @@ class ElementHandle(JSHandle):
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
-        clickCount : Optional[int]
+        click_count : Optional[int]
             defaults to 1. See UIEvent.detail.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -1206,10 +1203,10 @@ class ElementHandle(JSHandle):
                 position=position,
                 delay=delay,
                 button=button,
-                clickCount=clickCount,
+                clickCount=click_count,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -1218,12 +1215,12 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """ElementHandle.dblclick
 
@@ -1244,7 +1241,7 @@ class ElementHandle(JSHandle):
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
@@ -1254,7 +1251,7 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -1265,24 +1262,24 @@ class ElementHandle(JSHandle):
                 button=button,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
-    async def selectOption(
+    async def select_option(
         self,
         values: typing.Union[
             str,
             "ElementHandle",
-            SelectOption,
+            "OptionSelector",
             typing.List[str],
             typing.List["ElementHandle"],
-            typing.List[SelectOption],
+            typing.List["OptionSelector"],
         ] = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> typing.List[str]:
-        """ElementHandle.selectOption
+        """ElementHandle.select_option
 
         Returns the array of option values that have been successfully selected.
         Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
@@ -1290,11 +1287,11 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 
         Returns
@@ -1303,7 +1300,9 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
-                values=mapping.to_impl(values), timeout=timeout, noWaitAfter=noWaitAfter
+                values=mapping.to_impl(values),
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -1312,10 +1311,10 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """ElementHandle.tap
 
@@ -1336,13 +1335,13 @@ class ElementHandle(JSHandle):
         ----------
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -1351,12 +1350,12 @@ class ElementHandle(JSHandle):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
     async def fill(
-        self, value: str, timeout: int = None, noWaitAfter: bool = None
+        self, value: str, timeout: int = None, no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.fill
 
@@ -1370,17 +1369,17 @@ class ElementHandle(JSHandle):
             Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.fill(
-                value=value, timeout=timeout, noWaitAfter=noWaitAfter
+                value=value, timeout=timeout, noWaitAfter=no_wait_after
             )
         )
 
-    async def selectText(self, timeout: int = None) -> NoneType:
-        """ElementHandle.selectText
+    async def select_text(self, timeout: int = None) -> NoneType:
+        """ElementHandle.select_text
 
         This method waits for actionability checks, then focuses the element and selects all its text
         content.
@@ -1392,20 +1391,20 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(await self._impl_obj.selectText(timeout=timeout))
 
-    async def setInputFiles(
+    async def set_input_files(
         self,
         files: typing.Union[
             str,
             pathlib.Path,
-            FilePayload,
+            "FilePayload",
             typing.List[str],
             typing.List[pathlib.Path],
-            typing.List[FilePayload],
+            typing.List["FilePayload"],
         ],
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
-        """ElementHandle.setInputFiles
+        """ElementHandle.set_input_files
 
         This method expects `elementHandle` to point to an input
         element.
@@ -1415,15 +1414,15 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+        files : Union[str, pathlib.Path, Dict, List[str], List[pathlib.Path], List[Dict]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setInputFiles(
-                files=files, timeout=timeout, noWaitAfter=noWaitAfter
+                files=files, timeout=timeout, noWaitAfter=no_wait_after
             )
         )
 
@@ -1439,7 +1438,7 @@ class ElementHandle(JSHandle):
         text: str,
         delay: int = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """ElementHandle.type
 
@@ -1455,17 +1454,21 @@ class ElementHandle(JSHandle):
             Time to wait between key presses in milliseconds. Defaults to 0.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.type(
-                text=text, delay=delay, timeout=timeout, noWaitAfter=noWaitAfter
+                text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
             )
         )
 
     async def press(
-        self, key: str, delay: int = None, timeout: int = None, noWaitAfter: bool = None
+        self,
+        key: str,
+        delay: int = None,
+        timeout: int = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """ElementHandle.press
 
@@ -1490,17 +1493,17 @@ class ElementHandle(JSHandle):
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.press(
-                key=key, delay=delay, timeout=timeout, noWaitAfter=noWaitAfter
+                key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
             )
         )
 
     async def check(
-        self, timeout: int = None, force: bool = None, noWaitAfter: bool = None
+        self, timeout: int = None, force: bool = None, no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.check
 
@@ -1523,17 +1526,17 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.check(
-                timeout=timeout, force=force, noWaitAfter=noWaitAfter
+                timeout=timeout, force=force, noWaitAfter=no_wait_after
             )
         )
 
     async def uncheck(
-        self, timeout: int = None, force: bool = None, noWaitAfter: bool = None
+        self, timeout: int = None, force: bool = None, no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.uncheck
 
@@ -1556,17 +1559,17 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.uncheck(
-                timeout=timeout, force=force, noWaitAfter=noWaitAfter
+                timeout=timeout, force=force, noWaitAfter=no_wait_after
             )
         )
 
-    async def boundingBox(self) -> typing.Union[FloatRect, NoneType]:
-        """ElementHandle.boundingBox
+    async def bounding_box(self) -> typing.Union["FloatRect", NoneType]:
+        """ElementHandle.bounding_box
 
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
         calculated relative to the main frame viewport - which is usually the same as the browser window.
@@ -1582,7 +1585,7 @@ class ElementHandle(JSHandle):
         -------
         Optional[{"x": float, "y": float, "width": float, "height": float}]
         """
-        return mapping.from_maybe_impl(await self._impl_obj.boundingBox())
+        return mapping.from_impl_nullable(await self._impl_obj.boundingBox())
 
     async def screenshot(
         self,
@@ -1590,7 +1593,7 @@ class ElementHandle(JSHandle):
         type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
-        omitBackground: bool = None,
+        omit_background: bool = None,
     ) -> bytes:
         """ElementHandle.screenshot
 
@@ -1608,7 +1611,7 @@ class ElementHandle(JSHandle):
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
         quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omitBackground : Optional[bool]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
 
         Returns
@@ -1621,14 +1624,14 @@ class ElementHandle(JSHandle):
                 type=type,
                 path=path,
                 quality=quality,
-                omitBackground=omitBackground,
+                omitBackground=omit_background,
             )
         )
 
-    async def querySelector(
+    async def query_selector(
         self, selector: str
     ) -> typing.Union["ElementHandle", NoneType]:
-        """ElementHandle.querySelector
+        """ElementHandle.query_selector
 
         The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See Working with
         selectors for more details. If no elements match the selector, the return value resolves to
@@ -1647,8 +1650,8 @@ class ElementHandle(JSHandle):
             await self._impl_obj.querySelector(selector=selector)
         )
 
-    async def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
-        """ElementHandle.querySelectorAll
+    async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
+        """ElementHandle.query_selector_all
 
         The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See Working with
         selectors for more details. If no elements match the selector, the return value resolves to
@@ -1667,14 +1670,14 @@ class ElementHandle(JSHandle):
             await self._impl_obj.querySelectorAll(selector=selector)
         )
 
-    async def evalOnSelector(
+    async def eval_on_selector(
         self,
         selector: str,
         expression: str,
         arg: typing.Any = None,
         force_expr: bool = None,
     ) -> typing.Any:
-        """ElementHandle.evalOnSelector
+        """ElementHandle.eval_on_selector
 
         Returns the return value of `pageFunction`
         The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
@@ -1707,14 +1710,14 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def evalOnSelectorAll(
+    async def eval_on_selector_all(
         self,
         selector: str,
         expression: str,
         arg: typing.Any = None,
         force_expr: bool = None,
     ) -> typing.Any:
-        """ElementHandle.evalOnSelectorAll
+        """ElementHandle.eval_on_selector_all
 
         Returns the return value of `pageFunction`
         The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
@@ -1753,12 +1756,12 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def waitForElementState(
+    async def wait_for_element_state(
         self,
         state: Literal["disabled", "enabled", "hidden", "stable", "visible"],
         timeout: int = None,
     ) -> NoneType:
-        """ElementHandle.waitForElementState
+        """ElementHandle.wait_for_element_state
 
         Returns the element satisfies the `state`.
         Depending on the `state` parameter, this method waits for one of the actionability checks to pass.
@@ -1783,13 +1786,13 @@ class ElementHandle(JSHandle):
             await self._impl_obj.waitForElementState(state=state, timeout=timeout)
         )
 
-    async def waitForSelector(
+    async def wait_for_selector(
         self,
         selector: str,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         timeout: int = None,
     ) -> typing.Union["ElementHandle", NoneType]:
-        """ElementHandle.waitForSelector
+        """ElementHandle.wait_for_selector
 
         Returns element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or
         `detached`.
@@ -1832,7 +1835,7 @@ class Accessibility(AsyncBase):
         super().__init__(obj)
 
     async def snapshot(
-        self, interestingOnly: bool = None, root: "ElementHandle" = None
+        self, interesting_only: bool = None, root: "ElementHandle" = None
     ) -> typing.Union[typing.Dict, NoneType]:
         """Accessibility.snapshot
 
@@ -1847,7 +1850,7 @@ class Accessibility(AsyncBase):
 
         Parameters
         ----------
-        interestingOnly : Optional[bool]
+        interesting_only : Optional[bool]
             Prune uninteresting nodes from the tree. Defaults to `true`.
         root : Optional[ElementHandle]
             The root DOM element for the snapshot. Defaults to the whole page.
@@ -1858,7 +1861,7 @@ class Accessibility(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.snapshot(
-                interestingOnly=interestingOnly, root=mapping.to_impl(root)
+                interestingOnly=interesting_only, root=mapping.to_impl(root)
             )
         )
 
@@ -1895,8 +1898,8 @@ class FileChooser(AsyncBase):
         return mapping.from_impl(self._impl_obj.element)
 
     @property
-    def isMultiple(self) -> bool:
-        """FileChooser.isMultiple
+    def is_multiple(self) -> bool:
+        """FileChooser.is_multiple
 
         Returns whether this file chooser accepts multiple files.
 
@@ -1906,15 +1909,15 @@ class FileChooser(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.isMultiple)
 
-    async def setFiles(
+    async def set_files(
         self,
         files: typing.Union[
-            str, FilePayload, typing.List[str], typing.List[FilePayload]
+            str, "FilePayload", typing.List[str], typing.List["FilePayload"]
         ],
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
-        """FileChooser.setFiles
+        """FileChooser.set_files
 
         Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then
         they are resolved relative to the current working directory.
@@ -1922,15 +1925,15 @@ class FileChooser(AsyncBase):
 
         Parameters
         ----------
-        files : Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+        files : Union[str, Dict, List[str], List[Dict]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setFiles(
-                files=files, timeout=timeout, noWaitAfter=noWaitAfter
+                files=files, timeout=timeout, noWaitAfter=no_wait_after
             )
         )
 
@@ -1983,8 +1986,8 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def parentFrame(self) -> typing.Union["Frame", NoneType]:
-        """Frame.parentFrame
+    def parent_frame(self) -> typing.Union["Frame", NoneType]:
+        """Frame.parent_frame
 
         Parent frame, if any. Detached frames and main frames return `null`.
 
@@ -1995,8 +1998,8 @@ class Frame(AsyncBase):
         return mapping.from_impl_nullable(self._impl_obj.parentFrame)
 
     @property
-    def childFrames(self) -> typing.List["Frame"]:
-        """Frame.childFrames
+    def child_frames(self) -> typing.List["Frame"]:
+        """Frame.child_frames
 
         Returns
         -------
@@ -2008,7 +2011,7 @@ class Frame(AsyncBase):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None,
     ) -> typing.Union["Response", NoneType]:
         """Frame.goto
@@ -2038,7 +2041,7 @@ class Frame(AsyncBase):
             URL to navigate frame to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -2052,17 +2055,17 @@ class Frame(AsyncBase):
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.goto(
-                url=url, timeout=timeout, waitUntil=waitUntil, referer=referer
+                url=url, timeout=timeout, waitUntil=wait_until, referer=referer
             )
         )
 
-    async def waitForNavigation(
+    async def wait_for_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
-        """Frame.waitForNavigation
+        """Frame.wait_for_navigation
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
         last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
@@ -2076,7 +2079,7 @@ class Frame(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool], NoneType]
             URL string, URL regex pattern or predicate receiving URL to match while waiting for the navigation.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -2090,16 +2093,16 @@ class Frame(AsyncBase):
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForNavigation(
-                url=self._wrap_handler(url), waitUntil=waitUntil, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             )
         )
 
-    async def waitForLoadState(
+    async def wait_for_load_state(
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> NoneType:
-        """Frame.waitForLoadState
+        """Frame.wait_for_load_state
 
         Returns when the required load state has been reached.
         This resolves when the frame reaches a required load state, `load` by default. The navigation must have been committed
@@ -2119,8 +2122,8 @@ class Frame(AsyncBase):
             await self._impl_obj.waitForLoadState(state=state, timeout=timeout)
         )
 
-    async def frameElement(self) -> "ElementHandle":
-        """Frame.frameElement
+    async def frame_element(self) -> "ElementHandle":
+        """Frame.frame_element
 
         Returns the `frame` or `iframe` element handle which corresponds to this frame.
         This is an inverse of elementHandle.contentFrame(). Note that returned handle actually belongs to the parent frame.
@@ -2165,10 +2168,10 @@ class Frame(AsyncBase):
             )
         )
 
-    async def evaluateHandle(
+    async def evaluate_handle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
-        """Frame.evaluateHandle
+        """Frame.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
         The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page
@@ -2197,10 +2200,10 @@ class Frame(AsyncBase):
             )
         )
 
-    async def querySelector(
+    async def query_selector(
         self, selector: str
     ) -> typing.Union["ElementHandle", NoneType]:
-        """Frame.querySelector
+        """Frame.query_selector
 
         Returns the ElementHandle pointing to the frame element.
         The method finds an element matching the specified selector within the frame. See Working with
@@ -2220,8 +2223,8 @@ class Frame(AsyncBase):
             await self._impl_obj.querySelector(selector=selector)
         )
 
-    async def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
-        """Frame.querySelectorAll
+    async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
+        """Frame.query_selector_all
 
         Returns the ElementHandles pointing to the frame elements.
         The method finds all elements matching the specified selector within the frame. See Working with
@@ -2241,13 +2244,13 @@ class Frame(AsyncBase):
             await self._impl_obj.querySelectorAll(selector=selector)
         )
 
-    async def waitForSelector(
+    async def wait_for_selector(
         self,
         selector: str,
         timeout: int = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
-        """Frame.waitForSelector
+        """Frame.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or
         `detached`.
@@ -2279,14 +2282,14 @@ class Frame(AsyncBase):
             )
         )
 
-    async def dispatchEvent(
+    async def dispatch_event(
         self,
         selector: str,
         type: str,
-        eventInit: typing.Dict = None,
+        event_init: typing.Dict = None,
         timeout: int = None,
     ) -> NoneType:
-        """Frame.dispatchEvent
+        """Frame.dispatch_event
 
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
         is dispatched. This is equivalend to calling
@@ -2311,7 +2314,7 @@ class Frame(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        eventInit : Optional[Dict]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2320,19 +2323,19 @@ class Frame(AsyncBase):
             await self._impl_obj.dispatchEvent(
                 selector=selector,
                 type=type,
-                eventInit=mapping.to_impl(eventInit),
+                eventInit=mapping.to_impl(event_init),
                 timeout=timeout,
             )
         )
 
-    async def evalOnSelector(
+    async def eval_on_selector(
         self,
         selector: str,
         expression: str,
         arg: typing.Any = None,
         force_expr: bool = None,
     ) -> typing.Any:
-        """Frame.evalOnSelector
+        """Frame.eval_on_selector
 
         Returns the return value of `pageFunction`
         The method finds an element matching the specified selector within the frame and passes it as a first argument to
@@ -2365,14 +2368,14 @@ class Frame(AsyncBase):
             )
         )
 
-    async def evalOnSelectorAll(
+    async def eval_on_selector_all(
         self,
         selector: str,
         expression: str,
         arg: typing.Any = None,
         force_expr: bool = None,
     ) -> typing.Any:
-        """Frame.evalOnSelectorAll
+        """Frame.eval_on_selector_all
 
         Returns the return value of `pageFunction`
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements
@@ -2415,13 +2418,13 @@ class Frame(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.content())
 
-    async def setContent(
+    async def set_content(
         self,
         html: str,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> NoneType:
-        """Frame.setContent
+        """Frame.set_content
 
         Parameters
         ----------
@@ -2429,7 +2432,7 @@ class Frame(AsyncBase):
             HTML markup to assign to the page.
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -2437,12 +2440,12 @@ class Frame(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setContent(
-                html=html, timeout=timeout, waitUntil=waitUntil
+                html=html, timeout=timeout, waitUntil=wait_until
             )
         )
 
-    def isDetached(self) -> bool:
-        """Frame.isDetached
+    def is_detached(self) -> bool:
+        """Frame.is_detached
 
         Returns `true` if the frame has been detached, or `false` otherwise.
 
@@ -2452,14 +2455,14 @@ class Frame(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.isDetached())
 
-    async def addScriptTag(
+    async def add_script_tag(
         self,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
         content: str = None,
         type: str = None,
     ) -> "ElementHandle":
-        """Frame.addScriptTag
+        """Frame.add_script_tag
 
         Returns the added tag when the script's onload fires or when the script content was injected into frame.
         Adds a `<script>` tag into the page with the desired url or content.
@@ -2485,13 +2488,13 @@ class Frame(AsyncBase):
             )
         )
 
-    async def addStyleTag(
+    async def add_style_tag(
         self,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
         content: str = None,
     ) -> "ElementHandle":
-        """Frame.addStyleTag
+        """Frame.add_style_tag
 
         Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
@@ -2520,13 +2523,13 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
-        clickCount: int = None,
+        click_count: int = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.click
 
@@ -2547,19 +2550,19 @@ class Frame(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
-        clickCount : Optional[int]
+        click_count : Optional[int]
             defaults to 1. See UIEvent.detail.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -2569,10 +2572,10 @@ class Frame(AsyncBase):
                 position=position,
                 delay=delay,
                 button=button,
-                clickCount=clickCount,
+                clickCount=click_count,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2582,12 +2585,12 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.dblclick
 
@@ -2610,7 +2613,7 @@ class Frame(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
@@ -2620,7 +2623,7 @@ class Frame(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -2632,7 +2635,7 @@ class Frame(AsyncBase):
                 button=button,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2642,10 +2645,10 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.tap
 
@@ -2668,13 +2671,13 @@ class Frame(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -2684,12 +2687,12 @@ class Frame(AsyncBase):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
     async def fill(
-        self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None
+        self, selector: str, value: str, timeout: int = None, no_wait_after: bool = None
     ) -> NoneType:
         """Frame.fill
 
@@ -2707,12 +2710,15 @@ class Frame(AsyncBase):
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.fill(
-                selector=selector, value=value, timeout=timeout, noWaitAfter=noWaitAfter
+                selector=selector,
+                value=value,
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2733,10 +2739,10 @@ class Frame(AsyncBase):
             await self._impl_obj.focus(selector=selector, timeout=timeout)
         )
 
-    async def textContent(
+    async def text_content(
         self, selector: str, timeout: int = None
     ) -> typing.Union[str, NoneType]:
-        """Frame.textContent
+        """Frame.text_content
 
         Resolves to the `element.textContent`.
 
@@ -2755,8 +2761,8 @@ class Frame(AsyncBase):
             await self._impl_obj.textContent(selector=selector, timeout=timeout)
         )
 
-    async def innerText(self, selector: str, timeout: int = None) -> str:
-        """Frame.innerText
+    async def inner_text(self, selector: str, timeout: int = None) -> str:
+        """Frame.inner_text
 
         Resolves to the `element.innerText`.
 
@@ -2775,8 +2781,8 @@ class Frame(AsyncBase):
             await self._impl_obj.innerText(selector=selector, timeout=timeout)
         )
 
-    async def innerHTML(self, selector: str, timeout: int = None) -> str:
-        """Frame.innerHTML
+    async def inner_html(self, selector: str, timeout: int = None) -> str:
+        """Frame.inner_html
 
         Resolves to the `element.innerHTML`.
 
@@ -2795,10 +2801,10 @@ class Frame(AsyncBase):
             await self._impl_obj.innerHTML(selector=selector, timeout=timeout)
         )
 
-    async def getAttribute(
+    async def get_attribute(
         self, selector: str, name: str, timeout: int = None
     ) -> typing.Union[str, NoneType]:
-        """Frame.getAttribute
+        """Frame.get_attribute
 
         Returns element attribute value.
 
@@ -2827,7 +2833,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -2850,7 +2856,7 @@ class Frame(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -2867,21 +2873,21 @@ class Frame(AsyncBase):
             )
         )
 
-    async def selectOption(
+    async def select_option(
         self,
         selector: str,
         values: typing.Union[
             str,
             "ElementHandle",
-            SelectOption,
+            "OptionSelector",
             typing.List[str],
             typing.List["ElementHandle"],
-            typing.List[SelectOption],
+            typing.List["OptionSelector"],
         ] = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> typing.List[str]:
-        """Frame.selectOption
+        """Frame.select_option
 
         Returns the array of option values that have been successfully selected.
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
@@ -2891,11 +2897,11 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for. See working with selectors for more details.
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 
         Returns
@@ -2907,25 +2913,25 @@ class Frame(AsyncBase):
                 selector=selector,
                 values=mapping.to_impl(values),
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
-    async def setInputFiles(
+    async def set_input_files(
         self,
         selector: str,
         files: typing.Union[
             str,
             pathlib.Path,
-            FilePayload,
+            "FilePayload",
             typing.List[str],
             typing.List[pathlib.Path],
-            typing.List[FilePayload],
+            typing.List["FilePayload"],
         ],
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
-        """Frame.setInputFiles
+        """Frame.set_input_files
 
         This method expects `selector` to point to an input
         element.
@@ -2937,15 +2943,18 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
-        files : Union[str, pathlib.Path, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[pathlib.Path], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+        files : Union[str, pathlib.Path, Dict, List[str], List[pathlib.Path], List[Dict]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setInputFiles(
-                selector=selector, files=files, timeout=timeout, noWaitAfter=noWaitAfter
+                selector=selector,
+                files=files,
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2955,7 +2964,7 @@ class Frame(AsyncBase):
         text: str,
         delay: int = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.type
 
@@ -2973,7 +2982,7 @@ class Frame(AsyncBase):
             Time to wait between key presses in milliseconds. Defaults to 0.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -2982,7 +2991,7 @@ class Frame(AsyncBase):
                 text=text,
                 delay=delay,
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2992,7 +3001,7 @@ class Frame(AsyncBase):
         key: str,
         delay: int = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.press
 
@@ -3018,7 +3027,7 @@ class Frame(AsyncBase):
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -3027,7 +3036,7 @@ class Frame(AsyncBase):
                 key=key,
                 delay=delay,
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -3036,7 +3045,7 @@ class Frame(AsyncBase):
         selector: str,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.check
 
@@ -3061,12 +3070,15 @@ class Frame(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.check(
-                selector=selector, timeout=timeout, force=force, noWaitAfter=noWaitAfter
+                selector=selector,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -3075,7 +3087,7 @@ class Frame(AsyncBase):
         selector: str,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Frame.uncheck
 
@@ -3100,17 +3112,20 @@ class Frame(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.uncheck(
-                selector=selector, timeout=timeout, force=force, noWaitAfter=noWaitAfter
+                selector=selector,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=no_wait_after,
             )
         )
 
-    async def waitForTimeout(self, timeout: int) -> NoneType:
-        """Frame.waitForTimeout
+    async def wait_for_timeout(self, timeout: int) -> NoneType:
+        """Frame.wait_for_timeout
 
         Returns a promise that resolves after the timeout.
         Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
@@ -3125,7 +3140,7 @@ class Frame(AsyncBase):
             await self._impl_obj.waitForTimeout(timeout=timeout)
         )
 
-    async def waitForFunction(
+    async def wait_for_function(
         self,
         expression: str,
         arg: typing.Any = None,
@@ -3133,7 +3148,7 @@ class Frame(AsyncBase):
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
-        """Frame.waitForFunction
+        """Frame.wait_for_function
 
         Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
@@ -3207,7 +3222,7 @@ class Frame(AsyncBase):
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
         """Frame.expect_navigation
@@ -3230,7 +3245,7 @@ class Frame(AsyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self._impl_obj.waitForNavigation(url, wait_until, timeout)
         )
 
 
@@ -3282,10 +3297,10 @@ class Worker(AsyncBase):
             )
         )
 
-    async def evaluateHandle(
+    async def evaluate_handle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
-        """Worker.evaluateHandle
+        """Worker.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
         The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns
@@ -3325,7 +3340,7 @@ class Selectors(AsyncBase):
         name: str,
         source: str = None,
         path: typing.Union[str, pathlib.Path] = None,
-        contentScript: bool = None,
+        content_script: bool = None,
     ) -> NoneType:
         """Selectors.register
 
@@ -3337,12 +3352,12 @@ class Selectors(AsyncBase):
             Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only contain `[a-zA-Z0-9_]` characters.
         source : Optional[str]
             Script that evaluates to a selector engine instance.
-        contentScript : Optional[bool]
+        content_script : Optional[bool]
             Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not guaranteed when this engine is used together with other registered engines.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.register(
-                name=name, source=source, path=path, contentScript=contentScript
+                name=name, source=source, path=path, contentScript=content_script
             )
         )
 
@@ -3389,14 +3404,14 @@ class ConsoleMessage(AsyncBase):
         return mapping.from_impl_list(self._impl_obj.args)
 
     @property
-    def location(self) -> ConsoleMessageLocation:
+    def location(self) -> "SourceLocation":
         """ConsoleMessage.location
 
         Returns
         -------
         {"url": str, "lineNumber": int, "columnNumber": int}
         """
-        return mapping.from_maybe_impl(self._impl_obj.location)
+        return mapping.from_impl(self._impl_obj.location)
 
 
 mapping.register(ConsoleMessageImpl, ConsoleMessage)
@@ -3431,8 +3446,8 @@ class Dialog(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.message)
 
     @property
-    def defaultValue(self) -> str:
-        """Dialog.defaultValue
+    def default_value(self) -> str:
+        """Dialog.default_value
 
         If dialog is prompt, returns default prompt value. Otherwise, returns empty string.
 
@@ -3442,18 +3457,18 @@ class Dialog(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.defaultValue)
 
-    async def accept(self, promptText: str = None) -> NoneType:
+    async def accept(self, prompt_text: str = None) -> NoneType:
         """Dialog.accept
 
         Returns when the dialog has been accepted.
 
         Parameters
         ----------
-        promptText : Optional[str]
+        prompt_text : Optional[str]
             A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.accept(promptText=promptText)
+            await self._impl_obj.accept(promptText=prompt_text)
         )
 
     async def dismiss(self) -> NoneType:
@@ -3484,8 +3499,8 @@ class Download(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def suggestedFilename(self) -> str:
-        """Download.suggestedFilename
+    def suggested_filename(self) -> str:
+        """Download.suggested_filename
 
         Returns suggested filename for this download. It is typically computed by the browser from the
         `Content-Disposition` response header
@@ -3527,8 +3542,8 @@ class Download(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.path())
 
-    async def saveAs(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
-        """Download.saveAs
+    async def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
+        """Download.save_as
 
         Saves the download to a user-specified path.
 
@@ -3633,8 +3648,8 @@ class Page(AsyncBase):
         return mapping.from_impl(self._impl_obj.context)
 
     @property
-    def mainFrame(self) -> "Frame":
-        """Page.mainFrame
+    def main_frame(self) -> "Frame":
+        """Page.main_frame
 
         The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
 
@@ -3731,8 +3746,8 @@ class Page(AsyncBase):
             self._impl_obj.frame(name=name, url=self._wrap_handler(url))
         )
 
-    def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
-        """Page.setDefaultNavigationTimeout
+    def set_default_navigation_timeout(self, timeout: int) -> NoneType:
+        """Page.set_default_navigation_timeout
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
 
@@ -3755,8 +3770,8 @@ class Page(AsyncBase):
             self._impl_obj.setDefaultNavigationTimeout(timeout=timeout)
         )
 
-    def setDefaultTimeout(self, timeout: int) -> NoneType:
-        """Page.setDefaultTimeout
+    def set_default_timeout(self, timeout: int) -> NoneType:
+        """Page.set_default_timeout
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
@@ -3771,10 +3786,10 @@ class Page(AsyncBase):
             self._impl_obj.setDefaultTimeout(timeout=timeout)
         )
 
-    async def querySelector(
+    async def query_selector(
         self, selector: str
     ) -> typing.Union["ElementHandle", NoneType]:
-        """Page.querySelector
+        """Page.query_selector
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `null`.
@@ -3793,8 +3808,8 @@ class Page(AsyncBase):
             await self._impl_obj.querySelector(selector=selector)
         )
 
-    async def querySelectorAll(self, selector: str) -> typing.List["ElementHandle"]:
-        """Page.querySelectorAll
+    async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
+        """Page.query_selector_all
 
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `[]`.
@@ -3813,13 +3828,13 @@ class Page(AsyncBase):
             await self._impl_obj.querySelectorAll(selector=selector)
         )
 
-    async def waitForSelector(
+    async def wait_for_selector(
         self,
         selector: str,
         timeout: int = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> typing.Union["ElementHandle", NoneType]:
-        """Page.waitForSelector
+        """Page.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Resolves to `null` if waiting for `hidden` or
         `detached`.
@@ -3851,14 +3866,14 @@ class Page(AsyncBase):
             )
         )
 
-    async def dispatchEvent(
+    async def dispatch_event(
         self,
         selector: str,
         type: str,
-        eventInit: typing.Dict = None,
+        event_init: typing.Dict = None,
         timeout: int = None,
     ) -> NoneType:
-        """Page.dispatchEvent
+        """Page.dispatch_event
 
         The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
         is dispatched. This is equivalend to calling
@@ -3883,7 +3898,7 @@ class Page(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        eventInit : Optional[Dict]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -3892,7 +3907,7 @@ class Page(AsyncBase):
             await self._impl_obj.dispatchEvent(
                 selector=selector,
                 type=type,
-                eventInit=mapping.to_impl(eventInit),
+                eventInit=mapping.to_impl(event_init),
                 timeout=timeout,
             )
         )
@@ -3932,10 +3947,10 @@ class Page(AsyncBase):
             )
         )
 
-    async def evaluateHandle(
+    async def evaluate_handle(
         self, expression: str, arg: typing.Any = None, force_expr: bool = None
     ) -> "JSHandle":
-        """Page.evaluateHandle
+        """Page.evaluate_handle
 
         Returns the value of the `pageFunction` invacation as in-page object (JSHandle).
         The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page
@@ -3964,14 +3979,14 @@ class Page(AsyncBase):
             )
         )
 
-    async def evalOnSelector(
+    async def eval_on_selector(
         self,
         selector: str,
         expression: str,
         arg: typing.Any = None,
         force_expr: bool = None,
     ) -> typing.Any:
-        """Page.evalOnSelector
+        """Page.eval_on_selector
 
         The method finds an element matching the specified selector within the page and passes it as a first argument to
         `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
@@ -4003,14 +4018,14 @@ class Page(AsyncBase):
             )
         )
 
-    async def evalOnSelectorAll(
+    async def eval_on_selector_all(
         self,
         selector: str,
         expression: str,
         arg: typing.Any = None,
         force_expr: bool = None,
     ) -> typing.Any:
-        """Page.evalOnSelectorAll
+        """Page.eval_on_selector_all
 
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as
         a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
@@ -4041,14 +4056,14 @@ class Page(AsyncBase):
             )
         )
 
-    async def addScriptTag(
+    async def add_script_tag(
         self,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
         content: str = None,
         type: str = None,
     ) -> "ElementHandle":
-        """Page.addScriptTag
+        """Page.add_script_tag
 
         Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
         fires or when the script content was injected into frame.
@@ -4075,13 +4090,13 @@ class Page(AsyncBase):
             )
         )
 
-    async def addStyleTag(
+    async def add_style_tag(
         self,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
         content: str = None,
     ) -> "ElementHandle":
-        """Page.addStyleTag
+        """Page.add_style_tag
 
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
         content. Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
@@ -4104,8 +4119,8 @@ class Page(AsyncBase):
             await self._impl_obj.addStyleTag(url=url, path=path, content=content)
         )
 
-    async def exposeFunction(self, name: str, binding: typing.Callable) -> NoneType:
-        """Page.exposeFunction
+    async def expose_function(self, name: str, binding: typing.Callable) -> NoneType:
+        """Page.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in the page. When called, the function
         executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of
@@ -4132,10 +4147,10 @@ class Page(AsyncBase):
             )
         )
 
-    async def exposeBinding(
+    async def expose_binding(
         self, name: str, binding: typing.Callable, handle: bool = None
     ) -> NoneType:
-        """Page.exposeBinding
+        """Page.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in this page. When called, the function
         executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of
@@ -4164,8 +4179,8 @@ class Page(AsyncBase):
             )
         )
 
-    async def setExtraHTTPHeaders(self, headers: typing.Dict[str, str]) -> NoneType:
-        """Page.setExtraHTTPHeaders
+    async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
+        """Page.set_extra_http_headers
 
         The extra HTTP headers will be sent with every request the page initiates.
 
@@ -4191,13 +4206,13 @@ class Page(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.content())
 
-    async def setContent(
+    async def set_content(
         self,
         html: str,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> NoneType:
-        """Page.setContent
+        """Page.set_content
 
         Parameters
         ----------
@@ -4205,7 +4220,7 @@ class Page(AsyncBase):
             HTML markup to assign to the page.
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -4213,7 +4228,7 @@ class Page(AsyncBase):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setContent(
-                html=html, timeout=timeout, waitUntil=waitUntil
+                html=html, timeout=timeout, waitUntil=wait_until
             )
         )
 
@@ -4221,7 +4236,7 @@ class Page(AsyncBase):
         self,
         url: str,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.goto
@@ -4253,7 +4268,7 @@ class Page(AsyncBase):
             URL to navigate page to. The url should include scheme, e.g. `https://`.
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -4267,14 +4282,14 @@ class Page(AsyncBase):
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.goto(
-                url=url, timeout=timeout, waitUntil=waitUntil, referer=referer
+                url=url, timeout=timeout, waitUntil=wait_until, referer=referer
             )
         )
 
     async def reload(
         self,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
         """Page.reload
 
@@ -4285,7 +4300,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -4296,15 +4311,15 @@ class Page(AsyncBase):
         Optional[Response]
         """
         return mapping.from_impl_nullable(
-            await self._impl_obj.reload(timeout=timeout, waitUntil=waitUntil)
+            await self._impl_obj.reload(timeout=timeout, waitUntil=wait_until)
         )
 
-    async def waitForLoadState(
+    async def wait_for_load_state(
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> NoneType:
-        """Page.waitForLoadState
+        """Page.wait_for_load_state
 
         Returns when the required load state has been reached.
         This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
@@ -4325,13 +4340,13 @@ class Page(AsyncBase):
             await self._impl_obj.waitForLoadState(state=state, timeout=timeout)
         )
 
-    async def waitForNavigation(
+    async def wait_for_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> typing.Union["Response", NoneType]:
-        """Page.waitForNavigation
+        """Page.wait_for_navigation
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
         last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
@@ -4347,7 +4362,7 @@ class Page(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool], NoneType]
             A glob pattern, regex pattern or predicate receiving URL to match while waiting for the navigation.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -4361,17 +4376,17 @@ class Page(AsyncBase):
         """
         return mapping.from_impl_nullable(
             await self._impl_obj.waitForNavigation(
-                url=self._wrap_handler(url), waitUntil=waitUntil, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             )
         )
 
-    async def waitForRequest(
+    async def wait_for_request(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         predicate: typing.Union[typing.Callable[["Request"], bool]] = None,
         timeout: int = None,
     ) -> "Request":
-        """Page.waitForRequest
+        """Page.wait_for_request
 
         Returns promise that resolves to the matched request.
 
@@ -4394,13 +4409,13 @@ class Page(AsyncBase):
             )
         )
 
-    async def waitForResponse(
+    async def wait_for_response(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         predicate: typing.Union[typing.Callable[["Response"], bool]] = None,
         timeout: int = None,
     ) -> "Response":
-        """Page.waitForResponse
+        """Page.wait_for_response
 
         Returns the matched response.
 
@@ -4423,13 +4438,13 @@ class Page(AsyncBase):
             )
         )
 
-    async def waitForEvent(
+    async def wait_for_event(
         self,
         event: str,
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -> typing.Any:
-        """Page.waitForEvent
+        """Page.wait_for_event
 
         Returns the event data value.
         Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
@@ -4450,12 +4465,12 @@ class Page(AsyncBase):
             )
         )
 
-    async def goBack(
+    async def go_back(
         self,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
-        """Page.goBack
+        """Page.go_back
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
         last redirect. If can not go back, resolves to `null`.
@@ -4465,7 +4480,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -4476,15 +4491,15 @@ class Page(AsyncBase):
         Optional[Response]
         """
         return mapping.from_impl_nullable(
-            await self._impl_obj.goBack(timeout=timeout, waitUntil=waitUntil)
+            await self._impl_obj.goBack(timeout=timeout, waitUntil=wait_until)
         )
 
-    async def goForward(
+    async def go_forward(
         self,
         timeout: int = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
     ) -> typing.Union["Response", NoneType]:
-        """Page.goForward
+        """Page.go_forward
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
         last redirect. If can not go forward, resolves to `null`.
@@ -4494,7 +4509,7 @@ class Page(AsyncBase):
         ----------
         timeout : Optional[int]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultNavigationTimeout(timeout), browserContext.setDefaultTimeout(timeout), page.setDefaultNavigationTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        waitUntil : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
+        wait_until : Optional[Literal['domcontentloaded', 'load', 'networkidle']]
             When to consider operation succeeded, defaults to `load`. Events can be either:
              - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
              - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -4505,30 +4520,30 @@ class Page(AsyncBase):
         Optional[Response]
         """
         return mapping.from_impl_nullable(
-            await self._impl_obj.goForward(timeout=timeout, waitUntil=waitUntil)
+            await self._impl_obj.goForward(timeout=timeout, waitUntil=wait_until)
         )
 
-    async def emulateMedia(
+    async def emulate_media(
         self,
         media: Literal["print", "screen"] = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
+        color_scheme: Literal["dark", "light", "no-preference"] = None,
     ) -> NoneType:
-        """Page.emulateMedia
+        """Page.emulate_media
 
 
         Parameters
         ----------
         media : Optional[Literal['print', 'screen']]
             Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null` disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value.
-        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
+        color_scheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated value.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.emulateMedia(media=media, colorScheme=colorScheme)
+            await self._impl_obj.emulateMedia(media=media, colorScheme=color_scheme)
         )
 
-    async def setViewportSize(self, width: int, height: int) -> NoneType:
-        """Page.setViewportSize
+    async def set_viewport_size(self, width: int, height: int) -> NoneType:
+        """Page.set_viewport_size
 
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
         browser.newContext([options]) allows to set viewport size (and more) for all pages in the context at once.
@@ -4546,26 +4561,26 @@ class Page(AsyncBase):
             await self._impl_obj.setViewportSize(width=width, height=height)
         )
 
-    def viewportSize(self) -> typing.Union[IntSize, NoneType]:
-        """Page.viewportSize
+    def viewport_size(self) -> typing.Union[typing.Tuple[int, int], NoneType]:
+        """Page.viewport_size
 
         Returns
         -------
-        Optional[{"width": int, "height": int}]
+        Optional[typing.Tuple[int, int]]
         """
         return mapping.from_maybe_impl(self._impl_obj.viewportSize())
 
-    async def bringToFront(self) -> NoneType:
-        """Page.bringToFront
+    async def bring_to_front(self) -> NoneType:
+        """Page.bring_to_front
 
         Brings page to front (activates tab).
         """
         return mapping.from_maybe_impl(await self._impl_obj.bringToFront())
 
-    async def addInitScript(
+    async def add_init_script(
         self, source: str = None, path: typing.Union[str, pathlib.Path] = None
     ) -> NoneType:
-        """Page.addInitScript
+        """Page.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
 
@@ -4648,9 +4663,9 @@ class Page(AsyncBase):
         type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
-        omitBackground: bool = None,
-        fullPage: bool = None,
-        clip: FloatRect = None,
+        omit_background: bool = None,
+        full_page: bool = None,
+        clip: "FloatRect" = None,
     ) -> bytes:
         """Page.screenshot
 
@@ -4669,9 +4684,9 @@ class Page(AsyncBase):
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, the image won't be saved to the disk.
         quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omitBackground : Optional[bool]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
-        fullPage : Optional[bool]
+        full_page : Optional[bool]
             When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to `false`.
         clip : Optional[{"x": float, "y": float, "width": float, "height": float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
@@ -4686,8 +4701,8 @@ class Page(AsyncBase):
                 type=type,
                 path=path,
                 quality=quality,
-                omitBackground=omitBackground,
-                fullPage=fullPage,
+                omitBackground=omit_background,
+                fullPage=full_page,
                 clip=clip,
             )
         )
@@ -4703,7 +4718,7 @@ class Page(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.title())
 
-    async def close(self, runBeforeUnload: bool = None) -> NoneType:
+    async def close(self, run_before_unload: bool = None) -> NoneType:
         """Page.close
 
         If `runBeforeUnload` is `false` the result will resolve only after the page has been closed. If `runBeforeUnload` is
@@ -4715,15 +4730,15 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        runBeforeUnload : Optional[bool]
+        run_before_unload : Optional[bool]
             Defaults to `false`. Whether to run the before unload page handlers.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.close(runBeforeUnload=runBeforeUnload)
+            await self._impl_obj.close(runBeforeUnload=run_before_unload)
         )
 
-    def isClosed(self) -> bool:
-        """Page.isClosed
+    def is_closed(self) -> bool:
+        """Page.is_closed
 
         Indicates that the page has been closed.
 
@@ -4739,13 +4754,13 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
-        clickCount: int = None,
+        click_count: int = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.click
 
@@ -4767,19 +4782,19 @@ class Page(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Optional[Literal['left', 'middle', 'right']]
             Defaults to `left`.
-        clickCount : Optional[int]
+        click_count : Optional[int]
             defaults to 1. See UIEvent.detail.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -4789,10 +4804,10 @@ class Page(AsyncBase):
                 position=position,
                 delay=delay,
                 button=button,
-                clickCount=clickCount,
+                clickCount=click_count,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -4802,12 +4817,12 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         delay: int = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.dblclick
 
@@ -4832,7 +4847,7 @@ class Page(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         delay : Optional[int]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
@@ -4842,7 +4857,7 @@ class Page(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -4854,7 +4869,7 @@ class Page(AsyncBase):
                 button=button,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -4864,10 +4879,10 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.tap
 
@@ -4892,13 +4907,13 @@ class Page(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -4908,12 +4923,12 @@ class Page(AsyncBase):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
     async def fill(
-        self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None
+        self, selector: str, value: str, timeout: int = None, no_wait_after: bool = None
     ) -> NoneType:
         """Page.fill
 
@@ -4932,12 +4947,15 @@ class Page(AsyncBase):
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.fill(
-                selector=selector, value=value, timeout=timeout, noWaitAfter=noWaitAfter
+                selector=selector,
+                value=value,
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -4959,10 +4977,10 @@ class Page(AsyncBase):
             await self._impl_obj.focus(selector=selector, timeout=timeout)
         )
 
-    async def textContent(
+    async def text_content(
         self, selector: str, timeout: int = None
     ) -> typing.Union[str, NoneType]:
-        """Page.textContent
+        """Page.text_content
 
         Returns `element.textContent`.
 
@@ -4981,8 +4999,8 @@ class Page(AsyncBase):
             await self._impl_obj.textContent(selector=selector, timeout=timeout)
         )
 
-    async def innerText(self, selector: str, timeout: int = None) -> str:
-        """Page.innerText
+    async def inner_text(self, selector: str, timeout: int = None) -> str:
+        """Page.inner_text
 
         Returns `element.innerText`.
 
@@ -5001,8 +5019,8 @@ class Page(AsyncBase):
             await self._impl_obj.innerText(selector=selector, timeout=timeout)
         )
 
-    async def innerHTML(self, selector: str, timeout: int = None) -> str:
-        """Page.innerHTML
+    async def inner_html(self, selector: str, timeout: int = None) -> str:
+        """Page.inner_html
 
         Returns `element.innerHTML`.
 
@@ -5021,10 +5039,10 @@ class Page(AsyncBase):
             await self._impl_obj.innerHTML(selector=selector, timeout=timeout)
         )
 
-    async def getAttribute(
+    async def get_attribute(
         self, selector: str, name: str, timeout: int = None
     ) -> typing.Union[str, NoneType]:
-        """Page.getAttribute
+        """Page.get_attribute
 
         Returns element attribute value.
 
@@ -5053,7 +5071,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: MousePosition = None,
+        position: typing.Union[typing.Tuple[float, float]] = None,
         timeout: int = None,
         force: bool = None,
     ) -> NoneType:
@@ -5077,7 +5095,7 @@ class Page(AsyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
         modifiers : Optional[List[Literal['Alt', 'Control', 'Meta', 'Shift']]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current modifiers back. If not specified, currently pressed modifiers are used.
-        position : Optional[{"x": float, "y": float}]
+        position : Optional[typing.Tuple[float, float]]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
@@ -5094,21 +5112,21 @@ class Page(AsyncBase):
             )
         )
 
-    async def selectOption(
+    async def select_option(
         self,
         selector: str,
         values: typing.Union[
             str,
             "ElementHandle",
-            SelectOption,
+            "OptionSelector",
             typing.List[str],
             typing.List["ElementHandle"],
-            typing.List[SelectOption],
+            typing.List["OptionSelector"],
         ] = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> typing.List[str]:
-        """Page.selectOption
+        """Page.select_option
 
         Returns the array of option values that have been successfully selected.
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
@@ -5120,11 +5138,11 @@ class Page(AsyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[str]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[str]}], NoneType]
+        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
             Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 
         Returns
@@ -5136,20 +5154,20 @@ class Page(AsyncBase):
                 selector=selector,
                 values=mapping.to_impl(values),
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
-    async def setInputFiles(
+    async def set_input_files(
         self,
         selector: str,
         files: typing.Union[
-            str, FilePayload, typing.List[str], typing.List[FilePayload]
+            str, "FilePayload", typing.List[str], typing.List["FilePayload"]
         ],
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
-        """Page.setInputFiles
+        """Page.set_input_files
 
         This method expects `selector` to point to an input
         element.
@@ -5161,15 +5179,18 @@ class Page(AsyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
-        files : Union[str, {"name": str, "mimeType": str, "buffer": bytes}, List[str], List[{"name": str, "mimeType": str, "buffer": bytes}]]
+        files : Union[str, Dict, List[str], List[Dict]]
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.setInputFiles(
-                selector=selector, files=files, timeout=timeout, noWaitAfter=noWaitAfter
+                selector=selector,
+                files=files,
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -5179,7 +5200,7 @@ class Page(AsyncBase):
         text: str,
         delay: int = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.type
 
@@ -5198,7 +5219,7 @@ class Page(AsyncBase):
             Time to wait between key presses in milliseconds. Defaults to 0.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -5207,7 +5228,7 @@ class Page(AsyncBase):
                 text=text,
                 delay=delay,
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -5217,7 +5238,7 @@ class Page(AsyncBase):
         key: str,
         delay: int = None,
         timeout: int = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.press
 
@@ -5244,7 +5265,7 @@ class Page(AsyncBase):
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
@@ -5253,7 +5274,7 @@ class Page(AsyncBase):
                 key=key,
                 delay=delay,
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -5262,7 +5283,7 @@ class Page(AsyncBase):
         selector: str,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.check
 
@@ -5288,12 +5309,15 @@ class Page(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.check(
-                selector=selector, timeout=timeout, force=force, noWaitAfter=noWaitAfter
+                selector=selector,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -5302,7 +5326,7 @@ class Page(AsyncBase):
         selector: str,
         timeout: int = None,
         force: bool = None,
-        noWaitAfter: bool = None,
+        no_wait_after: bool = None,
     ) -> NoneType:
         """Page.uncheck
 
@@ -5328,17 +5352,20 @@ class Page(AsyncBase):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         force : Optional[bool]
             Whether to bypass the actionability checks. Defaults to `false`.
-        noWaitAfter : Optional[bool]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.uncheck(
-                selector=selector, timeout=timeout, force=force, noWaitAfter=noWaitAfter
+                selector=selector,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=no_wait_after,
             )
         )
 
-    async def waitForTimeout(self, timeout: int) -> NoneType:
-        """Page.waitForTimeout
+    async def wait_for_timeout(self, timeout: int) -> NoneType:
+        """Page.wait_for_timeout
 
         Returns a promise that resolves after the timeout.
         Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
@@ -5354,7 +5381,7 @@ class Page(AsyncBase):
             await self._impl_obj.waitForTimeout(timeout=timeout)
         )
 
-    async def waitForFunction(
+    async def wait_for_function(
         self,
         expression: str,
         arg: typing.Any = None,
@@ -5362,7 +5389,7 @@ class Page(AsyncBase):
         timeout: int = None,
         polling: typing.Union[int, Literal["raf"]] = None,
     ) -> "JSHandle":
-        """Page.waitForFunction
+        """Page.wait_for_function
 
         Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
@@ -5400,17 +5427,17 @@ class Page(AsyncBase):
     async def pdf(
         self,
         scale: int = None,
-        displayHeaderFooter: bool = None,
-        headerTemplate: str = None,
-        footerTemplate: str = None,
-        printBackground: bool = None,
+        display_header_footer: bool = None,
+        header_template: str = None,
+        footer_template: str = None,
+        print_background: bool = None,
         landscape: bool = None,
-        pageRanges: str = None,
+        page_ranges: str = None,
         format: str = None,
         width: typing.Union[str, float] = None,
         height: typing.Union[str, float] = None,
-        preferCSSPageSize: bool = None,
-        margin: PdfMargins = None,
+        prefer_css_page_size: bool = None,
+        margin: "PdfMargins" = None,
         path: typing.Union[str, pathlib.Path] = None,
     ) -> bytes:
         """Page.pdf
@@ -5463,22 +5490,22 @@ class Page(AsyncBase):
         ----------
         scale : Optional[int]
             Scale of the webpage rendering. Defaults to `1`. Scale amount must be between 0.1 and 2.
-        displayHeaderFooter : Optional[bool]
+        display_header_footer : Optional[bool]
             Display header and footer. Defaults to `false`.
-        headerTemplate : Optional[str]
+        header_template : Optional[str]
             HTML template for the print header. Should be valid HTML markup with following classes used to inject printing values into them:
              - `'date'` formatted print date
              - `'title'` document title
              - `'url'` document location
              - `'pageNumber'` current page number
              - `'totalPages'` total pages in the document
-        footerTemplate : Optional[str]
+        footer_template : Optional[str]
             HTML template for the print footer. Should use the same format as the `headerTemplate`.
-        printBackground : Optional[bool]
+        print_background : Optional[bool]
             Print background graphics. Defaults to `false`.
         landscape : Optional[bool]
             Paper orientation. Defaults to `false`.
-        pageRanges : Optional[str]
+        page_ranges : Optional[str]
             Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
         format : Optional[str]
             Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
@@ -5486,7 +5513,7 @@ class Page(AsyncBase):
             Paper width, accepts values labeled with units.
         height : Union[str, float, NoneType]
             Paper height, accepts values labeled with units.
-        preferCSSPageSize : Optional[bool]
+        prefer_css_page_size : Optional[bool]
             Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
         margin : Optional[{"top": Union[str, int, NoneType], "right": Union[str, int, NoneType], "bottom": Union[str, int, NoneType], "left": Union[str, int, NoneType]}]
             Paper margins, defaults to none.
@@ -5500,16 +5527,16 @@ class Page(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.pdf(
                 scale=scale,
-                displayHeaderFooter=displayHeaderFooter,
-                headerTemplate=headerTemplate,
-                footerTemplate=footerTemplate,
-                printBackground=printBackground,
+                displayHeaderFooter=display_header_footer,
+                headerTemplate=header_template,
+                footerTemplate=footer_template,
+                printBackground=print_background,
                 landscape=landscape,
-                pageRanges=pageRanges,
+                pageRanges=page_ranges,
                 format=format,
                 width=width,
                 height=height,
-                preferCSSPageSize=preferCSSPageSize,
+                preferCSSPageSize=prefer_css_page_size,
                 margin=margin,
                 path=path,
             )
@@ -5689,7 +5716,7 @@ class Page(AsyncBase):
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        waitUntil: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: int = None,
     ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
         """Page.expect_navigation
@@ -5712,7 +5739,7 @@ class Page(AsyncBase):
             page.setDefaultTimeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForNavigation(url, waitUntil, timeout)
+            self._impl_obj.waitForNavigation(url, wait_until, timeout)
         )
 
     def expect_popup(
@@ -5864,8 +5891,8 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_impl_nullable(self._impl_obj.browser)
 
-    def setDefaultNavigationTimeout(self, timeout: int) -> NoneType:
-        """BrowserContext.setDefaultNavigationTimeout
+    def set_default_navigation_timeout(self, timeout: int) -> NoneType:
+        """BrowserContext.set_default_navigation_timeout
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
 
@@ -5888,8 +5915,8 @@ class BrowserContext(AsyncBase):
             self._impl_obj.setDefaultNavigationTimeout(timeout=timeout)
         )
 
-    def setDefaultTimeout(self, timeout: int) -> NoneType:
-        """BrowserContext.setDefaultTimeout
+    def set_default_timeout(self, timeout: int) -> NoneType:
+        """BrowserContext.set_default_timeout
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
@@ -5905,8 +5932,8 @@ class BrowserContext(AsyncBase):
             self._impl_obj.setDefaultTimeout(timeout=timeout)
         )
 
-    async def newPage(self) -> "Page":
-        """BrowserContext.newPage
+    async def new_page(self) -> "Page":
+        """BrowserContext.new_page
 
         Creates a new page in the browser context.
 
@@ -5918,7 +5945,7 @@ class BrowserContext(AsyncBase):
 
     async def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
-    ) -> typing.List[Cookie]:
+    ) -> typing.List["Cookie"]:
         """BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -5933,10 +5960,10 @@ class BrowserContext(AsyncBase):
         -------
         List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]
         """
-        return mapping.from_maybe_impl(await self._impl_obj.cookies(urls=urls))
+        return mapping.from_impl_list(await self._impl_obj.cookies(urls=urls))
 
-    async def addCookies(self, cookies: typing.List[Cookie]) -> NoneType:
-        """BrowserContext.addCookies
+    async def add_cookies(self, cookies: typing.List["Cookie"]) -> NoneType:
+        """BrowserContext.add_cookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
         obtained via browserContext.cookies([urls]).
@@ -5947,17 +5974,17 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.addCookies(cookies=cookies))
 
-    async def clearCookies(self) -> NoneType:
-        """BrowserContext.clearCookies
+    async def clear_cookies(self) -> NoneType:
+        """BrowserContext.clear_cookies
 
         Clears context cookies.
         """
         return mapping.from_maybe_impl(await self._impl_obj.clearCookies())
 
-    async def grantPermissions(
+    async def grant_permissions(
         self, permissions: typing.List[str], origin: str = None
     ) -> NoneType:
-        """BrowserContext.grantPermissions
+        """BrowserContext.grant_permissions
 
         Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
         specified.
@@ -5991,15 +6018,15 @@ class BrowserContext(AsyncBase):
             )
         )
 
-    async def clearPermissions(self) -> NoneType:
-        """BrowserContext.clearPermissions
+    async def clear_permissions(self) -> NoneType:
+        """BrowserContext.clear_permissions
 
         Clears all permission overrides for the browser context.
         """
         return mapping.from_maybe_impl(await self._impl_obj.clearPermissions())
 
-    async def setGeolocation(self, geolocation: Geolocation = None) -> NoneType:
-        """BrowserContext.setGeolocation
+    async def set_geolocation(self, geolocation: "Geolocation" = None) -> NoneType:
+        """BrowserContext.set_geolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 
@@ -6014,8 +6041,8 @@ class BrowserContext(AsyncBase):
             await self._impl_obj.setGeolocation(geolocation=geolocation)
         )
 
-    async def setExtraHTTPHeaders(self, headers: typing.Dict[str, str]) -> NoneType:
-        """BrowserContext.setExtraHTTPHeaders
+    async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
+        """BrowserContext.set_extra_http_headers
 
         The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged
         with page-specific extra HTTP headers set with page.setExtraHTTPHeaders(headers). If page overrides a particular header,
@@ -6032,8 +6059,8 @@ class BrowserContext(AsyncBase):
             await self._impl_obj.setExtraHTTPHeaders(headers=mapping.to_impl(headers))
         )
 
-    async def setOffline(self, offline: bool) -> NoneType:
-        """BrowserContext.setOffline
+    async def set_offline(self, offline: bool) -> NoneType:
+        """BrowserContext.set_offline
 
         Parameters
         ----------
@@ -6042,10 +6069,10 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.setOffline(offline=offline))
 
-    async def addInitScript(
+    async def add_init_script(
         self, source: str = None, path: typing.Union[str, pathlib.Path] = None
     ) -> NoneType:
-        """BrowserContext.addInitScript
+        """BrowserContext.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
 
@@ -6068,10 +6095,10 @@ class BrowserContext(AsyncBase):
             await self._impl_obj.addInitScript(source=source, path=path)
         )
 
-    async def exposeBinding(
+    async def expose_binding(
         self, name: str, binding: typing.Callable, handle: bool = None
     ) -> NoneType:
-        """BrowserContext.exposeBinding
+        """BrowserContext.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
         called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value
@@ -6097,8 +6124,8 @@ class BrowserContext(AsyncBase):
             )
         )
 
-    async def exposeFunction(self, name: str, binding: typing.Callable) -> NoneType:
-        """BrowserContext.exposeFunction
+    async def expose_function(self, name: str, binding: typing.Callable) -> NoneType:
+        """BrowserContext.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
         called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value
@@ -6172,13 +6199,13 @@ class BrowserContext(AsyncBase):
             )
         )
 
-    async def waitForEvent(
+    async def wait_for_event(
         self,
         event: str,
         predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
         timeout: int = None,
     ) -> typing.Any:
-        """BrowserContext.waitForEvent
+        """BrowserContext.wait_for_event
 
         Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
         value. Will throw an error if the context closes before the event is fired. Returns the event data value.
@@ -6207,10 +6234,10 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.close())
 
-    async def storageState(
+    async def storage_state(
         self, path: typing.Union[str, pathlib.Path] = None
-    ) -> StorageState:
-        """BrowserContext.storageState
+    ) -> "StorageState":
+        """BrowserContext.storage_state
 
         Returns storage state for this browser context, contains current cookies and local storage snapshot.
 
@@ -6223,7 +6250,7 @@ class BrowserContext(AsyncBase):
         -------
         {"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}
         """
-        return mapping.from_maybe_impl(await self._impl_obj.storageState(path=path))
+        return mapping.from_impl(await self._impl_obj.storageState(path=path))
 
     def expect_event(
         self,
@@ -6325,8 +6352,8 @@ class ChromiumBrowserContext(BrowserContext):
     def __init__(self, obj: ChromiumBrowserContextImpl):
         super().__init__(obj)
 
-    def backgroundPages(self) -> typing.List["Page"]:
-        """ChromiumBrowserContext.backgroundPages
+    def background_pages(self) -> typing.List["Page"]:
+        """ChromiumBrowserContext.background_pages
 
         All existing background pages in the context.
 
@@ -6336,8 +6363,8 @@ class ChromiumBrowserContext(BrowserContext):
         """
         return mapping.from_impl_list(self._impl_obj.backgroundPages())
 
-    def serviceWorkers(self) -> typing.List["Worker"]:
-        """ChromiumBrowserContext.serviceWorkers
+    def service_workers(self) -> typing.List["Worker"]:
+        """ChromiumBrowserContext.service_workers
 
         All existing service workers in the context.
 
@@ -6347,8 +6374,8 @@ class ChromiumBrowserContext(BrowserContext):
         """
         return mapping.from_impl_list(self._impl_obj.serviceWorkers())
 
-    async def newCDPSession(self, page: "Page") -> "CDPSession":
-        """ChromiumBrowserContext.newCDPSession
+    async def new_cdp_session(self, page: "Page") -> "CDPSession":
+        """ChromiumBrowserContext.new_cdp_session
 
         Returns the newly created session.
 
@@ -6397,8 +6424,8 @@ class Browser(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.version)
 
-    def isConnected(self) -> bool:
-        """Browser.isConnected
+    def is_connected(self) -> bool:
+        """Browser.is_connected
 
         Indicates that the browser is connected.
 
@@ -6408,83 +6435,77 @@ class Browser(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.isConnected())
 
-    async def newContext(
+    async def new_context(
         self,
-        viewport: typing.Union[IntSize, Literal[0]] = None,
-        ignoreHTTPSErrors: bool = None,
-        javaScriptEnabled: bool = None,
-        bypassCSP: bool = None,
-        userAgent: str = None,
+        viewport: typing.Union[typing.Tuple[int, int], Literal[0]] = None,
+        ignore_https_errors: bool = None,
+        java_script_enabled: bool = None,
+        bypass_csp: bool = None,
+        user_agent: str = None,
         locale: str = None,
-        timezoneId: str = None,
-        geolocation: Geolocation = None,
+        timezone_id: str = None,
+        geolocation: "Geolocation" = None,
         permissions: typing.List[str] = None,
-        extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
-        deviceScaleFactor: int = None,
-        isMobile: bool = None,
-        hasTouch: bool = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
-        acceptDownloads: bool = None,
-        defaultBrowserType: str = None,
-        proxy: ProxyServer = None,
-        videosPath: str = None,
-        videoSize: IntSize = None,
-        recordHar: RecordHarOptions = None,
-        recordVideo: RecordVideoOptions = None,
-        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
+        http_credentials: "HttpCredentials" = None,
+        device_scale_factor: int = None,
+        is_mobile: bool = None,
+        has_touch: bool = None,
+        color_scheme: Literal["dark", "light", "no-preference"] = None,
+        accept_downloads: bool = None,
+        default_browser_type: str = None,
+        proxy: "ProxySettings" = None,
+        record_har: "RecordHarOptions" = None,
+        record_video: "RecordVideoOptions" = None,
+        storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "BrowserContext":
-        """Browser.newContext
+        """Browser.new_context
 
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
 
         Parameters
         ----------
-        viewport : Union[{"width": int, "height": int}, '0', NoneType]
+        viewport : Union[typing.Tuple[int, int], '0', NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
-        ignoreHTTPSErrors : Optional[bool]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-        javaScriptEnabled : Optional[bool]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
-        bypassCSP : Optional[bool]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
-        userAgent : Optional[str]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
         locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as number and date formatting rules.
-        timezoneId : Optional[str]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
         geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See browserContext.grantPermissions(permissions[, options]) for more details.
-        extraHTTPHeaders : Optional[Dict[str, str]]
+        extra_http_headers : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        httpCredentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[{"username": str, "password": str}]
             Credentials for HTTP authentication.
-        deviceScaleFactor : Optional[int]
+        device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-        isMobile : Optional[bool]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
-        hasTouch : Optional[bool]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
+        color_scheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(params) for more details. Defaults to '`light`'.
-        acceptDownloads : Optional[bool]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
-        videosPath : Optional[str]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        videoSize : Optional[{"width": int, "height": int}]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
+        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
+        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+        storage_state : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
@@ -6494,60 +6515,56 @@ class Browser(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.newContext(
                 viewport=viewport,
-                ignoreHTTPSErrors=ignoreHTTPSErrors,
-                javaScriptEnabled=javaScriptEnabled,
-                bypassCSP=bypassCSP,
-                userAgent=userAgent,
+                ignoreHTTPSErrors=ignore_https_errors,
+                javaScriptEnabled=java_script_enabled,
+                bypassCSP=bypass_csp,
+                userAgent=user_agent,
                 locale=locale,
-                timezoneId=timezoneId,
+                timezoneId=timezone_id,
                 geolocation=geolocation,
                 permissions=permissions,
-                extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
+                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                 offline=offline,
-                httpCredentials=httpCredentials,
-                deviceScaleFactor=deviceScaleFactor,
-                isMobile=isMobile,
-                hasTouch=hasTouch,
-                colorScheme=colorScheme,
-                acceptDownloads=acceptDownloads,
-                defaultBrowserType=defaultBrowserType,
+                httpCredentials=http_credentials,
+                deviceScaleFactor=device_scale_factor,
+                isMobile=is_mobile,
+                hasTouch=has_touch,
+                colorScheme=color_scheme,
+                acceptDownloads=accept_downloads,
+                defaultBrowserType=default_browser_type,
                 proxy=proxy,
-                videosPath=videosPath,
-                videoSize=videoSize,
-                recordHar=recordHar,
-                recordVideo=recordVideo,
-                storageState=storageState,
+                recordHar=record_har,
+                recordVideo=record_video,
+                storageState=storage_state,
             )
         )
 
-    async def newPage(
+    async def new_page(
         self,
-        viewport: typing.Union[IntSize, Literal[0]] = None,
-        ignoreHTTPSErrors: bool = None,
-        javaScriptEnabled: bool = None,
-        bypassCSP: bool = None,
-        userAgent: str = None,
+        viewport: typing.Union[typing.Tuple[int, int], Literal[0]] = None,
+        ignore_https_errors: bool = None,
+        java_script_enabled: bool = None,
+        bypass_csp: bool = None,
+        user_agent: str = None,
         locale: str = None,
-        timezoneId: str = None,
-        geolocation: Geolocation = None,
+        timezone_id: str = None,
+        geolocation: "Geolocation" = None,
         permissions: typing.List[str] = None,
-        extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
-        deviceScaleFactor: int = None,
-        isMobile: bool = None,
-        hasTouch: bool = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
-        acceptDownloads: bool = None,
-        defaultBrowserType: str = None,
-        proxy: ProxyServer = None,
-        videosPath: str = None,
-        videoSize: IntSize = None,
-        recordHar: RecordHarOptions = None,
-        recordVideo: RecordVideoOptions = None,
-        storageState: typing.Union[StorageState, str, pathlib.Path] = None,
+        http_credentials: "HttpCredentials" = None,
+        device_scale_factor: int = None,
+        is_mobile: bool = None,
+        has_touch: bool = None,
+        color_scheme: Literal["dark", "light", "no-preference"] = None,
+        accept_downloads: bool = None,
+        default_browser_type: str = None,
+        proxy: "ProxySettings" = None,
+        record_har: "RecordHarOptions" = None,
+        record_video: "RecordVideoOptions" = None,
+        storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "Page":
-        """Browser.newPage
+        """Browser.new_page
 
         Creates a new page in a new browser context. Closing this page will close the context as well.
         This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
@@ -6556,50 +6573,46 @@ class Browser(AsyncBase):
 
         Parameters
         ----------
-        viewport : Union[{"width": int, "height": int}, '0', NoneType]
+        viewport : Union[typing.Tuple[int, int], '0', NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
-        ignoreHTTPSErrors : Optional[bool]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-        javaScriptEnabled : Optional[bool]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
-        bypassCSP : Optional[bool]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
-        userAgent : Optional[str]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
         locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as number and date formatting rules.
-        timezoneId : Optional[str]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
         geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See browserContext.grantPermissions(permissions[, options]) for more details.
-        extraHTTPHeaders : Optional[Dict[str, str]]
+        extra_http_headers : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        httpCredentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[{"username": str, "password": str}]
             Credentials for HTTP authentication.
-        deviceScaleFactor : Optional[int]
+        device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-        isMobile : Optional[bool]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
-        hasTouch : Optional[bool]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
+        color_scheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(params) for more details. Defaults to '`light`'.
-        acceptDownloads : Optional[bool]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
-        videosPath : Optional[str]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        videoSize : Optional[{"width": int, "height": int}]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
+        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
+        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        storageState : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
+        storage_state : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
         Returns
@@ -6609,29 +6622,27 @@ class Browser(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.newPage(
                 viewport=viewport,
-                ignoreHTTPSErrors=ignoreHTTPSErrors,
-                javaScriptEnabled=javaScriptEnabled,
-                bypassCSP=bypassCSP,
-                userAgent=userAgent,
+                ignoreHTTPSErrors=ignore_https_errors,
+                javaScriptEnabled=java_script_enabled,
+                bypassCSP=bypass_csp,
+                userAgent=user_agent,
                 locale=locale,
-                timezoneId=timezoneId,
+                timezoneId=timezone_id,
                 geolocation=geolocation,
                 permissions=permissions,
-                extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
+                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                 offline=offline,
-                httpCredentials=httpCredentials,
-                deviceScaleFactor=deviceScaleFactor,
-                isMobile=isMobile,
-                hasTouch=hasTouch,
-                colorScheme=colorScheme,
-                acceptDownloads=acceptDownloads,
-                defaultBrowserType=defaultBrowserType,
+                httpCredentials=http_credentials,
+                deviceScaleFactor=device_scale_factor,
+                isMobile=is_mobile,
+                hasTouch=has_touch,
+                colorScheme=color_scheme,
+                acceptDownloads=accept_downloads,
+                defaultBrowserType=default_browser_type,
                 proxy=proxy,
-                videosPath=videosPath,
-                videoSize=videoSize,
-                recordHar=recordHar,
-                recordVideo=recordVideo,
-                storageState=storageState,
+                recordHar=record_har,
+                recordVideo=record_video,
+                storageState=storage_state,
             )
         )
 
@@ -6667,8 +6678,8 @@ class BrowserType(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.name)
 
     @property
-    def executablePath(self) -> str:
-        """BrowserType.executablePath
+    def executable_path(self) -> str:
+        """BrowserType.executable_path
 
         A path where Playwright expects to find a bundled browser executable.
 
@@ -6680,21 +6691,21 @@ class BrowserType(AsyncBase):
 
     async def launch(
         self,
-        executablePath: typing.Union[str, pathlib.Path] = None,
+        executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
-        ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
-        handleSIGINT: bool = None,
-        handleSIGTERM: bool = None,
-        handleSIGHUP: bool = None,
+        ignore_default_args: typing.Union[bool, typing.List[str]] = None,
+        handle_sigint: bool = None,
+        handle_sigterm: bool = None,
+        handle_sighup: bool = None,
         timeout: int = None,
         env: typing.Union[typing.Dict[str, typing.Union[str, int, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: ProxyServer = None,
-        downloadsPath: typing.Union[str, pathlib.Path] = None,
-        slowMo: int = None,
-        chromiumSandbox: bool = None,
-        firefoxUserPrefs: typing.Union[
+        proxy: "ProxySettings" = None,
+        downloads_path: typing.Union[str, pathlib.Path] = None,
+        slow_mo: int = None,
+        chromium_sandbox: bool = None,
+        firefox_user_prefs: typing.Union[
             typing.Dict[str, typing.Union[str, int, bool]]
         ] = None,
     ) -> "Browser":
@@ -6716,17 +6727,17 @@ class BrowserType(AsyncBase):
 
         Parameters
         ----------
-        executablePath : Union[str, pathlib.Path, NoneType]
+        executable_path : Union[str, pathlib.Path, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
         args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
-        ignoreDefaultArgs : Union[bool, List[str], NoneType]
+        ignore_default_args : Union[bool, List[str], NoneType]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handleSIGINT : Optional[bool]
+        handle_sigint : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
-        handleSIGTERM : Optional[bool]
+        handle_sigterm : Optional[bool]
             Close the browser process on SIGTERM. Defaults to `true`.
-        handleSIGHUP : Optional[bool]
+        handle_sighup : Optional[bool]
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Optional[int]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
@@ -6738,13 +6749,13 @@ class BrowserType(AsyncBase):
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
-        downloadsPath : Union[str, pathlib.Path, NoneType]
+        downloads_path : Union[str, pathlib.Path, NoneType]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
-        slowMo : Optional[int]
+        slow_mo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
-        chromiumSandbox : Optional[bool]
+        chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `false`.
-        firefoxUserPrefs : Optional[Dict[str, Union[str, int, bool]]]
+        firefox_user_prefs : Optional[Dict[str, Union[str, int, bool]]]
             Firefox user preferences. Learn more about the Firefox user preferences at `about:config`.
 
         Returns
@@ -6753,64 +6764,62 @@ class BrowserType(AsyncBase):
         """
         return mapping.from_impl(
             await self._impl_obj.launch(
-                executablePath=executablePath,
+                executablePath=executable_path,
                 args=args,
-                ignoreDefaultArgs=ignoreDefaultArgs,
-                handleSIGINT=handleSIGINT,
-                handleSIGTERM=handleSIGTERM,
-                handleSIGHUP=handleSIGHUP,
+                ignoreDefaultArgs=ignore_default_args,
+                handleSIGINT=handle_sigint,
+                handleSIGTERM=handle_sigterm,
+                handleSIGHUP=handle_sighup,
                 timeout=timeout,
                 env=mapping.to_impl(env),
                 headless=headless,
                 devtools=devtools,
                 proxy=proxy,
-                downloadsPath=downloadsPath,
-                slowMo=slowMo,
-                chromiumSandbox=chromiumSandbox,
-                firefoxUserPrefs=mapping.to_impl(firefoxUserPrefs),
+                downloadsPath=downloads_path,
+                slowMo=slow_mo,
+                chromiumSandbox=chromium_sandbox,
+                firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
             )
         )
 
-    async def launchPersistentContext(
+    async def launch_persistent_context(
         self,
-        userDataDir: typing.Union[str, pathlib.Path],
-        executablePath: typing.Union[str, pathlib.Path] = None,
+        user_data_dir: typing.Union[str, pathlib.Path],
+        executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
-        ignoreDefaultArgs: typing.Union[bool, typing.List[str]] = None,
-        handleSIGINT: bool = None,
-        handleSIGTERM: bool = None,
-        handleSIGHUP: bool = None,
+        ignore_default_args: typing.Union[bool, typing.List[str]] = None,
+        handle_sigint: bool = None,
+        handle_sigterm: bool = None,
+        handle_sighup: bool = None,
         timeout: int = None,
         env: typing.Union[typing.Dict[str, typing.Union[str, int, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: ProxyServer = None,
-        downloadsPath: typing.Union[str, pathlib.Path] = None,
-        slowMo: int = None,
-        viewport: typing.Union[IntSize, Literal[0]] = None,
-        ignoreHTTPSErrors: bool = None,
-        javaScriptEnabled: bool = None,
-        bypassCSP: bool = None,
-        userAgent: str = None,
+        proxy: "ProxySettings" = None,
+        downloads_path: typing.Union[str, pathlib.Path] = None,
+        slow_mo: int = None,
+        viewport: typing.Union[typing.Tuple[int, int], Literal[0]] = None,
+        ignore_https_errors: bool = None,
+        java_script_enabled: bool = None,
+        bypass_csp: bool = None,
+        user_agent: str = None,
         locale: str = None,
-        timezoneId: str = None,
-        geolocation: Geolocation = None,
+        timezone_id: str = None,
+        geolocation: "Geolocation" = None,
         permissions: typing.List[str] = None,
-        extraHTTPHeaders: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        httpCredentials: Credentials = None,
-        deviceScaleFactor: int = None,
-        isMobile: bool = None,
-        hasTouch: bool = None,
-        colorScheme: Literal["dark", "light", "no-preference"] = None,
-        acceptDownloads: bool = None,
-        chromiumSandbox: bool = None,
-        videosPath: str = None,
-        videoSize: IntSize = None,
-        recordHar: RecordHarOptions = None,
-        recordVideo: RecordVideoOptions = None,
+        http_credentials: "HttpCredentials" = None,
+        device_scale_factor: int = None,
+        is_mobile: bool = None,
+        has_touch: bool = None,
+        color_scheme: Literal["dark", "light", "no-preference"] = None,
+        accept_downloads: bool = None,
+        chromium_sandbox: bool = None,
+        record_har: "RecordHarOptions" = None,
+        record_video: "RecordVideoOptions" = None,
     ) -> "BrowserContext":
-        """BrowserType.launchPersistentContext
+        """BrowserType.launch_persistent_context
 
         Returns the persistent browser context instance.
         Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this
@@ -6818,19 +6827,19 @@ class BrowserType(AsyncBase):
 
         Parameters
         ----------
-        userDataDir : Union[str, pathlib.Path]
+        user_data_dir : Union[str, pathlib.Path]
             Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for Chromium and Firefox.
-        executablePath : Union[str, pathlib.Path, NoneType]
+        executable_path : Union[str, pathlib.Path, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox or WebKit, use at your own risk.
         args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found here.
-        ignoreDefaultArgs : Union[bool, List[str], NoneType]
+        ignore_default_args : Union[bool, List[str], NoneType]
             If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handleSIGINT : Optional[bool]
+        handle_sigint : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
-        handleSIGTERM : Optional[bool]
+        handle_sigterm : Optional[bool]
             Close the browser process on SIGTERM. Defaults to `true`.
-        handleSIGHUP : Optional[bool]
+        handle_sighup : Optional[bool]
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Optional[int]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
@@ -6842,52 +6851,48 @@ class BrowserType(AsyncBase):
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings.
-        downloadsPath : Union[str, pathlib.Path, NoneType]
+        downloads_path : Union[str, pathlib.Path, NoneType]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
-        slowMo : Optional[int]
+        slow_mo : Optional[int]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
-        viewport : Union[{"width": int, "height": int}, '0', NoneType]
+        viewport : Union[typing.Tuple[int, int], '0', NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
-        ignoreHTTPSErrors : Optional[bool]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-        javaScriptEnabled : Optional[bool]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
-        bypassCSP : Optional[bool]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
-        userAgent : Optional[str]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
         locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value as well as number and date formatting rules.
-        timezoneId : Optional[str]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See ICU’s `metaZones.txt` for a list of supported timezone IDs.
         geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
         permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See browserContext.grantPermissions(permissions[, options]) for more details.
-        extraHTTPHeaders : Optional[Dict[str, str]]
+        extra_http_headers : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        httpCredentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[{"username": str, "password": str}]
             Credentials for HTTP authentication.
-        deviceScaleFactor : Optional[int]
+        device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-        isMobile : Optional[bool]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
-        hasTouch : Optional[bool]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        colorScheme : Optional[Literal['dark', 'light', 'no-preference']]
+        color_scheme : Optional[Literal['dark', 'light', 'no-preference']]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See page.emulateMedia(params) for more details. Defaults to '`light`'.
-        acceptDownloads : Optional[bool]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-        chromiumSandbox : Optional[bool]
+        chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
-        videosPath : Optional[str]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videosPath`. Enables video recording for all pages to `videosPath` directory. If not specified, videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
-        videoSize : Optional[{"width": int, "height": int}]
-            **NOTE** Use `recordVideo` instead, it takes precedence over `videoSize`. Specifies dimensions of the automatically recorded video. Can only be used if `videosPath` is set. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of the page will be scaled down if necessary to fit specified size.
-        recordHar : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
+        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
             Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        recordVideo : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
+        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
             Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
 
         Returns
@@ -6896,42 +6901,40 @@ class BrowserType(AsyncBase):
         """
         return mapping.from_impl(
             await self._impl_obj.launchPersistentContext(
-                userDataDir=userDataDir,
-                executablePath=executablePath,
+                userDataDir=user_data_dir,
+                executablePath=executable_path,
                 args=args,
-                ignoreDefaultArgs=ignoreDefaultArgs,
-                handleSIGINT=handleSIGINT,
-                handleSIGTERM=handleSIGTERM,
-                handleSIGHUP=handleSIGHUP,
+                ignoreDefaultArgs=ignore_default_args,
+                handleSIGINT=handle_sigint,
+                handleSIGTERM=handle_sigterm,
+                handleSIGHUP=handle_sighup,
                 timeout=timeout,
                 env=mapping.to_impl(env),
                 headless=headless,
                 devtools=devtools,
                 proxy=proxy,
-                downloadsPath=downloadsPath,
-                slowMo=slowMo,
+                downloadsPath=downloads_path,
+                slowMo=slow_mo,
                 viewport=viewport,
-                ignoreHTTPSErrors=ignoreHTTPSErrors,
-                javaScriptEnabled=javaScriptEnabled,
-                bypassCSP=bypassCSP,
-                userAgent=userAgent,
+                ignoreHTTPSErrors=ignore_https_errors,
+                javaScriptEnabled=java_script_enabled,
+                bypassCSP=bypass_csp,
+                userAgent=user_agent,
                 locale=locale,
-                timezoneId=timezoneId,
+                timezoneId=timezone_id,
                 geolocation=geolocation,
                 permissions=permissions,
-                extraHTTPHeaders=mapping.to_impl(extraHTTPHeaders),
+                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                 offline=offline,
-                httpCredentials=httpCredentials,
-                deviceScaleFactor=deviceScaleFactor,
-                isMobile=isMobile,
-                hasTouch=hasTouch,
-                colorScheme=colorScheme,
-                acceptDownloads=acceptDownloads,
-                chromiumSandbox=chromiumSandbox,
-                videosPath=videosPath,
-                videoSize=videoSize,
-                recordHar=recordHar,
-                recordVideo=recordVideo,
+                httpCredentials=http_credentials,
+                deviceScaleFactor=device_scale_factor,
+                isMobile=is_mobile,
+                hasTouch=has_touch,
+                colorScheme=color_scheme,
+                acceptDownloads=accept_downloads,
+                chromiumSandbox=chromium_sandbox,
+                recordHar=record_har,
+                recordVideo=record_video,
             )
         )
 
@@ -6960,8 +6963,8 @@ class Playwright(AsyncBase):
         return mapping.from_impl(self._impl_obj.selectors)
 
     @property
-    def devices(self) -> typing.Dict[str, DeviceDescriptor]:
-        return mapping.from_maybe_impl(self._impl_obj.devices)
+    def devices(self) -> typing.Dict[str, "DeviceDescriptor"]:
+        return mapping.from_impl_dict(self._impl_obj.devices)
 
     def stop(self) -> NoneType:
         return mapping.from_maybe_impl(self._impl_obj.stop())

@@ -37,6 +37,7 @@ from playwright._download import Download
 from playwright._element_handle import ElementHandle, ValuesToSelect
 from playwright._file_chooser import FileChooser
 from playwright._frame import Frame
+from playwright._helper import to_snake_case
 from playwright._input import Keyboard, Mouse, Touchscreen
 from playwright._js_handle import JSHandle, Serializable
 from playwright._network import Request, Response, Route, WebSocket
@@ -49,8 +50,6 @@ from playwright._video import Video
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
-    if "playwright._types" in value:
-        value = re.sub(r"playwright\._types\.", "", value)
     value = re.sub(r"playwright\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
@@ -73,7 +72,7 @@ def signature(func: FunctionType, indent: int) -> str:
         if name == "return":
             continue
         processed = process_type(value, True)
-        tokens.append(f"{name}: {processed}")
+        tokens.append(f"{to_snake_case(name)}: {processed}")
     return split.join(tokens)
 
 
@@ -86,17 +85,17 @@ def arguments(func: FunctionType, indent: int) -> str:
         if name == "return":
             continue
         if "Callable" in value_str:
-            tokens.append(f"{name}=self._wrap_handler({name})")
+            tokens.append(f"{name}=self._wrap_handler({to_snake_case(name)})")
         elif (
             "typing.Any" in value_str
             or "typing.Dict" in value_str
             or "Handle" in value_str
         ):
-            tokens.append(f"{name}=mapping.to_impl({name})")
+            tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")
         elif re.match(r"<class 'playwright\.[\w]+\.[\w]+", value_str):
-            tokens.append(f"{name}={name}._impl_obj")
+            tokens.append(f"{name}={to_snake_case(name)}._impl_obj")
         else:
-            tokens.append(f"{name}={name}")
+            tokens.append(f"{name}={to_snake_case(name)}")
     return split.join(tokens)
 
 
@@ -111,7 +110,8 @@ def short_name(t: Any) -> str:
 
 
 def return_value(value: Any) -> List[str]:
-    if "playwright" not in str(value) or "playwright._types" in str(value):
+    value_str = str(value)
+    if "playwright" not in value_str:
         return ["mapping.from_maybe_impl(", ")"]
     if (
         get_origin(value) == Union
@@ -151,7 +151,9 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal
 
+
 from playwright._accessibility import Accessibility as AccessibilityImpl
+from playwright._api_types import DeviceDescriptor, Geolocation, FilePayload, FloatRect, HttpCredentials, PdfMargins, ProxySettings, OptionSelector, SourceLocation, RequestFailure, RecordHarOptions, RecordVideoOptions
 from playwright._browser import Browser as BrowserImpl
 from playwright._browser_context import BrowserContext as BrowserContextImpl
 from playwright._browser_type import BrowserType as BrowserTypeImpl
@@ -163,7 +165,7 @@ from playwright._download import Download as DownloadImpl
 from playwright._element_handle import ElementHandle as ElementHandleImpl
 from playwright._file_chooser import FileChooser as FileChooserImpl
 from playwright._frame import Frame as FrameImpl
-from playwright._types import ConsoleMessageLocation, Cookie, Credentials, DeviceDescriptor, MousePosition, Error, FilePayload, SelectOption, RequestFailure, IntSize, FloatRect, Geolocation, ProxyServer, PdfMargins, ResourceTiming, RecordHarOptions, RecordVideoOptions, StorageState
+from playwright._api_structures import Cookie, ResourceTiming, StorageState
 from playwright._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright._js_handle import JSHandle as JSHandleImpl
 from playwright._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl

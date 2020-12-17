@@ -15,18 +15,19 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyee import EventEmitter
 
+from playwright._api_types import Error, FilePayload
 from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright._element_handle import (
     ElementHandle,
     ValuesToSelect,
     convert_select_option_values,
-    normalize_file_payloads,
 )
 from playwright._event_context_manager import EventContextManagerImpl
+from playwright._file_chooser import normalize_file_payloads
 from playwright._helper import (
     DocumentLoadState,
     FrameNavigatedEvent,
@@ -45,7 +46,6 @@ from playwright._js_handle import (
     serialize_argument,
 )
 from playwright._network import Response
-from playwright._types import Error, FilePayload, MousePosition
 from playwright._wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -351,7 +351,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         delay: int = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -365,7 +365,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         delay: int = None,
         button: MouseButton = None,
         timeout: int = None,
@@ -378,7 +378,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         timeout: int = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -411,7 +411,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: MousePosition = None,
+        position: Tuple[float, float] = None,
         timeout: int = None,
         force: bool = None,
     ) -> None:

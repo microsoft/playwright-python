@@ -29,10 +29,10 @@ async def test_request_fulfill(page, server):
         assert "empty.html" in request.url
         assert request.headers["user-agent"]
         assert request.method == "GET"
-        assert request.postData is None
-        assert request.isNavigationRequest
-        assert request.resourceType == "document"
-        assert request.frame == page.mainFrame
+        assert request.post_data is None
+        assert request.is_navigation_request()
+        assert request.resource_type == "document"
+        assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
         await route.fulfill(body="Text")
 
@@ -96,7 +96,7 @@ async def test_page_events_request_should_report_requests_and_responses_handled_
     await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
     await page.evaluate("() => window.activationPromise")
     [request, sw_response] = await asyncio.gather(
-        page.waitForEvent("request"), page.evaluate('() => fetchDummy("foo")')
+        page.wait_for_event("request"), page.evaluate('() => fetchDummy("foo")')
     )
     assert sw_response == "responseFromServiceWorker:foo"
     assert request.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
@@ -112,7 +112,7 @@ async def test_request_frame_should_work_for_main_frame_navigation_request(
     page.on("request", lambda r: requests.append(r))
     await page.goto(server.EMPTY_PAGE)
     assert len(requests) == 1
-    assert requests[0].frame == page.mainFrame
+    assert requests[0].frame == page.main_frame
 
 
 async def test_request_frame_should_work_for_subframe_navigation_request(
@@ -133,7 +133,7 @@ async def test_request_frame_should_work_for_fetch_requests(page, server):
     await page.evaluate('() => fetch("/digits/1.png")')
     requests = [r for r in requests if "favicon" not in r.url]
     assert len(requests) == 1
-    assert requests[0].frame == page.mainFrame
+    assert requests[0].frame == page.main_frame
 
 
 async def test_request_headers_should_work(
@@ -190,7 +190,7 @@ async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
 
     server.set_route("/something", handle_something)
 
-    requestPromise = asyncio.create_task(page.waitForEvent("request"))
+    requestPromise = asyncio.create_task(page.wait_for_event("request"))
     text = await page.evaluate(
         """async url => {
       const data = await fetch(url);
@@ -215,7 +215,7 @@ async def test_response_headers_should_work(page, server):
     assert response.headers["foo"] == "bar"
 
 
-async def test_request_postdata_should_work(page, server):
+async def test_request_post_data_should_work(page, server):
     await page.goto(server.EMPTY_PAGE)
     server.set_route("/post", lambda r: r.finish())
     requests = []
@@ -224,14 +224,14 @@ async def test_request_postdata_should_work(page, server):
         '() => fetch("./post", { method: "POST", body: JSON.stringify({foo: "bar"})})'
     )
     assert len(requests) == 1
-    assert requests[0].postData == '{"foo":"bar"}'
+    assert requests[0].post_data == '{"foo":"bar"}'
 
 
-async def test_request_postdata_should_be_undefined_when_there_is_no_post_data(
+async def test_request_post_data__should_be_undefined_when_there_is_no_post_data(
     page, server
 ):
     response = await page.goto(server.EMPTY_PAGE)
-    assert response.request.postData is None
+    assert response.request.post_data is None
 
 
 async def test_should_parse_the_json_post_data(page, server):
@@ -243,7 +243,7 @@ async def test_should_parse_the_json_post_data(page, server):
         """() => fetch('./post', { method: 'POST', body: JSON.stringify({ foo: 'bar' }) })"""
     )
     assert len(requests) == 1
-    assert requests[0].postDataJSON == {"foo": "bar"}
+    assert requests[0].post_data_json == {"foo": "bar"}
 
 
 async def test_should_parse_the_data_if_content_type_is_form_urlencoded(page, server):
@@ -251,17 +251,17 @@ async def test_should_parse_the_data_if_content_type_is_form_urlencoded(page, se
     server.set_route("/post", lambda req: req.finish())
     requests = []
     page.on("request", lambda r: requests.append(r))
-    await page.setContent(
+    await page.set_content(
         """<form method='POST' action='/post'><input type='text' name='foo' value='bar'><input type='number' name='baz' value='123'><input type='submit'></form>"""
     )
     await page.click("input[type=submit]")
     assert len(requests) == 1
-    assert requests[0].postDataJSON == {"foo": "bar", "baz": "123"}
+    assert requests[0].post_data_json == {"foo": "bar", "baz": "123"}
 
 
 async def test_should_be_undefined_when_there_is_no_post_data(page, server):
     response = await page.goto(server.EMPTY_PAGE)
-    assert response.request.postDataJSON is None
+    assert response.request.post_data_json is None
 
 
 async def test_should_work_with_binary_post_data(page, server):
@@ -275,7 +275,7 @@ async def test_should_work_with_binary_post_data(page, server):
     }"""
     )
     assert len(requests) == 1
-    buffer = requests[0].postDataBuffer
+    buffer = requests[0].post_data_buffer
     assert len(buffer) == 256
     for i in range(256):
         assert buffer[i] == i
@@ -293,7 +293,7 @@ async def test_should_work_with_binary_post_data_and_interception(page, server):
     }"""
     )
     assert len(requests) == 1
-    buffer = requests[0].postDataBuffer
+    buffer = requests[0].post_data_buffer
     assert len(buffer) == 256
     for i in range(256):
         assert buffer[i] == i
@@ -316,9 +316,9 @@ async def test_response_text_should_throw_when_requesting_body_of_redirected_res
 ):
     server.set_redirect("/foo.html", "/empty.html")
     response = await page.goto(server.PREFIX + "/foo.html")
-    redirectedFrom = response.request.redirectedFrom
-    assert redirectedFrom
-    redirected = await redirectedFrom.response()
+    redirected_from = response.request.redirected_from
+    assert redirected_from
+    redirected = await redirected_from.response()
     assert redirected.status == 302
     error = None
     try:
@@ -356,7 +356,7 @@ async def test_response_status_text_should_work(page, server):
     server.set_route("/cool", lambda r: (r.setResponseCode(200, b"cool!"), r.finish()))
 
     response = await page.goto(server.PREFIX + "/cool")
-    assert response.statusText == "cool!"
+    assert response.status_text == "cool!"
 
 
 async def test_request_resource_type_should_return_event_source(page, server):
@@ -390,7 +390,7 @@ async def test_request_resource_type_should_return_event_source(page, server):
         )
         == SSE_MESSAGE
     )
-    assert requests[0].resourceType == "eventsource"
+    assert requests[0].resource_type == "eventsource"
 
 
 async def test_network_events_request(page, server):
@@ -399,10 +399,10 @@ async def test_network_events_request(page, server):
     await page.goto(server.EMPTY_PAGE)
     assert len(requests) == 1
     assert requests[0].url == server.EMPTY_PAGE
-    assert requests[0].resourceType == "document"
+    assert requests[0].resource_type == "document"
     assert requests[0].method == "GET"
     assert await requests[0].response()
-    assert requests[0].frame == page.mainFrame
+    assert requests[0].frame == page.main_frame
     assert requests[0].frame.url == server.EMPTY_PAGE
 
 
@@ -418,7 +418,7 @@ async def test_network_events_response(page, server):
 
 
 async def test_network_events_request_failed(
-    page, server, is_chromium, is_webkit, is_firefox, is_mac, is_win
+    page, server, is_chromium, is_webkit, is_mac, is_win
 ):
     def handle_request(request):
         request.setHeader("Content-Type", "text/css")
@@ -432,37 +432,37 @@ async def test_network_events_request_failed(
     assert len(failed_requests) == 1
     assert "one-style.css" in failed_requests[0].url
     assert await failed_requests[0].response() is None
-    assert failed_requests[0].resourceType == "stylesheet"
+    assert failed_requests[0].resource_type == "stylesheet"
     if is_chromium:
-        assert failed_requests[0].failure["errorText"] == "net::ERR_EMPTY_RESPONSE"
+        assert failed_requests[0].failure.error_text == "net::ERR_EMPTY_RESPONSE"
     elif is_webkit:
         if is_mac:
             assert (
-                failed_requests[0].failure["errorText"]
+                failed_requests[0].failure.error_text
                 == "The network connection was lost."
             )
         elif is_win:
             assert (
-                failed_requests[0].failure["errorText"]
+                failed_requests[0].failure.error_text
                 == "Server returned nothing (no headers, no data)"
             )
         else:
-            assert failed_requests[0].failure["errorText"] == "Message Corrupt"
+            assert failed_requests[0].failure.error_text == "Message Corrupt"
     else:
-        assert failed_requests[0].failure["errorText"] == "NS_ERROR_NET_RESET"
+        assert failed_requests[0].failure.error_text == "NS_ERROR_NET_RESET"
     assert failed_requests[0].frame
 
 
 async def test_network_events_request_finished(page, server):
     response = (
         await asyncio.gather(
-            page.goto(server.EMPTY_PAGE), page.waitForEvent("requestfinished")
+            page.goto(server.EMPTY_PAGE), page.wait_for_event("requestfinished")
         )
     )[0]
     request = response.request
     assert request.url == server.EMPTY_PAGE
     assert await request.response()
-    assert request.frame == page.mainFrame
+    assert request.frame == page.main_frame
     assert request.frame.url == server.EMPTY_PAGE
 
 
@@ -496,10 +496,10 @@ async def test_network_events_should_support_redirects(page, server):
         f"200 {server.EMPTY_PAGE}",
         f"DONE {server.EMPTY_PAGE}",
     ]
-    redirectedFrom = response.request.redirectedFrom
-    assert "/foo.html" in redirectedFrom.url
-    assert redirectedFrom.redirectedFrom is None
-    assert redirectedFrom.redirectedTo == response.request
+    redirected_from = response.request.redirected_from
+    assert "/foo.html" in redirected_from.url
+    assert redirected_from.redirected_from is None
+    assert redirected_from.redirected_to == response.request
 
 
 async def test_request_is_navigation_request_should_work(page, server):
@@ -513,11 +513,11 @@ async def test_request_is_navigation_request_should_work(page, server):
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
     await page.goto(server.PREFIX + "/rrredirect")
     print("kek")
-    assert requests.get("rrredirect").isNavigationRequest
-    assert requests.get("one-frame.html").isNavigationRequest
-    assert requests.get("frame.html").isNavigationRequest
-    assert requests.get("script.js").isNavigationRequest is False
-    assert requests.get("style.css").isNavigationRequest is False
+    assert requests.get("rrredirect").is_navigation_request()
+    assert requests.get("one-frame.html").is_navigation_request()
+    assert requests.get("frame.html").is_navigation_request()
+    assert requests.get("script.js").is_navigation_request() is False
+    assert requests.get("style.css").is_navigation_request() is False
 
 
 async def test_request_is_navigation_request_should_work_when_navigating_to_image(
@@ -526,11 +526,11 @@ async def test_request_is_navigation_request_should_work_when_navigating_to_imag
     requests = []
     page.on("request", lambda r: requests.append(r))
     await page.goto(server.PREFIX + "/pptr.png")
-    assert requests[0].isNavigationRequest()
+    assert requests[0].is_navigation_request()
 
 
 async def test_set_extra_http_headers_should_work(page, server):
-    await page.setExtraHTTPHeaders({"foo": "bar"})
+    await page.set_extra_http_headers({"foo": "bar"})
 
     request = (
         await asyncio.gather(
@@ -543,7 +543,7 @@ async def test_set_extra_http_headers_should_work(page, server):
 
 async def test_set_extra_http_headers_should_work_with_redirects(page, server):
     server.set_redirect("/foo.html", "/empty.html")
-    await page.setExtraHTTPHeaders({"foo": "bar"})
+    await page.set_extra_http_headers({"foo": "bar"})
 
     request = (
         await asyncio.gather(
@@ -557,10 +557,10 @@ async def test_set_extra_http_headers_should_work_with_redirects(page, server):
 async def test_set_extra_http_headers_should_work_with_extra_headers_from_browser_context(
     browser, server
 ):
-    context = await browser.newContext()
-    await context.setExtraHTTPHeaders({"foo": "bar"})
+    context = await browser.new_context()
+    await context.set_extra_http_headers({"foo": "bar"})
 
-    page = await context.newPage()
+    page = await context.new_page()
     request = (
         await asyncio.gather(
             server.wait_for_request("/empty.html"),
@@ -574,10 +574,10 @@ async def test_set_extra_http_headers_should_work_with_extra_headers_from_browse
 async def test_set_extra_http_headers_should_override_extra_headers_from_browser_context(
     browser, server
 ):
-    context = await browser.newContext(extraHTTPHeaders={"fOo": "bAr", "baR": "foO"})
+    context = await browser.new_context(extra_http_headers={"fOo": "bAr", "baR": "foO"})
 
-    page = await context.newPage()
-    await page.setExtraHTTPHeaders({"Foo": "Bar"})
+    page = await context.new_page()
+    await page.set_extra_http_headers({"Foo": "Bar"})
 
     request = (
         await asyncio.gather(
@@ -595,7 +595,7 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
 ):
     error = None
     try:
-        await page.setExtraHTTPHeaders({"foo": 1})
+        await page.set_extra_http_headers({"foo": 1})
     except Error as exc:
         error = exc
     assert error.message == "headers[0].value: expected string, got number"

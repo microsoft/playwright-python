@@ -71,11 +71,11 @@ async def test_should_get_a_non_session_cookie(context, page, server, is_firefox
     ]
 
 
-async def test_should_properly_report_httponly_cookie(context, page, server):
+async def test_should_properly_report_httpOnly_cookie(context, page, server):
     server.set_route(
         "/empty.html",
         lambda r: (
-            r.setHeader("Set-Cookie", "name=value;HttpOnly; Path=/"),
+            r.setHeader("Set-Cookie", "name=value;httpOnly; Path=/"),
             r.finish(),
         ),
     )
@@ -86,7 +86,7 @@ async def test_should_properly_report_httponly_cookie(context, page, server):
     assert cookies[0]["httpOnly"] is True
 
 
-async def test_should_properly_report_strict_samesite_cookie(
+async def test_should_properly_report_strict_sameSite_cookie(
     context, page, server, is_webkit, is_win
 ):
     if is_webkit and is_win:
@@ -95,7 +95,7 @@ async def test_should_properly_report_strict_samesite_cookie(
     server.set_route(
         "/empty.html",
         lambda r: (
-            r.setHeader("Set-Cookie", "name=value;SameSite=Strict"),
+            r.setHeader("Set-Cookie", "name=value;sameSite=Strict"),
             r.finish(),
         ),
     )
@@ -105,7 +105,7 @@ async def test_should_properly_report_strict_samesite_cookie(
     assert cookies[0]["sameSite"] == "Strict"
 
 
-async def test_should_properly_report_lax_samesite_cookie(
+async def test_should_properly_report_lax_sameSite_cookie(
     context, page, server, is_webkit, is_win
 ):
     if is_webkit and is_win:
@@ -114,7 +114,7 @@ async def test_should_properly_report_lax_samesite_cookie(
     server.set_route(
         "/empty.html",
         lambda r: (
-            r.setHeader("Set-Cookie", "name=value;SameSite=Lax"),
+            r.setHeader("Set-Cookie", "name=value;sameSite=Lax"),
             r.finish(),
         ),
     )
@@ -161,7 +161,7 @@ async def test_should_get_multiple_cookies(context, page, server, is_firefox):
 
 
 async def test_should_get_cookies_from_multiple_urls(context):
-    await context.addCookies(
+    await context.add_cookies(
         [
             {"url": "https://foo.com", "name": "doggo", "value": "woofs"},
             {"url": "https://bar.com", "name": "catto", "value": "purrs"},
