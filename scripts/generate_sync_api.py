@@ -18,7 +18,7 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
-from playwright._helper import to_snake_case
+from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -155,7 +155,9 @@ def generate(t: Any) -> None:
 
 def main() -> None:
     print(header)
-    print("from playwright._sync_base import EventContextManager, SyncBase, mapping")
+    print(
+        "from playwright._impl._sync_base import EventContextManager, SyncBase, mapping"
+    )
     print("NoneType = type(None)")
 
     for t in all_types:

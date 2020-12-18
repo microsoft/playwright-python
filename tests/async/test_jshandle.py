@@ -16,7 +16,7 @@ import json
 import math
 from datetime import datetime
 
-from playwright import Error
+from playwright.async_api import Error
 
 
 async def test_jshandle_evaluate_work(page):

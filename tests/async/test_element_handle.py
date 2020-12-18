@@ -14,7 +14,7 @@
 
 import asyncio
 
-from playwright import Error, FloatRect
+from playwright.async_api import Error, FloatRect
 
 
 async def test_bounding_box(page, server):

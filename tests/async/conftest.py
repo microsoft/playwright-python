@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright import async_playwright
+from playwright.async_api import async_playwright
 
 
 # Will mark all the tests as async

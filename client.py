@@ -88,5 +88,5 @@ def main(playwright: Playwright) -> None:
 
 
 if __name__ == "__main__":
-    with playwright.sync_playwright() as p:
+    with playwright.sync_api.sync_playwright() as p:
         main(p)

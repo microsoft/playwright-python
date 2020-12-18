@@ -19,8 +19,7 @@ from typing import Any
 
 import pytest
 
-from playwright import Error, TimeoutError
-from playwright.async_api import Request
+from playwright.async_api import Error, Request, TimeoutError
 
 
 async def test_goto_should_work(page, server):
