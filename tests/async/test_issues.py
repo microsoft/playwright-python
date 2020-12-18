@@ -26,5 +26,5 @@ async def test_issue_189(browser_type):
 @pytest.mark.only_browser("chromium")
 async def test_issue_195(playwright, browser):
     iphone_11 = playwright.devices["iPhone 11"]
-    context = await browser.new_context(**iphone_11.__dict__)
+    context = await browser.new_context(**iphone_11)
     await context.close()

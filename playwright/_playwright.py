@@ -37,9 +37,19 @@ class Playwright(ChannelOwner):
         self.selectors = from_channel(initializer["selectors"])
         self.devices = {}
         self.devices = {
-            device["name"]: DeviceDescriptor._parse(device["descriptor"])
+            device["name"]: parse_device_descriptor(device["descriptor"])
             for device in initializer["deviceDescriptors"]
         }
 
     def stop(self) -> None:
         pass
+
+
+def parse_device_descriptor(dict: Dict) -> DeviceDescriptor:
+    return {
+        "user_agent": dict["userAgent"],
+        "viewport": dict["viewport"],
+        "device_scale_factor": dict["deviceScaleFactor"],
+        "is_mobile": dict["isMobile"],
+        "has_touch": dict["hasTouch"],
+    }

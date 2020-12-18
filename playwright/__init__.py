@@ -28,13 +28,8 @@ Error = api_types.Error
 FilePayload = api_types.FilePayload
 FloatRect = api_types.FloatRect
 Geolocation = api_types.Geolocation
-HttpCredentials = api_types.HttpCredentials
 PdfMargins = api_types.PdfMargins
 ProxySettings = api_types.ProxySettings
-RecordHarOptions = api_types.RecordHarOptions
-RecordVideoOptions = api_types.RecordVideoOptions
-RequestFailure = api_types.RequestFailure
-OptionSelector = api_types.OptionSelector
 SourceLocation = api_types.SourceLocation
 TimeoutError = api_types.TimeoutError
 
@@ -55,7 +50,6 @@ __all__ = [
     "async_playwright",
     "sync_playwright",
     "Cookie",
-    "HttpCredentials",
     "DeviceDescriptor",
     "Error",
     "FilePayload",
@@ -63,11 +57,7 @@ __all__ = [
     "Geolocation",
     "PdfMargins",
     "ProxySettings",
-    "RecordHarOptions",
-    "RecordVideoOptions",
-    "RequestFailure",
     "ResourceTiming",
-    "OptionSelector",
     "SourceLocation",
     "StorageState",
     "TimeoutError",

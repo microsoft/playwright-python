@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from playwright import Error, OptionSelector, TimeoutError
+from playwright import Error, TimeoutError
 
 
 async def test_close_should_reject_all_promises(context):
@@ -729,47 +729,32 @@ async def test_select_option_should_select_single_option(page, server):
 
 async def test_select_option_should_select_single_option_by_value(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
-    await page.select_option("select", OptionSelector(value="blue"))
+    await page.select_option("select", "blue")
     assert await page.evaluate("result.onInput") == ["blue"]
     assert await page.evaluate("result.onChange") == ["blue"]
 
 
 async def test_select_option_should_select_single_option_by_label(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
-    await page.select_option("select", OptionSelector(label="Indigo"))
+    await page.select_option("select", label="Indigo")
     assert await page.evaluate("result.onInput") == ["indigo"]
     assert await page.evaluate("result.onChange") == ["indigo"]
 
 
 async def test_select_option_should_select_single_option_by_handle(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
-    await page.select_option("select", await page.query_selector("[id=whiteOption]"))
+    await page.select_option(
+        "select", element=await page.query_selector("[id=whiteOption]")
+    )
     assert await page.evaluate("result.onInput") == ["white"]
     assert await page.evaluate("result.onChange") == ["white"]
 
 
 async def test_select_option_should_select_single_option_by_index(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
-    await page.select_option("select", OptionSelector(index=2))
+    await page.select_option("select", index=2)
     assert await page.evaluate("result.onInput") == ["brown"]
     assert await page.evaluate("result.onChange") == ["brown"]
-
-
-async def test_select_option_should_select_single_option_by_multiple_attributes(
-    page, server
-):
-    await page.goto(server.PREFIX + "/input/select.html")
-    await page.select_option("select", OptionSelector(value="green", label="Green"))
-    assert await page.evaluate("result.onInput") == ["green"]
-    assert await page.evaluate("result.onChange") == ["green"]
-
-
-async def test_select_option_should_not_select_single_option_when_some_attributes_do_not_match(
-    page, server
-):
-    await page.goto(server.PREFIX + "/input/select.html")
-    await page.select_option("select", OptionSelector(value="green", label="Brown"))
-    assert await page.evaluate("document.querySelector('select').value") == ""
 
 
 async def test_select_option_should_select_only_first_option(page, server):
@@ -810,11 +795,9 @@ async def test_select_option_should_select_multiple_options_with_attributes(
     await page.evaluate("makeMultiple()")
     await page.select_option(
         "select",
-        [
-            OptionSelector(value="blue"),
-            OptionSelector(label="Green"),
-            OptionSelector(index=4),
-        ],
+        value="blue",
+        label="Green",
+        index=4,
     )
     assert await page.evaluate("result.onInput") == ["blue", "gray", "green"]
     assert await page.evaluate("result.onChange") == ["blue", "gray", "green"]

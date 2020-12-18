@@ -16,14 +16,14 @@ import asyncio
 
 
 async def test_request_continue_should_work(page, server):
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: asyncio.create_task(route.continue_()))
     await page.goto(server.EMPTY_PAGE)
 
 
 async def test_request_continue_should_amend_http_headers(page, server):
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(
+        lambda route: asyncio.create_task(
             route.continue_(headers={**route.request.headers, "FOO": "bar"})
         ),
     )
@@ -40,7 +40,7 @@ async def test_request_continue_should_amend_method(page, server):
     server_request = asyncio.create_task(server.wait_for_request("/sleep.zzz"))
     await page.goto(server.EMPTY_PAGE)
     await page.route(
-        "**/*", lambda route, _: asyncio.create_task(route.continue_(method="POST"))
+        "**/*", lambda route: asyncio.create_task(route.continue_(method="POST"))
     )
     [request, _] = await asyncio.gather(
         server.wait_for_request("/sleep.zzz"),
@@ -53,7 +53,7 @@ async def test_request_continue_should_amend_method(page, server):
 async def test_request_continue_should_amend_method_on_main_request(page, server):
     request = asyncio.create_task(server.wait_for_request("/empty.html"))
     await page.route(
-        "**/*", lambda route, _: asyncio.create_task(route.continue_(method="POST"))
+        "**/*", lambda route: asyncio.create_task(route.continue_(method="POST"))
     )
     await page.goto(server.EMPTY_PAGE)
     assert (await request).method.decode() == "POST"
@@ -63,7 +63,7 @@ async def test_request_continue_should_amend_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(route.continue_(post_data=b"doggo")),
+        lambda route: asyncio.create_task(route.continue_(post_data=b"doggo")),
     )
 
     [server_request, _] = await asyncio.gather(
@@ -81,7 +81,7 @@ async def test_should_override_request_url(page, server):
     request = asyncio.create_task(server.wait_for_request("/empty.html"))
     await page.route(
         "**/foo",
-        lambda route, _: asyncio.create_task(route.continue_(url=server.EMPTY_PAGE)),
+        lambda route: asyncio.create_task(route.continue_(url=server.EMPTY_PAGE)),
     )
 
     await page.goto(server.PREFIX + "/foo")
@@ -92,7 +92,7 @@ async def test_should_amend_utf8_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(route.continue_(post_data="пушкин")),
+        lambda route: asyncio.create_task(route.continue_(post_data="пушкин")),
     )
 
     [server_request, result] = await asyncio.gather(
@@ -107,7 +107,7 @@ async def test_should_amend_binary_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(
+        lambda route: asyncio.create_task(
             route.continue_(post_data=b"\x00\x01\x02\x03\x04")
         ),
     )

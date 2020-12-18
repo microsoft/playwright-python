@@ -19,13 +19,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 from playwright._api_structures import StorageState
-from playwright._api_types import (
-    Geolocation,
-    HttpCredentials,
-    ProxySettings,
-    RecordHarOptions,
-    RecordVideoOptions,
-)
+from playwright._api_types import Geolocation, ProxySettings
 from playwright._browser_context import BrowserContext
 from playwright._connection import ChannelOwner, from_channel
 from playwright._helper import ColorScheme, is_safe_close_error, locals_to_params
@@ -83,7 +77,7 @@ class Browser(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Tuple[str, str] = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -91,24 +85,14 @@ class Browser(ChannelOwner):
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
         proxy: ProxySettings = None,
-        recordHar: RecordHarOptions = None,
-        recordVideo: RecordVideoOptions = None,
+        recordHarPath: Union[Path, str] = None,
+        recordHarOmitContent: bool = None,
+        recordVideoDir: Union[Path, str] = None,
+        recordVideoSize: Tuple[int, int] = None,
         storageState: Union[StorageState, str, Path] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        # Python is strict in which variables gets passed to methods. We get this
-        # value from the device descriptors, thats why we have to strip it out.
-        if defaultBrowserType in params:
-            del params["defaultBrowserType"]
-        if storageState:
-            if not isinstance(storageState, dict):
-                with open(storageState, "r") as f:
-                    params["storageState"] = json.load(f)
-        if viewport == 0:
-            del params["viewport"]
-            params["noDefaultViewport"] = True
-        if extraHTTPHeaders:
-            params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
+        normalize_context_params(params)
 
         channel = await self._channel.send("newContext", params)
         context = from_channel(channel)
@@ -130,7 +114,7 @@ class Browser(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Tuple[str, str] = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -138,19 +122,13 @@ class Browser(ChannelOwner):
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
         proxy: ProxySettings = None,
-        recordHar: RecordHarOptions = None,
-        recordVideo: RecordVideoOptions = None,
+        recordHarPath: Union[Path, str] = None,
+        recordHarOmitContent: bool = None,
+        recordVideoDir: Union[Path, str] = None,
+        recordVideoSize: Tuple[int, int] = None,
         storageState: Union[StorageState, str, Path] = None,
     ) -> Page:
         params = locals_to_params(locals())
-        # Python is strict in which variables gets passed to methods. We get this
-        # value from the device descriptors, thats why we have to strip it out.
-        if defaultBrowserType:
-            del params["defaultBrowserType"]
-        if storageState:
-            if not isinstance(storageState, dict):
-                with open(storageState, "r") as f:
-                    params["storageState"] = json.load(f)
         context = await self.newContext(**params)
         page = await context.newPage()
         page._owned_context = context
@@ -170,3 +148,33 @@ class Browser(ChannelOwner):
     @property
     def version(self) -> str:
         return self._initializer["version"]
+
+
+def normalize_context_params(params: Dict) -> None:
+    if "viewport" in params and params["viewport"] == 0:
+        del params["viewport"]
+        params["noDefaultViewport"] = True
+    if "defaultBrowserType" in params:
+        del params["defaultBrowserType"]
+    if "extraHTTPHeaders" in params:
+        params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
+    if "recordHarPath" in params:
+        params["recordHar"] = {"path": str(params["recordHarPath"])}
+        if "recordHarOmitContent" in params:
+            params["recordHar"]["omitContent"] = True
+            del params["recordHarOmitContent"]
+        del params["recordHarPath"]
+    if "recordVideoDir" in params:
+        params["recordVideo"] = {"dir": str(params["recordVideoDir"])}
+        if "recordVideoSize" in params:
+            params["recordVideo"]["size"] = {
+                "width": params["recordVideoSize"][0],
+                "height": params["recordVideoSize"][1],
+            }
+            del params["recordVideoSize"]
+        del params["recordVideoDir"]
+    if "storageState" in params:
+        storageState = params["storageState"]
+        if not isinstance(storageState, dict):
+            with open(storageState, "r") as f:
+                params["storageState"] = json.load(f)

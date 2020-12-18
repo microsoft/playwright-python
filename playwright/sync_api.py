@@ -29,13 +29,8 @@ from playwright._api_types import (
     FilePayload,
     FloatRect,
     Geolocation,
-    HttpCredentials,
-    OptionSelector,
     PdfMargins,
     ProxySettings,
-    RecordHarOptions,
-    RecordVideoOptions,
-    RequestFailure,
     SourceLocation,
 )
 from playwright._browser import Browser as BrowserImpl
@@ -175,6 +170,18 @@ class Request(SyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
+    def is_navigation_request(self) -> bool:
+        """Request.is_navigation_request
+
+        Whether this request is driving frame's navigation.
+
+        Returns
+        -------
+        bool
+        """
+        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest)
+
+    @property
     def redirected_from(self) -> typing.Union["Request", NoneType]:
         """Request.redirected_from
 
@@ -196,7 +203,7 @@ class Request(SyncBase):
         """Request.redirected_to
 
         New request issued by the browser if the server responded with redirect.
-        This method is the opposite of request.redirectedFrom():
+        This method is the opposite of request.redirected_from():
 
         Returns
         -------
@@ -205,7 +212,7 @@ class Request(SyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
 
     @property
-    def failure(self) -> typing.Union["RequestFailure", NoneType]:
+    def failure(self) -> typing.Union[str, NoneType]:
         """Request.failure
 
         The method returns `null` unless this request has failed, as reported by `requestfailed` event.
@@ -213,9 +220,9 @@ class Request(SyncBase):
 
         Returns
         -------
-        Optional[{"errorText": str}]
+        Optional[str]
         """
-        return mapping.from_impl_nullable(self._impl_obj.failure)
+        return mapping.from_maybe_impl(self._impl_obj.failure)
 
     @property
     def timing(self) -> "ResourceTiming":
@@ -241,17 +248,6 @@ class Request(SyncBase):
         Optional[Response]
         """
         return mapping.from_impl_nullable(self._sync(self._impl_obj.response()))
-
-    def is_navigation_request(self) -> bool:
-        """Request.is_navigation_request
-
-        Whether this request is driving frame's navigation.
-
-        Returns
-        -------
-        bool
-        """
-        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest())
 
 
 mapping.register(RequestImpl, Request)
@@ -654,7 +650,7 @@ class Keyboard(SyncBase):
 
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
-        **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
+        **NOTE** Modifier keys DO NOT effect `keyboard.insert_text`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
         ----------
@@ -897,7 +893,7 @@ class JSHandle(SyncBase):
         in-page object (JSHandle).
         If the function passed to the `jsHandle.evaluateHandle` returns a Promise, then `jsHandle.evaluateHandle` would wait
         for the promise to resolve and return its value.
-        See page.evaluateHandle(pageFunction[, arg]) for more details.
+        See page.evaluate_handle(pageFunction[, arg]) for more details.
 
         Parameters
         ----------
@@ -1265,7 +1261,7 @@ class ElementHandle(JSHandle):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
         Passing zero timeout disables this.
 
-        **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        **NOTE** `element_handle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
@@ -1300,14 +1296,10 @@ class ElementHandle(JSHandle):
 
     def select_option(
         self,
-        values: typing.Union[
-            str,
-            "ElementHandle",
-            "OptionSelector",
-            typing.List[str],
-            typing.List["ElementHandle"],
-            typing.List["OptionSelector"],
-        ] = None,
+        value: typing.Union[str, typing.List[str]] = None,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: int = None,
         no_wait_after: bool = None,
     ) -> typing.List[str]:
@@ -1319,8 +1311,6 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
-            Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         no_wait_after : Optional[bool]
@@ -1333,7 +1323,10 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.selectOption(
-                    values=mapping.to_impl(values),
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                 )
@@ -1363,7 +1356,7 @@ class ElementHandle(JSHandle):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
         Passing zero timeout disables this.
 
-        **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        **NOTE** `element_handle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
@@ -1485,7 +1478,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.type
 
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
-        To press a special key, like `Control` or `ArrowDown`, use elementHandle.press(key[, options]).
+        To press a special key, like `Control` or `ArrowDown`, use element_handle.press(key[, options]).
         An example of typing into a text field and then submitting the form:
 
         Parameters
@@ -1855,7 +1848,7 @@ class ElementHandle(JSHandle):
         will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
         throw.
 
-        **NOTE** This method does not work across navigations, use page.waitForSelector(selector[, options]) instead.
+        **NOTE** This method does not work across navigations, use page.wait_for_selector(selector[, options]) instead.
 
         Parameters
         ----------
@@ -2190,7 +2183,7 @@ class Frame(SyncBase):
         """Frame.frame_element
 
         Returns the `frame` or `iframe` element handle which corresponds to this frame.
-        This is an inverse of elementHandle.contentFrame(). Note that returned handle actually belongs to the parent frame.
+        This is an inverse of element_handle.content_frame(). Note that returned handle actually belongs to the parent frame.
         This method throws an error if the frame has been detached before `frameElement()` returns.
 
         Returns
@@ -2242,12 +2235,12 @@ class Frame(SyncBase):
         """Frame.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
-        The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page
+        The only difference between `frame.evaluate` and `frame.evaluate_handle` is that `frame.evaluate_handle` returns in-page
         object (JSHandle).
-        If the function, passed to the `frame.evaluateHandle`, returns a Promise, then `frame.evaluateHandle` would wait for
+        If the function, passed to the `frame.evaluate_handle`, returns a Promise, then `frame.evaluate_handle` would wait for
         the promise to resolve and return its value.
         A string can also be passed in instead of a function.
-        JSHandle instances can be passed as an argument to the `frame.evaluateHandle`:
+        JSHandle instances can be passed as an argument to the `frame.evaluate_handle`:
 
         Parameters
         ----------
@@ -2970,14 +2963,10 @@ class Frame(SyncBase):
     def select_option(
         self,
         selector: str,
-        values: typing.Union[
-            str,
-            "ElementHandle",
-            "OptionSelector",
-            typing.List[str],
-            typing.List["ElementHandle"],
-            typing.List["OptionSelector"],
-        ] = None,
+        value: typing.Union[str, typing.List[str]] = None,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: int = None,
         no_wait_after: bool = None,
     ) -> typing.List[str]:
@@ -2991,8 +2980,6 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to query for. See working with selectors for more details.
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
-            Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         no_wait_after : Optional[bool]
@@ -3006,7 +2993,10 @@ class Frame(SyncBase):
             self._sync(
                 self._impl_obj.selectOption(
                     selector=selector,
-                    values=mapping.to_impl(values),
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                 )
@@ -3234,7 +3224,7 @@ class Frame(SyncBase):
         """Frame.wait_for_timeout
 
         Returns a promise that resolves after the timeout.
-        Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
+        Note that `frame.wait_for_timeout()` should only be used for debugging. Tests using the timer in production are going to
         be flaky. Use signals such as network events, selectors becoming visible and others instead.
 
         Parameters
@@ -3259,7 +3249,7 @@ class Frame(SyncBase):
         Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
 
-        To pass an argument from Node.js to the predicate of `frame.waitForFunction` function:
+        To pass an argument from Node.js to the predicate of `frame.wait_for_function` function:
 
         Parameters
         ----------
@@ -3417,9 +3407,9 @@ class Worker(SyncBase):
         """Worker.evaluate_handle
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
-        The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns
+        The only difference between `worker.evaluate` and `worker.evaluate_handle` is that `worker.evaluate_handle` returns
         in-page object (JSHandle).
-        If the function passed to the `worker.evaluateHandle` returns a Promise, then `worker.evaluateHandle` would wait for
+        If the function passed to the `worker.evaluate_handle` returns a Promise, then `worker.evaluate_handle` would wait for
         the promise to resolve and return its value.
 
         Parameters
@@ -3871,15 +3861,15 @@ class Page(SyncBase):
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
 
-        page.goBack([options])
-        page.goForward([options])
+        page.go_back([options])
+        page.go_forward([options])
         page.goto(url[, options])
         page.reload([options])
-        page.setContent(html[, options])
-        page.waitForNavigation([options])
+        page.set_content(html[, options])
+        page.wait_for_navigation([options])
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout) takes priority over page.setDefaultTimeout(timeout),
-        browserContext.setDefaultTimeout(timeout) and browserContext.setDefaultNavigationTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout) takes priority over page.set_default_timeout(timeout),
+        browser_context.set_default_timeout(timeout) and browser_context.set_default_navigation_timeout(timeout).
 
         Parameters
         ----------
@@ -3895,7 +3885,7 @@ class Page(SyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout) takes priority over page.setDefaultTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout) takes priority over page.set_default_timeout(timeout).
 
         Parameters
         ----------
@@ -4079,12 +4069,12 @@ class Page(SyncBase):
         """Page.evaluate_handle
 
         Returns the value of the `pageFunction` invacation as in-page object (JSHandle).
-        The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page
+        The only difference between `page.evaluate` and `page.evaluate_handle` is that `page.evaluate_handle` returns in-page
         object (JSHandle).
-        If the function passed to the `page.evaluateHandle` returns a Promise, then `page.evaluateHandle` would wait for the
+        If the function passed to the `page.evaluate_handle` returns a Promise, then `page.evaluate_handle` would wait for the
         promise to resolve and return its value.
         A string can also be passed in instead of a function:
-        JSHandle instances can be passed as an argument to the `page.evaluateHandle`:
+        JSHandle instances can be passed as an argument to the `page.evaluate_handle`:
 
         Parameters
         ----------
@@ -4201,7 +4191,7 @@ class Page(SyncBase):
 
         Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
         fires or when the script content was injected into frame.
-        Shortcut for main frame's frame.addScriptTag(script).
+        Shortcut for main frame's frame.add_script_tag(script).
 
         Parameters
         ----------
@@ -4236,7 +4226,7 @@ class Page(SyncBase):
 
         Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
         content. Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
-        Shortcut for main frame's frame.addStyleTag(style).
+        Shortcut for main frame's frame.add_style_tag(style).
 
         Parameters
         ----------
@@ -4262,9 +4252,9 @@ class Page(SyncBase):
         executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of
         `playwrightFunction`.
         If the `playwrightFunction` returns a Promise, it will be awaited.
-        See browserContext.exposeFunction(name, playwrightFunction) for context-wide exposed function.
+        See browser_context.expose_function(name, playwrightFunction) for context-wide exposed function.
 
-        **NOTE** Functions installed via `page.exposeFunction` survive navigations.
+        **NOTE** Functions installed via `page.expose_function` survive navigations.
 
         An example of adding an `md5` function to the page:
 
@@ -4294,9 +4284,9 @@ class Page(SyncBase):
         executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of
         `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
         The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-        See browserContext.exposeBinding(name, playwrightBinding[, options]) for the context-wide version.
+        See browser_context.expose_binding(name, playwrightBinding[, options]) for the context-wide version.
 
-        **NOTE** Functions installed via `page.exposeBinding` survive navigations.
+        **NOTE** Functions installed via `page.expose_binding` survive navigations.
 
         An example of exposing page URL to all frames in a page:
 
@@ -4324,7 +4314,7 @@ class Page(SyncBase):
 
         The extra HTTP headers will be sent with every request the page initiates.
 
-        **NOTE** page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.
+        **NOTE** page.set_extra_http_headers does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -4470,7 +4460,7 @@ class Page(SyncBase):
         Returns when the required load state has been reached.
         This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
         when this method is called. If current document has already reached the required state, resolves immediately.
-        Shortcut for main frame's frame.waitForLoadState([state, options]).
+        Shortcut for main frame's frame.wait_for_load_state([state, options]).
 
         Parameters
         ----------
@@ -4502,7 +4492,7 @@ class Page(SyncBase):
         Consider this example:
         **NOTE** Usage of the History API to change the URL is
         considered a navigation.
-        Shortcut for main frame's frame.waitForNavigation([options]).
+        Shortcut for main frame's frame.wait_for_navigation([options]).
 
         Parameters
         ----------
@@ -4704,8 +4694,8 @@ class Page(SyncBase):
         """Page.set_viewport_size
 
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
-        browser.newContext([options]) allows to set viewport size (and more) for all pages in the context at once.
-        `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
+        browser.new_context([options]) allows to set viewport size (and more) for all pages in the context at once.
+        `page.set_viewport_size` will resize the page. A lot of websites don't expect phones to change size, so you should set the
         viewport size before navigating to the page.
 
         Parameters
@@ -4749,8 +4739,8 @@ class Page(SyncBase):
         the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
 
-        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and
-        page.addInitScript(script[, arg]) is not defined.
+        **NOTE** The order of evaluation of multiple scripts installed via browser_context.add_init_script(script[, arg]) and
+        page.add_init_script(script[, arg]) is not defined.
 
         Parameters
         ----------
@@ -4764,7 +4754,10 @@ class Page(SyncBase):
     def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[["Route", "Request"], typing.Any],
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ],
     ) -> NoneType:
         """Page.route
 
@@ -4775,7 +4768,7 @@ class Page(SyncBase):
 
         An example of a naïve handler that aborts all image requests:
         or the same snippet using a regex pattern instead:
-        Page routes take precedence over browser context routes (set up with browserContext.route(url, handler)) when request matches
+        Page routes take precedence over browser context routes (set up with browser_context.route(url, handler)) when request matches
         both handlers.
 
         **NOTE** Enabling routing disables http cache.
@@ -4784,7 +4777,7 @@ class Page(SyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -4798,7 +4791,10 @@ class Page(SyncBase):
     def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ] = None,
     ) -> NoneType:
         """Page.unroute
 
@@ -4808,7 +4804,7 @@ class Page(SyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -5291,14 +5287,10 @@ class Page(SyncBase):
     def select_option(
         self,
         selector: str,
-        values: typing.Union[
-            str,
-            "ElementHandle",
-            "OptionSelector",
-            typing.List[str],
-            typing.List["ElementHandle"],
-            typing.List["OptionSelector"],
-        ] = None,
+        value: typing.Union[str, typing.List[str]] = None,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: int = None,
         no_wait_after: bool = None,
     ) -> typing.List[str]:
@@ -5308,14 +5300,12 @@ class Page(SyncBase):
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
         matching `selector`, the method throws an error.
 
-        Shortcut for main frame's frame.selectOption(selector, values[, options])
+        Shortcut for main frame's frame.select_option(selector, values[, options])
 
         Parameters
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
-            Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         no_wait_after : Optional[bool]
@@ -5329,7 +5319,10 @@ class Page(SyncBase):
             self._sync(
                 self._impl_obj.selectOption(
                     selector=selector,
-                    values=mapping.to_impl(values),
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                 )
@@ -5556,9 +5549,9 @@ class Page(SyncBase):
         """Page.wait_for_timeout
 
         Returns a promise that resolves after the timeout.
-        Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
+        Note that `page.wait_for_timeout()` should only be used for debugging. Tests using the timer in production are going to be
         flaky. Use signals such as network events, selectors becoming visible and others instead.
-        Shortcut for main frame's frame.waitForTimeout(timeout).
+        Shortcut for main frame's frame.wait_for_timeout(timeout).
 
         Parameters
         ----------
@@ -5582,8 +5575,8 @@ class Page(SyncBase):
         Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
         The `waitForFunction` can be used to observe viewport size change:
 
-        To pass an argument from Node.js to the predicate of `page.waitForFunction` function:
-        Shortcut for main frame's frame.waitForFunction(pageFunction[, arg, options]).
+        To pass an argument from Node.js to the predicate of `page.wait_for_function` function:
+        Shortcut for main frame's frame.wait_for_function(pageFunction[, arg, options]).
 
         Parameters
         ----------
@@ -5637,7 +5630,7 @@ class Page(SyncBase):
         **NOTE** Generating a pdf is currently only supported in Chromium headless.
 
         `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
-        page.emulateMedia(params) before calling `page.pdf()`:
+        page.emulate_media(params) before calling `page.pdf()`:
 
         **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
         `-webkit-print-color-adjust` property to
@@ -6036,7 +6029,7 @@ class BrowserContext(SyncBase):
         """BrowserContext.pages
 
         Returns all open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can
-        find them using chromiumBrowserContext.backgroundPages().
+        find them using chromium_browser_context.background_pages().
 
         Returns
         -------
@@ -6061,15 +6054,15 @@ class BrowserContext(SyncBase):
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
 
-        page.goBack([options])
-        page.goForward([options])
+        page.go_back([options])
+        page.go_forward([options])
         page.goto(url[, options])
         page.reload([options])
-        page.setContent(html[, options])
-        page.waitForNavigation([options])
+        page.set_content(html[, options])
+        page.wait_for_navigation([options])
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout) and page.setDefaultTimeout(timeout) take priority over
-        browserContext.setDefaultNavigationTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout) and page.set_default_timeout(timeout) take priority over
+        browser_context.set_default_navigation_timeout(timeout).
 
         Parameters
         ----------
@@ -6085,8 +6078,8 @@ class BrowserContext(SyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        **NOTE** page.setDefaultNavigationTimeout(timeout), page.setDefaultTimeout(timeout) and
-        browserContext.setDefaultNavigationTimeout(timeout) take priority over browserContext.setDefaultTimeout(timeout).
+        **NOTE** page.set_default_navigation_timeout(timeout), page.set_default_timeout(timeout) and
+        browser_context.set_default_navigation_timeout(timeout) take priority over browser_context.set_default_timeout(timeout).
 
         Parameters
         ----------
@@ -6131,7 +6124,7 @@ class BrowserContext(SyncBase):
         """BrowserContext.add_cookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
-        obtained via browserContext.cookies([urls]).
+        obtained via browser_context.cookies([urls]).
 
         Parameters
         ----------
@@ -6192,30 +6185,44 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_maybe_impl(self._sync(self._impl_obj.clearPermissions()))
 
-    def set_geolocation(self, geolocation: "Geolocation" = None) -> NoneType:
+    def set_geolocation(
+        self, latitude: float, longitude: float, accuracy: float = None
+    ) -> NoneType:
         """BrowserContext.set_geolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 
-        **NOTE** Consider using browserContext.grantPermissions(permissions[, options]) to grant permissions for the browser context pages to
+        **NOTE** Consider using browser_context.grant_permissions(permissions[, options]) to grant permissions for the browser context pages to
         read its geolocation.
 
         Parameters
         ----------
-        geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
+        latitude : float
+            Latitude between -90 and 90. **required**
+        longitude : float
+            Longitude between -180 and 180. **required**
+        accuracy : Optional[float]
+            Non-negative accuracy value. Defaults to `0`.
         """
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.setGeolocation(geolocation=geolocation))
+            self._sync(
+                self._impl_obj.setGeolocation(
+                    latitude=latitude, longitude=longitude, accuracy=accuracy
+                )
+            )
         )
+
+    def reset_geolocation(self) -> NoneType:
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.resetGeolocation()))
 
     def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
         """BrowserContext.set_extra_http_headers
 
         The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are merged
-        with page-specific extra HTTP headers set with page.setExtraHTTPHeaders(headers). If page overrides a particular header,
+        with page-specific extra HTTP headers set with page.set_extra_http_headers(headers). If page overrides a particular header,
         page-specific header value will be used instead of the browser context header value.
 
-        **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
+        **NOTE** `browser_context.set_extra_http_headers` does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -6254,8 +6261,8 @@ class BrowserContext(SyncBase):
         the JavaScript environment, e.g. to seed `Math.random`.
         An example of overriding `Math.random` before the page loads:
 
-        **NOTE** The order of evaluation of multiple scripts installed via browserContext.addInitScript(script[, arg]) and
-        page.addInitScript(script[, arg]) is not defined.
+        **NOTE** The order of evaluation of multiple scripts installed via browser_context.add_init_script(script[, arg]) and
+        page.add_init_script(script[, arg]) is not defined.
 
         Parameters
         ----------
@@ -6275,7 +6282,7 @@ class BrowserContext(SyncBase):
         called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value
         of `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
         The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
-        See page.exposeBinding(name, playwrightBinding[, options]) for page-only version.
+        See page.expose_binding(name, playwrightBinding[, options]) for page-only version.
         An example of exposing page URL to all frames in all pages in the context:
 
         An example of passing an element handle:
@@ -6304,7 +6311,7 @@ class BrowserContext(SyncBase):
         called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value
         of `playwrightFunction`.
         If the `playwrightFunction` returns a Promise, it will be awaited.
-        See page.exposeFunction(name, playwrightFunction) for page-only version.
+        See page.expose_function(name, playwrightFunction) for page-only version.
         An example of adding an `md5` function to all pages in the context:
 
         Parameters
@@ -6325,7 +6332,10 @@ class BrowserContext(SyncBase):
     def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[["Route", "Request"], typing.Any],
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ],
     ) -> NoneType:
         """BrowserContext.route
 
@@ -6342,7 +6352,7 @@ class BrowserContext(SyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -6356,19 +6366,22 @@ class BrowserContext(SyncBase):
     def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ] = None,
     ) -> NoneType:
         """BrowserContext.unroute
 
-        Removes a route created with browserContext.route(url, handler). When `handler` is not specified, removes all routes for the
+        Removes a route created with browser_context.route(url, handler). When `handler` is not specified, removes all routes for the
         `url`.
 
         Parameters
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
-            A glob pattern, regex pattern or predicate receiving URL used to register a routing with browserContext.route(url, handler).
-        handler : Optional[Callable[[Route, Request], Any]]
-            Optional handler function used to register a routing with browserContext.route(url, handler).
+            A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
+            Optional handler function used to register a routing with browser_context.route(url, handler).
         """
         return mapping.from_maybe_impl(
             self._sync(
@@ -6633,7 +6646,7 @@ class Browser(SyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
         device_scale_factor: int = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -6641,8 +6654,10 @@ class Browser(SyncBase):
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: "ProxySettings" = None,
-        record_har: "RecordHarOptions" = None,
-        record_video: "RecordVideoOptions" = None,
+        record_har_path: typing.Union[str, pathlib.Path] = None,
+        record_har_omit_content: bool = None,
+        record_video_dir: typing.Union[str, pathlib.Path] = None,
+        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
         storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "BrowserContext":
         """Browser.new_context
@@ -6672,7 +6687,7 @@ class Browser(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[typing.Tuple[str, str]]
             Credentials for HTTP authentication.
         device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -6686,10 +6701,14 @@ class Browser(SyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
-        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
+        record_har_path : Union[str, pathlib.Path, NoneType]
+            Path on the filesystem to write the HAR file to.
+        record_har_omit_content : Optional[bool]
+            Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+        record_video_dir : Union[str, pathlib.Path, NoneType]
+            Path to the directory to put videos into.
+        record_video_size : Optional[typing.Tuple[int, int]]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary to fit the specified size.
         storage_state : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
@@ -6719,8 +6738,10 @@ class Browser(SyncBase):
                     acceptDownloads=accept_downloads,
                     defaultBrowserType=default_browser_type,
                     proxy=proxy,
-                    recordHar=record_har,
-                    recordVideo=record_video,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
                     storageState=storage_state,
                 )
             )
@@ -6739,7 +6760,7 @@ class Browser(SyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
         device_scale_factor: int = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -6747,15 +6768,17 @@ class Browser(SyncBase):
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: "ProxySettings" = None,
-        record_har: "RecordHarOptions" = None,
-        record_video: "RecordVideoOptions" = None,
+        record_har_path: typing.Union[str, pathlib.Path] = None,
+        record_har_omit_content: bool = None,
+        record_video_dir: typing.Union[str, pathlib.Path] = None,
+        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
         storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "Page":
         """Browser.new_page
 
         Creates a new page in a new browser context. Closing this page will close the context as well.
         This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
-        testing frameworks should explicitly create browser.newContext([options]) followed by the browserContext.newPage() to
+        testing frameworks should explicitly create browser.new_context([options]) followed by the browser_context.new_page() to
         control their exact life times.
 
         Parameters
@@ -6781,7 +6804,7 @@ class Browser(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[typing.Tuple[str, str]]
             Credentials for HTTP authentication.
         device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -6795,10 +6818,14 @@ class Browser(SyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
-        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
+        record_har_path : Union[str, pathlib.Path, NoneType]
+            Path on the filesystem to write the HAR file to.
+        record_har_omit_content : Optional[bool]
+            Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+        record_video_dir : Union[str, pathlib.Path, NoneType]
+            Path to the directory to put videos into.
+        record_video_size : Optional[typing.Tuple[int, int]]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary to fit the specified size.
         storage_state : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
@@ -6828,8 +6855,10 @@ class Browser(SyncBase):
                     acceptDownloads=accept_downloads,
                     defaultBrowserType=default_browser_type,
                     proxy=proxy,
-                    recordHar=record_har,
-                    recordVideo=record_video,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
                     storageState=storage_state,
                 )
             )
@@ -6838,9 +6867,9 @@ class Browser(SyncBase):
     def close(self) -> NoneType:
         """Browser.close
 
-        In case this browser is obtained using browserType.launch([options]), closes the browser and all of its pages (if any were
+        In case this browser is obtained using browser_type.launch([options]), closes the browser and all of its pages (if any were
         opened).
-        In case this browser is obtained using browserType.connect(params), clears all created contexts belonging to this browser
+        In case this browser is obtained using browser_type.connect(params), clears all created contexts belonging to this browser
         and disconnects from the browser server.
         The Browser object itself is considered to be disposed and cannot be used anymore.
         """
@@ -6909,7 +6938,7 @@ class BrowserType(SyncBase):
         If Google Chrome (rather than Chromium) is preferred, a Chrome
         Canary or Dev
         Channel build is suggested.
-        In browserType.launch([options]) above, any mention of Chromium also applies to Chrome.
+        In browser_type.launch([options]) above, any mention of Chromium also applies to Chrome.
         See `this article` for
         a description of the differences between Chromium and Chrome. `This article` describes
         some differences for Linux users.
@@ -7000,15 +7029,17 @@ class BrowserType(SyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
         device_scale_factor: int = None,
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         accept_downloads: bool = None,
         chromium_sandbox: bool = None,
-        record_har: "RecordHarOptions" = None,
-        record_video: "RecordVideoOptions" = None,
+        record_har_path: typing.Union[str, pathlib.Path] = None,
+        record_har_omit_content: bool = None,
+        record_video_dir: typing.Union[str, pathlib.Path] = None,
+        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -7067,7 +7098,7 @@ class BrowserType(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[typing.Tuple[str, str]]
             Credentials for HTTP authentication.
         device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -7081,10 +7112,14 @@ class BrowserType(SyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
-        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
+        record_har_path : Union[str, pathlib.Path, NoneType]
+            Path on the filesystem to write the HAR file to.
+        record_har_omit_content : Optional[bool]
+            Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+        record_video_dir : Union[str, pathlib.Path, NoneType]
+            Path to the directory to put videos into.
+        record_video_size : Optional[typing.Tuple[int, int]]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary to fit the specified size.
 
         Returns
         -------
@@ -7125,8 +7160,10 @@ class BrowserType(SyncBase):
                     colorScheme=color_scheme,
                     acceptDownloads=accept_downloads,
                     chromiumSandbox=chromium_sandbox,
-                    recordHar=record_har,
-                    recordVideo=record_video,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
                 )
             )
         )

@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._api_structures import Cookie, StorageState
-from playwright._api_types import Error, Geolocation
+from playwright._api_types import Error
 from playwright._connection import ChannelOwner, from_channel
 from playwright._event_context_manager import EventContextManagerImpl
 from playwright._helper import (
@@ -84,7 +85,9 @@ class BrowserContext(ChannelOwner):
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
             if handler_entry.matcher.matches(request.url):
-                handler_entry.handler(route, request)
+                result = cast(Any, handler_entry.handler)(route, request)
+                if inspect.iscoroutine(result):
+                    asyncio.create_task(result)
                 return
         asyncio.create_task(route.continue_())
 
@@ -138,8 +141,15 @@ class BrowserContext(ChannelOwner):
     async def clearPermissions(self) -> None:
         await self._channel.send("clearPermissions")
 
-    async def setGeolocation(self, geolocation: Optional[Geolocation]) -> None:
-        await self._channel.send("setGeolocation", locals_to_params(locals()))
+    async def setGeolocation(
+        self, latitude: float, longitude: float, accuracy: Optional[float]
+    ) -> None:
+        await self._channel.send(
+            "setGeolocation", {"geolocation": locals_to_params(locals())}
+        )
+
+    async def resetGeolocation(self) -> None:
+        await self._channel.send("setGeolocation", {})
 
     async def setExtraHTTPHeaders(self, headers: Dict[str, str]) -> None:
         await self._channel.send(

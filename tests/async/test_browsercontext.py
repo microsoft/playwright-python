@@ -178,7 +178,7 @@ async def test_user_agent_should_work_for_subframes(browser, server, utils):
 
 async def test_user_agent_should_emulate_device_user_agent(playwright, browser, server):
     context = await browser.new_context(
-        user_agent=playwright.devices["iPhone 6"].user_agent
+        user_agent=playwright.devices["iPhone 6"]["user_agent"]
     )
     page = await context.new_page()
     await page.goto(server.PREFIX + "/mobile.html")
@@ -440,7 +440,7 @@ async def test_route_should_intercept(context, server):
         assert request.headers["user-agent"]
         assert request.method == "GET"
         assert request.post_data is None
-        assert request.is_navigation_request()
+        assert request.is_navigation_request
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"

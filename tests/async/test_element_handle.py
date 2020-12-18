@@ -600,7 +600,7 @@ async def test_uncheck_the_box(page):
 async def test_select_single_option(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
     select = await page.query_selector("select")
-    await select.select_option("blue")
+    await select.select_option(value="blue")
     assert await page.evaluate("result.onInput") == ["blue"]
     assert await page.evaluate("result.onChange") == ["blue"]
 
