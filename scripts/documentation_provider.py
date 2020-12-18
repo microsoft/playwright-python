@@ -119,7 +119,7 @@ class DocumentationProvider:
         method = (
             clazz["methods"].get(method_name)
             or clazz["properties"].get(method_name)
-            or super_clazz["methods"].get(method_name)
+            or (super_clazz and super_clazz["methods"].get(method_name))
         )
         fqname = f"{class_name}.{method_name}"
 
@@ -156,9 +156,19 @@ class DocumentationProvider:
                 expand = True
             if fqname == "Page.setViewportSize" and name == "viewportSize":
                 expand = True
+            if fqname == "BrowserContext.setGeolocation" and name == "geolocation":
+                expand = True
             if expand:
                 for opt_name, opt_value in args[name]["type"]["properties"].items():
-                    args_with_expanded_options[opt_name] = opt_value
+                    if opt_name == "recordHar" or opt_name == "recordVideo":
+                        for sub_name, sub_value in opt_value["type"][
+                            "properties"
+                        ].items():
+                            args_with_expanded_options[
+                                opt_name + sub_name[0:1].upper() + sub_name[1:]
+                            ] = sub_value
+                    else:
+                        args_with_expanded_options[opt_name] = opt_value
             else:
                 args_with_expanded_options[name] = value
 
@@ -289,22 +299,10 @@ class DocumentationProvider:
                 return '{"x": float, "y": float, "width": float, "height": float}'
             if match.group(1) == "Geolocation":
                 return '{"latitude": float, "longitude": float, "accuracy": Optional[float]}'
-            if match.group(1) == "HttpCredentials":
-                return '{"username": str, "password": str}'
             if match.group(1) == "PdfMargins":
                 return '{"top": Union[str, int, NoneType], "right": Union[str, int, NoneType], "bottom": Union[str, int, NoneType], "left": Union[str, int, NoneType]}'
             if match.group(1) == "ProxySettings":
                 return '{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}'
-            if match.group(1) == "RecordHarOptions":
-                return (
-                    '{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}'
-                )
-            if match.group(1) == "RecordVideoOptions":
-                return '{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}'
-            if match.group(1) == "RequestFailure":
-                return '{"errorText": str}'
-            if match.group(1) == "OptionSelector":
-                return '{"value": Optional[str], "label": Optional[str], "index": Optional[int]}'
             if match.group(1) == "SourceLocation":
                 return '{"url": str, "lineNumber": int, "columnNumber": int}'
 
@@ -383,6 +381,8 @@ class DocumentationProvider:
             if "screenshot(clip=)" in fqname:
                 return "float"
             if fqname == "Page.pdf(width=)" or fqname == "Page.pdf(height=)":
+                return "float"
+            if fqname.startswith("BrowserContext.setGeolocation"):
                 return "float"
             return "int"
 

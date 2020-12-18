@@ -15,7 +15,6 @@
 import asyncio
 from typing import List, cast
 
-from playwright import HttpCredentials
 from playwright.async_api import Browser, Page, Request, Route
 
 
@@ -126,9 +125,7 @@ async def test_should_inherit_http_credentials_from_browser_context(
     browser: Browser, server
 ):
     server.set_auth("/title.html", b"user", b"pass")
-    context = await browser.new_context(
-        http_credentials=HttpCredentials("user", "pass")
-    )
+    context = await browser.new_context(http_credentials=("user", "pass"))
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (

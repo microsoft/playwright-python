@@ -27,7 +27,7 @@ from typing import (
     cast,
 )
 
-from playwright._api_types import FilePayload, FloatRect, OptionSelector
+from playwright._api_types import FilePayload, FloatRect, filter_out_none
 from playwright._connection import ChannelOwner, from_nullable_channel
 from playwright._file_chooser import normalize_file_payloads
 from playwright._helper import KeyboardModifier, MouseButton, locals_to_params
@@ -123,12 +123,21 @@ class ElementHandle(JSHandle):
         await self._channel.send("dblclick", locals_to_params(locals()))
 
     async def selectOption(
-        self, values: "ValuesToSelect", timeout: int = None, noWaitAfter: bool = None
+        self,
+        value: Union[str, List[str]] = None,
+        index: Union[int, List[int]] = None,
+        label: Union[str, List[str]] = None,
+        element: Union["ElementHandle", List["ElementHandle"]] = None,
+        timeout: int = None,
+        noWaitAfter: bool = None,
     ) -> List[str]:
-        params = locals_to_params(locals())
-        if "values" in params:
-            values = params.pop("values")
-            params = {**params, **convert_select_option_values(values)}
+        params = locals_to_params(
+            dict(
+                timeout=timeout,
+                noWaitAfter=noWaitAfter,
+                **convert_select_option_values(value, index, label, element)
+            )
+        )
         return await self._channel.send("selectOption", params)
 
     async def tap(
@@ -277,31 +286,32 @@ class ElementHandle(JSHandle):
         )
 
 
-ValuesToSelect = Union[
-    str,
-    ElementHandle,
-    OptionSelector,
-    List[str],
-    List[ElementHandle],
-    List[OptionSelector],
-    None,
-]
-
-
-def convert_select_option_values(arg: ValuesToSelect) -> Any:
-    if arg is None:
+def convert_select_option_values(
+    value: Union[str, List[str]] = None,
+    index: Union[int, List[int]] = None,
+    label: Union[str, List[str]] = None,
+    element: Union["ElementHandle", List["ElementHandle"]] = None,
+) -> Any:
+    if value is None and index is None and label is None and element is None:
         return {}
-    arg_list = arg if isinstance(arg, list) else [arg]
-    if not len(arg_list):
-        return {}
-    first_arg = arg_list[0]
-    if isinstance(first_arg, ElementHandle):
-        element_list = cast(List[ElementHandle], arg_list)
-        return dict(elements=list(map(lambda e: e._channel, element_list)))
-    if isinstance(first_arg, str):
-        return dict(options=list(map(lambda e: dict(value=e), arg_list)))
-    if isinstance(first_arg, OptionSelector):
-        return dict(
-            options=list(map(lambda e: cast(OptionSelector, e)._to_json(), arg_list))
-        )
-    return None
+
+    options: Any = None
+    elements: Any = None
+    if value:
+        if not isinstance(value, list):
+            value = [value]
+        options = (options or []) + list(map(lambda e: dict(value=e), value))
+    if index:
+        if not isinstance(index, list):
+            index = [index]
+        options = (options or []) + list(map(lambda e: dict(index=e), index))
+    if label:
+        if not isinstance(label, list):
+            label = [label]
+        options = (options or []) + list(map(lambda e: dict(label=e), label))
+    if element:
+        if not isinstance(element, list):
+            element = [element]
+        elements = list(map(lambda e: e._channel, element))
+
+    return filter_out_none(dict(options=options, elements=elements))

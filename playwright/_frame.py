@@ -21,11 +21,7 @@ from pyee import EventEmitter
 
 from playwright._api_types import Error, FilePayload
 from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
-from playwright._element_handle import (
-    ElementHandle,
-    ValuesToSelect,
-    convert_select_option_values,
-)
+from playwright._element_handle import ElementHandle, convert_select_option_values
 from playwright._event_context_manager import EventContextManagerImpl
 from playwright._file_chooser import normalize_file_payloads
 from playwright._helper import (
@@ -420,14 +416,21 @@ class Frame(ChannelOwner):
     async def selectOption(
         self,
         selector: str,
-        values: ValuesToSelect,
+        value: Union[str, List[str]] = None,
+        index: Union[int, List[int]] = None,
+        label: Union[str, List[str]] = None,
+        element: Union["ElementHandle", List["ElementHandle"]] = None,
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> List[str]:
-        params = locals_to_params(locals())
-        if "values" in params:
-            values = params.pop("values")
-            params = dict(**params, **convert_select_option_values(values))
+        params = locals_to_params(
+            dict(
+                selector=selector,
+                timeout=timeout,
+                noWaitAfter=noWaitAfter,
+                **convert_select_option_values(value, index, label, element),
+            )
+        )
         return await self._channel.send("selectOption", params)
 
     async def setInputFiles(

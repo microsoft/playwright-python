@@ -14,11 +14,9 @@
 
 import os
 
-from playwright import RecordVideoOptions
-
 
 def test_should_expose_video_path(browser, tmpdir, server):
-    page = browser.new_page(record_video=RecordVideoOptions(tmpdir))
+    page = browser.new_page(record_video_dir=tmpdir, record_video_size=(100, 200))
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()
     assert str(tmpdir) in path
@@ -26,7 +24,7 @@ def test_should_expose_video_path(browser, tmpdir, server):
 
 
 def test_video_should_exist(browser, tmpdir, server):
-    page = browser.new_page(record_video=RecordVideoOptions(tmpdir))
+    page = browser.new_page(record_video_dir=tmpdir)
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()
     assert str(tmpdir) in path
@@ -35,7 +33,7 @@ def test_video_should_exist(browser, tmpdir, server):
 
 
 def test_record_video_to_path(browser, tmpdir, server):
-    page = browser.new_page(record_video=RecordVideoOptions(tmpdir))
+    page = browser.new_page(record_video_dir=tmpdir)
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()
     assert str(tmpdir) in path
@@ -44,9 +42,7 @@ def test_record_video_to_path(browser, tmpdir, server):
 
 
 def test_record_video_to_path_persistent(browser_type, tmpdir, server):
-    context = browser_type.launch_persistent_context(
-        tmpdir, record_video=RecordVideoOptions(tmpdir)
-    )
+    context = browser_type.launch_persistent_context(tmpdir, record_video_dir=tmpdir)
     page = context.pages[0]
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()

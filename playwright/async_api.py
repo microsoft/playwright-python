@@ -29,13 +29,8 @@ from playwright._api_types import (
     FilePayload,
     FloatRect,
     Geolocation,
-    HttpCredentials,
-    OptionSelector,
     PdfMargins,
     ProxySettings,
-    RecordHarOptions,
-    RecordVideoOptions,
-    RequestFailure,
     SourceLocation,
 )
 from playwright._async_base import AsyncBase, AsyncEventContextManager, mapping
@@ -217,7 +212,7 @@ class Request(AsyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
 
     @property
-    def failure(self) -> typing.Union["RequestFailure", NoneType]:
+    def failure(self) -> typing.Union[str, NoneType]:
         """Request.failure
 
         The method returns `null` unless this request has failed, as reported by `requestfailed` event.
@@ -225,9 +220,9 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Optional[{"errorText": str}]
+        Optional[str]
         """
-        return mapping.from_impl_nullable(self._impl_obj.failure)
+        return mapping.from_maybe_impl(self._impl_obj.failure)
 
     @property
     def timing(self) -> "ResourceTiming":
@@ -1269,14 +1264,10 @@ class ElementHandle(JSHandle):
 
     async def select_option(
         self,
-        values: typing.Union[
-            str,
-            "ElementHandle",
-            "OptionSelector",
-            typing.List[str],
-            typing.List["ElementHandle"],
-            typing.List["OptionSelector"],
-        ] = None,
+        value: typing.Union[str, typing.List[str]] = None,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: int = None,
         no_wait_after: bool = None,
     ) -> typing.List[str]:
@@ -1288,8 +1279,6 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
-            Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         no_wait_after : Optional[bool]
@@ -1301,7 +1290,10 @@ class ElementHandle(JSHandle):
         """
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
-                values=mapping.to_impl(values),
+                value=value,
+                index=index,
+                label=label,
+                element=mapping.to_impl(element),
                 timeout=timeout,
                 noWaitAfter=no_wait_after,
             )
@@ -2877,14 +2869,10 @@ class Frame(AsyncBase):
     async def select_option(
         self,
         selector: str,
-        values: typing.Union[
-            str,
-            "ElementHandle",
-            "OptionSelector",
-            typing.List[str],
-            typing.List["ElementHandle"],
-            typing.List["OptionSelector"],
-        ] = None,
+        value: typing.Union[str, typing.List[str]] = None,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: int = None,
         no_wait_after: bool = None,
     ) -> typing.List[str]:
@@ -2898,8 +2886,6 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for. See working with selectors for more details.
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
-            Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         no_wait_after : Optional[bool]
@@ -2912,7 +2898,10 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
                 selector=selector,
-                values=mapping.to_impl(values),
+                value=value,
+                index=index,
+                label=label,
+                element=mapping.to_impl(element),
                 timeout=timeout,
                 noWaitAfter=no_wait_after,
             )
@@ -5122,14 +5111,10 @@ class Page(AsyncBase):
     async def select_option(
         self,
         selector: str,
-        values: typing.Union[
-            str,
-            "ElementHandle",
-            "OptionSelector",
-            typing.List[str],
-            typing.List["ElementHandle"],
-            typing.List["OptionSelector"],
-        ] = None,
+        value: typing.Union[str, typing.List[str]] = None,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: int = None,
         no_wait_after: bool = None,
     ) -> typing.List[str]:
@@ -5145,8 +5130,6 @@ class Page(AsyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See working with selectors for more details.
-        values : Union[str, ElementHandle, {"value": Optional[str], "label": Optional[str], "index": Optional[int]}, List[str], List[ElementHandle], List[{"value": Optional[str], "label": Optional[str], "index": Optional[int]}], NoneType]
-            Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise only the first option matching one of the passed options is selected. String values are equivalent to `{value:'string'}`. Option is considered matching if all specified properties match.
         timeout : Optional[int]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or page.setDefaultTimeout(timeout) methods.
         no_wait_after : Optional[bool]
@@ -5159,7 +5142,10 @@ class Page(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.selectOption(
                 selector=selector,
-                values=mapping.to_impl(values),
+                value=value,
+                index=index,
+                label=label,
+                element=mapping.to_impl(element),
                 timeout=timeout,
                 noWaitAfter=no_wait_after,
             )
@@ -6032,7 +6018,9 @@ class BrowserContext(AsyncBase):
         """
         return mapping.from_maybe_impl(await self._impl_obj.clearPermissions())
 
-    async def set_geolocation(self, geolocation: "Geolocation" = None) -> NoneType:
+    async def set_geolocation(
+        self, latitude: float, longitude: float, accuracy: float = None
+    ) -> NoneType:
         """BrowserContext.set_geolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -6042,11 +6030,21 @@ class BrowserContext(AsyncBase):
 
         Parameters
         ----------
-        geolocation : Optional[{"latitude": float, "longitude": float, "accuracy": Optional[float]}]
+        latitude : float
+            Latitude between -90 and 90. **required**
+        longitude : float
+            Longitude between -180 and 180. **required**
+        accuracy : Optional[float]
+            Non-negative accuracy value. Defaults to `0`.
         """
         return mapping.from_maybe_impl(
-            await self._impl_obj.setGeolocation(geolocation=geolocation)
+            await self._impl_obj.setGeolocation(
+                latitude=latitude, longitude=longitude, accuracy=accuracy
+            )
         )
+
+    async def reset_geolocation(self) -> NoneType:
+        return mapping.from_maybe_impl(await self._impl_obj.resetGeolocation())
 
     async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
         """BrowserContext.set_extra_http_headers
@@ -6461,7 +6459,7 @@ class Browser(AsyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
         device_scale_factor: int = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -6469,8 +6467,10 @@ class Browser(AsyncBase):
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: "ProxySettings" = None,
-        record_har: "RecordHarOptions" = None,
-        record_video: "RecordVideoOptions" = None,
+        record_har_path: typing.Union[str, pathlib.Path] = None,
+        record_har_omit_content: bool = None,
+        record_video_dir: typing.Union[str, pathlib.Path] = None,
+        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
         storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "BrowserContext":
         """Browser.new_context
@@ -6500,7 +6500,7 @@ class Browser(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[typing.Tuple[str, str]]
             Credentials for HTTP authentication.
         device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -6514,10 +6514,14 @@ class Browser(AsyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
-        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
+        record_har_path : Union[str, pathlib.Path, NoneType]
+            Path on the filesystem to write the HAR file to.
+        record_har_omit_content : Optional[bool]
+            Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+        record_video_dir : Union[str, pathlib.Path, NoneType]
+            Path to the directory to put videos into.
+        record_video_size : Optional[typing.Tuple[int, int]]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary to fit the specified size.
         storage_state : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
@@ -6546,8 +6550,10 @@ class Browser(AsyncBase):
                 acceptDownloads=accept_downloads,
                 defaultBrowserType=default_browser_type,
                 proxy=proxy,
-                recordHar=record_har,
-                recordVideo=record_video,
+                recordHarPath=record_har_path,
+                recordHarOmitContent=record_har_omit_content,
+                recordVideoDir=record_video_dir,
+                recordVideoSize=record_video_size,
                 storageState=storage_state,
             )
         )
@@ -6565,7 +6571,7 @@ class Browser(AsyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
         device_scale_factor: int = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -6573,8 +6579,10 @@ class Browser(AsyncBase):
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: "ProxySettings" = None,
-        record_har: "RecordHarOptions" = None,
-        record_video: "RecordVideoOptions" = None,
+        record_har_path: typing.Union[str, pathlib.Path] = None,
+        record_har_omit_content: bool = None,
+        record_video_dir: typing.Union[str, pathlib.Path] = None,
+        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
         storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "Page":
         """Browser.new_page
@@ -6607,7 +6615,7 @@ class Browser(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[typing.Tuple[str, str]]
             Credentials for HTTP authentication.
         device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -6621,10 +6629,14 @@ class Browser(AsyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Optional[{"server": str, "bypass": Optional[str], "username": Optional[str], "password": Optional[str]}]
             Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'per-context' } })`.
-        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
+        record_har_path : Union[str, pathlib.Path, NoneType]
+            Path on the filesystem to write the HAR file to.
+        record_har_omit_content : Optional[bool]
+            Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+        record_video_dir : Union[str, pathlib.Path, NoneType]
+            Path to the directory to put videos into.
+        record_video_size : Optional[typing.Tuple[int, int]]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary to fit the specified size.
         storage_state : Union[{"cookies": Optional[List[{"name": str, "value": str, "url": Optional[str], "domain": Optional[str], "path": Optional[str], "expires": Optional[int], "httpOnly": Optional[bool], "secure": Optional[bool], "sameSite": Optional[Literal['Strict', 'Lax', 'None']]}]], "origins": Optional[List[Dict]]}, str, pathlib.Path, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information obtained via browserContext.storageState([options]). Either a path to the file with saved storage, or an object with the following fields:
 
@@ -6653,8 +6665,10 @@ class Browser(AsyncBase):
                 acceptDownloads=accept_downloads,
                 defaultBrowserType=default_browser_type,
                 proxy=proxy,
-                recordHar=record_har,
-                recordVideo=record_video,
+                recordHarPath=record_har_path,
+                recordHarOmitContent=record_har_omit_content,
+                recordVideoDir=record_video_dir,
+                recordVideoSize=record_video_size,
                 storageState=storage_state,
             )
         )
@@ -6822,15 +6836,17 @@ class BrowserType(AsyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
         device_scale_factor: int = None,
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         accept_downloads: bool = None,
         chromium_sandbox: bool = None,
-        record_har: "RecordHarOptions" = None,
-        record_video: "RecordVideoOptions" = None,
+        record_har_path: typing.Union[str, pathlib.Path] = None,
+        record_har_omit_content: bool = None,
+        record_video_dir: typing.Union[str, pathlib.Path] = None,
+        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -6889,7 +6905,7 @@ class BrowserType(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Optional[{"username": str, "password": str}]
+        http_credentials : Optional[typing.Tuple[str, str]]
             Credentials for HTTP authentication.
         device_scale_factor : Optional[int]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -6903,10 +6919,14 @@ class BrowserType(AsyncBase):
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
-        record_har : Optional[{"omitContent": Optional[bool], "path": Union[str, pathlib.Path]}]
-            Enables HAR recording for all pages into `recordHar.path` file. If not specified, the HAR is not recorded. Make sure to await browserContext.close() for the HAR to be saved.
-        record_video : Optional[{"dir": Union[str, pathlib.Path], "size": Optional[{"width": int, "height": int}]}]
-            Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await browserContext.close() for videos to be saved.
+        record_har_path : Union[str, pathlib.Path, NoneType]
+            Path on the filesystem to write the HAR file to.
+        record_har_omit_content : Optional[bool]
+            Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+        record_video_dir : Union[str, pathlib.Path, NoneType]
+            Path to the directory to put videos into.
+        record_video_size : Optional[typing.Tuple[int, int]]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary to fit the specified size.
 
         Returns
         -------
@@ -6946,8 +6966,10 @@ class BrowserType(AsyncBase):
                 colorScheme=color_scheme,
                 acceptDownloads=accept_downloads,
                 chromiumSandbox=chromium_sandbox,
-                recordHar=record_har,
-                recordVideo=record_video,
+                recordHarPath=record_har_path,
+                recordHarOmitContent=record_har_omit_content,
+                recordVideoDir=record_video_dir,
+                recordVideoSize=record_video_size,
             )
         )
 

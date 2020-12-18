@@ -237,6 +237,8 @@ class Connection:
                 return {"x": payload[0], "y": payload[1]}
             if param_name == "size" or param_name == "viewport":
                 return {"width": payload[0], "height": payload[1]}
+            if param_name == "httpCredentials":
+                return {"username": payload[0], "password": payload[1]}
         if isinstance(payload, Path):
             return str(payload)
         if isinstance(payload, ApiType):

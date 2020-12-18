@@ -178,7 +178,7 @@ async def test_user_agent_should_work_for_subframes(browser, server, utils):
 
 async def test_user_agent_should_emulate_device_user_agent(playwright, browser, server):
     context = await browser.new_context(
-        user_agent=playwright.devices["iPhone 6"].user_agent
+        user_agent=playwright.devices["iPhone 6"]["user_agent"]
     )
     page = await context.new_page()
     await page.goto(server.PREFIX + "/mobile.html")
