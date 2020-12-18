@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 import playwright
+from playwright._impl._logger import init_logger
 
 
 def compute_driver_executable() -> Path:
@@ -37,3 +38,5 @@ if sys.version_info.major == 3 and sys.version_info.minor == 7:
         # RuntimeError: Cannot add child handler, the child watcher does not have a loop attached
         asyncio.get_event_loop()
         asyncio.get_child_watcher()
+
+init_logger()
