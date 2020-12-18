@@ -81,33 +81,32 @@ def generate(t: Any) -> None:
             and "expect_" not in name
             and "remove_listener" != name
         ):
+            is_async = inspect.iscoroutinefunction(value)
             print("")
-            if inspect.iscoroutinefunction(value):
-                print(
-                    f"    async def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
-                )
-                documentation_provider.print_entry(
-                    class_name, name, get_type_hints(value, api_globals)
-                )
-                [prefix, suffix] = return_value(
-                    get_type_hints(value, api_globals)["return"]
-                )
-                prefix = "        return " + prefix + f"await self._impl_obj.{name}("
-                suffix = ")" + suffix
-                print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
-            else:
-                print(
-                    f"    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
-                )
-                documentation_provider.print_entry(
-                    class_name, name, get_type_hints(value, api_globals)
-                )
-                [prefix, suffix] = return_value(
-                    get_type_hints(value, api_globals)["return"]
-                )
-                prefix = "        return " + prefix + f"self._impl_obj.{name}("
-                suffix = ")" + suffix
-                print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
+            async_prefix = "async " if is_async else ""
+            await_prefix = "await " if is_async else ""
+            print(
+                f"    {async_prefix}def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+            )
+            documentation_provider.print_entry(
+                class_name, name, get_type_hints(value, api_globals)
+            )
+            [prefix, suffix] = return_value(
+                get_type_hints(value, api_globals)["return"]
+            )
+            prefix = prefix + f"{await_prefix}self._impl_obj.{name}("
+            suffix = ")" + suffix
+            print(
+                f"""
+        try:
+            log_api("=> {to_snake_case(class_name)}.{to_snake_case(name)} started")
+            result = {prefix}{arguments(value, len(prefix))}{suffix}
+            log_api("<= {to_snake_case(class_name)}.{to_snake_case(name)} succeded")
+            return result
+        except Exception as e:
+            log_api("<= {to_snake_case(class_name)}.{to_snake_case(name)} failed")
+            raise e"""
+            )
         if "expect_" in name:
             print("")
             return_type_value = return_type(value)
