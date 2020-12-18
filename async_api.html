@@ -203,6 +203,18 @@ class Request(AsyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
+    def is_navigation_request(self) -&gt; bool:
+        &#34;&#34;&#34;Request.is_navigation_request
+
+        Whether this request is driving frame&#39;s navigation.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest)
+
+    @property
     def redirected_from(self) -&gt; typing.Union[&#34;Request&#34;, NoneType]:
         &#34;&#34;&#34;Request.redirected_from
 
@@ -269,17 +281,6 @@ class Request(AsyncBase):
         Optional[Response]
         &#34;&#34;&#34;
         return mapping.from_impl_nullable(await self._impl_obj.response())
-
-    def is_navigation_request(self) -&gt; bool:
-        &#34;&#34;&#34;Request.is_navigation_request
-
-        Whether this request is driving frame&#39;s navigation.
-
-        Returns
-        -------
-        bool
-        &#34;&#34;&#34;
-        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest())
 
 
 mapping.register(RequestImpl, Request)
@@ -4634,7 +4635,10 @@ class Page(AsyncBase):
     async def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ],
     ) -&gt; NoneType:
         &#34;&#34;&#34;Page.route
 
@@ -4654,7 +4658,7 @@ class Page(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -4666,7 +4670,10 @@ class Page(AsyncBase):
     async def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ] = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;Page.unroute
 
@@ -4676,7 +4683,7 @@ class Page(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -6178,7 +6185,10 @@ class BrowserContext(AsyncBase):
     async def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ],
     ) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.route
 
@@ -6195,7 +6205,7 @@ class BrowserContext(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -6207,7 +6217,10 @@ class BrowserContext(AsyncBase):
     async def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ] = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.unroute
 
@@ -6218,7 +6231,7 @@ class BrowserContext(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function used to register a routing with browser_context.route(url, handler).
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -8188,7 +8201,10 @@ control their exact life times.</p>
     async def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ],
     ) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.route
 
@@ -8205,7 +8221,7 @@ control their exact life times.</p>
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -8217,7 +8233,10 @@ control their exact life times.</p>
     async def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ] = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.unroute
 
@@ -8228,7 +8247,7 @@ control their exact life times.</p>
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function used to register a routing with browser_context.route(url, handler).
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -8901,7 +8920,7 @@ specified.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.route"><code class="name flex">
-<span>async def <span class="ident">route</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any]) ‑> NoneType</span>
+<span>async def <span class="ident">route</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Union[Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>')], Any], Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any]]) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.route</p>
@@ -8916,7 +8935,7 @@ handlers.</p>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Union[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>], Any], Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]]</code></dt>
 <dd>handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -8926,7 +8945,10 @@ handlers.</p>
 <pre><code class="python">async def route(
     self,
     url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-    handler: typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+    handler: typing.Union[
+        typing.Callable[[&#34;Route&#34;], typing.Any],
+        typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+    ],
 ) -&gt; NoneType:
     &#34;&#34;&#34;BrowserContext.route
 
@@ -8943,7 +8965,7 @@ handlers.</p>
     ----------
     url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL to match while routing.
-    handler : Callable[[Route, Request], Any]
+    handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
         handler function to route the request.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -9169,7 +9191,7 @@ read its geolocation.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.BrowserContext.unroute"><code class="name flex">
-<span>async def <span class="ident">unroute</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any] = None) ‑> NoneType</span>
+<span>async def <span class="ident">unroute</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Union[Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>')], Any], Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any]] = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.unroute</p>
@@ -9179,7 +9201,7 @@ read its geolocation.</p>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Union[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>], Any], Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any], NoneType]</code></dt>
 <dd>Optional handler function used to register a routing with browser_context.route(url, handler).</dd>
 </dl></div>
 <details class="source">
@@ -9189,7 +9211,10 @@ read its geolocation.</p>
 <pre><code class="python">async def unroute(
     self,
     url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-    handler: typing.Union[typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any]] = None,
+    handler: typing.Union[
+        typing.Callable[[&#34;Route&#34;], typing.Any],
+        typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+    ] = None,
 ) -&gt; NoneType:
     &#34;&#34;&#34;BrowserContext.unroute
 
@@ -9200,7 +9225,7 @@ read its geolocation.</p>
     ----------
     url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).
-    handler : Optional[Callable[[Route, Request], Any]]
+    handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
         Optional handler function used to register a routing with browser_context.route(url, handler).
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -19520,7 +19545,10 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
     async def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ],
     ) -&gt; NoneType:
         &#34;&#34;&#34;Page.route
 
@@ -19540,7 +19568,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -19552,7 +19580,10 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
     async def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[[&#34;Route&#34;], typing.Any],
+            typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+        ] = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;Page.unroute
 
@@ -19562,7 +19593,7 @@ To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function to route the request.
         &#34;&#34;&#34;
         return mapping.from_maybe_impl(
@@ -23710,7 +23741,7 @@ last redirect.</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.route"><code class="name flex">
-<span>async def <span class="ident">route</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any]) ‑> NoneType</span>
+<span>async def <span class="ident">route</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Union[Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>')], Any], Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any]]) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.route</p>
@@ -23726,7 +23757,7 @@ both handlers.</p>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Union[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>], Any], Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]]</code></dt>
 <dd>handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -23736,7 +23767,10 @@ both handlers.</p>
 <pre><code class="python">async def route(
     self,
     url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-    handler: typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+    handler: typing.Union[
+        typing.Callable[[&#34;Route&#34;], typing.Any],
+        typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+    ],
 ) -&gt; NoneType:
     &#34;&#34;&#34;Page.route
 
@@ -23756,7 +23790,7 @@ both handlers.</p>
     ----------
     url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL to match while routing.
-    handler : Callable[[Route, Request], Any]
+    handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
         handler function to route the request.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -24493,7 +24527,7 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 </details>
 </dd>
 <dt id="playwright.async_api.Page.unroute"><code class="name flex">
-<span>async def <span class="ident">unroute</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any] = None) ‑> NoneType</span>
+<span>async def <span class="ident">unroute</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]], handler: Union[Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>')], Any], Callable[[ForwardRef('<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>'), ForwardRef('<a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>')], Any]] = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.unroute</p>
@@ -24502,7 +24536,7 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[str, Pattern, Callable[[str], bool]]</code></dt>
 <dd>A glob pattern, regex pattern or predicate receiving URL to match while routing.</dd>
-<dt><strong><code>handler</code></strong> :&ensp;<code>Optional[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any]]</code></dt>
+<dt><strong><code>handler</code></strong> :&ensp;<code>Union[Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>], Any], Callable[[<a title="playwright.async_api.Route" href="#playwright.async_api.Route">Route</a>, <a title="playwright.async_api.Request" href="#playwright.async_api.Request">Request</a>], Any], NoneType]</code></dt>
 <dd>Optional handler function to route the request.</dd>
 </dl></div>
 <details class="source">
@@ -24512,7 +24546,10 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
 <pre><code class="python">async def unroute(
     self,
     url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-    handler: typing.Union[typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any]] = None,
+    handler: typing.Union[
+        typing.Callable[[&#34;Route&#34;], typing.Any],
+        typing.Callable[[&#34;Route&#34;, &#34;Request&#34;], typing.Any],
+    ] = None,
 ) -&gt; NoneType:
     &#34;&#34;&#34;Page.unroute
 
@@ -24522,7 +24559,7 @@ Shortcut for main frame's frame.uncheck(selector[, options]).</p>
     ----------
     url : Union[str, Pattern, Callable[[str], bool]]
         A glob pattern, regex pattern or predicate receiving URL to match while routing.
-    handler : Optional[Callable[[Route, Request], Any]]
+    handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
         Optional handler function to route the request.
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(
@@ -25258,6 +25295,18 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
+    def is_navigation_request(self) -&gt; bool:
+        &#34;&#34;&#34;Request.is_navigation_request
+
+        Whether this request is driving frame&#39;s navigation.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest)
+
+    @property
     def redirected_from(self) -&gt; typing.Union[&#34;Request&#34;, NoneType]:
         &#34;&#34;&#34;Request.redirected_from
 
@@ -25323,18 +25372,7 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
         -------
         Optional[Response]
         &#34;&#34;&#34;
-        return mapping.from_impl_nullable(await self._impl_obj.response())
-
-    def is_navigation_request(self) -&gt; bool:
-        &#34;&#34;&#34;Request.is_navigation_request
-
-        Whether this request is driving frame&#39;s navigation.
-
-        Returns
-        -------
-        bool
-        &#34;&#34;&#34;
-        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest())</code></pre>
+        return mapping.from_impl_nullable(await self._impl_obj.response())</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -25421,6 +25459,32 @@ def headers(self) -&gt; typing.Dict[str, str]:
     Dict[str, str]
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._impl_obj.headers)</code></pre>
+</details>
+</dd>
+<dt id="playwright.async_api.Request.is_navigation_request"><code class="name">var <span class="ident">is_navigation_request</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Request.is_navigation_request</p>
+<p>Whether this request is driving frame's navigation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def is_navigation_request(self) -&gt; bool:
+    &#34;&#34;&#34;Request.is_navigation_request
+
+    Whether this request is driving frame&#39;s navigation.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+    return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest)</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.Request.method"><code class="name">var <span class="ident">method</span> : str</code></dt>
@@ -25681,33 +25745,6 @@ def url(self) -&gt; str:
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="playwright.async_api.Request.is_navigation_request"><code class="name flex">
-<span>def <span class="ident">is_navigation_request</span></span>(<span>self) ‑> bool</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Request.is_navigation_request</p>
-<p>Whether this request is driving frame's navigation.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_navigation_request(self) -&gt; bool:
-    &#34;&#34;&#34;Request.is_navigation_request
-
-    Whether this request is driving frame&#39;s navigation.
-
-    Returns
-    -------
-    bool
-    &#34;&#34;&#34;
-    return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest())</code></pre>
-</details>
-</dd>
 <dt id="playwright.async_api.Request.response"><code class="name flex">
 <span>async def <span class="ident">response</span></span>(<span>self) ‑> Union[<a title="playwright.async_api.Response" href="#playwright.async_api.Response">Response</a>, NoneType]</span>
 </code></dt>
