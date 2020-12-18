@@ -440,7 +440,7 @@ async def test_route_should_intercept(context, server):
         assert request.headers["user-agent"]
         assert request.method == "GET"
         assert request.post_data is None
-        assert request.is_navigation_request()
+        assert request.is_navigation_request
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"

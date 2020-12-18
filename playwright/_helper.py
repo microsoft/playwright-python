@@ -44,7 +44,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright._network import Request, Route
 
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
-RouteHandler = Callable[["Route", "Request"], Any]
+RouteHandler = Union[Callable[["Route"], Any], Callable[["Route", "Request"], Any]]
 
 ColorScheme = Literal["dark", "light", "no-preference"]
 DocumentLoadState = Literal["domcontentloaded", "load", "networkidle"]

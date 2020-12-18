@@ -105,6 +105,7 @@ class Request(ChannelOwner):
     def frame(self) -> "Frame":
         return from_channel(self._initializer["frame"])
 
+    @property
     def isNavigationRequest(self) -> bool:
         return self._initializer["isNavigationRequest"]
 

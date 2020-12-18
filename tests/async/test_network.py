@@ -30,7 +30,7 @@ async def test_request_fulfill(page, server):
         assert request.headers["user-agent"]
         assert request.method == "GET"
         assert request.post_data is None
-        assert request.is_navigation_request()
+        assert request.is_navigation_request
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
@@ -513,11 +513,11 @@ async def test_request_is_navigation_request_should_work(page, server):
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
     await page.goto(server.PREFIX + "/rrredirect")
     print("kek")
-    assert requests.get("rrredirect").is_navigation_request()
-    assert requests.get("one-frame.html").is_navigation_request()
-    assert requests.get("frame.html").is_navigation_request()
-    assert requests.get("script.js").is_navigation_request() is False
-    assert requests.get("style.css").is_navigation_request() is False
+    assert requests.get("rrredirect").is_navigation_request
+    assert requests.get("one-frame.html").is_navigation_request
+    assert requests.get("frame.html").is_navigation_request
+    assert requests.get("script.js").is_navigation_request is False
+    assert requests.get("style.css").is_navigation_request is False
 
 
 async def test_request_is_navigation_request_should_work_when_navigating_to_image(
@@ -526,7 +526,7 @@ async def test_request_is_navigation_request_should_work_when_navigating_to_imag
     requests = []
     page.on("request", lambda r: requests.append(r))
     await page.goto(server.PREFIX + "/pptr.png")
-    assert requests[0].is_navigation_request()
+    assert requests[0].is_navigation_request
 
 
 async def test_set_extra_http_headers_should_work(page, server):

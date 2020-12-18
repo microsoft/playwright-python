@@ -95,10 +95,10 @@ Parameter type mismatch in Frame.dispatchEvent(eventInit=): documented as Option
 Parameter type mismatch in Page.dispatchEvent(eventInit=): documented as Optional[EvaluationArgument], code has Optional[Dict]
 
 # Route
-Parameter type mismatch in Page.route(handler=): documented as function(Route, Request), code has Callable[[Route, Request], Any]
-Parameter type mismatch in Page.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[Callable[[Route, Request], Any]]
-Parameter type mismatch in BrowserContext.route(handler=): documented as function(Route, Request), code has Callable[[Route, Request], Any]
-Parameter type mismatch in BrowserContext.unroute(handler=): documented as Optional[function(Route, Request)], code has Optional[Callable[[Route, Request], Any]]
+Parameter type mismatch in Page.unroute(handler=): documented as Optional[function(Route, Request)], code has Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
+Parameter type mismatch in Page.route(handler=): documented as function(Route, Request), code has Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
+Parameter type mismatch in BrowserContext.unroute(handler=): documented as Optional[function(Route, Request)], code has Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
+Parameter type mismatch in BrowserContext.route(handler=): documented as function(Route, Request), code has Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
 
 # Selectors
 Parameter type mismatch in Selectors.register(script=): documented as Union[Callable, str, Dict], code has Optional[str]

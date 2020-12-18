@@ -175,6 +175,18 @@ class Request(AsyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
+    def is_navigation_request(self) -> bool:
+        """Request.is_navigation_request
+
+        Whether this request is driving frame's navigation.
+
+        Returns
+        -------
+        bool
+        """
+        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest)
+
+    @property
     def redirected_from(self) -> typing.Union["Request", NoneType]:
         """Request.redirected_from
 
@@ -241,17 +253,6 @@ class Request(AsyncBase):
         Optional[Response]
         """
         return mapping.from_impl_nullable(await self._impl_obj.response())
-
-    def is_navigation_request(self) -> bool:
-        """Request.is_navigation_request
-
-        Whether this request is driving frame's navigation.
-
-        Returns
-        -------
-        bool
-        """
-        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest())
 
 
 mapping.register(RequestImpl, Request)
@@ -4606,7 +4607,10 @@ class Page(AsyncBase):
     async def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[["Route", "Request"], typing.Any],
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ],
     ) -> NoneType:
         """Page.route
 
@@ -4626,7 +4630,7 @@ class Page(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -4638,7 +4642,10 @@ class Page(AsyncBase):
     async def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ] = None,
     ) -> NoneType:
         """Page.unroute
 
@@ -4648,7 +4655,7 @@ class Page(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -6150,7 +6157,10 @@ class BrowserContext(AsyncBase):
     async def route(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Callable[["Route", "Request"], typing.Any],
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ],
     ) -> NoneType:
         """BrowserContext.route
 
@@ -6167,7 +6177,7 @@ class BrowserContext(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL to match while routing.
-        handler : Callable[[Route, Request], Any]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any]]
             handler function to route the request.
         """
         return mapping.from_maybe_impl(
@@ -6179,7 +6189,10 @@ class BrowserContext(AsyncBase):
     async def unroute(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
-        handler: typing.Union[typing.Callable[["Route", "Request"], typing.Any]] = None,
+        handler: typing.Union[
+            typing.Callable[["Route"], typing.Any],
+            typing.Callable[["Route", "Request"], typing.Any],
+        ] = None,
     ) -> NoneType:
         """BrowserContext.unroute
 
@@ -6190,7 +6203,7 @@ class BrowserContext(AsyncBase):
         ----------
         url : Union[str, Pattern, Callable[[str], bool]]
             A glob pattern, regex pattern or predicate receiving URL used to register a routing with browser_context.route(url, handler).
-        handler : Optional[Callable[[Route, Request], Any]]
+        handler : Union[Callable[[Route], Any], Callable[[Route, Request], Any], NoneType]
             Optional handler function used to register a routing with browser_context.route(url, handler).
         """
         return mapping.from_maybe_impl(
