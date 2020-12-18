@@ -17,8 +17,7 @@ import os
 
 import pytest
 
-from playwright import Error
-from playwright.async_api import BrowserType
+from playwright.async_api import BrowserType, Error
 
 
 async def test_browser_type_launch_should_reject_all_promises_when_browser_is_closed(

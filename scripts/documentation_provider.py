@@ -27,7 +27,7 @@ from typing import (  # type: ignore
     get_type_hints,
 )
 
-from playwright._helper import to_snake_case
+from playwright._impl._helper import to_snake_case
 
 enum_regex = r"^\"[^\"]+\"(?:\|\"[^\"]+\")+$"
 union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
@@ -286,12 +286,12 @@ class DocumentationProvider:
         str_value = str(value)
         if isinstance(value, list):
             return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a), value)))}]"
-        if str_value == "<class 'playwright._types.Error'>":
+        if str_value == "<class 'playwright._impl._types.Error'>":
             return "Error"
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
-        match = re.match(r"^<class 'playwright\.[\w_]+\.([\w]+)'>$", str_value)
+        match = re.match(r"^<class 'playwright\._impl\.[\w_]+\.([\w]+)'>$", str_value)
         if match and "_api_structures" not in str_value:
             if match.group(1) == "FilePayload":
                 return "Dict"

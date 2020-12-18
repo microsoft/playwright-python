@@ -17,8 +17,7 @@ import asyncio
 
 import pytest
 
-from playwright import Error, Geolocation
-from playwright.async_api import BrowserContext, Page
+from playwright.async_api import BrowserContext, Error, Geolocation, Page
 
 
 async def test_should_work(page: Page, server, context: BrowserContext):

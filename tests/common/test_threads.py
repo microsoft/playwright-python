@@ -14,7 +14,7 @@
 
 import threading
 
-from playwright import sync_playwright
+from playwright.sync_api import sync_playwright
 
 
 def test_running_in_thread(browser_name):

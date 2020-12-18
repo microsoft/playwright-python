@@ -1,7 +1,6 @@
 import pytest
 
-from playwright import Error
-from playwright.async_api import Page
+from playwright.async_api import Error, Page
 
 
 async def test_selectors_register_should_work(selectors, browser):

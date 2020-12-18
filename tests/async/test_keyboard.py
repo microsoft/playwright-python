@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 
-from playwright._api_types import Error
+from playwright._impl._api_types import Error
 from playwright.async_api import Page
 
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright import Error
+from playwright.async_api import Error
 
 
 async def test_add_init_script_evaluate_before_anything_else_on_the_page(page):

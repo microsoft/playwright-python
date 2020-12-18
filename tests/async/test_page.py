@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from playwright import Error, TimeoutError
+from playwright.async_api import Error, TimeoutError
 
 
 async def test_close_should_reject_all_promises(context):

@@ -16,8 +16,7 @@ import os
 
 import pytest
 
-from playwright import Error, TimeoutError, sync_playwright
-from playwright.sync_api import Browser, Page
+from playwright.sync_api import Browser, Error, Page, TimeoutError, sync_playwright
 
 
 def test_sync_query_selector(page):

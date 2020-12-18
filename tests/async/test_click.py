@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright import Error, TimeoutError
+from playwright.async_api import Error, TimeoutError
 
 
 async def give_it_a_chance_to_click(page):
