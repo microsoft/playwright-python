@@ -62,13 +62,8 @@ Error = api_types.Error
 FilePayload = api_types.FilePayload
 FloatRect = api_types.FloatRect
 Geolocation = api_types.Geolocation
-HttpCredentials = api_types.HttpCredentials
 PdfMargins = api_types.PdfMargins
 ProxySettings = api_types.ProxySettings
-RecordHarOptions = api_types.RecordHarOptions
-RecordVideoOptions = api_types.RecordVideoOptions
-RequestFailure = api_types.RequestFailure
-OptionSelector = api_types.OptionSelector
 SourceLocation = api_types.SourceLocation
 TimeoutError = api_types.TimeoutError
 
@@ -89,7 +84,6 @@ __all__ = [
     &#34;async_playwright&#34;,
     &#34;sync_playwright&#34;,
     &#34;Cookie&#34;,
-    &#34;HttpCredentials&#34;,
     &#34;DeviceDescriptor&#34;,
     &#34;Error&#34;,
     &#34;FilePayload&#34;,
@@ -97,11 +91,7 @@ __all__ = [
     &#34;Geolocation&#34;,
     &#34;PdfMargins&#34;,
     &#34;ProxySettings&#34;,
-    &#34;RecordHarOptions&#34;,
-    &#34;RecordVideoOptions&#34;,
-    &#34;RequestFailure&#34;,
     &#34;ResourceTiming&#34;,
-    &#34;OptionSelector&#34;,
     &#34;SourceLocation&#34;,
     &#34;StorageState&#34;,
     &#34;TimeoutError&#34;,
@@ -268,48 +258,34 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="playwright.DeviceDescriptor"><code class="flex name class">
 <span>class <span class="ident">DeviceDescriptor</span></span>
-<span>(</span><span>user_agent: str = None, viewport: Tuple[int, int] = None, device_scale_factor: int = None, is_mobile: bool = None, has_touch: bool = None)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class DeviceDescriptor(ApiType):
+<pre><code class="python">class DeviceDescriptor(TypedDict):
     user_agent: Optional[str]
     viewport: Optional[Tuple[int, int]]
     device_scale_factor: Optional[int]
     is_mobile: Optional[bool]
-    has_touch: Optional[bool]
-
-    @classmethod
-    def _parse(cls, dict: Dict) -&gt; &#34;DeviceDescriptor&#34;:
-        return DeviceDescriptor(
-            dict[&#34;userAgent&#34;],
-            dict[&#34;viewport&#34;],
-            dict[&#34;deviceScaleFactor&#34;],
-            dict[&#34;isMobile&#34;],
-            dict[&#34;hasTouch&#34;],
-        )
-
-    def __init__(
-        self,
-        user_agent: str = None,
-        viewport: Tuple[int, int] = None,
-        device_scale_factor: int = None,
-        is_mobile: bool = None,
-        has_touch: bool = None,
-    ):
-        self.user_agent = user_agent
-        self.viewport = viewport
-        self.device_scale_factor = device_scale_factor
-        self.is_mobile = is_mobile
-        self.has_touch = has_touch</code></pre>
+    has_touch: Optional[bool]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>playwright._api_types.ApiType</li>
+<li>builtins.dict</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -493,80 +469,6 @@ dict(one=1, two=2)</p></div>
 </dd>
 </dl>
 </dd>
-<dt id="playwright.HttpCredentials"><code class="flex name class">
-<span>class <span class="ident">HttpCredentials</span></span>
-<span>(</span><span>username: str, password: str)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class HttpCredentials(ApiType):
-    username: str
-    password: str
-
-    def __init__(self, username: str, password: str):
-        self.username = username
-        self.password = password</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>playwright._api_types.ApiType</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.HttpCredentials.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.HttpCredentials.username"><code class="name">var <span class="ident">username</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="playwright.OptionSelector"><code class="flex name class">
-<span>class <span class="ident">OptionSelector</span></span>
-<span>(</span><span>value: str = None, label: str = None, index: int = None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class OptionSelector(ApiType):
-    value: Optional[str]
-    label: Optional[str]
-    index: Optional[int]
-
-    def __init__(self, value: str = None, label: str = None, index: int = None):
-        self.value = value
-        self.label = label
-        self.index = index</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>playwright._api_types.ApiType</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.OptionSelector.index"><code class="name">var <span class="ident">index</span> : Union[int, NoneType]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.OptionSelector.label"><code class="name">var <span class="ident">label</span> : Union[str, NoneType]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.OptionSelector.value"><code class="name">var <span class="ident">value</span> : Union[str, NoneType]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
 <dt id="playwright.PdfMargins"><code class="flex name class">
 <span>class <span class="ident">PdfMargins</span></span>
 <span>(</span><span>top: Union[str, int], right: Union[str, int], bottom: Union[str, int], left: Union[str, int])</span>
@@ -666,123 +568,6 @@ dict(one=1, two=2)</p></div>
 <div class="desc"></div>
 </dd>
 <dt id="playwright.ProxySettings.username"><code class="name">var <span class="ident">username</span> : Union[str, NoneType]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="playwright.RecordHarOptions"><code class="flex name class">
-<span>class <span class="ident">RecordHarOptions</span></span>
-<span>(</span><span>path: Union[str, pathlib.Path], omit_content: bool = None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RecordHarOptions(ApiType):
-    omit_content: Optional[bool]
-    path: Union[Path, str]
-
-    def __init__(self, path: Union[str, Path], omit_content: bool = None):
-        self.path = path
-        self.omit_content = omit_content
-
-    def _to_json(self) -&gt; Dict:
-        return filter_out_none(
-            {&#34;omitContent&#34;: self.omit_content, &#34;path&#34;: str(self.path)}
-        )</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>playwright._api_types.ApiType</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.RecordHarOptions.omit_content"><code class="name">var <span class="ident">omit_content</span> : Union[bool, NoneType]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.RecordHarOptions.path"><code class="name">var <span class="ident">path</span> : Union[pathlib.Path, str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="playwright.RecordVideoOptions"><code class="flex name class">
-<span>class <span class="ident">RecordVideoOptions</span></span>
-<span>(</span><span>dir: Union[str, pathlib.Path], size: Tuple[int, int] = None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RecordVideoOptions(ApiType):
-    dir: Union[Path, str]
-    size: Optional[Tuple[int, int]]
-
-    def __init__(self, dir: Union[str, Path], size: Tuple[int, int] = None):
-        self.dir = dir
-        self.size = size
-
-    def _to_json(self) -&gt; Dict:
-        return filter_out_none(
-            {
-                &#34;dir&#34;: str(self.dir),
-                &#34;size&#34;: {&#34;width&#34;: self.size[0], &#34;height&#34;: self.size[1]}
-                if self.size
-                else None,
-            }
-        )</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>playwright._api_types.ApiType</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.RecordVideoOptions.dir"><code class="name">var <span class="ident">dir</span> : Union[pathlib.Path, str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="playwright.RecordVideoOptions.size"><code class="name">var <span class="ident">size</span> : Union[Tuple[int, int], NoneType]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="playwright.RequestFailure"><code class="flex name class">
-<span>class <span class="ident">RequestFailure</span></span>
-<span>(</span><span>error_text: str)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RequestFailure(ApiType):
-    error_text: str
-
-    @classmethod
-    def _parse(cls, dict: Optional[Dict]) -&gt; Optional[&#34;RequestFailure&#34;]:
-        if not dict:
-            return None
-        return RequestFailure(dict[&#34;errorText&#34;])
-
-    def __init__(self, error_text: str):
-        self.error_text = error_text</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>playwright._api_types.ApiType</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="playwright.RequestFailure.error_text"><code class="name">var <span class="ident">error_text</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
