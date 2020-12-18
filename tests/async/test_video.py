@@ -14,11 +14,9 @@
 
 import os
 
-from playwright import RecordVideoOptions
-
 
 async def test_should_expose_video_path(browser, tmpdir, server):
-    page = await browser.new_page(record_video=RecordVideoOptions(tmpdir))
+    page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
     path = await page.video.path()
     assert str(tmpdir) in path
@@ -26,7 +24,7 @@ async def test_should_expose_video_path(browser, tmpdir, server):
 
 
 async def test_short_video_should_exist(browser, tmpdir, server):
-    page = await browser.new_page(record_video=RecordVideoOptions(tmpdir))
+    page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
     path = await page.video.path()
     assert str(tmpdir) in path
@@ -38,7 +36,7 @@ async def test_short_video_should_exist_persistent_context(browser_type, tmpdir)
     context = await browser_type.launch_persistent_context(
         str(tmpdir),
         viewport=(320, 240),
-        record_video=RecordVideoOptions(str(tmpdir) + "1"),
+        record_video_dir=str(tmpdir) + "1",
     )
     page = context.pages[0]
     await context.close()

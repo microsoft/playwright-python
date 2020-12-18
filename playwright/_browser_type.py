@@ -16,18 +16,11 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
-from playwright._api_types import (
-    Geolocation,
-    HttpCredentials,
-    ProxySettings,
-    RecordHarOptions,
-    RecordVideoOptions,
-)
-from playwright._browser import Browser
+from playwright._api_types import Geolocation, ProxySettings
+from playwright._browser import Browser, normalize_context_params
 from playwright._browser_context import BrowserContext
 from playwright._connection import ChannelOwner, from_channel
 from playwright._helper import ColorScheme, Env, locals_to_params, not_installed_error
-from playwright._network import serialize_headers
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -103,23 +96,21 @@ class BrowserType(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Tuple[str, str] = None,
         deviceScaleFactor: int = None,
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
         chromiumSandbox: bool = None,
-        recordHar: RecordHarOptions = None,
-        recordVideo: RecordVideoOptions = None,
+        recordHarPath: Union[Path, str] = None,
+        recordHarOmitContent: bool = None,
+        recordVideoDir: Union[Path, str] = None,
+        recordVideoSize: Tuple[int, int] = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
-        if viewport == 0:
-            del params["viewport"]
-            params["noDefaultViewport"] = True
-        if extraHTTPHeaders:
-            params["extraHTTPHeaders"] = serialize_headers(extraHTTPHeaders)
+        normalize_context_params(params)
         normalize_launch_params(params)
         try:
             context = from_channel(

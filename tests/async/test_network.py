@@ -434,22 +434,19 @@ async def test_network_events_request_failed(
     assert await failed_requests[0].response() is None
     assert failed_requests[0].resource_type == "stylesheet"
     if is_chromium:
-        assert failed_requests[0].failure.error_text == "net::ERR_EMPTY_RESPONSE"
+        assert failed_requests[0].failure == "net::ERR_EMPTY_RESPONSE"
     elif is_webkit:
         if is_mac:
-            assert (
-                failed_requests[0].failure.error_text
-                == "The network connection was lost."
-            )
+            assert failed_requests[0].failure == "The network connection was lost."
         elif is_win:
             assert (
-                failed_requests[0].failure.error_text
+                failed_requests[0].failure
                 == "Server returned nothing (no headers, no data)"
             )
         else:
-            assert failed_requests[0].failure.error_text == "Message Corrupt"
+            assert failed_requests[0].failure == "Message Corrupt"
     else:
-        assert failed_requests[0].failure.error_text == "NS_ERROR_NET_RESET"
+        assert failed_requests[0].failure == "NS_ERROR_NET_RESET"
     assert failed_requests[0].frame
 
 

@@ -16,12 +16,10 @@ import base64
 import json
 import os
 
-from playwright import RecordHarOptions
-
 
 def test_should_work(browser, server, tmpdir):
     path = os.path.join(tmpdir, "log.har")
-    context = browser.new_context(record_har=RecordHarOptions(path))
+    context = browser.new_context(record_har_path=path)
     page = context.new_page()
     page.goto(server.EMPTY_PAGE)
     context.close()
@@ -32,7 +30,7 @@ def test_should_work(browser, server, tmpdir):
 
 def test_should_omit_content(browser, server, tmpdir):
     path = os.path.join(tmpdir, "log.har")
-    context = browser.new_context(record_har=RecordHarOptions(path, omit_content=True))
+    context = browser.new_context(record_har_path=path, record_har_omit_content=True)
     page = context.new_page()
     page.goto(server.PREFIX + "/har.html")
     context.close()
@@ -47,7 +45,7 @@ def test_should_omit_content(browser, server, tmpdir):
 
 def test_should_include_content(browser, server, tmpdir):
     path = os.path.join(tmpdir, "log.har")
-    context = browser.new_context(record_har=RecordHarOptions(path))
+    context = browser.new_context(record_har_path=path)
     page = context.new_page()
     page.goto(server.PREFIX + "/har.html")
     context.close()

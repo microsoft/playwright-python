@@ -36,7 +36,7 @@ from playwright._connection import ChannelOwner, from_channel, from_nullable_cha
 from playwright._console_message import ConsoleMessage
 from playwright._dialog import Dialog
 from playwright._download import Download
-from playwright._element_handle import ElementHandle, ValuesToSelect
+from playwright._element_handle import ElementHandle
 from playwright._event_context_manager import EventContextManagerImpl
 from playwright._file_chooser import FileChooser
 from playwright._frame import Frame
@@ -717,13 +717,14 @@ class Page(ChannelOwner):
     async def selectOption(
         self,
         selector: str,
-        values: ValuesToSelect,
+        value: Union[str, List[str]] = None,
+        index: Union[int, List[int]] = None,
+        label: Union[str, List[str]] = None,
+        element: Union["ElementHandle", List["ElementHandle"]] = None,
         timeout: int = None,
         noWaitAfter: bool = None,
     ) -> List[str]:
         params = locals_to_params(locals())
-        if "values" not in params:
-            params["values"] = None
         return await self._main_frame.selectOption(**params)
 
     async def setInputFiles(

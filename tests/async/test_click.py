@@ -303,7 +303,7 @@ async def test_click_on_checkbox_label_and_toggle(page, server):
 async def test_not_hang_with_touch_enabled_viewports(playwright, server, browser):
     iphone_6 = playwright.devices["iPhone 6"]
     context = await browser.new_context(
-        viewport=iphone_6.viewport, has_touch=iphone_6.has_touch
+        viewport=iphone_6["viewport"], has_touch=iphone_6["has_touch"]
     )
     page = await context.new_page()
     await page.mouse.down()

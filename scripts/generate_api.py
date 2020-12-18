@@ -34,7 +34,7 @@ from playwright._chromium_browser_context import ChromiumBrowserContext
 from playwright._console_message import ConsoleMessage
 from playwright._dialog import Dialog
 from playwright._download import Download
-from playwright._element_handle import ElementHandle, ValuesToSelect
+from playwright._element_handle import ElementHandle
 from playwright._file_chooser import FileChooser
 from playwright._frame import Frame
 from playwright._helper import to_snake_case
@@ -153,7 +153,7 @@ else:  # pragma: no cover
 
 
 from playwright._accessibility import Accessibility as AccessibilityImpl
-from playwright._api_types import DeviceDescriptor, Geolocation, FilePayload, FloatRect, HttpCredentials, PdfMargins, ProxySettings, OptionSelector, SourceLocation, RequestFailure, RecordHarOptions, RecordVideoOptions
+from playwright._api_types import DeviceDescriptor, Geolocation, FilePayload, FloatRect, PdfMargins, ProxySettings, SourceLocation
 from playwright._browser import Browser as BrowserImpl
 from playwright._browser_context import BrowserContext as BrowserContextImpl
 from playwright._browser_type import BrowserType as BrowserTypeImpl
@@ -205,5 +205,4 @@ all_types = [
 ]
 
 api_globals = globals()
-assert ValuesToSelect
 assert Serializable

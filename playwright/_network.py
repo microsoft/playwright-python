@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, ca
 from urllib import parse
 
 from playwright._api_structures import ResourceTiming
-from playwright._api_types import Error, RequestFailure
+from playwright._api_types import Error
 from playwright._connection import ChannelOwner, from_channel, from_nullable_channel
 from playwright._event_context_manager import EventContextManagerImpl
 from playwright._helper import ContinueParameters, Header, locals_to_params
@@ -118,8 +118,8 @@ class Request(ChannelOwner):
         return self._redirected_to
 
     @property
-    def failure(self) -> Optional[RequestFailure]:
-        return RequestFailure(self._failure_text) if self._failure_text else None
+    def failure(self) -> Optional[str]:
+        return self._failure_text
 
     @property
     def timing(self) -> ResourceTiming:

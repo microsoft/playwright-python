@@ -12,8 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
+import sys
 from typing import Any, Dict, Optional, Tuple, Union
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import TypedDict
+else:  # pragma: no cover
+    from typing_extensions import TypedDict
 
 
 class Error(Exception):
@@ -68,36 +73,12 @@ class FloatRect(ApiType):
         self.height = height
 
 
-class DeviceDescriptor(ApiType):
+class DeviceDescriptor(TypedDict):
     user_agent: Optional[str]
     viewport: Optional[Tuple[int, int]]
     device_scale_factor: Optional[int]
     is_mobile: Optional[bool]
     has_touch: Optional[bool]
-
-    @classmethod
-    def _parse(cls, dict: Dict) -> "DeviceDescriptor":
-        return DeviceDescriptor(
-            dict["userAgent"],
-            dict["viewport"],
-            dict["deviceScaleFactor"],
-            dict["isMobile"],
-            dict["hasTouch"],
-        )
-
-    def __init__(
-        self,
-        user_agent: str = None,
-        viewport: Tuple[int, int] = None,
-        device_scale_factor: int = None,
-        is_mobile: bool = None,
-        has_touch: bool = None,
-    ):
-        self.user_agent = user_agent
-        self.viewport = viewport
-        self.device_scale_factor = device_scale_factor
-        self.is_mobile = is_mobile
-        self.has_touch = has_touch
 
 
 class Geolocation(ApiType):
@@ -109,15 +90,6 @@ class Geolocation(ApiType):
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy
-
-
-class HttpCredentials(ApiType):
-    username: str
-    password: str
-
-    def __init__(self, username: str, password: str):
-        self.username = username
-        self.password = password
 
 
 class PdfMargins(ApiType):
@@ -158,52 +130,6 @@ class ProxySettings(ApiType):
         self.password = password
 
 
-class RequestFailure(ApiType):
-    error_text: str
-
-    @classmethod
-    def _parse(cls, dict: Optional[Dict]) -> Optional["RequestFailure"]:
-        if not dict:
-            return None
-        return RequestFailure(dict["errorText"])
-
-    def __init__(self, error_text: str):
-        self.error_text = error_text
-
-
-class RecordHarOptions(ApiType):
-    omit_content: Optional[bool]
-    path: Union[Path, str]
-
-    def __init__(self, path: Union[str, Path], omit_content: bool = None):
-        self.path = path
-        self.omit_content = omit_content
-
-    def _to_json(self) -> Dict:
-        return filter_out_none(
-            {"omitContent": self.omit_content, "path": str(self.path)}
-        )
-
-
-class RecordVideoOptions(ApiType):
-    dir: Union[Path, str]
-    size: Optional[Tuple[int, int]]
-
-    def __init__(self, dir: Union[str, Path], size: Tuple[int, int] = None):
-        self.dir = dir
-        self.size = size
-
-    def _to_json(self) -> Dict:
-        return filter_out_none(
-            {
-                "dir": str(self.dir),
-                "size": {"width": self.size[0], "height": self.size[1]}
-                if self.size
-                else None,
-            }
-        )
-
-
 class SourceLocation(ApiType):
     url: str
     line: int
@@ -213,17 +139,6 @@ class SourceLocation(ApiType):
         self.url = url
         self.line = line
         self.column = column
-
-
-class OptionSelector(ApiType):
-    value: Optional[str]
-    label: Optional[str]
-    index: Optional[int]
-
-    def __init__(self, value: str = None, label: str = None, index: int = None):
-        self.value = value
-        self.label = label
-        self.index = index
 
 
 def filter_out_none(args: Dict) -> Any:
