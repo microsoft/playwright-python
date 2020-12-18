@@ -24,25 +24,20 @@ from playwright.async_api import Browser, Page, Route
 async def test_page_route_should_intercept(page, server):
     intercepted = []
 
-    async def handle_request(route, request, intercepted):
+    async def handle_request(route, request):
         assert route.request == request
         assert "empty.html" in request.url
         assert request.headers["user-agent"]
         assert request.method == "GET"
         assert request.post_data is None
-        assert request.is_navigation_request()
+        assert request.is_navigation_request
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
         await route.continue_()
         intercepted.append(True)
 
-    await page.route(
-        "**/empty.html",
-        lambda route, request: asyncio.create_task(
-            handle_request(route, request, intercepted)
-        ),
-    )
+    await page.route("**/empty.html", handle_request)
 
     response = await page.goto(server.EMPTY_PAGE)
     assert response.ok
@@ -52,14 +47,14 @@ async def test_page_route_should_intercept(page, server):
 async def test_page_route_should_unroute(page: Page, server):
     intercepted = []
 
-    def handler1(route, request):
+    def handler1(route):
         intercepted.append(1)
         asyncio.create_task(route.continue_())
 
     await page.route("**/empty.html", handler1)
     await page.route(
         "**/empty.html",
-        lambda route, _: (
+        lambda route: (
             intercepted.append(2),  # type: ignore
             asyncio.create_task(route.continue_()),
         ),
@@ -67,7 +62,7 @@ async def test_page_route_should_unroute(page: Page, server):
 
     await page.route(
         "**/empty.html",
-        lambda route, _: (
+        lambda route: (
             intercepted.append(3),  # type: ignore
             asyncio.create_task(route.continue_()),
         ),
@@ -75,7 +70,7 @@ async def test_page_route_should_unroute(page: Page, server):
 
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             intercepted.append(4),  # type: ignore
             asyncio.create_task(route.continue_()),
         ),
@@ -98,7 +93,7 @@ async def test_page_route_should_unroute(page: Page, server):
 async def test_page_route_should_work_when_POST_is_redirected_with_302(page, server):
     server.set_redirect("/rredirect", "/empty.html")
     await page.goto(server.EMPTY_PAGE)
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: route.continue_())
     await page.set_content(
         """
       <form action='/rredirect' method='post'>
@@ -119,9 +114,7 @@ async def test_page_route_should_work_when_header_manipulation_headers_with_redi
     server.set_redirect("/rrredirect", "/empty.html")
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(
-            route.continue_(headers={**route.request.headers, "foo": "bar"})
-        ),
+        lambda route: route.continue_(headers={**route.request.headers, "foo": "bar"}),
     )
 
     await page.goto(server.PREFIX + "/rrredirect")
@@ -137,7 +130,7 @@ async def test_page_route_should_be_able_to_remove_headers(page, server):
 
     await page.route(
         "**/*",  # remove "origin" header
-        lambda route, _: asyncio.create_task(handle_request(route)),
+        handle_request,
     )
 
     [serverRequest, _] = await asyncio.gather(
@@ -150,7 +143,7 @@ async def test_page_route_should_contain_referer_header(page, server):
     requests = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             requests.append(route.request),
             asyncio.create_task(route.continue_()),
         ),
@@ -171,7 +164,7 @@ async def test_page_route_should_properly_return_navigation_response_when_URL_ha
     )
 
     # Setup request interception.
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: route.continue_())
     response = await page.reload()
     assert response.status == 200
 
@@ -184,7 +177,7 @@ async def test_page_route_should_show_custom_HTTP_headers(page, server):
 
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             assert_headers(route.request),
             asyncio.create_task(route.continue_()),
         ),
@@ -198,7 +191,7 @@ async def test_page_route_should_show_custom_HTTP_headers(page, server):
 async def test_page_route_should_work_with_redirect_inside_sync_XHR(page, server):
     await page.goto(server.EMPTY_PAGE)
     server.set_redirect("/logo.png", "/pptr.png")
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: route.continue_())
     status = await page.evaluate(
         """async() => {
       const request = new XMLHttpRequest();
@@ -219,7 +212,7 @@ async def test_page_route_should_work_with_custom_referer_headers(page, server):
 
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             assert_headers(route),
             asyncio.create_task(route.continue_()),
         ),
@@ -230,7 +223,7 @@ async def test_page_route_should_work_with_custom_referer_headers(page, server):
 
 
 async def test_page_route_should_be_abortable(page, server):
-    await page.route(r"/\.css$/", lambda route, _: asyncio.create_task(route.abort()))
+    await page.route(r"/\.css$/", lambda route: asyncio.create_task(route.abort()))
     failed = []
 
     def handle_request(request):
@@ -250,7 +243,7 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
 ):
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(route.abort("internetdisconnected")),
+        lambda route: route.abort("internetdisconnected"),
     )
     failed_requests = []
     page.on("requestfailed", lambda request: failed_requests.append(request))
@@ -269,7 +262,7 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
 async def test_page_route_should_send_referer(page, server):
     await page.set_extra_http_headers({"referer": "http://google.com/"})
 
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: route.continue_())
     [request, _] = await asyncio.gather(
         server.wait_for_request("/grid.html"),
         page.goto(server.PREFIX + "/grid.html"),
@@ -280,7 +273,7 @@ async def test_page_route_should_send_referer(page, server):
 async def test_page_route_should_fail_navigation_when_aborting_main_resource(
     page, server, is_webkit, is_firefox
 ):
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.abort()))
+    await page.route("**/*", lambda route: route.abort())
     with pytest.raises(Error) as exc:
         await page.goto(server.EMPTY_PAGE)
     assert exc
@@ -296,7 +289,7 @@ async def test_page_route_should_not_work_with_redirects(page, server):
     intercepted = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             asyncio.create_task(route.continue_()),
             intercepted.append(route.request),
         ),
@@ -313,14 +306,14 @@ async def test_page_route_should_not_work_with_redirects(page, server):
 
     assert len(intercepted) == 1
     assert intercepted[0].resource_type == "document"
-    assert intercepted[0].is_navigation_request()
+    assert intercepted[0].is_navigation_request
     assert "/non-existing-page.html" in intercepted[0].url
 
     chain = []
     r = response.request
     while r:
         chain.append(r)
-        assert r.is_navigation_request()
+        assert r.is_navigation_request
         r = r.redirected_from
 
     assert len(chain) == 5
@@ -337,7 +330,7 @@ async def test_page_route_should_work_with_redirects_for_subresources(page, serv
     intercepted = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             asyncio.create_task(route.continue_()),
             intercepted.append(route.request),
         ),
@@ -385,7 +378,7 @@ async def test_page_route_should_work_with_equal_requests(page, server):
 
     spinner = []
 
-    async def handle_route(route, spinner):
+    async def handle_route(route):
         if len(spinner) == 1:
             await route.abort()
             spinner.pop(0)
@@ -394,7 +387,7 @@ async def test_page_route_should_work_with_equal_requests(page, server):
             spinner.append(True)
 
     # Cancel 2nd request.
-    await page.route("**/*", lambda r, _: asyncio.create_task(handle_route(r, spinner)))
+    await page.route("**/*", handle_route)
 
     results = []
     for idx in range(3):
@@ -412,7 +405,7 @@ async def test_page_route_should_navigate_to_dataURL_and_not_fire_dataURL_reques
     requests = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             requests.append(route.request),
             asyncio.create_task(route.continue_()),
         ),
@@ -431,7 +424,7 @@ async def test_page_route_should_be_able_to_fetch_dataURL_and_not_fire_dataURL_r
     requests = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             requests.append(route.request),
             asyncio.create_task(route.continue_()),
         ),
@@ -449,7 +442,7 @@ async def test_page_route_should_navigate_to_URL_with_hash_and_and_fire_requests
     requests = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             requests.append(route.request),
             asyncio.create_task(route.continue_()),
         ),
@@ -465,14 +458,14 @@ async def test_page_route_should_navigate_to_URL_with_hash_and_and_fire_requests
 async def test_page_route_should_work_with_encoded_server(page, server):
     # The requestWillBeSent will report encoded URL, whereas interception will
     # report URL as-is. @see crbug.com/759388
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: route.continue_())
     response = await page.goto(server.PREFIX + "/some nonexisting page")
     assert response.status == 404
 
 
 async def test_page_route_should_work_with_badly_encoded_server(page, server):
     server.set_route("/malformed?rnd=%911", lambda req: req.finish())
-    await page.route("**/*", lambda route, _: asyncio.create_task(route.continue_()))
+    await page.route("**/*", lambda route: route.continue_())
     response = await page.goto(server.PREFIX + "/malformed?rnd=%911")
     assert response.status == 200
 
@@ -483,7 +476,7 @@ async def test_page_route_should_work_with_encoded_server___2(page, server):
     requests = []
     await page.route(
         "**/*",
-        lambda route, _: (
+        lambda route: (
             asyncio.create_task(route.continue_()),
             requests.append(route.request),
         ),
@@ -523,7 +516,7 @@ async def test_page_route_should_intercept_main_resource_during_cross_process_na
     intercepted = []
     await page.route(
         server.CROSS_PROCESS_PREFIX + "/empty.html",
-        lambda route, _: (
+        lambda route: (
             intercepted.append(True),
             asyncio.create_task(route.continue_()),
         ),
@@ -545,7 +538,7 @@ async def test_page_route_should_create_a_redirect(page, server):
 
     await page.route(
         "**/*",
-        lambda route, request: asyncio.create_task(handle_route(route, request)),
+        handle_route,
     )
 
     text = await page.evaluate(
@@ -576,7 +569,7 @@ async def test_page_route_should_support_cors_with_GET(page, server):
 
     await page.route(
         "**/cars*",
-        lambda route, request: asyncio.create_task(handle_route(route, request)),
+        handle_route,
     )
     # Should succeed
     resp = await page.evaluate(
@@ -603,13 +596,11 @@ async def test_page_route_should_support_cors_with_POST(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/cars",
-        lambda route, _: asyncio.create_task(
-            route.fulfill(
-                content_type="application/json",
-                headers={"Access-Control-Allow-Origin": "*"},
-                status=200,
-                body=json.dumps(["electric", "gas"]),
-            )
+        lambda route: route.fulfill(
+            content_type="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+            status=200,
+            body=json.dumps(["electric", "gas"]),
         ),
     )
 
@@ -632,13 +623,11 @@ async def test_page_route_should_support_cors_for_different_methods(page, server
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/cars",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(
-                content_type="application/json",
-                headers={"Access-Control-Allow-Origin": "*"},
-                status=200,
-                body=json.dumps([request.method, "electric", "gas"]),
-            )
+        lambda route, request: route.fulfill(
+            content_type="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+            status=200,
+            body=json.dumps([request.method, "electric", "gas"]),
         ),
     )
 
@@ -675,13 +664,11 @@ async def test_page_route_should_support_cors_for_different_methods(page, server
 async def test_request_fulfill_should_work_a(page, server):
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(
-            route.fulfill(
-                status=201,
-                headers={"foo": "bar"},
-                content_type="text/html",
-                body="Yo, page!",
-            )
+        lambda route: route.fulfill(
+            status=201,
+            headers={"foo": "bar"},
+            content_type="text/html",
+            body="Yo, page!",
         ),
     )
 
@@ -694,9 +681,7 @@ async def test_request_fulfill_should_work_a(page, server):
 async def test_request_fulfill_should_work_with_status_code_422(page, server):
     await page.route(
         "**/*",
-        lambda route, _: asyncio.create_task(
-            route.fulfill(status=422, body="Yo, page!")
-        ),
+        lambda route: route.fulfill(status=422, body="Yo, page!"),
     )
 
     response = await page.goto(server.EMPTY_PAGE)
@@ -710,11 +695,9 @@ async def test_request_fulfill_should_allow_mocking_binary_responses(
 ):
     await page.route(
         "**/*",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(
-                content_type="image/png",
-                body=(assetdir / "pptr.png").read_bytes(),
-            )
+        lambda route: route.fulfill(
+            content_type="image/png",
+            body=(assetdir / "pptr.png").read_bytes(),
         ),
     )
 
@@ -737,11 +720,9 @@ async def test_request_fulfill_should_allow_mocking_svg_with_charset(
 ):
     await page.route(
         "**/*",
-        lambda route: asyncio.create_task(
-            route.fulfill(
-                content_type="image/svg+xml ; charset=utf-8",
-                body='<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="30" height="30" stroke="black" fill="transparent" stroke-width="5"/></svg>',
-            )
+        lambda route: route.fulfill(
+            content_type="image/svg+xml ; charset=utf-8",
+            body='<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="30" height="30" stroke="black" fill="transparent" stroke-width="5"/></svg>',
         ),
     )
 
@@ -763,8 +744,8 @@ async def test_request_fulfill_should_work_with_file_path(
 ):
     await page.route(
         "**/*",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(content_type="shouldBeIgnored", path=assetdir / "pptr.png")
+        lambda route: route.fulfill(
+            content_type="shouldBeIgnored", path=assetdir / "pptr.png"
         ),
     )
     await page.evaluate(
@@ -786,8 +767,8 @@ async def test_request_fulfill_should_stringify_intercepted_request_response_hea
 ):
     await page.route(
         "**/*",
-        lambda route: asyncio.create_task(
-            route.fulfill(status=200, headers={"foo": True}, body="Yo, page!")
+        lambda route: route.fulfill(
+            status=200, headers={"foo": True}, body="Yo, page!"
         ),
     )
 
@@ -890,10 +871,10 @@ async def test_request_fulfill_should_work_with_request_interception(page, serve
 
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
     await page.goto(server.PREFIX + "/rrredirect")
-    assert requests["rrredirect"].is_navigation_request()
-    assert requests["frame.html"].is_navigation_request()
-    assert requests["script.js"].is_navigation_request() is False
-    assert requests["style.css"].is_navigation_request() is False
+    assert requests["rrredirect"].is_navigation_request
+    assert requests["frame.html"].is_navigation_request
+    assert requests["script.js"].is_navigation_request is False
+    assert requests["style.css"].is_navigation_request is False
 
 
 async def test_Interception_should_work_with_request_interception(
@@ -902,9 +883,7 @@ async def test_Interception_should_work_with_request_interception(
     context = await browser.new_context(ignore_https_errors=True)
     page = await context.new_page()
 
-    await page.route(
-        "**/*", lambda route, request: asyncio.ensure_future(route.continue_())
-    )
+    await page.route("**/*", lambda route: asyncio.ensure_future(route.continue_()))
     response = await page.goto(https_server.EMPTY_PAGE)
     assert response
     assert response.status == 200

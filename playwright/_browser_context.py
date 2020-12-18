@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._api_structures import Cookie, StorageState
 from playwright._api_types import Error, Geolocation
@@ -84,7 +85,9 @@ class BrowserContext(ChannelOwner):
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
             if handler_entry.matcher.matches(request.url):
-                handler_entry.handler(route, request)
+                result = cast(Any, handler_entry.handler)(route, request)
+                if inspect.iscoroutine(result):
+                    asyncio.create_task(result)
                 return
         asyncio.create_task(route.continue_())
 
