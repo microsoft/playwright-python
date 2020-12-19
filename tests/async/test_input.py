@@ -15,9 +15,8 @@
 import asyncio
 import os
 
-from playwright import FilePayload
-from playwright._path_utils import get_file_dirname
-from playwright.async_api import Page
+from playwright._impl._path_utils import get_file_dirname
+from playwright.async_api import FilePayload, Page
 
 _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"

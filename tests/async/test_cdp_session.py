@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright import Error
+from playwright.async_api import Error
 
 
 @pytest.mark.only_browser("chromium")

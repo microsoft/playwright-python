@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright import Error
+from playwright.sync_api import Error, Page
 
 
 def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
@@ -27,7 +27,7 @@ def test_add_init_script_work_with_a_path(page, assetdir):
     assert page.evaluate("window.result") == 123
 
 
-def test_add_init_script_work_with_content(page):
+def test_add_init_script_work_with_content(page: Page):
     page.add_init_script("window.injected = 123")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123

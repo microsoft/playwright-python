@@ -18,14 +18,6 @@ from playwright.sync_api import Playwright
 
 def main(playwright: Playwright) -> None:
     browser = playwright.chromium.launch(headless=False)
-    page = browser.new_page(viewport=0)
-    page.set_content(
-        "<button id=button onclick=\"window.open('http://webkit.org', '_blank')\">Click me</input>"
-    )
-
-    with page.expect_popup() as popup_info:
-        page.click("#button")
-    print(popup_info.value)
 
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Creating context...")
@@ -88,5 +80,5 @@ def main(playwright: Playwright) -> None:
 
 
 if __name__ == "__main__":
-    with playwright.sync_playwright() as p:
+    with playwright.sync_api.sync_playwright() as p:
         main(p)

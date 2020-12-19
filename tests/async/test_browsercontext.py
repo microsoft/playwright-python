@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright import Error
+from playwright.async_api import Error
 
 
 async def test_page_event_should_create_new_context(browser):

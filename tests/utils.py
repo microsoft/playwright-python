@@ -15,11 +15,11 @@
 import re
 from typing import List, Tuple, cast
 
-from playwright._api_types import Error
-from playwright._element_handle import ElementHandle
-from playwright._frame import Frame
-from playwright._page import Page
-from playwright._selectors import Selectors
+from playwright._impl._api_types import Error
+from playwright._impl._element_handle import ElementHandle
+from playwright._impl._frame import Frame
+from playwright._impl._page import Page
+from playwright._impl._selectors import Selectors
 
 
 class Utils:

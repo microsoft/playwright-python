@@ -17,8 +17,7 @@ from asyncio.futures import Future
 
 import pytest
 
-from playwright import Error
-from playwright.async_api import Page, Worker
+from playwright.async_api import Error, Page, Worker
 
 
 async def test_workers_page_workers(page, server):

@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright import Error
+from playwright.async_api import Error
 
 
 async def test_should_work(page, ws_server):

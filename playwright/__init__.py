@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """
 Python package `playwright` is a Python library to automate Chromium,
 Firefox and WebKit with a single API. Playwright is built to enable cross-browser
@@ -18,50 +19,6 @@ web automation that is ever-green, capable, reliable and fast.
 For more information you'll find the documentation for the sync API [here](sync_api.html)
 and for the async API [here](async_api.html).
 """
-
-import playwright._api_structures as api_structures
-import playwright._api_types as api_types
-from playwright._main import AsyncPlaywrightContextManager, SyncPlaywrightContextManager
-
-DeviceDescriptor = api_types.DeviceDescriptor
-Error = api_types.Error
-FilePayload = api_types.FilePayload
-FloatRect = api_types.FloatRect
-Geolocation = api_types.Geolocation
-PdfMargins = api_types.PdfMargins
-ProxySettings = api_types.ProxySettings
-SourceLocation = api_types.SourceLocation
-TimeoutError = api_types.TimeoutError
-
-Cookie = api_structures.Cookie
-ResourceTiming = api_structures.ResourceTiming
-StorageState = api_structures.StorageState
-
-
-def async_playwright() -> AsyncPlaywrightContextManager:
-    return AsyncPlaywrightContextManager()
-
-
-def sync_playwright() -> SyncPlaywrightContextManager:
-    return SyncPlaywrightContextManager()
-
-
-__all__ = [
-    "async_playwright",
-    "sync_playwright",
-    "Cookie",
-    "DeviceDescriptor",
-    "Error",
-    "FilePayload",
-    "FloatRect",
-    "Geolocation",
-    "PdfMargins",
-    "ProxySettings",
-    "ResourceTiming",
-    "SourceLocation",
-    "StorageState",
-    "TimeoutError",
-]
 
 __pdoc__ = {
     "_accessibility": False,

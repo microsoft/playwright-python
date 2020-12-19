@@ -18,7 +18,7 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
-from playwright._helper import to_snake_case
+from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -83,6 +83,7 @@ def generate(t: Any) -> None:
             and "expect_" not in name
             and "remove_listener" != name
         ):
+            is_async = inspect.iscoroutinefunction(value)
             print("")
             print(
                 f"    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
@@ -93,15 +94,24 @@ def generate(t: Any) -> None:
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
             )
-            if inspect.iscoroutinefunction(value):
-                prefix = (
-                    "        return " + prefix + f"self._sync(self._impl_obj.{name}("
-                )
+            if is_async:
+                prefix = prefix + f"self._sync(self._impl_obj.{name}("
                 suffix = "))" + suffix
             else:
-                prefix = "        return " + prefix + f"self._impl_obj.{name}("
+                prefix = prefix + f"self._impl_obj.{name}("
                 suffix = ")" + suffix
-            print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
+
+            print(
+                f"""
+        try:
+            log_api("=> {to_snake_case(class_name)}.{to_snake_case(name)} started")
+            result = {prefix}{arguments(value, len(prefix))}{suffix}
+            log_api("<= {to_snake_case(class_name)}.{to_snake_case(name)} succeded")
+            return result
+        except Exception as e:
+            log_api("<= {to_snake_case(class_name)}.{to_snake_case(name)} failed")
+            raise e"""
+            )
         if "expect_" in name:
             print("")
             return_type_value = return_type(value)
@@ -155,7 +165,9 @@ def generate(t: Any) -> None:
 
 def main() -> None:
     print(header)
-    print("from playwright._sync_base import EventContextManager, SyncBase, mapping")
+    print(
+        "from playwright._impl._sync_base import EventContextManager, SyncBase, mapping"
+    )
     print("NoneType = type(None)")
 
     for t in all_types:

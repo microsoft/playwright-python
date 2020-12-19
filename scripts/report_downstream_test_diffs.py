@@ -6,7 +6,7 @@ import subprocess
 import typing
 from collections import namedtuple
 
-from playwright._path_utils import get_file_dirname
+from playwright._impl._path_utils import get_file_dirname
 
 _dirname = get_file_dirname()
 

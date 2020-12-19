@@ -14,7 +14,7 @@
 
 import asyncio
 
-from playwright import Error
+from playwright.async_api import Error
 
 
 async def test_evaluate_handle(page, server):
