@@ -64,4 +64,4 @@ jobs:
         ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright-python:${TAG_NAME}
 
         ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright-python:focal
-        ./scripts/tag_image_and_push.sh playwright:localbuild-focal playwright.azurecr.io/public/playwright-python:${TAG_NAME}-focal
+        ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright-python:${TAG_NAME}-focal
