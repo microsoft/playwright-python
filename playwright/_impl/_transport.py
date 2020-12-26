@@ -13,11 +13,25 @@
 # limitations under the License.
 
 import asyncio
+import io
 import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
+
+
+# Sourced from: https://github.com/pytest-dev/pytest/blob/da01ee0a4bb0af780167ecd228ab3ad249511302/src/_pytest/faulthandler.py#L69-L77
+def _get_stderr_fileno() -> Optional[int]:
+    try:
+        return sys.stderr.fileno()
+    except (AttributeError, io.UnsupportedOperation):
+        # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
+        # https://docs.python.org/3/library/faulthandler.html#issue-with-file-descriptors
+        # This is potentially dangerous, but the best we can do.
+        if not hasattr(sys, "__stderr__"):
+            return None
+        return sys.__stderr__.fileno()
 
 
 class Transport:
@@ -41,7 +55,7 @@ class Transport:
             "run-driver",
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
-            stderr=sys.stderr,
+            stderr=_get_stderr_fileno(),
             limit=32768,
         )
         assert proc.stdout
