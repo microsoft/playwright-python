@@ -478,7 +478,7 @@ async def test_set_content_should_respect_timeout(page, server):
     server.set_route(img_path, lambda request: None)
     with pytest.raises(Error) as exc_info:
         await page.set_content(
-            '<img src="${server.PREFIX + img_path}"></img>', timeout=1
+            f'<img src="{server.PREFIX + img_path}"></img>', timeout=1
         )
     assert exc_info.type is TimeoutError
 
