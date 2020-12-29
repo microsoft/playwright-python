@@ -89,7 +89,7 @@ async def test_should_click_background_tab(browser_type, launch_arguments, serve
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page = await browser.new_page()
     await page.set_content(
-        '<button>Hello</button><a target=_blank href="${server.EMPTY_PAGE}">empty.html</a>'
+        f'<button>Hello</button><a target=_blank href="{server.EMPTY_PAGE}">empty.html</a>'
     )
     await page.click("a")
     await page.click("button")

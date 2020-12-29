@@ -537,7 +537,7 @@ class Page(ChannelOwner):
             timeout = self._timeout_settings.timeout()
         wait_helper = WaitHelper(self._loop)
         wait_helper.reject_on_timeout(
-            timeout, f'Timeout while waiting for event "${event}"'
+            timeout, f'Timeout while waiting for event "{event}"'
         )
         if event != Page.Events.Crash:
             wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
