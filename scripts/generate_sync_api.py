@@ -52,7 +52,9 @@ def generate(t: Any) -> None:
         print("")
         print("    @property")
         print(f"    def {to_snake_case(name)}(self) -> {process_type(type)}:")
-        documentation_provider.print_entry(class_name, name, {"return": type})
+        documentation_provider.print_entry(
+            class_name, to_snake_case(name), {"return": type}
+        )
         [prefix, suffix] = return_value(type)
         prefix = "        return " + prefix + f"self._impl_obj.{name}"
         print(f"{prefix}{suffix}")
@@ -67,7 +69,7 @@ def generate(t: Any) -> None:
                 f"    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
             )
             documentation_provider.print_entry(
-                class_name, name, get_type_hints(value, api_globals)
+                class_name, to_snake_case(name), get_type_hints(value, api_globals)
             )
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
@@ -89,7 +91,7 @@ def generate(t: Any) -> None:
                 f"    def {to_snake_case(name)}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
             )
             documentation_provider.print_entry(
-                class_name, name, get_type_hints(value, api_globals)
+                class_name, to_snake_case(name), get_type_hints(value, api_globals)
             )
             [prefix, suffix] = return_value(
                 get_type_hints(value, api_globals)["return"]
@@ -145,9 +147,9 @@ def generate(t: Any) -> None:
 
             wait_for_method = "waitForEvent(event, predicate, timeout)"
             if event_name == "request":
-                wait_for_method = "waitForRequest(url, predicate, timeout)"
+                wait_for_method = "waitForRequest(url_or_predicate, timeout)"
             elif event_name == "response":
-                wait_for_method = "waitForResponse(url, predicate, timeout)"
+                wait_for_method = "waitForResponse(url_or_predicate, timeout)"
             elif event_name == "loadstate":
                 wait_for_method = "waitForLoadState(state, timeout)"
             elif event_name == "navigation":

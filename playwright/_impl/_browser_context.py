@@ -97,13 +97,13 @@ class BrowserContext(ChannelOwner):
             return
         asyncio.create_task(binding_call.call(func))
 
-    def setDefaultNavigationTimeout(self, timeout: int) -> None:
+    def setDefaultNavigationTimeout(self, timeout: float) -> None:
         self._timeout_settings.set_navigation_timeout(timeout)
         self._channel.send_no_reply(
             "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
         )
 
-    def setDefaultTimeout(self, timeout: int) -> None:
+    def setDefaultTimeout(self, timeout: float) -> None:
         self._timeout_settings.set_timeout(timeout)
         self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
@@ -160,17 +160,17 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("setOffline", dict(offline=offline))
 
     async def addInitScript(
-        self, source: str = None, path: Union[str, Path] = None
+        self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
             with open(path, "r") as file:
-                source = file.read()
-        if not isinstance(source, str):
+                script = file.read()
+        if not isinstance(script, str):
             raise Error("Either path or source parameter must be specified")
-        await self._channel.send("addInitScript", dict(source=source))
+        await self._channel.send("addInitScript", dict(source=script))
 
     async def exposeBinding(
-        self, name: str, binding: Callable, handle: bool = None
+        self, name: str, callback: Callable, handle: bool = None
     ) -> None:
         for page in self._pages:
             if name in page._bindings:
@@ -179,13 +179,13 @@ class BrowserContext(ChannelOwner):
                 )
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
-        self._bindings[name] = binding
+        self._bindings[name] = callback
         await self._channel.send(
             "exposeBinding", dict(name=name, needsHandle=handle or False)
         )
 
-    async def exposeFunction(self, name: str, binding: Callable) -> None:
-        await self.exposeBinding(name, lambda source, *args: binding(*args))
+    async def exposeFunction(self, name: str, callback: Callable) -> None:
+        await self.exposeBinding(name, lambda source, *args: callback(*args))
 
     async def route(self, url: URLMatch, handler: RouteHandler) -> None:
         self._routes.append(RouteHandlerEntry(URLMatcher(url), handler))
@@ -209,7 +209,7 @@ class BrowserContext(ChannelOwner):
             )
 
     async def waitForEvent(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
     ) -> Any:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
@@ -256,13 +256,13 @@ class BrowserContext(ChannelOwner):
         self,
         event: str,
         predicate: Callable[[Any], bool] = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
     def expect_page(
         self,
         predicate: Callable[[Page], bool] = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> EventContextManagerImpl[Page]:
         return EventContextManagerImpl(self.waitForEvent("page", predicate, timeout))

@@ -20,6 +20,9 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import TypedDict
 
+# These are types that we use in the API. They are public and are a part of the
+# stable API.
+
 
 class Error(Exception):
     def __init__(self, message: str, stack: str = None) -> None:
@@ -93,17 +96,17 @@ class Geolocation(ApiType):
 
 
 class PdfMargins(ApiType):
-    top: Optional[Union[str, int]]
-    right: Optional[Union[str, int]]
-    bottom: Optional[Union[str, int]]
-    left: Optional[Union[str, int]]
+    top: Optional[Union[str, float]]
+    right: Optional[Union[str, float]]
+    bottom: Optional[Union[str, float]]
+    left: Optional[Union[str, float]]
 
     def __init__(
         self,
-        top: Union[str, int],
-        right: Union[str, int],
-        bottom: Union[str, int],
-        left: Union[str, int],
+        top: Union[str, float],
+        right: Union[str, float],
+        bottom: Union[str, float],
+        left: Union[str, float],
     ):
         self.top = top
         self.right = right
@@ -132,13 +135,13 @@ class ProxySettings(ApiType):
 
 class SourceLocation(ApiType):
     url: str
-    line: int
-    column: int
+    line_number: int
+    column_number: int
 
-    def __init__(self, url: str, line: int, column: int):
+    def __init__(self, url: str, line_number: int, column_number: int):
         self.url = url
-        self.line = line
-        self.column = column
+        self.line_number = line_number
+        self.column_number = column_number
 
 
 def filter_out_none(args: Dict) -> Any:

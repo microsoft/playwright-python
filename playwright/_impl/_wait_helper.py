@@ -34,7 +34,7 @@ class WaitHelper:
     ) -> None:
         self.reject_on(wait_for_event_future(emitter, event, predicate), error)
 
-    def reject_on_timeout(self, timeout: int, message: str) -> None:
+    def reject_on_timeout(self, timeout: float, message: str) -> None:
         if timeout == 0:
             return
         self.reject_on(

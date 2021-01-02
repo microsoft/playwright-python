@@ -28,16 +28,16 @@ class Selectors(ChannelOwner):
     async def register(
         self,
         name: str,
-        source: str = None,
+        script: str = None,
         path: Union[str, Path] = None,
         contentScript: bool = None,
     ) -> None:
-        if not source and not path:
+        if not script and not path:
             raise Error("Either source or path should be specified")
         if path:
             with open(path, "r") as file:
-                source = file.read()
-        params: Dict = dict(name=name, source=source)
+                script = file.read()
+        params: Dict = dict(name=name, source=script)
         if contentScript:
             params["contentScript"] = True
         await self._channel.send("register", params)

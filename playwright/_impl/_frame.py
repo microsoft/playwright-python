@@ -104,7 +104,7 @@ class Frame(ChannelOwner):
     async def goto(
         self,
         url: str,
-        timeout: int = None,
+        timeout: float = None,
         waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
@@ -115,7 +115,7 @@ class Frame(ChannelOwner):
             ),
         )
 
-    def _setup_navigation_wait_helper(self, timeout: int = None) -> WaitHelper:
+    def _setup_navigation_wait_helper(self, timeout: float = None) -> WaitHelper:
         wait_helper = WaitHelper(self._loop)
         wait_helper.reject_on_event(
             self._page, "close", Error("Navigation failed because page was closed!")
@@ -138,7 +138,7 @@ class Frame(ChannelOwner):
         self,
         url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> Optional[Response]:
         if not waitUntil:
             waitUntil = "load"
@@ -174,7 +174,7 @@ class Frame(ChannelOwner):
         return None
 
     async def waitForLoadState(
-        self, state: DocumentLoadState = None, timeout: int = None
+        self, state: DocumentLoadState = None, timeout: float = None
     ) -> None:
         if not state:
             state = "load"
@@ -238,7 +238,7 @@ class Frame(ChannelOwner):
     async def waitForSelector(
         self,
         selector: str,
-        timeout: int = None,
+        timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
@@ -246,7 +246,7 @@ class Frame(ChannelOwner):
         )
 
     async def dispatchEvent(
-        self, selector: str, type: str, eventInit: Dict = None, timeout: int = None
+        self, selector: str, type: str, eventInit: Dict = None, timeout: float = None
     ) -> None:
         await self._channel.send(
             "dispatchEvent",
@@ -297,7 +297,7 @@ class Frame(ChannelOwner):
     async def setContent(
         self,
         html: str,
-        timeout: int = None,
+        timeout: float = None,
         waitUntil: DocumentLoadState = None,
     ) -> None:
         await self._channel.send("setContent", locals_to_params(locals()))
@@ -352,10 +352,10 @@ class Frame(ChannelOwner):
         selector: str,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        delay: int = None,
+        delay: float = None,
         button: MouseButton = None,
         clickCount: int = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -366,9 +366,9 @@ class Frame(ChannelOwner):
         selector: str,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        delay: int = None,
+        delay: float = None,
         button: MouseButton = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -379,31 +379,31 @@ class Frame(ChannelOwner):
         selector: str,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("tap", locals_to_params(locals()))
 
     async def fill(
-        self, selector: str, value: str, timeout: int = None, noWaitAfter: bool = None
+        self, selector: str, value: str, timeout: float = None, noWaitAfter: bool = None
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
-    async def focus(self, selector: str, timeout: int = None) -> None:
+    async def focus(self, selector: str, timeout: float = None) -> None:
         await self._channel.send("focus", locals_to_params(locals()))
 
-    async def textContent(self, selector: str, timeout: int = None) -> Optional[str]:
+    async def textContent(self, selector: str, timeout: float = None) -> Optional[str]:
         return await self._channel.send("textContent", locals_to_params(locals()))
 
-    async def innerText(self, selector: str, timeout: int = None) -> str:
+    async def innerText(self, selector: str, timeout: float = None) -> str:
         return await self._channel.send("innerText", locals_to_params(locals()))
 
-    async def innerHTML(self, selector: str, timeout: int = None) -> str:
+    async def innerHTML(self, selector: str, timeout: float = None) -> str:
         return await self._channel.send("innerHTML", locals_to_params(locals()))
 
     async def getAttribute(
-        self, selector: str, name: str, timeout: int = None
+        self, selector: str, name: str, timeout: float = None
     ) -> Optional[str]:
         return await self._channel.send("getAttribute", locals_to_params(locals()))
 
@@ -412,7 +412,7 @@ class Frame(ChannelOwner):
         selector: str,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
     ) -> None:
         await self._channel.send("hover", locals_to_params(locals()))
@@ -424,7 +424,7 @@ class Frame(ChannelOwner):
         index: Union[int, List[int]] = None,
         label: Union[str, List[str]] = None,
         element: Union["ElementHandle", List["ElementHandle"]] = None,
-        timeout: int = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> List[str]:
         params = locals_to_params(
@@ -441,7 +441,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]],
-        timeout: int = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
         params = locals_to_params(locals())
@@ -452,8 +452,8 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         text: str,
-        delay: int = None,
-        timeout: int = None,
+        delay: float = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("type", locals_to_params(locals()))
@@ -462,8 +462,8 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         key: str,
-        delay: int = None,
-        timeout: int = None,
+        delay: float = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("press", locals_to_params(locals()))
@@ -471,7 +471,7 @@ class Frame(ChannelOwner):
     async def check(
         self,
         selector: str,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -480,13 +480,13 @@ class Frame(ChannelOwner):
     async def uncheck(
         self,
         selector: str,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 
-    async def waitForTimeout(self, timeout: int) -> None:
+    async def waitForTimeout(self, timeout: float) -> None:
         await self._connection._loop.create_task(asyncio.sleep(timeout / 1000))
 
     async def waitForFunction(
@@ -494,8 +494,8 @@ class Frame(ChannelOwner):
         expression: str,
         arg: Serializable = None,
         force_expr: bool = None,
-        timeout: int = None,
-        polling: Union[int, Literal["raf"]] = None,
+        timeout: float = None,
+        polling: Union[float, Literal["raf"]] = None,
     ) -> JSHandle:
         if not is_function_body(expression):
             force_expr = True
@@ -510,7 +510,7 @@ class Frame(ChannelOwner):
     def expect_load_state(
         self,
         state: DocumentLoadState = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
         return EventContextManagerImpl(self.waitForLoadState(state, timeout))
 
@@ -518,6 +518,6 @@ class Frame(ChannelOwner):
         self,
         url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
         return EventContextManagerImpl(self.waitForNavigation(url, waitUntil, timeout))

@@ -295,7 +295,7 @@ class WebSocket(ChannelOwner):
         return self._initializer["url"]
 
     async def waitForEvent(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: int = None
+        self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
     ) -> Any:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
@@ -318,7 +318,7 @@ class WebSocket(ChannelOwner):
         self,
         event: str,
         predicate: Callable[[Any], bool] = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
 
