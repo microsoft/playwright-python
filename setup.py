@@ -90,6 +90,10 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                             from_location, os.stat(from_location).st_mode | stat.S_IEXEC
                         )
                     zip.write(from_location, to_location)
+            if platform == "mac":
+                shutil.copyfile(
+                    wheel_location, without_platform + "macosx_11_0_universal2.whl"
+                )
         os.remove(base_wheel_location)
 
 
