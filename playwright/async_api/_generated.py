@@ -2320,7 +2320,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.wait_for_element_state
 
-        Returns the element satisfies the `state`.
+        Returns when the element satisfies the `state`.
 
         Depending on the `state` parameter, this method waits for one of the [actionability](./actionability.md) checks to pass.
         This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
@@ -2362,7 +2362,8 @@ class ElementHandle(JSHandle):
     ) -> typing.Union["ElementHandle", NoneType]:
         """ElementHandle.wait_for_selector
 
-        Returns element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or `detached`.
+        Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
+        `detached`.
 
         Wait for the `selector` relative to the element handle to satisfy `state` option (either appear/disappear from dom, or
         become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method
