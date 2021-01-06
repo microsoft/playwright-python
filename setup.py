@@ -15,19 +15,30 @@
 import glob
 import os
 import shutil
-import stat
 import subprocess
 import sys
+import typing
 import zipfile
 
 import setuptools
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "0.170.0-next.1608058598043"
+driver_version = "1.8.0-next-1609895143000"
 
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+NoneType = type(None)
+
+
+def extractall(zip: typing.Any, path: str) -> NoneType:
+    for name in zip.namelist():
+        member = zip.getinfo(name)
+        extracted_path = zip._extract_member(member, path, None)
+        attr = member.external_attr >> 16
+        if attr != 0:
+            os.chmod(extracted_path, attr)
 
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
@@ -42,9 +53,12 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
         for platform in ["mac", "linux", "win32", "win32_x64"]:
-            zip_file = f"playwright-cli-{driver_version}-{platform}.zip"
+            zip_file = f"playwright-{driver_version}-{platform}.zip"
             if not os.path.exists("driver/" + zip_file):
-                url = "https://playwright.azureedge.net/builds/cli/next/" + zip_file
+                url = "https://playwright.azureedge.net/builds/driver/"
+                if "-next" in driver_version:
+                    url = url + "next/"
+                url = url + zip_file
                 print("Fetching ", url)
                 subprocess.check_call(
                     ["curl", "--http1.1", url, "-o", "driver/" + zip_file]
@@ -57,19 +71,12 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
         }
         for platform in ["mac", "linux", "win32", "win32_x64"]:
-            zip_file = f"driver/playwright-cli-{driver_version}-{platform}.zip"
+            zip_file = f"driver/playwright-{driver_version}-{platform}.zip"
             with zipfile.ZipFile(zip_file, "r") as zip:
-                zip.extractall(f"driver/{platform}")
+                extractall(zip, f"driver/{platform}")
             if platform_map[sys.platform] == platform:
                 with zipfile.ZipFile(zip_file, "r") as zip:
-                    zip.extractall("playwright/driver")
-                for file in os.listdir("playwright/driver"):
-                    if file == "playwright-cli" or file.startswith("ffmpeg"):
-                        print(f"playwright/driver/{file}")
-                        os.chmod(
-                            f"playwright/driver/{file}",
-                            os.stat(f"playwright/driver/{file}").st_mode | stat.S_IEXEC,
-                        )
+                    extractall(zip, "playwright/driver")
             wheel = ""
             if platform == "mac":
                 wheel = "macosx_10_13_x86_64.whl"
@@ -82,14 +89,12 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             wheel_location = without_platform + wheel
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
-                for file in os.listdir(f"driver/{platform}"):
-                    from_location = f"driver/{platform}/{file}"
-                    to_location = f"playwright/driver/{file}"
-                    if file == "playwright-cli" or file.startswith("ffmpeg"):
-                        os.chmod(
-                            from_location, os.stat(from_location).st_mode | stat.S_IEXEC
-                        )
-                    zip.write(from_location, to_location)
+                driver_root = os.path.abspath(f"driver/{platform}")
+                for dir_path, dirs, files in os.walk(driver_root):
+                    for file in files:
+                        from_path = os.path.join(dir_path, file)
+                        to_path = os.path.relpath(from_path, driver_root)
+                        zip.write(from_path, f"playwright/driver/{to_path}")
         os.remove(base_wheel_location)
 
 

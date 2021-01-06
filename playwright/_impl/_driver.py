@@ -25,8 +25,8 @@ def compute_driver_executable() -> Path:
     package_path = Path(inspect.getfile(playwright)).parent
     platform = sys.platform
     if platform == "win32":
-        return package_path / "driver" / "playwright-cli.exe"
-    return package_path / "driver" / "playwright-cli"
+        return package_path / "driver" / "playwright.cmd"
+    return package_path / "driver" / "playwright.sh"
 
 
 if sys.version_info.major == 3 and sys.version_info.minor == 7:
