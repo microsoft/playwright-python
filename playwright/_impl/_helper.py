@@ -41,9 +41,11 @@ else:  # pragma: no cover
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright._impl._network import Request, Route
+    from playwright._impl._network import Request, Response, Route
 
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
+URLMatchRequest = Union[str, Pattern, Callable[["Request"], bool]]
+URLMatchResponse = Union[str, Pattern, Callable[["Response"], bool]]
 RouteHandler = Union[Callable[["Route"], Any], Callable[["Route", "Request"], Any]]
 
 ColorScheme = Literal["dark", "light", "no-preference"]
@@ -97,7 +99,7 @@ class FrameNavigatedEvent(TypedDict):
     error: Optional[str]
 
 
-Env = Dict[str, Union[str, int, bool]]
+Env = Dict[str, Union[str, float, bool]]
 
 
 class URLMatcher:
@@ -124,23 +126,23 @@ class URLMatcher:
 class TimeoutSettings:
     def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
         self._parent = parent
-        self._timeout = 30000
-        self._navigation_timeout = 30000
+        self._timeout = 30000.0
+        self._navigation_timeout = 30000.0
 
-    def set_timeout(self, timeout: int) -> None:
+    def set_timeout(self, timeout: float) -> None:
         self._timeout = timeout
 
-    def timeout(self) -> int:
+    def timeout(self) -> float:
         if self._timeout is not None:
             return self._timeout
         if self._parent:
             return self._parent.timeout()
         return 30000
 
-    def set_navigation_timeout(self, navigation_timeout: int) -> None:
+    def set_navigation_timeout(self, navigation_timeout: float) -> None:
         self._navigation_timeout = navigation_timeout
 
-    def navigation_timeout(self) -> int:
+    def navigation_timeout(self) -> float:
         if self._navigation_timeout is not None:
             return self._navigation_timeout
         if self._parent:

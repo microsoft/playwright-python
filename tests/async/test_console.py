@@ -120,7 +120,7 @@ async def test_console_should_have_location_for_console_api_calls(page, server):
     location = message.location
     # Engines have different column notion.
     assert location.url == server.PREFIX + "/consolelog.html"
-    assert location.line == 7
+    assert location.line_number == 7
 
 
 async def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(

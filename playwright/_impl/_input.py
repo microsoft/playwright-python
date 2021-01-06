@@ -31,10 +31,10 @@ class Keyboard:
     async def insertText(self, text: str) -> None:
         await self._channel.send("keyboardInsertText", locals_to_params(locals()))
 
-    async def type(self, text: str, delay: int = None) -> None:
+    async def type(self, text: str, delay: float = None) -> None:
         await self._channel.send("keyboardType", locals_to_params(locals()))
 
-    async def press(self, key: str, delay: int = None) -> None:
+    async def press(self, key: str, delay: float = None) -> None:
         await self._channel.send("keyboardPress", locals_to_params(locals()))
 
 
@@ -65,7 +65,7 @@ class Mouse:
         self,
         x: float,
         y: float,
-        delay: int = None,
+        delay: float = None,
         button: MouseButton = None,
         clickCount: int = None,
     ) -> None:
@@ -75,7 +75,7 @@ class Mouse:
         self,
         x: float,
         y: float,
-        delay: int = None,
+        delay: float = None,
         button: MouseButton = None,
     ) -> None:
         await self.click(x, y, delay=delay, button=button, clickCount=2)

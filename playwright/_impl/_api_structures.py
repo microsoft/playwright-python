@@ -20,7 +20,9 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal, TypedDict
 
-# These are the structures that we like keeping in a JSON form for their potential reuse between SDKs / services.
+# These are the structures that we like keeping in a JSON form for their potential
+# reuse between SDKs / services. They are public and are a part of the
+# stable API.
 
 # Explicitly mark optional params as such for the documentation
 # If there is at least one optional param, set total=False for better mypy handling.
@@ -32,7 +34,7 @@ class Cookie(TypedDict, total=False):
     url: Optional[str]
     domain: Optional[str]
     path: Optional[str]
-    expires: Optional[int]
+    expires: Optional[float]
     httpOnly: Optional[bool]
     secure: Optional[bool]
     sameSite: Optional[Literal["Strict", "Lax", "None"]]

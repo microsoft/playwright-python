@@ -21,11 +21,11 @@ from playwright._impl._selectors import Selectors
 
 
 class Playwright(ChannelOwner):
+    devices: Dict[str, DeviceDescriptor]
+    selectors: Selectors
     chromium: BrowserType
     firefox: BrowserType
     webkit: BrowserType
-    selectors: Selectors
-    devices: Dict[str, DeviceDescriptor]
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict

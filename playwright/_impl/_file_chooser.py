@@ -50,7 +50,7 @@ class FileChooser:
     async def setFiles(
         self,
         files: Union[str, FilePayload, List[str], List[FilePayload]],
-        timeout: int = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._element_handle.setInputFiles(files, timeout, noWaitAfter)

@@ -56,9 +56,6 @@ class ElementHandle(JSHandle):
     async def _createSelectorForTest(self, name: str) -> Optional[str]:
         return await self._channel.send("createSelectorForTest", dict(name=name))
 
-    def toString(self) -> str:
-        return self._preview
-
     def asElement(self) -> Optional["ElementHandle"]:
         return self
 
@@ -85,14 +82,14 @@ class ElementHandle(JSHandle):
             "dispatchEvent", dict(type=type, eventInit=serialize_argument(eventInit))
         )
 
-    async def scrollIntoViewIfNeeded(self, timeout: int = None) -> None:
+    async def scrollIntoViewIfNeeded(self, timeout: float = None) -> None:
         await self._channel.send("scrollIntoViewIfNeeded", locals_to_params(locals()))
 
     async def hover(
         self,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
     ) -> None:
         await self._channel.send("hover", locals_to_params(locals()))
@@ -101,10 +98,10 @@ class ElementHandle(JSHandle):
         self,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        delay: int = None,
+        delay: float = None,
         button: MouseButton = None,
         clickCount: int = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -114,9 +111,9 @@ class ElementHandle(JSHandle):
         self,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        delay: int = None,
+        delay: float = None,
         button: MouseButton = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -128,7 +125,7 @@ class ElementHandle(JSHandle):
         index: Union[int, List[int]] = None,
         label: Union[str, List[str]] = None,
         element: Union["ElementHandle", List["ElementHandle"]] = None,
-        timeout: int = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> List[str]:
         params = locals_to_params(
@@ -144,24 +141,24 @@ class ElementHandle(JSHandle):
         self,
         modifiers: List[KeyboardModifier] = None,
         position: Tuple[float, float] = None,
-        timeout: int = None,
+        timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("tap", locals_to_params(locals()))
 
     async def fill(
-        self, value: str, timeout: int = None, noWaitAfter: bool = None
+        self, value: str, timeout: float = None, noWaitAfter: bool = None
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
-    async def selectText(self, timeout: int = None) -> None:
+    async def selectText(self, timeout: float = None) -> None:
         await self._channel.send("selectText", locals_to_params(locals()))
 
     async def setInputFiles(
         self,
         files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]],
-        timeout: int = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
         params = locals_to_params(locals())
@@ -174,24 +171,28 @@ class ElementHandle(JSHandle):
     async def type(
         self,
         text: str,
-        delay: int = None,
-        timeout: int = None,
+        delay: float = None,
+        timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("type", locals_to_params(locals()))
 
     async def press(
-        self, key: str, delay: int = None, timeout: int = None, noWaitAfter: bool = None
+        self,
+        key: str,
+        delay: float = None,
+        timeout: float = None,
+        noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("press", locals_to_params(locals()))
 
     async def check(
-        self, timeout: int = None, force: bool = None, noWaitAfter: bool = None
+        self, timeout: float = None, force: bool = None, noWaitAfter: bool = None
     ) -> None:
         await self._channel.send("check", locals_to_params(locals()))
 
     async def uncheck(
-        self, timeout: int = None, force: bool = None, noWaitAfter: bool = None
+        self, timeout: float = None, force: bool = None, noWaitAfter: bool = None
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 
@@ -201,7 +202,7 @@ class ElementHandle(JSHandle):
 
     async def screenshot(
         self,
-        timeout: int = None,
+        timeout: float = None,
         type: Literal["jpeg", "png"] = None,
         path: Union[str, Path] = None,
         quality: int = None,
@@ -271,7 +272,7 @@ class ElementHandle(JSHandle):
     async def waitForElementState(
         self,
         state: Literal["disabled", "enabled", "hidden", "stable", "visible"],
-        timeout: int = None,
+        timeout: float = None,
     ) -> None:
         await self._channel.send("waitForElementState", locals_to_params(locals()))
 
@@ -279,7 +280,7 @@ class ElementHandle(JSHandle):
         self,
         selector: str,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
-        timeout: int = None,
+        timeout: float = None,
     ) -> Optional["ElementHandle"]:
         return from_nullable_channel(
             await self._channel.send("waitForSelector", locals_to_params(locals()))
