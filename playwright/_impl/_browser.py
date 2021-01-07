@@ -13,23 +13,22 @@
 # limitations under the License.
 
 import json
-import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
-from playwright._impl._api_structures import StorageState
-from playwright._impl._api_types import Geolocation, ProxySettings
+from playwright._impl._api_structures import (
+    Geolocation,
+    HttpCredentials,
+    ProxySettings,
+    StorageState,
+    ViewportSize,
+)
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import ColorScheme, is_safe_close_error, locals_to_params
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_type import BrowserType
@@ -66,7 +65,8 @@ class Browser(ChannelOwner):
 
     async def new_context(
         self,
-        viewport: Union[Tuple[int, int], Literal[0]] = None,
+        viewport: ViewportSize = None,
+        noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -77,7 +77,7 @@ class Browser(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Tuple[str, str] = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: float = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -88,7 +88,7 @@ class Browser(ChannelOwner):
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,
         recordVideoDir: Union[Path, str] = None,
-        recordVideoSize: Tuple[int, int] = None,
+        recordVideoSize: ViewportSize = None,
         storageState: Union[StorageState, str, Path] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
@@ -103,7 +103,8 @@ class Browser(ChannelOwner):
 
     async def new_page(
         self,
-        viewport: Union[Tuple[int, int], Literal[0]] = None,
+        viewport: ViewportSize = None,
+        noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -114,7 +115,7 @@ class Browser(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Tuple[str, str] = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: float = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -125,7 +126,7 @@ class Browser(ChannelOwner):
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,
         recordVideoDir: Union[Path, str] = None,
-        recordVideoSize: Tuple[int, int] = None,
+        recordVideoSize: ViewportSize = None,
         storageState: Union[StorageState, str, Path] = None,
     ) -> Page:
         params = locals_to_params(locals())
@@ -151,8 +152,8 @@ class Browser(ChannelOwner):
 
 
 def normalize_context_params(params: Dict) -> None:
-    if "viewport" in params and params["viewport"] == 0:
-        del params["viewport"]
+    if params.get("noViewport"):
+        del params["noViewport"]
         params["noDefaultViewport"] = True
     if "defaultBrowserType" in params:
         del params["defaultBrowserType"]
@@ -167,10 +168,7 @@ def normalize_context_params(params: Dict) -> None:
     if "recordVideoDir" in params:
         params["recordVideo"] = {"dir": str(params["recordVideoDir"])}
         if "recordVideoSize" in params:
-            params["recordVideo"]["size"] = {
-                "width": params["recordVideoSize"][0],
-                "height": params["recordVideoSize"][1],
-            }
+            params["recordVideo"]["size"] = params["recordVideoSize"]
             del params["recordVideoSize"]
         del params["recordVideoDir"]
     if "storageState" in params:

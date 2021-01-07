@@ -14,24 +14,24 @@
 
 import asyncio
 
-from playwright.async_api import Error, FloatRect
+from playwright.async_api import Error
 
 
 async def test_bounding_box(page, server):
-    await page.set_viewport_size(500, 500)
+    await page.set_viewport_size({"width": 500, "height": 500})
     await page.goto(server.PREFIX + "/grid.html")
     element_handle = await page.query_selector(".box:nth-of-type(13)")
     box = await element_handle.bounding_box()
-    assert box == FloatRect(100, 50, 50, 50)
+    assert box == {"x": 100, "y": 50, "width": 50, "height": 50}
 
 
 async def test_bounding_box_handle_nested_frames(page, server):
-    await page.set_viewport_size(500, 500)
+    await page.set_viewport_size({"width": 500, "height": 500})
     await page.goto(server.PREFIX + "/frames/nested-frames.html")
     nested_frame = page.frame(name="dos")
     element_handle = await nested_frame.query_selector("div")
     box = await element_handle.bounding_box()
-    assert box == FloatRect(24, 224, 268, 18)
+    assert box == {"x": 24, "y": 224, "width": 268, "height": 18}
 
 
 async def test_bounding_box_return_null_for_invisible_elements(page, server):
@@ -41,12 +41,12 @@ async def test_bounding_box_return_null_for_invisible_elements(page, server):
 
 
 async def test_bounding_box_force_a_layout(page, server):
-    await page.set_viewport_size(500, 500)
+    await page.set_viewport_size({"width": 500, "height": 500})
     await page.set_content('<div style="width: 100px; height: 100px">hello</div>')
     element_handle = await page.query_selector("div")
     await page.evaluate('element => element.style.height = "200px"', element_handle)
     box = await element_handle.bounding_box()
-    assert box == FloatRect(8, 8, 100, 200)
+    assert box == {"x": 8, "y": 8, "width": 100, "height": 200}
 
 
 async def test_bounding_box_with_SVG_nodes(page, server):
@@ -56,7 +56,7 @@ async def test_bounding_box_with_SVG_nodes(page, server):
            </svg>"""
     )
     element = await page.query_selector("#therect")
-    pwBounding_box = await element.bounding_box()
+    pw_bounding_box = await element.bounding_box()
     web_bounding_box = await page.evaluate(
         """e => {
             rect = e.getBoundingClientRect()
@@ -64,7 +64,7 @@ async def test_bounding_box_with_SVG_nodes(page, server):
         }""",
         element,
     )
-    assert pwBounding_box == FloatRect._parse(web_bounding_box)
+    assert pw_bounding_box == web_bounding_box
 
 
 async def test_bounding_box_with_page_scale(browser, server):
@@ -86,10 +86,10 @@ async def test_bounding_box_with_page_scale(browser, server):
     )
 
     box = await button.bounding_box()
-    assert round(box.x * 100) == 17 * 100
-    assert round(box.y * 100) == 23 * 100
-    assert round(box.width * 100) == 200 * 100
-    assert round(box.height * 100) == 20 * 100
+    assert round(box["x"] * 100) == 17 * 100
+    assert round(box["y"] * 100) == 23 * 100
+    assert round(box["width"] * 100) == 200 * 100
+    assert round(box["height"] * 100) == 20 * 100
     await context.close()
 
 
@@ -111,21 +111,19 @@ async def test_bounding_box_when_inline_box_child_is_outside_of_viewport(page, s
     )
     handle = await page.query_selector("span")
     box = await handle.bounding_box()
-    web_bounding_box = FloatRect._parse(
-        await handle.evaluate(
-            """e => {
-            rect = e.getBoundingClientRect();
-            return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
-        }"""
-        )
+    web_bounding_box = await handle.evaluate(
+        """e => {
+        rect = e.getBoundingClientRect();
+        return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
+    }"""
     )
 
     def roundbox(b):
         return {
-            "x": round(b.x * 100),
-            "y": round(b.y * 100),
-            "width": round(b.width * 100),
-            "height": round(b.height * 100),
+            "x": round(b["x"] * 100),
+            "y": round(b["y"] * 100),
+            "width": round(b["width"] * 100),
+            "height": round(b["height"] * 100),
         }
 
     assert roundbox(box) == roundbox(web_bounding_box)

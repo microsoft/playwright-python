@@ -17,24 +17,24 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, Geolocation, Page
+from playwright.async_api import BrowserContext, Error, Page
 
 
 async def test_should_work(page: Page, server, context: BrowserContext):
     await context.grant_permissions(["geolocation"])
     await page.goto(server.EMPTY_PAGE)
-    await context.set_geolocation(latitude=10, longitude=10)
+    await context.set_geolocation({"latitude": 10, "longitude": 10})
     geolocation = await page.evaluate(
         """() => new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
       resolve({latitude: position.coords.latitude, longitude: position.coords.longitude});
     }))"""
     )
-    assert geolocation == Geolocation(latitude=10, longitude=10)._to_json()
+    assert geolocation == {"latitude": 10, "longitude": 10}
 
 
 async def test_should_throw_when_invalid_longitude(context):
     with pytest.raises(Error) as exc:
-        await context.set_geolocation(latitude=10, longitude=200)
+        await context.set_geolocation({"latitude": 10, "longitude": 200})
     assert (
         "geolocation.longitude: precondition -180 <= LONGITUDE <= 180 failed."
         in exc.value.message
@@ -43,11 +43,11 @@ async def test_should_throw_when_invalid_longitude(context):
 
 async def test_should_isolate_contexts(page, server, context, browser):
     await context.grant_permissions(["geolocation"])
-    await context.set_geolocation(latitude=10, longitude=10)
+    await context.set_geolocation({"latitude": 10, "longitude": 10})
     await page.goto(server.EMPTY_PAGE)
 
     context2 = await browser.new_context(
-        permissions=["geolocation"], geolocation=Geolocation(latitude=20, longitude=20)
+        permissions=["geolocation"], geolocation={"latitude": 20, "longitude": 20}
     )
 
     page2 = await context2.new_page()
@@ -58,21 +58,21 @@ async def test_should_isolate_contexts(page, server, context, browser):
       resolve({latitude: position.coords.latitude, longitude: position.coords.longitude})
     }))"""
     )
-    assert geolocation == Geolocation(latitude=10, longitude=10)._to_json()
+    assert geolocation == {"latitude": 10, "longitude": 10}
 
     geolocation2 = await page2.evaluate(
         """() => new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
       resolve({latitude: position.coords.latitude, longitude: position.coords.longitude})
     }))"""
     )
-    assert geolocation2 == Geolocation(latitude=20, longitude=20)._to_json()
+    assert geolocation2 == {"latitude": 20, "longitude": 20}
 
     await context2.close()
 
 
 async def test_should_use_context_options(browser, server):
     options = {
-        "geolocation": Geolocation(latitude=10, longitude=10),
+        "geolocation": {"latitude": 10, "longitude": 10},
         "permissions": ["geolocation"],
     }
     context = await browser.new_context(**options)
@@ -84,7 +84,7 @@ async def test_should_use_context_options(browser, server):
       resolve({latitude: position.coords.latitude, longitude: position.coords.longitude});
     }))"""
     )
-    assert geolocation == Geolocation(latitude=10, longitude=10)._to_json()
+    assert geolocation == {"latitude": 10, "longitude": 10}
     await context.close()
 
 
@@ -94,7 +94,7 @@ async def test_watchPosition_should_be_notified(page, server, context):
     messages = []
     page.on("console", lambda message: messages.append(message.text))
 
-    await context.set_geolocation(latitude=0, longitude=0)
+    await context.set_geolocation({"latitude": 0, "longitude": 0})
     await page.evaluate(
         """() => {
       navigator.geolocation.watchPosition(pos => {
@@ -104,13 +104,13 @@ async def test_watchPosition_should_be_notified(page, server, context):
     }"""
     )
 
-    await context.set_geolocation(latitude=0, longitude=10)
+    await context.set_geolocation({"latitude": 0, "longitude": 10})
     await page.wait_for_event("console", lambda message: "lat=0 lng=10" in message.text)
-    await context.set_geolocation(latitude=20, longitude=30)
+    await context.set_geolocation({"latitude": 20, "longitude": 30})
     await page.wait_for_event(
         "console", lambda message: "lat=20 lng=30" in message.text
     )
-    await context.set_geolocation(latitude=40, longitude=50)
+    await context.set_geolocation({"latitude": 40, "longitude": 50})
     await page.wait_for_event(
         "console", lambda message: "lat=40 lng=50" in message.text
     )
@@ -123,7 +123,7 @@ async def test_watchPosition_should_be_notified(page, server, context):
 
 async def test_should_use_context_options_for_popup(page, context, server):
     await context.grant_permissions(["geolocation"])
-    await context.set_geolocation(latitude=10, longitude=10)
+    await context.set_geolocation({"latitude": 10, "longitude": 10})
     [popup, _] = await asyncio.gather(
         page.wait_for_event("popup"),
         page.evaluate(
@@ -133,4 +133,4 @@ async def test_should_use_context_options_for_popup(page, context, server):
     )
     await popup.wait_for_load_state()
     geolocation = await popup.evaluate("() => window.geolocationPromise")
-    assert geolocation == Geolocation(latitude=10, longitude=10)._to_json()
+    assert geolocation == {"latitude": 10, "longitude": 10}

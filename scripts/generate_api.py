@@ -92,7 +92,10 @@ def arguments(func: FunctionType, indent: int) -> str:
             or "Handle" in value_str
         ):
             tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")
-        elif re.match(r"<class 'playwright\._impl\.[\w]+\.[\w]+", value_str):
+        elif (
+            re.match(r"<class 'playwright\._impl\.[\w]+\.[\w]+", value_str)
+            and "_api_structures" not in value_str
+        ):
             tokens.append(f"{name}={to_snake_case(name)}._impl_obj")
         else:
             tokens.append(f"{name}={to_snake_case(name)}")
@@ -155,15 +158,7 @@ else:  # pragma: no cover
 
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
-from playwright._impl._api_types import (
-    DeviceDescriptor,
-    FilePayload,
-    FloatRect,
-    Geolocation,
-    PdfMargins,
-    ProxySettings,
-    SourceLocation,
-)
+from playwright._impl._api_structures import Cookie, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ViewportSize
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -175,7 +170,6 @@ from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl
 from playwright._impl._frame import Frame as FrameImpl
-from playwright._impl._api_structures import Cookie, ResourceTiming, StorageState
 from playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
 from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl

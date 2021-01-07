@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import sys
-from typing import List, Optional
+from typing import List, Optional, Union
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -40,6 +40,24 @@ class Cookie(TypedDict, total=False):
     sameSite: Optional[Literal["Lax", "None", "Strict"]]
 
 
+class FloatRect(TypedDict):
+    x: float
+    y: float
+    width: float
+    height: float
+
+
+class Geolocation(TypedDict, total=False):
+    latitude: float
+    longitude: float
+    accuracy: Optional[float]
+
+
+class HttpCredentials(TypedDict):
+    username: str
+    password: str
+
+
 class LocalStorageEntry(TypedDict):
     name: str
     value: str
@@ -48,6 +66,25 @@ class LocalStorageEntry(TypedDict):
 class OriginState(TypedDict):
     origin: str
     localStorage: List[LocalStorageEntry]
+
+
+class PdfMargins(TypedDict, total=False):
+    top: Optional[Union[str, float]]
+    right: Optional[Union[str, float]]
+    bottom: Optional[Union[str, float]]
+    left: Optional[Union[str, float]]
+
+
+class Position(TypedDict):
+    x: float
+    y: float
+
+
+class ProxySettings(TypedDict, total=False):
+    server: str
+    bypass: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
 
 
 class StorageState(TypedDict, total=False):
@@ -65,3 +102,20 @@ class ResourceTiming(TypedDict):
     requestStart: float
     responseStart: float
     responseEnd: float
+
+
+class ViewportSize(TypedDict):
+    width: int
+    height: int
+
+
+class SourceLocation(TypedDict):
+    url: str
+    lineNumber: int
+    columnNumber: int
+
+
+class FilePayload(TypedDict):
+    name: str
+    mimeType: str
+    buffer: bytes

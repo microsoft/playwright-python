@@ -16,7 +16,9 @@ import os
 
 
 def test_should_expose_video_path(browser, tmpdir, server):
-    page = browser.new_page(record_video_dir=tmpdir, record_video_size=(100, 200))
+    page = browser.new_page(
+        record_video_dir=tmpdir, record_video_size={"width": 100, "height": 200}
+    )
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()
     assert str(tmpdir) in path

@@ -160,7 +160,7 @@ async def test_should_not_override_viewport_size_when_passed_null(
 ):
     # Our WebKit embedder does not respect window features.
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
-    context = await browser.new_context(viewport=0)
+    context = await browser.new_context(no_viewport=True)
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     [popup, _] = await asyncio.gather(

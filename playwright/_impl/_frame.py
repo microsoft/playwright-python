@@ -15,11 +15,12 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
 from pyee import EventEmitter
 
-from playwright._impl._api_types import Error, FilePayload
+from playwright._impl._api_structures import FilePayload, Position
+from playwright._impl._api_types import Error
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -351,7 +352,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         delay: float = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -365,7 +366,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         delay: float = None,
         button: MouseButton = None,
         timeout: float = None,
@@ -378,7 +379,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -411,7 +412,7 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -> None:
@@ -511,7 +512,7 @@ class Frame(ChannelOwner):
         self,
         state: DocumentLoadState = None,
         timeout: float = None,
-    ) -> EventContextManagerImpl[Optional[Response]]:
+    ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.wait_for_load_state(state, timeout))
 
     def expect_navigation(
@@ -519,7 +520,7 @@ class Frame(ChannelOwner):
         url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
         timeout: float = None,
-    ) -> EventContextManagerImpl[Optional[Response]]:
+    ) -> EventContextManagerImpl:
         return EventContextManagerImpl(
             self.wait_for_navigation(url, waitUntil, timeout)
         )
