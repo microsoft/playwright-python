@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import sys
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -37,12 +37,22 @@ class Cookie(TypedDict, total=False):
     expires: Optional[float]
     httpOnly: Optional[bool]
     secure: Optional[bool]
-    sameSite: Optional[Literal["Strict", "Lax", "None"]]
+    sameSite: Optional[Literal["Lax", "None", "Strict"]]
+
+
+class LocalStorageEntry(TypedDict):
+    name: str
+    value: str
+
+
+class OriginState(TypedDict):
+    origin: str
+    localStorage: List[LocalStorageEntry]
 
 
 class StorageState(TypedDict, total=False):
     cookies: Optional[List[Cookie]]
-    origins: Optional[List[Dict]]
+    origins: Optional[List[OriginState]]
 
 
 class ResourceTiming(TypedDict):

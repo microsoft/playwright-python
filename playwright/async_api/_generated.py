@@ -121,7 +121,7 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.post_data)
 
     @property
-    def post_data_json(self) -> typing.Union[typing.Dict, NoneType]:
+    def post_data_json(self) -> typing.Union[typing.Any, NoneType]:
         """Request.post_data_json
 
         Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
@@ -131,7 +131,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[Dict, NoneType]
+        Union[Any, NoneType]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data_json)
 
@@ -413,7 +413,7 @@ class Response(AsyncBase):
             log_api("<= response.text failed")
             raise e
 
-    async def json(self) -> typing.Union[typing.Dict, typing.List]:
+    async def json(self) -> typing.Any:
         """Response.json
 
         Returns the JSON representation of response body.
@@ -422,7 +422,7 @@ class Response(AsyncBase):
 
         Returns
         -------
-        Union[Dict, List]
+        Any
         """
 
         try:
@@ -513,12 +513,12 @@ class Route(AsyncBase):
         status : Union[int, NoneType]
             Response status code, defaults to `200`.
         headers : Union[Dict[str, str], NoneType]
-            Optional response headers. Header values will be converted to a string.
+            Response headers. Header values will be converted to a string.
         body : Union[bytes, str, NoneType]
-            Optional response body.
+            Response body.
         path : Union[pathlib.Path, str, NoneType]
-            Optional file path to respond with. The content type will be inferred from file extension. If `path` is a relative path,
-            then it is resolved relative to the current working directory.
+            File path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it
+            is resolved relative to the current working directory.
         content_type : Union[str, NoneType]
             If set, equals to setting `Content-Type` response header.
         """
@@ -600,10 +600,7 @@ class WebSocket(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     async def wait_for_event(
-        self,
-        event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
-        timeout: float = None,
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> typing.Any:
         """WebSocket.wait_for_event
 
@@ -616,10 +613,10 @@ class WebSocket(AsyncBase):
         ----------
         event : str
             Event name, same one would pass into `webSocket.on(event)`.
-        predicate : Union[Callable[[Any], bool], NoneType]
-            receives the event data and resolves to truthy value when the waiting should resolve.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
         Returns
@@ -643,10 +640,7 @@ class WebSocket(AsyncBase):
             raise e
 
     def expect_event(
-        self,
-        event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
-        timeout: float = None,
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> AsyncEventContextManager:
         """WebSocket.expect_event
 
@@ -1061,11 +1055,13 @@ class JSHandle(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -1107,11 +1103,13 @@ class JSHandle(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -1663,6 +1661,16 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
+        value : Union[List[str], str, NoneType]
+            Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        index : Union[List[int], int, NoneType]
+            Options to select by index. Optional.
+        label : Union[List[str], str, NoneType]
+            Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        element : Union[ElementHandle, List[ElementHandle], NoneType]
+            Option elements to select. Optional.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -1820,8 +1828,7 @@ class ElementHandle(JSHandle):
             str,
             pathlib.Path,
             "FilePayload",
-            typing.List[str],
-            typing.List[pathlib.Path],
+            typing.List[typing.Union[str, pathlib.Path]],
             typing.List["FilePayload"],
         ],
         timeout: float = None,
@@ -1837,7 +1844,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : Union[List[pathlib.Path], List[str], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -2230,11 +2237,13 @@ class ElementHandle(JSHandle):
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -2288,11 +2297,13 @@ class ElementHandle(JSHandle):
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -2333,6 +2344,7 @@ class ElementHandle(JSHandle):
           [stable](./actionability.md#stable).
         - `"enabled"` Wait until the element is [enabled](./actionability.md#enabled).
         - `"disabled"` Wait until the element is [not enabled](./actionability.md#enabled).
+        - `"editable"` Wait until the element is [editable](./actionability.md#editable).
 
         If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
 
@@ -2505,7 +2517,11 @@ class FileChooser(AsyncBase):
     async def set_files(
         self,
         files: typing.Union[
-            str, "FilePayload", typing.List[str], typing.List["FilePayload"]
+            str,
+            pathlib.Path,
+            "FilePayload",
+            typing.List[typing.Union[str, pathlib.Path]],
+            typing.List["FilePayload"],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -2517,7 +2533,7 @@ class FileChooser(AsyncBase):
 
         Parameters
         ----------
-        files : Union[List[str], List[{name: str, mime_type: str, buffer: bytes}], str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -2809,11 +2825,13 @@ class Frame(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -2855,11 +2873,13 @@ class Frame(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in the page context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -3075,11 +3095,13 @@ class Frame(AsyncBase):
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -3126,11 +3148,13 @@ class Frame(AsyncBase):
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -3244,15 +3268,15 @@ class Frame(AsyncBase):
         Parameters
         ----------
         url : Union[str, NoneType]
-            URL of a script to be added. Optional.
+            URL of a script to be added.
         path : Union[pathlib.Path, str, NoneType]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
-            current working directory. Optional.
+            current working directory.
         content : Union[str, NoneType]
-            Raw JavaScript content to be injected into frame. Optional.
+            Raw JavaScript content to be injected into frame.
         type : Union[str, NoneType]
             Script type. Use 'module' in order to load a Javascript ES6 module. See
-            [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details. Optional.
+            [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
         Returns
         -------
@@ -3288,12 +3312,12 @@ class Frame(AsyncBase):
         Parameters
         ----------
         url : Union[str, NoneType]
-            URL of the `<link>` tag. Optional.
+            URL of the `<link>` tag.
         path : Union[pathlib.Path, str, NoneType]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
-            current working directory. Optional.
+            current working directory.
         content : Union[str, NoneType]
-            Raw CSS content to be injected into frame. Optional.
+            Raw CSS content to be injected into frame.
 
         Returns
         -------
@@ -3810,6 +3834,16 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+        value : Union[List[str], str, NoneType]
+            Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        index : Union[List[int], int, NoneType]
+            Options to select by index. Optional.
+        label : Union[List[str], str, NoneType]
+            Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        element : Union[ElementHandle, List[ElementHandle], NoneType]
+            Option elements to select. Optional.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3849,8 +3883,7 @@ class Frame(AsyncBase):
             str,
             pathlib.Path,
             "FilePayload",
-            typing.List[str],
-            typing.List[pathlib.Path],
+            typing.List[typing.Union[str, pathlib.Path]],
             typing.List["FilePayload"],
         ],
         timeout: float = None,
@@ -3869,7 +3902,7 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md#working-with-selectors) for more details.
-        files : Union[List[pathlib.Path], List[str], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4161,11 +4194,13 @@ class Frame(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
         timeout : Union[float, NoneType]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
@@ -4306,11 +4341,13 @@ class Worker(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in the worker context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -4348,11 +4385,13 @@ class Worker(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in the page context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -5131,11 +5170,13 @@ class Page(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in the page context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -5177,11 +5218,13 @@ class Page(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in the page context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -5227,11 +5270,13 @@ class Page(AsyncBase):
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -5276,11 +5321,13 @@ class Page(AsyncBase):
         selector : str
             A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
 
         Returns
         -------
@@ -5320,15 +5367,15 @@ class Page(AsyncBase):
         Parameters
         ----------
         url : Union[str, NoneType]
-            URL of a script to be added. Optional.
+            URL of a script to be added.
         path : Union[pathlib.Path, str, NoneType]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
-            current working directory. Optional.
+            current working directory.
         content : Union[str, NoneType]
-            Raw JavaScript content to be injected into frame. Optional.
+            Raw JavaScript content to be injected into frame.
         type : Union[str, NoneType]
             Script type. Use 'module' in order to load a Javascript ES6 module. See
-            [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details. Optional.
+            [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
         Returns
         -------
@@ -5364,12 +5411,12 @@ class Page(AsyncBase):
         Parameters
         ----------
         url : Union[str, NoneType]
-            URL of the `<link>` tag. Optional.
+            URL of the `<link>` tag.
         path : Union[pathlib.Path, str, NoneType]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
-            current working directory. Optional.
+            current working directory.
         content : Union[str, NoneType]
-            Raw CSS content to be injected into frame. Optional.
+            Raw CSS content to be injected into frame.
 
         Returns
         -------
@@ -5824,10 +5871,7 @@ class Page(AsyncBase):
             raise e
 
     async def wait_for_event(
-        self,
-        event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
-        timeout: float = None,
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> typing.Any:
         """Page.wait_for_event
 
@@ -5840,10 +5884,10 @@ class Page(AsyncBase):
         ----------
         event : str
             Event name, same one would pass into `page.on(event)`.
-        predicate : Union[Callable[[Any], bool], NoneType]
-            receives the event data and resolves to truthy value when the waiting should resolve.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
         Returns
@@ -6061,7 +6105,10 @@ class Page(AsyncBase):
         Parameters
         ----------
         script : Union[str, NoneType]
-            Script to be evaluated in the page.
+            Script to be evaluated in all pages in the browser context. Optional.
+        path : Union[pathlib.Path, str, NoneType]
+            Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
+            directory. Optional.
         """
 
         try:
@@ -6798,6 +6845,16 @@ class Page(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md#working-with-selectors) for more details.
+        value : Union[List[str], str, NoneType]
+            Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        index : Union[List[int], int, NoneType]
+            Options to select by index. Optional.
+        label : Union[List[str], str, NoneType]
+            Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        element : Union[ElementHandle, List[ElementHandle], NoneType]
+            Option elements to select. Optional.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -6834,7 +6891,11 @@ class Page(AsyncBase):
         self,
         selector: str,
         files: typing.Union[
-            str, "FilePayload", typing.List[str], typing.List["FilePayload"]
+            str,
+            pathlib.Path,
+            "FilePayload",
+            typing.List[typing.Union[str, pathlib.Path]],
+            typing.List["FilePayload"],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -6852,7 +6913,7 @@ class Page(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md#working-with-selectors) for more details.
-        files : Union[List[str], List[{name: str, mime_type: str, buffer: bytes}], str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7156,11 +7217,13 @@ class Page(AsyncBase):
         Parameters
         ----------
         expression : str
-            Function to be evaluated in browser context
-        force_expr : bool
-            Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `pageFunction`
+        force_expr : Union[bool, NoneType]
+            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
+            Optional.
         timeout : Union[float, NoneType]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
@@ -7317,10 +7380,7 @@ class Page(AsyncBase):
             raise e
 
     def expect_event(
-        self,
-        event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
-        timeout: float = None,
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> AsyncEventContextManager:
         """Page.expect_event
 
@@ -7759,7 +7819,7 @@ class BrowserContext(AsyncBase):
 
         Returns
         -------
-        List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}]
+        List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
         """
 
         try:
@@ -7779,7 +7839,7 @@ class BrowserContext(AsyncBase):
 
         Parameters
         ----------
-        cookies : List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}]
+        cookies : List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
         """
 
         try:
@@ -7885,7 +7945,7 @@ class BrowserContext(AsyncBase):
         longitude : float
             Longitude between -180 and 180. **required**
         accuracy : Union[float, NoneType]
-            Non-negative accuracy value. Defaults to `0`.
+            Non-negative accuracy value. Defaults to `0`. Optional.
         """
 
         try:
@@ -7902,6 +7962,10 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def reset_geolocation(self) -> NoneType:
+        """BrowserContext.reset_geolocation
+
+        Emulates position unavailable state.
+        """
 
         try:
             log_api("=> browser_context.reset_geolocation started")
@@ -7981,7 +8045,10 @@ class BrowserContext(AsyncBase):
         Parameters
         ----------
         script : Union[str, NoneType]
-            Script to be evaluated in all pages in the browser context.
+            Script to be evaluated in all pages in the browser context. Optional.
+        path : Union[pathlib.Path, str, NoneType]
+            Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
+            directory. Optional.
         """
 
         try:
@@ -8149,10 +8216,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def wait_for_event(
-        self,
-        event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
-        timeout: float = None,
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> typing.Any:
         """BrowserContext.wait_for_event
 
@@ -8163,10 +8227,10 @@ class BrowserContext(AsyncBase):
         ----------
         event : str
             Event name, same one would pass into `browserContext.on(event)`.
-        predicate : Union[Callable[[Any], bool], NoneType]
-            receives the event data and resolves to truthy value when the waiting should resolve.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
         Returns
@@ -8222,7 +8286,7 @@ class BrowserContext(AsyncBase):
 
         Returns
         -------
-        {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}], NoneType], origins: Union[List[Dict], NoneType]}
+        {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}
         """
 
         try:
@@ -8235,10 +8299,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     def expect_event(
-        self,
-        event: str,
-        predicate: typing.Union[typing.Callable[[typing.Any], bool]] = None,
-        timeout: float = None,
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> AsyncEventContextManager:
         """BrowserContext.expect_event
 
@@ -8551,7 +8612,7 @@ class Browser(AsyncBase):
             Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not
             configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary
             to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}], NoneType], origins: Union[List[Dict], NoneType]}, NoneType]
+        storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
@@ -8687,7 +8748,7 @@ class Browser(AsyncBase):
             Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not
             configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary
             to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}], NoneType], origins: Union[List[Dict], NoneType]}, NoneType]
+        storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
@@ -8739,8 +8800,8 @@ class Browser(AsyncBase):
         In case this browser is obtained using `browser_type.launch()`, closes the browser and all of its pages (if any
         were opened).
 
-        In case this browser is obtained using `browser_type.connect()`, clears all created contexts belonging to this
-        browser and disconnects from the browser server.
+        In case this browser is connected to, clears all created contexts belonging to this browser and disconnects from the
+        browser server.
 
         The `Browser` object itself is considered to be disposed and cannot be used anymore.
         """
@@ -9169,6 +9230,25 @@ class Playwright(AsyncBase):
         return mapping.from_impl(self._impl_obj.webkit)
 
     def stop(self) -> NoneType:
+        """Playwright.stop
+
+        Terminates this instance of Playwright in case it was created bypassing the Python context manager. This is useful in
+        REPL applications.
+
+        ```py
+        >>> from playwright import sync_playwright
+
+        >>> playwright = sync_playwright().start()
+
+        >>> browser = playwright.chromium.launch()
+        >>> page = browser.newPage()
+        >>> page.goto("http://whatsmyuseragent.org/")
+        >>> page.screenshot(path="example.png")
+        >>> browser.close()
+
+        >>> playwright.stop()
+        ```
+        """
 
         try:
             log_api("=> playwright.stop started")

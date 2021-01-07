@@ -30,7 +30,7 @@ class WaitHelper:
         emitter: EventEmitter,
         event: str,
         error: Error,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable = None,
     ) -> None:
         self.reject_on(wait_for_event_future(emitter, event, predicate), error)
 
@@ -54,7 +54,7 @@ class WaitHelper:
         self,
         emitter: EventEmitter,
         event: str,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable = None,
     ) -> Any:
         future = wait_for_event_future(emitter, event, predicate)
         return await self.wait_for_future(future)
@@ -75,7 +75,7 @@ class WaitHelper:
 
 
 def wait_for_event_future(
-    emitter: EventEmitter, event: str, predicate: Callable[[Any], bool] = None
+    emitter: EventEmitter, event: str, predicate: Callable = None
 ) -> asyncio.Future:
     future: asyncio.Future = asyncio.Future()
 
