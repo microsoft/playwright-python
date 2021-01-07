@@ -134,7 +134,7 @@ class Frame(ChannelOwner):
         wait_helper.reject_on_timeout(timeout, f"Timeout {timeout}ms exceeded.")
         return wait_helper
 
-    async def waitForNavigation(
+    async def wait_for_navigation(
         self,
         url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
@@ -166,14 +166,14 @@ class Frame(ChannelOwner):
         if waitUntil not in self._load_states:
             t = deadline - monotonic_time()
             if t > 0:
-                await self.waitForLoadState(state=waitUntil, timeout=t)
+                await self.wait_for_load_state(state=waitUntil, timeout=t)
 
         if "newDocument" in event and "request" in event["newDocument"]:
             request = from_channel(event["newDocument"]["request"])
             return await request.response()
         return None
 
-    async def waitForLoadState(
+    async def wait_for_load_state(
         self, state: DocumentLoadState = None, timeout: float = None
     ) -> None:
         if not state:
@@ -187,7 +187,7 @@ class Frame(ChannelOwner):
             self._event_emitter, "loadstate", lambda s: s == state
         )
 
-    async def frameElement(self) -> ElementHandle:
+    async def frame_element(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))
 
     async def evaluate(
@@ -206,7 +206,7 @@ class Frame(ChannelOwner):
             )
         )
 
-    async def evaluateHandle(
+    async def evaluate_handle(
         self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> JSHandle:
         if not is_function_body(expression):
@@ -222,12 +222,12 @@ class Frame(ChannelOwner):
             )
         )
 
-    async def querySelector(self, selector: str) -> Optional[ElementHandle]:
+    async def query_selector(self, selector: str) -> Optional[ElementHandle]:
         return from_nullable_channel(
             await self._channel.send("querySelector", dict(selector=selector))
         )
 
-    async def querySelectorAll(self, selector: str) -> List[ElementHandle]:
+    async def query_selector_all(self, selector: str) -> List[ElementHandle]:
         return list(
             map(
                 cast(ElementHandle, from_channel),
@@ -235,7 +235,7 @@ class Frame(ChannelOwner):
             )
         )
 
-    async def waitForSelector(
+    async def wait_for_selector(
         self,
         selector: str,
         timeout: float = None,
@@ -245,7 +245,7 @@ class Frame(ChannelOwner):
             await self._channel.send("waitForSelector", locals_to_params(locals()))
         )
 
-    async def dispatchEvent(
+    async def dispatch_event(
         self, selector: str, type: str, eventInit: Dict = None, timeout: float = None
     ) -> None:
         await self._channel.send(
@@ -253,7 +253,7 @@ class Frame(ChannelOwner):
             dict(selector=selector, type=type, eventInit=serialize_argument(eventInit)),
         )
 
-    async def evalOnSelector(
+    async def eval_on_selector(
         self,
         selector: str,
         expression: str,
@@ -272,7 +272,7 @@ class Frame(ChannelOwner):
             )
         )
 
-    async def evalOnSelectorAll(
+    async def eval_on_selector_all(
         self,
         selector: str,
         expression: str,
@@ -294,7 +294,7 @@ class Frame(ChannelOwner):
     async def content(self) -> str:
         return await self._channel.send("content")
 
-    async def setContent(
+    async def set_content(
         self,
         html: str,
         timeout: float = None,
@@ -311,17 +311,17 @@ class Frame(ChannelOwner):
         return self._url or ""
 
     @property
-    def parentFrame(self) -> Optional["Frame"]:
+    def parent_frame(self) -> Optional["Frame"]:
         return self._parent_frame
 
     @property
-    def childFrames(self) -> List["Frame"]:
+    def child_frames(self) -> List["Frame"]:
         return self._child_frames.copy()
 
-    def isDetached(self) -> bool:
+    def is_detached(self) -> bool:
         return self._detached
 
-    async def addScriptTag(
+    async def add_script_tag(
         self,
         url: str = None,
         path: Union[str, Path] = None,
@@ -335,7 +335,7 @@ class Frame(ChannelOwner):
                 del params["path"]
         return from_channel(await self._channel.send("addScriptTag", params))
 
-    async def addStyleTag(
+    async def add_style_tag(
         self, url: str = None, path: Union[str, Path] = None, content: str = None
     ) -> ElementHandle:
         params = locals_to_params(locals())
@@ -393,16 +393,16 @@ class Frame(ChannelOwner):
     async def focus(self, selector: str, timeout: float = None) -> None:
         await self._channel.send("focus", locals_to_params(locals()))
 
-    async def textContent(self, selector: str, timeout: float = None) -> Optional[str]:
+    async def text_content(self, selector: str, timeout: float = None) -> Optional[str]:
         return await self._channel.send("textContent", locals_to_params(locals()))
 
-    async def innerText(self, selector: str, timeout: float = None) -> str:
+    async def inner_text(self, selector: str, timeout: float = None) -> str:
         return await self._channel.send("innerText", locals_to_params(locals()))
 
-    async def innerHTML(self, selector: str, timeout: float = None) -> str:
+    async def inner_html(self, selector: str, timeout: float = None) -> str:
         return await self._channel.send("innerHTML", locals_to_params(locals()))
 
-    async def getAttribute(
+    async def get_attribute(
         self, selector: str, name: str, timeout: float = None
     ) -> Optional[str]:
         return await self._channel.send("getAttribute", locals_to_params(locals()))
@@ -417,7 +417,7 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("hover", locals_to_params(locals()))
 
-    async def selectOption(
+    async def select_option(
         self,
         selector: str,
         value: Union[str, List[str]] = None,
@@ -437,7 +437,7 @@ class Frame(ChannelOwner):
         )
         return await self._channel.send("selectOption", params)
 
-    async def setInputFiles(
+    async def set_input_files(
         self,
         selector: str,
         files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]],
@@ -486,10 +486,10 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 
-    async def waitForTimeout(self, timeout: float) -> None:
+    async def wait_for_timeout(self, timeout: float) -> None:
         await self._connection._loop.create_task(asyncio.sleep(timeout / 1000))
 
-    async def waitForFunction(
+    async def wait_for_function(
         self,
         expression: str,
         arg: Serializable = None,
@@ -512,7 +512,7 @@ class Frame(ChannelOwner):
         state: DocumentLoadState = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
-        return EventContextManagerImpl(self.waitForLoadState(state, timeout))
+        return EventContextManagerImpl(self.wait_for_load_state(state, timeout))
 
     def expect_navigation(
         self,
@@ -520,4 +520,6 @@ class Frame(ChannelOwner):
         waitUntil: DocumentLoadState = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Optional[Response]]:
-        return EventContextManagerImpl(self.waitForNavigation(url, waitUntil, timeout))
+        return EventContextManagerImpl(
+            self.wait_for_navigation(url, waitUntil, timeout)
+        )

@@ -44,16 +44,16 @@ class FileChooser:
         return self._element_handle
 
     @property
-    def isMultiple(self) -> bool:
+    def is_multiple(self) -> bool:
         return self._is_multiple
 
-    async def setFiles(
+    async def set_files(
         self,
         files: Union[str, FilePayload, List[str], List[FilePayload]],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._element_handle.setInputFiles(files, timeout, noWaitAfter)
+        await self._element_handle.set_input_files(files, timeout, noWaitAfter)
 
 
 def normalize_file_payloads(

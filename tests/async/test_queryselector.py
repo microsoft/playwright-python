@@ -136,7 +136,7 @@ async def test_selectors_register_should_handle_errors(selectors, page: Page, ut
         return root.querySelector('dummy');
       },
       queryAll(root, selector) {
-        return Array.from(root.querySelectorAll('dummy'));
+        return Array.from(root.query_selector_all('dummy'));
       }
     }"""
 

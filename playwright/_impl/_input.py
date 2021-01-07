@@ -28,7 +28,7 @@ class Keyboard:
     async def up(self, key: str) -> None:
         await self._channel.send("keyboardUp", locals_to_params(locals()))
 
-    async def insertText(self, text: str) -> None:
+    async def insert_text(self, text: str) -> None:
         await self._channel.send("keyboardInsertText", locals_to_params(locals()))
 
     async def type(self, text: str, delay: float = None) -> None:

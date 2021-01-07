@@ -97,13 +97,13 @@ class BrowserContext(ChannelOwner):
             return
         asyncio.create_task(binding_call.call(func))
 
-    def setDefaultNavigationTimeout(self, timeout: float) -> None:
+    def set_default_navigation_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_navigation_timeout(timeout)
         self._channel.send_no_reply(
             "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
         )
 
-    def setDefaultTimeout(self, timeout: float) -> None:
+    def set_default_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_timeout(timeout)
         self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
@@ -115,9 +115,9 @@ class BrowserContext(ChannelOwner):
     def browser(self) -> Optional["Browser"]:
         return self._browser
 
-    async def newPage(self) -> Page:
+    async def new_page(self) -> Page:
         if self._owner_page:
-            raise Error("Please use browser.newContext()")
+            raise Error("Please use browser.new_context()")
         return from_channel(await self._channel.send("newPage"))
 
     async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
@@ -127,39 +127,39 @@ class BrowserContext(ChannelOwner):
             urls = [urls]
         return await self._channel.send("cookies", dict(urls=urls))
 
-    async def addCookies(self, cookies: List[Cookie]) -> None:
+    async def add_cookies(self, cookies: List[Cookie]) -> None:
         await self._channel.send("addCookies", dict(cookies=cookies))
 
-    async def clearCookies(self) -> None:
+    async def clear_cookies(self) -> None:
         await self._channel.send("clearCookies")
 
-    async def grantPermissions(
+    async def grant_permissions(
         self, permissions: List[str], origin: str = None
     ) -> None:
         await self._channel.send("grantPermissions", locals_to_params(locals()))
 
-    async def clearPermissions(self) -> None:
+    async def clear_permissions(self) -> None:
         await self._channel.send("clearPermissions")
 
-    async def setGeolocation(
+    async def set_geolocation(
         self, latitude: float, longitude: float, accuracy: Optional[float]
     ) -> None:
         await self._channel.send(
             "setGeolocation", {"geolocation": locals_to_params(locals())}
         )
 
-    async def resetGeolocation(self) -> None:
+    async def reset_geolocation(self) -> None:
         await self._channel.send("setGeolocation", {})
 
-    async def setExtraHTTPHeaders(self, headers: Dict[str, str]) -> None:
+    async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
         await self._channel.send(
             "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
         )
 
-    async def setOffline(self, offline: bool) -> None:
+    async def set_offline(self, offline: bool) -> None:
         await self._channel.send("setOffline", dict(offline=offline))
 
-    async def addInitScript(
+    async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
@@ -169,7 +169,7 @@ class BrowserContext(ChannelOwner):
             raise Error("Either path or source parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
 
-    async def exposeBinding(
+    async def expose_binding(
         self, name: str, callback: Callable, handle: bool = None
     ) -> None:
         for page in self._pages:
@@ -184,8 +184,8 @@ class BrowserContext(ChannelOwner):
             "exposeBinding", dict(name=name, needsHandle=handle or False)
         )
 
-    async def exposeFunction(self, name: str, callback: Callable) -> None:
-        await self.exposeBinding(name, lambda source, *args: callback(*args))
+    async def expose_function(self, name: str, callback: Callable) -> None:
+        await self.expose_binding(name, lambda source, *args: callback(*args))
 
     async def route(self, url: URLMatch, handler: RouteHandler) -> None:
         self._routes.append(RouteHandlerEntry(URLMatcher(url), handler))
@@ -208,7 +208,7 @@ class BrowserContext(ChannelOwner):
                 "setNetworkInterceptionEnabled", dict(enabled=False)
             )
 
-    async def waitForEvent(
+    async def wait_for_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
     ) -> Any:
         if timeout is None:
@@ -245,7 +245,7 @@ class BrowserContext(ChannelOwner):
             if not is_safe_close_error(e):
                 raise e
 
-    async def storageState(self, path: Union[str, Path] = None) -> StorageState:
+    async def storage_state(self, path: Union[str, Path] = None) -> StorageState:
         result = await self._channel.send_return_as_dict("storageState")
         if path:
             with open(path, "w") as f:
@@ -258,11 +258,11 @@ class BrowserContext(ChannelOwner):
         predicate: Callable[[Any], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
+        return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))
 
     def expect_page(
         self,
         predicate: Callable[[Page], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Page]:
-        return EventContextManagerImpl(self.waitForEvent("page", predicate, timeout))
+        return EventContextManagerImpl(self.wait_for_event("page", predicate, timeout))

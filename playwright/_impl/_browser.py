@@ -61,10 +61,10 @@ class Browser(ChannelOwner):
     def contexts(self) -> List[BrowserContext]:
         return self._contexts.copy()
 
-    def isConnected(self) -> bool:
+    def is_connected(self) -> bool:
         return self._is_connected
 
-    async def newContext(
+    async def new_context(
         self,
         viewport: Union[Tuple[int, int], Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
@@ -101,7 +101,7 @@ class Browser(ChannelOwner):
         context._options = params
         return context
 
-    async def newPage(
+    async def new_page(
         self,
         viewport: Union[Tuple[int, int], Literal[0]] = None,
         ignoreHTTPSErrors: bool = None,
@@ -129,8 +129,8 @@ class Browser(ChannelOwner):
         storageState: Union[StorageState, str, Path] = None,
     ) -> Page:
         params = locals_to_params(locals())
-        context = await self.newContext(**params)
-        page = await context.newPage()
+        context = await self.new_context(**params)
+        page = await context.new_page()
         page._owned_context = context
         context._owner_page = page
         return page

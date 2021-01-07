@@ -125,7 +125,7 @@ async def test_should_be_atomic(selectors, page, utils):
                 return result;
             },
             queryAll(root, selector) {
-                const result = Array.from(root.querySelectorAll(selector));
+                const result = Array.from(root.query_selector_all(selector));
                 for (const e of result)
                 Promise.resolve().then(() => result.onclick = "");
                 return result;

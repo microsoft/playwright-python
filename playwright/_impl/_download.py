@@ -30,7 +30,7 @@ class Download(ChannelOwner):
         return self._initializer["url"]
 
     @property
-    def suggestedFilename(self) -> str:
+    def suggested_filename(self) -> str:
         return self._initializer["suggestedFilename"]
 
     async def delete(self) -> None:
@@ -42,6 +42,6 @@ class Download(ChannelOwner):
     async def path(self) -> Optional[str]:
         return await self._channel.send("path")
 
-    async def saveAs(self, path: Union[str, Path]) -> None:
+    async def save_as(self, path: Union[str, Path]) -> None:
         path = str(Path(path))
         return await self._channel.send("saveAs", dict(path=path))

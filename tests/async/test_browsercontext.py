@@ -404,7 +404,7 @@ async def test_expose_function_should_throw_for_duplicate_registrations(
     )
 
 
-async def test_expose_function_should_be_callable_from_inside_addInitScript(
+async def test_expose_function_should_be_callable_from_inside_add_init_script(
     context, server
 ):
     args = []
