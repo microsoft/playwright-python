@@ -55,13 +55,13 @@ class ChromiumBrowserContext(BrowserContext):
         self._service_workers.add(worker)
         self.emit(ChromiumBrowserContext.Events.ServiceWorker, worker)
 
-    def backgroundPages(self) -> List[Page]:
+    def background_pages(self) -> List[Page]:
         return list(self._background_pages)
 
-    def serviceWorkers(self) -> List[Worker]:
+    def service_workers(self) -> List[Worker]:
         return list(self._service_workers)
 
-    async def newCDPSession(self, page: Page) -> CDPSession:
+    async def new_cdp_session(self, page: Page) -> CDPSession:
         return from_channel(
             await self._channel.send("crNewCDPSession", {"page": page._channel})
         )

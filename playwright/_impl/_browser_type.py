@@ -44,7 +44,7 @@ class BrowserType(ChannelOwner):
         return self._initializer["name"]
 
     @property
-    def executablePath(self) -> str:
+    def executable_path(self) -> str:
         return self._initializer["executablePath"]
 
     async def launch(
@@ -74,7 +74,7 @@ class BrowserType(ChannelOwner):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
 
-    async def launchPersistentContext(
+    async def launch_persistent_context(
         self,
         userDataDir: Union[str, Path],
         executablePath: Union[str, Path] = None,

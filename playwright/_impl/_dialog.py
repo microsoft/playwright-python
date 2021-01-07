@@ -33,7 +33,7 @@ class Dialog(ChannelOwner):
         return self._initializer["message"]
 
     @property
-    def defaultValue(self) -> str:
+    def default_value(self) -> str:
         return self._initializer["defaultValue"]
 
     async def accept(self, promptText: str = None) -> None:

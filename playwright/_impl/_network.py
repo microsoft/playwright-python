@@ -65,7 +65,7 @@ class Request(ChannelOwner):
         return self._initializer["url"]
 
     @property
-    def resourceType(self) -> str:
+    def resource_type(self) -> str:
         return self._initializer["resourceType"]
 
     @property
@@ -73,15 +73,15 @@ class Request(ChannelOwner):
         return self._initializer["method"]
 
     @property
-    def postData(self) -> Optional[str]:
-        data = self.postDataBuffer
+    def post_data(self) -> Optional[str]:
+        data = self.post_data_buffer
         if not data:
             return None
         return data.decode()
 
     @property
-    def postDataJSON(self) -> Optional[Dict]:
-        post_data = self.postData
+    def post_data_json(self) -> Optional[Dict]:
+        post_data = self.post_data
         if not post_data:
             return None
         content_type = self.headers["content-type"]
@@ -92,7 +92,7 @@ class Request(ChannelOwner):
         return json.loads(post_data)
 
     @property
-    def postDataBuffer(self) -> Optional[bytes]:
+    def post_data_buffer(self) -> Optional[bytes]:
         b64_content = self._initializer.get("postData")
         if not b64_content:
             return None
@@ -110,15 +110,15 @@ class Request(ChannelOwner):
         return from_channel(self._initializer["frame"])
 
     @property
-    def isNavigationRequest(self) -> bool:
+    def is_navigation_request(self) -> bool:
         return self._initializer["isNavigationRequest"]
 
     @property
-    def redirectedFrom(self) -> Optional["Request"]:
+    def redirected_from(self) -> Optional["Request"]:
         return self._redirected_from
 
     @property
-    def redirectedTo(self) -> Optional["Request"]:
+    def redirected_to(self) -> Optional["Request"]:
         return self._redirected_to
 
     @property
@@ -233,7 +233,7 @@ class Response(ChannelOwner):
         return self._initializer["status"]
 
     @property
-    def statusText(self) -> str:
+    def status_text(self) -> str:
         return self._initializer["statusText"]
 
     @property
@@ -294,7 +294,7 @@ class WebSocket(ChannelOwner):
     def url(self) -> str:
         return self._initializer["url"]
 
-    async def waitForEvent(
+    async def wait_for_event(
         self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
     ) -> Any:
         if timeout is None:
@@ -320,7 +320,7 @@ class WebSocket(ChannelOwner):
         predicate: Callable[[Any], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.waitForEvent(event, predicate, timeout))
+        return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))
 
     def _on_frame_sent(self, opcode: int, data: str) -> None:
         if opcode == 2:
@@ -334,7 +334,7 @@ class WebSocket(ChannelOwner):
         else:
             self.emit(WebSocket.Events.FrameReceived, data)
 
-    def isClosed(self) -> bool:
+    def is_closed(self) -> bool:
         return self._is_closed
 
     def _on_close(self) -> None:

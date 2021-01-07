@@ -94,7 +94,7 @@ class Request(AsyncBase):
         -------
         str
         """
-        return mapping.from_maybe_impl(self._impl_obj.resourceType)
+        return mapping.from_maybe_impl(self._impl_obj.resource_type)
 
     @property
     def method(self) -> str:
@@ -118,7 +118,7 @@ class Request(AsyncBase):
         -------
         Union[str, NoneType]
         """
-        return mapping.from_maybe_impl(self._impl_obj.postData)
+        return mapping.from_maybe_impl(self._impl_obj.post_data)
 
     @property
     def post_data_json(self) -> typing.Union[typing.Dict, NoneType]:
@@ -133,7 +133,7 @@ class Request(AsyncBase):
         -------
         Union[Dict, NoneType]
         """
-        return mapping.from_maybe_impl(self._impl_obj.postDataJSON)
+        return mapping.from_maybe_impl(self._impl_obj.post_data_json)
 
     @property
     def post_data_buffer(self) -> typing.Union[bytes, NoneType]:
@@ -145,7 +145,7 @@ class Request(AsyncBase):
         -------
         Union[bytes, NoneType]
         """
-        return mapping.from_maybe_impl(self._impl_obj.postDataBuffer)
+        return mapping.from_maybe_impl(self._impl_obj.post_data_buffer)
 
     @property
     def headers(self) -> typing.Dict[str, str]:
@@ -181,7 +181,7 @@ class Request(AsyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._impl_obj.isNavigationRequest)
+        return mapping.from_maybe_impl(self._impl_obj.is_navigation_request)
 
     @property
     def redirected_from(self) -> typing.Union["Request", NoneType]:
@@ -201,7 +201,7 @@ class Request(AsyncBase):
         -------
         Union[Request, NoneType]
         """
-        return mapping.from_impl_nullable(self._impl_obj.redirectedFrom)
+        return mapping.from_impl_nullable(self._impl_obj.redirected_from)
 
     @property
     def redirected_to(self) -> typing.Union["Request", NoneType]:
@@ -215,7 +215,7 @@ class Request(AsyncBase):
         -------
         Union[Request, NoneType]
         """
-        return mapping.from_impl_nullable(self._impl_obj.redirectedTo)
+        return mapping.from_impl_nullable(self._impl_obj.redirected_to)
 
     @property
     def failure(self) -> typing.Union[str, NoneType]:
@@ -318,7 +318,7 @@ class Response(AsyncBase):
         -------
         str
         """
-        return mapping.from_maybe_impl(self._impl_obj.statusText)
+        return mapping.from_maybe_impl(self._impl_obj.status_text)
 
     @property
     def headers(self) -> typing.Dict[str, str]:
@@ -630,7 +630,7 @@ class WebSocket(AsyncBase):
         try:
             log_api("=> web_socket.wait_for_event started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForEvent(
+                await self._impl_obj.wait_for_event(
                     event=event,
                     predicate=self._wrap_handler(predicate),
                     timeout=timeout,
@@ -664,11 +664,11 @@ class WebSocket(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def is_closed(self) -> bool:
@@ -683,7 +683,7 @@ class WebSocket(AsyncBase):
 
         try:
             log_api("=> web_socket.is_closed started")
-            result = mapping.from_maybe_impl(self._impl_obj.isClosed())
+            result = mapping.from_maybe_impl(self._impl_obj.is_closed())
             log_api("<= web_socket.is_closed succeded")
             return result
         except Exception as e:
@@ -776,7 +776,9 @@ class Keyboard(AsyncBase):
 
         try:
             log_api("=> keyboard.insert_text started")
-            result = mapping.from_maybe_impl(await self._impl_obj.insertText(text=text))
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.insert_text(text=text)
+            )
             log_api("<= keyboard.insert_text succeded")
             return result
         except Exception as e:
@@ -1119,7 +1121,7 @@ class JSHandle(AsyncBase):
         try:
             log_api("=> js_handle.evaluate_handle started")
             result = mapping.from_impl(
-                await self._impl_obj.evaluateHandle(
+                await self._impl_obj.evaluate_handle(
                     expression=expression,
                     arg=mapping.to_impl(arg),
                     force_expr=force_expr,
@@ -1149,7 +1151,7 @@ class JSHandle(AsyncBase):
         try:
             log_api("=> js_handle.get_property started")
             result = mapping.from_impl(
-                await self._impl_obj.getProperty(propertyName=property_name)
+                await self._impl_obj.get_property(propertyName=property_name)
             )
             log_api("<= js_handle.get_property succeded")
             return result
@@ -1169,7 +1171,7 @@ class JSHandle(AsyncBase):
 
         try:
             log_api("=> js_handle.get_properties started")
-            result = mapping.from_impl_dict(await self._impl_obj.getProperties())
+            result = mapping.from_impl_dict(await self._impl_obj.get_properties())
             log_api("<= js_handle.get_properties succeded")
             return result
         except Exception as e:
@@ -1188,7 +1190,7 @@ class JSHandle(AsyncBase):
 
         try:
             log_api("=> js_handle.as_element started")
-            result = mapping.from_impl_nullable(self._impl_obj.asElement())
+            result = mapping.from_impl_nullable(self._impl_obj.as_element())
             log_api("<= js_handle.as_element succeded")
             return result
         except Exception as e:
@@ -1225,7 +1227,7 @@ class JSHandle(AsyncBase):
 
         try:
             log_api("=> js_handle.json_value started")
-            result = mapping.from_maybe_impl(await self._impl_obj.jsonValue())
+            result = mapping.from_maybe_impl(await self._impl_obj.json_value())
             log_api("<= js_handle.json_value succeded")
             return result
         except Exception as e:
@@ -1252,7 +1254,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.as_element started")
-            result = mapping.from_impl_nullable(self._impl_obj.asElement())
+            result = mapping.from_impl_nullable(self._impl_obj.as_element())
             log_api("<= element_handle.as_element succeded")
             return result
         except Exception as e:
@@ -1271,7 +1273,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.owner_frame started")
-            result = mapping.from_impl_nullable(await self._impl_obj.ownerFrame())
+            result = mapping.from_impl_nullable(await self._impl_obj.owner_frame())
             log_api("<= element_handle.owner_frame succeded")
             return result
         except Exception as e:
@@ -1290,7 +1292,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.content_frame started")
-            result = mapping.from_impl_nullable(await self._impl_obj.contentFrame())
+            result = mapping.from_impl_nullable(await self._impl_obj.content_frame())
             log_api("<= element_handle.content_frame succeded")
             return result
         except Exception as e:
@@ -1315,7 +1317,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.get_attribute started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.getAttribute(name=name)
+                await self._impl_obj.get_attribute(name=name)
             )
             log_api("<= element_handle.get_attribute succeded")
             return result
@@ -1335,7 +1337,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.text_content started")
-            result = mapping.from_maybe_impl(await self._impl_obj.textContent())
+            result = mapping.from_maybe_impl(await self._impl_obj.text_content())
             log_api("<= element_handle.text_content succeded")
             return result
         except Exception as e:
@@ -1354,7 +1356,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.inner_text started")
-            result = mapping.from_maybe_impl(await self._impl_obj.innerText())
+            result = mapping.from_maybe_impl(await self._impl_obj.inner_text())
             log_api("<= element_handle.inner_text succeded")
             return result
         except Exception as e:
@@ -1373,7 +1375,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.inner_html started")
-            result = mapping.from_maybe_impl(await self._impl_obj.innerHTML())
+            result = mapping.from_maybe_impl(await self._impl_obj.inner_html())
             log_api("<= element_handle.inner_html succeded")
             return result
         except Exception as e:
@@ -1414,7 +1416,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.dispatch_event started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.dispatchEvent(
+                await self._impl_obj.dispatch_event(
                     type=type, eventInit=mapping.to_impl(event_init)
                 )
             )
@@ -1444,7 +1446,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.scroll_into_view_if_needed started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.scrollIntoViewIfNeeded(timeout=timeout)
+                await self._impl_obj.scroll_into_view_if_needed(timeout=timeout)
             )
             log_api("<= element_handle.scroll_into_view_if_needed succeded")
             return result
@@ -1677,7 +1679,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.select_option started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.selectOption(
+                await self._impl_obj.select_option(
                     value=value,
                     index=index,
                     label=label,
@@ -1804,7 +1806,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.select_text started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.selectText(timeout=timeout)
+                await self._impl_obj.select_text(timeout=timeout)
             )
             log_api("<= element_handle.select_text succeded")
             return result
@@ -1848,7 +1850,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.set_input_files started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setInputFiles(
+                await self._impl_obj.set_input_files(
                     files=files, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
@@ -2085,7 +2087,7 @@ class ElementHandle(JSHandle):
 
         try:
             log_api("=> element_handle.bounding_box started")
-            result = mapping.from_impl_nullable(await self._impl_obj.boundingBox())
+            result = mapping.from_impl_nullable(await self._impl_obj.bounding_box())
             log_api("<= element_handle.bounding_box succeded")
             return result
         except Exception as e:
@@ -2168,7 +2170,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.query_selector started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.querySelector(selector=selector)
+                await self._impl_obj.query_selector(selector=selector)
             )
             log_api("<= element_handle.query_selector succeded")
             return result
@@ -2196,7 +2198,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.query_selector_all started")
             result = mapping.from_impl_list(
-                await self._impl_obj.querySelectorAll(selector=selector)
+                await self._impl_obj.query_selector_all(selector=selector)
             )
             log_api("<= element_handle.query_selector_all succeded")
             return result
@@ -2242,7 +2244,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.eval_on_selector started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.evalOnSelector(
+                await self._impl_obj.eval_on_selector(
                     selector=selector,
                     expression=expression,
                     arg=mapping.to_impl(arg),
@@ -2300,7 +2302,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.evalOnSelectorAll(
+                await self._impl_obj.eval_on_selector_all(
                     selector=selector,
                     expression=expression,
                     arg=mapping.to_impl(arg),
@@ -2346,7 +2348,9 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.wait_for_element_state started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForElementState(state=state, timeout=timeout)
+                await self._impl_obj.wait_for_element_state(
+                    state=state, timeout=timeout
+                )
             )
             log_api("<= element_handle.wait_for_element_state succeded")
             return result
@@ -2396,7 +2400,7 @@ class ElementHandle(JSHandle):
         try:
             log_api("=> element_handle.wait_for_selector started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.waitForSelector(
+                await self._impl_obj.wait_for_selector(
                     selector=selector, state=state, timeout=timeout
                 )
             )
@@ -2496,7 +2500,7 @@ class FileChooser(AsyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._impl_obj.isMultiple)
+        return mapping.from_maybe_impl(self._impl_obj.is_multiple)
 
     async def set_files(
         self,
@@ -2526,7 +2530,7 @@ class FileChooser(AsyncBase):
         try:
             log_api("=> file_chooser.set_files started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setFiles(
+                await self._impl_obj.set_files(
                     files=files, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
@@ -2595,7 +2599,7 @@ class Frame(AsyncBase):
         -------
         Union[Frame, NoneType]
         """
-        return mapping.from_impl_nullable(self._impl_obj.parentFrame)
+        return mapping.from_impl_nullable(self._impl_obj.parent_frame)
 
     @property
     def child_frames(self) -> typing.List["Frame"]:
@@ -2605,7 +2609,7 @@ class Frame(AsyncBase):
         -------
         List[Frame]
         """
-        return mapping.from_impl_list(self._impl_obj.childFrames)
+        return mapping.from_impl_list(self._impl_obj.child_frames)
 
     async def goto(
         self,
@@ -2712,7 +2716,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.wait_for_navigation started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.waitForNavigation(
+                await self._impl_obj.wait_for_navigation(
                     url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
                 )
             )
@@ -2752,7 +2756,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.wait_for_load_state started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForLoadState(state=state, timeout=timeout)
+                await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
             )
             log_api("<= frame.wait_for_load_state succeded")
             return result
@@ -2777,7 +2781,7 @@ class Frame(AsyncBase):
 
         try:
             log_api("=> frame.frame_element started")
-            result = mapping.from_impl(await self._impl_obj.frameElement())
+            result = mapping.from_impl(await self._impl_obj.frame_element())
             log_api("<= frame.frame_element succeded")
             return result
         except Exception as e:
@@ -2865,7 +2869,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.evaluate_handle started")
             result = mapping.from_impl(
-                await self._impl_obj.evaluateHandle(
+                await self._impl_obj.evaluate_handle(
                     expression=expression,
                     arg=mapping.to_impl(arg),
                     force_expr=force_expr,
@@ -2901,7 +2905,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.query_selector started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.querySelector(selector=selector)
+                await self._impl_obj.query_selector(selector=selector)
             )
             log_api("<= frame.query_selector succeded")
             return result
@@ -2931,7 +2935,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.query_selector_all started")
             result = mapping.from_impl_list(
-                await self._impl_obj.querySelectorAll(selector=selector)
+                await self._impl_obj.query_selector_all(selector=selector)
             )
             log_api("<= frame.query_selector_all succeded")
             return result
@@ -2980,7 +2984,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.wait_for_selector started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.waitForSelector(
+                await self._impl_obj.wait_for_selector(
                     selector=selector, timeout=timeout, state=state
                 )
             )
@@ -3034,7 +3038,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.dispatch_event started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.dispatchEvent(
+                await self._impl_obj.dispatch_event(
                     selector=selector,
                     type=type,
                     eventInit=mapping.to_impl(event_init),
@@ -3085,7 +3089,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.eval_on_selector started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.evalOnSelector(
+                await self._impl_obj.eval_on_selector(
                     selector=selector,
                     expression=expression,
                     arg=mapping.to_impl(arg),
@@ -3136,7 +3140,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.evalOnSelectorAll(
+                await self._impl_obj.eval_on_selector_all(
                     selector=selector,
                     expression=expression,
                     arg=mapping.to_impl(arg),
@@ -3195,7 +3199,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.set_content started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setContent(
+                await self._impl_obj.set_content(
                     html=html, timeout=timeout, waitUntil=wait_until
                 )
             )
@@ -3217,7 +3221,7 @@ class Frame(AsyncBase):
 
         try:
             log_api("=> frame.is_detached started")
-            result = mapping.from_maybe_impl(self._impl_obj.isDetached())
+            result = mapping.from_maybe_impl(self._impl_obj.is_detached())
             log_api("<= frame.is_detached succeded")
             return result
         except Exception as e:
@@ -3258,7 +3262,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.add_script_tag started")
             result = mapping.from_impl(
-                await self._impl_obj.addScriptTag(
+                await self._impl_obj.add_script_tag(
                     url=url, path=path, content=content, type=type
                 )
             )
@@ -3299,7 +3303,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.add_style_tag started")
             result = mapping.from_impl(
-                await self._impl_obj.addStyleTag(url=url, path=path, content=content)
+                await self._impl_obj.add_style_tag(url=url, path=path, content=content)
             )
             log_api("<= frame.add_style_tag succeded")
             return result
@@ -3623,7 +3627,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.text_content started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.textContent(selector=selector, timeout=timeout)
+                await self._impl_obj.text_content(selector=selector, timeout=timeout)
             )
             log_api("<= frame.text_content succeded")
             return result
@@ -3653,7 +3657,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.inner_text started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.innerText(selector=selector, timeout=timeout)
+                await self._impl_obj.inner_text(selector=selector, timeout=timeout)
             )
             log_api("<= frame.inner_text succeded")
             return result
@@ -3683,7 +3687,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.inner_html started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.innerHTML(selector=selector, timeout=timeout)
+                await self._impl_obj.inner_html(selector=selector, timeout=timeout)
             )
             log_api("<= frame.inner_html succeded")
             return result
@@ -3717,7 +3721,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.get_attribute started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.getAttribute(
+                await self._impl_obj.get_attribute(
                     selector=selector, name=name, timeout=timeout
                 )
             )
@@ -3822,7 +3826,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.select_option started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.selectOption(
+                await self._impl_obj.select_option(
                     selector=selector,
                     value=value,
                     index=index,
@@ -3878,7 +3882,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.set_input_files started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setInputFiles(
+                await self._impl_obj.set_input_files(
                     selector=selector,
                     files=files,
                     timeout=timeout,
@@ -4130,7 +4134,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.wait_for_timeout started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForTimeout(timeout=timeout)
+                await self._impl_obj.wait_for_timeout(timeout=timeout)
             )
             log_api("<= frame.wait_for_timeout succeded")
             return result
@@ -4177,7 +4181,7 @@ class Frame(AsyncBase):
         try:
             log_api("=> frame.wait_for_function started")
             result = mapping.from_impl(
-                await self._impl_obj.waitForFunction(
+                await self._impl_obj.wait_for_function(
                     expression=expression,
                     arg=mapping.to_impl(arg),
                     force_expr=force_expr,
@@ -4231,10 +4235,12 @@ class Frame(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
-        return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
+        return AsyncEventContextManager(
+            self._impl_obj.wait_for_load_state(state, timeout)
+        )
 
     def expect_navigation(
         self,
@@ -4258,11 +4264,11 @@ class Frame(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForNavigation(url, wait_until, timeout)
+            self._impl_obj.wait_for_navigation(url, wait_until, timeout)
         )
 
 
@@ -4356,7 +4362,7 @@ class Worker(AsyncBase):
         try:
             log_api("=> worker.evaluate_handle started")
             result = mapping.from_impl(
-                await self._impl_obj.evaluateHandle(
+                await self._impl_obj.evaluate_handle(
                     expression=expression,
                     arg=mapping.to_impl(arg),
                     force_expr=force_expr,
@@ -4507,7 +4513,7 @@ class Dialog(AsyncBase):
         -------
         str
         """
-        return mapping.from_maybe_impl(self._impl_obj.defaultValue)
+        return mapping.from_maybe_impl(self._impl_obj.default_value)
 
     async def accept(self, prompt_text: str = None) -> NoneType:
         """Dialog.accept
@@ -4579,7 +4585,7 @@ class Download(AsyncBase):
         -------
         str
         """
-        return mapping.from_maybe_impl(self._impl_obj.suggestedFilename)
+        return mapping.from_maybe_impl(self._impl_obj.suggested_filename)
 
     async def delete(self) -> NoneType:
         """Download.delete
@@ -4647,7 +4653,7 @@ class Download(AsyncBase):
 
         try:
             log_api("=> download.save_as started")
-            result = mapping.from_maybe_impl(await self._impl_obj.saveAs(path=path))
+            result = mapping.from_maybe_impl(await self._impl_obj.save_as(path=path))
             log_api("<= download.save_as succeded")
             return result
         except Exception as e:
@@ -4773,7 +4779,7 @@ class Page(AsyncBase):
         -------
         Frame
         """
-        return mapping.from_impl(self._impl_obj.mainFrame)
+        return mapping.from_impl(self._impl_obj.main_frame)
 
     @property
     def frames(self) -> typing.List["Frame"]:
@@ -4900,7 +4906,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.set_default_navigation_timeout started")
             result = mapping.from_maybe_impl(
-                self._impl_obj.setDefaultNavigationTimeout(timeout=timeout)
+                self._impl_obj.set_default_navigation_timeout(timeout=timeout)
             )
             log_api("<= page.set_default_navigation_timeout succeded")
             return result
@@ -4924,7 +4930,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.set_default_timeout started")
             result = mapping.from_maybe_impl(
-                self._impl_obj.setDefaultTimeout(timeout=timeout)
+                self._impl_obj.set_default_timeout(timeout=timeout)
             )
             log_api("<= page.set_default_timeout succeded")
             return result
@@ -4955,7 +4961,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.query_selector started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.querySelector(selector=selector)
+                await self._impl_obj.query_selector(selector=selector)
             )
             log_api("<= page.query_selector succeded")
             return result
@@ -4984,7 +4990,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.query_selector_all started")
             result = mapping.from_impl_list(
-                await self._impl_obj.querySelectorAll(selector=selector)
+                await self._impl_obj.query_selector_all(selector=selector)
             )
             log_api("<= page.query_selector_all succeded")
             return result
@@ -5033,7 +5039,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_selector started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.waitForSelector(
+                await self._impl_obj.wait_for_selector(
                     selector=selector, timeout=timeout, state=state
                 )
             )
@@ -5087,7 +5093,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.dispatch_event started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.dispatchEvent(
+                await self._impl_obj.dispatch_event(
                     selector=selector,
                     type=type,
                     eventInit=mapping.to_impl(event_init),
@@ -5185,7 +5191,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.evaluate_handle started")
             result = mapping.from_impl(
-                await self._impl_obj.evaluateHandle(
+                await self._impl_obj.evaluate_handle(
                     expression=expression,
                     arg=mapping.to_impl(arg),
                     force_expr=force_expr,
@@ -5235,7 +5241,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.eval_on_selector started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.evalOnSelector(
+                await self._impl_obj.eval_on_selector(
                     selector=selector,
                     expression=expression,
                     arg=mapping.to_impl(arg),
@@ -5284,7 +5290,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.evalOnSelectorAll(
+                await self._impl_obj.eval_on_selector_all(
                     selector=selector,
                     expression=expression,
                     arg=mapping.to_impl(arg),
@@ -5332,7 +5338,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.add_script_tag started")
             result = mapping.from_impl(
-                await self._impl_obj.addScriptTag(
+                await self._impl_obj.add_script_tag(
                     url=url, path=path, content=content, type=type
                 )
             )
@@ -5373,7 +5379,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.add_style_tag started")
             result = mapping.from_impl(
-                await self._impl_obj.addStyleTag(url=url, path=path, content=content)
+                await self._impl_obj.add_style_tag(url=url, path=path, content=content)
             )
             log_api("<= page.add_style_tag succeded")
             return result
@@ -5408,7 +5414,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.expose_function started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.exposeFunction(
+                await self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
                 )
             )
@@ -5452,7 +5458,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.expose_binding started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.exposeBinding(
+                await self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
                 )
             )
@@ -5478,7 +5484,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.set_extra_http_headers started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setExtraHTTPHeaders(
+                await self._impl_obj.set_extra_http_headers(
                     headers=mapping.to_impl(headers)
                 )
             )
@@ -5534,7 +5540,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.set_content started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setContent(
+                await self._impl_obj.set_content(
                     html=html, timeout=timeout, waitUntil=wait_until
                 )
             )
@@ -5681,7 +5687,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_load_state started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForLoadState(state=state, timeout=timeout)
+                await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
             )
             log_api("<= page.wait_for_load_state succeded")
             return result
@@ -5733,7 +5739,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_navigation started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.waitForNavigation(
+                await self._impl_obj.wait_for_navigation(
                     url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
                 )
             )
@@ -5770,7 +5776,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_request started")
             result = mapping.from_impl(
-                await self._impl_obj.waitForRequest(
+                await self._impl_obj.wait_for_request(
                     urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
                 )
             )
@@ -5807,7 +5813,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_response started")
             result = mapping.from_impl(
-                await self._impl_obj.waitForResponse(
+                await self._impl_obj.wait_for_response(
                     urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
                 )
             )
@@ -5848,7 +5854,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_event started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForEvent(
+                await self._impl_obj.wait_for_event(
                     event=event,
                     predicate=self._wrap_handler(predicate),
                     timeout=timeout,
@@ -5893,7 +5899,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.go_back started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.goBack(timeout=timeout, waitUntil=wait_until)
+                await self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until)
             )
             log_api("<= page.go_back succeded")
             return result
@@ -5934,7 +5940,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.go_forward started")
             result = mapping.from_impl_nullable(
-                await self._impl_obj.goForward(timeout=timeout, waitUntil=wait_until)
+                await self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until)
             )
             log_api("<= page.go_forward succeded")
             return result
@@ -5964,7 +5970,9 @@ class Page(AsyncBase):
         try:
             log_api("=> page.emulate_media started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.emulateMedia(media=media, colorScheme=color_scheme)
+                await self._impl_obj.emulate_media(
+                    media=media, colorScheme=color_scheme
+                )
             )
             log_api("<= page.emulate_media succeded")
             return result
@@ -5992,7 +6000,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.set_viewport_size started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setViewportSize(width=width, height=height)
+                await self._impl_obj.set_viewport_size(width=width, height=height)
             )
             log_api("<= page.set_viewport_size succeded")
             return result
@@ -6010,7 +6018,7 @@ class Page(AsyncBase):
 
         try:
             log_api("=> page.viewport_size started")
-            result = mapping.from_maybe_impl(self._impl_obj.viewportSize())
+            result = mapping.from_maybe_impl(self._impl_obj.viewport_size())
             log_api("<= page.viewport_size succeded")
             return result
         except Exception as e:
@@ -6025,7 +6033,7 @@ class Page(AsyncBase):
 
         try:
             log_api("=> page.bring_to_front started")
-            result = mapping.from_maybe_impl(await self._impl_obj.bringToFront())
+            result = mapping.from_maybe_impl(await self._impl_obj.bring_to_front())
             log_api("<= page.bring_to_front succeded")
             return result
         except Exception as e:
@@ -6059,7 +6067,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.add_init_script started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.addInitScript(script=script, path=path)
+                await self._impl_obj.add_init_script(script=script, path=path)
             )
             log_api("<= page.add_init_script succeded")
             return result
@@ -6269,7 +6277,7 @@ class Page(AsyncBase):
 
         try:
             log_api("=> page.is_closed started")
-            result = mapping.from_maybe_impl(self._impl_obj.isClosed())
+            result = mapping.from_maybe_impl(self._impl_obj.is_closed())
             log_api("<= page.is_closed succeded")
             return result
         except Exception as e:
@@ -6602,7 +6610,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.text_content started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.textContent(selector=selector, timeout=timeout)
+                await self._impl_obj.text_content(selector=selector, timeout=timeout)
             )
             log_api("<= page.text_content succeded")
             return result
@@ -6632,7 +6640,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.inner_text started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.innerText(selector=selector, timeout=timeout)
+                await self._impl_obj.inner_text(selector=selector, timeout=timeout)
             )
             log_api("<= page.inner_text succeded")
             return result
@@ -6662,7 +6670,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.inner_html started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.innerHTML(selector=selector, timeout=timeout)
+                await self._impl_obj.inner_html(selector=selector, timeout=timeout)
             )
             log_api("<= page.inner_html succeded")
             return result
@@ -6696,7 +6704,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.get_attribute started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.getAttribute(
+                await self._impl_obj.get_attribute(
                     selector=selector, name=name, timeout=timeout
                 )
             )
@@ -6806,7 +6814,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.select_option started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.selectOption(
+                await self._impl_obj.select_option(
                     selector=selector,
                     value=value,
                     index=index,
@@ -6857,7 +6865,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.set_input_files started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setInputFiles(
+                await self._impl_obj.set_input_files(
                     selector=selector,
                     files=files,
                     timeout=timeout,
@@ -7119,7 +7127,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_timeout started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForTimeout(timeout=timeout)
+                await self._impl_obj.wait_for_timeout(timeout=timeout)
             )
             log_api("<= page.wait_for_timeout succeded")
             return result
@@ -7168,7 +7176,7 @@ class Page(AsyncBase):
         try:
             log_api("=> page.wait_for_function started")
             result = mapping.from_impl(
-                await self._impl_obj.waitForFunction(
+                await self._impl_obj.wait_for_function(
                     expression=expression,
                     arg=mapping.to_impl(arg),
                     force_expr=force_expr,
@@ -7330,11 +7338,11 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_console_message(
@@ -7358,12 +7366,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "console"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_dialog(
@@ -7387,12 +7395,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "dialog"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_download(
@@ -7416,12 +7424,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "download"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_file_chooser(
@@ -7445,12 +7453,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "filechooser"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_load_state(
@@ -7474,10 +7482,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
-        return AsyncEventContextManager(self._impl_obj.waitForLoadState(state, timeout))
+        return AsyncEventContextManager(
+            self._impl_obj.wait_for_load_state(state, timeout)
+        )
 
     def expect_navigation(
         self,
@@ -7501,11 +7511,11 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForNavigation(url, wait_until, timeout)
+            self._impl_obj.wait_for_navigation(url, wait_until, timeout)
         )
 
     def expect_popup(
@@ -7529,12 +7539,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "popup"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_request(
@@ -7560,11 +7570,11 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForRequest(url_or_predicate, timeout)
+            self._impl_obj.wait_for_request(url_or_predicate, timeout)
         )
 
     def expect_response(
@@ -7590,11 +7600,11 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForResponse(url_or_predicate, timeout)
+            self._impl_obj.wait_for_response(url_or_predicate, timeout)
         )
 
     def expect_worker(
@@ -7618,12 +7628,12 @@ class Page(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "worker"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
 
@@ -7682,7 +7692,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.set_default_navigation_timeout started")
             result = mapping.from_maybe_impl(
-                self._impl_obj.setDefaultNavigationTimeout(timeout=timeout)
+                self._impl_obj.set_default_navigation_timeout(timeout=timeout)
             )
             log_api("<= browser_context.set_default_navigation_timeout succeded")
             return result
@@ -7707,7 +7717,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.set_default_timeout started")
             result = mapping.from_maybe_impl(
-                self._impl_obj.setDefaultTimeout(timeout=timeout)
+                self._impl_obj.set_default_timeout(timeout=timeout)
             )
             log_api("<= browser_context.set_default_timeout succeded")
             return result
@@ -7727,7 +7737,7 @@ class BrowserContext(AsyncBase):
 
         try:
             log_api("=> browser_context.new_page started")
-            result = mapping.from_impl(await self._impl_obj.newPage())
+            result = mapping.from_impl(await self._impl_obj.new_page())
             log_api("<= browser_context.new_page succeded")
             return result
         except Exception as e:
@@ -7775,7 +7785,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.add_cookies started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.addCookies(cookies=cookies)
+                await self._impl_obj.add_cookies(cookies=cookies)
             )
             log_api("<= browser_context.add_cookies succeded")
             return result
@@ -7791,7 +7801,7 @@ class BrowserContext(AsyncBase):
 
         try:
             log_api("=> browser_context.clear_cookies started")
-            result = mapping.from_maybe_impl(await self._impl_obj.clearCookies())
+            result = mapping.from_maybe_impl(await self._impl_obj.clear_cookies())
             log_api("<= browser_context.clear_cookies succeded")
             return result
         except Exception as e:
@@ -7833,7 +7843,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.grant_permissions started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.grantPermissions(
+                await self._impl_obj.grant_permissions(
                     permissions=permissions, origin=origin
                 )
             )
@@ -7851,7 +7861,7 @@ class BrowserContext(AsyncBase):
 
         try:
             log_api("=> browser_context.clear_permissions started")
-            result = mapping.from_maybe_impl(await self._impl_obj.clearPermissions())
+            result = mapping.from_maybe_impl(await self._impl_obj.clear_permissions())
             log_api("<= browser_context.clear_permissions succeded")
             return result
         except Exception as e:
@@ -7881,7 +7891,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.set_geolocation started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setGeolocation(
+                await self._impl_obj.set_geolocation(
                     latitude=latitude, longitude=longitude, accuracy=accuracy
                 )
             )
@@ -7895,7 +7905,7 @@ class BrowserContext(AsyncBase):
 
         try:
             log_api("=> browser_context.reset_geolocation started")
-            result = mapping.from_maybe_impl(await self._impl_obj.resetGeolocation())
+            result = mapping.from_maybe_impl(await self._impl_obj.reset_geolocation())
             log_api("<= browser_context.reset_geolocation succeded")
             return result
         except Exception as e:
@@ -7920,7 +7930,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.set_extra_http_headers started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setExtraHTTPHeaders(
+                await self._impl_obj.set_extra_http_headers(
                     headers=mapping.to_impl(headers)
                 )
             )
@@ -7942,7 +7952,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.set_offline started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.setOffline(offline=offline)
+                await self._impl_obj.set_offline(offline=offline)
             )
             log_api("<= browser_context.set_offline succeded")
             return result
@@ -7977,7 +7987,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.add_init_script started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.addInitScript(script=script, path=path)
+                await self._impl_obj.add_init_script(script=script, path=path)
             )
             log_api("<= browser_context.add_init_script succeded")
             return result
@@ -8017,7 +8027,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.expose_binding started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.exposeBinding(
+                await self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
                 )
             )
@@ -8050,7 +8060,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.expose_function started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.exposeFunction(
+                await self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
                 )
             )
@@ -8167,7 +8177,7 @@ class BrowserContext(AsyncBase):
         try:
             log_api("=> browser_context.wait_for_event started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.waitForEvent(
+                await self._impl_obj.wait_for_event(
                     event=event,
                     predicate=self._wrap_handler(predicate),
                     timeout=timeout,
@@ -8217,7 +8227,7 @@ class BrowserContext(AsyncBase):
 
         try:
             log_api("=> browser_context.storage_state started")
-            result = mapping.from_impl(await self._impl_obj.storageState(path=path))
+            result = mapping.from_impl(await self._impl_obj.storage_state(path=path))
             log_api("<= browser_context.storage_state succeded")
             return result
         except Exception as e:
@@ -8246,11 +8256,11 @@ class BrowserContext(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
     def expect_page(
@@ -8274,12 +8284,12 @@ class BrowserContext(AsyncBase):
             Predicate receiving event data.
         timeout : Optional[int]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.setDefaultTimeout(timeout) or
-            page.setDefaultTimeout(timeout) methods.
+            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
+            page.set_default_timeout(timeout) methods.
         """
         event = "page"
         return AsyncEventContextManager(
-            self._impl_obj.waitForEvent(event, predicate, timeout)
+            self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
 
@@ -8352,7 +8362,7 @@ class ChromiumBrowserContext(BrowserContext):
 
         try:
             log_api("=> chromium_browser_context.background_pages started")
-            result = mapping.from_impl_list(self._impl_obj.backgroundPages())
+            result = mapping.from_impl_list(self._impl_obj.background_pages())
             log_api("<= chromium_browser_context.background_pages succeded")
             return result
         except Exception as e:
@@ -8371,7 +8381,7 @@ class ChromiumBrowserContext(BrowserContext):
 
         try:
             log_api("=> chromium_browser_context.service_workers started")
-            result = mapping.from_impl_list(self._impl_obj.serviceWorkers())
+            result = mapping.from_impl_list(self._impl_obj.service_workers())
             log_api("<= chromium_browser_context.service_workers succeded")
             return result
         except Exception as e:
@@ -8396,7 +8406,7 @@ class ChromiumBrowserContext(BrowserContext):
         try:
             log_api("=> chromium_browser_context.new_cdp_session started")
             result = mapping.from_impl(
-                await self._impl_obj.newCDPSession(page=page._impl_obj)
+                await self._impl_obj.new_cdp_session(page=page._impl_obj)
             )
             log_api("<= chromium_browser_context.new_cdp_session succeded")
             return result
@@ -8448,7 +8458,7 @@ class Browser(AsyncBase):
 
         try:
             log_api("=> browser.is_connected started")
-            result = mapping.from_maybe_impl(self._impl_obj.isConnected())
+            result = mapping.from_maybe_impl(self._impl_obj.is_connected())
             log_api("<= browser.is_connected succeded")
             return result
         except Exception as e:
@@ -8554,7 +8564,7 @@ class Browser(AsyncBase):
         try:
             log_api("=> browser.new_context started")
             result = mapping.from_impl(
-                await self._impl_obj.newContext(
+                await self._impl_obj.new_context(
                     viewport=viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
@@ -8690,7 +8700,7 @@ class Browser(AsyncBase):
         try:
             log_api("=> browser.new_page started")
             result = mapping.from_impl(
-                await self._impl_obj.newPage(
+                await self._impl_obj.new_page(
                     viewport=viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
@@ -8774,7 +8784,7 @@ class BrowserType(AsyncBase):
         -------
         str
         """
-        return mapping.from_maybe_impl(self._impl_obj.executablePath)
+        return mapping.from_maybe_impl(self._impl_obj.executable_path)
 
     async def launch(
         self,
@@ -9042,7 +9052,7 @@ class BrowserType(AsyncBase):
         try:
             log_api("=> browser_type.launch_persistent_context started")
             result = mapping.from_impl(
-                await self._impl_obj.launchPersistentContext(
+                await self._impl_obj.launch_persistent_context(
                     userDataDir=user_data_dir,
                     executablePath=executable_path,
                     args=args,

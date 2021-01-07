@@ -59,7 +59,7 @@ class JSHandle(ChannelOwner):
             )
         )
 
-    async def evaluateHandle(
+    async def evaluate_handle(
         self, expression: str, arg: Serializable = None, force_expr: bool = None
     ) -> "JSHandle":
         if not is_function_body(expression):
@@ -75,24 +75,24 @@ class JSHandle(ChannelOwner):
             )
         )
 
-    async def getProperty(self, propertyName: str) -> "JSHandle":
+    async def get_property(self, propertyName: str) -> "JSHandle":
         return from_channel(
             await self._channel.send("getProperty", dict(name=propertyName))
         )
 
-    async def getProperties(self) -> Dict[str, "JSHandle"]:
+    async def get_properties(self) -> Dict[str, "JSHandle"]:
         return {
             prop["name"]: from_channel(prop["value"])
             for prop in await self._channel.send("getPropertyList")
         }
 
-    def asElement(self) -> Optional["ElementHandle"]:
+    def as_element(self) -> Optional["ElementHandle"]:
         return None
 
     async def dispose(self) -> None:
         await self._channel.send("dispose")
 
-    async def jsonValue(self) -> Any:
+    async def json_value(self) -> Any:
         return parse_result(await self._channel.send("jsonValue"))
 
 

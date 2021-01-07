@@ -38,7 +38,7 @@ async def test_should_throw_upon_second_create_new_page(browser):
     with pytest.raises(Error) as exc:
         await page.context.new_page()
     await page.close()
-    assert "Please use browser.newContext()" in exc.value.message
+    assert "Please use browser.new_context()" in exc.value.message
 
 
 async def test_version_should_work(browser: Browser, is_chromium):

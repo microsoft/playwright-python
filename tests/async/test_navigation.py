@@ -541,11 +541,11 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
-      <a id=back onclick='javascript:goBack()'>back</a>
-      <a id=forward onclick='javascript:goForward()'>forward</a>
+      <a id=back onclick='javascript:go_back()'>back</a>
+      <a id=forward onclick='javascript:go_forward()'>forward</a>
       <script>
-        function goBack() { history.back(); }
-        function goForward() { history.forward(); }
+        function go_back() { history.back(); }
+        function go_forward() { history.forward(); }
         history.pushState({}, '', '/first.html')
         history.pushState({}, '', '/second.html')
       </script>
@@ -829,7 +829,7 @@ async def test_wait_for_load_state_should_work_with_clicking_target__blank(
     assert await popup.evaluate("document.readyState") == "complete"
 
 
-async def test_wait_for_load_state_should_wait_for_load_state_of_newPage(
+async def test_wait_for_load_state_should_wait_for_load_state_of_new_page(
     context, page, server
 ):
     async with context.expect_page() as page_info:

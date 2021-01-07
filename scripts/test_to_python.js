@@ -52,10 +52,10 @@ const fs = require('fs');
     line = line.replace(/ = null/g, ' = None');
     line = line.replace(/===/g, '==');
     line = line.replace('await Promise.all([', 'await asyncio.gather(');
-    line = line.replace(/\.\$\(/, '.querySelector(');
-    line = line.replace(/\.\$$\(/, '.querySelectorAll(');
-    line = line.replace(/\.\$eval\(/, '.evalOnSelector(');
-    line = line.replace(/\.\$$eval\(/, '.evalOnSelectorAll(');
+    line = line.replace(/\.\$\(/, '.query_selector(');
+    line = line.replace(/\.\$$\(/, '.query_selector_all(');
+    line = line.replace(/\.\$eval\(/, '.eval_on_selector(');
+    line = line.replace(/\.\$$eval\(/, '.eval_on_selector_all(');
 
     match = line.match(/(\s+)expect\((.*)\).toEqual\((.*)\)/)
     if (match)
