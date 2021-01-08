@@ -22,9 +22,13 @@ from playwright._impl._logger import init_logger
 
 
 def compute_driver_executable() -> Path:
-    package_path = Path(inspect.getfile(playwright)).parent
-    platform = sys.platform
-    if platform == "win32":
+    if getattr(sys, "frozen", False):
+        # pyinstaller
+        package_path = Path(sys._MEIPASS)  # type: ignore
+    else:
+        # normal Python environment
+        package_path = Path(inspect.getfile(playwright)).parent
+    if sys.platform == "win32":
         return package_path / "driver" / "playwright.cmd"
     return package_path / "driver" / "playwright.sh"
 
