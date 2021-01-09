@@ -1,76 +1,8 @@
 # Playwright Python API
-Method not documented: BrowserContext.reset_geolocation
-Method not documented: Playwright.stop
-
-# Deprecated
-Method not implemented: BrowserContext.set_http_credentials
-Parameter not implemented: Browser.new_context(video_size=)
-Parameter not implemented: Browser.new_context(videos_path=)
-Parameter not implemented: Browser.new_page(video_size=)
-Parameter not implemented: Browser.new_page(videos_path=)
-Parameter not implemented: BrowserType.launch_persistent_context(video_size=)
-Parameter not implemented: BrowserType.launch_persistent_context(videos_path=)
-
-# Browser Server
-Method not implemented: BrowserServer.close
-Method not implemented: BrowserServer.kill
-Method not implemented: BrowserServer.process
-Method not implemented: BrowserServer.ws_endpoint
-Method not implemented: BrowserType.connect
-Method not implemented: BrowserType.launch_server
-
-# Chromium-specifics that are missing
-Method not implemented: ChromiumBrowser.new_browser_cdp_session
-Method not implemented: ChromiumBrowser.start_tracing
-Method not implemented: ChromiumBrowser.stop_tracing
-Method not implemented: ChromiumCoverage.start_css_coverage
-Method not implemented: ChromiumCoverage.start_js_coverage
-Method not implemented: ChromiumCoverage.stop_css_coverage
-Method not implemented: ChromiumCoverage.stop_js_coverage
-Method not implemented: Page.coverage
-
-# No streams in Python
-Method not implemented: Download.create_read_stream
-
-# Logger
-Method not implemented: Logger.is_enabled
-Method not implemented: Logger.log
-Parameter not implemented: Browser.new_context(logger=)
-Parameter not implemented: Browser.new_page(logger=)
-Parameter not implemented: BrowserType.launch_persistent_context(logger=)
-Parameter not implemented: BrowserType.launch(logger=)
-
-# Errors are exported on the top level
-Method not implemented: Playwright.errors
 
 # Hidden property
 Parameter not documented: Browser.new_context(default_browser_type=)
 Parameter not documented: Browser.new_page(default_browser_type=)
-
-# Add init script
-Parameter not documented: BrowserContext.add_init_script(path=)
-Parameter not documented: Page.add_init_script(path=)
-Parameter not implemented: BrowserContext.add_init_script(arg=)
-Parameter not implemented: Page.add_init_script(arg=)
-Parameter type mismatch in BrowserContext.add_init_script(script=): documented as Union[Callable, str, {path: Union[pathlib.Path, str, NoneType], content: Union[str, NoneType]}], code has Union[str, NoneType]
-Parameter type mismatch in Page.add_init_script(script=): documented as Union[Callable, str, {path: Union[pathlib.Path, str, NoneType], content: Union[str, NoneType]}], code has Union[str, NoneType]
-
-# Select option
-Parameter not documented: ElementHandle.select_option(element=)
-Parameter not documented: ElementHandle.select_option(index=)
-Parameter not documented: ElementHandle.select_option(label=)
-Parameter not documented: ElementHandle.select_option(value=)
-Parameter not documented: Frame.select_option(element=)
-Parameter not documented: Frame.select_option(index=)
-Parameter not documented: Frame.select_option(label=)
-Parameter not documented: Frame.select_option(value=)
-Parameter not documented: Page.select_option(element=)
-Parameter not documented: Page.select_option(index=)
-Parameter not documented: Page.select_option(label=)
-Parameter not documented: Page.select_option(value=)
-Parameter not implemented: ElementHandle.select_option(values=)
-Parameter not implemented: Frame.select_option(values=)
-Parameter not implemented: Page.select_option(values=)
 
 # Nullable viewport
 Parameter type mismatch in BrowserType.launch_persistent_context(viewport=): documented as Union[typing.Tuple[int, int], NoneType], code has Union["0", typing.Tuple[int, int], NoneType]
@@ -81,41 +13,40 @@ Parameter type mismatch in Browser.new_context(viewport=): documented as Union[t
 Parameter not documented: Selectors.register(path=)
 Parameter type mismatch in Selectors.register(script=): documented as Union[Callable, str, {path: Union[pathlib.Path, str, NoneType], content: Union[str, NoneType]}], code has Union[str, NoneType]
 
-# Eval on selector
-Parameter type mismatch in ElementHandle.eval_on_selector_all(expression=): documented as Callable[[List[Element]], Any], code has str
-Parameter type mismatch in Frame.eval_on_selector_all(expression=): documented as Callable[[List[Element]], Any], code has str
-Parameter type mismatch in Page.eval_on_selector_all(expression=): documented as Callable[[List[Element]], Any], code has str
-Parameter type mismatch in ElementHandle.eval_on_selector(expression=): documented as Callable[[Element], Any], code has str
-Parameter type mismatch in Frame.eval_on_selector(expression=): documented as Callable[[Element], Any], code has str
-Parameter type mismatch in Page.eval_on_selector(expression=): documented as Callable[[Element], Any], code has str
+# We don't expand the type of the return value here.
+Parameter type mismatch in Accessibility.snapshot(return=): documented as Union[{role: str, name: str, value: Union[float, str, NoneType], description: Union[str, NoneType], keyshortcuts: Union[str, NoneType], roledescription: Union[str, NoneType], valuetext: Union[str, NoneType], disabled: Union[bool, NoneType], expanded: Union[bool, NoneType], focused: Union[bool, NoneType], modal: Union[bool, NoneType], multiline: Union[bool, NoneType], multiselectable: Union[bool, NoneType], readonly: Union[bool, NoneType], required: Union[bool, NoneType], selected: Union[bool, NoneType], checked: Union["mixed", bool, NoneType], pressed: Union["mixed", bool, NoneType], level: Union[int, NoneType], valuemin: Union[float, NoneType], valuemax: Union[float, NoneType], autocomplete: Union[str, NoneType], haspopup: Union[str, NoneType], invalid: Union[str, NoneType], orientation: Union[str, NoneType], children: Union[List[Dict], NoneType]}, NoneType], code has Union[Dict, NoneType]
 
-# Misc
-Parameter type mismatch in Accessibility.snapshot(return=): documented as Union[{role: str, name: str, value: Union[float, str, NoneType], description: Union[str, NoneType], keyshortcuts: Union[str, NoneType], roledescription: Union[str, NoneType], valuetext: Union[str, NoneType], disabled: Union[bool, NoneType], expanded: Union[bool, NoneType], focused: Union[bool, NoneType], modal: Union[bool, NoneType], multiline: Union[bool, NoneType], multiselectable: Union[bool, NoneType], readonly: Union[bool, NoneType], required: Union[bool, NoneType], selected: Union[bool, NoneType], checked: Union["mixed", bool, NoneType], pressed: Union["mixed", bool, NoneType], level: Union[int, NoneType], valuemin: Union[float, NoneType], valuemax: Union[float, NoneType], autocomplete: Union[str, NoneType], haspopup: Union[str, NoneType], invalid: Union[str, NoneType], orientation: Union[str, NoneType], children: Union[List[Any], NoneType]}, NoneType], code has Union[Dict, NoneType]
+# One vs two arguments in the callback, Python explicitly unions.
 Parameter type mismatch in BrowserContext.route(handler=): documented as Callable[[Route, Request], Any], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
 Parameter type mismatch in BrowserContext.unroute(handler=): documented as Union[Callable[[Route, Request], Any], NoneType], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], NoneType]
-Parameter type mismatch in BrowserContext.wait_for_event(predicate=): documented as Union[Function, NoneType], code has Union[Callable[[Any], bool], NoneType]
-Parameter type mismatch in CDPSession.send(params=): documented as Union[Any, NoneType], code has Union[Dict, NoneType]
-Parameter type mismatch in CDPSession.send(return=): documented as Any, code has Dict
-Parameter type mismatch in JSHandle.evaluate(expression=): documented as Callable, code has str
+
+# Get vs set cookies
+Parameter type mismatch in BrowserContext.storage_state(return=): documented as {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, code has {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}
+Parameter type mismatch in BrowserContext.cookies(return=): documented as List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], code has List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
+
+# Figure it out
 Parameter type mismatch in Page.route(handler=): documented as Callable[[Route, Request], Any], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
 Parameter type mismatch in Page.unroute(handler=): documented as Union[Callable[[Route, Request], Any], NoneType], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], NoneType]
-Parameter type mismatch in Page.wait_for_event(predicate=): documented as Union[Function, NoneType], code has Union[Callable[[Any], bool], NoneType]
-Parameter type mismatch in Playwright.devices(return=): documented as Any, code has Dict[str, {user_agent: Union[str, NoneType], viewport: Union[typing.Tuple[int, int], NoneType], device_scale_factor: Union[int, NoneType], is_mobile: Union[bool, NoneType], has_touch: Union[bool, NoneType]}]
 Parameter type mismatch in Request.failure(return=): documented as Union[{error_text: str}, NoneType], code has Union[str, NoneType]
-Parameter type mismatch in Request.post_data_json(return=): documented as Union[Any, NoneType], code has Union[Dict, NoneType]
 Parameter type mismatch in Request.timing(return=): documented as {start_time: float, domain_lookup_start: float, domain_lookup_end: float, connect_start: float, secure_connection_start: float, connect_end: float, request_start: float, response_start: float, response_end: float}, code has {startTime: float, domainLookupStart: float, domainLookupEnd: float, connectStart: float, secureConnectionStart: float, connectEnd: float, requestStart: float, responseStart: float, responseEnd: float}
 Parameter type mismatch in Response.finished(return=): documented as Union[Error, NoneType], code has Union[str, NoneType]
-Parameter type mismatch in Response.json(return=): documented as Any, code has Union[Dict, List]
-Parameter type mismatch in WebSocket.wait_for_event(predicate=): documented as Union[Function, NoneType], code has Union[Callable[[Any], bool], NoneType]
+Parameter type mismatch in Playwright.devices(return=): documented as Dict, code has Dict[str, {user_agent: Union[str, NoneType], viewport: Union[typing.Tuple[int, int], NoneType], device_scale_factor: Union[int, NoneType], is_mobile: Union[bool, NoneType], has_touch: Union[bool, NoneType]}]
 
-# Fixable
-Parameter type mismatch in ElementHandle.set_input_files(files=): documented as Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], Union[pathlib.Path, str], {name: str, mime_type: str, buffer: bytes}], code has Union[List[pathlib.Path], List[str], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
-Parameter type mismatch in Frame.set_input_files(files=): documented as Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], Union[pathlib.Path, str], {name: str, mime_type: str, buffer: bytes}], code has Union[List[pathlib.Path], List[str], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
-Parameter type mismatch in Page.set_input_files(files=): documented as Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], Union[pathlib.Path, str], {name: str, mime_type: str, buffer: bytes}], code has Union[List[str], List[{name: str, mime_type: str, buffer: bytes}], str, {name: str, mime_type: str, buffer: bytes}]
-Parameter type mismatch in FileChooser.set_files(files=): documented as Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], Union[pathlib.Path, str], {name: str, mime_type: str, buffer: bytes}], code has Union[List[str], List[{name: str, mime_type: str, buffer: bytes}], str, {name: str, mime_type: str, buffer: bytes}]
 
-Parameter type mismatch in Browser.new_page(storage_state=): documented as Union[Union[pathlib.Path, str], {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], http_only: Union[bool, NoneType], secure: Union[bool, NoneType], same_site: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, local_storage: List[{name: str, value: str}]}], NoneType]}, NoneType], code has Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}], NoneType], origins: Union[List[Dict], NoneType]}, NoneType]
-Parameter type mismatch in BrowserContext.storage_state(return=): documented as {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, http_only: bool, secure: bool, same_site: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, local_storage: List[{name: str, value: str}]}]}, code has {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}], NoneType], origins: Union[List[Dict], NoneType]}
-Parameter type mismatch in Browser.new_context(storage_state=): documented as Union[Union[pathlib.Path, str], {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], http_only: Union[bool, NoneType], secure: Union[bool, NoneType], same_site: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, local_storage: List[{name: str, value: str}]}], NoneType]}, NoneType], code has Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}], NoneType], origins: Union[List[Dict], NoneType]}, NoneType]
-Parameter type mismatch in BrowserContext.cookies(return=): documented as List[{name: str, value: str, domain: str, path: str, expires: float, http_only: bool, secure: bool, same_site: Union["Lax", "None", "Strict"]}], code has List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}]
-Parameter type mismatch in BrowserContext.add_cookies(cookies=): documented as List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], http_only: Union[bool, NoneType], secure: Union[bool, NoneType], same_site: Union["Lax", "None", "Strict", NoneType]}], code has List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Strict", "Lax", "None", NoneType]}]
+# TODO
+Method not implemented: Page.is_editable
+Method not implemented: ElementHandle.is_hidden
+Method not implemented: Page.is_enabled
+Method not implemented: ElementHandle.is_enabled
+Method not implemented: Page.is_disabled
+Parameter type mismatch in ElementHandle.wait_for_element_state(state=): documented as Union["disabled", "editable", "enabled", "hidden", "stable", "visible"], code has Union["disabled", "enabled", "hidden", "stable", "visible"]
+Method not implemented: Frame.is_hidden
+Method not implemented: ElementHandle.is_visible
+Method not implemented: Page.is_hidden
+Method not implemented: ElementHandle.is_editable
+Method not implemented: Frame.is_disabled
+Method not implemented: Frame.is_visible
+Method not implemented: ElementHandle.is_disabled
+Method not implemented: Frame.is_enabled
+Method not implemented: Page.is_visible
+Method not implemented: Frame.is_editable

@@ -533,7 +533,7 @@ class Page(ChannelOwner):
         )
 
     async def wait_for_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
+        self, event: str, predicate: Callable = None, timeout: float = None
     ) -> Any:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
@@ -736,7 +736,7 @@ class Page(ChannelOwner):
     async def set_input_files(
         self,
         selector: str,
-        files: Union[str, FilePayload, List[str], List[FilePayload]],
+        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -841,7 +841,7 @@ class Page(ChannelOwner):
     def expect_event(
         self,
         event: str,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))

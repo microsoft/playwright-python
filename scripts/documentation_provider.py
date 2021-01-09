@@ -37,6 +37,8 @@ class DocumentationProvider:
     def __init__(self) -> None:
         self.api: Any = {}
         self.printed_entries: List[str] = []
+        # with open('/home/pfeldman/code/playwright/api.json', 'r') as f:
+        #     self.api = json.load(f)
         process_output = subprocess.run(
             ["python", "-m", "playwright", "print-api-json"],
             check=True,
@@ -56,16 +58,13 @@ class DocumentationProvider:
                     continue
                 method_name = member["name"]
                 new_name = to_snake_case(method_name)
-                if method_name == "continue":
-                    new_name = "continue_"
-                if method_name == "$eval":
-                    new_name = "eval_on_selector"
-                if method_name == "$$eval":
-                    new_name = "eval_on_selector_all"
-                if method_name == "$":
-                    new_name = "query_selector"
-                if method_name == "$$":
-                    new_name = "query_selector_all"
+                alias = (
+                    member["langs"].get("aliases").get("python")
+                    if member["langs"].get("aliases")
+                    else None
+                )
+                if alias:
+                    new_name = alias
                 members[new_name] = member
                 member["name"] = new_name
 
@@ -74,32 +73,16 @@ class DocumentationProvider:
                     for arg in member["args"]:
                         arg_name = arg["name"]
                         new_name = to_snake_case(arg_name)
-                        if arg_name == "pageFunction":
-                            new_name = "expression"
-
                         expand_type = None
                         expand_as_optional = False
                         if arg_name == "options":
                             expand_type = arg["type"]
                             expand_as_optional = True
-                        if arg_name == "optionsOrPredicate":
-                            expand_type = arg["type"]["union"][1]
-                            expand_as_optional = True
-                        if arg_name == "params" and "properties" in arg["type"]:
-                            expand_type = arg["type"]
-                        if method_name == "emulateMedia" and arg_name == "params":
-                            expand_type = arg["type"]
-                        if method_name == "fulfill" and arg_name == "response":
-                            expand_type = arg["type"]
-                        if method_name == "continue" and arg_name == "overrides":
-                            expand_type = arg["type"]
                         if (
                             method_name == "setViewportSize"
                             and arg_name == "viewportSize"
                         ):
                             expand_type = arg["type"]
-                        if arg_name == "geolocation":
-                            expand_type = arg["type"]["union"][1]
                         if arg_name == "frameSelector":
                             expand_type = arg["type"]["union"][1]
 
@@ -175,8 +158,6 @@ class DocumentationProvider:
                 name = to_snake_case(name)
                 if name == "return":
                     continue
-                if name == "force_expr":
-                    continue
                 original_name = name
                 doc_value = args.get(name)
                 if name in args:
@@ -190,11 +171,6 @@ class DocumentationProvider:
                     if doc_value.get("comment"):
                         print(
                             f"{indent}    {self.indent_paragraph(self.render_links(doc_value['comment']), f'{indent}    ')}"
-                        )
-                    if original_name == "expression":
-                        print(f"{indent}force_expr : bool")
-                        print(
-                            f"{indent}    Whether to treat given expression as JavaScript evaluate expression, even though it looks like an arrow function"
                         )
                     self.compare_types(code_type, doc_value, f"{fqname}({name}=)")
         if (
@@ -212,6 +188,13 @@ class DocumentationProvider:
         print(f'{indent}"""')
 
         for name in args:
+            if args[name].get("deprecated"):
+                continue
+            if (
+                args[name]["langs"].get("only")
+                and "python" not in args[name]["langs"]["only"]
+            ):
+                continue
             self.errors.add(
                 f"Parameter not implemented: {class_name}.{method_name}({name}=)"
             )
@@ -359,6 +342,9 @@ class DocumentationProvider:
         if "union" in type:
             ll = [self.serialize_doc_type(t) for t in type["union"]]
             ll.sort(key=lambda item: "}" if item == "NoneType" else item)
+            for i in range(len(ll)):
+                if ll[i].startswith("Union["):
+                    ll[i] = ll[i][6:-1]
             return f"Union[{', '.join(ll)}]"
 
         type_name = type["name"]
@@ -386,7 +372,11 @@ class DocumentationProvider:
             items = []
             for p in type["properties"]:
                 items.append(
-                    to_snake_case(p["name"])
+                    (
+                        p["name"]
+                        if p["name"] in ["httpOnly", "sameSite", "localStorage"]
+                        else to_snake_case(p["name"])
+                    )
                     + ": "
                     + (
                         self.serialize_doc_type(p["type"])
@@ -400,8 +390,12 @@ class DocumentationProvider:
             return "bool"
         if type_name == "string":
             return "str"
-        if type_name == "Object" or type_name == "Serializable":
+        if type_name == "any" or type_name == "Serializable":
             return "Any"
+        if type_name == "Object":
+            return "Dict"
+        if type_name == "Function":
+            return "Callable"
         if type_name == "Buffer":
             return "bytes"
         if type_name == "URL":
@@ -417,7 +411,16 @@ class DocumentationProvider:
     def print_remainder(self) -> None:
         for clazz in self.api:
             class_name = clazz["name"]
+            if clazz["langs"].get("only") and "python" not in clazz["langs"]["only"]:
+                continue
             for [member_name, member] in clazz["members"].items():
+                if (
+                    member["langs"].get("only")
+                    and "python" not in member["langs"]["only"]
+                ):
+                    continue
+                if member.get("deprecated"):
+                    continue
                 entry = f"{class_name}.{member_name}"
                 if entry not in self.printed_entries:
                     self.errors.add(f"Method not implemented: {entry}")

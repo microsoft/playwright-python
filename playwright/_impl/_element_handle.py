@@ -157,7 +157,7 @@ class ElementHandle(JSHandle):
 
     async def set_input_files(
         self,
-        files: Union[str, Path, FilePayload, List[str], List[Path], List[FilePayload]],
+        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:

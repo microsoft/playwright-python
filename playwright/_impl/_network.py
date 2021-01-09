@@ -80,7 +80,7 @@ class Request(ChannelOwner):
         return data.decode()
 
     @property
-    def post_data_json(self) -> Optional[Dict]:
+    def post_data_json(self) -> Optional[Any]:
         post_data = self.post_data
         if not post_data:
             return None
@@ -251,7 +251,7 @@ class Response(ChannelOwner):
         content = await self.body()
         return content.decode()
 
-    async def json(self) -> Union[Dict, List]:
+    async def json(self) -> Union[Any]:
         return json.loads(await self.text())
 
     @property
@@ -295,7 +295,7 @@ class WebSocket(ChannelOwner):
         return self._initializer["url"]
 
     async def wait_for_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
+        self, event: str, predicate: Callable = None, timeout: float = None
     ) -> Any:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
@@ -317,7 +317,7 @@ class WebSocket(ChannelOwner):
     def expect_event(
         self,
         event: str,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))

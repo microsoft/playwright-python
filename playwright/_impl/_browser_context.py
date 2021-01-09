@@ -209,7 +209,7 @@ class BrowserContext(ChannelOwner):
             )
 
     async def wait_for_event(
-        self, event: str, predicate: Callable[[Any], bool] = None, timeout: float = None
+        self, event: str, predicate: Callable = None, timeout: float = None
     ) -> Any:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
@@ -255,7 +255,7 @@ class BrowserContext(ChannelOwner):
     def expect_event(
         self,
         event: str,
-        predicate: Callable[[Any], bool] = None,
+        predicate: Callable = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))
