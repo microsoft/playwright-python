@@ -87,7 +87,7 @@ async def test_page_event_should_isolate_localStorage_and_cookies(browser, serve
 
 
 async def test_page_event_should_propagate_default_viewport_to_the_page(browser, utils):
-    context = await browser.new_context(viewport=(456, 789))
+    context = await browser.new_context(viewport={"width": 456, "height": 789})
     page = await context.new_page()
     await utils.verify_viewport(page, 456, 789)
     await context.close()
@@ -104,7 +104,7 @@ async def test_page_event_should_not_allow_device_scale_factor_with_null_viewpor
     browser,
 ):
     with pytest.raises(Error) as exc_info:
-        await browser.new_context(viewport=0, device_scale_factor=1)
+        await browser.new_context(no_viewport=True, device_scale_factor=1)
     assert (
         exc_info.value.message
         == '"deviceScaleFactor" option is not supported with null "viewport"'
@@ -113,7 +113,7 @@ async def test_page_event_should_not_allow_device_scale_factor_with_null_viewpor
 
 async def test_page_event_should_not_allow_is_mobile_with_null_viewport(browser):
     with pytest.raises(Error) as exc_info:
-        await browser.new_context(viewport=0, is_mobile=True)
+        await browser.new_context(no_viewport=True, is_mobile=True)
     assert (
         exc_info.value.message
         == '"isMobile" option is not supported with null "viewport"'

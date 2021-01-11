@@ -19,7 +19,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
-from playwright._impl._api_structures import Cookie, StorageState
+from playwright._impl._api_structures import Cookie, Geolocation, StorageState
 from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._event_context_manager import EventContextManagerImpl
@@ -141,15 +141,8 @@ class BrowserContext(ChannelOwner):
     async def clear_permissions(self) -> None:
         await self._channel.send("clearPermissions")
 
-    async def set_geolocation(
-        self, latitude: float, longitude: float, accuracy: Optional[float]
-    ) -> None:
-        await self._channel.send(
-            "setGeolocation", {"geolocation": locals_to_params(locals())}
-        )
-
-    async def reset_geolocation(self) -> None:
-        await self._channel.send("setGeolocation", {})
+    async def set_geolocation(self, geolocation: Geolocation = None) -> None:
+        await self._channel.send("setGeolocation", locals_to_params(locals()))
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
         await self._channel.send(

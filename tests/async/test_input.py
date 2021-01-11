@@ -16,7 +16,7 @@ import asyncio
 import os
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.async_api import FilePayload, Page
+from playwright.async_api import Page
 
 _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
@@ -56,7 +56,9 @@ async def test_should_set_from_memory(page):
     await page.set_content("<input type=file>")
     await page.set_input_files(
         "input",
-        files=[FilePayload("test.txt", "text/plain", b"this is a test")],
+        files=[
+            {"name": "test.txt", "mimeType": "text/plain", "buffer": b"this is a test"}
+        ],
     )
     assert await page.eval_on_selector("input", "input => input.files.length") == 1
     assert (

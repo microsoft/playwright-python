@@ -101,9 +101,9 @@ async def test_should_not_affect_screenshots(page, server, assert_to_be_golden):
     # Firefox headful produces a different image.
     page2 = await page.context.new_page()
     await asyncio.gather(
-        page.set_viewport_size(width=500, height=500),
+        page.set_viewport_size({"width": 500, "height": 500}),
         page.goto(server.PREFIX + "/grid.html"),
-        page2.set_viewport_size(width=50, height=50),
+        page2.set_viewport_size({"width": 50, "height": 50}),
         page2.goto(server.PREFIX + "/grid.html"),
     )
     await asyncio.gather(

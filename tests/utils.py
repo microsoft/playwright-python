@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import re
-from typing import List, Tuple, cast
+from typing import List, cast
 
 from playwright._impl._api_types import Error
 from playwright._impl._element_handle import ElementHandle
@@ -56,8 +56,8 @@ class Utils:
         return result
 
     async def verify_viewport(self, page: Page, width: int, height: int):
-        assert cast(Tuple[int, int], page.viewport_size())[0] == width
-        assert cast(Tuple[int, int], page.viewport_size())[1] == height
+        assert page.viewport_size()["width"] == width
+        assert page.viewport_size()["height"] == height
         assert await page.evaluate("window.innerWidth") == width
         assert await page.evaluate("window.innerHeight") == height
 

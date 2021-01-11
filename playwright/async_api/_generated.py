@@ -23,15 +23,19 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
-from playwright._impl._api_structures import Cookie, ResourceTiming, StorageState
-from playwright._impl._api_types import (
-    DeviceDescriptor,
+from playwright._impl._api_structures import (
+    Cookie,
     FilePayload,
     FloatRect,
     Geolocation,
+    HttpCredentials,
     PdfMargins,
+    Position,
     ProxySettings,
+    ResourceTiming,
     SourceLocation,
+    StorageState,
+    ViewportSize,
 )
 from playwright._impl._async_base import AsyncBase, AsyncEventContextManager, mapping
 from playwright._impl._browser import Browser as BrowserImpl
@@ -221,9 +225,14 @@ class Request(AsyncBase):
     def failure(self) -> typing.Union[str, NoneType]:
         """Request.failure
 
-        The method returns `null` unless this request has failed, as reported by `requestfailed` event.
+        Returns human-readable error message, e.g. `'net::ERR_FAILED'`. The method returns `None` unless this request has
+        failed, as reported by `requestfailed` event.
 
         Example of logging of all the failed requests:
+
+        ```python
+        page.on('requestfailed', lambda request: print(request.url + ' ' + request.failure);
+        ```
 
         Returns
         -------
@@ -644,23 +653,37 @@ class WebSocket(AsyncBase):
     ) -> AsyncEventContextManager:
         """WebSocket.expect_event
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
+        closed before the `event` is fired.
 
-        async with page.expect_event() as event_info:
-            await page.click("button")
+        ```python-async
+        async with ws.expect_event(event_name) as event_info:
+            await ws.click("button")
+        value = await event_info.value
+        ```
+
+        ```python-sync
+        with ws.expect_event(event_name) as event_info:
+            ws.click("button")
         value = event_info.value
+        ```
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        event : str
+            Event name, same one typically passed into `page.on(event)`.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
         )
@@ -1457,7 +1480,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         timeout: float = None,
         force: bool = None,
     ) -> NoneType:
@@ -1479,7 +1502,7 @@ class ElementHandle(JSHandle):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         timeout : Union[float, NoneType]
@@ -1507,7 +1530,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         click_count: int = None,
@@ -1533,7 +1556,7 @@ class ElementHandle(JSHandle):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         delay : Union[float, NoneType]
@@ -1578,7 +1601,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
@@ -1606,7 +1629,7 @@ class ElementHandle(JSHandle):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         delay : Union[float, NoneType]
@@ -1707,7 +1730,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -1732,7 +1755,7 @@ class ElementHandle(JSHandle):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         timeout : Union[float, NoneType]
@@ -1844,7 +1867,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -2533,7 +2556,7 @@ class FileChooser(AsyncBase):
 
         Parameters
         ----------
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -2758,7 +2781,7 @@ class Frame(AsyncBase):
         ----------
         state : Union["domcontentloaded", "load", "networkidle", NoneType]
             Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-            document, the method returns immediately. Can be one of:
+            document, the method resolves immediately. Can be one of:
             - `'load'` - wait for the `load` event to be fired.
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
             - `'networkidle'` - wait until there are no network connections for at least `500` ms.
@@ -3341,7 +3364,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         click_count: int = None,
@@ -3370,7 +3393,7 @@ class Frame(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         delay : Union[float, NoneType]
@@ -3417,7 +3440,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
@@ -3448,7 +3471,7 @@ class Frame(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         delay : Union[float, NoneType]
@@ -3492,7 +3515,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -3520,7 +3543,7 @@ class Frame(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         timeout : Union[float, NoneType]
@@ -3761,7 +3784,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         timeout: float = None,
         force: bool = None,
     ) -> NoneType:
@@ -3786,7 +3809,7 @@ class Frame(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         timeout : Union[float, NoneType]
@@ -3902,7 +3925,7 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md#working-with-selectors) for more details.
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4253,26 +4276,44 @@ class Frame(AsyncBase):
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
+    ) -> AsyncEventContextManager:
         """Frame.expect_load_state
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
+        by default. The navigation must have been committed when this method is called. If current document has already reached
+        the required state, resolves immediately.
 
-        async with page.expect_loadstate() as event_info:
-            await page.click("button")
-        value = event_info.value
+        ```python-async
+        async with frame.expect_load_state():
+            await frame.click('button') # Click triggers navigation.
+        # Context manager waits for 'load' event.
+        ```
+
+        ```python-sync
+        with frame.expect_load_state():
+            frame.click('button') # Click triggers navigation.
+        # Context manager waits for 'load' event.
+        ```
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        state : Union["domcontentloaded", "load", "networkidle", NoneType]
+            Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
+            document, the method resolves immediately. Can be one of:
+            - `'load'` - wait for the `load` event to be fired.
+            - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
+            - `'networkidle'` - wait until there are no network connections for at least `500` ms.
+        timeout : Union[float, NoneType]
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
+            changed by using the `browser_context.set_default_navigation_timeout()`,
+            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
+            `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_load_state(state, timeout)
         )
@@ -4282,26 +4323,52 @@ class Frame(AsyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
+    ) -> AsyncEventContextManager:
         """Frame.expect_navigation
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
+        navigation will resolve with `null`.
 
-        async with page.expect_navigation() as event_info:
-            await page.click("button")
-        value = event_info.value
+        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
+        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
+        Consider this example:
+
+        ```python-async
+        async with frame.expect_navigation():
+            await frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
+        # Context manager waited for the navigation to happen.
+        ```
+
+        ```python-sync
+        with frame.expect_navigation():
+            frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
+        # Context manager waited for the navigation to happen.
+        ```
+
+        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        considered a navigation.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+            - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+            - `'load'` - consider operation to be finished when the `load` event is fired.
+            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+        timeout : Union[float, NoneType]
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
+            changed by using the `browser_context.set_default_navigation_timeout()`,
+            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
+            `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_navigation(url, wait_until, timeout)
         )
@@ -4438,7 +4505,10 @@ class Selectors(AsyncBase):
             Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only
             contain `[a-zA-Z0-9_]` characters.
         script : Union[str, NoneType]
-            Script that evaluates to a selector engine instance.
+            Raw script content.
+        path : Union[pathlib.Path, str, NoneType]
+            Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
+            directory.
         content_script : Union[bool, NoneType]
             Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but
             not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not
@@ -4506,7 +4576,7 @@ class ConsoleMessage(AsyncBase):
 
         Returns
         -------
-        {url: str, line_number: int, column_number: int}
+        {url: str, lineNumber: int, columnNumber: int}
         """
         return mapping.from_impl(self._impl_obj.location)
 
@@ -5883,7 +5953,7 @@ class Page(AsyncBase):
         Parameters
         ----------
         event : str
-            Event name, same one would pass into `page.on(event)`.
+            Event name, same one typically passed into `page.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -6024,7 +6094,7 @@ class Page(AsyncBase):
             log_api("<= page.emulate_media failed")
             raise e
 
-    async def set_viewport_size(self, width: int, height: int) -> NoneType:
+    async def set_viewport_size(self, viewport_size: "ViewportSize") -> NoneType:
         """Page.set_viewport_size
 
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
@@ -6035,16 +6105,13 @@ class Page(AsyncBase):
 
         Parameters
         ----------
-        width : int
-            page width in pixels. **required**
-        height : int
-            page height in pixels. **required**
+        viewport_size : {width: int, height: int}
         """
 
         try:
             log_api("=> page.set_viewport_size started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.set_viewport_size(width=width, height=height)
+                await self._impl_obj.set_viewport_size(viewportSize=viewport_size)
             )
             log_api("<= page.set_viewport_size succeded")
             return result
@@ -6052,17 +6119,17 @@ class Page(AsyncBase):
             log_api("<= page.set_viewport_size failed")
             raise e
 
-    def viewport_size(self) -> typing.Union[typing.Tuple[int, int], NoneType]:
+    def viewport_size(self) -> typing.Union["ViewportSize", NoneType]:
         """Page.viewport_size
 
         Returns
         -------
-        Union[typing.Tuple[int, int], NoneType]
+        Union[{width: int, height: int}, NoneType]
         """
 
         try:
             log_api("=> page.viewport_size started")
-            result = mapping.from_maybe_impl(self._impl_obj.viewport_size())
+            result = mapping.from_impl_nullable(self._impl_obj.viewport_size())
             log_api("<= page.viewport_size succeded")
             return result
         except Exception as e:
@@ -6337,7 +6404,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         click_count: int = None,
@@ -6368,7 +6435,7 @@ class Page(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         delay : Union[float, NoneType]
@@ -6415,7 +6482,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
@@ -6448,7 +6515,7 @@ class Page(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         delay : Union[float, NoneType]
@@ -6492,7 +6559,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -6522,7 +6589,7 @@ class Page(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         timeout : Union[float, NoneType]
@@ -6767,7 +6834,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: typing.Union[typing.Tuple[float, float]] = None,
+        position: "Position" = None,
         timeout: float = None,
         force: bool = None,
     ) -> NoneType:
@@ -6794,7 +6861,7 @@ class Page(AsyncBase):
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[typing.Tuple[float, float], NoneType]
+        position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
         timeout : Union[float, NoneType]
@@ -6913,7 +6980,7 @@ class Page(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md#working-with-selectors) for more details.
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mime_type: str, buffer: bytes}], pathlib.Path, str, {name: str, mime_type: str, buffer: bytes}]
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7384,23 +7451,37 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager:
         """Page.expect_event
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the `event` is fired.
 
-        async with page.expect_event() as event_info:
+        ```python-async
+        async with page.expect_event(event_name) as event_info:
             await page.click("button")
+        value = await event_info.value
+        ```
+
+        ```python-sync
+        with page.expect_event(event_name) as event_info:
+            page.click("button")
         value = event_info.value
+        ```
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        event : str
+            Event name, same one typically passed into `page.on(event)`.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
         )
@@ -7412,53 +7493,24 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["ConsoleMessage"]:
         """Page.expect_console_message
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_console() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `console` event to fire. If predicate is provided, it passes `ConsoleMessage` value into
+        the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the worker event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        predicate : Union[Callable[[ConsoleMessage], bool], NoneType]
+            Receives the `ConsoleMessage` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[ConsoleMessage]
         """
+
         event = "console"
-        return AsyncEventContextManager(
-            self._impl_obj.wait_for_event(event, predicate, timeout)
-        )
-
-    def expect_dialog(
-        self,
-        predicate: typing.Union[typing.Callable[["Dialog"], bool]] = None,
-        timeout: float = None,
-    ) -> AsyncEventContextManager["Dialog"]:
-        """Page.expect_dialog
-
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_dialog() as event_info:
-            await page.click("button")
-        value = event_info.value
-
-        Parameters
-        ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
-        """
-        event = "dialog"
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
         )
@@ -7470,23 +7522,23 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Download"]:
         """Page.expect_download
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_download() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `download` event to fire. If predicate is provided, it passes `Download` value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the download event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        predicate : Union[Callable[[Download], bool], NoneType]
+            Receives the `Download` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Download]
         """
+
         event = "download"
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
@@ -7499,23 +7551,23 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["FileChooser"]:
         """Page.expect_file_chooser
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_filechooser() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `filechooser` event to fire. If predicate is provided, it passes `FileChooser` value into
+        the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the worker event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        predicate : Union[Callable[[FileChooser], bool], NoneType]
+            Receives the `FileChooser` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[FileChooser]
         """
+
         event = "filechooser"
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
@@ -7525,26 +7577,46 @@ class Page(AsyncBase):
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
+    ) -> AsyncEventContextManager:
         """Page.expect_load_state
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
+        by default. The navigation must have been committed when this method is called. If current document has already reached
+        the required state, resolves immediately.
 
-        async with page.expect_loadstate() as event_info:
-            await page.click("button")
-        value = event_info.value
+        ```python-async
+        async with page.expect_load_state():
+            await page.click('button') # Click triggers navigation.
+        # Context manager waits for 'load' event.
+        ```
+
+        ```python-sync
+        with page.expect_load_state():
+            page.click('button') # Click triggers navigation.
+        # Context manager waits for 'load' event.
+        ```
+
+        Shortcut for main frame's `frame.expect_load_state()`.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        state : Union["domcontentloaded", "load", "networkidle", NoneType]
+            Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
+            document, the method resolves immediately. Can be one of:
+            - `'load'` - wait for the `load` event to be fired.
+            - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
+            - `'networkidle'` - wait until there are no network connections for at least `500` ms.
+        timeout : Union[float, NoneType]
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
+            changed by using the `browser_context.set_default_navigation_timeout()`,
+            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
+            `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_load_state(state, timeout)
         )
@@ -7554,26 +7626,54 @@ class Page(AsyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> AsyncEventContextManager[typing.Union["Response", NoneType]]:
+    ) -> AsyncEventContextManager:
         """Page.expect_navigation
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
+        navigation will resolve with `null`.
 
-        async with page.expect_navigation() as event_info:
-            await page.click("button")
-        value = event_info.value
+        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
+        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
+        Consider this example:
+
+        ```python-async
+        async with page.expect_navigation():
+            await page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
+        # Context manager waited for the navigation to happen.
+        ```
+
+        ```python-sync
+        with page.expect_navigation():
+            page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
+        # Context manager waited for the navigation to happen.
+        ```
+
+        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        considered a navigation.
+
+        Shortcut for main frame's `frame.expect_navigation()`.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+            - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+            - `'load'` - consider operation to be finished when the `load` event is fired.
+            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+        timeout : Union[float, NoneType]
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
+            changed by using the `browser_context.set_default_navigation_timeout()`,
+            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
+            `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_navigation(url, wait_until, timeout)
         )
@@ -7585,23 +7685,23 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Page"]:
         """Page.expect_popup
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_popup() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `popup` event to fire. If predicate is provided, it passes [Popup] value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the popup event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        predicate : Union[Callable[[Page], bool], NoneType]
+            Receives the [Popup] object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Page]
         """
+
         event = "popup"
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
@@ -7616,23 +7716,23 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_request() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `response` event to fire. If predicate is provided, it passes `Request` value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the download event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
+            Receives the `Request` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Request]
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_request(url_or_predicate, timeout)
         )
@@ -7646,23 +7746,23 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_response
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_response() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `response` event to fire. If predicate is provided, it passes `Response` value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the download event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        url_or_predicate : Union[Callable[[Response], bool], Pattern, str]
+            Receives the `Response` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Response]
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_response(url_or_predicate, timeout)
         )
@@ -7674,23 +7774,23 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Worker"]:
         """Page.expect_worker
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_worker() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `worker` event to fire. If predicate is provided, it passes `Worker` value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the worker event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        predicate : Union[Callable[[Worker], bool], NoneType]
+            Receives the `Worker` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Worker]
         """
+
         event = "worker"
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
@@ -7928,9 +8028,7 @@ class BrowserContext(AsyncBase):
             log_api("<= browser_context.clear_permissions failed")
             raise e
 
-    async def set_geolocation(
-        self, latitude: float, longitude: float, accuracy: float = None
-    ) -> NoneType:
+    async def set_geolocation(self, geolocation: "Geolocation" = None) -> NoneType:
         """BrowserContext.set_geolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -7940,40 +8038,18 @@ class BrowserContext(AsyncBase):
 
         Parameters
         ----------
-        latitude : float
-            Latitude between -90 and 90. **required**
-        longitude : float
-            Longitude between -180 and 180. **required**
-        accuracy : Union[float, NoneType]
-            Non-negative accuracy value. Defaults to `0`. Optional.
+        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
         """
 
         try:
             log_api("=> browser_context.set_geolocation started")
             result = mapping.from_maybe_impl(
-                await self._impl_obj.set_geolocation(
-                    latitude=latitude, longitude=longitude, accuracy=accuracy
-                )
+                await self._impl_obj.set_geolocation(geolocation=geolocation)
             )
             log_api("<= browser_context.set_geolocation succeded")
             return result
         except Exception as e:
             log_api("<= browser_context.set_geolocation failed")
-            raise e
-
-    async def reset_geolocation(self) -> NoneType:
-        """BrowserContext.reset_geolocation
-
-        Emulates position unavailable state.
-        """
-
-        try:
-            log_api("=> browser_context.reset_geolocation started")
-            result = mapping.from_maybe_impl(await self._impl_obj.reset_geolocation())
-            log_api("<= browser_context.reset_geolocation succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.reset_geolocation failed")
             raise e
 
     async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
@@ -8303,23 +8379,37 @@ class BrowserContext(AsyncBase):
     ) -> AsyncEventContextManager:
         """BrowserContext.expect_event
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
+        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
+        is closed before the `event` is fired.
 
-        async with page.expect_event() as event_info:
-            await page.click("button")
+        ```python-async
+        async with context.expect_event(event_name) as event_info:
+            await context.click("button")
+        value = await event_info.value
+        ```
+
+        ```python-sync
+        with context.expect_event(event_name) as event_info:
+            context.click("button")
         value = event_info.value
+        ```
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        event : str
+            Event name, same one typically passed into `page.on(event)`.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager
         """
+
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
         )
@@ -8331,23 +8421,23 @@ class BrowserContext(AsyncBase):
     ) -> AsyncEventContextManager["Page"]:
         """BrowserContext.expect_page
 
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_page() as event_info:
-            await page.click("button")
-        value = event_info.value
+        Performs action and waits for `page` event to fire. If predicate is provided, it passes `Page` value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        closed before the worker event is fired.
 
         Parameters
         ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
+        predicate : Union[Callable[[Page], bool], NoneType]
+            Receives the `Page` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Page]
         """
+
         event = "page"
         return AsyncEventContextManager(
             self._impl_obj.wait_for_event(event, predicate, timeout)
@@ -8528,7 +8618,8 @@ class Browser(AsyncBase):
 
     async def new_context(
         self,
-        viewport: typing.Union[typing.Tuple[int, int], Literal[0]] = None,
+        viewport: "ViewportSize" = None,
+        no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
         bypass_csp: bool = None,
@@ -8539,7 +8630,7 @@ class Browser(AsyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
+        http_credentials: "HttpCredentials" = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -8550,7 +8641,7 @@ class Browser(AsyncBase):
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
+        record_video_size: "ViewportSize" = None,
         storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "BrowserContext":
         """Browser.new_context
@@ -8559,8 +8650,10 @@ class Browser(AsyncBase):
 
         Parameters
         ----------
-        viewport : Union["0", typing.Tuple[int, int], NoneType]
-            Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
+        viewport : Union[{width: int, height: int}, NoneType]
+            Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+        no_viewport : Union[bool, NoneType]
+            Disables the default viewport.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -8584,7 +8677,7 @@ class Browser(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Union[bool, NoneType]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[typing.Tuple[str, str], NoneType]
+        http_credentials : Union[{username: str, password: str}, NoneType]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
         device_scale_factor : Union[float, NoneType]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -8608,10 +8701,8 @@ class Browser(AsyncBase):
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, NoneType]
             Path to the directory to put videos into.
-        record_video_size : Union[typing.Tuple[int, int], NoneType]
-            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not
-            configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary
-            to fit the specified size.
+        record_video_size : Union[{width: int, height: int}, NoneType]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
         storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
@@ -8627,6 +8718,7 @@ class Browser(AsyncBase):
             result = mapping.from_impl(
                 await self._impl_obj.new_context(
                     viewport=viewport,
+                    noViewport=no_viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
                     bypassCSP=bypass_csp,
@@ -8660,7 +8752,8 @@ class Browser(AsyncBase):
 
     async def new_page(
         self,
-        viewport: typing.Union[typing.Tuple[int, int], Literal[0]] = None,
+        viewport: "ViewportSize" = None,
+        no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
         bypass_csp: bool = None,
@@ -8671,7 +8764,7 @@ class Browser(AsyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
+        http_credentials: "HttpCredentials" = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -8682,7 +8775,7 @@ class Browser(AsyncBase):
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
+        record_video_size: "ViewportSize" = None,
         storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
     ) -> "Page":
         """Browser.new_page
@@ -8695,8 +8788,10 @@ class Browser(AsyncBase):
 
         Parameters
         ----------
-        viewport : Union["0", typing.Tuple[int, int], NoneType]
-            Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
+        viewport : Union[{width: int, height: int}, NoneType]
+            Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+        no_viewport : Union[bool, NoneType]
+            Disables the default viewport.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -8720,7 +8815,7 @@ class Browser(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Union[bool, NoneType]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[typing.Tuple[str, str], NoneType]
+        http_credentials : Union[{username: str, password: str}, NoneType]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
         device_scale_factor : Union[float, NoneType]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -8744,10 +8839,8 @@ class Browser(AsyncBase):
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, NoneType]
             Path to the directory to put videos into.
-        record_video_size : Union[typing.Tuple[int, int], NoneType]
-            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not
-            configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary
-            to fit the specified size.
+        record_video_size : Union[{width: int, height: int}, NoneType]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
         storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
             Populates context with given storage state. This method can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
@@ -8763,6 +8856,7 @@ class Browser(AsyncBase):
             result = mapping.from_impl(
                 await self._impl_obj.new_page(
                     viewport=viewport,
+                    noViewport=no_viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
                     bypassCSP=bypass_csp,
@@ -8980,7 +9074,8 @@ class BrowserType(AsyncBase):
         proxy: "ProxySettings" = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
-        viewport: typing.Union[typing.Tuple[int, int], Literal[0]] = None,
+        viewport: "ViewportSize" = None,
+        no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
         bypass_csp: bool = None,
@@ -8991,7 +9086,7 @@ class BrowserType(AsyncBase):
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: typing.Union[typing.Tuple[str, str]] = None,
+        http_credentials: "HttpCredentials" = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -9001,7 +9096,7 @@ class BrowserType(AsyncBase):
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: typing.Union[typing.Tuple[int, int]] = None,
+        record_video_size: "ViewportSize" = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -9053,8 +9148,10 @@ class BrowserType(AsyncBase):
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
             Defaults to 0.
-        viewport : Union["0", typing.Tuple[int, int], NoneType]
-            Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `null` disables the default viewport.
+        viewport : Union[{width: int, height: int}, NoneType]
+            Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+        no_viewport : Union[bool, NoneType]
+            Disables the default viewport.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -9078,7 +9175,7 @@ class BrowserType(AsyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         offline : Union[bool, NoneType]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[typing.Tuple[str, str], NoneType]
+        http_credentials : Union[{username: str, password: str}, NoneType]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
         device_scale_factor : Union[float, NoneType]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
@@ -9100,10 +9197,8 @@ class BrowserType(AsyncBase):
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, NoneType]
             Path to the directory to put videos into.
-        record_video_size : Union[typing.Tuple[int, int], NoneType]
-            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`. If `viewport` is not
-            configured explicitly the video size defaults to 1280x720. Actual picture of each page will be scaled down if necessary
-            to fit the specified size.
+        record_video_size : Union[{width: int, height: int}, NoneType]
+            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
 
         Returns
         -------
@@ -9129,6 +9224,7 @@ class BrowserType(AsyncBase):
                     downloadsPath=downloads_path,
                     slowMo=slow_mo,
                     viewport=viewport,
+                    noViewport=no_viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
                     bypassCSP=bypass_csp,
@@ -9167,7 +9263,7 @@ class Playwright(AsyncBase):
         super().__init__(obj)
 
     @property
-    def devices(self) -> typing.Dict[str, "DeviceDescriptor"]:
+    def devices(self) -> typing.Dict:
         """Playwright.devices
 
         Returns a list of devices to be used with `browser.new_context()` or `browser.new_page()`. Actual list of
@@ -9176,9 +9272,9 @@ class Playwright(AsyncBase):
 
         Returns
         -------
-        Dict[str, {user_agent: Union[str, NoneType], viewport: Union[typing.Tuple[int, int], NoneType], device_scale_factor: Union[int, NoneType], is_mobile: Union[bool, NoneType], has_touch: Union[bool, NoneType]}]
+        Dict
         """
-        return mapping.from_impl_dict(self._impl_obj.devices)
+        return mapping.from_maybe_impl(self._impl_obj.devices)
 
     @property
     def selectors(self) -> "Selectors":

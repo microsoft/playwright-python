@@ -16,7 +16,7 @@ import inspect
 from typing import Any, Callable, Dict, List, Optional
 from weakref import WeakKeyDictionary
 
-from playwright._impl._api_types import ApiType, Error
+from playwright._impl._api_types import Error
 
 
 class ImplWrapper:
@@ -34,8 +34,6 @@ class ImplToApiMapping:
 
     def from_maybe_impl(self, obj: Any) -> Any:
         if not obj:
-            return obj
-        if isinstance(obj, ApiType):
             return obj
         if isinstance(obj, dict):
             return {name: self.from_maybe_impl(value) for name, value in obj.items()}

@@ -35,7 +35,7 @@ async def test_short_video_should_exist(browser, tmpdir, server):
 async def test_short_video_should_exist_persistent_context(browser_type, tmpdir):
     context = await browser_type.launch_persistent_context(
         str(tmpdir),
-        viewport=(320, 240),
+        viewport={"width": 320, "height": 240},
         record_video_dir=str(tmpdir) + "1",
     )
     page = context.pages[0]

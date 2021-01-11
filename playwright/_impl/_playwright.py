@@ -14,14 +14,13 @@
 
 from typing import Dict
 
-from playwright._impl._api_types import DeviceDescriptor
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._selectors import Selectors
 
 
 class Playwright(ChannelOwner):
-    devices: Dict[str, DeviceDescriptor]
+    devices: Dict
     selectors: Selectors
     chromium: BrowserType
     firefox: BrowserType
@@ -45,7 +44,7 @@ class Playwright(ChannelOwner):
         pass
 
 
-def parse_device_descriptor(dict: Dict) -> DeviceDescriptor:
+def parse_device_descriptor(dict: Dict) -> Dict:
     return {
         "user_agent": dict["userAgent"],
         "viewport": dict["viewport"],

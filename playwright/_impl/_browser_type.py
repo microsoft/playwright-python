@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 
-from playwright._impl._api_types import Geolocation, ProxySettings
+from playwright._impl._api_structures import (
+    Geolocation,
+    HttpCredentials,
+    ProxySettings,
+    ViewportSize,
+)
 from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import ChannelOwner, from_channel
@@ -26,11 +30,6 @@ from playwright._impl._helper import (
     locals_to_params,
     not_installed_error,
 )
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 
 class BrowserType(ChannelOwner):
@@ -90,7 +89,8 @@ class BrowserType(ChannelOwner):
         proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: float = None,
-        viewport: Union[Tuple[int, int], Literal[0]] = None,
+        viewport: ViewportSize = None,
+        noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
         bypassCSP: bool = None,
@@ -101,7 +101,7 @@ class BrowserType(ChannelOwner):
         permissions: List[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: Tuple[str, str] = None,
+        httpCredentials: HttpCredentials = None,
         deviceScaleFactor: float = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -111,7 +111,7 @@ class BrowserType(ChannelOwner):
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,
         recordVideoDir: Union[Path, str] = None,
-        recordVideoSize: Tuple[int, int] = None,
+        recordVideoSize: ViewportSize = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())

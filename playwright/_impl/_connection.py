@@ -21,7 +21,6 @@ from typing import Any, Callable, Dict, Optional, Union
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
-from playwright._impl._api_types import ApiType
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
@@ -232,17 +231,8 @@ class Connection:
     def _replace_channels_with_guids(self, payload: Any, param_name: str) -> Any:
         if payload is None:
             return payload
-        if isinstance(payload, tuple):
-            if param_name == "position":
-                return {"x": payload[0], "y": payload[1]}
-            if param_name == "size" or param_name == "viewport":
-                return {"width": payload[0], "height": payload[1]}
-            if param_name == "httpCredentials":
-                return {"username": payload[0], "password": payload[1]}
         if isinstance(payload, Path):
             return str(payload)
-        if isinstance(payload, ApiType):
-            return payload._to_json()
         if isinstance(payload, list):
             return list(
                 map(lambda p: self._replace_channels_with_guids(p, "index"), payload)

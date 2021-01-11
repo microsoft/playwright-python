@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
 
-from playwright._impl._api_types import FilePayload
+from playwright._impl._api_structures import FilePayload
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
@@ -72,12 +72,12 @@ def normalize_file_payloads(
                         "buffer": base64.b64encode(fd.read()).decode(),
                     }
                 )
-        if isinstance(item, FilePayload):
+        else:
             file_payloads.append(
                 {
-                    "name": item.name,
-                    "mimeType": item.mime_type,
-                    "buffer": base64.b64encode(item.buffer).decode(),
+                    "name": item["name"],
+                    "mimeType": item["mimeType"],
+                    "buffer": base64.b64encode(item["buffer"]).decode(),
                 }
             )
 

@@ -78,26 +78,51 @@ def generate(t: Any) -> None:
         if (
             not name.startswith("_")
             and isinstance(value, FunctionType)
-            and "expect_" not in name
             and "remove_listener" != name
         ):
             is_async = inspect.iscoroutinefunction(value)
+            return_type_value = return_type(value)
+            return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
+            return_type_value = return_type_value.replace(
+                "EventContextManager", "AsyncEventContextManager"
+            )
             print("")
             async_prefix = "async " if is_async else ""
             await_prefix = "await " if is_async else ""
             print(
-                f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
             documentation_provider.print_entry(
                 class_name, name, get_type_hints(value, api_globals)
             )
-            [prefix, suffix] = return_value(
-                get_type_hints(value, api_globals)["return"]
-            )
-            prefix = prefix + f"{await_prefix}self._impl_obj.{name}("
-            suffix = ")" + suffix
-            print(
-                f"""
+            if "expect_" in name:
+                print("")
+                event_name = re.sub(r"expect_(.*)", r"\1", name)
+                event_name = re.sub(r"_", "", event_name)
+                event_name = re.sub(r"consolemessage", "console", event_name)
+                wait_for_method = "wait_for_event(event, predicate, timeout)"
+                if event_name == "request":
+                    wait_for_method = "wait_for_request(url_or_predicate, timeout)"
+                elif event_name == "response":
+                    wait_for_method = "wait_for_response(url_or_predicate, timeout)"
+                elif event_name == "loadstate":
+                    wait_for_method = "wait_for_load_state(state, timeout)"
+                elif event_name == "navigation":
+                    wait_for_method = "wait_for_navigation(url, wait_until, timeout)"
+                elif event_name != "event":
+                    print(f'        event = "{event_name}"')
+
+                print(
+                    f"        return AsyncEventContextManager(self._impl_obj.{wait_for_method})"
+                )
+            else:
+                [prefix, suffix] = return_value(
+                    get_type_hints(value, api_globals)["return"]
+                )
+                prefix = prefix + f"{await_prefix}self._impl_obj.{name}("
+                suffix = ")" + suffix
+                print(
+                    f"""
         try:
             log_api("=> {to_snake_case(class_name)}.{name} started")
             result = {prefix}{arguments(value, len(prefix))}{suffix}
@@ -106,53 +131,7 @@ def generate(t: Any) -> None:
         except Exception as e:
             log_api("<= {to_snake_case(class_name)}.{name} failed")
             raise e"""
-            )
-        if "expect_" in name:
-            print("")
-            return_type_value = return_type(value)
-            return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
-            event_name = re.sub(r"expect_(.*)", r"\1", name)
-            event_name = re.sub(r"_", "", event_name)
-            event_name = re.sub(r"consolemessage", "console", event_name)
-
-            print(
-                f"""    def {name}({signature(value, len(name) + 9)}) -> Async{return_type_value}:
-        \"\"\"{class_name}.{name}
-
-        Returns context manager that waits for ``event`` to fire upon exit. It passes event's value
-        into the ``predicate`` function and waits for the predicate to return a truthy value. Will throw
-        an error if the page is closed before the ``event`` is fired.
-
-        async with page.expect_{event_name}() as event_info:
-            await page.click("button")
-        value = event_info.value
-
-        Parameters
-        ----------
-        predicate : Optional[typing.Callable[[Any], bool]]
-            Predicate receiving event data.
-        timeout : Optional[int]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout.
-            The default value can be changed by using the browserContext.set_default_timeout(timeout) or
-            page.set_default_timeout(timeout) methods.
-        \"\"\""""
-            )
-
-            wait_for_method = "wait_for_event(event, predicate, timeout)"
-            if event_name == "request":
-                wait_for_method = "wait_for_request(url_or_predicate, timeout)"
-            elif event_name == "response":
-                wait_for_method = "wait_for_response(url_or_predicate, timeout)"
-            elif event_name == "loadstate":
-                wait_for_method = "wait_for_load_state(state, timeout)"
-            elif event_name == "navigation":
-                wait_for_method = "wait_for_navigation(url, wait_until, timeout)"
-            elif event_name != "event":
-                print(f'        event = "{event_name}"')
-
-            print(
-                f"        return AsyncEventContextManager(self._impl_obj.{wait_for_method})"
-            )
+                )
 
     print("")
     print(f"mapping.register({class_name}Impl, {class_name})")

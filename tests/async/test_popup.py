@@ -125,7 +125,9 @@ async def test_should_inherit_http_credentials_from_browser_context(
     browser: Browser, server
 ):
     server.set_auth("/title.html", b"user", b"pass")
-    context = await browser.new_context(http_credentials=("user", "pass"))
+    context = await browser.new_context(
+        http_credentials={"username": "user", "password": "pass"}
+    )
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     popup = (
@@ -144,7 +146,9 @@ async def test_should_inherit_http_credentials_from_browser_context(
 async def test_should_inherit_touch_support_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.new_context(viewport=(400, 500), has_touch=True)
+    context = await browser.new_context(
+        viewport={"width": 400, "height": 500}, has_touch=True
+    )
 
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -162,7 +166,7 @@ async def test_should_inherit_touch_support_from_browser_context(
 async def test_should_inherit_viewport_size_from_browser_context(
     browser: Browser, server
 ):
-    context = await browser.new_context(viewport=(400, 500))
+    context = await browser.new_context(viewport={"width": 400, "height": 500})
 
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -178,7 +182,7 @@ async def test_should_inherit_viewport_size_from_browser_context(
 
 
 async def test_should_use_viewport_size_from_window_features(browser: Browser, server):
-    context = await browser.new_context(viewport=(700, 700))
+    context = await browser.new_context(viewport={"width": 700, "height": 700})
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     [size, popup] = await asyncio.gather(
@@ -190,7 +194,7 @@ async def test_should_use_viewport_size_from_window_features(browser: Browser, s
         ),
         page.wait_for_event("popup"),
     )
-    await popup.set_viewport_size(width=500, height=400)
+    await popup.set_viewport_size({"width": 500, "height": 400})
     await popup.wait_for_load_state()
     resized = await popup.evaluate(
         "() => ({ width: window.innerWidth, height: window.innerHeight })"

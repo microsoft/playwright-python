@@ -52,17 +52,19 @@ from playwright.sync_api._generated import (
 )
 
 Cookie = playwright._impl._api_structures.Cookie
+FilePayload = playwright._impl._api_structures.FilePayload
+FloatRect = playwright._impl._api_structures.FloatRect
+Geolocation = playwright._impl._api_structures.Geolocation
+HttpCredentials = playwright._impl._api_structures.HttpCredentials
+PdfMargins = playwright._impl._api_structures.PdfMargins
+Position = playwright._impl._api_structures.Position
+ProxySettings = playwright._impl._api_structures.ProxySettings
 ResourceTiming = playwright._impl._api_structures.ResourceTiming
+SourceLocation = playwright._impl._api_structures.SourceLocation
 StorageState = playwright._impl._api_structures.StorageState
+ViewportSize = playwright._impl._api_structures.ViewportSize
 
-DeviceDescriptor = playwright._impl._api_types.DeviceDescriptor
 Error = playwright._impl._api_types.Error
-FilePayload = playwright._impl._api_types.FilePayload
-FloatRect = playwright._impl._api_types.FloatRect
-Geolocation = playwright._impl._api_types.Geolocation
-PdfMargins = playwright._impl._api_types.PdfMargins
-ProxySettings = playwright._impl._api_types.ProxySettings
-SourceLocation = playwright._impl._api_types.SourceLocation
 TimeoutError = playwright._impl._api_types.TimeoutError
 
 
@@ -71,7 +73,7 @@ def sync_playwright() -> PlaywrightContextManager:
 
 
 __all__ = [
-    "sync_playwright",
+    "async_playwright",
     "Accessibility",
     "BindingCall",
     "Browser",
@@ -81,7 +83,6 @@ __all__ = [
     "ChromiumBrowserContext",
     "ConsoleMessage",
     "Cookie",
-    "DeviceDescriptor",
     "Dialog",
     "Download",
     "ElementHandle",
@@ -91,11 +92,13 @@ __all__ = [
     "FloatRect",
     "Frame",
     "Geolocation",
+    "HttpCredentials",
     "JSHandle",
     "Keyboard",
     "Mouse",
     "Page",
     "PdfMargins",
+    "Position",
     "Playwright",
     "ProxySettings",
     "Request",
@@ -109,6 +112,7 @@ __all__ = [
     "TimeoutError",
     "Touchscreen",
     "Video",
+    "ViewportSize",
     "WebSocket",
     "Worker",
 ]

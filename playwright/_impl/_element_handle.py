@@ -15,19 +15,9 @@
 import base64
 import sys
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
-from playwright._impl._api_types import FilePayload, FloatRect, filter_out_none
+from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._file_chooser import normalize_file_payloads
 from playwright._impl._helper import KeyboardModifier, MouseButton, locals_to_params
@@ -88,7 +78,7 @@ class ElementHandle(JSHandle):
     async def hover(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -> None:
@@ -97,7 +87,7 @@ class ElementHandle(JSHandle):
     async def click(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         delay: float = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -110,7 +100,7 @@ class ElementHandle(JSHandle):
     async def dblclick(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         delay: float = None,
         button: MouseButton = None,
         timeout: float = None,
@@ -140,7 +130,7 @@ class ElementHandle(JSHandle):
     async def tap(
         self,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -197,8 +187,7 @@ class ElementHandle(JSHandle):
         await self._channel.send("uncheck", locals_to_params(locals()))
 
     async def bounding_box(self) -> Optional[FloatRect]:
-        bb = await self._channel.send("boundingBox")
-        return FloatRect._parse(bb)
+        return await self._channel.send("boundingBox")
 
     async def screenshot(
         self,
@@ -316,3 +305,13 @@ def convert_select_option_values(
         elements = list(map(lambda e: e._channel, element))
 
     return filter_out_none(dict(options=options, elements=elements))
+
+
+def filter_out_none(args: Dict) -> Any:
+    copy = {}
+    for key in args:
+        if key == "self":
+            continue
+        if args[key] is not None:
+            copy[key] = args[key]
+    return copy

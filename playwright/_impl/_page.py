@@ -18,27 +18,23 @@ import inspect
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._impl._accessibility import Accessibility
-from playwright._impl._api_types import Error, FilePayload, FloatRect, PdfMargins
+from playwright._impl._api_structures import (
+    FilePayload,
+    FloatRect,
+    PdfMargins,
+    Position,
+    ViewportSize,
+)
+from playwright._impl._api_types import Error
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
-from playwright._impl._dialog import Dialog
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._event_context_manager import EventContextManagerImpl
@@ -123,10 +119,7 @@ class Page(ChannelOwner):
         self._main_frame: Frame = from_channel(initializer["mainFrame"])
         self._main_frame._page = self
         self._frames = [self._main_frame]
-        vs = initializer.get("viewportSize")
-        self._viewport_size: Optional[Tuple[int, int]] = (
-            (vs["width"], vs["height"]) if vs else None
-        )
+        self._viewport_size: Optional[ViewportSize] = initializer.get("viewportSize")
         self._is_closed = False
         self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
@@ -572,13 +565,11 @@ class Page(ChannelOwner):
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
-    async def set_viewport_size(self, width: int, height: int) -> None:
-        self._viewport_size = (width, height)
-        await self._channel.send(
-            "setViewportSize", dict(viewportSize=locals_to_params(locals()))
-        )
+    async def set_viewport_size(self, viewportSize: ViewportSize) -> None:
+        self._viewport_size = viewportSize
+        await self._channel.send("setViewportSize", locals_to_params(locals()))
 
-    def viewport_size(self) -> Optional[Tuple[int, int]]:
+    def viewport_size(self) -> Optional[ViewportSize]:
         return self._viewport_size
 
     async def bring_to_front(self) -> None:
@@ -654,7 +645,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         delay: float = None,
         button: MouseButton = None,
         clickCount: int = None,
@@ -668,7 +659,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         delay: float = None,
         button: MouseButton = None,
         timeout: float = None,
@@ -681,7 +672,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -714,7 +705,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         modifiers: List[KeyboardModifier] = None,
-        position: Tuple[float, float] = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -> None:
@@ -855,15 +846,6 @@ class Page(ChannelOwner):
             self.wait_for_event("console", predicate, timeout)
         )
 
-    def expect_dialog(
-        self,
-        predicate: Callable[[Dialog], bool] = None,
-        timeout: float = None,
-    ) -> EventContextManagerImpl[Dialog]:
-        return EventContextManagerImpl(
-            self.wait_for_event("dialog", predicate, timeout)
-        )
-
     def expect_download(
         self,
         predicate: Callable[[Download], bool] = None,
@@ -886,7 +868,7 @@ class Page(ChannelOwner):
         self,
         state: DocumentLoadState = None,
         timeout: float = None,
-    ) -> EventContextManagerImpl[Optional[Response]]:
+    ) -> EventContextManagerImpl:
         return EventContextManagerImpl(self.wait_for_load_state(state, timeout))
 
     def expect_navigation(
@@ -894,7 +876,7 @@ class Page(ChannelOwner):
         url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
         timeout: float = None,
-    ) -> EventContextManagerImpl[Optional[Response]]:
+    ) -> EventContextManagerImpl:
         return EventContextManagerImpl(
             self.wait_for_navigation(url, waitUntil, timeout)
         )

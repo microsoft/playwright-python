@@ -37,8 +37,6 @@ class DocumentationProvider:
     def __init__(self) -> None:
         self.api: Any = {}
         self.printed_entries: List[str] = []
-        # with open('/home/pfeldman/code/playwright/api.json', 'r') as f:
-        #     self.api = json.load(f)
         process_output = subprocess.run(
             ["python", "-m", "playwright", "print-api-json"],
             check=True,
@@ -73,40 +71,12 @@ class DocumentationProvider:
                     for arg in member["args"]:
                         arg_name = arg["name"]
                         new_name = to_snake_case(arg_name)
-                        expand_type = None
-                        expand_as_optional = False
                         if arg_name == "options":
-                            expand_type = arg["type"]
-                            expand_as_optional = True
-                        if (
-                            method_name == "setViewportSize"
-                            and arg_name == "viewportSize"
-                        ):
-                            expand_type = arg["type"]
-                        if arg_name == "frameSelector":
-                            expand_type = arg["type"]["union"][1]
-
-                        if expand_type:
-                            for opt_property in expand_type["properties"]:
+                            for opt_property in arg["type"]["properties"]:
                                 opt_name = opt_property["name"]
-                                if opt_name == "recordHar" or opt_name == "recordVideo":
-                                    for sub_property in opt_property["type"][
-                                        "properties"
-                                    ]:
-                                        sub_name = sub_property["name"]
-                                        new_sub_name = to_snake_case(
-                                            opt_name
-                                            + sub_name[0:1].upper()
-                                            + sub_name[1:]
-                                        )
-                                        args[new_sub_name] = sub_property
-                                        sub_property["name"] = new_sub_name
-                                        sub_property["required"] = False
-                                else:
-                                    args[to_snake_case(opt_name)] = opt_property
-                                    opt_property["name"] = to_snake_case(opt_name)
-                                    if expand_as_optional:
-                                        opt_property["required"] = False
+                                args[to_snake_case(opt_name)] = opt_property
+                                opt_property["name"] = to_snake_case(opt_name)
+                                opt_property["required"] = False
                         else:
                             args[new_name] = arg
                             arg["name"] = new_name
@@ -126,8 +96,6 @@ class DocumentationProvider:
             return
         original_method_name = method_name
         self.printed_entries.append(f"{class_name}.{method_name}")
-        if class_name == "JSHandle":
-            self.printed_entries.append(f"ElementHandle.{method_name}")
         clazz = self.classes[class_name]
         method = clazz["members"].get(method_name)
         if not method and "extends" in clazz:
@@ -273,12 +241,20 @@ class DocumentationProvider:
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
-        match = re.match(r"^<class 'playwright\._impl\.[\w_]+\.([\w]+)'>$", str_value)
+        match = re.match(
+            r"playwright._impl._event_context_manager.EventContextManagerImpl\[playwright._impl.[^.]+.(.*)\]",
+            str_value,
+        )
+        if match:
+            return "EventContextManager[" + match.group(1) + "]"
+        match = re.match(r"^<class 'playwright\._impl\.[\w_]+\.([^']+)'>$", str_value)
         if (
             match
             and "_api_structures" not in str_value
             and "_api_types" not in str_value
         ):
+            if match.group(1) == "EventContextManagerImpl":
+                return "EventContextManager"
             return match.group(1)
 
         match = re.match(r"^typing\.(\w+)$", str_value)
@@ -325,14 +301,6 @@ class DocumentationProvider:
 
     def serialize_doc_type(self, type: Any) -> str:
         result = self.inner_serialize_doc_type(type)
-        if result == "{x: float, y: float}":
-            result = "typing.Tuple[float, float]"
-        if result == "Union[Callable, str]":
-            return "str"
-        if result == "{width: int, height: int}":
-            return "typing.Tuple[int, int]"
-        if result == "{username: str, password: str}":
-            return "typing.Tuple[str, str]"
         return result
 
     def inner_serialize_doc_type(self, type: Any) -> str:
@@ -372,11 +340,7 @@ class DocumentationProvider:
             items = []
             for p in type["properties"]:
                 items.append(
-                    (
-                        p["name"]
-                        if p["name"] in ["httpOnly", "sameSite", "localStorage"]
-                        else to_snake_case(p["name"])
-                    )
+                    (p["name"])
                     + ": "
                     + (
                         self.serialize_doc_type(p["type"])
