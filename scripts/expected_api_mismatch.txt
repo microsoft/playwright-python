@@ -16,24 +16,3 @@ Parameter type mismatch in Page.unroute(handler=): documented as Union[Callable[
 # Get vs set cookies
 Parameter type mismatch in BrowserContext.storage_state(return=): documented as {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, code has {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}
 Parameter type mismatch in BrowserContext.cookies(return=): documented as List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], code has List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
-
-# TODO
-Method not implemented: Page.is_editable
-Method not implemented: ElementHandle.is_hidden
-Method not implemented: Page.is_enabled
-Method not implemented: ElementHandle.is_enabled
-Method not implemented: Page.is_disabled
-Parameter type mismatch in ElementHandle.wait_for_element_state(state=): documented as Union["disabled", "editable", "enabled", "hidden", "stable", "visible"], code has Union["disabled", "enabled", "hidden", "stable", "visible"]
-Method not implemented: Frame.is_hidden
-Method not implemented: ElementHandle.is_visible
-Method not implemented: Page.is_hidden
-Method not implemented: ElementHandle.is_editable
-Method not implemented: Frame.is_disabled
-Method not implemented: Frame.is_visible
-Method not implemented: ElementHandle.is_disabled
-Method not implemented: Frame.is_enabled
-Method not implemented: Page.is_visible
-Method not implemented: Frame.is_editable
-Method not implemented: Page.is_checked
-Method not implemented: ElementHandle.is_checked
-Method not implemented: Frame.is_checked

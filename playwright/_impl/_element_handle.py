@@ -67,6 +67,24 @@ class ElementHandle(JSHandle):
     async def inner_html(self) -> str:
         return await self._channel.send("innerHTML")
 
+    async def is_checked(self) -> bool:
+        return await self._channel.send("isChecked")
+
+    async def is_disabled(self) -> bool:
+        return await self._channel.send("isDisabled")
+
+    async def is_editable(self) -> bool:
+        return await self._channel.send("isEditable")
+
+    async def is_enabled(self) -> bool:
+        return await self._channel.send("isEnabled")
+
+    async def is_hidden(self) -> bool:
+        return await self._channel.send("isHidden")
+
+    async def is_visible(self) -> bool:
+        return await self._channel.send("isVisible")
+
     async def dispatch_event(self, type: str, eventInit: Dict = None) -> None:
         await self._channel.send(
             "dispatchEvent", dict(type=type, eventInit=serialize_argument(eventInit))
@@ -260,7 +278,9 @@ class ElementHandle(JSHandle):
 
     async def wait_for_element_state(
         self,
-        state: Literal["disabled", "enabled", "hidden", "stable", "visible"],
+        state: Literal[
+            "disabled", "editable", "enabled", "hidden", "stable", "visible"
+        ],
         timeout: float = None,
     ) -> None:
         await self._channel.send("waitForElementState", locals_to_params(locals()))

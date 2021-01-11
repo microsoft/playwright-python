@@ -14,6 +14,8 @@
 
 import asyncio
 
+import pytest
+
 from playwright.async_api import Error
 
 
@@ -276,44 +278,35 @@ async def test_click_throw_for_detached_nodes(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
     await page.evaluate("button => button.remove()", button)
-    error = None
-    try:
+    with pytest.raises(Error) as exc_info:
         await button.click()
-    except Error as e:
-        error = e
-    assert "Element is not attached to the DOM" in error.message
+    assert "Element is not attached to the DOM" in exc_info.value.message
 
 
 async def test_click_throw_for_hidden_nodes_with_force(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
     await page.evaluate('button => button.style.display = "none"', button)
-    try:
+    with pytest.raises(Error) as exc_info:
         await button.click(force=True)
-    except Error as e:
-        error = e
-    assert "Element is not visible" in error.message
+    assert "Element is not visible" in exc_info.value.message
 
 
 async def test_click_throw_for_recursively_hidden_nodes_with_force(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
     await page.evaluate('button => button.parentElement.style.display = "none"', button)
-    try:
+    with pytest.raises(Error) as exc_info:
         await button.click(force=True)
-    except Error as e:
-        error = e
-    assert "Element is not visible" in error.message
+    assert "Element is not visible" in exc_info.value.message
 
 
 async def test_click_throw_for__br__elements_with_force(page, server):
     await page.set_content("hello<br>goodbye")
     br = await page.query_selector("br")
-    try:
+    with pytest.raises(Error) as exc_info:
         await br.click(force=True)
-    except Error as e:
-        error = e
-    assert "Element is outside of the viewport" in error.message
+    assert "Element is outside of the viewport" in exc_info.value.message
 
 
 async def test_double_click_the_button(page, server):
@@ -378,11 +371,9 @@ async def test_scroll_should_throw_for_detached_element(page, server):
     await page.set_content("<div>Hello</div>")
     div = await page.query_selector("div")
     await div.evaluate("div => div.remove()")
-    try:
+    with pytest.raises(Error) as exc_info:
         await div.scroll_into_view_if_needed()
-    except Error as e:
-        error = e
-    assert "Element is not attached to the DOM" in error.message
+    assert "Element is not attached to the DOM" in exc_info.value.message
 
 
 async def waiting_helper(page, after):
@@ -431,11 +422,9 @@ async def test_should_wait_for_nested_display_none_to_become_visible(page):
 async def test_should_timeout_waiting_for_visible(page):
     await page.set_content('<div style="display:none">Hello</div>')
     div = await page.query_selector("div")
-    try:
-        error = await div.scroll_into_view_if_needed(timeout=3000)
-    except Error as e:
-        error = e
-    assert "element is not visible" in error.message
+    with pytest.raises(Error) as exc_info:
+        await div.scroll_into_view_if_needed(timeout=3000)
+    assert "element is not visible" in exc_info.value.message
 
 
 async def test_fill_input(page, server):
@@ -494,11 +483,9 @@ async def test_select_text_timeout_waiting_for_invisible_element(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
     await textarea.evaluate('e => e.style.display = "none"')
-    try:
+    with pytest.raises(Error) as exc_info:
         await textarea.select_text(timeout=3000)
-    except Error as e:
-        error = e
-    assert "element is not visible" in error.message
+    assert "element is not visible" in exc_info.value.message
 
 
 async def test_select_text_wait_for_visible(page, server):
@@ -559,19 +546,14 @@ async def test_inner_text(page, server):
 
 async def test_inner_text_should_throw(page, server):
     await page.set_content("<svg>text</svg>")
-    error1 = None
-    try:
+    with pytest.raises(Error) as exc_info1:
         await page.inner_text("svg")
-    except Error as e:
-        error1 = e
-    assert "Not an HTMLElement" in error1.message
+    assert "Not an HTMLElement" in exc_info1.value.message
+
     handle = await page.query_selector("svg")
-    error2 = None
-    try:
+    with pytest.raises(Error) as exc_info2:
         await handle.inner_text()
-    except Error as e:
-        error2 = e
-    assert "Not an HTMLElement" in error2.message
+    assert "Not an HTMLElement" in exc_info2.value.message
 
 
 async def test_text_content(page, server):
@@ -609,3 +591,71 @@ async def test_focus_a_button(page, server):
     assert await button.evaluate("button => document.activeElement === button") is False
     await button.focus()
     assert await button.evaluate("button => document.activeElement === button")
+
+
+async def test_is_visible_and_is_hidden_should_work(page):
+    await page.set_content("<div>Hi</div><span></span>")
+    div = await page.query_selector("div")
+    assert await div.is_visible()
+    assert await div.is_hidden() is False
+    assert await page.is_visible("div")
+    assert await page.is_hidden("div") is False
+    span = await page.query_selector("span")
+    assert await span.is_visible() is False
+    assert await span.is_hidden()
+    assert await page.is_visible("span") is False
+    assert await page.is_hidden("span")
+
+
+async def test_is_enabled_and_is_disabled_should_work(page):
+    await page.set_content(
+        """
+        <button disabled>button1</button>
+        <button>button2</button>
+        <div>div</div>
+    """
+    )
+    div = await page.query_selector("div")
+    assert await div.is_enabled()
+    assert await div.is_disabled() is False
+    assert await page.is_enabled("div")
+    assert await page.is_disabled("div") is False
+    button1 = await page.query_selector(":text('button1')")
+    assert await button1.is_enabled() is False
+    assert await button1.is_disabled()
+    assert await page.is_enabled(":text('button1')") is False
+    assert await page.is_disabled(":text('button1')")
+    button2 = await page.query_selector(":text('button2')")
+    assert await button2.is_enabled()
+    assert await button2.is_disabled() is False
+    assert await page.is_enabled(":text('button2')")
+    assert await page.is_disabled(":text('button2')") is False
+
+
+async def test_is_editable_should_work(page):
+    await page.set_content(
+        "<input id=input1 disabled><textarea></textarea><input id=input2>"
+    )
+    await page.eval_on_selector("textarea", "t => t.readOnly = true")
+    input1 = await page.query_selector("#input1")
+    assert await input1.is_editable() is False
+    assert await page.is_editable("#input1") is False
+    input2 = await page.query_selector("#input2")
+    assert await input2.is_editable()
+    assert await page.is_editable("#input2")
+    textarea = await page.query_selector("textarea")
+    assert await textarea.is_editable() is False
+    assert await page.is_editable("textarea") is False
+
+
+async def test_is_checked_should_work(page):
+    await page.set_content('<input type="checkbox" checked><div>Not a checkbox</div>')
+    handle = await page.query_selector("input")
+    assert await handle.is_checked()
+    assert await page.is_checked("input")
+    await handle.evaluate("input => input.checked = false")
+    assert await handle.is_checked() is False
+    assert await page.is_checked("input") is False
+    with pytest.raises(Error) as exc_info:
+        await page.is_checked("div")
+    assert "Not a checkbox or radio button" in exc_info.value.message

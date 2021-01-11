@@ -24,7 +24,6 @@ from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 from playwright._impl._path_utils import get_file_dirname
 
 from .server import test_server
-from .utils import utils as utils_object
 
 _dirname = get_file_dirname()
 
@@ -68,11 +67,6 @@ def https_server():
 @pytest.fixture
 def ws_server():
     yield test_server.ws_server
-
-
-@pytest.fixture
-def utils():
-    yield utils_object
 
 
 @pytest.fixture(autouse=True, scope="session")
