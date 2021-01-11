@@ -16,6 +16,13 @@ import pytest
 
 from playwright.async_api import async_playwright
 
+from .utils import utils as utils_object
+
+
+@pytest.fixture
+def utils():
+    yield utils_object
+
 
 # Will mark all the tests as async
 def pytest_collection_modifyitems(items):

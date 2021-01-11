@@ -15,16 +15,19 @@
 import re
 from typing import List, cast
 
-from playwright._impl._api_types import Error
-from playwright._impl._element_handle import ElementHandle
-from playwright._impl._frame import Frame
-from playwright._impl._page import Page
-from playwright._impl._selectors import Selectors
+from playwright.sync_api import (
+    ElementHandle,
+    Error,
+    Frame,
+    Page,
+    Selectors,
+    ViewportSize,
+)
 
 
 class Utils:
-    async def attach_frame(self, page: Page, frame_id: str, url: str):
-        handle = await page.evaluate_handle(
+    def attach_frame(self, page: Page, frame_id: str, url: str):
+        handle = page.evaluate_handle(
             """async ({ frame_id, url }) => {
                 const frame = document.createElement('iframe');
                 frame.src = url;
@@ -35,10 +38,10 @@ class Utils:
             }""",
             {"frame_id": frame_id, "url": url},
         )
-        return await cast(ElementHandle, handle.as_element()).content_frame()
+        return cast(ElementHandle, handle.as_element()).content_frame()
 
-    async def detach_frame(self, page: Page, frame_id: str):
-        await page.evaluate(
+    def detach_frame(self, page: Page, frame_id: str):
+        page.evaluate(
             "frame_id => document.getElementById(frame_id).remove()", frame_id
         )
 
@@ -55,17 +58,15 @@ class Utils:
             result = result + utils.dump_frames(child, "    " + indentation)
         return result
 
-    async def verify_viewport(self, page: Page, width: int, height: int):
-        assert page.viewport_size()["width"] == width
-        assert page.viewport_size()["height"] == height
-        assert await page.evaluate("window.innerWidth") == width
-        assert await page.evaluate("window.innerHeight") == height
+    def verify_viewport(self, page: Page, width: int, height: int):
+        assert cast(ViewportSize, page.viewport_size())["width"] == width
+        assert cast(ViewportSize, page.viewport_size())["height"] == height
+        assert page.evaluate("window.innerWidth") == width
+        assert page.evaluate("window.innerHeight") == height
 
-    async def register_selector_engine(
-        self, selectors: Selectors, *args, **kwargs
-    ) -> None:
+    def register_selector_engine(self, selectors: Selectors, *args, **kwargs) -> None:
         try:
-            await selectors.register(*args, **kwargs)
+            selectors.register(*args, **kwargs)
         except Error as exc:
             if "has been already registered" not in exc.message:
                 raise exc

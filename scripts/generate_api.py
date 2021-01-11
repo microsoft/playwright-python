@@ -50,6 +50,7 @@ from playwright._impl._video import Video
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
+    value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)
     value = re.sub(r"playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:

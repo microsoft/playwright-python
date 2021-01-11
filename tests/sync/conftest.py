@@ -17,6 +17,13 @@ import pytest
 
 from playwright.sync_api import sync_playwright
 
+from .utils import utils as utils_object
+
+
+@pytest.fixture
+def utils():
+    yield utils_object
+
 
 @pytest.fixture(scope="session")
 def playwright():

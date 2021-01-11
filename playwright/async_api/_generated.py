@@ -241,7 +241,7 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
     @property
-    def timing(self) -> "ResourceTiming":
+    def timing(self) -> ResourceTiming:
         """Request.timing
 
         Returns resource timing information for given request. Most of the timing values become available upon the response,
@@ -1403,6 +1403,120 @@ class ElementHandle(JSHandle):
             log_api("<= element_handle.inner_html failed")
             raise e
 
+    async def is_checked(self) -> bool:
+        """ElementHandle.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> element_handle.is_checked started")
+            result = mapping.from_maybe_impl(await self._impl_obj.is_checked())
+            log_api("<= element_handle.is_checked succeded")
+            return result
+        except Exception as e:
+            log_api("<= element_handle.is_checked failed")
+            raise e
+
+    async def is_disabled(self) -> bool:
+        """ElementHandle.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> element_handle.is_disabled started")
+            result = mapping.from_maybe_impl(await self._impl_obj.is_disabled())
+            log_api("<= element_handle.is_disabled succeded")
+            return result
+        except Exception as e:
+            log_api("<= element_handle.is_disabled failed")
+            raise e
+
+    async def is_editable(self) -> bool:
+        """ElementHandle.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> element_handle.is_editable started")
+            result = mapping.from_maybe_impl(await self._impl_obj.is_editable())
+            log_api("<= element_handle.is_editable succeded")
+            return result
+        except Exception as e:
+            log_api("<= element_handle.is_editable failed")
+            raise e
+
+    async def is_enabled(self) -> bool:
+        """ElementHandle.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> element_handle.is_enabled started")
+            result = mapping.from_maybe_impl(await self._impl_obj.is_enabled())
+            log_api("<= element_handle.is_enabled succeded")
+            return result
+        except Exception as e:
+            log_api("<= element_handle.is_enabled failed")
+            raise e
+
+    async def is_hidden(self) -> bool:
+        """ElementHandle.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> element_handle.is_hidden started")
+            result = mapping.from_maybe_impl(await self._impl_obj.is_hidden())
+            log_api("<= element_handle.is_hidden succeded")
+            return result
+        except Exception as e:
+            log_api("<= element_handle.is_hidden failed")
+            raise e
+
+    async def is_visible(self) -> bool:
+        """ElementHandle.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> element_handle.is_visible started")
+            result = mapping.from_maybe_impl(await self._impl_obj.is_visible())
+            log_api("<= element_handle.is_visible succeded")
+            return result
+        except Exception as e:
+            log_api("<= element_handle.is_visible failed")
+            raise e
+
     async def dispatch_event(
         self, type: str, event_init: typing.Dict = None
     ) -> NoneType:
@@ -1480,7 +1594,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -> NoneType:
@@ -1530,7 +1644,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         click_count: int = None,
@@ -1601,7 +1715,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
@@ -1730,7 +1844,7 @@ class ElementHandle(JSHandle):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -1850,9 +1964,9 @@ class ElementHandle(JSHandle):
         files: typing.Union[
             str,
             pathlib.Path,
-            "FilePayload",
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List["FilePayload"],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -2094,7 +2208,7 @@ class ElementHandle(JSHandle):
             log_api("<= element_handle.uncheck failed")
             raise e
 
-    async def bounding_box(self) -> typing.Union["FloatRect", NoneType]:
+    async def bounding_box(self) -> typing.Union[FloatRect, NoneType]:
         """ElementHandle.bounding_box
 
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -2351,7 +2465,9 @@ class ElementHandle(JSHandle):
 
     async def wait_for_element_state(
         self,
-        state: Literal["disabled", "enabled", "hidden", "stable", "visible"],
+        state: Literal[
+            "disabled", "editable", "enabled", "hidden", "stable", "visible"
+        ],
         timeout: float = None,
     ) -> NoneType:
         """ElementHandle.wait_for_element_state
@@ -2373,7 +2489,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        state : Union["disabled", "enabled", "hidden", "stable", "visible"]
+        state : Union["disabled", "editable", "enabled", "hidden", "stable", "visible"]
             A state to wait for, see below for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -2542,9 +2658,9 @@ class FileChooser(AsyncBase):
         files: typing.Union[
             str,
             pathlib.Path,
-            "FilePayload",
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List["FilePayload"],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -3037,6 +3153,186 @@ class Frame(AsyncBase):
             log_api("<= frame.wait_for_selector failed")
             raise e
 
+    async def is_checked(self, selector: str, timeout: float = None) -> bool:
+        """Frame.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> frame.is_checked started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_checked(selector=selector, timeout=timeout)
+            )
+            log_api("<= frame.is_checked succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.is_checked failed")
+            raise e
+
+    async def is_disabled(self, selector: str, timeout: float = None) -> bool:
+        """Frame.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> frame.is_disabled started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+            )
+            log_api("<= frame.is_disabled succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.is_disabled failed")
+            raise e
+
+    async def is_editable(self, selector: str, timeout: float = None) -> bool:
+        """Frame.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> frame.is_editable started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_editable(selector=selector, timeout=timeout)
+            )
+            log_api("<= frame.is_editable succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.is_editable failed")
+            raise e
+
+    async def is_enabled(self, selector: str, timeout: float = None) -> bool:
+        """Frame.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> frame.is_enabled started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+            )
+            log_api("<= frame.is_enabled succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.is_enabled failed")
+            raise e
+
+    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+        """Frame.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> frame.is_hidden started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_hidden(selector=selector, timeout=timeout)
+            )
+            log_api("<= frame.is_hidden succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.is_hidden failed")
+            raise e
+
+    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+        """Frame.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> frame.is_visible started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_visible(selector=selector, timeout=timeout)
+            )
+            log_api("<= frame.is_visible succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.is_visible failed")
+            raise e
+
     async def dispatch_event(
         self,
         selector: str,
@@ -3364,7 +3660,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         click_count: int = None,
@@ -3440,7 +3736,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
@@ -3515,7 +3811,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -3784,7 +4080,7 @@ class Frame(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -> NoneType:
@@ -3905,9 +4201,9 @@ class Frame(AsyncBase):
         files: typing.Union[
             str,
             pathlib.Path,
-            "FilePayload",
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List["FilePayload"],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -4571,7 +4867,7 @@ class ConsoleMessage(AsyncBase):
         return mapping.from_impl_list(self._impl_obj.args)
 
     @property
-    def location(self) -> "SourceLocation":
+    def location(self) -> SourceLocation:
         """ConsoleMessage.location
 
         Returns
@@ -5156,6 +5452,186 @@ class Page(AsyncBase):
             return result
         except Exception as e:
             log_api("<= page.wait_for_selector failed")
+            raise e
+
+    async def is_checked(self, selector: str, timeout: float = None) -> bool:
+        """Page.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> page.is_checked started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_checked(selector=selector, timeout=timeout)
+            )
+            log_api("<= page.is_checked succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.is_checked failed")
+            raise e
+
+    async def is_disabled(self, selector: str, timeout: float = None) -> bool:
+        """Page.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> page.is_disabled started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+            )
+            log_api("<= page.is_disabled succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.is_disabled failed")
+            raise e
+
+    async def is_editable(self, selector: str, timeout: float = None) -> bool:
+        """Page.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> page.is_editable started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_editable(selector=selector, timeout=timeout)
+            )
+            log_api("<= page.is_editable succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.is_editable failed")
+            raise e
+
+    async def is_enabled(self, selector: str, timeout: float = None) -> bool:
+        """Page.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> page.is_enabled started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+            )
+            log_api("<= page.is_enabled succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.is_enabled failed")
+            raise e
+
+    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+        """Page.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> page.is_hidden started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_hidden(selector=selector, timeout=timeout)
+            )
+            log_api("<= page.is_hidden succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.is_hidden failed")
+            raise e
+
+    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+        """Page.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> page.is_visible started")
+            result = mapping.from_maybe_impl(
+                await self._impl_obj.is_visible(selector=selector, timeout=timeout)
+            )
+            log_api("<= page.is_visible succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.is_visible failed")
             raise e
 
     async def dispatch_event(
@@ -6094,7 +6570,7 @@ class Page(AsyncBase):
             log_api("<= page.emulate_media failed")
             raise e
 
-    async def set_viewport_size(self, viewport_size: "ViewportSize") -> NoneType:
+    async def set_viewport_size(self, viewport_size: ViewportSize) -> NoneType:
         """Page.set_viewport_size
 
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
@@ -6119,7 +6595,7 @@ class Page(AsyncBase):
             log_api("<= page.set_viewport_size failed")
             raise e
 
-    def viewport_size(self) -> typing.Union["ViewportSize", NoneType]:
+    def viewport_size(self) -> typing.Union[ViewportSize, NoneType]:
         """Page.viewport_size
 
         Returns
@@ -6276,7 +6752,7 @@ class Page(AsyncBase):
         quality: int = None,
         omit_background: bool = None,
         full_page: bool = None,
-        clip: "FloatRect" = None,
+        clip: FloatRect = None,
     ) -> bytes:
         """Page.screenshot
 
@@ -6404,7 +6880,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         click_count: int = None,
@@ -6482,7 +6958,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
@@ -6559,7 +7035,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -6834,7 +7310,7 @@ class Page(AsyncBase):
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
-        position: "Position" = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -> NoneType:
@@ -6960,9 +7436,9 @@ class Page(AsyncBase):
         files: typing.Union[
             str,
             pathlib.Path,
-            "FilePayload",
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List["FilePayload"],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -7333,7 +7809,7 @@ class Page(AsyncBase):
         width: typing.Union[str, float] = None,
         height: typing.Union[str, float] = None,
         prefer_css_page_size: bool = None,
-        margin: "PdfMargins" = None,
+        margin: PdfMargins = None,
         path: typing.Union[str, pathlib.Path] = None,
     ) -> bytes:
         """Page.pdf
@@ -7906,7 +8382,7 @@ class BrowserContext(AsyncBase):
 
     async def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
-    ) -> typing.List["Cookie"]:
+    ) -> typing.List[Cookie]:
         """BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -7931,7 +8407,7 @@ class BrowserContext(AsyncBase):
             log_api("<= browser_context.cookies failed")
             raise e
 
-    async def add_cookies(self, cookies: typing.List["Cookie"]) -> NoneType:
+    async def add_cookies(self, cookies: typing.List[Cookie]) -> NoneType:
         """BrowserContext.add_cookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -8028,7 +8504,7 @@ class BrowserContext(AsyncBase):
             log_api("<= browser_context.clear_permissions failed")
             raise e
 
-    async def set_geolocation(self, geolocation: "Geolocation" = None) -> NoneType:
+    async def set_geolocation(self, geolocation: Geolocation = None) -> NoneType:
         """BrowserContext.set_geolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -8348,7 +8824,7 @@ class BrowserContext(AsyncBase):
 
     async def storage_state(
         self, path: typing.Union[str, pathlib.Path] = None
-    ) -> "StorageState":
+    ) -> StorageState:
         """BrowserContext.storage_state
 
         Returns storage state for this browser context, contains current cookies and local storage snapshot.
@@ -8618,7 +9094,7 @@ class Browser(AsyncBase):
 
     async def new_context(
         self,
-        viewport: "ViewportSize" = None,
+        viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -8626,23 +9102,23 @@ class Browser(AsyncBase):
         user_agent: str = None,
         locale: str = None,
         timezone_id: str = None,
-        geolocation: "Geolocation" = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
-        proxy: "ProxySettings" = None,
+        proxy: ProxySettings = None,
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: "ViewportSize" = None,
-        storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
+        record_video_size: ViewportSize = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -8752,7 +9228,7 @@ class Browser(AsyncBase):
 
     async def new_page(
         self,
-        viewport: "ViewportSize" = None,
+        viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -8760,23 +9236,23 @@ class Browser(AsyncBase):
         user_agent: str = None,
         locale: str = None,
         timezone_id: str = None,
-        geolocation: "Geolocation" = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
-        proxy: "ProxySettings" = None,
+        proxy: ProxySettings = None,
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: "ViewportSize" = None,
-        storage_state: typing.Union["StorageState", str, pathlib.Path] = None,
+        record_video_size: ViewportSize = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -> "Page":
         """Browser.new_page
 
@@ -8953,7 +9429,7 @@ class BrowserType(AsyncBase):
         env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: "ProxySettings" = None,
+        proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
         chromium_sandbox: bool = None,
@@ -9071,10 +9547,10 @@ class BrowserType(AsyncBase):
         env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: "ProxySettings" = None,
+        proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
-        viewport: "ViewportSize" = None,
+        viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -9082,11 +9558,11 @@ class BrowserType(AsyncBase):
         user_agent: str = None,
         locale: str = None,
         timezone_id: str = None,
-        geolocation: "Geolocation" = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: "HttpCredentials" = None,
+        http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -9096,7 +9572,7 @@ class BrowserType(AsyncBase):
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: "ViewportSize" = None,
+        record_video_size: ViewportSize = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 

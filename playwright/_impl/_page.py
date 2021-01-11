@@ -360,6 +360,24 @@ class Page(ChannelOwner):
     ) -> Optional[ElementHandle]:
         return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
 
+    async def is_checked(self, selector: str, timeout: float = None) -> bool:
+        return await self._main_frame.is_checked(**locals_to_params(locals()))
+
+    async def is_disabled(self, selector: str, timeout: float = None) -> bool:
+        return await self._main_frame.is_disabled(**locals_to_params(locals()))
+
+    async def is_editable(self, selector: str, timeout: float = None) -> bool:
+        return await self._main_frame.is_editable(**locals_to_params(locals()))
+
+    async def is_enabled(self, selector: str, timeout: float = None) -> bool:
+        return await self._main_frame.is_enabled(**locals_to_params(locals()))
+
+    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+        return await self._main_frame.is_hidden(**locals_to_params(locals()))
+
+    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+        return await self._main_frame.is_visible(**locals_to_params(locals()))
+
     async def dispatch_event(
         self, selector: str, type: str, eventInit: Dict = None, timeout: float = None
     ) -> None:
