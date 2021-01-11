@@ -430,7 +430,7 @@ Playwright will discard them as well for an easier to process tree, unless <code
 
     def new_context(
         self,
-        viewport: &#34;ViewportSize&#34; = None,
+        viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -438,23 +438,23 @@ Playwright will discard them as well for an easier to process tree, unless <code
         user_agent: str = None,
         locale: str = None,
         timezone_id: str = None,
-        geolocation: &#34;Geolocation&#34; = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: &#34;HttpCredentials&#34; = None,
+        http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
-        proxy: &#34;ProxySettings&#34; = None,
+        proxy: ProxySettings = None,
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: &#34;ViewportSize&#34; = None,
-        storage_state: typing.Union[&#34;StorageState&#34;, str, pathlib.Path] = None,
+        record_video_size: ViewportSize = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;Browser.new_context
 
@@ -566,7 +566,7 @@ Playwright will discard them as well for an easier to process tree, unless <code
 
     def new_page(
         self,
-        viewport: &#34;ViewportSize&#34; = None,
+        viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -574,23 +574,23 @@ Playwright will discard them as well for an easier to process tree, unless <code
         user_agent: str = None,
         locale: str = None,
         timezone_id: str = None,
-        geolocation: &#34;Geolocation&#34; = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: &#34;HttpCredentials&#34; = None,
+        http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
-        proxy: &#34;ProxySettings&#34; = None,
+        proxy: ProxySettings = None,
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: &#34;ViewportSize&#34; = None,
-        storage_state: typing.Union[&#34;StorageState&#34;, str, pathlib.Path] = None,
+        record_video_size: ViewportSize = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
     ) -&gt; &#34;Page&#34;:
         &#34;&#34;&#34;Browser.new_page
 
@@ -859,7 +859,7 @@ browser server.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.new_context"><code class="name flex">
-<span>def <span class="ident">new_context</span></span>(<span>self, viewport: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a> = None, no_viewport: bool = None, ignore_https_errors: bool = None, java_script_enabled: bool = None, bypass_csp: bool = None, user_agent: str = None, locale: str = None, timezone_id: str = None, geolocation: <a title="playwright.sync_api.Geolocation" href="#playwright.sync_api.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extra_http_headers: Dict[str, str] = None, offline: bool = None, http_credentials: <a title="playwright.sync_api.HttpCredentials" href="#playwright.sync_api.HttpCredentials">HttpCredentials</a> = None, device_scale_factor: float = None, is_mobile: bool = None, has_touch: bool = None, color_scheme: Literal['dark', 'light', 'no-preference'] = None, accept_downloads: bool = None, default_browser_type: str = None, proxy: <a title="playwright.sync_api.ProxySettings" href="#playwright.sync_api.ProxySettings">ProxySettings</a> = None, record_har_path: Union[str, pathlib.Path] = None, record_har_omit_content: bool = None, record_video_dir: Union[str, pathlib.Path] = None, record_video_size: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a> = None, storage_state: Union[ForwardRef('<a title="playwright.sync_api.StorageState" href="#playwright.sync_api.StorageState">StorageState</a>'), str, pathlib.Path] = None) ‑> playwright.sync_api._generated.BrowserContext</span>
+<span>def <span class="ident">new_context</span></span>(<span>self, viewport: playwright._impl._api_structures.ViewportSize = None, no_viewport: bool = None, ignore_https_errors: bool = None, java_script_enabled: bool = None, bypass_csp: bool = None, user_agent: str = None, locale: str = None, timezone_id: str = None, geolocation: playwright._impl._api_structures.Geolocation = None, permissions: List[str] = None, extra_http_headers: Dict[str, str] = None, offline: bool = None, http_credentials: playwright._impl._api_structures.HttpCredentials = None, device_scale_factor: float = None, is_mobile: bool = None, has_touch: bool = None, color_scheme: Literal['dark', 'light', 'no-preference'] = None, accept_downloads: bool = None, default_browser_type: str = None, proxy: playwright._impl._api_structures.ProxySettings = None, record_har_path: Union[str, pathlib.Path] = None, record_har_omit_content: bool = None, record_video_dir: Union[str, pathlib.Path] = None, record_video_size: playwright._impl._api_structures.ViewportSize = None, storage_state: Union[playwright._impl._api_structures.StorageState, str, pathlib.Path] = None) ‑> playwright.sync_api._generated.BrowserContext</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.new_context</p>
@@ -936,7 +936,7 @@ the following fields:</dd>
 </summary>
 <pre><code class="python">def new_context(
     self,
-    viewport: &#34;ViewportSize&#34; = None,
+    viewport: ViewportSize = None,
     no_viewport: bool = None,
     ignore_https_errors: bool = None,
     java_script_enabled: bool = None,
@@ -944,23 +944,23 @@ the following fields:</dd>
     user_agent: str = None,
     locale: str = None,
     timezone_id: str = None,
-    geolocation: &#34;Geolocation&#34; = None,
+    geolocation: Geolocation = None,
     permissions: typing.List[str] = None,
     extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
     offline: bool = None,
-    http_credentials: &#34;HttpCredentials&#34; = None,
+    http_credentials: HttpCredentials = None,
     device_scale_factor: float = None,
     is_mobile: bool = None,
     has_touch: bool = None,
     color_scheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     accept_downloads: bool = None,
     default_browser_type: str = None,
-    proxy: &#34;ProxySettings&#34; = None,
+    proxy: ProxySettings = None,
     record_har_path: typing.Union[str, pathlib.Path] = None,
     record_har_omit_content: bool = None,
     record_video_dir: typing.Union[str, pathlib.Path] = None,
-    record_video_size: &#34;ViewportSize&#34; = None,
-    storage_state: typing.Union[&#34;StorageState&#34;, str, pathlib.Path] = None,
+    record_video_size: ViewportSize = None,
+    storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;Browser.new_context
 
@@ -1072,7 +1072,7 @@ the following fields:</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Browser.new_page"><code class="name flex">
-<span>def <span class="ident">new_page</span></span>(<span>self, viewport: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a> = None, no_viewport: bool = None, ignore_https_errors: bool = None, java_script_enabled: bool = None, bypass_csp: bool = None, user_agent: str = None, locale: str = None, timezone_id: str = None, geolocation: <a title="playwright.sync_api.Geolocation" href="#playwright.sync_api.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extra_http_headers: Dict[str, str] = None, offline: bool = None, http_credentials: <a title="playwright.sync_api.HttpCredentials" href="#playwright.sync_api.HttpCredentials">HttpCredentials</a> = None, device_scale_factor: float = None, is_mobile: bool = None, has_touch: bool = None, color_scheme: Literal['dark', 'light', 'no-preference'] = None, accept_downloads: bool = None, default_browser_type: str = None, proxy: <a title="playwright.sync_api.ProxySettings" href="#playwright.sync_api.ProxySettings">ProxySettings</a> = None, record_har_path: Union[str, pathlib.Path] = None, record_har_omit_content: bool = None, record_video_dir: Union[str, pathlib.Path] = None, record_video_size: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a> = None, storage_state: Union[ForwardRef('<a title="playwright.sync_api.StorageState" href="#playwright.sync_api.StorageState">StorageState</a>'), str, pathlib.Path] = None) ‑> playwright.sync_api._generated.Page</span>
+<span>def <span class="ident">new_page</span></span>(<span>self, viewport: playwright._impl._api_structures.ViewportSize = None, no_viewport: bool = None, ignore_https_errors: bool = None, java_script_enabled: bool = None, bypass_csp: bool = None, user_agent: str = None, locale: str = None, timezone_id: str = None, geolocation: playwright._impl._api_structures.Geolocation = None, permissions: List[str] = None, extra_http_headers: Dict[str, str] = None, offline: bool = None, http_credentials: playwright._impl._api_structures.HttpCredentials = None, device_scale_factor: float = None, is_mobile: bool = None, has_touch: bool = None, color_scheme: Literal['dark', 'light', 'no-preference'] = None, accept_downloads: bool = None, default_browser_type: str = None, proxy: playwright._impl._api_structures.ProxySettings = None, record_har_path: Union[str, pathlib.Path] = None, record_har_omit_content: bool = None, record_video_dir: Union[str, pathlib.Path] = None, record_video_size: playwright._impl._api_structures.ViewportSize = None, storage_state: Union[playwright._impl._api_structures.StorageState, str, pathlib.Path] = None) ‑> playwright.sync_api._generated.Page</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Browser.new_page</p>
@@ -1152,7 +1152,7 @@ the following fields:</dd>
 </summary>
 <pre><code class="python">def new_page(
     self,
-    viewport: &#34;ViewportSize&#34; = None,
+    viewport: ViewportSize = None,
     no_viewport: bool = None,
     ignore_https_errors: bool = None,
     java_script_enabled: bool = None,
@@ -1160,23 +1160,23 @@ the following fields:</dd>
     user_agent: str = None,
     locale: str = None,
     timezone_id: str = None,
-    geolocation: &#34;Geolocation&#34; = None,
+    geolocation: Geolocation = None,
     permissions: typing.List[str] = None,
     extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
     offline: bool = None,
-    http_credentials: &#34;HttpCredentials&#34; = None,
+    http_credentials: HttpCredentials = None,
     device_scale_factor: float = None,
     is_mobile: bool = None,
     has_touch: bool = None,
     color_scheme: Literal[&#34;dark&#34;, &#34;light&#34;, &#34;no-preference&#34;] = None,
     accept_downloads: bool = None,
     default_browser_type: str = None,
-    proxy: &#34;ProxySettings&#34; = None,
+    proxy: ProxySettings = None,
     record_har_path: typing.Union[str, pathlib.Path] = None,
     record_har_omit_content: bool = None,
     record_video_dir: typing.Union[str, pathlib.Path] = None,
-    record_video_size: &#34;ViewportSize&#34; = None,
-    storage_state: typing.Union[&#34;StorageState&#34;, str, pathlib.Path] = None,
+    record_video_size: ViewportSize = None,
+    storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
 ) -&gt; &#34;Page&#34;:
     &#34;&#34;&#34;Browser.new_page
 
@@ -1409,7 +1409,7 @@ the following fields:</dd>
 
     def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
-    ) -&gt; typing.List[&#34;Cookie&#34;]:
+    ) -&gt; typing.List[Cookie]:
         &#34;&#34;&#34;BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -1436,7 +1436,7 @@ the following fields:</dd>
             log_api(&#34;&lt;= browser_context.cookies failed&#34;)
             raise e
 
-    def add_cookies(self, cookies: typing.List[&#34;Cookie&#34;]) -&gt; NoneType:
+    def add_cookies(self, cookies: typing.List[Cookie]) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.add_cookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -1537,7 +1537,7 @@ the following fields:</dd>
             log_api(&#34;&lt;= browser_context.clear_permissions failed&#34;)
             raise e
 
-    def set_geolocation(self, geolocation: &#34;Geolocation&#34; = None) -&gt; NoneType:
+    def set_geolocation(self, geolocation: Geolocation = None) -&gt; NoneType:
         &#34;&#34;&#34;BrowserContext.set_geolocation
 
         Sets the context&#39;s geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -1869,7 +1869,7 @@ the following fields:</dd>
 
     def storage_state(
         self, path: typing.Union[str, pathlib.Path] = None
-    ) -&gt; &#34;StorageState&#34;:
+    ) -&gt; StorageState:
         &#34;&#34;&#34;BrowserContext.storage_state
 
         Returns storage state for this browser context, contains current cookies and local storage snapshot.
@@ -2033,7 +2033,7 @@ def pages(self) -&gt; typing.List[&#34;Page&#34;]:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.BrowserContext.add_cookies"><code class="name flex">
-<span>def <span class="ident">add_cookies</span></span>(<span>self, cookies: List[ForwardRef('<a title="playwright.sync_api.Cookie" href="#playwright.sync_api.Cookie">Cookie</a>')]) ‑> NoneType</span>
+<span>def <span class="ident">add_cookies</span></span>(<span>self, cookies: List[playwright._impl._api_structures.Cookie]) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.add_cookies</p>
@@ -2048,7 +2048,7 @@ obtained via <code>browser_context.cookies()</code>.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_cookies(self, cookies: typing.List[&#34;Cookie&#34;]) -&gt; NoneType:
+<pre><code class="python">def add_cookies(self, cookies: typing.List[Cookie]) -&gt; NoneType:
     &#34;&#34;&#34;BrowserContext.add_cookies
 
     Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
@@ -2246,7 +2246,7 @@ are returned.</p>
 </summary>
 <pre><code class="python">def cookies(
     self, urls: typing.Union[str, typing.List[str]] = None
-) -&gt; typing.List[&#34;Cookie&#34;]:
+) -&gt; typing.List[Cookie]:
     &#34;&#34;&#34;BrowserContext.cookies
 
     If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
@@ -2874,7 +2874,7 @@ header, page-specific header value will be used instead of the browser context h
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserContext.set_geolocation"><code class="name flex">
-<span>def <span class="ident">set_geolocation</span></span>(<span>self, geolocation: <a title="playwright.sync_api.Geolocation" href="#playwright.sync_api.Geolocation">Geolocation</a> = None) ‑> NoneType</span>
+<span>def <span class="ident">set_geolocation</span></span>(<span>self, geolocation: playwright._impl._api_structures.Geolocation = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserContext.set_geolocation</p>
@@ -2892,7 +2892,7 @@ to read its geolocation.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_geolocation(self, geolocation: &#34;Geolocation&#34; = None) -&gt; NoneType:
+<pre><code class="python">def set_geolocation(self, geolocation: Geolocation = None) -&gt; NoneType:
     &#34;&#34;&#34;BrowserContext.set_geolocation
 
     Sets the context&#39;s geolocation. Passing `null` or `undefined` emulates position unavailable.
@@ -2973,7 +2973,7 @@ state is still returned, but won't be saved to the disk.</dd>
 </summary>
 <pre><code class="python">def storage_state(
     self, path: typing.Union[str, pathlib.Path] = None
-) -&gt; &#34;StorageState&#34;:
+) -&gt; StorageState:
     &#34;&#34;&#34;BrowserContext.storage_state
 
     Returns storage state for this browser context, contains current cookies and local storage snapshot.
@@ -3178,7 +3178,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
         env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: &#34;ProxySettings&#34; = None,
+        proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
         chromium_sandbox: bool = None,
@@ -3298,10 +3298,10 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
         env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
-        proxy: &#34;ProxySettings&#34; = None,
+        proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
-        viewport: &#34;ViewportSize&#34; = None,
+        viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -3309,11 +3309,11 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
         user_agent: str = None,
         locale: str = None,
         timezone_id: str = None,
-        geolocation: &#34;Geolocation&#34; = None,
+        geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
         extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
         offline: bool = None,
-        http_credentials: &#34;HttpCredentials&#34; = None,
+        http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
         is_mobile: bool = None,
         has_touch: bool = None,
@@ -3323,7 +3323,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: &#34;ViewportSize&#34; = None,
+        record_video_size: ViewportSize = None,
     ) -&gt; &#34;BrowserContext&#34;:
         &#34;&#34;&#34;BrowserType.launch_persistent_context
 
@@ -3546,7 +3546,7 @@ def name(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.BrowserType.launch"><code class="name flex">
-<span>def <span class="ident">launch</span></span>(<span>self, executable_path: Union[str, pathlib.Path] = None, args: List[str] = None, ignore_default_args: Union[bool, List[str]] = None, handle_sigint: bool = None, handle_sigterm: bool = None, handle_sighup: bool = None, timeout: float = None, env: Dict[str, Union[str, float, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.sync_api.ProxySettings" href="#playwright.sync_api.ProxySettings">ProxySettings</a> = None, downloads_path: Union[str, pathlib.Path] = None, slow_mo: float = None, chromium_sandbox: bool = None, firefox_user_prefs: Dict[str, Union[str, float, bool]] = None) ‑> playwright.sync_api._generated.Browser</span>
+<span>def <span class="ident">launch</span></span>(<span>self, executable_path: Union[str, pathlib.Path] = None, args: List[str] = None, ignore_default_args: Union[bool, List[str]] = None, handle_sigint: bool = None, handle_sigterm: bool = None, handle_sighup: bool = None, timeout: float = None, env: Dict[str, Union[str, float, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright._impl._api_structures.ProxySettings = None, downloads_path: Union[str, pathlib.Path] = None, slow_mo: float = None, chromium_sandbox: bool = None, firefox_user_prefs: Dict[str, Union[str, float, bool]] = None) ‑> playwright.sync_api._generated.Browser</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launch</p>
@@ -3630,7 +3630,7 @@ deleted when browser is closed.</dd>
     env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
     headless: bool = None,
     devtools: bool = None,
-    proxy: &#34;ProxySettings&#34; = None,
+    proxy: ProxySettings = None,
     downloads_path: typing.Union[str, pathlib.Path] = None,
     slow_mo: float = None,
     chromium_sandbox: bool = None,
@@ -3739,7 +3739,7 @@ deleted when browser is closed.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.BrowserType.launch_persistent_context"><code class="name flex">
-<span>def <span class="ident">launch_persistent_context</span></span>(<span>self, user_data_dir: Union[str, pathlib.Path], executable_path: Union[str, pathlib.Path] = None, args: List[str] = None, ignore_default_args: Union[bool, List[str]] = None, handle_sigint: bool = None, handle_sigterm: bool = None, handle_sighup: bool = None, timeout: float = None, env: Dict[str, Union[str, float, bool]] = None, headless: bool = None, devtools: bool = None, proxy: <a title="playwright.sync_api.ProxySettings" href="#playwright.sync_api.ProxySettings">ProxySettings</a> = None, downloads_path: Union[str, pathlib.Path] = None, slow_mo: float = None, viewport: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a> = None, no_viewport: bool = None, ignore_https_errors: bool = None, java_script_enabled: bool = None, bypass_csp: bool = None, user_agent: str = None, locale: str = None, timezone_id: str = None, geolocation: <a title="playwright.sync_api.Geolocation" href="#playwright.sync_api.Geolocation">Geolocation</a> = None, permissions: List[str] = None, extra_http_headers: Dict[str, str] = None, offline: bool = None, http_credentials: <a title="playwright.sync_api.HttpCredentials" href="#playwright.sync_api.HttpCredentials">HttpCredentials</a> = None, device_scale_factor: float = None, is_mobile: bool = None, has_touch: bool = None, color_scheme: Literal['dark', 'light', 'no-preference'] = None, accept_downloads: bool = None, chromium_sandbox: bool = None, record_har_path: Union[str, pathlib.Path] = None, record_har_omit_content: bool = None, record_video_dir: Union[str, pathlib.Path] = None, record_video_size: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a> = None) ‑> playwright.sync_api._generated.BrowserContext</span>
+<span>def <span class="ident">launch_persistent_context</span></span>(<span>self, user_data_dir: Union[str, pathlib.Path], executable_path: Union[str, pathlib.Path] = None, args: List[str] = None, ignore_default_args: Union[bool, List[str]] = None, handle_sigint: bool = None, handle_sigterm: bool = None, handle_sighup: bool = None, timeout: float = None, env: Dict[str, Union[str, float, bool]] = None, headless: bool = None, devtools: bool = None, proxy: playwright._impl._api_structures.ProxySettings = None, downloads_path: Union[str, pathlib.Path] = None, slow_mo: float = None, viewport: playwright._impl._api_structures.ViewportSize = None, no_viewport: bool = None, ignore_https_errors: bool = None, java_script_enabled: bool = None, bypass_csp: bool = None, user_agent: str = None, locale: str = None, timezone_id: str = None, geolocation: playwright._impl._api_structures.Geolocation = None, permissions: List[str] = None, extra_http_headers: Dict[str, str] = None, offline: bool = None, http_credentials: playwright._impl._api_structures.HttpCredentials = None, device_scale_factor: float = None, is_mobile: bool = None, has_touch: bool = None, color_scheme: Literal['dark', 'light', 'no-preference'] = None, accept_downloads: bool = None, chromium_sandbox: bool = None, record_har_path: Union[str, pathlib.Path] = None, record_har_omit_content: bool = None, record_video_dir: Union[str, pathlib.Path] = None, record_video_size: playwright._impl._api_structures.ViewportSize = None) ‑> playwright.sync_api._generated.BrowserContext</span>
 </code></dt>
 <dd>
 <div class="desc"><p>BrowserType.launch_persistent_context</p>
@@ -3864,10 +3864,10 @@ in Firefox.</dd>
     env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
     headless: bool = None,
     devtools: bool = None,
-    proxy: &#34;ProxySettings&#34; = None,
+    proxy: ProxySettings = None,
     downloads_path: typing.Union[str, pathlib.Path] = None,
     slow_mo: float = None,
-    viewport: &#34;ViewportSize&#34; = None,
+    viewport: ViewportSize = None,
     no_viewport: bool = None,
     ignore_https_errors: bool = None,
     java_script_enabled: bool = None,
@@ -3875,11 +3875,11 @@ in Firefox.</dd>
     user_agent: str = None,
     locale: str = None,
     timezone_id: str = None,
-    geolocation: &#34;Geolocation&#34; = None,
+    geolocation: Geolocation = None,
     permissions: typing.List[str] = None,
     extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
     offline: bool = None,
-    http_credentials: &#34;HttpCredentials&#34; = None,
+    http_credentials: HttpCredentials = None,
     device_scale_factor: float = None,
     is_mobile: bool = None,
     has_touch: bool = None,
@@ -3889,7 +3889,7 @@ in Firefox.</dd>
     record_har_path: typing.Union[str, pathlib.Path] = None,
     record_har_omit_content: bool = None,
     record_video_dir: typing.Union[str, pathlib.Path] = None,
-    record_video_size: &#34;ViewportSize&#34; = None,
+    record_video_size: ViewportSize = None,
 ) -&gt; &#34;BrowserContext&#34;:
     &#34;&#34;&#34;BrowserType.launch_persistent_context
 
@@ -4451,7 +4451,7 @@ send messages.</p></div>
         return mapping.from_impl_list(self._impl_obj.args)
 
     @property
-    def location(self) -&gt; &#34;SourceLocation&#34;:
+    def location(self) -&gt; SourceLocation:
         &#34;&#34;&#34;ConsoleMessage.location
 
         Returns
@@ -4500,7 +4500,7 @@ def args(self) -&gt; typing.List[&#34;JSHandle&#34;]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def location(self) -&gt; &#34;SourceLocation&#34;:
+def location(self) -&gt; SourceLocation:
     &#34;&#34;&#34;ConsoleMessage.location
 
     Returns
@@ -5359,6 +5359,120 @@ def url(self) -&gt; str:
             log_api(&#34;&lt;= element_handle.inner_html failed&#34;)
             raise e
 
+    def is_checked(self) -&gt; bool:
+        &#34;&#34;&#34;ElementHandle.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; element_handle.is_checked started&#34;)
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_checked()))
+            log_api(&#34;&lt;= element_handle.is_checked succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= element_handle.is_checked failed&#34;)
+            raise e
+
+    def is_disabled(self) -&gt; bool:
+        &#34;&#34;&#34;ElementHandle.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; element_handle.is_disabled started&#34;)
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_disabled()))
+            log_api(&#34;&lt;= element_handle.is_disabled succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= element_handle.is_disabled failed&#34;)
+            raise e
+
+    def is_editable(self) -&gt; bool:
+        &#34;&#34;&#34;ElementHandle.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; element_handle.is_editable started&#34;)
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_editable()))
+            log_api(&#34;&lt;= element_handle.is_editable succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= element_handle.is_editable failed&#34;)
+            raise e
+
+    def is_enabled(self) -&gt; bool:
+        &#34;&#34;&#34;ElementHandle.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; element_handle.is_enabled started&#34;)
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_enabled()))
+            log_api(&#34;&lt;= element_handle.is_enabled succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= element_handle.is_enabled failed&#34;)
+            raise e
+
+    def is_hidden(self) -&gt; bool:
+        &#34;&#34;&#34;ElementHandle.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; element_handle.is_hidden started&#34;)
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_hidden()))
+            log_api(&#34;&lt;= element_handle.is_hidden succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= element_handle.is_hidden failed&#34;)
+            raise e
+
+    def is_visible(self) -&gt; bool:
+        &#34;&#34;&#34;ElementHandle.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; element_handle.is_visible started&#34;)
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_visible()))
+            log_api(&#34;&lt;= element_handle.is_visible succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= element_handle.is_visible failed&#34;)
+            raise e
+
     def dispatch_event(self, type: str, event_init: typing.Dict = None) -&gt; NoneType:
         &#34;&#34;&#34;ElementHandle.dispatch_event
 
@@ -5436,7 +5550,7 @@ def url(self) -&gt; str:
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -&gt; NoneType:
@@ -5491,7 +5605,7 @@ def url(self) -&gt; str:
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         delay: float = None,
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         click_count: int = None,
@@ -5564,7 +5678,7 @@ def url(self) -&gt; str:
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         delay: float = None,
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: float = None,
@@ -5697,7 +5811,7 @@ def url(self) -&gt; str:
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -5821,9 +5935,9 @@ def url(self) -&gt; str:
         files: typing.Union[
             str,
             pathlib.Path,
-            &#34;FilePayload&#34;,
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[&#34;FilePayload&#34;],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -6078,7 +6192,7 @@ def url(self) -&gt; str:
             log_api(&#34;&lt;= element_handle.uncheck failed&#34;)
             raise e
 
-    def bounding_box(self) -&gt; typing.Union[&#34;FloatRect&#34;, NoneType]:
+    def bounding_box(self) -&gt; typing.Union[FloatRect, NoneType]:
         &#34;&#34;&#34;ElementHandle.bounding_box
 
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -6341,7 +6455,9 @@ def url(self) -&gt; str:
 
     def wait_for_element_state(
         self,
-        state: Literal[&#34;disabled&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;],
+        state: Literal[
+            &#34;disabled&#34;, &#34;editable&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;
+        ],
         timeout: float = None,
     ) -&gt; NoneType:
         &#34;&#34;&#34;ElementHandle.wait_for_element_state
@@ -6363,7 +6479,7 @@ def url(self) -&gt; str:
 
         Parameters
         ----------
-        state : Union[&#34;disabled&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;]
+        state : Union[&#34;disabled&#34;, &#34;editable&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;]
             A state to wait for, see below for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -6503,7 +6619,7 @@ snippet should click the center of the element.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def bounding_box(self) -&gt; typing.Union[&#34;FloatRect&#34;, NoneType]:
+<pre><code class="python">def bounding_box(self) -&gt; typing.Union[FloatRect, NoneType]:
     &#34;&#34;&#34;ElementHandle.bounding_box
 
     This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -6617,7 +6733,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, click_count: int = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, click_count: int = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.click</p>
@@ -6662,7 +6778,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     delay: float = None,
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     click_count: int = None,
@@ -6769,7 +6885,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.dblclick</p>
@@ -6816,7 +6932,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     delay: float = None,
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     timeout: float = None,
@@ -7285,7 +7401,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, timeout: float = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, timeout: float = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.hover</p>
@@ -7320,7 +7436,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     timeout: float = None,
     force: bool = None,
 ) -&gt; NoneType:
@@ -7438,6 +7554,216 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         return result
     except Exception as e:
         log_api(&#34;&lt;= element_handle.inner_text failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.ElementHandle.is_checked"><code class="name flex">
+<span>def <span class="ident">is_checked</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.is_checked</p>
+<p>Returns whether the element is checked. Throws if the element is not a checkbox or radio input.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_checked(self) -&gt; bool:
+    &#34;&#34;&#34;ElementHandle.is_checked
+
+    Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; element_handle.is_checked started&#34;)
+        result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_checked()))
+        log_api(&#34;&lt;= element_handle.is_checked succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= element_handle.is_checked failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.ElementHandle.is_disabled"><code class="name flex">
+<span>def <span class="ident">is_disabled</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.is_disabled</p>
+<p>Returns whether the element is disabled, the opposite of <a href="./actionability.md#enabled">enabled</a>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_disabled(self) -&gt; bool:
+    &#34;&#34;&#34;ElementHandle.is_disabled
+
+    Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; element_handle.is_disabled started&#34;)
+        result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_disabled()))
+        log_api(&#34;&lt;= element_handle.is_disabled succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= element_handle.is_disabled failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.ElementHandle.is_editable"><code class="name flex">
+<span>def <span class="ident">is_editable</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.is_editable</p>
+<p>Returns whether the element is <a href="./actionability.md#editable">editable</a>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_editable(self) -&gt; bool:
+    &#34;&#34;&#34;ElementHandle.is_editable
+
+    Returns whether the element is [editable](./actionability.md#editable).
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; element_handle.is_editable started&#34;)
+        result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_editable()))
+        log_api(&#34;&lt;= element_handle.is_editable succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= element_handle.is_editable failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.ElementHandle.is_enabled"><code class="name flex">
+<span>def <span class="ident">is_enabled</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.is_enabled</p>
+<p>Returns whether the element is <a href="./actionability.md#enabled">enabled</a>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_enabled(self) -&gt; bool:
+    &#34;&#34;&#34;ElementHandle.is_enabled
+
+    Returns whether the element is [enabled](./actionability.md#enabled).
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; element_handle.is_enabled started&#34;)
+        result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_enabled()))
+        log_api(&#34;&lt;= element_handle.is_enabled succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= element_handle.is_enabled failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.ElementHandle.is_hidden"><code class="name flex">
+<span>def <span class="ident">is_hidden</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.is_hidden</p>
+<p>Returns whether the element is hidden, the opposite of <a href="./actionability.md#visible">visible</a>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_hidden(self) -&gt; bool:
+    &#34;&#34;&#34;ElementHandle.is_hidden
+
+    Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; element_handle.is_hidden started&#34;)
+        result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_hidden()))
+        log_api(&#34;&lt;= element_handle.is_hidden succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= element_handle.is_hidden failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.ElementHandle.is_visible"><code class="name flex">
+<span>def <span class="ident">is_visible</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ElementHandle.is_visible</p>
+<p>Returns whether the element is <a href="./actionability.md#visible">visible</a>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_visible(self) -&gt; bool:
+    &#34;&#34;&#34;ElementHandle.is_visible
+
+    Returns whether the element is [visible](./actionability.md#visible).
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; element_handle.is_visible started&#34;)
+        result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_visible()))
+        log_api(&#34;&lt;= element_handle.is_visible succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= element_handle.is_visible failed&#34;)
         raise e</code></pre>
 </details>
 </dd>
@@ -7956,7 +8282,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.set_input_files"><code class="name flex">
-<span>def <span class="ident">set_input_files</span></span>(<span>self, files: Union[str, pathlib.Path, ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>'), List[Union[str, pathlib.Path]], List[ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>')]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">set_input_files</span></span>(<span>self, files: Union[str, pathlib.Path, playwright._impl._api_structures.FilePayload, List[Union[str, pathlib.Path]], List[playwright._impl._api_structures.FilePayload]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.set_input_files</p>
@@ -7985,9 +8311,9 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     files: typing.Union[
         str,
         pathlib.Path,
-        &#34;FilePayload&#34;,
+        FilePayload,
         typing.List[typing.Union[str, pathlib.Path]],
-        typing.List[&#34;FilePayload&#34;],
+        typing.List[FilePayload],
     ],
     timeout: float = None,
     no_wait_after: bool = None,
@@ -8029,7 +8355,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.tap"><code class="name flex">
-<span>def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">tap</span></span>(<span>self, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.tap</p>
@@ -8071,7 +8397,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     timeout: float = None,
     force: bool = None,
     no_wait_after: bool = None,
@@ -8321,7 +8647,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.ElementHandle.wait_for_element_state"><code class="name flex">
-<span>def <span class="ident">wait_for_element_state</span></span>(<span>self, state: Literal['disabled', 'enabled', 'hidden', 'stable', 'visible'], timeout: float = None) ‑> NoneType</span>
+<span>def <span class="ident">wait_for_element_state</span></span>(<span>self, state: Literal['disabled', 'editable', 'enabled', 'hidden', 'stable', 'visible'], timeout: float = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ElementHandle.wait_for_element_state</p>
@@ -8339,7 +8665,7 @@ This method throws when the element is detached while waiting, unless waiting fo
 <p>If the element does not satisfy the condition for the <code>timeout</code> milliseconds, this method will throw.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>state</code></strong> :&ensp;<code>Union["disabled", "enabled", "hidden", "stable", "visible"]</code></dt>
+<dt><strong><code>state</code></strong> :&ensp;<code>Union["disabled", "editable", "enabled", "hidden", "stable", "visible"]</code></dt>
 <dd>A state to wait for, see below for more details.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
 <dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
@@ -8351,7 +8677,9 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
 </summary>
 <pre><code class="python">def wait_for_element_state(
     self,
-    state: Literal[&#34;disabled&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;],
+    state: Literal[
+        &#34;disabled&#34;, &#34;editable&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;
+    ],
     timeout: float = None,
 ) -&gt; NoneType:
     &#34;&#34;&#34;ElementHandle.wait_for_element_state
@@ -8373,7 +8701,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
 
     Parameters
     ----------
-    state : Union[&#34;disabled&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;]
+    state : Union[&#34;disabled&#34;, &#34;editable&#34;, &#34;enabled&#34;, &#34;hidden&#34;, &#34;stable&#34;, &#34;visible&#34;]
         A state to wait for, see below for more details.
     timeout : Union[float, NoneType]
         Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8571,9 +8899,9 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         files: typing.Union[
             str,
             pathlib.Path,
-            &#34;FilePayload&#34;,
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[&#34;FilePayload&#34;],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -8699,7 +9027,7 @@ def page(self) -&gt; &#34;Page&#34;:
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.sync_api.FileChooser.set_files"><code class="name flex">
-<span>def <span class="ident">set_files</span></span>(<span>self, files: Union[str, pathlib.Path, ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>'), List[Union[str, pathlib.Path]], List[ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>')]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">set_files</span></span>(<span>self, files: Union[str, pathlib.Path, playwright._impl._api_structures.FilePayload, List[Union[str, pathlib.Path]], List[playwright._impl._api_structures.FilePayload]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>FileChooser.set_files</p>
@@ -8726,9 +9054,9 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     files: typing.Union[
         str,
         pathlib.Path,
-        &#34;FilePayload&#34;,
+        FilePayload,
         typing.List[typing.Union[str, pathlib.Path]],
-        typing.List[&#34;FilePayload&#34;],
+        typing.List[FilePayload],
     ],
     timeout: float = None,
     no_wait_after: bool = None,
@@ -9339,6 +9667,196 @@ dict(one=1, two=2)</p></div>
             log_api(&#34;&lt;= frame.wait_for_selector failed&#34;)
             raise e
 
+    def is_checked(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Frame.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; frame.is_checked started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_checked(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= frame.is_checked succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= frame.is_checked failed&#34;)
+            raise e
+
+    def is_disabled(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Frame.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; frame.is_disabled started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= frame.is_disabled succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= frame.is_disabled failed&#34;)
+            raise e
+
+    def is_editable(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Frame.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; frame.is_editable started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_editable(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= frame.is_editable succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= frame.is_editable failed&#34;)
+            raise e
+
+    def is_enabled(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Frame.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; frame.is_enabled started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= frame.is_enabled succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= frame.is_enabled failed&#34;)
+            raise e
+
+    def is_hidden(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Frame.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; frame.is_hidden started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
+            )
+            log_api(&#34;&lt;= frame.is_hidden succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= frame.is_hidden failed&#34;)
+            raise e
+
+    def is_visible(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Frame.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; frame.is_visible started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_visible(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= frame.is_visible succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= frame.is_visible failed&#34;)
+            raise e
+
     def dispatch_event(
         self,
         selector: str,
@@ -9678,7 +10196,7 @@ dict(one=1, two=2)</p></div>
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         delay: float = None,
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         click_count: int = None,
@@ -9756,7 +10274,7 @@ dict(one=1, two=2)</p></div>
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         delay: float = None,
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: float = None,
@@ -9833,7 +10351,7 @@ dict(one=1, two=2)</p></div>
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -10114,7 +10632,7 @@ dict(one=1, two=2)</p></div>
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -&gt; NoneType:
@@ -10239,9 +10757,9 @@ dict(one=1, two=2)</p></div>
         files: typing.Union[
             str,
             pathlib.Path,
-            &#34;FilePayload&#34;,
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[&#34;FilePayload&#34;],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -11104,7 +11622,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, click_count: int = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, click_count: int = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.click</p>
@@ -11154,7 +11672,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     delay: float = None,
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     click_count: int = None,
@@ -11263,7 +11781,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.dblclick</p>
@@ -11315,7 +11833,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     delay: float = None,
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     timeout: float = None,
@@ -12368,7 +12886,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, timeout: float = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, timeout: float = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.hover</p>
@@ -12408,7 +12926,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     timeout: float = None,
     force: bool = None,
 ) -&gt; NoneType:
@@ -12577,6 +13095,63 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         raise e</code></pre>
 </details>
 </dd>
+<dt id="playwright.sync_api.Frame.is_checked"><code class="name flex">
+<span>def <span class="ident">is_checked</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.is_checked</p>
+<p>Returns whether the element is checked. Throws if the element is not a checkbox or radio input.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_checked(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Frame.is_checked
+
+    Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; frame.is_checked started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_checked(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= frame.is_checked succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= frame.is_checked failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.Frame.is_detached"><code class="name flex">
 <span>def <span class="ident">is_detached</span></span>(<span>self) ‑> bool</span>
 </code></dt>
@@ -12609,6 +13184,289 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         return result
     except Exception as e:
         log_api(&#34;&lt;= frame.is_detached failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Frame.is_disabled"><code class="name flex">
+<span>def <span class="ident">is_disabled</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.is_disabled</p>
+<p>Returns whether the element is disabled, the opposite of <a href="./actionability.md#enabled">enabled</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_disabled(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Frame.is_disabled
+
+    Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; frame.is_disabled started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= frame.is_disabled succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= frame.is_disabled failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Frame.is_editable"><code class="name flex">
+<span>def <span class="ident">is_editable</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.is_editable</p>
+<p>Returns whether the element is <a href="./actionability.md#editable">editable</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_editable(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Frame.is_editable
+
+    Returns whether the element is [editable](./actionability.md#editable).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; frame.is_editable started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_editable(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= frame.is_editable succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= frame.is_editable failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Frame.is_enabled"><code class="name flex">
+<span>def <span class="ident">is_enabled</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.is_enabled</p>
+<p>Returns whether the element is <a href="./actionability.md#enabled">enabled</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_enabled(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Frame.is_enabled
+
+    Returns whether the element is [enabled](./actionability.md#enabled).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; frame.is_enabled started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= frame.is_enabled succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= frame.is_enabled failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Frame.is_hidden"><code class="name flex">
+<span>def <span class="ident">is_hidden</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.is_hidden</p>
+<p>Returns whether the element is hidden, the opposite of <a href="./actionability.md#visible">visible</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_hidden(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Frame.is_hidden
+
+    Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; frame.is_hidden started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
+        )
+        log_api(&#34;&lt;= frame.is_hidden succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= frame.is_hidden failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Frame.is_visible"><code class="name flex">
+<span>def <span class="ident">is_visible</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame.is_visible</p>
+<p>Returns whether the element is <a href="./actionability.md#visible">visible</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_visible(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Frame.is_visible
+
+    Returns whether the element is [visible](./actionability.md#visible).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; frame.is_visible started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_visible(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= frame.is_visible succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= frame.is_visible failed&#34;)
         raise e</code></pre>
 </details>
 </dd>
@@ -12992,7 +13850,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.set_input_files"><code class="name flex">
-<span>def <span class="ident">set_input_files</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>'), List[Union[str, pathlib.Path]], List[ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>')]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">set_input_files</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, playwright._impl._api_structures.FilePayload, List[Union[str, pathlib.Path]], List[playwright._impl._api_structures.FilePayload]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.set_input_files</p>
@@ -13025,9 +13883,9 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     files: typing.Union[
         str,
         pathlib.Path,
-        &#34;FilePayload&#34;,
+        FilePayload,
         typing.List[typing.Union[str, pathlib.Path]],
-        typing.List[&#34;FilePayload&#34;],
+        typing.List[FilePayload],
     ],
     timeout: float = None,
     no_wait_after: bool = None,
@@ -13075,7 +13933,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Frame.tap"><code class="name flex">
-<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.tap</p>
@@ -13122,7 +13980,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     timeout: float = None,
     force: bool = None,
     no_wait_after: bool = None,
@@ -15723,6 +16581,196 @@ modifier, modifier is pressed and being held while the subsequent key is being p
             log_api(&#34;&lt;= page.wait_for_selector failed&#34;)
             raise e
 
+    def is_checked(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Page.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; page.is_checked started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_checked(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= page.is_checked succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= page.is_checked failed&#34;)
+            raise e
+
+    def is_disabled(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Page.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; page.is_disabled started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= page.is_disabled succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= page.is_disabled failed&#34;)
+            raise e
+
+    def is_editable(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Page.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; page.is_editable started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_editable(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= page.is_editable succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= page.is_editable failed&#34;)
+            raise e
+
+    def is_enabled(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Page.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; page.is_enabled started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= page.is_enabled succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= page.is_enabled failed&#34;)
+            raise e
+
+    def is_hidden(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Page.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; page.is_hidden started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
+            )
+            log_api(&#34;&lt;= page.is_hidden succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= page.is_hidden failed&#34;)
+            raise e
+
+    def is_visible(self, selector: str, timeout: float = None) -&gt; bool:
+        &#34;&#34;&#34;Page.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md#working-with-selectors) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; page.is_visible started&#34;)
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.is_visible(selector=selector, timeout=timeout)
+                )
+            )
+            log_api(&#34;&lt;= page.is_visible succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= page.is_visible failed&#34;)
+            raise e
+
     def dispatch_event(
         self,
         selector: str,
@@ -16701,7 +17749,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
             log_api(&#34;&lt;= page.emulate_media failed&#34;)
             raise e
 
-    def set_viewport_size(self, viewport_size: &#34;ViewportSize&#34;) -&gt; NoneType:
+    def set_viewport_size(self, viewport_size: ViewportSize) -&gt; NoneType:
         &#34;&#34;&#34;Page.set_viewport_size
 
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
@@ -16726,7 +17774,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
             log_api(&#34;&lt;= page.set_viewport_size failed&#34;)
             raise e
 
-    def viewport_size(self) -&gt; typing.Union[&#34;ViewportSize&#34;, NoneType]:
+    def viewport_size(self) -&gt; typing.Union[ViewportSize, NoneType]:
         &#34;&#34;&#34;Page.viewport_size
 
         Returns
@@ -16889,7 +17937,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         quality: int = None,
         omit_background: bool = None,
         full_page: bool = None,
-        clip: &#34;FloatRect&#34; = None,
+        clip: FloatRect = None,
     ) -&gt; bytes:
         &#34;&#34;&#34;Page.screenshot
 
@@ -17019,7 +18067,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         delay: float = None,
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         click_count: int = None,
@@ -17099,7 +18147,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         delay: float = None,
         button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
         timeout: float = None,
@@ -17178,7 +18226,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
@@ -17465,7 +18513,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         modifiers: typing.Union[
             typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
         ] = None,
-        position: &#34;Position&#34; = None,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
     ) -&gt; NoneType:
@@ -17595,9 +18643,9 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         files: typing.Union[
             str,
             pathlib.Path,
-            &#34;FilePayload&#34;,
+            FilePayload,
             typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[&#34;FilePayload&#34;],
+            typing.List[FilePayload],
         ],
         timeout: float = None,
         no_wait_after: bool = None,
@@ -17980,7 +19028,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         width: typing.Union[str, float] = None,
         height: typing.Union[str, float] = None,
         prefer_css_page_size: bool = None,
-        margin: &#34;PdfMargins&#34; = None,
+        margin: PdfMargins = None,
         path: typing.Union[str, pathlib.Path] = None,
     ) -&gt; bytes:
         &#34;&#34;&#34;Page.pdf
@@ -19040,7 +20088,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.click"><code class="name flex">
-<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, click_count: int = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">click</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, click_count: int = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.click</p>
@@ -19091,7 +20139,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     delay: float = None,
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     click_count: int = None,
@@ -19254,7 +20302,7 @@ and should be handled manually via [<code>event: Page.dialog</code>] event.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.dblclick"><code class="name flex">
-<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">dblclick</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, delay: float = None, button: Literal['left', 'middle', 'right'] = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.dblclick</p>
@@ -19307,7 +20355,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     delay: float = None,
     button: Literal[&#34;left&#34;, &#34;middle&#34;, &#34;right&#34;] = None,
     timeout: float = None,
@@ -21189,7 +22237,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.hover"><code class="name flex">
-<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, timeout: float = None, force: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">hover</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, timeout: float = None, force: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.hover</p>
@@ -21230,7 +22278,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     timeout: float = None,
     force: bool = None,
 ) -&gt; NoneType:
@@ -21401,6 +22449,63 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         raise e</code></pre>
 </details>
 </dd>
+<dt id="playwright.sync_api.Page.is_checked"><code class="name flex">
+<span>def <span class="ident">is_checked</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.is_checked</p>
+<p>Returns whether the element is checked. Throws if the element is not a checkbox or radio input.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_checked(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Page.is_checked
+
+    Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; page.is_checked started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_checked(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= page.is_checked succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= page.is_checked failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
 <dt id="playwright.sync_api.Page.is_closed"><code class="name flex">
 <span>def <span class="ident">is_closed</span></span>(<span>self) ‑> bool</span>
 </code></dt>
@@ -21433,6 +22538,289 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         return result
     except Exception as e:
         log_api(&#34;&lt;= page.is_closed failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.is_disabled"><code class="name flex">
+<span>def <span class="ident">is_disabled</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.is_disabled</p>
+<p>Returns whether the element is disabled, the opposite of <a href="./actionability.md#enabled">enabled</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_disabled(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Page.is_disabled
+
+    Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; page.is_disabled started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= page.is_disabled succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= page.is_disabled failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.is_editable"><code class="name flex">
+<span>def <span class="ident">is_editable</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.is_editable</p>
+<p>Returns whether the element is <a href="./actionability.md#editable">editable</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_editable(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Page.is_editable
+
+    Returns whether the element is [editable](./actionability.md#editable).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; page.is_editable started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_editable(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= page.is_editable succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= page.is_editable failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.is_enabled"><code class="name flex">
+<span>def <span class="ident">is_enabled</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.is_enabled</p>
+<p>Returns whether the element is <a href="./actionability.md#enabled">enabled</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_enabled(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Page.is_enabled
+
+    Returns whether the element is [enabled](./actionability.md#enabled).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; page.is_enabled started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= page.is_enabled succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= page.is_enabled failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.is_hidden"><code class="name flex">
+<span>def <span class="ident">is_hidden</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.is_hidden</p>
+<p>Returns whether the element is hidden, the opposite of <a href="./actionability.md#visible">visible</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_hidden(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Page.is_hidden
+
+    Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; page.is_hidden started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
+        )
+        log_api(&#34;&lt;= page.is_hidden succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= page.is_hidden failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="playwright.sync_api.Page.is_visible"><code class="name flex">
+<span>def <span class="ident">is_visible</span></span>(<span>self, selector: str, timeout: float = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Page.is_visible</p>
+<p>Returns whether the element is <a href="./actionability.md#visible">visible</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+<a href="./selectors.md#working-with-selectors">working with selectors</a> for more details.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
+<dd>Maximum time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be changed by
+using the <code>browser_context.set_default_timeout()</code> or <code>page.set_default_timeout()</code> methods.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_visible(self, selector: str, timeout: float = None) -&gt; bool:
+    &#34;&#34;&#34;Page.is_visible
+
+    Returns whether the element is [visible](./actionability.md#visible).
+
+    Parameters
+    ----------
+    selector : str
+        A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+        [working with selectors](./selectors.md#working-with-selectors) for more details.
+    timeout : Union[float, NoneType]
+        Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+        using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; page.is_visible started&#34;)
+        result = mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.is_visible(selector=selector, timeout=timeout)
+            )
+        )
+        log_api(&#34;&lt;= page.is_visible succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= page.is_visible failed&#34;)
         raise e</code></pre>
 </details>
 </dd>
@@ -21472,7 +22860,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.pdf"><code class="name flex">
-<span>def <span class="ident">pdf</span></span>(<span>self, scale: float = None, display_header_footer: bool = None, header_template: str = None, footer_template: str = None, print_background: bool = None, landscape: bool = None, page_ranges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, prefer_css_page_size: bool = None, margin: <a title="playwright.sync_api.PdfMargins" href="#playwright.sync_api.PdfMargins">PdfMargins</a> = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
+<span>def <span class="ident">pdf</span></span>(<span>self, scale: float = None, display_header_footer: bool = None, header_template: str = None, footer_template: str = None, print_background: bool = None, landscape: bool = None, page_ranges: str = None, format: str = None, width: Union[str, float] = None, height: Union[str, float] = None, prefer_css_page_size: bool = None, margin: playwright._impl._api_structures.PdfMargins = None, path: Union[str, pathlib.Path] = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.pdf</p>
@@ -21573,7 +22961,7 @@ directory. If no path is provided, the PDF won't be saved to the disk.</dd>
     width: typing.Union[str, float] = None,
     height: typing.Union[str, float] = None,
     prefer_css_page_size: bool = None,
-    margin: &#34;PdfMargins&#34; = None,
+    margin: PdfMargins = None,
     path: typing.Union[str, pathlib.Path] = None,
 ) -&gt; bytes:
     &#34;&#34;&#34;Page.pdf
@@ -22045,7 +23433,7 @@ matches both handlers.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.screenshot"><code class="name flex">
-<span>def <span class="ident">screenshot</span></span>(<span>self, timeout: float = None, type: Literal['jpeg', 'png'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omit_background: bool = None, full_page: bool = None, clip: <a title="playwright.sync_api.FloatRect" href="#playwright.sync_api.FloatRect">FloatRect</a> = None) ‑> bytes</span>
+<span>def <span class="ident">screenshot</span></span>(<span>self, timeout: float = None, type: Literal['jpeg', 'png'] = None, path: Union[str, pathlib.Path] = None, quality: int = None, omit_background: bool = None, full_page: bool = None, clip: playwright._impl._api_structures.FloatRect = None) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.screenshot</p>
@@ -22093,7 +23481,7 @@ Defaults to <code>false</code>.</dd>
     quality: int = None,
     omit_background: bool = None,
     full_page: bool = None,
-    clip: &#34;FloatRect&#34; = None,
+    clip: FloatRect = None,
 ) -&gt; bytes:
     &#34;&#34;&#34;Page.screenshot
 
@@ -22473,7 +23861,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.set_input_files"><code class="name flex">
-<span>def <span class="ident">set_input_files</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>'), List[Union[str, pathlib.Path]], List[ForwardRef('<a title="playwright.sync_api.FilePayload" href="#playwright.sync_api.FilePayload">FilePayload</a>')]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">set_input_files</span></span>(<span>self, selector: str, files: Union[str, pathlib.Path, playwright._impl._api_structures.FilePayload, List[Union[str, pathlib.Path]], List[playwright._impl._api_structures.FilePayload]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.set_input_files</p>
@@ -22506,9 +23894,9 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     files: typing.Union[
         str,
         pathlib.Path,
-        &#34;FilePayload&#34;,
+        FilePayload,
         typing.List[typing.Union[str, pathlib.Path]],
-        typing.List[&#34;FilePayload&#34;],
+        typing.List[FilePayload],
     ],
     timeout: float = None,
     no_wait_after: bool = None,
@@ -22556,7 +23944,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.set_viewport_size"><code class="name flex">
-<span>def <span class="ident">set_viewport_size</span></span>(<span>self, viewport_size: <a title="playwright.sync_api.ViewportSize" href="#playwright.sync_api.ViewportSize">ViewportSize</a>) ‑> NoneType</span>
+<span>def <span class="ident">set_viewport_size</span></span>(<span>self, viewport_size: playwright._impl._api_structures.ViewportSize) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.set_viewport_size</p>
@@ -22573,7 +23961,7 @@ viewport size before navigating to the page.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_viewport_size(self, viewport_size: &#34;ViewportSize&#34;) -&gt; NoneType:
+<pre><code class="python">def set_viewport_size(self, viewport_size: ViewportSize) -&gt; NoneType:
     &#34;&#34;&#34;Page.set_viewport_size
 
     In the case of multiple pages in a single browser, each page can have its own viewport size. However,
@@ -22600,7 +23988,7 @@ viewport size before navigating to the page.</p>
 </details>
 </dd>
 <dt id="playwright.sync_api.Page.tap"><code class="name flex">
-<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: <a title="playwright.sync_api.Position" href="#playwright.sync_api.Position">Position</a> = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
+<span>def <span class="ident">tap</span></span>(<span>self, selector: str, modifiers: List[Literal['Alt', 'Control', 'Meta', 'Shift']] = None, position: playwright._impl._api_structures.Position = None, timeout: float = None, force: bool = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.tap</p>
@@ -22648,7 +24036,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     modifiers: typing.Union[
         typing.List[Literal[&#34;Alt&#34;, &#34;Control&#34;, &#34;Meta&#34;, &#34;Shift&#34;]]
     ] = None,
-    position: &#34;Position&#34; = None,
+    position: Position = None,
     timeout: float = None,
     force: bool = None,
     no_wait_after: bool = None,
@@ -23056,7 +24444,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def viewport_size(self) -&gt; typing.Union[&#34;ViewportSize&#34;, NoneType]:
+<pre><code class="python">def viewport_size(self) -&gt; typing.Union[ViewportSize, NoneType]:
     &#34;&#34;&#34;Page.viewport_size
 
     Returns
@@ -24302,7 +25690,7 @@ dict(one=1, two=2)</p></div>
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
     @property
-    def timing(self) -&gt; &#34;ResourceTiming&#34;:
+    def timing(self) -&gt; ResourceTiming:
         &#34;&#34;&#34;Request.timing
 
         Returns resource timing information for given request. Most of the timing values become available upon the response,
@@ -24676,7 +26064,7 @@ def resource_type(self) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def timing(self) -&gt; &#34;ResourceTiming&#34;:
+def timing(self) -&gt; ResourceTiming:
     &#34;&#34;&#34;Request.timing
 
     Returns resource timing information for given request. Most of the timing values become available upon the response,
@@ -27002,6 +28390,12 @@ Optional.</dd>
 <li><code><a title="playwright.sync_api.ElementHandle.hover" href="#playwright.sync_api.ElementHandle.hover">hover</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.inner_html" href="#playwright.sync_api.ElementHandle.inner_html">inner_html</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.inner_text" href="#playwright.sync_api.ElementHandle.inner_text">inner_text</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.is_checked" href="#playwright.sync_api.ElementHandle.is_checked">is_checked</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.is_disabled" href="#playwright.sync_api.ElementHandle.is_disabled">is_disabled</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.is_editable" href="#playwright.sync_api.ElementHandle.is_editable">is_editable</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.is_enabled" href="#playwright.sync_api.ElementHandle.is_enabled">is_enabled</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.is_hidden" href="#playwright.sync_api.ElementHandle.is_hidden">is_hidden</a></code></li>
+<li><code><a title="playwright.sync_api.ElementHandle.is_visible" href="#playwright.sync_api.ElementHandle.is_visible">is_visible</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.owner_frame" href="#playwright.sync_api.ElementHandle.owner_frame">owner_frame</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.press" href="#playwright.sync_api.ElementHandle.press">press</a></code></li>
 <li><code><a title="playwright.sync_api.ElementHandle.query_selector" href="#playwright.sync_api.ElementHandle.query_selector">query_selector</a></code></li>
@@ -27073,7 +28467,13 @@ Optional.</dd>
 <li><code><a title="playwright.sync_api.Frame.hover" href="#playwright.sync_api.Frame.hover">hover</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.inner_html" href="#playwright.sync_api.Frame.inner_html">inner_html</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.inner_text" href="#playwright.sync_api.Frame.inner_text">inner_text</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.is_checked" href="#playwright.sync_api.Frame.is_checked">is_checked</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.is_detached" href="#playwright.sync_api.Frame.is_detached">is_detached</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.is_disabled" href="#playwright.sync_api.Frame.is_disabled">is_disabled</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.is_editable" href="#playwright.sync_api.Frame.is_editable">is_editable</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.is_enabled" href="#playwright.sync_api.Frame.is_enabled">is_enabled</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.is_hidden" href="#playwright.sync_api.Frame.is_hidden">is_hidden</a></code></li>
+<li><code><a title="playwright.sync_api.Frame.is_visible" href="#playwright.sync_api.Frame.is_visible">is_visible</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.name" href="#playwright.sync_api.Frame.name">name</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.page" href="#playwright.sync_api.Frame.page">page</a></code></li>
 <li><code><a title="playwright.sync_api.Frame.parent_frame" href="#playwright.sync_api.Frame.parent_frame">parent_frame</a></code></li>
@@ -27186,7 +28586,13 @@ Optional.</dd>
 <li><code><a title="playwright.sync_api.Page.hover" href="#playwright.sync_api.Page.hover">hover</a></code></li>
 <li><code><a title="playwright.sync_api.Page.inner_html" href="#playwright.sync_api.Page.inner_html">inner_html</a></code></li>
 <li><code><a title="playwright.sync_api.Page.inner_text" href="#playwright.sync_api.Page.inner_text">inner_text</a></code></li>
+<li><code><a title="playwright.sync_api.Page.is_checked" href="#playwright.sync_api.Page.is_checked">is_checked</a></code></li>
 <li><code><a title="playwright.sync_api.Page.is_closed" href="#playwright.sync_api.Page.is_closed">is_closed</a></code></li>
+<li><code><a title="playwright.sync_api.Page.is_disabled" href="#playwright.sync_api.Page.is_disabled">is_disabled</a></code></li>
+<li><code><a title="playwright.sync_api.Page.is_editable" href="#playwright.sync_api.Page.is_editable">is_editable</a></code></li>
+<li><code><a title="playwright.sync_api.Page.is_enabled" href="#playwright.sync_api.Page.is_enabled">is_enabled</a></code></li>
+<li><code><a title="playwright.sync_api.Page.is_hidden" href="#playwright.sync_api.Page.is_hidden">is_hidden</a></code></li>
+<li><code><a title="playwright.sync_api.Page.is_visible" href="#playwright.sync_api.Page.is_visible">is_visible</a></code></li>
 <li><code><a title="playwright.sync_api.Page.keyboard" href="#playwright.sync_api.Page.keyboard">keyboard</a></code></li>
 <li><code><a title="playwright.sync_api.Page.main_frame" href="#playwright.sync_api.Page.main_frame">main_frame</a></code></li>
 <li><code><a title="playwright.sync_api.Page.mouse" href="#playwright.sync_api.Page.mouse">mouse</a></code></li>
