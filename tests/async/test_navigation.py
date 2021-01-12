@@ -670,25 +670,6 @@ async def test_expect_navigation_should_work_for_cross_process_navigations(
     await goto_task
 
 
-@pytest.mark.skip("flaky, investigate")
-async def test_wait_for_load_state_should_pick_up_ongoing_navigation(page, server):
-    requests = []
-
-    def handler(request: Any):
-        requests.append(request)
-
-    server.set_route("/one-style.css", handler)
-
-    await asyncio.gather(
-        server.wait_for_request("/one-style.css"),
-        page.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded"),
-    )
-
-    async with page.expect_load_state():
-        requests[0].setResponseCode(404)
-        requests[0].finish()
-
-
 async def test_wait_for_load_state_should_respect_timeout(page, server):
     requests = []
 

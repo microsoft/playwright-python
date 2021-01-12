@@ -43,7 +43,6 @@ class FileChooser:
     def element(self) -> "ElementHandle":
         return self._element_handle
 
-    @property
     def is_multiple(self) -> bool:
         return self._is_multiple
 

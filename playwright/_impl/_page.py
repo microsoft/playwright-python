@@ -587,6 +587,7 @@ class Page(ChannelOwner):
         self._viewport_size = viewportSize
         await self._channel.send("setViewportSize", locals_to_params(locals()))
 
+    @property
     def viewport_size(self) -> Optional[ViewportSize]:
         return self._viewport_size
 
@@ -881,13 +882,6 @@ class Page(ChannelOwner):
         return EventContextManagerImpl(
             self.wait_for_event("filechooser", predicate, timeout)
         )
-
-    def expect_load_state(
-        self,
-        state: DocumentLoadState = None,
-        timeout: float = None,
-    ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.wait_for_load_state(state, timeout))
 
     def expect_navigation(
         self,

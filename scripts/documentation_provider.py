@@ -86,7 +86,11 @@ class DocumentationProvider:
             clazz["members"] = members
 
     def print_entry(
-        self, class_name: str, method_name: str, signature: Dict[str, Any] = None
+        self,
+        class_name: str,
+        method_name: str,
+        signature: Dict[str, Any] = None,
+        is_property: bool = False,
     ) -> None:
         if class_name in ["BindingCall"] or method_name in [
             "pid",
@@ -106,6 +110,15 @@ class DocumentationProvider:
 
         if not method:
             self.errors.add(f"Method not documented: {fqname}")
+            return
+
+        doc_is_property = (
+            not method.get("async") and not len(method["args"]) and "type" in method
+        )
+        if method["name"].startswith("is_") or method["name"].startswith("as_"):
+            doc_is_property = False
+        if doc_is_property != is_property:
+            self.errors.add(f"Method vs property mismatch: {fqname}")
             return
 
         indent = " " * 8
@@ -140,7 +153,7 @@ class DocumentationProvider:
                         print(
                             f"{indent}    {self.indent_paragraph(self.render_links(doc_value['comment']), f'{indent}    ')}"
                         )
-                    self.compare_types(code_type, doc_value, f"{fqname}({name}=)")
+                    self.compare_types(code_type, doc_value, f"{fqname}({name}=)", "in")
         if (
             signature
             and "return" in signature
@@ -148,7 +161,7 @@ class DocumentationProvider:
         ):
             value = signature["return"]
             doc_value = method
-            self.compare_types(value, doc_value, f"{fqname}(return=)")
+            self.compare_types(value, doc_value, f"{fqname}(return=)", "out")
             print("")
             print("        Returns")
             print("        -------")
@@ -219,11 +232,13 @@ class DocumentationProvider:
             return text[:-1] + ", NoneType]"
         return f"Union[{text}, NoneType]"
 
-    def compare_types(self, value: Any, doc_value: Any, fqname: str) -> None:
+    def compare_types(
+        self, value: Any, doc_value: Any, fqname: str, direction: str
+    ) -> None:
         if "(arg=)" in fqname or "(pageFunction=)" in fqname:
             return
         code_type = self.serialize_python_type(value)
-        doc_type = self.serialize_doc_type(doc_value["type"])
+        doc_type = self.serialize_doc_type(doc_value["type"], direction)
         if not doc_value["required"]:
             doc_type = self.make_optional(doc_type)
 
@@ -299,16 +314,16 @@ class DocumentationProvider:
             return f"Union[{body}]"
         return str_value
 
-    def serialize_doc_type(self, type: Any) -> str:
-        result = self.inner_serialize_doc_type(type)
+    def serialize_doc_type(self, type: Any, direction: str) -> str:
+        result = self.inner_serialize_doc_type(type, direction)
         return result
 
-    def inner_serialize_doc_type(self, type: Any) -> str:
+    def inner_serialize_doc_type(self, type: Any, direction: str) -> str:
         if type["name"] == "Promise":
             type = type["templates"][0]
 
         if "union" in type:
-            ll = [self.serialize_doc_type(t) for t in type["union"]]
+            ll = [self.serialize_doc_type(t, direction) for t in type["union"]]
             ll.sort(key=lambda item: "}" if item == "NoneType" else item)
             for i in range(len(ll)):
                 if ll[i].startswith("Union["):
@@ -317,7 +332,10 @@ class DocumentationProvider:
 
         type_name = type["name"]
         if type_name == "path":
-            return "Union[pathlib.Path, str]"
+            if direction == "in":
+                return "Union[pathlib.Path, str]"
+            else:
+                return "pathlib.Path"
 
         if type_name == "function" and "args" not in type:
             return "Callable"
@@ -325,8 +343,8 @@ class DocumentationProvider:
         if type_name == "function":
             return_type = "Any"
             if type.get("returnType"):
-                return_type = self.serialize_doc_type(type["returnType"])
-            return f"Callable[[{', '.join(self.serialize_doc_type(t) for t in type['args'])}], {return_type}]"
+                return_type = self.serialize_doc_type(type["returnType"], direction)
+            return f"Callable[[{', '.join(self.serialize_doc_type(t, direction) for t in type['args'])}], {return_type}]"
 
         if "templates" in type:
             base = type_name
@@ -334,7 +352,7 @@ class DocumentationProvider:
                 base = "List"
             if type_name == "Object" or type_name == "Map":
                 base = "Dict"
-            return f"{base}[{', '.join(self.serialize_doc_type(t) for t in type['templates'])}]"
+            return f"{base}[{', '.join(self.serialize_doc_type(t, direction) for t in type['templates'])}]"
 
         if type_name == "Object" and "properties" in type:
             items = []
@@ -343,9 +361,11 @@ class DocumentationProvider:
                     (p["name"])
                     + ": "
                     + (
-                        self.serialize_doc_type(p["type"])
+                        self.serialize_doc_type(p["type"], direction)
                         if p["required"]
-                        else self.make_optional(self.serialize_doc_type(p["type"]))
+                        else self.make_optional(
+                            self.serialize_doc_type(p["type"], direction)
+                        )
                     )
                 )
             return f"{{{', '.join(items)}}}"

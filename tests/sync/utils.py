@@ -59,8 +59,8 @@ class Utils:
         return result
 
     def verify_viewport(self, page: Page, width: int, height: int):
-        assert cast(ViewportSize, page.viewport_size())["width"] == width
-        assert cast(ViewportSize, page.viewport_size())["height"] == height
+        assert cast(ViewportSize, page.viewport_size)["width"] == width
+        assert cast(ViewportSize, page.viewport_size)["height"] == height
         assert page.evaluate("window.innerWidth") == width
         assert page.evaluate("window.innerHeight") == height
 
