@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import pathlib
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -26,13 +27,17 @@ class Video:
         self._page = page
         self._path_future = page._loop.create_future()
 
-    async def path(self) -> str:
+    async def path(self) -> pathlib.Path:
         return await self._path_future
 
     def _set_relative_path(self, relative_path: str) -> None:
         self._path_future.set_result(
-            os.path.join(
-                cast(str, self._page._browser_context._options["recordVideo"]["dir"]),
-                relative_path,
+            pathlib.Path(
+                os.path.join(
+                    cast(
+                        str, self._page._browser_context._options["recordVideo"]["dir"]
+                    ),
+                    relative_path,
+                )
             )
         )

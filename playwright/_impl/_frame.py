@@ -526,13 +526,6 @@ class Frame(ChannelOwner):
     async def title(self) -> str:
         return await self._channel.send("title")
 
-    def expect_load_state(
-        self,
-        state: DocumentLoadState = None,
-        timeout: float = None,
-    ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.wait_for_load_state(state, timeout))
-
     def expect_navigation(
         self,
         url: URLMatch = None,

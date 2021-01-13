@@ -55,9 +55,11 @@ class ChromiumBrowserContext(BrowserContext):
         self._service_workers.add(worker)
         self.emit(ChromiumBrowserContext.Events.ServiceWorker, worker)
 
+    @property
     def background_pages(self) -> List[Page]:
         return list(self._background_pages)
 
+    @property
     def service_workers(self) -> List[Worker]:
         return list(self._service_workers)
 

@@ -176,18 +176,6 @@ class Request(SyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
-    def is_navigation_request(self) -> bool:
-        """Request.is_navigation_request
-
-        Whether this request is driving frame's navigation.
-
-        Returns
-        -------
-        bool
-        """
-        return mapping.from_maybe_impl(self._impl_obj.is_navigation_request)
-
-    @property
     def redirected_from(self) -> typing.Union["Request", NoneType]:
         """Request.redirected_from
 
@@ -271,6 +259,25 @@ class Request(SyncBase):
             return result
         except Exception as e:
             log_api("<= request.response failed")
+            raise e
+
+    def is_navigation_request(self) -> bool:
+        """Request.is_navigation_request
+
+        Whether this request is driving frame's navigation.
+
+        Returns
+        -------
+        bool
+        """
+
+        try:
+            log_api("=> request.is_navigation_request started")
+            result = mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
+            log_api("<= request.is_navigation_request succeded")
+            return result
+        except Exception as e:
+            log_api("<= request.is_navigation_request failed")
             raise e
 
 
@@ -663,13 +670,13 @@ class WebSocket(SyncBase):
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
         closed before the `event` is fired.
 
-        ```python-async
+        ```python async
         async with ws.expect_event(event_name) as event_info:
             await ws.click("button")
         value = await event_info.value
         ```
 
-        ```python-sync
+        ```python sync
         with ws.expect_event(event_name) as event_info:
             ws.click("button")
         value = event_info.value
@@ -678,7 +685,7 @@ class WebSocket(SyncBase):
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -746,7 +753,7 @@ class Keyboard(SyncBase):
         [repeat](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat) set to true. To release the key, use
         `keyboard.up()`.
 
-        > **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
+        > NOTE: Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 
         Parameters
         ----------
@@ -788,7 +795,7 @@ class Keyboard(SyncBase):
 
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
-        > **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
+        > NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
         ----------
@@ -814,7 +821,7 @@ class Keyboard(SyncBase):
 
         To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
 
-        > **NOTE** Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
+        > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
         ----------
@@ -1251,7 +1258,7 @@ class JSHandle(SyncBase):
 
         Returns a JSON representation of the object. If the object has a `toJSON` function, it **will not be called**.
 
-        > **NOTE** The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
+        > NOTE: The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
         error if the object has circular references.
 
         Returns
@@ -1760,7 +1767,7 @@ class ElementHandle(JSHandle):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        > **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        > NOTE: `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
@@ -1890,7 +1897,7 @@ class ElementHandle(JSHandle):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        > **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        > NOTE: `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
@@ -2576,7 +2583,7 @@ class ElementHandle(JSHandle):
         will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
         throw.
 
-        > **NOTE** This method does not work across navigations, use `page.wait_for_selector()` instead.
+        > NOTE: This method does not work across navigations, use `page.wait_for_selector()` instead.
 
         Parameters
         ----------
@@ -2630,7 +2637,7 @@ class Accessibility(SyncBase):
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
         page.
 
-        > **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
+        > NOTE: The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
         Playwright will discard them as well for an easier to process tree, unless `interestingOnly` is set to `false`.
 
         An example of dumping the entire accessibility tree:
@@ -2696,7 +2703,6 @@ class FileChooser(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.element)
 
-    @property
     def is_multiple(self) -> bool:
         """FileChooser.is_multiple
 
@@ -2706,7 +2712,15 @@ class FileChooser(SyncBase):
         -------
         bool
         """
-        return mapping.from_maybe_impl(self._impl_obj.is_multiple)
+
+        try:
+            log_api("=> file_chooser.is_multiple started")
+            result = mapping.from_maybe_impl(self._impl_obj.is_multiple())
+            log_api("<= file_chooser.is_multiple succeded")
+            return result
+        except Exception as e:
+            log_api("<= file_chooser.is_multiple failed")
+            raise e
 
     def set_files(
         self,
@@ -2780,8 +2794,7 @@ class Frame(SyncBase):
 
         If the name is empty, returns the id attribute instead.
 
-        > **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed
-        later.
+        > NOTE: This value is calculated once when the frame is created, and will not update if the attribute is changed later.
 
         Returns
         -------
@@ -2846,9 +2859,9 @@ class Frame(SyncBase):
         "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
         `response.status()`.
 
-        > **NOTE** `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation
-        to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-        > **NOTE** Headless mode doesn't support navigation to a PDF document. See the
+        > NOTE: `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
+        > NOTE: Headless mode doesn't support navigation to a PDF document. See the
         [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 
         Parameters
@@ -2904,7 +2917,7 @@ class Frame(SyncBase):
         This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
         the frame to navigate. Consider this example:
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Parameters
@@ -3850,7 +3863,7 @@ class Frame(SyncBase):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        > **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        > NOTE: `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
@@ -3924,7 +3937,7 @@ class Frame(SyncBase):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        > **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        > NOTE: `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
@@ -4691,51 +4704,6 @@ class Frame(SyncBase):
             log_api("<= frame.title failed")
             raise e
 
-    def expect_load_state(
-        self,
-        state: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
-    ) -> EventContextManager:
-        """Frame.expect_load_state
-
-        Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
-        by default. The navigation must have been committed when this method is called. If current document has already reached
-        the required state, resolves immediately.
-
-        ```python-async
-        async with frame.expect_load_state():
-            await frame.click('button') # Click triggers navigation.
-        # Context manager waits for 'load' event.
-        ```
-
-        ```python-sync
-        with frame.expect_load_state():
-            frame.click('button') # Click triggers navigation.
-        # Context manager waits for 'load' event.
-        ```
-
-        Parameters
-        ----------
-        state : Union["domcontentloaded", "load", "networkidle", NoneType]
-            Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-            document, the method resolves immediately. Can be one of:
-            - `'load'` - wait for the `load` event to be fired.
-            - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
-            - `'networkidle'` - wait until there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
-            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-            changed by using the `browser_context.set_default_navigation_timeout()`,
-            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-            `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        EventContextManager
-        """
-        return EventContextManager(
-            self, self._impl_obj.wait_for_load_state(state, timeout)
-        )
-
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
@@ -4744,7 +4712,7 @@ class Frame(SyncBase):
     ) -> EventContextManager:
         """Frame.expect_navigation
 
-        Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
         response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
         navigation will resolve with `null`.
 
@@ -4752,19 +4720,19 @@ class Frame(SyncBase):
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python-async
+        ```python async
         async with frame.expect_navigation():
             await frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        ```python-sync
+        ```python sync
         with frame.expect_navigation():
             frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Parameters
@@ -5156,14 +5124,14 @@ class Download(SyncBase):
             log_api("<= download.failure failed")
             raise e
 
-    def path(self) -> typing.Union[str, NoneType]:
+    def path(self) -> typing.Union[pathlib.Path, NoneType]:
         """Download.path
 
         Returns path to the downloaded file in case of successful download.
 
         Returns
         -------
-        Union[str, NoneType]
+        Union[pathlib.Path, NoneType]
         """
 
         try:
@@ -5205,7 +5173,7 @@ class Video(SyncBase):
     def __init__(self, obj: VideoImpl):
         super().__init__(obj)
 
-    def path(self) -> str:
+    def path(self) -> pathlib.Path:
         """Video.path
 
         Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
@@ -5213,7 +5181,7 @@ class Video(SyncBase):
 
         Returns
         -------
-        str
+        pathlib.Path
         """
 
         try:
@@ -5343,13 +5311,23 @@ class Page(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
+    def viewport_size(self) -> typing.Union[ViewportSize, NoneType]:
+        """Page.viewport_size
+
+        Returns
+        -------
+        Union[{width: int, height: int}, NoneType]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.viewport_size)
+
+    @property
     def workers(self) -> typing.List["Worker"]:
         """Page.workers
 
         This method returns all of the dedicated [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
         associated with the page.
 
-        > **NOTE** This does not contain ServiceWorkers
+        > NOTE: This does not contain ServiceWorkers
 
         Returns
         -------
@@ -5431,7 +5409,7 @@ class Page(SyncBase):
         - `page.set_content()`
         - `page.wait_for_navigation()`
 
-        > **NOTE** `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
+        > NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
         `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
 
         Parameters
@@ -5456,7 +5434,7 @@ class Page(SyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        > **NOTE** `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`.
+        > NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`.
 
         Parameters
         ----------
@@ -6146,7 +6124,7 @@ class Page(SyncBase):
 
         See `browser_context.expose_function()` for context-wide exposed function.
 
-        > **NOTE** Functions installed via `page.exposeFunction` survive navigations.
+        > NOTE: Functions installed via `page.expose_function()` survive navigations.
 
         An example of adding an `md5` function to the page:
 
@@ -6189,7 +6167,7 @@ class Page(SyncBase):
 
         See `browser_context.expose_binding()` for the context-wide version.
 
-        > **NOTE** Functions installed via `page.exposeBinding` survive navigations.
+        > NOTE: Functions installed via `page.expose_binding()` survive navigations.
 
         An example of exposing page URL to all frames in a page:
 
@@ -6226,7 +6204,7 @@ class Page(SyncBase):
 
         The extra HTTP headers will be sent with every request the page initiates.
 
-        > **NOTE** page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.
+        > NOTE: `page.set_extra_http_headers()` does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -6330,9 +6308,9 @@ class Page(SyncBase):
         Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
         `response.status()`.
 
-        > **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        > NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
         `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-        > **NOTE** Headless mode doesn't support navigation to a PDF document. See the
+        > NOTE: Headless mode doesn't support navigation to a PDF document. See the
         [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 
         Shortcut for main frame's `frame.goto()`
@@ -6472,7 +6450,7 @@ class Page(SyncBase):
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Shortcut for main frame's `frame.wait_for_navigation()`.
@@ -6607,7 +6585,7 @@ class Page(SyncBase):
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -6779,23 +6757,6 @@ class Page(SyncBase):
             log_api("<= page.set_viewport_size failed")
             raise e
 
-    def viewport_size(self) -> typing.Union[ViewportSize, NoneType]:
-        """Page.viewport_size
-
-        Returns
-        -------
-        Union[{width: int, height: int}, NoneType]
-        """
-
-        try:
-            log_api("=> page.viewport_size started")
-            result = mapping.from_impl_nullable(self._impl_obj.viewport_size())
-            log_api("<= page.viewport_size succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.viewport_size failed")
-            raise e
-
     def bring_to_front(self) -> NoneType:
         """Page.bring_to_front
 
@@ -6828,7 +6789,7 @@ class Page(SyncBase):
 
         An example of overriding `Math.random` before the page loads:
 
-        > **NOTE** The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
+        > NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
         Parameters
@@ -6865,7 +6826,7 @@ class Page(SyncBase):
 
         Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 
-        > **NOTE** The handler will only be called for the first url if the response is a redirect.
+        > NOTE: The handler will only be called for the first url if the response is a redirect.
 
         An example of a naïve handler that aborts all image requests:
 
@@ -6874,7 +6835,7 @@ class Page(SyncBase):
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
         matches both handlers.
 
-        > **NOTE** Enabling routing disables http cache.
+        > NOTE: Enabling routing disables http cache.
 
         Parameters
         ----------
@@ -6948,7 +6909,7 @@ class Page(SyncBase):
 
         Returns the buffer with the captured screenshot.
 
-        > **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
+        > NOTE: Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
         discussion.
 
         Parameters
@@ -7026,8 +6987,8 @@ class Page(SyncBase):
 
         By default, `page.close()` **does not** run `beforeunload` handlers.
 
-        > **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
-        > and should be handled manually via [`event: Page.dialog`] event.
+        > NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
+        via [`event: Page.dialog`] event.
 
         Parameters
         ----------
@@ -7173,7 +7134,7 @@ class Page(SyncBase):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        > **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        > NOTE: `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Shortcut for main frame's `frame.dblclick()`.
 
@@ -7249,7 +7210,7 @@ class Page(SyncBase):
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        > **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        > NOTE: `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Shortcut for main frame's `frame.tap()`.
 
@@ -8040,12 +8001,12 @@ class Page(SyncBase):
 
         Returns the PDF buffer.
 
-        > **NOTE** Generating a pdf is currently only supported in Chromium headless.
+        > NOTE: Generating a pdf is currently only supported in Chromium headless.
 
         `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
         `page.emulate_media()` before calling `page.pdf()`:
 
-        > **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
+        > NOTE: By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
         [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust) property to
         force rendering of exact colors.
 
@@ -8075,9 +8036,8 @@ class Page(SyncBase):
         - `A5`: 5.83in x 8.27in
         - `A6`: 4.13in x 5.83in
 
-        > **NOTE** `headerTemplate` and `footerTemplate` markup have the following limitations:
-        > 1. Script tags inside templates are not evaluated.
-        > 2. Page styles are not visible inside templates.
+        > NOTE: `headerTemplate` and `footerTemplate` markup have the following limitations: > 1. Script tags inside templates
+        are not evaluated. > 2. Page styles are not visible inside templates.
 
         Parameters
         ----------
@@ -8157,13 +8117,13 @@ class Page(SyncBase):
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
         closed before the `event` is fired.
 
-        ```python-async
+        ```python async
         async with page.expect_event(event_name) as event_info:
             await page.click("button")
         value = await event_info.value
         ```
 
-        ```python-sync
+        ```python sync
         with page.expect_event(event_name) as event_info:
             page.click("button")
         value = event_info.value
@@ -8172,7 +8132,7 @@ class Page(SyncBase):
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -8271,53 +8231,6 @@ class Page(SyncBase):
             self, self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
-    def expect_load_state(
-        self,
-        state: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
-    ) -> EventContextManager:
-        """Page.expect_load_state
-
-        Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
-        by default. The navigation must have been committed when this method is called. If current document has already reached
-        the required state, resolves immediately.
-
-        ```python-async
-        async with page.expect_load_state():
-            await page.click('button') # Click triggers navigation.
-        # Context manager waits for 'load' event.
-        ```
-
-        ```python-sync
-        with page.expect_load_state():
-            page.click('button') # Click triggers navigation.
-        # Context manager waits for 'load' event.
-        ```
-
-        Shortcut for main frame's `frame.expect_load_state()`.
-
-        Parameters
-        ----------
-        state : Union["domcontentloaded", "load", "networkidle", NoneType]
-            Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-            document, the method resolves immediately. Can be one of:
-            - `'load'` - wait for the `load` event to be fired.
-            - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
-            - `'networkidle'` - wait until there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
-            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-            changed by using the `browser_context.set_default_navigation_timeout()`,
-            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-            `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        EventContextManager
-        """
-        return EventContextManager(
-            self, self._impl_obj.wait_for_load_state(state, timeout)
-        )
-
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
@@ -8326,7 +8239,7 @@ class Page(SyncBase):
     ) -> EventContextManager:
         """Page.expect_navigation
 
-        Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
         response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
         navigation will resolve with `null`.
 
@@ -8334,19 +8247,19 @@ class Page(SyncBase):
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python-async
+        ```python async
         async with page.expect_navigation():
             await page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        ```python-sync
+        ```python sync
         with page.expect_navigation():
             page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Shortcut for main frame's `frame.expect_navigation()`.
@@ -8532,7 +8445,7 @@ class BrowserContext(SyncBase):
         - `page.set_content()`
         - `page.wait_for_navigation()`
 
-        > **NOTE** `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
+        > NOTE: `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
         `browser_context.set_default_navigation_timeout()`.
 
         Parameters
@@ -8557,7 +8470,7 @@ class BrowserContext(SyncBase):
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        > **NOTE** `page.set_default_navigation_timeout()`, `page.set_default_timeout()` and
+        > NOTE: `page.set_default_navigation_timeout()`, `page.set_default_timeout()` and
         `browser_context.set_default_navigation_timeout()` take priority over `browser_context.set_default_timeout()`.
 
         Parameters
@@ -8731,8 +8644,8 @@ class BrowserContext(SyncBase):
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 
-        > **NOTE** Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages
-        to read its geolocation.
+        > NOTE: Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages to
+        read its geolocation.
 
         Parameters
         ----------
@@ -8757,7 +8670,7 @@ class BrowserContext(SyncBase):
         with page-specific extra HTTP headers set with `page.set_extra_http_headers()`. If page overrides a particular
         header, page-specific header value will be used instead of the browser context header value.
 
-        > **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
+        > NOTE: `browser_context.set_extra_http_headers()` does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -8815,7 +8728,7 @@ class BrowserContext(SyncBase):
 
         An example of overriding `Math.random` before the page loads:
 
-        > **NOTE** The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
+        > NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
         Parameters
@@ -8937,7 +8850,7 @@ class BrowserContext(SyncBase):
         Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
         handlers.
 
-        > **NOTE** Enabling routing disables http cache.
+        > NOTE: Enabling routing disables http cache.
 
         Parameters
         ----------
@@ -9044,7 +8957,7 @@ class BrowserContext(SyncBase):
 
         Closes the browser context. All the pages that belong to the browser context will be closed.
 
-        > **NOTE** the default browser context cannot be closed.
+        > NOTE: The default browser context cannot be closed.
         """
 
         try:
@@ -9095,22 +9008,22 @@ class BrowserContext(SyncBase):
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
         is closed before the `event` is fired.
 
-        ```python-async
-        async with context.expect_event(event_name) as event_info:
+        ```python async
+        async with context.expect_event("page") as event_info:
             await context.click("button")
-        value = await event_info.value
+        page = await event_info.value
         ```
 
-        ```python-sync
-        with context.expect_event(event_name) as event_info:
+        ```python sync
+        with context.expect_event("page") as event_info:
             context.click("button")
-        value = event_info.value
+        page = event_info.value
         ```
 
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -9213,6 +9126,7 @@ class ChromiumBrowserContext(BrowserContext):
     def __init__(self, obj: ChromiumBrowserContextImpl):
         super().__init__(obj)
 
+    @property
     def background_pages(self) -> typing.List["Page"]:
         """ChromiumBrowserContext.background_pages
 
@@ -9222,16 +9136,9 @@ class ChromiumBrowserContext(BrowserContext):
         -------
         List[Page]
         """
+        return mapping.from_impl_list(self._impl_obj.background_pages)
 
-        try:
-            log_api("=> chromium_browser_context.background_pages started")
-            result = mapping.from_impl_list(self._impl_obj.background_pages())
-            log_api("<= chromium_browser_context.background_pages succeded")
-            return result
-        except Exception as e:
-            log_api("<= chromium_browser_context.background_pages failed")
-            raise e
-
+    @property
     def service_workers(self) -> typing.List["Worker"]:
         """ChromiumBrowserContext.service_workers
 
@@ -9241,15 +9148,7 @@ class ChromiumBrowserContext(BrowserContext):
         -------
         List[Worker]
         """
-
-        try:
-            log_api("=> chromium_browser_context.service_workers started")
-            result = mapping.from_impl_list(self._impl_obj.service_workers())
-            log_api("<= chromium_browser_context.service_workers succeded")
-            return result
-        except Exception as e:
-            log_api("<= chromium_browser_context.service_workers failed")
-            raise e
+        return mapping.from_impl_list(self._impl_obj.service_workers)
 
     def new_cdp_session(self, page: "Page") -> "CDPSession":
         """ChromiumBrowserContext.new_cdp_session
@@ -9365,7 +9264,7 @@ class Browser(SyncBase):
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         no_viewport : Union[bool, NoneType]
-            Disables the default viewport.
+            Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -9505,7 +9404,7 @@ class Browser(SyncBase):
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         no_viewport : Union[bool, NoneType]
-            Disables the default viewport.
+            Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -9869,7 +9768,7 @@ class BrowserType(SyncBase):
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         no_viewport : Union[bool, NoneType]
-            Disables the default viewport.
+            Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -9986,9 +9885,7 @@ class Playwright(SyncBase):
     def devices(self) -> typing.Dict:
         """Playwright.devices
 
-        Returns a list of devices to be used with `browser.new_context()` or `browser.new_page()`. Actual list of
-        devices can be found in
-        [src/server/deviceDescriptors.ts](https://github.com/Microsoft/playwright/blob/master/src/server/deviceDescriptors.ts).
+        Returns a dictionary of devices to be used with `browser.new_context()` or `browser.new_page()`.
 
         Returns
         -------
@@ -10052,7 +9949,7 @@ class Playwright(SyncBase):
         REPL applications.
 
         ```py
-        >>> from playwright import sync_playwright
+        >>> from playwright.sync_api import sync_playwright
 
         >>> playwright = sync_playwright().start()
 

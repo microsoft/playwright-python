@@ -29,7 +29,7 @@ async def test_page_route_should_intercept(page, server):
         assert request.headers["user-agent"]
         assert request.method == "GET"
         assert request.post_data is None
-        assert request.is_navigation_request
+        assert request.is_navigation_request()
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
@@ -305,14 +305,14 @@ async def test_page_route_should_not_work_with_redirects(page, server):
 
     assert len(intercepted) == 1
     assert intercepted[0].resource_type == "document"
-    assert intercepted[0].is_navigation_request
+    assert intercepted[0].is_navigation_request()
     assert "/non-existing-page.html" in intercepted[0].url
 
     chain = []
     r = response.request
     while r:
         chain.append(r)
-        assert r.is_navigation_request
+        assert r.is_navigation_request()
         r = r.redirected_from
 
     assert len(chain) == 5
@@ -862,18 +862,18 @@ async def test_request_fulfill_should_include_the_origin_header(page, server):
 async def test_request_fulfill_should_work_with_request_interception(page, server):
     requests = {}
 
-    def _handle_route(route: Route):
+    async def _handle_route(route: Route):
         requests[route.request.url.split("/").pop()] = route.request
-        asyncio.create_task(route.continue_())
+        await route.continue_()
 
     await page.route("**/*", _handle_route)
 
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
     await page.goto(server.PREFIX + "/rrredirect")
-    assert requests["rrredirect"].is_navigation_request
-    assert requests["frame.html"].is_navigation_request
-    assert requests["script.js"].is_navigation_request is False
-    assert requests["style.css"].is_navigation_request is False
+    assert requests["rrredirect"].is_navigation_request()
+    assert requests["frame.html"].is_navigation_request()
+    assert requests["script.js"].is_navigation_request() is False
+    assert requests["style.css"].is_navigation_request() is False
 
 
 async def test_Interception_should_work_with_request_interception(

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pathlib
 from pathlib import Path
 from typing import Dict, Optional, Union
 
@@ -39,8 +40,8 @@ class Download(ChannelOwner):
     async def failure(self) -> Optional[str]:
         return patch_error_message(await self._channel.send("failure"))
 
-    async def path(self) -> Optional[str]:
-        return await self._channel.send("path")
+    async def path(self) -> Optional[pathlib.Path]:
+        return pathlib.Path(await self._channel.send("path"))
 
     async def save_as(self, path: Union[str, Path]) -> None:
         path = str(Path(path))

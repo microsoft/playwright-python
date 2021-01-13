@@ -244,7 +244,7 @@ async def test_should_work_for_single_file_pick(page, server):
             page.click("input"),
         )
     )[0]
-    assert file_chooser.is_multiple is False
+    assert file_chooser.is_multiple() is False
 
 
 async def test_should_work_for_multiple(page, server):
@@ -255,7 +255,7 @@ async def test_should_work_for_multiple(page, server):
             page.click("input"),
         )
     )[0]
-    assert file_chooser.is_multiple
+    assert file_chooser.is_multiple()
 
 
 async def test_should_work_for_webkitdirectory(page, server):
@@ -266,4 +266,4 @@ async def test_should_work_for_webkitdirectory(page, server):
             page.click("input"),
         )
     )[0]
-    assert file_chooser.is_multiple
+    assert file_chooser.is_multiple()
