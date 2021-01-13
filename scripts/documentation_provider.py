@@ -34,7 +34,8 @@ union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
 
 
 class DocumentationProvider:
-    def __init__(self) -> None:
+    def __init__(self, is_async: bool) -> None:
+        self.is_async = is_async
         self.api: Any = {}
         self.printed_entries: List[str] = []
         process_output = subprocess.run(
@@ -190,21 +191,29 @@ class DocumentationProvider:
     def beautify_method_comment(self, comment: str, indent: str) -> str:
         lines = comment.split("\n")
         result = []
-        in_example = False
+        skip_example = False
         last_was_blank = True
         for line in lines:
             if not line.strip():
                 last_was_blank = True
                 continue
-            if line.strip() == "```js":
-                in_example = True
-            if not in_example:
+            match = re.match(r"\s*```(.+)", line)
+            if match:
+                lang = match[1]
+                if lang in ["html", "yml", "sh", "py", "python"]:
+                    skip_example = False
+                elif lang == "python " + ("async" if self.is_async else "sync"):
+                    skip_example = False
+                    line = "```py"
+                else:
+                    skip_example = True
+            if not skip_example:
                 if last_was_blank:
                     last_was_blank = False
                     result.append("")
                 result.append(self.render_links(line))
-            if line.strip() == "```":
-                in_example = False
+            if skip_example and line.strip() == "```":
+                skip_example = False
         return self.indent_paragraph("\n".join(result), indent)
 
     def render_links(self, comment: str) -> str:

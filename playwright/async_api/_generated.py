@@ -664,16 +664,10 @@ class WebSocket(AsyncBase):
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
         closed before the `event` is fired.
 
-        ```python async
+        ```py
         async with ws.expect_event(event_name) as event_info:
             await ws.click("button")
         value = await event_info.value
-        ```
-
-        ```python sync
-        with ws.expect_event(event_name) as event_info:
-            ws.click("button")
-        value = event_info.value
         ```
 
         Parameters
@@ -4597,15 +4591,9 @@ class Frame(AsyncBase):
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python async
+        ```py
         async with frame.expect_navigation():
             await frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
-        ```
-
-        ```python sync
-        with frame.expect_navigation():
-            frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
@@ -7890,16 +7878,10 @@ class Page(AsyncBase):
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
         closed before the `event` is fired.
 
-        ```python async
+        ```py
         async with page.expect_event(event_name) as event_info:
             await page.click("button")
         value = await event_info.value
-        ```
-
-        ```python sync
-        with page.expect_event(event_name) as event_info:
-            page.click("button")
-        value = event_info.value
         ```
 
         Parameters
@@ -8024,15 +8006,9 @@ class Page(AsyncBase):
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python async
+        ```py
         async with page.expect_navigation():
             await page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
-        ```
-
-        ```python sync
-        with page.expect_navigation():
-            page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
@@ -8770,16 +8746,10 @@ class BrowserContext(AsyncBase):
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
         is closed before the `event` is fired.
 
-        ```python async
+        ```py
         async with context.expect_event("page") as event_info:
             await context.click("button")
         page = await event_info.value
-        ```
-
-        ```python sync
-        with context.expect_event("page") as event_info:
-            context.click("button")
-        page = event_info.value
         ```
 
         Parameters
