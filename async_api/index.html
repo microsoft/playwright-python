@@ -197,7 +197,7 @@ __all__ = [
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
         page.
 
-        &gt; **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
+        &gt; NOTE: The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
         Playwright will discard them as well for an easier to process tree, unless `interestingOnly` is set to `false`.
 
         An example of dumping the entire accessibility tree:
@@ -244,7 +244,7 @@ __all__ = [
 <p>Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
 page.</p>
 <blockquote>
-<p><strong>NOTE</strong> The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
+<p>NOTE: The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
 Playwright will discard them as well for an easier to process tree, unless <code>interestingOnly</code> is set to <code>false</code>.</p>
 </blockquote>
 <p>An example of dumping the entire accessibility tree:</p>
@@ -273,7 +273,7 @@ Playwright will discard them as well for an easier to process tree, unless <code
     Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
     page.
 
-    &gt; **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
+    &gt; NOTE: The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen readers.
     Playwright will discard them as well for an easier to process tree, unless `interestingOnly` is set to `false`.
 
     An example of dumping the entire accessibility tree:
@@ -461,7 +461,7 @@ Playwright will discard them as well for an easier to process tree, unless <code
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         no_viewport : Union[bool, NoneType]
-            Disables the default viewport.
+            Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -599,7 +599,7 @@ Playwright will discard them as well for an easier to process tree, unless <code
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         no_viewport : Union[bool, NoneType]
-            Disables the default viewport.
+            Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -861,7 +861,7 @@ browser server.</p>
 <dt><strong><code>viewport</code></strong> :&ensp;<code>Union[{width: int, height: int}, NoneType]</code></dt>
 <dd>Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <code>no_viewport</code> disables the fixed viewport.</dd>
 <dt><strong><code>no_viewport</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
-<dd>Disables the default viewport.</dd>
+<dd>Does not enforce fixed viewport, allows resizing window in the headed mode.</dd>
 <dt><strong><code>ignore_https_errors</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
 <dd>Whether to ignore HTTPS errors during navigation. Defaults to <code>false</code>.</dd>
 <dt><strong><code>java_script_enabled</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
@@ -963,7 +963,7 @@ the following fields:</dd>
     viewport : Union[{width: int, height: int}, NoneType]
         Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
     no_viewport : Union[bool, NoneType]
-        Disables the default viewport.
+        Does not enforce fixed viewport, allows resizing window in the headed mode.
     ignore_https_errors : Union[bool, NoneType]
         Whether to ignore HTTPS errors during navigation. Defaults to `false`.
     java_script_enabled : Union[bool, NoneType]
@@ -1075,7 +1075,7 @@ testing frameworks should explicitly create <code>browser.new_context()</code> f
 <dt><strong><code>viewport</code></strong> :&ensp;<code>Union[{width: int, height: int}, NoneType]</code></dt>
 <dd>Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <code>no_viewport</code> disables the fixed viewport.</dd>
 <dt><strong><code>no_viewport</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
-<dd>Disables the default viewport.</dd>
+<dd>Does not enforce fixed viewport, allows resizing window in the headed mode.</dd>
 <dt><strong><code>ignore_https_errors</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
 <dd>Whether to ignore HTTPS errors during navigation. Defaults to <code>false</code>.</dd>
 <dt><strong><code>java_script_enabled</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
@@ -1181,7 +1181,7 @@ the following fields:</dd>
     viewport : Union[{width: int, height: int}, NoneType]
         Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
     no_viewport : Union[bool, NoneType]
-        Disables the default viewport.
+        Does not enforce fixed viewport, allows resizing window in the headed mode.
     ignore_https_errors : Union[bool, NoneType]
         Whether to ignore HTTPS errors during navigation. Defaults to `false`.
     java_script_enabled : Union[bool, NoneType]
@@ -1331,7 +1331,7 @@ the following fields:</dd>
         - `page.set_content()`
         - `page.wait_for_navigation()`
 
-        &gt; **NOTE** `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
+        &gt; NOTE: `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
         `browser_context.set_default_navigation_timeout()`.
 
         Parameters
@@ -1356,7 +1356,7 @@ the following fields:</dd>
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        &gt; **NOTE** `page.set_default_navigation_timeout()`, `page.set_default_timeout()` and
+        &gt; NOTE: `page.set_default_navigation_timeout()`, `page.set_default_timeout()` and
         `browser_context.set_default_navigation_timeout()` take priority over `browser_context.set_default_timeout()`.
 
         Parameters
@@ -1524,8 +1524,8 @@ the following fields:</dd>
 
         Sets the context&#39;s geolocation. Passing `null` or `undefined` emulates position unavailable.
 
-        &gt; **NOTE** Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages
-        to read its geolocation.
+        &gt; NOTE: Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages to
+        read its geolocation.
 
         Parameters
         ----------
@@ -1550,7 +1550,7 @@ the following fields:</dd>
         with page-specific extra HTTP headers set with `page.set_extra_http_headers()`. If page overrides a particular
         header, page-specific header value will be used instead of the browser context header value.
 
-        &gt; **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
+        &gt; NOTE: `browser_context.set_extra_http_headers()` does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -1606,7 +1606,7 @@ the following fields:</dd>
 
         An example of overriding `Math.random` before the page loads:
 
-        &gt; **NOTE** The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
+        &gt; NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
         Parameters
@@ -1724,7 +1724,7 @@ the following fields:</dd>
         Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
         handlers.
 
-        &gt; **NOTE** Enabling routing disables http cache.
+        &gt; NOTE: Enabling routing disables http cache.
 
         Parameters
         ----------
@@ -1825,7 +1825,7 @@ the following fields:</dd>
 
         Closes the browser context. All the pages that belong to the browser context will be closed.
 
-        &gt; **NOTE** the default browser context cannot be closed.
+        &gt; NOTE: The default browser context cannot be closed.
         &#34;&#34;&#34;
 
         try:
@@ -1874,22 +1874,22 @@ the following fields:</dd>
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
         is closed before the `event` is fired.
 
-        ```python-async
-        async with context.expect_event(event_name) as event_info:
+        ```python async
+        async with context.expect_event(&#34;page&#34;) as event_info:
             await context.click(&#34;button&#34;)
-        value = await event_info.value
+        page = await event_info.value
         ```
 
-        ```python-sync
-        with context.expect_event(event_name) as event_info:
+        ```python sync
+        with context.expect_event(&#34;page&#34;) as event_info:
             context.click(&#34;button&#34;)
-        value = event_info.value
+        page = event_info.value
         ```
 
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -2054,7 +2054,7 @@ evaluated in the context of the newly attached frame.</p>
 the JavaScript environment, e.g. to seed <code>Math.random</code>.</p>
 <p>An example of overriding <code>Math.random</code> before the page loads:</p>
 <blockquote>
-<p><strong>NOTE</strong> The order of evaluation of multiple scripts installed via <code>browser_context.add_init_script()</code> and
+<p>NOTE: The order of evaluation of multiple scripts installed via <code>browser_context.add_init_script()</code> and
 <code>page.add_init_script()</code> is not defined.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -2084,7 +2084,7 @@ directory. Optional.</dd>
 
     An example of overriding `Math.random` before the page loads:
 
-    &gt; **NOTE** The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
+    &gt; NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
     `page.add_init_script()` is not defined.
 
     Parameters
@@ -2167,7 +2167,7 @@ directory. Optional.</dd>
 <div class="desc"><p>BrowserContext.close</p>
 <p>Closes the browser context. All the pages that belong to the browser context will be closed.</p>
 <blockquote>
-<p><strong>NOTE</strong> the default browser context cannot be closed.</p>
+<p>NOTE: The default browser context cannot be closed.</p>
 </blockquote></div>
 <details class="source">
 <summary>
@@ -2178,7 +2178,7 @@ directory. Optional.</dd>
 
     Closes the browser context. All the pages that belong to the browser context will be closed.
 
-    &gt; **NOTE** the default browser context cannot be closed.
+    &gt; NOTE: The default browser context cannot be closed.
     &#34;&#34;&#34;
 
     try:
@@ -2248,18 +2248,20 @@ are returned.</p>
 <p>Performs action and waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the
 <code>predicate</code> function and waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if browser context
 is closed before the <code>event</code> is fired.</p>
-<pre><code class="language-python-async">async with context.expect_event(event_name) as event_info:
-    await context.click(&quot;button&quot;)
-value = await event_info.value
-</code></pre>
-<pre><code class="language-python-sync">with context.expect_event(event_name) as event_info:
+<p>```python async
+async with context.expect_event("page") as event_info:
+await context.click("button")
+page = await event_info.value</p>
+<pre><code>
+```python sync
+with context.expect_event(&quot;page&quot;) as event_info:
     context.click(&quot;button&quot;)
-value = event_info.value
+page = event_info.value
 </code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>event</code></strong> :&ensp;<code>str</code></dt>
-<dd>Event name, same one typically passed into <code>page.on(event)</code>.</dd>
+<dd>Event name, same one typically passed into <code>*.on(event)</code>.</dd>
 <dt><strong><code>predicate</code></strong> :&ensp;<code>Union[Callable, NoneType]</code></dt>
 <dd>Receives the event data and resolves to truthy value when the waiting should resolve.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
@@ -2284,22 +2286,22 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
     is closed before the `event` is fired.
 
-    ```python-async
-    async with context.expect_event(event_name) as event_info:
+    ```python async
+    async with context.expect_event(&#34;page&#34;) as event_info:
         await context.click(&#34;button&#34;)
-    value = await event_info.value
+    page = await event_info.value
     ```
 
-    ```python-sync
-    with context.expect_event(event_name) as event_info:
+    ```python sync
+    with context.expect_event(&#34;page&#34;) as event_info:
         context.click(&#34;button&#34;)
-    value = event_info.value
+    page = event_info.value
     ```
 
     Parameters
     ----------
     event : str
-        Event name, same one typically passed into `page.on(event)`.
+        Event name, same one typically passed into `*.on(event)`.
     predicate : Union[Callable, NoneType]
         Receives the event data and resolves to truthy value when the waiting should resolve.
     timeout : Union[float, NoneType]
@@ -2623,7 +2625,7 @@ is enabled, every request matching the url pattern will stall unless it's contin
 <p>Page routes (set up with <code>page.route()</code>) take precedence over browser context routes when request matches both
 handlers.</p>
 <blockquote>
-<p><strong>NOTE</strong> Enabling routing disables http cache.</p>
+<p>NOTE: Enabling routing disables http cache.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2656,7 +2658,7 @@ handlers.</p>
     Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
     handlers.
 
-    &gt; **NOTE** Enabling routing disables http cache.
+    &gt; NOTE: Enabling routing disables http cache.
 
     Parameters
     ----------
@@ -2693,7 +2695,7 @@ handlers.</p>
 - <code>page.set_content()</code>
 - <code>page.wait_for_navigation()</code></p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.set_default_navigation_timeout()</code> and <code>page.set_default_timeout()</code> take priority over
+<p>NOTE: <code>page.set_default_navigation_timeout()</code> and <code>page.set_default_timeout()</code> take priority over
 <code>browser_context.set_default_navigation_timeout()</code>.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -2716,7 +2718,7 @@ handlers.</p>
     - `page.set_content()`
     - `page.wait_for_navigation()`
 
-    &gt; **NOTE** `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
+    &gt; NOTE: `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
     `browser_context.set_default_navigation_timeout()`.
 
     Parameters
@@ -2744,7 +2746,7 @@ handlers.</p>
 <div class="desc"><p>BrowserContext.set_default_timeout</p>
 <p>This setting will change the default maximum time for all the methods accepting <code>timeout</code> option.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.set_default_navigation_timeout()</code>, <code>page.set_default_timeout()</code> and
+<p>NOTE: <code>page.set_default_navigation_timeout()</code>, <code>page.set_default_timeout()</code> and
 <code>browser_context.set_default_navigation_timeout()</code> take priority over <code>browser_context.set_default_timeout()</code>.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -2761,7 +2763,7 @@ handlers.</p>
 
     This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-    &gt; **NOTE** `page.set_default_navigation_timeout()`, `page.set_default_timeout()` and
+    &gt; NOTE: `page.set_default_navigation_timeout()`, `page.set_default_timeout()` and
     `browser_context.set_default_navigation_timeout()` take priority over `browser_context.set_default_timeout()`.
 
     Parameters
@@ -2791,7 +2793,7 @@ handlers.</p>
 with page-specific extra HTTP headers set with <code>page.set_extra_http_headers()</code>. If page overrides a particular
 header, page-specific header value will be used instead of the browser context header value.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>browserContext.setExtraHTTPHeaders</code> does not guarantee the order of headers in the outgoing requests.</p>
+<p>NOTE: <code>browser_context.set_extra_http_headers()</code> does not guarantee the order of headers in the outgoing requests.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2809,7 +2811,7 @@ header, page-specific header value will be used instead of the browser context h
     with page-specific extra HTTP headers set with `page.set_extra_http_headers()`. If page overrides a particular
     header, page-specific header value will be used instead of the browser context header value.
 
-    &gt; **NOTE** `browserContext.setExtraHTTPHeaders` does not guarantee the order of headers in the outgoing requests.
+    &gt; NOTE: `browser_context.set_extra_http_headers()` does not guarantee the order of headers in the outgoing requests.
 
     Parameters
     ----------
@@ -2838,8 +2840,8 @@ header, page-specific header value will be used instead of the browser context h
 <div class="desc"><p>BrowserContext.set_geolocation</p>
 <p>Sets the context's geolocation. Passing <code>null</code> or <code>undefined</code> emulates position unavailable.</p>
 <blockquote>
-<p><strong>NOTE</strong> Consider using <code>browser_context.grant_permissions()</code> to grant permissions for the browser context pages
-to read its geolocation.</p>
+<p>NOTE: Consider using <code>browser_context.grant_permissions()</code> to grant permissions for the browser context pages to
+read its geolocation.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2855,8 +2857,8 @@ to read its geolocation.</p>
 
     Sets the context&#39;s geolocation. Passing `null` or `undefined` emulates position unavailable.
 
-    &gt; **NOTE** Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages
-    to read its geolocation.
+    &gt; NOTE: Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages to
+    read its geolocation.
 
     Parameters
     ----------
@@ -3328,7 +3330,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         no_viewport : Union[bool, NoneType]
-            Disables the default viewport.
+            Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
@@ -3738,7 +3740,7 @@ Defaults to 0.</dd>
 <dt><strong><code>viewport</code></strong> :&ensp;<code>Union[{width: int, height: int}, NoneType]</code></dt>
 <dd>Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <code>no_viewport</code> disables the fixed viewport.</dd>
 <dt><strong><code>no_viewport</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
-<dd>Disables the default viewport.</dd>
+<dd>Does not enforce fixed viewport, allows resizing window in the headed mode.</dd>
 <dt><strong><code>ignore_https_errors</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
 <dd>Whether to ignore HTTPS errors during navigation. Defaults to <code>false</code>.</dd>
 <dt><strong><code>java_script_enabled</code></strong> :&ensp;<code>Union[bool, NoneType]</code></dt>
@@ -3890,7 +3892,7 @@ in Firefox.</dd>
     viewport : Union[{width: int, height: int}, NoneType]
         Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
     no_viewport : Union[bool, NoneType]
-        Disables the default viewport.
+        Does not enforce fixed viewport, allows resizing window in the headed mode.
     ignore_https_errors : Union[bool, NoneType]
         Whether to ignore HTTPS errors during navigation. Defaults to `false`.
     java_script_enabled : Union[bool, NoneType]
@@ -4151,6 +4153,7 @@ send messages.</p></div>
     def __init__(self, obj: ChromiumBrowserContextImpl):
         super().__init__(obj)
 
+    @property
     def background_pages(self) -&gt; typing.List[&#34;Page&#34;]:
         &#34;&#34;&#34;ChromiumBrowserContext.background_pages
 
@@ -4160,16 +4163,9 @@ send messages.</p></div>
         -------
         List[Page]
         &#34;&#34;&#34;
+        return mapping.from_impl_list(self._impl_obj.background_pages)
 
-        try:
-            log_api(&#34;=&gt; chromium_browser_context.background_pages started&#34;)
-            result = mapping.from_impl_list(self._impl_obj.background_pages())
-            log_api(&#34;&lt;= chromium_browser_context.background_pages succeded&#34;)
-            return result
-        except Exception as e:
-            log_api(&#34;&lt;= chromium_browser_context.background_pages failed&#34;)
-            raise e
-
+    @property
     def service_workers(self) -&gt; typing.List[&#34;Worker&#34;]:
         &#34;&#34;&#34;ChromiumBrowserContext.service_workers
 
@@ -4179,15 +4175,7 @@ send messages.</p></div>
         -------
         List[Worker]
         &#34;&#34;&#34;
-
-        try:
-            log_api(&#34;=&gt; chromium_browser_context.service_workers started&#34;)
-            result = mapping.from_impl_list(self._impl_obj.service_workers())
-            log_api(&#34;&lt;= chromium_browser_context.service_workers succeded&#34;)
-            return result
-        except Exception as e:
-            log_api(&#34;&lt;= chromium_browser_context.service_workers failed&#34;)
-            raise e
+        return mapping.from_impl_list(self._impl_obj.service_workers)
 
     async def new_cdp_session(self, page: &#34;Page&#34;) -&gt; &#34;CDPSession&#34;:
         &#34;&#34;&#34;ChromiumBrowserContext.new_cdp_session
@@ -4221,11 +4209,9 @@ send messages.</p></div>
 <li>playwright._impl._async_base.AsyncBase</li>
 <li>playwright._impl._impl_to_api_mapping.ImplWrapper</li>
 </ul>
-<h3>Methods</h3>
+<h3>Instance variables</h3>
 <dl>
-<dt id="playwright.async_api.ChromiumBrowserContext.background_pages"><code class="name flex">
-<span>def <span class="ident">background_pages</span></span>(<span>self) ‑> List[playwright.async_api._generated.Page]</span>
-</code></dt>
+<dt id="playwright.async_api.ChromiumBrowserContext.background_pages"><code class="name">var <span class="ident">background_pages</span> : List[playwright.async_api._generated.Page]</code></dt>
 <dd>
 <div class="desc"><p>ChromiumBrowserContext.background_pages</p>
 <p>All existing background pages in the context.</p>
@@ -4238,7 +4224,8 @@ send messages.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def background_pages(self) -&gt; typing.List[&#34;Page&#34;]:
+<pre><code class="python">@property
+def background_pages(self) -&gt; typing.List[&#34;Page&#34;]:
     &#34;&#34;&#34;ChromiumBrowserContext.background_pages
 
     All existing background pages in the context.
@@ -4247,17 +4234,38 @@ send messages.</p></div>
     -------
     List[Page]
     &#34;&#34;&#34;
-
-    try:
-        log_api(&#34;=&gt; chromium_browser_context.background_pages started&#34;)
-        result = mapping.from_impl_list(self._impl_obj.background_pages())
-        log_api(&#34;&lt;= chromium_browser_context.background_pages succeded&#34;)
-        return result
-    except Exception as e:
-        log_api(&#34;&lt;= chromium_browser_context.background_pages failed&#34;)
-        raise e</code></pre>
+    return mapping.from_impl_list(self._impl_obj.background_pages)</code></pre>
 </details>
 </dd>
+<dt id="playwright.async_api.ChromiumBrowserContext.service_workers"><code class="name">var <span class="ident">service_workers</span> : List[playwright.async_api._generated.Worker]</code></dt>
+<dd>
+<div class="desc"><p>ChromiumBrowserContext.service_workers</p>
+<p>All existing service workers in the context.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>]</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def service_workers(self) -&gt; typing.List[&#34;Worker&#34;]:
+    &#34;&#34;&#34;ChromiumBrowserContext.service_workers
+
+    All existing service workers in the context.
+
+    Returns
+    -------
+    List[Worker]
+    &#34;&#34;&#34;
+    return mapping.from_impl_list(self._impl_obj.service_workers)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
 <dt id="playwright.async_api.ChromiumBrowserContext.new_cdp_session"><code class="name flex">
 <span>async def <span class="ident">new_cdp_session</span></span>(<span>self, page: <a title="playwright.async_api.Page" href="#playwright.async_api.Page">Page</a>) ‑> playwright.async_api._generated.CDPSession</span>
 </code></dt>
@@ -4302,41 +4310,6 @@ send messages.</p></div>
         return result
     except Exception as e:
         log_api(&#34;&lt;= chromium_browser_context.new_cdp_session failed&#34;)
-        raise e</code></pre>
-</details>
-</dd>
-<dt id="playwright.async_api.ChromiumBrowserContext.service_workers"><code class="name flex">
-<span>def <span class="ident">service_workers</span></span>(<span>self) ‑> List[playwright.async_api._generated.Worker]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>ChromiumBrowserContext.service_workers</p>
-<p>All existing service workers in the context.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[<a title="playwright.async_api.Worker" href="#playwright.async_api.Worker">Worker</a>]</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def service_workers(self) -&gt; typing.List[&#34;Worker&#34;]:
-    &#34;&#34;&#34;ChromiumBrowserContext.service_workers
-
-    All existing service workers in the context.
-
-    Returns
-    -------
-    List[Worker]
-    &#34;&#34;&#34;
-
-    try:
-        log_api(&#34;=&gt; chromium_browser_context.service_workers started&#34;)
-        result = mapping.from_impl_list(self._impl_obj.service_workers())
-        log_api(&#34;&lt;= chromium_browser_context.service_workers succeded&#34;)
-        return result
-    except Exception as e:
-        log_api(&#34;&lt;= chromium_browser_context.service_workers failed&#34;)
         raise e</code></pre>
 </details>
 </dd>
@@ -4896,14 +4869,14 @@ def type(self) -&gt; str:
             log_api(&#34;&lt;= download.failure failed&#34;)
             raise e
 
-    async def path(self) -&gt; typing.Union[str, NoneType]:
+    async def path(self) -&gt; typing.Union[pathlib.Path, NoneType]:
         &#34;&#34;&#34;Download.path
 
         Returns path to the downloaded file in case of successful download.
 
         Returns
         -------
-        Union[str, NoneType]
+        Union[pathlib.Path, NoneType]
         &#34;&#34;&#34;
 
         try:
@@ -5065,28 +5038,28 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="playwright.async_api.Download.path"><code class="name flex">
-<span>async def <span class="ident">path</span></span>(<span>self) ‑> Union[str, NoneType]</span>
+<span>async def <span class="ident">path</span></span>(<span>self) ‑> Union[pathlib.Path, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Download.path</p>
 <p>Returns path to the downloaded file in case of successful download.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Union[str, NoneType]</code></dt>
+<dt><code>Union[pathlib.Path, NoneType]</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def path(self) -&gt; typing.Union[str, NoneType]:
+<pre><code class="python">async def path(self) -&gt; typing.Union[pathlib.Path, NoneType]:
     &#34;&#34;&#34;Download.path
 
     Returns path to the downloaded file in case of successful download.
 
     Returns
     -------
-    Union[str, NoneType]
+    Union[pathlib.Path, NoneType]
     &#34;&#34;&#34;
 
     try:
@@ -5624,7 +5597,7 @@ def url(self) -&gt; str:
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        &gt; **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        &gt; NOTE: `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
@@ -5750,7 +5723,7 @@ def url(self) -&gt; str:
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        &gt; **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        &gt; NOTE: `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
@@ -6413,7 +6386,7 @@ def url(self) -&gt; str:
         will return immediately. If the selector doesn&#39;t satisfy the condition for the `timeout` milliseconds, the function will
         throw.
 
-        &gt; **NOTE** This method does not work across navigations, use `page.wait_for_selector()` instead.
+        &gt; NOTE: This method does not work across navigations, use `page.wait_for_selector()` instead.
 
         Parameters
         ----------
@@ -6787,7 +6760,7 @@ first click of the <code>dblclick()</code> triggers a navigation event, this met
 <p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a <code><a title="playwright.async_api.TimeoutError" href="#playwright.async_api.TimeoutError">TimeoutError</a></code>.
 Passing zero timeout disables this.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>elementHandle.dblclick()</code> dispatches two <code>click</code> events and a single <code>dblclick</code> event.</p>
+<p>NOTE: <code>elementHandle.dblclick()</code> dispatches two <code>click</code> events and a single <code>dblclick</code> event.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -6841,7 +6814,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
     Passing zero timeout disables this.
 
-    &gt; **NOTE** `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
+    &gt; NOTE: `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
     Parameters
     ----------
@@ -8235,7 +8208,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 <p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a <code><a title="playwright.async_api.TimeoutError" href="#playwright.async_api.TimeoutError">TimeoutError</a></code>.
 Passing zero timeout disables this.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>elementHandle.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
+<p>NOTE: <code>elementHandle.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -8282,7 +8255,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
     Passing zero timeout disables this.
 
-    &gt; **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+    &gt; NOTE: `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
     Parameters
     ----------
@@ -8592,7 +8565,7 @@ become visible/hidden). If at the moment of calling the method <code>selector</c
 will return immediately. If the selector doesn't satisfy the condition for the <code>timeout</code> milliseconds, the function will
 throw.</p>
 <blockquote>
-<p><strong>NOTE</strong> This method does not work across navigations, use <code>page.wait_for_selector()</code> instead.</p>
+<p>NOTE: This method does not work across navigations, use <code>page.wait_for_selector()</code> instead.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -8635,7 +8608,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
     will return immediately. If the selector doesn&#39;t satisfy the condition for the `timeout` milliseconds, the function will
     throw.
 
-    &gt; **NOTE** This method does not work across navigations, use `page.wait_for_selector()` instead.
+    &gt; NOTE: This method does not work across navigations, use `page.wait_for_selector()` instead.
 
     Parameters
     ----------
@@ -8738,7 +8711,6 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         &#34;&#34;&#34;
         return mapping.from_impl(self._impl_obj.element)
 
-    @property
     def is_multiple(self) -&gt; bool:
         &#34;&#34;&#34;FileChooser.is_multiple
 
@@ -8748,7 +8720,15 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
         -------
         bool
         &#34;&#34;&#34;
-        return mapping.from_maybe_impl(self._impl_obj.is_multiple)
+
+        try:
+            log_api(&#34;=&gt; file_chooser.is_multiple started&#34;)
+            result = mapping.from_maybe_impl(self._impl_obj.is_multiple())
+            log_api(&#34;&lt;= file_chooser.is_multiple succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= file_chooser.is_multiple failed&#34;)
+            raise e
 
     async def set_files(
         self,
@@ -8825,32 +8805,6 @@ def element(self) -&gt; &#34;ElementHandle&#34;:
     return mapping.from_impl(self._impl_obj.element)</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.FileChooser.is_multiple"><code class="name">var <span class="ident">is_multiple</span> : bool</code></dt>
-<dd>
-<div class="desc"><p>FileChooser.is_multiple</p>
-<p>Returns whether this file chooser accepts multiple files.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def is_multiple(self) -&gt; bool:
-    &#34;&#34;&#34;FileChooser.is_multiple
-
-    Returns whether this file chooser accepts multiple files.
-
-    Returns
-    -------
-    bool
-    &#34;&#34;&#34;
-    return mapping.from_maybe_impl(self._impl_obj.is_multiple)</code></pre>
-</details>
-</dd>
 <dt id="playwright.async_api.FileChooser.page"><code class="name">var <span class="ident">page</span> : playwright.async_api._generated.Page</code></dt>
 <dd>
 <div class="desc"><p>FileChooser.page</p>
@@ -8880,6 +8834,41 @@ def page(self) -&gt; &#34;Page&#34;:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="playwright.async_api.FileChooser.is_multiple"><code class="name flex">
+<span>def <span class="ident">is_multiple</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FileChooser.is_multiple</p>
+<p>Returns whether this file chooser accepts multiple files.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_multiple(self) -&gt; bool:
+    &#34;&#34;&#34;FileChooser.is_multiple
+
+    Returns whether this file chooser accepts multiple files.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; file_chooser.is_multiple started&#34;)
+        result = mapping.from_maybe_impl(self._impl_obj.is_multiple())
+        log_api(&#34;&lt;= file_chooser.is_multiple succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= file_chooser.is_multiple failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
 <dt id="playwright.async_api.FileChooser.set_files"><code class="name flex">
 <span>async def <span class="ident">set_files</span></span>(<span>self, files: Union[str, pathlib.Path, playwright._impl._api_structures.FilePayload, List[Union[str, pathlib.Path]], List[playwright._impl._api_structures.FilePayload]], timeout: float = None, no_wait_after: bool = None) ‑> NoneType</span>
 </code></dt>
@@ -9077,8 +9066,7 @@ dict(one=1, two=2)</p></div>
 
         If the name is empty, returns the id attribute instead.
 
-        &gt; **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed
-        later.
+        &gt; NOTE: This value is calculated once when the frame is created, and will not update if the attribute is changed later.
 
         Returns
         -------
@@ -9143,9 +9131,9 @@ dict(one=1, two=2)</p></div>
         &#34;Not Found&#34; and 500 &#34;Internal Server Error&#34;.  The status code for such responses can be retrieved by calling
         `response.status()`.
 
-        &gt; **NOTE** `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation
-        to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-        &gt; **NOTE** Headless mode doesn&#39;t support navigation to a PDF document. See the
+        &gt; NOTE: `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
+        &gt; NOTE: Headless mode doesn&#39;t support navigation to a PDF document. See the
         [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 
         Parameters
@@ -9199,7 +9187,7 @@ dict(one=1, two=2)</p></div>
         This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
         the frame to navigate. Consider this example:
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Parameters
@@ -10111,7 +10099,7 @@ dict(one=1, two=2)</p></div>
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        &gt; **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        &gt; NOTE: `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Parameters
         ----------
@@ -10183,7 +10171,7 @@ dict(one=1, two=2)</p></div>
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        &gt; **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        &gt; NOTE: `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Parameters
         ----------
@@ -10922,52 +10910,6 @@ dict(one=1, two=2)</p></div>
             log_api(&#34;&lt;= frame.title failed&#34;)
             raise e
 
-    def expect_load_state(
-        self,
-        state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
-        timeout: float = None,
-    ) -&gt; AsyncEventContextManager:
-        &#34;&#34;&#34;Frame.expect_load_state
-
-        Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
-        by default. The navigation must have been committed when this method is called. If current document has already reached
-        the required state, resolves immediately.
-
-        ```python-async
-        async with frame.expect_load_state():
-            await frame.click(&#39;button&#39;) # Click triggers navigation.
-        # Context manager waits for &#39;load&#39; event.
-        ```
-
-        ```python-sync
-        with frame.expect_load_state():
-            frame.click(&#39;button&#39;) # Click triggers navigation.
-        # Context manager waits for &#39;load&#39; event.
-        ```
-
-        Parameters
-        ----------
-        state : Union[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;, NoneType]
-            Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-            document, the method resolves immediately. Can be one of:
-            - `&#39;load&#39;` - wait for the `load` event to be fired.
-            - `&#39;domcontentloaded&#39;` - wait for the `DOMContentLoaded` event to be fired.
-            - `&#39;networkidle&#39;` - wait until there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
-            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-            changed by using the `browser_context.set_default_navigation_timeout()`,
-            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-            `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        EventContextManager
-        &#34;&#34;&#34;
-
-        return AsyncEventContextManager(
-            self._impl_obj.wait_for_load_state(state, timeout)
-        )
-
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
@@ -10976,7 +10918,7 @@ dict(one=1, two=2)</p></div>
     ) -&gt; AsyncEventContextManager:
         &#34;&#34;&#34;Frame.expect_navigation
 
-        Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
         response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
         navigation will resolve with `null`.
 
@@ -10984,19 +10926,19 @@ dict(one=1, two=2)</p></div>
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python-async
+        ```python async
         async with frame.expect_navigation():
             await frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        ```python-sync
+        ```python sync
         with frame.expect_navigation():
             frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Parameters
@@ -11059,8 +11001,7 @@ def child_frames(self) -&gt; typing.List[&#34;Frame&#34;]:
 <p>Returns frame's name attribute as specified in the tag.</p>
 <p>If the name is empty, returns the id attribute instead.</p>
 <blockquote>
-<p><strong>NOTE</strong> This value is calculated once when the frame is created, and will not update if the attribute is changed
-later.</p>
+<p>NOTE: This value is calculated once when the frame is created, and will not update if the attribute is changed later.</p>
 </blockquote>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -11079,8 +11020,7 @@ def name(self) -&gt; str:
 
     If the name is empty, returns the id attribute instead.
 
-    &gt; **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed
-    later.
+    &gt; NOTE: This value is calculated once when the frame is created, and will not update if the attribute is changed later.
 
     Returns
     -------
@@ -11576,7 +11516,7 @@ first click of the <code>dblclick()</code> triggers a navigation event, this met
 <p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a <code><a title="playwright.async_api.TimeoutError" href="#playwright.async_api.TimeoutError">TimeoutError</a></code>.
 Passing zero timeout disables this.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>frame.dblclick()</code> dispatches two <code>click</code> events and a single <code>dblclick</code> event.</p>
+<p>NOTE: <code>frame.dblclick()</code> dispatches two <code>click</code> events and a single <code>dblclick</code> event.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -11634,7 +11574,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
     Passing zero timeout disables this.
 
-    &gt; **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
+    &gt; NOTE: `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
     Parameters
     ----------
@@ -12115,113 +12055,31 @@ Optional.</dd>
         raise e</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.Frame.expect_load_state"><code class="name flex">
-<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: float = None) ‑> playwright._impl._async_base.AsyncEventContextManager</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Frame.expect_load_state</p>
-<p>Performs action and waits for the required load state. It resolves when the page reaches a required load state, <code>load</code>
-by default. The navigation must have been committed when this method is called. If current document has already reached
-the required state, resolves immediately.</p>
-<pre><code class="language-python-async">async with frame.expect_load_state():
-    await frame.click('button') # Click triggers navigation.
-# Context manager waits for 'load' event.
-</code></pre>
-<pre><code class="language-python-sync">with frame.expect_load_state():
-    frame.click('button') # Click triggers navigation.
-# Context manager waits for 'load' event.
-</code></pre>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>state</code></strong> :&ensp;<code>Union["domcontentloaded", "load", "networkidle", NoneType]</code></dt>
-<dd>Optional load state to wait for, defaults to <code>load</code>. If the state has been already reached while loading current
-document, the method resolves immediately. Can be one of:
-- <code>'load'</code> - wait for the <code>load</code> event to be fired.
-- <code>'domcontentloaded'</code> - wait for the <code>DOMContentLoaded</code> event to be fired.
-- <code>'networkidle'</code> - wait until there are no network connections for at least <code>500</code> ms.</dd>
-<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
-<dd>Maximum operation time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be
-changed by using the <code>browser_context.set_default_navigation_timeout()</code>,
-<code>browser_context.set_default_timeout()</code>, <code>page.set_default_navigation_timeout()</code> or
-<code>page.set_default_timeout()</code> methods.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>EventContextManager</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def expect_load_state(
-    self,
-    state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
-    timeout: float = None,
-) -&gt; AsyncEventContextManager:
-    &#34;&#34;&#34;Frame.expect_load_state
-
-    Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
-    by default. The navigation must have been committed when this method is called. If current document has already reached
-    the required state, resolves immediately.
-
-    ```python-async
-    async with frame.expect_load_state():
-        await frame.click(&#39;button&#39;) # Click triggers navigation.
-    # Context manager waits for &#39;load&#39; event.
-    ```
-
-    ```python-sync
-    with frame.expect_load_state():
-        frame.click(&#39;button&#39;) # Click triggers navigation.
-    # Context manager waits for &#39;load&#39; event.
-    ```
-
-    Parameters
-    ----------
-    state : Union[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;, NoneType]
-        Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-        document, the method resolves immediately. Can be one of:
-        - `&#39;load&#39;` - wait for the `load` event to be fired.
-        - `&#39;domcontentloaded&#39;` - wait for the `DOMContentLoaded` event to be fired.
-        - `&#39;networkidle&#39;` - wait until there are no network connections for at least `500` ms.
-    timeout : Union[float, NoneType]
-        Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-        changed by using the `browser_context.set_default_navigation_timeout()`,
-        `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-        `page.set_default_timeout()` methods.
-
-    Returns
-    -------
-    EventContextManager
-    &#34;&#34;&#34;
-
-    return AsyncEventContextManager(
-        self._impl_obj.wait_for_load_state(state, timeout)
-    )</code></pre>
-</details>
-</dd>
 <dt id="playwright.async_api.Frame.expect_navigation"><code class="name flex">
 <span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, wait_until: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: float = None) ‑> playwright._impl._async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame.expect_navigation</p>
-<p>Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+<p>Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
 response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
 navigation will resolve with <code>null</code>.</p>
 <p>This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
 cause the page to navigate. e.g. The click target has an <code>onclick</code> handler that triggers navigation from a <code>setTimeout</code>.
 Consider this example:</p>
-<pre><code class="language-python-async">async with frame.expect_navigation():
-    await frame.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
-# Context manager waited for the navigation to happen.
-</code></pre>
-<pre><code class="language-python-sync">with frame.expect_navigation():
+<p>```python async
+async with frame.expect_navigation():
+await frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation</p>
+<h1 id="context-manager-waited-for-the-navigation-to-happen">Context manager waited for the navigation to happen.</h1>
+<pre><code>
+```python sync
+with frame.expect_navigation():
     frame.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
 # Context manager waited for the navigation to happen.
 </code></pre>
-<p><strong>NOTE</strong> Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
+<blockquote>
+<p>NOTE: Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
 considered a navigation.</p>
+</blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[Callable[[str], bool], Pattern, str, NoneType]</code></dt>
@@ -12254,7 +12112,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 ) -&gt; AsyncEventContextManager:
     &#34;&#34;&#34;Frame.expect_navigation
 
-    Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+    Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
     response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
     navigation will resolve with `null`.
 
@@ -12262,19 +12120,19 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
     Consider this example:
 
-    ```python-async
+    ```python async
     async with frame.expect_navigation():
         await frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
     # Context manager waited for the navigation to happen.
     ```
 
-    ```python-sync
+    ```python sync
     with frame.expect_navigation():
         frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
     # Context manager waited for the navigation to happen.
     ```
 
-    **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+    &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
     considered a navigation.
 
     Parameters
@@ -12552,9 +12410,9 @@ last redirect.</p>
 The status code for such responses can be retrieved by calling
 <code>response.status()</code>.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>frame.goto</code> either throws an error or returns a main resource response. The only exceptions are navigation
-to <code>about:blank</code> or navigation to the same URL with a different hash, which would succeed and return <code>null</code>.
-<strong>NOTE</strong> Headless mode doesn't support navigation to a PDF document. See the
+<p>NOTE: <code>frame.goto</code> either throws an error or returns a main resource response. The only exceptions are navigation to
+<code>about:blank</code> or navigation to the same URL with a different hash, which would succeed and return <code>null</code>.
+NOTE: Headless mode doesn't support navigation to a PDF document. See the
 <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=761295">upstream issue</a>.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -12607,9 +12465,9 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     &#34;Not Found&#34; and 500 &#34;Internal Server Error&#34;.  The status code for such responses can be retrieved by calling
     `response.status()`.
 
-    &gt; **NOTE** `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation
-    to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-    &gt; **NOTE** Headless mode doesn&#39;t support navigation to a PDF document. See the
+    &gt; NOTE: `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+    `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
+    &gt; NOTE: Headless mode doesn&#39;t support navigation to a PDF document. See the
     [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 
     Parameters
@@ -13689,7 +13547,7 @@ element is detached during the checks, the whole action is retried.
 <p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a <code><a title="playwright.async_api.TimeoutError" href="#playwright.async_api.TimeoutError">TimeoutError</a></code>.
 Passing zero timeout disables this.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>frame.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
+<p>NOTE: <code>frame.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -13740,7 +13598,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
     Passing zero timeout disables this.
 
-    &gt; **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+    &gt; NOTE: `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
     Parameters
     ----------
@@ -14212,8 +14070,10 @@ last redirect. In case of navigation to a different anchor or navigation due to 
 resolve with <code>null</code>.</p>
 <p>This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
 the frame to navigate. Consider this example:</p>
-<p><strong>NOTE</strong> Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
+<blockquote>
+<p>NOTE: Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
 considered a navigation.</p>
+</blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[Callable[[str], bool], Pattern, str, NoneType]</code></dt>
@@ -14253,7 +14113,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
     the frame to navigate. Consider this example:
 
-    **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+    &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
     considered a navigation.
 
     Parameters
@@ -14699,7 +14559,7 @@ dict(one=1, two=2)</p></div>
 
         Returns a JSON representation of the object. If the object has a `toJSON` function, it **will not be called**.
 
-        &gt; **NOTE** The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
+        &gt; NOTE: The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
         error if the object has circular references.
 
         Returns
@@ -15034,7 +14894,7 @@ Optional.</dd>
 <div class="desc"><p>JSHandle.json_value</p>
 <p>Returns a JSON representation of the object. If the object has a <code>toJSON</code> function, it <strong>will not be called</strong>.</p>
 <blockquote>
-<p><strong>NOTE</strong> The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
+<p>NOTE: The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
 error if the object has circular references.</p>
 </blockquote>
 <h2 id="returns">Returns</h2>
@@ -15051,7 +14911,7 @@ error if the object has circular references.</p>
 
     Returns a JSON representation of the object. If the object has a `toJSON` function, it **will not be called**.
 
-    &gt; **NOTE** The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
+    &gt; NOTE: The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
     error if the object has circular references.
 
     Returns
@@ -15111,7 +14971,7 @@ error if the object has circular references.</p>
         [repeat](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat) set to true. To release the key, use
         `keyboard.up()`.
 
-        &gt; **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
+        &gt; NOTE: Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 
         Parameters
         ----------
@@ -15153,7 +15013,7 @@ error if the object has circular references.</p>
 
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
-        &gt; **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
+        &gt; NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
         ----------
@@ -15179,7 +15039,7 @@ error if the object has circular references.</p>
 
         To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
 
-        &gt; **NOTE** Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
+        &gt; NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
         ----------
@@ -15269,7 +15129,7 @@ active. To release the modifier key, use <code>keyboard.up()</code>.</p>
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat">repeat</a> set to true. To release the key, use
 <code>keyboard.up()</code>.</p>
 <blockquote>
-<p><strong>NOTE</strong> Modifier keys DO influence <code>keyboard.down</code>. Holding down <code>Shift</code> will type the text in upper case.</p>
+<p>NOTE: Modifier keys DO influence <code>keyboard.down</code>. Holding down <code>Shift</code> will type the text in upper case.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -15306,7 +15166,7 @@ active. To release the modifier key, use <code>keyboard.up()</code>.</p>
     [repeat](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat) set to true. To release the key, use
     `keyboard.up()`.
 
-    &gt; **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
+    &gt; NOTE: Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 
     Parameters
     ----------
@@ -15331,7 +15191,7 @@ active. To release the modifier key, use <code>keyboard.up()</code>.</p>
 <div class="desc"><p>Keyboard.insert_text</p>
 <p>Dispatches only <code>input</code> event, does not emit the <code>keydown</code>, <code>keyup</code> or <code>keypress</code> events.</p>
 <blockquote>
-<p><strong>NOTE</strong> Modifier keys DO NOT effect <code>keyboard.insertText</code>. Holding down <code>Shift</code> will not type the text in upper case.</p>
+<p>NOTE: Modifier keys DO NOT effect <code>keyboard.insertText</code>. Holding down <code>Shift</code> will not type the text in upper case.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -15347,7 +15207,7 @@ active. To release the modifier key, use <code>keyboard.up()</code>.</p>
 
     Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
-    &gt; **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
+    &gt; NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 
     Parameters
     ----------
@@ -15445,7 +15305,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 <p>Sends a <code>keydown</code>, <code>keypress</code>/<code>input</code>, and <code>keyup</code> event for each character in the text.</p>
 <p>To press a special key, like <code>Control</code> or <code>ArrowDown</code>, use <code>keyboard.press()</code>.</p>
 <blockquote>
-<p><strong>NOTE</strong> Modifier keys DO NOT effect <code>keyboard.type</code>. Holding down <code>Shift</code> will not type the text in upper case.</p>
+<p>NOTE: Modifier keys DO NOT effect <code>keyboard.type</code>. Holding down <code>Shift</code> will not type the text in upper case.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -15465,7 +15325,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
     To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
 
-    &gt; **NOTE** Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
+    &gt; NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 
     Parameters
     ----------
@@ -16046,13 +15906,23 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
+    def viewport_size(self) -&gt; typing.Union[ViewportSize, NoneType]:
+        &#34;&#34;&#34;Page.viewport_size
+
+        Returns
+        -------
+        Union[{width: int, height: int}, NoneType]
+        &#34;&#34;&#34;
+        return mapping.from_impl_nullable(self._impl_obj.viewport_size)
+
+    @property
     def workers(self) -&gt; typing.List[&#34;Worker&#34;]:
         &#34;&#34;&#34;Page.workers
 
         This method returns all of the dedicated [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
         associated with the page.
 
-        &gt; **NOTE** This does not contain ServiceWorkers
+        &gt; NOTE: This does not contain ServiceWorkers
 
         Returns
         -------
@@ -16134,7 +16004,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         - `page.set_content()`
         - `page.wait_for_navigation()`
 
-        &gt; **NOTE** `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
+        &gt; NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
         `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
 
         Parameters
@@ -16159,7 +16029,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-        &gt; **NOTE** `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`.
+        &gt; NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`.
 
         Parameters
         ----------
@@ -16825,7 +16695,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         See `browser_context.expose_function()` for context-wide exposed function.
 
-        &gt; **NOTE** Functions installed via `page.exposeFunction` survive navigations.
+        &gt; NOTE: Functions installed via `page.expose_function()` survive navigations.
 
         An example of adding an `md5` function to the page:
 
@@ -16866,7 +16736,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         See `browser_context.expose_binding()` for the context-wide version.
 
-        &gt; **NOTE** Functions installed via `page.exposeBinding` survive navigations.
+        &gt; NOTE: Functions installed via `page.expose_binding()` survive navigations.
 
         An example of exposing page URL to all frames in a page:
 
@@ -16901,7 +16771,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         The extra HTTP headers will be sent with every request the page initiates.
 
-        &gt; **NOTE** page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.
+        &gt; NOTE: `page.set_extra_http_headers()` does not guarantee the order of headers in the outgoing requests.
 
         Parameters
         ----------
@@ -17001,9 +16871,9 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         Found&#34; and 500 &#34;Internal Server Error&#34;.  The status code for such responses can be retrieved by calling
         `response.status()`.
 
-        &gt; **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        &gt; NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
         `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-        &gt; **NOTE** Headless mode doesn&#39;t support navigation to a PDF document. See the
+        &gt; NOTE: Headless mode doesn&#39;t support navigation to a PDF document. See the
         [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 
         Shortcut for main frame&#39;s `frame.goto()`
@@ -17139,7 +17009,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Shortcut for main frame&#39;s `frame.wait_for_navigation()`.
@@ -17264,7 +17134,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -17430,23 +17300,6 @@ modifier, modifier is pressed and being held while the subsequent key is being p
             log_api(&#34;&lt;= page.set_viewport_size failed&#34;)
             raise e
 
-    def viewport_size(self) -&gt; typing.Union[ViewportSize, NoneType]:
-        &#34;&#34;&#34;Page.viewport_size
-
-        Returns
-        -------
-        Union[{width: int, height: int}, NoneType]
-        &#34;&#34;&#34;
-
-        try:
-            log_api(&#34;=&gt; page.viewport_size started&#34;)
-            result = mapping.from_impl_nullable(self._impl_obj.viewport_size())
-            log_api(&#34;&lt;= page.viewport_size succeded&#34;)
-            return result
-        except Exception as e:
-            log_api(&#34;&lt;= page.viewport_size failed&#34;)
-            raise e
-
     async def bring_to_front(self) -&gt; NoneType:
         &#34;&#34;&#34;Page.bring_to_front
 
@@ -17477,7 +17330,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         An example of overriding `Math.random` before the page loads:
 
-        &gt; **NOTE** The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
+        &gt; NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
         Parameters
@@ -17514,7 +17367,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         Once routing is enabled, every request matching the url pattern will stall unless it&#39;s continued, fulfilled or aborted.
 
-        &gt; **NOTE** The handler will only be called for the first url if the response is a redirect.
+        &gt; NOTE: The handler will only be called for the first url if the response is a redirect.
 
         An example of a naïve handler that aborts all image requests:
 
@@ -17523,7 +17376,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
         matches both handlers.
 
-        &gt; **NOTE** Enabling routing disables http cache.
+        &gt; NOTE: Enabling routing disables http cache.
 
         Parameters
         ----------
@@ -17593,7 +17446,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         Returns the buffer with the captured screenshot.
 
-        &gt; **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
+        &gt; NOTE: Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
         discussion.
 
         Parameters
@@ -17669,8 +17522,8 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         By default, `page.close()` **does not** run `beforeunload` handlers.
 
-        &gt; **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
-        &gt; and should be handled manually via [`event: Page.dialog`] event.
+        &gt; NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
+        via [`event: Page.dialog`] event.
 
         Parameters
         ----------
@@ -17814,7 +17667,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        &gt; **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
+        &gt; NOTE: `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
         Shortcut for main frame&#39;s `frame.dblclick()`.
 
@@ -17888,7 +17741,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
         Passing zero timeout disables this.
 
-        &gt; **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        &gt; NOTE: `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
         Shortcut for main frame&#39;s `frame.tap()`.
 
@@ -18651,12 +18504,12 @@ modifier, modifier is pressed and being held while the subsequent key is being p
 
         Returns the PDF buffer.
 
-        &gt; **NOTE** Generating a pdf is currently only supported in Chromium headless.
+        &gt; NOTE: Generating a pdf is currently only supported in Chromium headless.
 
         `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
         `page.emulate_media()` before calling `page.pdf()`:
 
-        &gt; **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
+        &gt; NOTE: By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
         [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust) property to
         force rendering of exact colors.
 
@@ -18686,9 +18539,8 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         - `A5`: 5.83in x 8.27in
         - `A6`: 4.13in x 5.83in
 
-        &gt; **NOTE** `headerTemplate` and `footerTemplate` markup have the following limitations:
-        &gt; 1. Script tags inside templates are not evaluated.
-        &gt; 2. Page styles are not visible inside templates.
+        &gt; NOTE: `headerTemplate` and `footerTemplate` markup have the following limitations: &gt; 1. Script tags inside templates
+        are not evaluated. &gt; 2. Page styles are not visible inside templates.
 
         Parameters
         ----------
@@ -18766,13 +18618,13 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
         closed before the `event` is fired.
 
-        ```python-async
+        ```python async
         async with page.expect_event(event_name) as event_info:
             await page.click(&#34;button&#34;)
         value = await event_info.value
         ```
 
-        ```python-sync
+        ```python sync
         with page.expect_event(event_name) as event_info:
             page.click(&#34;button&#34;)
         value = event_info.value
@@ -18781,7 +18633,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -18884,54 +18736,6 @@ modifier, modifier is pressed and being held while the subsequent key is being p
             self._impl_obj.wait_for_event(event, predicate, timeout)
         )
 
-    def expect_load_state(
-        self,
-        state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
-        timeout: float = None,
-    ) -&gt; AsyncEventContextManager:
-        &#34;&#34;&#34;Page.expect_load_state
-
-        Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
-        by default. The navigation must have been committed when this method is called. If current document has already reached
-        the required state, resolves immediately.
-
-        ```python-async
-        async with page.expect_load_state():
-            await page.click(&#39;button&#39;) # Click triggers navigation.
-        # Context manager waits for &#39;load&#39; event.
-        ```
-
-        ```python-sync
-        with page.expect_load_state():
-            page.click(&#39;button&#39;) # Click triggers navigation.
-        # Context manager waits for &#39;load&#39; event.
-        ```
-
-        Shortcut for main frame&#39;s `frame.expect_load_state()`.
-
-        Parameters
-        ----------
-        state : Union[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;, NoneType]
-            Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-            document, the method resolves immediately. Can be one of:
-            - `&#39;load&#39;` - wait for the `load` event to be fired.
-            - `&#39;domcontentloaded&#39;` - wait for the `DOMContentLoaded` event to be fired.
-            - `&#39;networkidle&#39;` - wait until there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
-            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-            changed by using the `browser_context.set_default_navigation_timeout()`,
-            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-            `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        EventContextManager
-        &#34;&#34;&#34;
-
-        return AsyncEventContextManager(
-            self._impl_obj.wait_for_load_state(state, timeout)
-        )
-
     def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
@@ -18940,7 +18744,7 @@ modifier, modifier is pressed and being held while the subsequent key is being p
     ) -&gt; AsyncEventContextManager:
         &#34;&#34;&#34;Page.expect_navigation
 
-        Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
         response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
         navigation will resolve with `null`.
 
@@ -18948,19 +18752,19 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python-async
+        ```python async
         async with page.expect_navigation():
             await page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        ```python-sync
+        ```python sync
         with page.expect_navigation():
             page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
-        **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+        &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
         Shortcut for main frame&#39;s `frame.expect_navigation()`.
@@ -19336,13 +19140,36 @@ def video(self) -&gt; typing.Union[&#34;Video&#34;, NoneType]:
     return mapping.from_impl_nullable(self._impl_obj.video)</code></pre>
 </details>
 </dd>
+<dt id="playwright.async_api.Page.viewport_size"><code class="name">var <span class="ident">viewport_size</span> : Union[playwright._impl._api_structures.ViewportSize, NoneType]</code></dt>
+<dd>
+<div class="desc"><p>Page.viewport_size</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Union[{width: int, height: int}, NoneType]</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def viewport_size(self) -&gt; typing.Union[ViewportSize, NoneType]:
+    &#34;&#34;&#34;Page.viewport_size
+
+    Returns
+    -------
+    Union[{width: int, height: int}, NoneType]
+    &#34;&#34;&#34;
+    return mapping.from_impl_nullable(self._impl_obj.viewport_size)</code></pre>
+</details>
+</dd>
 <dt id="playwright.async_api.Page.workers"><code class="name">var <span class="ident">workers</span> : List[playwright.async_api._generated.Worker]</code></dt>
 <dd>
 <div class="desc"><p>Page.workers</p>
 <p>This method returns all of the dedicated <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API">WebWorkers</a>
 associated with the page.</p>
 <blockquote>
-<p><strong>NOTE</strong> This does not contain ServiceWorkers</p>
+<p>NOTE: This does not contain ServiceWorkers</p>
 </blockquote>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -19360,7 +19187,7 @@ def workers(self) -&gt; typing.List[&#34;Worker&#34;]:
     This method returns all of the dedicated [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
     associated with the page.
 
-    &gt; **NOTE** This does not contain ServiceWorkers
+    &gt; NOTE: This does not contain ServiceWorkers
 
     Returns
     -------
@@ -19385,7 +19212,7 @@ attached frame.</p>
 the JavaScript environment, e.g. to seed <code>Math.random</code>.</p>
 <p>An example of overriding <code>Math.random</code> before the page loads:</p>
 <blockquote>
-<p><strong>NOTE</strong> The order of evaluation of multiple scripts installed via <code>browser_context.add_init_script()</code> and
+<p>NOTE: The order of evaluation of multiple scripts installed via <code>browser_context.add_init_script()</code> and
 <code>page.add_init_script()</code> is not defined.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -19415,7 +19242,7 @@ directory. Optional.</dd>
 
     An example of overriding `Math.random` before the page loads:
 
-    &gt; **NOTE** The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
+    &gt; NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
     `page.add_init_script()` is not defined.
 
     Parameters
@@ -19837,8 +19664,8 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 <code>runBeforeUnload</code> is <code>true</code> the method will run unload handlers, but will <strong>not</strong> wait for the page to close.</p>
 <p>By default, <code>page.close()</code> <strong>does not</strong> run <code>beforeunload</code> handlers.</p>
 <blockquote>
-<p><strong>NOTE</strong> if <code>runBeforeUnload</code> is passed as true, a <code>beforeunload</code> dialog might be summoned
-and should be handled manually via [<code>event: Page.dialog</code>] event.</p>
+<p>NOTE: if <code>runBeforeUnload</code> is passed as true, a <code>beforeunload</code> dialog might be summoned and should be handled manually
+via [<code>event: Page.dialog</code>] event.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -19858,8 +19685,8 @@ and should be handled manually via [<code>event: Page.dialog</code>] event.</p>
 
     By default, `page.close()` **does not** run `beforeunload` handlers.
 
-    &gt; **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned
-    &gt; and should be handled manually via [`event: Page.dialog`] event.
+    &gt; NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
+    via [`event: Page.dialog`] event.
 
     Parameters
     ----------
@@ -19931,7 +19758,7 @@ first click of the <code>dblclick()</code> triggers a navigation event, this met
 <p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a <code><a title="playwright.async_api.TimeoutError" href="#playwright.async_api.TimeoutError">TimeoutError</a></code>.
 Passing zero timeout disables this.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.dblclick()</code> dispatches two <code>click</code> events and a single <code>dblclick</code> event.</p>
+<p>NOTE: <code>page.dblclick()</code> dispatches two <code>click</code> events and a single <code>dblclick</code> event.</p>
 </blockquote>
 <p>Shortcut for main frame's <code>frame.dblclick()</code>.</p>
 <h2 id="parameters">Parameters</h2>
@@ -19990,7 +19817,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
     Passing zero timeout disables this.
 
-    &gt; **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
+    &gt; NOTE: `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
     Shortcut for main frame&#39;s `frame.dblclick()`.
 
@@ -20646,18 +20473,20 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
 <p>Performs action and waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the
 <code>predicate</code> function and waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the page is
 closed before the <code>event</code> is fired.</p>
-<pre><code class="language-python-async">async with page.expect_event(event_name) as event_info:
-    await page.click(&quot;button&quot;)
-value = await event_info.value
-</code></pre>
-<pre><code class="language-python-sync">with page.expect_event(event_name) as event_info:
+<p>```python async
+async with page.expect_event(event_name) as event_info:
+await page.click("button")
+value = await event_info.value</p>
+<pre><code>
+```python sync
+with page.expect_event(event_name) as event_info:
     page.click(&quot;button&quot;)
 value = event_info.value
 </code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>event</code></strong> :&ensp;<code>str</code></dt>
-<dd>Event name, same one typically passed into <code>page.on(event)</code>.</dd>
+<dd>Event name, same one typically passed into <code>*.on(event)</code>.</dd>
 <dt><strong><code>predicate</code></strong> :&ensp;<code>Union[Callable, NoneType]</code></dt>
 <dd>Receives the event data and resolves to truthy value when the waiting should resolve.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
@@ -20682,13 +20511,13 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
     closed before the `event` is fired.
 
-    ```python-async
+    ```python async
     async with page.expect_event(event_name) as event_info:
         await page.click(&#34;button&#34;)
     value = await event_info.value
     ```
 
-    ```python-sync
+    ```python sync
     with page.expect_event(event_name) as event_info:
         page.click(&#34;button&#34;)
     value = event_info.value
@@ -20697,7 +20526,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     Parameters
     ----------
     event : str
-        Event name, same one typically passed into `page.on(event)`.
+        Event name, same one typically passed into `*.on(event)`.
     predicate : Union[Callable, NoneType]
         Receives the event data and resolves to truthy value when the waiting should resolve.
     timeout : Union[float, NoneType]
@@ -20769,116 +20598,31 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     )</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.Page.expect_load_state"><code class="name flex">
-<span>def <span class="ident">expect_load_state</span></span>(<span>self, state: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: float = None) ‑> playwright._impl._async_base.AsyncEventContextManager</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Page.expect_load_state</p>
-<p>Performs action and waits for the required load state. It resolves when the page reaches a required load state, <code>load</code>
-by default. The navigation must have been committed when this method is called. If current document has already reached
-the required state, resolves immediately.</p>
-<pre><code class="language-python-async">async with page.expect_load_state():
-    await page.click('button') # Click triggers navigation.
-# Context manager waits for 'load' event.
-</code></pre>
-<pre><code class="language-python-sync">with page.expect_load_state():
-    page.click('button') # Click triggers navigation.
-# Context manager waits for 'load' event.
-</code></pre>
-<p>Shortcut for main frame's <code>frame.expect_load_state()</code>.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>state</code></strong> :&ensp;<code>Union["domcontentloaded", "load", "networkidle", NoneType]</code></dt>
-<dd>Optional load state to wait for, defaults to <code>load</code>. If the state has been already reached while loading current
-document, the method resolves immediately. Can be one of:
-- <code>'load'</code> - wait for the <code>load</code> event to be fired.
-- <code>'domcontentloaded'</code> - wait for the <code>DOMContentLoaded</code> event to be fired.
-- <code>'networkidle'</code> - wait until there are no network connections for at least <code>500</code> ms.</dd>
-<dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
-<dd>Maximum operation time in milliseconds, defaults to 30 seconds, pass <code>0</code> to disable timeout. The default value can be
-changed by using the <code>browser_context.set_default_navigation_timeout()</code>,
-<code>browser_context.set_default_timeout()</code>, <code>page.set_default_navigation_timeout()</code> or
-<code>page.set_default_timeout()</code> methods.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>EventContextManager</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def expect_load_state(
-    self,
-    state: Literal[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;] = None,
-    timeout: float = None,
-) -&gt; AsyncEventContextManager:
-    &#34;&#34;&#34;Page.expect_load_state
-
-    Performs action and waits for the required load state. It resolves when the page reaches a required load state, `load`
-    by default. The navigation must have been committed when this method is called. If current document has already reached
-    the required state, resolves immediately.
-
-    ```python-async
-    async with page.expect_load_state():
-        await page.click(&#39;button&#39;) # Click triggers navigation.
-    # Context manager waits for &#39;load&#39; event.
-    ```
-
-    ```python-sync
-    with page.expect_load_state():
-        page.click(&#39;button&#39;) # Click triggers navigation.
-    # Context manager waits for &#39;load&#39; event.
-    ```
-
-    Shortcut for main frame&#39;s `frame.expect_load_state()`.
-
-    Parameters
-    ----------
-    state : Union[&#34;domcontentloaded&#34;, &#34;load&#34;, &#34;networkidle&#34;, NoneType]
-        Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
-        document, the method resolves immediately. Can be one of:
-        - `&#39;load&#39;` - wait for the `load` event to be fired.
-        - `&#39;domcontentloaded&#39;` - wait for the `DOMContentLoaded` event to be fired.
-        - `&#39;networkidle&#39;` - wait until there are no network connections for at least `500` ms.
-    timeout : Union[float, NoneType]
-        Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-        changed by using the `browser_context.set_default_navigation_timeout()`,
-        `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-        `page.set_default_timeout()` methods.
-
-    Returns
-    -------
-    EventContextManager
-    &#34;&#34;&#34;
-
-    return AsyncEventContextManager(
-        self._impl_obj.wait_for_load_state(state, timeout)
-    )</code></pre>
-</details>
-</dd>
 <dt id="playwright.async_api.Page.expect_navigation"><code class="name flex">
 <span>def <span class="ident">expect_navigation</span></span>(<span>self, url: Union[str, Pattern, Callable[[str], bool]] = None, wait_until: Literal['domcontentloaded', 'load', 'networkidle'] = None, timeout: float = None) ‑> playwright._impl._async_base.AsyncEventContextManager</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Page.expect_navigation</p>
-<p>Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+<p>Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
 response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
 navigation will resolve with <code>null</code>.</p>
 <p>This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
 cause the page to navigate. e.g. The click target has an <code>onclick</code> handler that triggers navigation from a <code>setTimeout</code>.
 Consider this example:</p>
-<pre><code class="language-python-async">async with page.expect_navigation():
-    await page.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
-# Context manager waited for the navigation to happen.
-</code></pre>
-<pre><code class="language-python-sync">with page.expect_navigation():
+<p>```python async
+async with page.expect_navigation():
+await page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation</p>
+<h1 id="context-manager-waited-for-the-navigation-to-happen">Context manager waited for the navigation to happen.</h1>
+<pre><code>
+```python sync
+with page.expect_navigation():
     page.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
 # Context manager waited for the navigation to happen.
 </code></pre>
-<p><strong>NOTE</strong> Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
+<blockquote>
+<p>NOTE: Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
 considered a navigation.</p>
+</blockquote>
 <p>Shortcut for main frame's <code>frame.expect_navigation()</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -20912,7 +20656,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 ) -&gt; AsyncEventContextManager:
     &#34;&#34;&#34;Page.expect_navigation
 
-    Performs action and wait for the next navigation. In case of multiple redirects, the navigation will resolve with the
+    Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
     response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
     navigation will resolve with `null`.
 
@@ -20920,19 +20664,19 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
     Consider this example:
 
-    ```python-async
+    ```python async
     async with page.expect_navigation():
         await page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
     # Context manager waited for the navigation to happen.
     ```
 
-    ```python-sync
+    ```python sync
     with page.expect_navigation():
         page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
     # Context manager waited for the navigation to happen.
     ```
 
-    **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+    &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
     considered a navigation.
 
     Shortcut for main frame&#39;s `frame.expect_navigation()`.
@@ -21196,7 +20940,7 @@ a [Promise], it will be awaited.</p>
 page: Page, frame: Frame }</code>.</p>
 <p>See <code>browser_context.expose_binding()</code> for the context-wide version.</p>
 <blockquote>
-<p><strong>NOTE</strong> Functions installed via <code>page.exposeBinding</code> survive navigations.</p>
+<p>NOTE: Functions installed via <code>page.expose_binding()</code> survive navigations.</p>
 </blockquote>
 <p>An example of exposing page URL to all frames in a page:</p>
 <p>An example of passing an element handle:</p>
@@ -21228,7 +20972,7 @@ supported. When passing by value, multiple arguments are supported.</dd>
 
     See `browser_context.expose_binding()` for the context-wide version.
 
-    &gt; **NOTE** Functions installed via `page.exposeBinding` survive navigations.
+    &gt; NOTE: Functions installed via `page.expose_binding()` survive navigations.
 
     An example of exposing page URL to all frames in a page:
 
@@ -21269,7 +21013,7 @@ executes <code>callback</code> and returns a [Promise] which resolves to the ret
 <p>If the <code>callback</code> returns a [Promise], it will be awaited.</p>
 <p>See <code>browser_context.expose_function()</code> for context-wide exposed function.</p>
 <blockquote>
-<p><strong>NOTE</strong> Functions installed via <code>page.exposeFunction</code> survive navigations.</p>
+<p>NOTE: Functions installed via <code>page.expose_function()</code> survive navigations.</p>
 </blockquote>
 <p>An example of adding an <code>md5</code> function to the page:</p>
 <p>An example of adding a <code>window.readfile</code> function to the page:</p>
@@ -21294,7 +21038,7 @@ executes <code>callback</code> and returns a [Promise] which resolves to the ret
 
     See `browser_context.expose_function()` for context-wide exposed function.
 
-    &gt; **NOTE** Functions installed via `page.exposeFunction` survive navigations.
+    &gt; NOTE: Functions installed via `page.expose_function()` survive navigations.
 
     An example of adding an `md5` function to the page:
 
@@ -21734,9 +21478,9 @@ Found" and 500 "Internal Server Error".
 The status code for such responses can be retrieved by calling
 <code>response.status()</code>.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.goto</code> either throws an error or returns a main resource response. The only exceptions are navigation to
+<p>NOTE: <code>page.goto</code> either throws an error or returns a main resource response. The only exceptions are navigation to
 <code>about:blank</code> or navigation to the same URL with a different hash, which would succeed and return <code>null</code>.
-<strong>NOTE</strong> Headless mode doesn't support navigation to a PDF document. See the
+NOTE: Headless mode doesn't support navigation to a PDF document. See the
 <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=761295">upstream issue</a>.</p>
 </blockquote>
 <p>Shortcut for main frame's <code>frame.goto()</code></p>
@@ -21790,9 +21534,9 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     Found&#34; and 500 &#34;Internal Server Error&#34;.  The status code for such responses can be retrieved by calling
     `response.status()`.
 
-    &gt; **NOTE** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+    &gt; NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
     `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-    &gt; **NOTE** Headless mode doesn&#39;t support navigation to a PDF document. See the
+    &gt; NOTE: Headless mode doesn&#39;t support navigation to a PDF document. See the
     [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 
     Shortcut for main frame&#39;s `frame.goto()`
@@ -22448,12 +22192,12 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
 <div class="desc"><p>Page.pdf</p>
 <p>Returns the PDF buffer.</p>
 <blockquote>
-<p><strong>NOTE</strong> Generating a pdf is currently only supported in Chromium headless.</p>
+<p>NOTE: Generating a pdf is currently only supported in Chromium headless.</p>
 </blockquote>
 <p><code>page.pdf()</code> generates a pdf of the page with <code>print</code> css media. To generate a pdf with <code>screen</code> media, call
 <code>page.emulate_media()</code> before calling <code>page.pdf()</code>:</p>
 <blockquote>
-<p><strong>NOTE</strong> By default, <code>page.pdf()</code> generates a pdf with modified colors for printing. Use the
+<p>NOTE: By default, <code>page.pdf()</code> generates a pdf with modified colors for printing. Use the
 <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust"><code>-webkit-print-color-adjust</code></a> property to
 force rendering of exact colors.</p>
 </blockquote>
@@ -22480,9 +22224,8 @@ force rendering of exact colors.</p>
 - <code>A5</code>: 5.83in x 8.27in
 - <code>A6</code>: 4.13in x 5.83in</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>headerTemplate</code> and <code>footerTemplate</code> markup have the following limitations:
-1. Script tags inside templates are not evaluated.
-2. Page styles are not visible inside templates.</p>
+<p>NOTE: <code>headerTemplate</code> and <code>footerTemplate</code> markup have the following limitations: &gt; 1. Script tags inside templates
+are not evaluated. &gt; 2. Page styles are not visible inside templates.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -22550,12 +22293,12 @@ directory. If no path is provided, the PDF won't be saved to the disk.</dd>
 
     Returns the PDF buffer.
 
-    &gt; **NOTE** Generating a pdf is currently only supported in Chromium headless.
+    &gt; NOTE: Generating a pdf is currently only supported in Chromium headless.
 
     `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
     `page.emulate_media()` before calling `page.pdf()`:
 
-    &gt; **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
+    &gt; NOTE: By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
     [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust) property to
     force rendering of exact colors.
 
@@ -22585,9 +22328,8 @@ directory. If no path is provided, the PDF won't be saved to the disk.</dd>
     - `A5`: 5.83in x 8.27in
     - `A6`: 4.13in x 5.83in
 
-    &gt; **NOTE** `headerTemplate` and `footerTemplate` markup have the following limitations:
-    &gt; 1. Script tags inside templates are not evaluated.
-    &gt; 2. Page styles are not visible inside templates.
+    &gt; NOTE: `headerTemplate` and `footerTemplate` markup have the following limitations: &gt; 1. Script tags inside templates
+    are not evaluated. &gt; 2. Page styles are not visible inside templates.
 
     Parameters
     ----------
@@ -22943,14 +22685,14 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 <p>Routing provides the capability to modify network requests that are made by a page.</p>
 <p>Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.</p>
 <blockquote>
-<p><strong>NOTE</strong> The handler will only be called for the first url if the response is a redirect.</p>
+<p>NOTE: The handler will only be called for the first url if the response is a redirect.</p>
 </blockquote>
 <p>An example of a naïve handler that aborts all image requests:</p>
 <p>or the same snippet using a regex pattern instead:</p>
 <p>Page routes take precedence over browser context routes (set up with <code>browser_context.route()</code>) when request
 matches both handlers.</p>
 <blockquote>
-<p><strong>NOTE</strong> Enabling routing disables http cache.</p>
+<p>NOTE: Enabling routing disables http cache.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -22977,7 +22719,7 @@ matches both handlers.</p>
 
     Once routing is enabled, every request matching the url pattern will stall unless it&#39;s continued, fulfilled or aborted.
 
-    &gt; **NOTE** The handler will only be called for the first url if the response is a redirect.
+    &gt; NOTE: The handler will only be called for the first url if the response is a redirect.
 
     An example of a naïve handler that aborts all image requests:
 
@@ -22986,7 +22728,7 @@ matches both handlers.</p>
     Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
     matches both handlers.
 
-    &gt; **NOTE** Enabling routing disables http cache.
+    &gt; NOTE: Enabling routing disables http cache.
 
     Parameters
     ----------
@@ -23017,7 +22759,7 @@ matches both handlers.</p>
 <div class="desc"><p>Page.screenshot</p>
 <p>Returns the buffer with the captured screenshot.</p>
 <blockquote>
-<p><strong>NOTE</strong> Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See <a href="https://crbug.com/741689">https://crbug.com/741689</a> for
+<p>NOTE: Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See <a href="https://crbug.com/741689">https://crbug.com/741689</a> for
 discussion.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -23065,7 +22807,7 @@ Defaults to <code>false</code>.</dd>
 
     Returns the buffer with the captured screenshot.
 
-    &gt; **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
+    &gt; NOTE: Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
     discussion.
 
     Parameters
@@ -23298,7 +23040,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 - <code>page.set_content()</code>
 - <code>page.wait_for_navigation()</code></p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.set_default_navigation_timeout()</code> takes priority over <code>page.set_default_timeout()</code>,
+<p>NOTE: <code>page.set_default_navigation_timeout()</code> takes priority over <code>page.set_default_timeout()</code>,
 <code>browser_context.set_default_timeout()</code> and <code>browser_context.set_default_navigation_timeout()</code>.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
@@ -23321,7 +23063,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     - `page.set_content()`
     - `page.wait_for_navigation()`
 
-    &gt; **NOTE** `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
+    &gt; NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
     `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
 
     Parameters
@@ -23349,7 +23091,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 <div class="desc"><p>Page.set_default_timeout</p>
 <p>This setting will change the default maximum time for all the methods accepting <code>timeout</code> option.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.set_default_navigation_timeout()</code> takes priority over <code>page.set_default_timeout()</code>.</p>
+<p>NOTE: <code>page.set_default_navigation_timeout()</code> takes priority over <code>page.set_default_timeout()</code>.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -23365,7 +23107,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 
     This setting will change the default maximum time for all the methods accepting `timeout` option.
 
-    &gt; **NOTE** `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`.
+    &gt; NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`.
 
     Parameters
     ----------
@@ -23392,7 +23134,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 <div class="desc"><p>Page.set_extra_http_headers</p>
 <p>The extra HTTP headers will be sent with every request the page initiates.</p>
 <blockquote>
-<p><strong>NOTE</strong> page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.</p>
+<p>NOTE: <code>page.set_extra_http_headers()</code> does not guarantee the order of headers in the outgoing requests.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -23408,7 +23150,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 
     The extra HTTP headers will be sent with every request the page initiates.
 
-    &gt; **NOTE** page.setExtraHTTPHeaders does not guarantee the order of headers in the outgoing requests.
+    &gt; NOTE: `page.set_extra_http_headers()` does not guarantee the order of headers in the outgoing requests.
 
     Parameters
     ----------
@@ -23570,7 +23312,7 @@ element is detached during the checks, the whole action is retried.
 <p>When all steps combined have not finished during the specified <code>timeout</code>, this method rejects with a <code><a title="playwright.async_api.TimeoutError" href="#playwright.async_api.TimeoutError">TimeoutError</a></code>.
 Passing zero timeout disables this.</p>
 <blockquote>
-<p><strong>NOTE</strong> <code>page.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
+<p>NOTE: <code>page.tap()</code> requires that the <code>hasTouch</code> option of the browser context be set to true.</p>
 </blockquote>
 <p>Shortcut for main frame's <code>frame.tap()</code>.</p>
 <h2 id="parameters">Parameters</h2>
@@ -23622,7 +23364,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
     When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
     Passing zero timeout disables this.
 
-    &gt; **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+    &gt; NOTE: `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
     Shortcut for main frame&#39;s `frame.tap()`.
 
@@ -23988,38 +23730,6 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
         raise e</code></pre>
 </details>
 </dd>
-<dt id="playwright.async_api.Page.viewport_size"><code class="name flex">
-<span>def <span class="ident">viewport_size</span></span>(<span>self) ‑> Union[playwright._impl._api_structures.ViewportSize, NoneType]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Page.viewport_size</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Union[{width: int, height: int}, NoneType]</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def viewport_size(self) -&gt; typing.Union[ViewportSize, NoneType]:
-    &#34;&#34;&#34;Page.viewport_size
-
-    Returns
-    -------
-    Union[{width: int, height: int}, NoneType]
-    &#34;&#34;&#34;
-
-    try:
-        log_api(&#34;=&gt; page.viewport_size started&#34;)
-        result = mapping.from_impl_nullable(self._impl_obj.viewport_size())
-        log_api(&#34;&lt;= page.viewport_size succeded&#34;)
-        return result
-    except Exception as e:
-        log_api(&#34;&lt;= page.viewport_size failed&#34;)
-        raise e</code></pre>
-</details>
-</dd>
 <dt id="playwright.async_api.Page.wait_for_event"><code class="name flex">
 <span>async def <span class="ident">wait_for_event</span></span>(<span>self, event: str, predicate: Callable = None, timeout: float = None) ‑> Any</span>
 </code></dt>
@@ -24031,7 +23741,7 @@ value. Will throw an error if the page is closed before the event is fired.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>event</code></strong> :&ensp;<code>str</code></dt>
-<dd>Event name, same one typically passed into <code>page.on(event)</code>.</dd>
+<dd>Event name, same one typically passed into <code>*.on(event)</code>.</dd>
 <dt><strong><code>predicate</code></strong> :&ensp;<code>Union[Callable, NoneType]</code></dt>
 <dd>Receives the event data and resolves to truthy value when the waiting should resolve.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
@@ -24060,7 +23770,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     Parameters
     ----------
     event : str
-        Event name, same one typically passed into `page.on(event)`.
+        Event name, same one typically passed into `*.on(event)`.
     predicate : Union[Callable, NoneType]
         Receives the event data and resolves to truthy value when the waiting should resolve.
     timeout : Union[float, NoneType]
@@ -24260,8 +23970,10 @@ resolve with <code>null</code>.</p>
 <p>This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
 cause the page to navigate. e.g. The click target has an <code>onclick</code> handler that triggers navigation from a <code>setTimeout</code>.
 Consider this example:</p>
-<p><strong>NOTE</strong> Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
+<blockquote>
+<p>NOTE: Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
 considered a navigation.</p>
+</blockquote>
 <p>Shortcut for main frame's <code>frame.wait_for_navigation()</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -24303,7 +24015,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
     Consider this example:
 
-    **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
+    &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
     considered a navigation.
 
     Shortcut for main frame&#39;s `frame.wait_for_navigation()`.
@@ -24668,9 +24380,7 @@ dict(one=1, two=2)</p></div>
     def devices(self) -&gt; typing.Dict:
         &#34;&#34;&#34;Playwright.devices
 
-        Returns a list of devices to be used with `browser.new_context()` or `browser.new_page()`. Actual list of
-        devices can be found in
-        [src/server/deviceDescriptors.ts](https://github.com/Microsoft/playwright/blob/master/src/server/deviceDescriptors.ts).
+        Returns a dictionary of devices to be used with `browser.new_context()` or `browser.new_page()`.
 
         Returns
         -------
@@ -24734,7 +24444,7 @@ dict(one=1, two=2)</p></div>
         REPL applications.
 
         ```py
-        &gt;&gt;&gt; from playwright import sync_playwright
+        &gt;&gt;&gt; from playwright.sync_api import sync_playwright
 
         &gt;&gt;&gt; playwright = sync_playwright().start()
 
@@ -24793,9 +24503,7 @@ def chromium(self) -&gt; &#34;BrowserType&#34;:
 <dt id="playwright.async_api.Playwright.devices"><code class="name">var <span class="ident">devices</span> : Dict</code></dt>
 <dd>
 <div class="desc"><p>Playwright.devices</p>
-<p>Returns a list of devices to be used with <code>browser.new_context()</code> or <code>browser.new_page()</code>. Actual list of
-devices can be found in
-<a href="https://github.com/Microsoft/playwright/blob/master/src/server/deviceDescriptors.ts">src/server/deviceDescriptors.ts</a>.</p>
+<p>Returns a dictionary of devices to be used with <code>browser.new_context()</code> or <code>browser.new_page()</code>.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Dict</code></dt>
@@ -24809,9 +24517,7 @@ devices can be found in
 def devices(self) -&gt; typing.Dict:
     &#34;&#34;&#34;Playwright.devices
 
-    Returns a list of devices to be used with `browser.new_context()` or `browser.new_page()`. Actual list of
-    devices can be found in
-    [src/server/deviceDescriptors.ts](https://github.com/Microsoft/playwright/blob/master/src/server/deviceDescriptors.ts).
+    Returns a dictionary of devices to be used with `browser.new_context()` or `browser.new_page()`.
 
     Returns
     -------
@@ -24910,7 +24616,7 @@ def webkit(self) -&gt; &#34;BrowserType&#34;:
 <div class="desc"><p>Playwright.stop</p>
 <p>Terminates this instance of Playwright in case it was created bypassing the Python context manager. This is useful in
 REPL applications.</p>
-<pre><code class="language-py">&gt;&gt;&gt; from playwright import sync_playwright
+<pre><code class="language-py">&gt;&gt;&gt; from playwright.sync_api import sync_playwright
 
 &gt;&gt;&gt; playwright = sync_playwright().start()
 
@@ -24933,7 +24639,7 @@ REPL applications.</p>
     REPL applications.
 
     ```py
-    &gt;&gt;&gt; from playwright import sync_playwright
+    &gt;&gt;&gt; from playwright.sync_api import sync_playwright
 
     &gt;&gt;&gt; playwright = sync_playwright().start()
 
@@ -25165,18 +24871,6 @@ dict(one=1, two=2)</p></div>
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
-    def is_navigation_request(self) -&gt; bool:
-        &#34;&#34;&#34;Request.is_navigation_request
-
-        Whether this request is driving frame&#39;s navigation.
-
-        Returns
-        -------
-        bool
-        &#34;&#34;&#34;
-        return mapping.from_maybe_impl(self._impl_obj.is_navigation_request)
-
-    @property
     def redirected_from(self) -&gt; typing.Union[&#34;Request&#34;, NoneType]:
         &#34;&#34;&#34;Request.redirected_from
 
@@ -25260,6 +24954,25 @@ dict(one=1, two=2)</p></div>
             return result
         except Exception as e:
             log_api(&#34;&lt;= request.response failed&#34;)
+            raise e
+
+    def is_navigation_request(self) -&gt; bool:
+        &#34;&#34;&#34;Request.is_navigation_request
+
+        Whether this request is driving frame&#39;s navigation.
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        try:
+            log_api(&#34;=&gt; request.is_navigation_request started&#34;)
+            result = mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
+            log_api(&#34;&lt;= request.is_navigation_request succeded&#34;)
+            return result
+        except Exception as e:
+            log_api(&#34;&lt;= request.is_navigation_request failed&#34;)
             raise e</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -25356,32 +25069,6 @@ def headers(self) -&gt; typing.Dict[str, str]:
     Dict[str, str]
     &#34;&#34;&#34;
     return mapping.from_maybe_impl(self._impl_obj.headers)</code></pre>
-</details>
-</dd>
-<dt id="playwright.async_api.Request.is_navigation_request"><code class="name">var <span class="ident">is_navigation_request</span> : bool</code></dt>
-<dd>
-<div class="desc"><p>Request.is_navigation_request</p>
-<p>Whether this request is driving frame's navigation.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def is_navigation_request(self) -&gt; bool:
-    &#34;&#34;&#34;Request.is_navigation_request
-
-    Whether this request is driving frame&#39;s navigation.
-
-    Returns
-    -------
-    bool
-    &#34;&#34;&#34;
-    return mapping.from_maybe_impl(self._impl_obj.is_navigation_request)</code></pre>
 </details>
 </dd>
 <dt id="playwright.async_api.Request.method"><code class="name">var <span class="ident">method</span> : str</code></dt>
@@ -25647,6 +25334,41 @@ def url(self) -&gt; str:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="playwright.async_api.Request.is_navigation_request"><code class="name flex">
+<span>def <span class="ident">is_navigation_request</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request.is_navigation_request</p>
+<p>Whether this request is driving frame's navigation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_navigation_request(self) -&gt; bool:
+    &#34;&#34;&#34;Request.is_navigation_request
+
+    Whether this request is driving frame&#39;s navigation.
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    try:
+        log_api(&#34;=&gt; request.is_navigation_request started&#34;)
+        result = mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
+        log_api(&#34;&lt;= request.is_navigation_request succeded&#34;)
+        return result
+    except Exception as e:
+        log_api(&#34;&lt;= request.is_navigation_request failed&#34;)
+        raise e</code></pre>
+</details>
+</dd>
 <dt id="playwright.async_api.Request.response"><code class="name flex">
 <span>async def <span class="ident">response</span></span>(<span>self) ‑> Union[playwright.async_api._generated.Response, NoneType]</span>
 </code></dt>
@@ -26996,7 +26718,7 @@ dict(one=1, two=2)</p></div>
     def __init__(self, obj: VideoImpl):
         super().__init__(obj)
 
-    async def path(self) -&gt; str:
+    async def path(self) -&gt; pathlib.Path:
         &#34;&#34;&#34;Video.path
 
         Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
@@ -27004,7 +26726,7 @@ dict(one=1, two=2)</p></div>
 
         Returns
         -------
-        str
+        pathlib.Path
         &#34;&#34;&#34;
 
         try:
@@ -27024,7 +26746,7 @@ dict(one=1, two=2)</p></div>
 <h3>Methods</h3>
 <dl>
 <dt id="playwright.async_api.Video.path"><code class="name flex">
-<span>async def <span class="ident">path</span></span>(<span>self) ‑> str</span>
+<span>async def <span class="ident">path</span></span>(<span>self) ‑> pathlib.Path</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Video.path</p>
@@ -27032,14 +26754,14 @@ dict(one=1, two=2)</p></div>
 upon closing the browser context.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>str</code></dt>
+<dt><code>pathlib.Path</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def path(self) -&gt; str:
+<pre><code class="python">async def path(self) -&gt; pathlib.Path:
     &#34;&#34;&#34;Video.path
 
     Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
@@ -27047,7 +26769,7 @@ upon closing the browser context.</p>
 
     Returns
     -------
-    str
+    pathlib.Path
     &#34;&#34;&#34;
 
     try:
@@ -27177,13 +26899,13 @@ dict(one=1, two=2)</p></div>
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
         closed before the `event` is fired.
 
-        ```python-async
+        ```python async
         async with ws.expect_event(event_name) as event_info:
             await ws.click(&#34;button&#34;)
         value = await event_info.value
         ```
 
-        ```python-sync
+        ```python sync
         with ws.expect_event(event_name) as event_info:
             ws.click(&#34;button&#34;)
         value = event_info.value
@@ -27192,7 +26914,7 @@ dict(one=1, two=2)</p></div>
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `page.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -27271,18 +26993,20 @@ def url(self) -&gt; str:
 <p>Performs action and waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the
 <code>predicate</code> function and waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the socket is
 closed before the <code>event</code> is fired.</p>
-<pre><code class="language-python-async">async with ws.expect_event(event_name) as event_info:
-    await ws.click(&quot;button&quot;)
-value = await event_info.value
-</code></pre>
-<pre><code class="language-python-sync">with ws.expect_event(event_name) as event_info:
+<p>```python async
+async with ws.expect_event(event_name) as event_info:
+await ws.click("button")
+value = await event_info.value</p>
+<pre><code>
+```python sync
+with ws.expect_event(event_name) as event_info:
     ws.click(&quot;button&quot;)
 value = event_info.value
 </code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>event</code></strong> :&ensp;<code>str</code></dt>
-<dd>Event name, same one typically passed into <code>page.on(event)</code>.</dd>
+<dd>Event name, same one typically passed into <code>*.on(event)</code>.</dd>
 <dt><strong><code>predicate</code></strong> :&ensp;<code>Union[Callable, NoneType]</code></dt>
 <dd>Receives the event data and resolves to truthy value when the waiting should resolve.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>Union[float, NoneType]</code></dt>
@@ -27307,13 +27031,13 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
     closed before the `event` is fired.
 
-    ```python-async
+    ```python async
     async with ws.expect_event(event_name) as event_info:
         await ws.click(&#34;button&#34;)
     value = await event_info.value
     ```
 
-    ```python-sync
+    ```python sync
     with ws.expect_event(event_name) as event_info:
         ws.click(&#34;button&#34;)
     value = event_info.value
@@ -27322,7 +27046,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     Parameters
     ----------
     event : str
-        Event name, same one typically passed into `page.on(event)`.
+        Event name, same one typically passed into `*.on(event)`.
     predicate : Union[Callable, NoneType]
         Receives the event data and resolves to truthy value when the waiting should resolve.
     timeout : Union[float, NoneType]
@@ -27969,7 +27693,6 @@ Optional.</dd>
 <li><code><a title="playwright.async_api.Frame.eval_on_selector_all" href="#playwright.async_api.Frame.eval_on_selector_all">eval_on_selector_all</a></code></li>
 <li><code><a title="playwright.async_api.Frame.evaluate" href="#playwright.async_api.Frame.evaluate">evaluate</a></code></li>
 <li><code><a title="playwright.async_api.Frame.evaluate_handle" href="#playwright.async_api.Frame.evaluate_handle">evaluate_handle</a></code></li>
-<li><code><a title="playwright.async_api.Frame.expect_load_state" href="#playwright.async_api.Frame.expect_load_state">expect_load_state</a></code></li>
 <li><code><a title="playwright.async_api.Frame.expect_navigation" href="#playwright.async_api.Frame.expect_navigation">expect_navigation</a></code></li>
 <li><code><a title="playwright.async_api.Frame.fill" href="#playwright.async_api.Frame.fill">fill</a></code></li>
 <li><code><a title="playwright.async_api.Frame.focus" href="#playwright.async_api.Frame.focus">focus</a></code></li>
@@ -28079,7 +27802,6 @@ Optional.</dd>
 <li><code><a title="playwright.async_api.Page.expect_download" href="#playwright.async_api.Page.expect_download">expect_download</a></code></li>
 <li><code><a title="playwright.async_api.Page.expect_event" href="#playwright.async_api.Page.expect_event">expect_event</a></code></li>
 <li><code><a title="playwright.async_api.Page.expect_file_chooser" href="#playwright.async_api.Page.expect_file_chooser">expect_file_chooser</a></code></li>
-<li><code><a title="playwright.async_api.Page.expect_load_state" href="#playwright.async_api.Page.expect_load_state">expect_load_state</a></code></li>
 <li><code><a title="playwright.async_api.Page.expect_navigation" href="#playwright.async_api.Page.expect_navigation">expect_navigation</a></code></li>
 <li><code><a title="playwright.async_api.Page.expect_popup" href="#playwright.async_api.Page.expect_popup">expect_popup</a></code></li>
 <li><code><a title="playwright.async_api.Page.expect_request" href="#playwright.async_api.Page.expect_request">expect_request</a></code></li>
