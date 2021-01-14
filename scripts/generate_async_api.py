@@ -32,7 +32,7 @@ from scripts.generate_api import (
     signature,
 )
 
-documentation_provider = DocumentationProvider()
+documentation_provider = DocumentationProvider(True)
 
 
 def generate(t: Any) -> None:
