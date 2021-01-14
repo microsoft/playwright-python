@@ -293,9 +293,12 @@ class WebSocket(ChannelOwner):
     def url(self) -> str:
         return self._initializer["url"]
 
-    async def wait_for_event(
-        self, event: str, predicate: Callable = None, timeout: float = None
-    ) -> Any:
+    def expect_event(
+        self,
+        event: str,
+        predicate: Callable = None,
+        timeout: float = None,
+    ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
         wait_helper = WaitHelper(self._loop)
@@ -311,15 +314,15 @@ class WebSocket(ChannelOwner):
                 self, WebSocket.Events.Error, Error("Socket error")
             )
         wait_helper.reject_on_event(self._parent, "close", Error("Page closed"))
-        return await wait_helper.wait_for_event(self, event, predicate)
+        wait_helper.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(wait_helper.result())
 
-    def expect_event(
-        self,
-        event: str,
-        predicate: Callable = None,
-        timeout: float = None,
-    ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))
+    async def wait_for_event(
+        self, event: str, predicate: Callable = None, timeout: float = None
+    ) -> Any:
+        async with self.expect_event(event, predicate, timeout) as event_info:
+            pass
+        return await event_info.value
 
     def _on_frame_sent(self, opcode: int, data: str) -> None:
         if opcode == 2:

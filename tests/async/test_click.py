@@ -99,7 +99,8 @@ async def test_click_with_disabled_javascript(browser, server):
     context = await browser.new_context(java_script_enabled=False)
     page = await context.new_page()
     await page.goto(server.PREFIX + "/wrappedlink.html")
-    await asyncio.gather(page.click("a"), page.wait_for_navigation())
+    async with page.expect_navigation():
+        await page.click("a")
     assert page.url == server.PREFIX + "/wrappedlink.html#clicked"
     await context.close()
 

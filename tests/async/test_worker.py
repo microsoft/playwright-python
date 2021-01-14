@@ -21,10 +21,9 @@ from playwright.async_api import Error, Page, Worker
 
 
 async def test_workers_page_workers(page, server):
-    await asyncio.gather(
-        page.wait_for_event("worker"), page.goto(server.PREFIX + "/worker/worker.html")
-    )
-    worker = page.workers[0]
+    async with page.expect_worker() as worker_info:
+        await page.goto(server.PREFIX + "/worker/worker.html")
+    worker = await worker_info.value
     assert "worker.js" in worker.url
 
     assert (
@@ -54,12 +53,11 @@ async def test_workers_should_emit_created_and_destroyed_events(page: Page):
 
 
 async def test_workers_should_report_console_logs(page):
-    [message, _] = await asyncio.gather(
-        page.wait_for_event("console"),
-        page.evaluate(
+    async with page.expect_console_message() as message_info:
+        await page.evaluate(
             '() => new Worker(URL.createObjectURL(new Blob(["console.log(1)"], {type: "application/javascript"})))'
-        ),
-    )
+        )
+    message = await message_info.value
     assert message.text == "1"
 
 
@@ -134,10 +132,9 @@ async def test_workers_should_clear_upon_cross_process_navigation(server, page):
 
 
 async def test_workers_should_report_network_activity(page, server):
-    [worker, _] = await asyncio.gather(
-        page.wait_for_event("worker"),
-        page.goto(server.PREFIX + "/worker/worker.html"),
-    )
+    async with page.expect_worker() as worker_info:
+        await page.goto(server.PREFIX + "/worker/worker.html"),
+    worker = await worker_info.value
     url = server.PREFIX + "/one-style.css"
     async with page.expect_request(url) as request_info, page.expect_response(
         url
@@ -176,11 +173,10 @@ async def test_workers_should_format_number_using_context_locale(browser, server
     context = await browser.new_context(locale="ru-RU")
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    [worker, _] = await asyncio.gather(
-        page.wait_for_event("worker"),
-        page.evaluate(
+    async with page.expect_worker() as worker_info:
+        await page.evaluate(
             "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
-        ),
-    )
+        )
+    worker = await worker_info.value
     assert await worker.evaluate("() => (10000.20).toLocaleString()") == "10\u00A0000,2"
     await context.close()

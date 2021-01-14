@@ -13,28 +13,27 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Coroutine, Generic, Optional, TypeVar, cast
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
 
 class EventInfoImpl(Generic[T]):
-    def __init__(self, coroutine: Coroutine) -> None:
-        self._value: Optional[T] = None
-        self._task = asyncio.get_event_loop().create_task(coroutine)
-        self._done = False
+    def __init__(self, future: asyncio.Future) -> None:
+        self._future = future
 
     @property
     async def value(self) -> T:
-        if not self._done:
-            self._value = await self._task
-            self._done = True
-        return cast(T, self._value)
+        return await self._future
 
 
 class EventContextManagerImpl(Generic[T]):
-    def __init__(self, coroutine: Coroutine) -> None:
-        self._event: EventInfoImpl = EventInfoImpl(coroutine)
+    def __init__(self, future: asyncio.Future) -> None:
+        self._event: EventInfoImpl = EventInfoImpl(future)
+
+    @property
+    def future(self) -> asyncio.Future:
+        return self._event._future
 
     async def __aenter__(self) -> EventInfoImpl[T]:
         return self._event

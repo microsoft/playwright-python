@@ -100,10 +100,8 @@ async def test_page_route_should_work_when_POST_is_redirected_with_302(page, ser
       </form>
     """
     )
-    await asyncio.gather(
-        page.eval_on_selector("form", "form => form.submit()"),
-        page.wait_for_navigation(),
-    )
+    async with page.expect_navigation():
+        await page.eval_on_selector("form", "form => form.submit()"),
 
 
 # @see https://github.com/GoogleChrome/puppeteer/issues/3973
@@ -496,12 +494,10 @@ async def test_page_route_should_not_throw_Invalid_Interception_Id_if_the_reques
     route_future = asyncio.Future()
     await page.route("**/*", lambda r, _: route_future.set_result(r))
 
-    await asyncio.gather(
-        page.wait_for_event("request"),  # Wait for request interception.
-        page.eval_on_selector(
+    async with page.expect_request("**/*"):
+        await page.eval_on_selector(
             "iframe", """(frame, url) => frame.src = url""", server.EMPTY_PAGE
-        ),
-    )
+        )
     # Delete frame to cause request to be canceled.
     await page.eval_on_selector("iframe", "frame => frame.remove()")
     route = await route_future

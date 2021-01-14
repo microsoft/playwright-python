@@ -94,9 +94,10 @@ async def test_page_events_request_should_report_requests_and_responses_handled_
 ):
     await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
     await page.evaluate("() => window.activationPromise")
-    [request, sw_response] = await asyncio.gather(
-        page.wait_for_event("request"), page.evaluate('() => fetchDummy("foo")')
-    )
+    sw_response = None
+    async with page.expect_request("**/*") as request_info:
+        sw_response = await page.evaluate('() => fetchDummy("foo")')
+    request = await request_info.value
     assert sw_response == "responseFromServiceWorker:foo"
     assert request.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
     response = await request.response()
@@ -450,12 +451,9 @@ async def test_network_events_request_failed(
 
 
 async def test_network_events_request_finished(page, server):
-    response = (
-        await asyncio.gather(
-            page.goto(server.EMPTY_PAGE), page.wait_for_event("requestfinished")
-        )
-    )[0]
-    request = response.request
+    async with page.expect_event("requestfinished") as event_info:
+        await page.goto(server.EMPTY_PAGE)
+    request = await event_info.value
     assert request.url == server.EMPTY_PAGE
     assert await request.response()
     assert request.frame == page.main_frame

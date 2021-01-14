@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-import asyncio
-
 import pytest
 
 from playwright.async_api import BrowserContext, Error, Page
@@ -124,13 +122,12 @@ async def test_watchPosition_should_be_notified(page, server, context):
 async def test_should_use_context_options_for_popup(page, context, server):
     await context.grant_permissions(["geolocation"])
     await context.set_geolocation({"latitude": 10, "longitude": 10})
-    [popup, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        page.evaluate(
+    async with page.expect_popup() as popup_info:
+        await page.evaluate(
             "url => window._popup = window.open(url)",
             server.PREFIX + "/geolocation.html",
-        ),
-    )
+        )
+    popup = await popup_info.value
     await popup.wait_for_load_state()
     geolocation = await popup.evaluate("() => window.geolocationPromise")
     assert geolocation == {"latitude": 10, "longitude": 10}

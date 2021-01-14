@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 import fnmatch
 import math
 import re
@@ -197,25 +196,6 @@ def locals_to_params(args: Dict) -> Dict:
 
 def monotonic_time() -> int:
     return math.floor(time.monotonic() * 1000)
-
-
-class PendingWaitEvent:
-    def __init__(
-        self, event: str, future: asyncio.Future, timeout_future: asyncio.Future
-    ):
-        self.event = event
-        self.future = future
-        self.timeout_future = timeout_future
-
-    def reject(self, is_crash: bool, target: str) -> None:
-        self.timeout_future.cancel()
-        if self.event == "close" and not is_crash:
-            return
-        if self.event == "crash" and is_crash:
-            return
-        self.future.set_exception(
-            Error(f"{target} crashed" if is_crash else f"{target} closed")
-        )
 
 
 class RouteHandlerEntry:

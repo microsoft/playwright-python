@@ -135,14 +135,14 @@ class Frame(ChannelOwner):
         wait_helper.reject_on_timeout(timeout, f"Timeout {timeout}ms exceeded.")
         return wait_helper
 
-    async def wait_for_navigation(
+    def expect_navigation(
         self,
         url: URLMatch = None,
-        waitUntil: DocumentLoadState = None,
+        wait_until: DocumentLoadState = None,
         timeout: float = None,
-    ) -> Optional[Response]:
-        if not waitUntil:
-            waitUntil = "load"
+    ) -> EventContextManagerImpl[Response]:
+        if not wait_until:
+            wait_until = "load"
 
         if timeout is None:
             timeout = self._page._timeout_settings.navigation_timeout()
@@ -156,23 +156,26 @@ class Frame(ChannelOwner):
                 return True
             return not matcher or matcher.matches(event["url"])
 
-        event = await wait_helper.wait_for_event(
+        wait_helper.wait_for_event(
             self._event_emitter,
             "navigated",
             predicate=predicate,
         )
-        if "error" in event:
-            raise Error(event["error"])
 
-        if waitUntil not in self._load_states:
-            t = deadline - monotonic_time()
-            if t > 0:
-                await self.wait_for_load_state(state=waitUntil, timeout=t)
+        async def continuation() -> Optional[Response]:
+            event = await wait_helper.result()
+            if "error" in event:
+                raise Error(event["error"])
+            if wait_until not in self._load_states:
+                t = deadline - monotonic_time()
+                if t > 0:
+                    await self.wait_for_load_state(state=wait_until, timeout=t)
+            if "newDocument" in event and "request" in event["newDocument"]:
+                request = from_channel(event["newDocument"]["request"])
+                return await request.response()
+            return None
 
-        if "newDocument" in event and "request" in event["newDocument"]:
-            request = from_channel(event["newDocument"]["request"])
-            return await request.response()
-        return None
+        return EventContextManagerImpl(asyncio.create_task(continuation()))
 
     async def wait_for_load_state(
         self, state: DocumentLoadState = None, timeout: float = None
@@ -184,9 +187,10 @@ class Frame(ChannelOwner):
         if state in self._load_states:
             return
         wait_helper = self._setup_navigation_wait_helper(timeout)
-        await wait_helper.wait_for_event(
+        wait_helper.wait_for_event(
             self._event_emitter, "loadstate", lambda s: s == state
         )
+        await wait_helper.result()
 
     async def frame_element(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))
@@ -526,12 +530,14 @@ class Frame(ChannelOwner):
     async def title(self) -> str:
         return await self._channel.send("title")
 
-    def expect_navigation(
+    async def wait_for_navigation(
         self,
         url: URLMatch = None,
         waitUntil: DocumentLoadState = None,
         timeout: float = None,
-    ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(
-            self.wait_for_navigation(url, waitUntil, timeout)
-        )
+    ) -> Optional[Response]:
+        async with self.expect_navigation(
+            url, waitUntil, timeout=timeout
+        ) as response_info:
+            pass
+        return await response_info.value

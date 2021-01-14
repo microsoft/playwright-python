@@ -187,7 +187,17 @@ class Request(SyncBase):
 
         For example, if the website `http://example.com` redirects to `https://example.com`:
 
+        ```py
+        response = page.goto(\"http://example.com\")
+        print(response.request.redirected_from.url) # \"http://example.com\"
+        ```
+
         If the website `https://google.com` has no redirects:
+
+        ```py
+        response = page.goto(\"https://google.com\")
+        print(response.request.redirected_from) # None
+        ```
 
         Returns
         -------
@@ -202,6 +212,10 @@ class Request(SyncBase):
         New request issued by the browser if the server responded with redirect.
 
         This method is the opposite of `request.redirected_from()`:
+
+        ```py
+        assert request.redirected_from.redirected_to == request
+        ```
 
         Returns
         -------
@@ -218,7 +232,7 @@ class Request(SyncBase):
 
         Example of logging of all the failed requests:
 
-        ```python
+        ```py
         page.on('requestfailed', lambda request: print(request.url + ' ' + request.failure);
         ```
 
@@ -235,6 +249,13 @@ class Request(SyncBase):
         Returns resource timing information for given request. Most of the timing values become available upon the response,
         `responseEnd` becomes available when request finishes. Find more information at
         [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming).
+
+        ```py
+        with page.expect_event(\"requestfinished\") as request_info:
+            page.goto(\"http://example.com\")
+        request = request_info.value
+        print(request.timing)
+        ```
 
         Returns
         -------
@@ -328,7 +349,7 @@ class Response(SyncBase):
     def status_text(self) -> str:
         """Response.status_text
 
-        Contains the status text of the response (e.g. usually an "OK" for a success).
+        Contains the status text of the response (e.g. usually an \"OK\" for a success).
 
         Returns
         -------
@@ -522,7 +543,18 @@ class Route(SyncBase):
 
         An example of fulfilling all requests with 404 responses:
 
+        ```py
+        page.route(\"**/*\", lambda route: route.fulfill(
+            status=404,
+            content_type=\"text/plain\",
+            body=\"not found!\"))
+        ```
+
         An example of serving static file:
+
+        ```py
+        page.route(\"**/xhr_endpoint\", lambda route: route.fulfill(path=\"mock_data.json\"))
+        ```
 
         Parameters
         ----------
@@ -568,6 +600,19 @@ class Route(SyncBase):
         """Route.continue_
 
         Continues route's request with optional overrides.
+
+        ```py
+        def handle(route, request):
+            # override headers
+            headers = {
+                **request.headers,
+                \"foo\": \"bar\" # set \"foo\" header
+                \"origin\": None # remove \"origin\" header
+            }
+            route.continue(headers=headers)
+        }
+        page.route(\"**/*\", handle)
+        ```
 
         Parameters
         ----------
@@ -619,6 +664,42 @@ class WebSocket(SyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
+    def expect_event(
+        self, event: str, predicate: typing.Callable = None, timeout: float = None
+    ) -> EventContextManager:
+        """WebSocket.expect_event
+
+        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
+        closed before the `event` is fired.
+
+        ```py
+        with ws.expect_event(event_name) as event_info:
+            ws.click(\"button\")
+        value = event_info.value
+        ```
+
+        Parameters
+        ----------
+        event : str
+            Event name, same one typically passed into `*.on(event)`.
+        predicate : Union[Callable, NoneType]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager
+        """
+        return EventContextManager(
+            self,
+            self._impl_obj.expect_event(
+                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
+        )
+
     def wait_for_event(
         self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> typing.Any:
@@ -660,39 +741,6 @@ class WebSocket(SyncBase):
         except Exception as e:
             log_api("<= web_socket.wait_for_event failed")
             raise e
-
-    def expect_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
-    ) -> EventContextManager:
-        """WebSocket.expect_event
-
-        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
-        closed before the `event` is fired.
-
-        ```py
-        with ws.expect_event(event_name) as event_info:
-            ws.click("button")
-        value = event_info.value
-        ```
-
-        Parameters
-        ----------
-        event : str
-            Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, NoneType]
-            Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
-            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
-            value can be changed by using the `browser_context.set_default_timeout()`.
-
-        Returns
-        -------
-        EventContextManager
-        """
-        return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
-        )
 
     def is_closed(self) -> bool:
         """WebSocket.is_closed
@@ -789,6 +837,10 @@ class Keyboard(SyncBase):
 
         Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 
+        ```py
+        page.keyboard.insert_text(\"嗨\")
+        ```
+
         > NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
@@ -814,6 +866,11 @@ class Keyboard(SyncBase):
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 
         To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
+
+        ```py
+        page.keyboard.type(\"Hello\") # types instantly
+        page.keyboard.type(\"World\", delay=100) # types slower, like a user
+        ```
 
         > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 
@@ -853,8 +910,20 @@ class Keyboard(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
+
+        ```py
+        page = browser.new_page()
+        page.goto(\"https://keycode.info\")
+        page.keyboard.press(\"a\")
+        page.screenshot(path=\"a.png\")
+        page.keyboard.press(\"ArrowLeft\")
+        page.screenshot(path=\"arrow_left.png\")
+        page.keyboard.press(\"Shift+O\")
+        page.screenshot(path=\"o.png\")
+        browser.close()
+        ```
 
         Shortcut for `keyboard.down()` and `keyboard.up()`.
 
@@ -1085,6 +1154,11 @@ class JSHandle(SyncBase):
 
         Examples:
 
+        ```py
+        tweet_handle = page.query_selector(\".tweet .retweets\")
+        assert tweet_handle.evaluate(\"node => node.innerText\") == \"10 retweets\"
+        ```
+
         Parameters
         ----------
         expression : str
@@ -1198,6 +1272,14 @@ class JSHandle(SyncBase):
         """JSHandle.get_properties
 
         The method returns a map with **own property names** as keys and JSHandle instances for the property values.
+
+        ```py
+        handle = page.evaluate_handle(\"{window, document}\")
+        properties = handle.get_properties()
+        window_handle = properties.get(\"window\")
+        document_handle = properties.get(\"document\")
+        handle.dispose()
+        ```
 
         Returns
         -------
@@ -1542,6 +1624,10 @@ class ElementHandle(JSHandle):
         is dispatched. This is equivalend to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
+        ```py
+        element_handle.dispatch_event(\"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -1555,6 +1641,12 @@ class ElementHandle(JSHandle):
         - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = page.evaluate_handle(\"new DataTransfer()\")
+        element_handle.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
+        ```
 
         Parameters
         ----------
@@ -1584,7 +1676,7 @@ class ElementHandle(JSHandle):
 
         This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is
         completely visible as defined by
-        [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s ```ratio```.
+        [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 
         Throws when `elementHandle` does not point to an element
         [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
@@ -1822,6 +1914,27 @@ class ElementHandle(JSHandle):
 
         Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
         element, the method throws an error.
+
+        ```py
+        # single selection matching the value
+        handle.select_option(\"select#colors\", \"blue\")
+        # single selection matching both the label
+        handle.select_option(\"select#colors\", label=\"blue\")
+        # multiple selection
+        handle.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
+        ```
+
+        ```py
+        # FIXME
+        # single selection matching the value
+        handle.select_option(\"blue\")
+        # single selection matching both the value and the label
+        handle.select_option(label=\"blue\")
+        # multiple selection
+        handle.select_option(\"red\", \"green\", \"blue\")
+        # multiple selection for blue, red and second option
+        handle.select_option(value=\"blue\", { index: 2 }, \"red\")
+        ```
 
         Parameters
         ----------
@@ -2067,7 +2180,18 @@ class ElementHandle(JSHandle):
 
         To press a special key, like `Control` or `ArrowDown`, use `element_handle.press()`.
 
+        ```py
+        element_handle.type(\"hello\") # types instantly
+        element_handle.type(\"world\", delay=100) # types slower, like a user
+        ```
+
         An example of typing into a text field and then submitting the form:
+
+        ```py
+        element_handle = page.query_selector(\"input\")
+        element_handle.type(\"some text\")
+        element_handle.press(\"Enter\")
+        ```
 
         Parameters
         ----------
@@ -2127,7 +2251,7 @@ class ElementHandle(JSHandle):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
@@ -2269,6 +2393,11 @@ class ElementHandle(JSHandle):
 
         Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
         snippet should click the center of the element.
+
+        ```py
+        box = element_handle.bounding_box()
+        page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
+        ```
 
         Returns
         -------
@@ -2417,6 +2546,12 @@ class ElementHandle(JSHandle):
 
         Examples:
 
+        ```py
+        tweet_handle = page.query_selector(\".tweet\")
+        assert tweet_handle.eval_on_selector(\".like\", \"node => node.innerText\") == \"100\"
+        assert tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") = \"10\"
+        ```
+
         Parameters
         ----------
         selector : str
@@ -2473,10 +2608,15 @@ class ElementHandle(JSHandle):
         Examples:
 
         ```html
-        <div class="feed">
-          <div class="tweet">Hello!</div>
-          <div class="tweet">Hi!</div>
+        <div class=\"feed\">
+          <div class=\"tweet\">Hello!</div>
+          <div class=\"tweet\">Hi!</div>
         </div>
+        ```
+
+        ```py
+        feed_handle = page.query_selector(\".feed\")
+        assert feed_handle.eval_on_selector_all(\".tweet\", \"nodes => nodes.map(n => n.innerText)\") == [\"hello!\", \"hi!\"]
         ```
 
         Parameters
@@ -2527,15 +2667,15 @@ class ElementHandle(JSHandle):
         Returns when the element satisfies the `state`.
 
         Depending on the `state` parameter, this method waits for one of the [actionability](./actionability.md) checks to pass.
-        This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
-        - `"visible"` Wait until the element is [visible](./actionability.md#visible).
-        - `"hidden"` Wait until the element is [not visible](./actionability.md#visible) or
+        This method throws when the element is detached while waiting, unless waiting for the `\"hidden\"` state.
+        - `\"visible\"` Wait until the element is [visible](./actionability.md#visible).
+        - `\"hidden\"` Wait until the element is [not visible](./actionability.md#visible) or
           [not attached](./actionability.md#attached). Note that waiting for hidden does not throw when the element detaches.
-        - `"stable"` Wait until the element is both [visible](./actionability.md#visible) and
+        - `\"stable\"` Wait until the element is both [visible](./actionability.md#visible) and
           [stable](./actionability.md#stable).
-        - `"enabled"` Wait until the element is [enabled](./actionability.md#enabled).
-        - `"disabled"` Wait until the element is [not enabled](./actionability.md#enabled).
-        - `"editable"` Wait until the element is [editable](./actionability.md#editable).
+        - `\"enabled\"` Wait until the element is [enabled](./actionability.md#enabled).
+        - `\"disabled\"` Wait until the element is [not enabled](./actionability.md#enabled).
+        - `\"editable\"` Wait until the element is [editable](./actionability.md#editable).
 
         If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
 
@@ -2576,6 +2716,13 @@ class ElementHandle(JSHandle):
         become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method
         will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
         throw.
+
+        ```py
+        page.set_content(\"<div><span></span></div>\")
+        div = page.query_selector(\"div\")
+        # waiting for the \"span\" selector relative to the div.
+        span = div.wait_for_selector(\"span\", state=\"attached\")
+        ```
 
         > NOTE: This method does not work across navigations, use `page.wait_for_selector()` instead.
 
@@ -2636,7 +2783,27 @@ class Accessibility(SyncBase):
 
         An example of dumping the entire accessibility tree:
 
+        ```py
+        snapshot = page.accessibility.snapshot()
+        print(snapshot)
+        ```
+
         An example of logging the focused node's name:
+
+        ```py
+        def find_focused_node(node):
+            if (node.get(\"focused\"))
+                return node
+            for child in (node.get(\"children\") or []):
+                found_node = find_focused_node(child)
+                return found_node
+            return null
+
+        snapshot = page.accessibility.snapshot()
+        node = find_focused_node(snapshot)
+        if node:
+            print(node[\"name\"])
+        ```
 
         Parameters
         ----------
@@ -2850,7 +3017,7 @@ class Frame(SyncBase):
         - the main resource failed to load.
 
         `frame.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404
-        "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
+        \"Not Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
         `response.status()`.
 
         > NOTE: `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
@@ -2896,20 +3063,27 @@ class Frame(SyncBase):
             log_api("<= frame.goto failed")
             raise e
 
-    def wait_for_navigation(
+    def expect_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> typing.Union["Response", NoneType]:
-        """Frame.wait_for_navigation
+    ) -> EventContextManager["Response"]:
+        """Frame.expect_navigation
 
-        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-        last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
-        resolve with `null`.
+        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
+        response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
+        navigation will resolve with `null`.
 
-        This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
-        the frame to navigate. Consider this example:
+        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
+        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
+        Consider this example:
+
+        ```py
+        with frame.expect_navigation():
+            frame.click(\"a.delayed-navigation\") # Clicking the link will indirectly cause a navigation
+        # Context manager waited for the navigation to happen.
+        ```
 
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
@@ -2917,7 +3091,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str, NoneType]
-            URL string, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
         wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -2931,25 +3105,14 @@ class Frame(SyncBase):
 
         Returns
         -------
-        Union[Response, NoneType]
+        EventContextManager[Response]
         """
-
-        try:
-            log_api("=> frame.wait_for_navigation started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.wait_for_navigation(
-                        url=self._wrap_handler(url),
-                        waitUntil=wait_until,
-                        timeout=timeout,
-                    )
-                )
-            )
-            log_api("<= frame.wait_for_navigation succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.wait_for_navigation failed")
-            raise e
+        return EventContextManager(
+            self,
+            self._impl_obj.expect_navigation(
+                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+            ).future,
+        )
 
     def wait_for_load_state(
         self,
@@ -2962,6 +3125,11 @@ class Frame(SyncBase):
 
         This returns when the frame reaches a required load state, `load` by default. The navigation must have been committed
         when this method is called. If current document has already reached the required state, resolves immediately.
+
+        ```py
+        frame.click(\"button\") # click triggers navigation.
+        frame.wait_for_load_state() # the promise resolves after \"load\" event.
+        ```
 
         Parameters
         ----------
@@ -3001,6 +3169,12 @@ class Frame(SyncBase):
 
         This method throws an error if the frame has been detached before `frameElement()` returns.
 
+        ```py
+        frame_element = frame.frame_element()
+        content_frame = frame_element.content_frame()
+        assert frame == content_frame
+        ```
+
         Returns
         -------
         ElementHandle
@@ -3022,16 +3196,33 @@ class Frame(SyncBase):
 
         Returns the return value of `pageFunction`
 
-        If the function passed to the `frame.evaluate` returns a [Promise], then `frame.evaluate` would wait for the promise to
-        resolve and return its value.
+        If the function passed to the `frame.evaluate()` returns a [Promise], then `frame.evaluate()` would wait
+        for the promise to resolve and return its value.
 
-        If the function passed to the `frame.evaluate` returns a non-[Serializable] value, then `frame.evaluate` returns
-        `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
-        `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        If the function passed to the `frame.evaluate()` returns a non-[Serializable] value,
+        then[ method: `Frame.evaluate`] returns `undefined`. DevTools Protocol also supports transferring some additional values
+        that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+
+        ```py
+        result = frame.evaluate(\"([x, y]) => Promise.resolve(x * y)\", [7, 8])
+        print(result) # prints \"56\"
+        ```
 
         A string can also be passed in instead of a function.
 
-        `ElementHandle` instances can be passed as an argument to the `frame.evaluate`:
+        ```py
+        print(frame.evaluate(\"1 + 2\")) # prints \"3\"
+        x = 10
+        print(frame.evaluate(f\"1 + {x}\")) # prints \"11\"
+        ```
+
+        `ElementHandle` instances can be passed as an argument to the `frame.evaluate()`:
+
+        ```py
+        body_handle = frame.query_selector(\"body\")
+        html = frame.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
+        body_handle.dispose()
+        ```
 
         Parameters
         ----------
@@ -3073,15 +3264,31 @@ class Frame(SyncBase):
 
         Returns the return value of `pageFunction` as in-page object (JSHandle).
 
-        The only difference between `frame.evaluate` and `frame.evaluateHandle` is that `frame.evaluateHandle` returns in-page
-        object (JSHandle).
+        The only difference between `frame.evaluate()` and `frame.evaluate_handle()` is
+        that[ method: Fframe.evaluateHandle`] returns in-page object (JSHandle).
 
-        If the function, passed to the `frame.evaluateHandle`, returns a [Promise], then `frame.evaluateHandle` would wait for
-        the promise to resolve and return its value.
+        If the function, passed to the `frame.evaluate_handle()`, returns a [Promise],
+        then[ method: Fframe.evaluateHandle`] would wait for the promise to resolve and return its value.
+
+        ```py
+        a_window_handle = frame.evaluate_handle(\"Promise.resolve(window)\")
+        a_window_handle # handle for the window object.
+        ```
 
         A string can also be passed in instead of a function.
 
-        `JSHandle` instances can be passed as an argument to the `frame.evaluateHandle`:
+        ```py
+        a_handle = page.evaluate_handle(\"document\") # handle for the \"document\"
+        ```
+
+        `JSHandle` instances can be passed as an argument to the `frame.evaluate_handle()`:
+
+        ```py
+        a_handle = page.evaluate_handle(\"document.body\")
+        result_handle = page.evaluate_handle(\"body => body.innerHTML\", a_handle)
+        print(result_handle.json_value())
+        result_handle.dispose()
+        ```
 
         Parameters
         ----------
@@ -3192,6 +3399,23 @@ class Frame(SyncBase):
         selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 
         This method works across navigations:
+
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            chromium = playwright.chromium
+            browser = chromium.launch()
+            page = browser.new_page()
+            for current_url in [\"https://google.com\", \"https://bbc.com\"]:
+                page.goto(current_url, wait_until=\"domcontentloaded\")
+                element = page.main_frame.wait_for_selector(\"img\")
+                print(\"Loaded image: \" + str(element.get_attribute(\"src\")))
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
 
         Parameters
         ----------
@@ -3432,6 +3656,10 @@ class Frame(SyncBase):
         is dispatched. This is equivalend to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
+        ```py
+        frame.dispatch_event(\"button#submit\", \"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -3445,6 +3673,12 @@ class Frame(SyncBase):
         - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = frame.evaluate_handle(\"new DataTransfer()\")
+        frame.dispatch_event(\"#source\", \"dragstart\", { \"dataTransfer\": data_transfer })
+        ```
 
         Parameters
         ----------
@@ -3496,6 +3730,12 @@ class Frame(SyncBase):
         If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
 
         Examples:
+
+        ```py
+        search_value = frame.eval_on_selector(\"#search\", \"el => el.value\")
+        preload_href = frame.eval_on_selector(\"link[rel=preload]\", \"el => el.href\")
+        html = frame.eval_on_selector(\".main-container\", \"(e, suffix) => e.outerHTML + suffix\", \"hello\")
+        ```
 
         Parameters
         ----------
@@ -3551,6 +3791,10 @@ class Frame(SyncBase):
         If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
 
         Examples:
+
+        ```py
+        divs_counts = frame.eval_on_selector_all(\"div\", \"(divs, min) => divs.length >= min\", 10)
+        ```
 
         Parameters
         ----------
@@ -3721,7 +3965,7 @@ class Frame(SyncBase):
 
         Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
 
-        Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
+        Adds a `<link rel=\"stylesheet\">` tag into the page with the desired url or a `<style type=\"text/css\">` tag with the
         content.
 
         Parameters
@@ -4265,6 +4509,15 @@ class Frame(SyncBase):
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
         matching `selector`, the method throws an error.
 
+        ```py
+        # single selection matching the value
+        frame.select_option(\"select#colors\", \"blue\")
+        # single selection matching both the label
+        frame.select_option(\"select#colors\", label=\"blue\")
+        # multiple selection
+        frame.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
+        ```
+
         Parameters
         ----------
         selector : str
@@ -4382,6 +4635,11 @@ class Frame(SyncBase):
 
         To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
 
+        ```py
+        frame.type(\"#mytextarea\", \"hello\") # types instantly
+        frame.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
+        ```
+
         Parameters
         ----------
         selector : str
@@ -4443,7 +4701,7 @@ class Frame(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
@@ -4636,7 +4894,28 @@ class Frame(SyncBase):
 
         The `waitForFunction` can be used to observe viewport size change:
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = await webkit.launch()
+            page = await browser.new_page()
+            watch_dog = page.main_frame.wait_for_function(\"() => window.innerWidth < 100\")
+            await page.set_viewport_size({\"width\": 50, \"height\": 50})
+            await watch_dog
+            await browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         To pass an argument to the predicate of `frame.waitForFunction` function:
+
+        ```py
+        selector = \".foo\"
+        frame.wait_for_function(\"selector => !!document.querySelector(selector)\", selector)
+        ```
 
         Parameters
         ----------
@@ -4698,26 +4977,25 @@ class Frame(SyncBase):
             log_api("<= frame.title failed")
             raise e
 
-    def expect_navigation(
+    def wait_for_navigation(
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> EventContextManager:
-        """Frame.expect_navigation
+    ) -> typing.Union["Response", NoneType]:
+        """Frame.wait_for_navigation
 
-        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
-        response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
-        navigation will resolve with `null`.
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
+        last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
+        resolve with `null`.
 
-        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
-        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
-        Consider this example:
+        This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
+        the frame to navigate. Consider this example:
 
         ```py
         with frame.expect_navigation():
-            frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
+            frame.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        # Resolves after navigation has finished
         ```
 
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
@@ -4726,7 +5004,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str, NoneType]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+            URL string, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
         wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -4740,11 +5018,25 @@ class Frame(SyncBase):
 
         Returns
         -------
-        EventContextManager
+        Union[Response, NoneType]
         """
-        return EventContextManager(
-            self, self._impl_obj.wait_for_navigation(url, wait_until, timeout)
-        )
+
+        try:
+            log_api("=> frame.wait_for_navigation started")
+            result = mapping.from_impl_nullable(
+                self._sync(
+                    self._impl_obj.wait_for_navigation(
+                        url=self._wrap_handler(url),
+                        waitUntil=wait_until,
+                        timeout=timeout,
+                    )
+                )
+            )
+            log_api("<= frame.wait_for_navigation succeded")
+            return result
+        except Exception as e:
+            log_api("<= frame.wait_for_navigation failed")
+            raise e
 
 
 mapping.register(FrameImpl, Frame)
@@ -4875,6 +5167,10 @@ class Selectors(SyncBase):
         """Selectors.register
 
         An example of registering selector engine that queries elements based on a tag name:
+
+        ```py
+        # FIXME: add snippet
+        ```
 
         Parameters
         ----------
@@ -5363,6 +5659,14 @@ class Page(SyncBase):
 
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
+        ```py
+        frame = page.frame(name=\"frame-name\")
+        ```
+
+        ```py
+        frame = page.frame(url=r\".*domain.*\")
+        ```
+
         Parameters
         ----------
         name : Union[str, NoneType]
@@ -5515,6 +5819,23 @@ class Page(SyncBase):
         selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 
         This method works across navigations:
+
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            chromium = playwright.chromium
+            browser = chromium.launch()
+            page = browser.new_page()
+            for current_url in [\"https://google.com\", \"https://bbc.com\"]:
+                page.goto(current_url, wait_until=\"domcontentloaded\")
+                element = page.wait_for_selector(\"img\")
+                print(\"Loaded image: \" + str(element.get_attribute(\"src\")))
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
 
         Parameters
         ----------
@@ -5755,6 +6076,10 @@ class Page(SyncBase):
         is dispatched. This is equivalend to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
+        ```py
+        page.dispatch_event(\"button#submit\", \"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -5768,6 +6093,12 @@ class Page(SyncBase):
         - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = page.evaluate_handle(\"new DataTransfer()\")
+        page.dispatch_event(\"#source\", \"dragstart\", { \"dataTransfer\": data_transfer })
+        ```
 
         Parameters
         ----------
@@ -5808,18 +6139,35 @@ class Page(SyncBase):
 
         Returns the value of the `pageFunction` invocation.
 
-        If the function passed to the `page.evaluate` returns a [Promise], then `page.evaluate` would wait for the promise to
-        resolve and return its value.
+        If the function passed to the `page.evaluate()` returns a [Promise], then `page.evaluate()` would wait
+        for the promise to resolve and return its value.
 
-        If the function passed to the `page.evaluate` returns a non-[Serializable] value, then `page.evaluate` resolves to
-        `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
-        `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        If the function passed to the `page.evaluate()` returns a non-[Serializable] value,
+        then[ method: `Page.evaluate`] resolves to `undefined`. DevTools Protocol also supports transferring some additional
+        values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
 
         Passing argument to `pageFunction`:
 
+        ```py
+        result = page.evaluate(\"([x, y]) => Promise.resolve(x * y)\", [7, 8])
+        print(result) # prints \"56\"
+        ```
+
         A string can also be passed in instead of a function:
 
-        `ElementHandle` instances can be passed as an argument to the `page.evaluate`:
+        ```py
+        print(page.evaluate(\"1 + 2\")) # prints \"3\"
+        x = 10
+        print(page.evaluate(f\"1 + {x}\")) # prints \"11\"
+        ```
+
+        `ElementHandle` instances can be passed as an argument to the `page.evaluate()`:
+
+        ```py
+        body_handle = page.query_selector(\"body\")
+        html = page.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
+        body_handle.dispose()
+        ```
 
         Shortcut for main frame's `frame.evaluate()`.
 
@@ -5863,15 +6211,31 @@ class Page(SyncBase):
 
         Returns the value of the `pageFunction` invocation as in-page object (JSHandle).
 
-        The only difference between `page.evaluate` and `page.evaluateHandle` is that `page.evaluateHandle` returns in-page
-        object (JSHandle).
+        The only difference between `page.evaluate()` and `page.evaluate_handle()` is that
+        `page.evaluate_handle()` returns in-page object (JSHandle).
 
-        If the function passed to the `page.evaluateHandle` returns a [Promise], then `page.evaluateHandle` would wait for the
-        promise to resolve and return its value.
+        If the function passed to the `page.evaluate_handle()` returns a [Promise], then [`method:Ppage.EvaluateHandle`]
+        would wait for the promise to resolve and return its value.
+
+        ```py
+        a_window_handle = page.evaluate_handle(\"Promise.resolve(window)\")
+        a_window_handle # handle for the window object.
+        ```
 
         A string can also be passed in instead of a function:
 
-        `JSHandle` instances can be passed as an argument to the `page.evaluateHandle`:
+        ```py
+        a_handle = page.evaluate_handle(\"document\") # handle for the \"document\"
+        ```
+
+        `JSHandle` instances can be passed as an argument to the `page.evaluate_handle()`:
+
+        ```py
+        a_handle = page.evaluate_handle(\"document.body\")
+        result_handle = page.evaluate_handle(\"body => body.innerHTML\", a_handle)
+        print(result_handle.json_value())
+        result_handle.dispose()
+        ```
 
         Parameters
         ----------
@@ -5922,6 +6286,12 @@ class Page(SyncBase):
         value.
 
         Examples:
+
+        ```py
+        search_value = page.eval_on_selector(\"#search\", \"el => el.value\")
+        preload_href = page.eval_on_selector(\"link[rel=preload]\", \"el => el.href\")
+        html = page.eval_on_selector(\".main-container\", \"(e, suffix) => e.outer_html + suffix\", \"hello\")
+        ```
 
         Shortcut for main frame's `frame.$eval()`.
 
@@ -5977,6 +6347,10 @@ class Page(SyncBase):
         value.
 
         Examples:
+
+        ```py
+        div_counts = page.eval_on_selector_all(\"div\", \"(divs, min) => divs.length >= min\", 10)
+        ```
 
         Parameters
         ----------
@@ -6069,7 +6443,7 @@ class Page(SyncBase):
     ) -> "ElementHandle":
         """Page.add_style_tag
 
-        Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
+        Adds a `<link rel=\"stylesheet\">` tag into the page with the desired url or a `<style type=\"text/css\">` tag with the
         content. Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
 
         Shortcut for main frame's `frame.add_style_tag()`.
@@ -6114,9 +6488,36 @@ class Page(SyncBase):
 
         > NOTE: Functions installed via `page.expose_function()` survive navigations.
 
-        An example of adding an `md5` function to the page:
+        An example of adding an `sha1` function to the page:
 
-        An example of adding a `window.readfile` function to the page:
+        ```py
+        import hashlib
+        from playwright.sync_api import sync_playwright
+
+        def sha1(text):
+            m = hashlib.sha1()
+            m.update(bytes(text, \"utf8\"))
+            return m.hexdigest()
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=False)
+            page = browser.new_page()
+            page.expose_function(\"sha1\", sha1)
+            page.set_content(\"\"\"
+                <script>
+                  async function onClick() {
+                    document.querySelector('div').textContent = await window.sha1('PLAYWRIGHT');
+                  }
+                </script>
+                <button onclick=\"onClick()\">Click me</button>
+                <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
 
         Parameters
         ----------
@@ -6159,7 +6560,45 @@ class Page(SyncBase):
 
         An example of exposing page URL to all frames in a page:
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=false)
+            context = browser.new_context()
+            page = context.new_page()
+            page.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
+            page.set_content(\"\"\"
+            <script>
+              async function onClick() {
+                document.querySelector('div').textContent = await window.pageURL();
+              }
+            </script>
+            <button onclick=\"onClick()\">Click me</button>
+            <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         An example of passing an element handle:
+
+        ```py
+        def print(source, element):
+            print(element.text_content())
+
+        page.expose_binding(\"clicked\", print, handle=true)
+        page.set_content(\"\"\"
+          <script>
+            document.addEventListener('click', event => window.clicked(event.target));
+          </script>
+          <div>Click me</div>
+          <div>Or click me</div>
+        \"\"\")
+        ```
 
         Parameters
         ----------
@@ -6292,8 +6731,8 @@ class Page(SyncBase):
         - the remote server does not respond or is unreachable.
         - the main resource failed to load.
 
-        `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not
-        Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
+        `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 \"Not
+        Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
         `response.status()`.
 
         > NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
@@ -6392,6 +6831,20 @@ class Page(SyncBase):
         This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
         when this method is called. If current document has already reached the required state, resolves immediately.
 
+        ```py
+        page.click(\"button\") # click triggers navigation.
+        page.wait_for_load_state() # the promise resolves after \"load\" event.
+        ```
+
+        ```py
+        with page.expect_popup() as page_info:
+            page.click(\"button\") # click triggers a popup.
+        popup = page_info.value
+         # Following resolves after \"domcontentloaded\" event.
+        popup.wait_for_load_state(\"domcontentloaded\")
+        print(popup.title()) # popup is ready to use.
+        ```
+
         Shortcut for main frame's `frame.wait_for_load_state()`.
 
         Parameters
@@ -6437,6 +6890,12 @@ class Page(SyncBase):
         This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
+
+        ```py
+        with page.expect_navigation():
+            page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        # Resolves after navigation has finished
+        ```
 
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
@@ -6491,6 +6950,12 @@ class Page(SyncBase):
 
         Waits for the matching request and returns it.
 
+        ```py
+        first_request = page.wait_for_request(\"http://example.com/resource\")
+        final_request = page.wait_for_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\")
+        return first_request.url
+        ```
+
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
@@ -6530,6 +6995,12 @@ class Page(SyncBase):
         """Page.wait_for_response
 
         Returns the matched response.
+
+        ```py
+        first_response = page.wait_for_response(\"https://example.com/resource\")
+        final_response = page.wait_for_response(lambda response: response.url == \"https://example.com\" and response.status === 200)
+        return final_response.ok
+        ```
 
         Parameters
         ----------
@@ -6695,6 +7166,33 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.emulate_media
 
+        ```py
+        page.evaluate(\"matchMedia('screen').matches\")
+        # → True
+        page.evaluate(\"matchMedia('print').matches\")
+        # → False
+
+        page.emulate_media(media=\"print\")
+        page.evaluate(\"matchMedia('screen').matches\")
+        # → False
+        page.evaluate(\"matchMedia('print').matches\")
+        # → True
+
+        page.emulate_media()
+        page.evaluate(\"matchMedia('screen').matches\")
+        # → True
+        page.evaluate(\"matchMedia('print').matches\")
+        # → False
+        ```
+
+        ```py
+        page.emulate_media(color_scheme=\"dark\")
+        page.evaluate(\"matchMedia('(prefers-color-scheme: dark)').matches\")
+        # → True
+        page.evaluate(\"matchMedia('(prefers-color-scheme: light)').matches\")
+        # → False
+        page.evaluate(\"matchMedia('(prefers-color-scheme: no-preference)').matches\")
+        ```
 
         Parameters
         ----------
@@ -6728,6 +7226,12 @@ class Page(SyncBase):
 
         `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
         viewport size before navigating to the page.
+
+        ```py
+        page = browser.new_page()
+        page.set_viewport_size({\"width\": 640, \"height\": 480})
+        page.goto(\"https://example.com\")
+        ```
 
         Parameters
         ----------
@@ -6777,6 +7281,11 @@ class Page(SyncBase):
 
         An example of overriding `Math.random` before the page loads:
 
+        ```py
+        # in your playwright script, assuming the preload.js file is in same directory
+        page.add_init_script(path=\"./preload.js\")
+        ```
+
         > NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
@@ -6818,7 +7327,21 @@ class Page(SyncBase):
 
         An example of a naïve handler that aborts all image requests:
 
+        ```py
+        page = browser.new_page()
+        page.route(\"**/*.{png,jpg,jpeg}\", lambda route: route.abort())
+        page.goto(\"https://example.com\")
+        browser.close()
+        ```
+
         or the same snippet using a regex pattern instead:
+
+        ```py
+        page = browser.new_page()
+        page.route(r\"(\\.png$)|(\\.jpg$)\", lambda route: route.abort())
+        page.goto(\"https://example.com\")
+        browser.close()
+        ```
 
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
         matches both handlers.
@@ -7540,6 +8063,15 @@ class Page(SyncBase):
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
         matching `selector`, the method throws an error.
 
+        ```py
+        # single selection matching the value
+        page.select_option(\"select#colors\", \"blue\")
+        # single selection matching both the label
+        page.select_option(\"select#colors\", label=\"blue\")
+        # multiple selection
+        page.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
+        ```
+
         Shortcut for main frame's `frame.select_option()`
 
         Parameters
@@ -7660,6 +8192,11 @@ class Page(SyncBase):
 
         To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
 
+        ```py
+        page.type(\"#mytextarea\", \"hello\") # types instantly
+        page.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
+        ```
+
         Shortcut for main frame's `frame.type()`.
 
         Parameters
@@ -7725,8 +8262,20 @@ class Page(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
+
+        ```py
+        page = browser.new_page()
+        page.goto(\"https://keycode.info\")
+        page.press(\"body\", \"A\")
+        page.screenshot(path=\"a.png\")
+        page.press(\"body\", \"ArrowLeft\")
+        page.screenshot(path=\"arrow_left.png\")
+        page.press(\"body\", \"Shift+O\")
+        page.screenshot(path=\"o.png\")
+        browser.close()
+        ```
 
         Parameters
         ----------
@@ -7891,6 +8440,11 @@ class Page(SyncBase):
         Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
         flaky. Use signals such as network events, selectors becoming visible and others instead.
 
+        ```py
+        # wait for 1 second
+        page.wait_for_timeout(1000)
+        ```
+
         Shortcut for main frame's `frame.wait_for_timeout()`.
 
         Parameters
@@ -7924,7 +8478,28 @@ class Page(SyncBase):
 
         The `waitForFunction` can be used to observe viewport size change:
 
-        To pass an argument to the predicate of `page.waitForFunction` function:
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = await webkit.launch()
+            page = await browser.new_page()
+            watch_dog = page.wait_for_function(\"() => window.innerWidth < 100\")
+            await page.set_viewport_size({\"width\": 50, \"height\": 50})
+            await watch_dog
+            await browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
+        To pass an argument to the predicate of `page.wait_for_function()` function:
+
+        ```py
+        selector = \".foo\"
+        page.wait_for_function(\"selector => !!document.querySelector(selector)\", selector)
+        ```
 
         Shortcut for main frame's `frame.wait_for_function()`.
 
@@ -7997,6 +8572,12 @@ class Page(SyncBase):
         > NOTE: By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
         [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust) property to
         force rendering of exact colors.
+
+        ```py
+        # generates a pdf with \"screen\" media type.
+        page.emulate_media(media=\"screen\")
+        page.pdf(path=\"page.pdf\")
+        ```
 
         The `width`, `height`, and `margin` options accept values labeled with units. Unlabeled values are treated as pixels.
 
@@ -8107,7 +8688,7 @@ class Page(SyncBase):
 
         ```py
         with page.expect_event(event_name) as event_info:
-            page.click("button")
+            page.click(\"button\")
         value = event_info.value
         ```
 
@@ -8126,7 +8707,10 @@ class Page(SyncBase):
         EventContextManager
         """
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_event(
+                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
     def expect_console_message(
@@ -8152,9 +8736,11 @@ class Page(SyncBase):
         -------
         EventContextManager[ConsoleMessage]
         """
-        event = "console"
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_console_message(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
     def expect_download(
@@ -8180,9 +8766,11 @@ class Page(SyncBase):
         -------
         EventContextManager[Download]
         """
-        event = "download"
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_download(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
     def expect_file_chooser(
@@ -8208,9 +8796,11 @@ class Page(SyncBase):
         -------
         EventContextManager[FileChooser]
         """
-        event = "filechooser"
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_file_chooser(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
     def expect_navigation(
@@ -8231,7 +8821,7 @@ class Page(SyncBase):
 
         ```py
         with page.expect_navigation():
-            page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation
+            page.click(\"a.delayed-navigation\") # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
@@ -8260,7 +8850,10 @@ class Page(SyncBase):
         EventContextManager
         """
         return EventContextManager(
-            self, self._impl_obj.wait_for_navigation(url, wait_until, timeout)
+            self,
+            self._impl_obj.expect_navigation(
+                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+            ).future,
         )
 
     def expect_popup(
@@ -8286,9 +8879,11 @@ class Page(SyncBase):
         -------
         EventContextManager[Page]
         """
-        event = "popup"
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_popup(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
     def expect_request(
@@ -8317,7 +8912,10 @@ class Page(SyncBase):
         EventContextManager[Request]
         """
         return EventContextManager(
-            self, self._impl_obj.wait_for_request(url_or_predicate, timeout)
+            self,
+            self._impl_obj.expect_request(
+                url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+            ).future,
         )
 
     def expect_response(
@@ -8346,7 +8944,10 @@ class Page(SyncBase):
         EventContextManager[Response]
         """
         return EventContextManager(
-            self, self._impl_obj.wait_for_response(url_or_predicate, timeout)
+            self,
+            self._impl_obj.expect_response(
+                url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+            ).future,
         )
 
     def expect_worker(
@@ -8372,9 +8973,11 @@ class Page(SyncBase):
         -------
         EventContextManager[Worker]
         """
-        event = "worker"
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_worker(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
 
@@ -8389,7 +8992,7 @@ class BrowserContext(SyncBase):
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
 
-        Returns all open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can
+        Returns all open pages in the context. Non visible pages, such as `\"background_page\"`, will not be listed here. You can
         find them using `chromium_browser_context.background_pages()`.
 
         Returns
@@ -8520,6 +9123,10 @@ class BrowserContext(SyncBase):
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
         obtained via `browser_context.cookies()`.
 
+        ```py
+        browser_context.add_cookies([cookie_object1, cookie_object2])
+        ```
+
         Parameters
         ----------
         cookies : List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
@@ -8602,6 +9209,13 @@ class BrowserContext(SyncBase):
         """BrowserContext.clear_permissions
 
         Clears all permission overrides for the browser context.
+
+        ```py
+        context = browser.new_context()
+        context.grant_permissions([\"clipboard-read\"])
+        # do stuff ..
+        context.clear_permissions()
+        ```
         """
 
         try:
@@ -8619,6 +9233,10 @@ class BrowserContext(SyncBase):
         """BrowserContext.set_geolocation
 
         Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
+
+        ```py
+        browser_context.set_geolocation({\"latitude\": 59.95, \"longitude\": 30.31667})
+        ```
 
         > NOTE: Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages to
         read its geolocation.
@@ -8704,6 +9322,11 @@ class BrowserContext(SyncBase):
 
         An example of overriding `Math.random` before the page loads:
 
+        ```py
+        # in your playwright script, assuming the preload.js file is in same directory.
+        browser_context.add_init_script(path=\"preload.js\")
+        ```
+
         > NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
@@ -8743,7 +9366,45 @@ class BrowserContext(SyncBase):
 
         An example of exposing page URL to all frames in all pages in the context:
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=false)
+            context = browser.new_context()
+            context.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
+            page = context.new_page()
+            page.set_content(\"\"\"
+            <script>
+              async function onClick() {
+                document.querySelector('div').textContent = await window.pageURL();
+              }
+            </script>
+            <button onclick=\"onClick()\">Click me</button>
+            <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         An example of passing an element handle:
+
+        ```py
+        def print(source, element):
+            print(element.text_content())
+
+        context.expose_binding(\"clicked\", print, handle=true)
+        page.set_content(\"\"\"
+          <script>
+            document.addEventListener('click', event => window.clicked(event.target));
+          </script>
+          <div>Click me</div>
+          <div>Or click me</div>
+        \"\"\")
+        ```
 
         Parameters
         ----------
@@ -8783,6 +9444,37 @@ class BrowserContext(SyncBase):
 
         An example of adding an `md5` function to all pages in the context:
 
+        ```py
+        import hashlib
+        from playwright.sync_api import sync_playwright
+
+        def sha1(text):
+            m = hashlib.sha1()
+            m.update(bytes(text, \"utf8\"))
+            return m.hexdigest()
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=False)
+            context = browser.new_context()
+            context.expose_function(\"sha1\", sha1)
+            page = context.new_page()
+            page.expose_function(\"sha1\", sha1)
+            page.set_content(\"\"\"
+                <script>
+                  async function onClick() {
+                    document.querySelector('div').textContent = await window.sha1('PLAYWRIGHT');
+                  }
+                </script>
+                <button onclick=\"onClick()\">Click me</button>
+                <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         Parameters
         ----------
         name : str
@@ -8821,7 +9513,24 @@ class BrowserContext(SyncBase):
 
         An example of a naïve handler that aborts all image requests:
 
+        ```py
+        context = browser.new_context()
+        page = context.new_page()
+        context.route(\"**/*.{png,jpg,jpeg}\", lambda route: route.abort())
+        page.goto(\"https://example.com\")
+        browser.close()
+        ```
+
         or the same snippet using a regex pattern instead:
+
+        ```py
+        context = browser.new_context()
+        page = context.new_page()
+        context.route(r\"(\\.png$)|(\\.jpg$)\", lambda page = await context.new_page()
+        page = context.new_page()
+        page.goto(\"https://example.com\")
+        browser.close()
+        ```
 
         Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
         handlers.
@@ -8888,18 +9597,25 @@ class BrowserContext(SyncBase):
             log_api("<= browser_context.unroute failed")
             raise e
 
-    def wait_for_event(
+    def expect_event(
         self, event: str, predicate: typing.Callable = None, timeout: float = None
-    ) -> typing.Any:
-        """BrowserContext.wait_for_event
+    ) -> EventContextManager:
+        """BrowserContext.expect_event
 
-        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
-        value. Will throw an error if the context closes before the event is fired. Returns the event data value.
+        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
+        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
+        is closed before the `event` is fired.
+
+        ```py
+        with context.expect_event(\"page\") as event_info:
+            context.click(\"button\")
+        page = event_info.value
+        ```
 
         Parameters
         ----------
         event : str
-            Event name, same one would pass into `browserContext.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -8908,25 +9624,14 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        Any
+        EventContextManager
         """
-
-        try:
-            log_api("=> browser_context.wait_for_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_event(
-                        event=event,
-                        predicate=self._wrap_handler(predicate),
-                        timeout=timeout,
-                    )
-                )
-            )
-            log_api("<= browser_context.wait_for_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.wait_for_event failed")
-            raise e
+        return EventContextManager(
+            self,
+            self._impl_obj.expect_event(
+                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
+        )
 
     def close(self) -> NoneType:
         """BrowserContext.close
@@ -8975,25 +9680,23 @@ class BrowserContext(SyncBase):
             log_api("<= browser_context.storage_state failed")
             raise e
 
-    def expect_event(
+    def wait_for_event(
         self, event: str, predicate: typing.Callable = None, timeout: float = None
-    ) -> EventContextManager:
-        """BrowserContext.expect_event
+    ) -> typing.Any:
+        """BrowserContext.wait_for_event
 
-        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
-        is closed before the `event` is fired.
+        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+        value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 
         ```py
-        with context.expect_event("page") as event_info:
-            context.click("button")
-        page = event_info.value
+        context = browser.new_context()
+        context.grant_permissions([\"geolocation\"])
         ```
 
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `*.on(event)`.
+            Event name, same one would pass into `browserContext.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -9002,11 +9705,25 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        EventContextManager
+        Any
         """
-        return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
-        )
+
+        try:
+            log_api("=> browser_context.wait_for_event started")
+            result = mapping.from_maybe_impl(
+                self._sync(
+                    self._impl_obj.wait_for_event(
+                        event=event,
+                        predicate=self._wrap_handler(predicate),
+                        timeout=timeout,
+                    )
+                )
+            )
+            log_api("<= browser_context.wait_for_event succeded")
+            return result
+        except Exception as e:
+            log_api("<= browser_context.wait_for_event failed")
+            raise e
 
     def expect_page(
         self,
@@ -9031,9 +9748,11 @@ class BrowserContext(SyncBase):
         -------
         EventContextManager[Page]
         """
-        event = "page"
         return EventContextManager(
-            self, self._impl_obj.wait_for_event(event, predicate, timeout)
+            self,
+            self._impl_obj.expect_page(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
         )
 
 
@@ -9160,6 +9879,13 @@ class Browser(SyncBase):
 
         Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
 
+        ```py
+        browser = pw.webkit.launch()
+        print(len(browser.contexts())) # prints `0`
+        context = browser.new_context()
+        print(len(browser.contexts())) # prints `1`
+        ```
+
         Returns
         -------
         List[BrowserContext]
@@ -9228,6 +9954,15 @@ class Browser(SyncBase):
         """Browser.new_context
 
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
+
+        ```py
+            browser = playwright.firefox.launch() # or \"chromium\" or \"webkit\".
+            # create a new incognito browser context.
+            context = browser.new_context()
+            # create a new page in a pristine context.
+            page = context.new_page()
+            page.goto(\"https://example.com\")
+        ```
 
         Parameters
         ----------
@@ -9552,6 +10287,12 @@ class BrowserType(SyncBase):
 
         You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
 
+        ```py
+        browser = playwright.chromium.launch( # or \"firefox\" or \"webkit\".
+            ignore_default_args=[\"--mute-audio\"]
+        )
+        ```
+
         > **Chromium-only** Playwright can also be used to control the Chrome browser, but it works best with the version of
         Chromium it is bundled with. There is no guarantee it will work with any other version. Use `executablePath` option with
         extreme caution.
@@ -9857,6 +10598,23 @@ class Playwright(SyncBase):
 
         Returns a dictionary of devices to be used with `browser.new_context()` or `browser.new_page()`.
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            iphone = playwright.devices[\"iPhone 6\"]
+            browser = webkit.launch()
+            context = browser.new_context(**iphone)
+            page = context.new_page()
+            page.goto(\"http://example.com\")
+            # other actions...
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         Returns
         -------
         Dict
@@ -9925,8 +10683,8 @@ class Playwright(SyncBase):
 
         >>> browser = playwright.chromium.launch()
         >>> page = browser.newPage()
-        >>> page.goto("http://whatsmyuseragent.org/")
-        >>> page.screenshot(path="example.png")
+        >>> page.goto(\"http://whatsmyuseragent.org/\")
+        >>> page.screenshot(path=\"example.png\")
         >>> browser.close()
 
         >>> playwright.stop()

@@ -91,26 +91,8 @@ def generate(t: Any) -> None:
                 class_name, name, get_type_hints(value, api_globals)
             )
             if "expect_" in name:
-                return_type_value = return_type(value)
-                return_type_value = re.sub(
-                    r"\"([^\"]+)Impl\"", r"\1", return_type_value
-                )
-                event_name = re.sub(r"expect_(.*)", r"\1", name)
-                event_name = re.sub(r"_", "", event_name)
-                event_name = re.sub(r"consolemessage", "console", event_name)
-                wait_for_method = "wait_for_event(event, predicate, timeout)"
-                if event_name == "request":
-                    wait_for_method = "wait_for_request(url_or_predicate, timeout)"
-                elif event_name == "response":
-                    wait_for_method = "wait_for_response(url_or_predicate, timeout)"
-                elif event_name == "loadstate":
-                    wait_for_method = "wait_for_load_state(state, timeout)"
-                elif event_name == "navigation":
-                    wait_for_method = "wait_for_navigation(url, wait_until, timeout)"
-                elif event_name != "event":
-                    print(f'        event = "{event_name}"')
                 print(
-                    f"        return EventContextManager(self, self._impl_obj.{wait_for_method})"
+                    f"        return EventContextManager(self, self._impl_obj.{name}({arguments(value, 12)}).future)"
                 )
             else:
                 [prefix, suffix] = return_value(

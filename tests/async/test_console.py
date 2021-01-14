@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 from typing import List
 
 from playwright.async_api import ConsoleMessage, Page
@@ -21,12 +20,9 @@ from playwright.async_api import ConsoleMessage, Page
 async def test_console_should_work(page: Page, server):
     messages: List[ConsoleMessage] = []
     page.once("console", lambda m: messages.append(m))
-    await asyncio.gather(
-        page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
-        page.wait_for_event("console"),
-    )
-    assert len(messages) == 1
-    message = messages[0]
+    async with page.expect_console_message() as message_info:
+        await page.evaluate('() => console.log("hello", 5, {foo: "bar"})')
+    message = await message_info.value
     assert message.text == "hello 5 JSHandle@object"
     assert str(message) == "hello 5 JSHandle@object"
     assert message.type == "log"
@@ -35,7 +31,7 @@ async def test_console_should_work(page: Page, server):
     assert await message.args[2].json_value() == {"foo": "bar"}
 
 
-async def test_console_should_emit_same_log_twice(page, server):
+async def test_console_should_emit_same_log_twice(page):
     messages = []
     page.on("console", lambda m: messages.append(m.text))
     await page.evaluate('() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } ')
@@ -85,36 +81,27 @@ async def test_console_should_work_for_different_console_api_calls(page, server)
     ]
 
 
-async def test_console_should_not_fail_for_window_object(page, server):
-    messages = []
-    page.once("console", lambda m: messages.append(m))
-    await asyncio.gather(
-        page.evaluate("() => console.error(window)"), page.wait_for_event("console")
-    )
-    assert len(messages) == 1
-    assert messages[0].text == "JSHandle@object"
+async def test_console_should_not_fail_for_window_object(page):
+    async with page.expect_console_message() as message_info:
+        await page.evaluate("console.error(window)")
+    message = await message_info.value
+    assert message.text == "JSHandle@object"
 
 
-async def test_console_should_trigger_correct_Log(page, server):
+async def test_console_should_trigger_correct_log(page, server):
     await page.goto("about:blank")
-    message = (
-        await asyncio.gather(
-            page.wait_for_event("console"),
-            page.evaluate("async url => fetch(url).catch(e => {})", server.EMPTY_PAGE),
-        )
-    )[0]
+    async with page.expect_console_message() as message_info:
+        await page.evaluate("async url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
+    message = await message_info.value
     assert "Access-Control-Allow-Origin" in message.text
     assert message.type == "error"
 
 
 async def test_console_should_have_location_for_console_api_calls(page, server):
     await page.goto(server.EMPTY_PAGE)
-    message = (
-        await asyncio.gather(
-            page.wait_for_event("console"),
-            page.goto(server.PREFIX + "/consolelog.html"),
-        )
-    )[0]
+    async with page.expect_console_message() as message_info:
+        await page.goto(server.PREFIX + "/consolelog.html"),
+    message = await message_info.value
     assert message.text == "yellow"
     assert message.type == "log"
     location = message.location
@@ -127,26 +114,23 @@ async def test_console_should_not_throw_when_there_are_console_messages_in_detac
     page, server
 ):
     await page.goto(server.EMPTY_PAGE)
-    popup = (
-        await asyncio.gather(
-            page.wait_for_event("popup"),
-            page.evaluate(
-                """async() => {
-                    // 1. Create a popup that Playwright is not connected to.
-                    const win = window.open('');
-                    window._popup = win;
-                    if (window.document.readyState !== 'complete')
-                    await new Promise(f => window.addEventListener('load', f));
-                    // 2. In this popup, create an iframe that console.logs a message.
-                    win.document.body.innerHTML = `<iframe src='/consolelog.html'></iframe>`;
-                    const frame = win.document.querySelector('iframe');
-                    if (!frame.contentDocument || frame.contentDocument.readyState !== 'complete')
-                    await new Promise(f => frame.addEventListener('load', f));
-                    // 3. After that, remove the iframe.
-                    frame.remove();
-                }"""
-            ),
+    async with page.expect_popup() as page_info:
+        await page.evaluate(
+            """async() => {
+                // 1. Create a popup that Playwright is not connected to.
+                const win = window.open('');
+                window._popup = win;
+                if (window.document.readyState !== 'complete')
+                await new Promise(f => window.addEventListener('load', f));
+                // 2. In this popup, create an iframe that console.logs a message.
+                win.document.body.innerHTML = `<iframe src='/consolelog.html'></iframe>`;
+                const frame = win.document.querySelector('iframe');
+                if (!frame.contentDocument || frame.contentDocument.readyState !== 'complete')
+                await new Promise(f => frame.addEventListener('load', f));
+                // 3. After that, remove the iframe.
+                frame.remove();
+            }"""
         )
-    )[0]
+    popup = await page_info.value
     # 4. Connect to the popup and make sure it doesn't throw.
     assert await popup.evaluate("1 + 1") == 2
