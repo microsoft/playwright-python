@@ -1874,16 +1874,10 @@ the following fields:</dd>
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
         is closed before the `event` is fired.
 
-        ```python async
+        ```py
         async with context.expect_event(&#34;page&#34;) as event_info:
             await context.click(&#34;button&#34;)
         page = await event_info.value
-        ```
-
-        ```python sync
-        with context.expect_event(&#34;page&#34;) as event_info:
-            context.click(&#34;button&#34;)
-        page = event_info.value
         ```
 
         Parameters
@@ -2248,15 +2242,9 @@ are returned.</p>
 <p>Performs action and waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the
 <code>predicate</code> function and waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if browser context
 is closed before the <code>event</code> is fired.</p>
-<p>```python async
-async with context.expect_event("page") as event_info:
-await context.click("button")
-page = await event_info.value</p>
-<pre><code>
-```python sync
-with context.expect_event(&quot;page&quot;) as event_info:
-    context.click(&quot;button&quot;)
-page = event_info.value
+<pre><code class="language-py">async with context.expect_event(&quot;page&quot;) as event_info:
+    await context.click(&quot;button&quot;)
+page = await event_info.value
 </code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2286,16 +2274,10 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
     is closed before the `event` is fired.
 
-    ```python async
+    ```py
     async with context.expect_event(&#34;page&#34;) as event_info:
         await context.click(&#34;button&#34;)
     page = await event_info.value
-    ```
-
-    ```python sync
-    with context.expect_event(&#34;page&#34;) as event_info:
-        context.click(&#34;button&#34;)
-    page = event_info.value
     ```
 
     Parameters
@@ -10926,15 +10908,9 @@ dict(one=1, two=2)</p></div>
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python async
+        ```py
         async with frame.expect_navigation():
             await frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
-        ```
-
-        ```python sync
-        with frame.expect_navigation():
-            frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
@@ -12066,14 +12042,8 @@ navigation will resolve with <code>null</code>.</p>
 <p>This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
 cause the page to navigate. e.g. The click target has an <code>onclick</code> handler that triggers navigation from a <code>setTimeout</code>.
 Consider this example:</p>
-<p>```python async
-async with frame.expect_navigation():
-await frame.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation</p>
-<h1 id="context-manager-waited-for-the-navigation-to-happen">Context manager waited for the navigation to happen.</h1>
-<pre><code>
-```python sync
-with frame.expect_navigation():
-    frame.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
+<pre><code class="language-py">async with frame.expect_navigation():
+    await frame.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
 # Context manager waited for the navigation to happen.
 </code></pre>
 <blockquote>
@@ -12120,15 +12090,9 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
     Consider this example:
 
-    ```python async
+    ```py
     async with frame.expect_navigation():
         await frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
-    # Context manager waited for the navigation to happen.
-    ```
-
-    ```python sync
-    with frame.expect_navigation():
-        frame.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
     # Context manager waited for the navigation to happen.
     ```
 
@@ -18618,16 +18582,10 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
         closed before the `event` is fired.
 
-        ```python async
+        ```py
         async with page.expect_event(event_name) as event_info:
             await page.click(&#34;button&#34;)
         value = await event_info.value
-        ```
-
-        ```python sync
-        with page.expect_event(event_name) as event_info:
-            page.click(&#34;button&#34;)
-        value = event_info.value
         ```
 
         Parameters
@@ -18752,15 +18710,9 @@ modifier, modifier is pressed and being held while the subsequent key is being p
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
         Consider this example:
 
-        ```python async
+        ```py
         async with page.expect_navigation():
             await page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
-        ```
-
-        ```python sync
-        with page.expect_navigation():
-            page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
         # Context manager waited for the navigation to happen.
         ```
 
@@ -20473,15 +20425,9 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
 <p>Performs action and waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the
 <code>predicate</code> function and waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the page is
 closed before the <code>event</code> is fired.</p>
-<p>```python async
-async with page.expect_event(event_name) as event_info:
-await page.click("button")
-value = await event_info.value</p>
-<pre><code>
-```python sync
-with page.expect_event(event_name) as event_info:
-    page.click(&quot;button&quot;)
-value = event_info.value
+<pre><code class="language-py">async with page.expect_event(event_name) as event_info:
+    await page.click(&quot;button&quot;)
+value = await event_info.value
 </code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -20511,16 +20457,10 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
     closed before the `event` is fired.
 
-    ```python async
+    ```py
     async with page.expect_event(event_name) as event_info:
         await page.click(&#34;button&#34;)
     value = await event_info.value
-    ```
-
-    ```python sync
-    with page.expect_event(event_name) as event_info:
-        page.click(&#34;button&#34;)
-    value = event_info.value
     ```
 
     Parameters
@@ -20609,14 +20549,8 @@ navigation will resolve with <code>null</code>.</p>
 <p>This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
 cause the page to navigate. e.g. The click target has an <code>onclick</code> handler that triggers navigation from a <code>setTimeout</code>.
 Consider this example:</p>
-<p>```python async
-async with page.expect_navigation():
-await page.click("a.delayed-navigation") # Clicking the link will indirectly cause a navigation</p>
-<h1 id="context-manager-waited-for-the-navigation-to-happen">Context manager waited for the navigation to happen.</h1>
-<pre><code>
-```python sync
-with page.expect_navigation():
-    page.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
+<pre><code class="language-py">async with page.expect_navigation():
+    await page.click(&quot;a.delayed-navigation&quot;) # Clicking the link will indirectly cause a navigation
 # Context manager waited for the navigation to happen.
 </code></pre>
 <blockquote>
@@ -20664,15 +20598,9 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
     Consider this example:
 
-    ```python async
+    ```py
     async with page.expect_navigation():
         await page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
-    # Context manager waited for the navigation to happen.
-    ```
-
-    ```python sync
-    with page.expect_navigation():
-        page.click(&#34;a.delayed-navigation&#34;) # Clicking the link will indirectly cause a navigation
     # Context manager waited for the navigation to happen.
     ```
 
@@ -26899,16 +26827,10 @@ dict(one=1, two=2)</p></div>
         `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
         closed before the `event` is fired.
 
-        ```python async
+        ```py
         async with ws.expect_event(event_name) as event_info:
             await ws.click(&#34;button&#34;)
         value = await event_info.value
-        ```
-
-        ```python sync
-        with ws.expect_event(event_name) as event_info:
-            ws.click(&#34;button&#34;)
-        value = event_info.value
         ```
 
         Parameters
@@ -26993,15 +26915,9 @@ def url(self) -&gt; str:
 <p>Performs action and waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the
 <code>predicate</code> function and waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the socket is
 closed before the <code>event</code> is fired.</p>
-<p>```python async
-async with ws.expect_event(event_name) as event_info:
-await ws.click("button")
-value = await event_info.value</p>
-<pre><code>
-```python sync
-with ws.expect_event(event_name) as event_info:
-    ws.click(&quot;button&quot;)
-value = event_info.value
+<pre><code class="language-py">async with ws.expect_event(event_name) as event_info:
+    await ws.click(&quot;button&quot;)
+value = await event_info.value
 </code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -27031,16 +26947,10 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
     `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
     closed before the `event` is fired.
 
-    ```python async
+    ```py
     async with ws.expect_event(event_name) as event_info:
         await ws.click(&#34;button&#34;)
     value = await event_info.value
-    ```
-
-    ```python sync
-    with ws.expect_event(event_name) as event_info:
-        ws.click(&#34;button&#34;)
-    value = event_info.value
     ```
 
     Parameters
