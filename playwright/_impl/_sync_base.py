@@ -13,17 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from typing import (
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    TypeVar,
-    cast,
-)
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, cast
 
 import greenlet
 
@@ -36,11 +26,11 @@ T = TypeVar("T")
 
 
 class EventInfo(Generic[T]):
-    def __init__(self, sync_base: "SyncBase", coroutine: Coroutine) -> None:
+    def __init__(self, sync_base: "SyncBase", future: asyncio.Future) -> None:
         self._sync_base = sync_base
         self._value: Optional[T] = None
         self._exception = None
-        self._future = sync_base._loop.create_task(coroutine)
+        self._future = future
         g_self = greenlet.getcurrent()
 
         def done_callback(task: Any) -> None:
@@ -64,8 +54,8 @@ class EventInfo(Generic[T]):
 
 
 class EventContextManager(Generic[T]):
-    def __init__(self, sync_base: "SyncBase", coroutine: Coroutine) -> None:
-        self._event: EventInfo = EventInfo(sync_base, coroutine)
+    def __init__(self, sync_base: "SyncBase", future: asyncio.Future) -> None:
+        self._event: EventInfo = EventInfo(sync_base, future)
 
     def __enter__(self) -> EventInfo[T]:
         return self._event

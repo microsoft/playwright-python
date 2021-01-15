@@ -45,7 +45,6 @@ from playwright._impl._helper import (
     DocumentLoadState,
     KeyboardModifier,
     MouseButton,
-    PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
@@ -123,7 +122,6 @@ class Page(ChannelOwner):
         self._is_closed = False
         self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
-        self._pending_wait_for_events: List[PendingWaitEvent] = []
         self._routes: List[RouteHandlerEntry] = []
         self._owned_context: Optional["BrowserContext"] = None
         self._timeout_settings: TimeoutSettings = TimeoutSettings(None)
@@ -287,16 +285,10 @@ class Page(ChannelOwner):
     def _on_close(self) -> None:
         self._is_closed = True
         self._browser_context._pages.remove(self)
-        self._reject_pending_operations(False)
         self.emit(Page.Events.Close)
 
     def _on_crash(self) -> None:
-        self._reject_pending_operations(True)
         self.emit(Page.Events.Crash)
-
-    def _reject_pending_operations(self, is_crash: bool) -> None:
-        for pending_event in self._pending_wait_for_events:
-            pending_event.reject(is_crash, "Page")
 
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
         if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
@@ -504,59 +496,25 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchRequest,
         timeout: float = None,
     ) -> Request:
-        matcher = None if callable(urlOrPredicate) else URLMatcher(urlOrPredicate)
-        predicate = urlOrPredicate if callable(urlOrPredicate) else None
-
-        def my_predicate(request: Request) -> bool:
-            if matcher:
-                return matcher.matches(request.url)
-            if predicate:
-                return urlOrPredicate(request)
-            return True
-
-        return cast(
-            Request,
-            await self.wait_for_event(
-                Page.Events.Request, predicate=my_predicate, timeout=timeout
-            ),
-        )
+        async with self.expect_request(urlOrPredicate, timeout) as request_info:
+            pass
+        return await request_info.value
 
     async def wait_for_response(
         self,
         urlOrPredicate: URLMatchResponse,
         timeout: float = None,
     ) -> Response:
-        matcher = None if callable(urlOrPredicate) else URLMatcher(urlOrPredicate)
-        predicate = urlOrPredicate if callable(urlOrPredicate) else None
-
-        def my_predicate(response: Response) -> bool:
-            if matcher:
-                return matcher.matches(response.url)
-            if predicate:
-                return predicate(response)
-            return True
-
-        return cast(
-            Response,
-            await self.wait_for_event(
-                Page.Events.Response, predicate=my_predicate, timeout=timeout
-            ),
-        )
+        async with self.expect_response(urlOrPredicate, timeout) as request_info:
+            pass
+        return await request_info.value
 
     async def wait_for_event(
         self, event: str, predicate: Callable = None, timeout: float = None
     ) -> Any:
-        if timeout is None:
-            timeout = self._timeout_settings.timeout()
-        wait_helper = WaitHelper(self._loop)
-        wait_helper.reject_on_timeout(
-            timeout, f'Timeout while waiting for event "{event}"'
-        )
-        if event != Page.Events.Crash:
-            wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
-        if event != Page.Events.Close:
-            wait_helper.reject_on_event(self, Page.Events.Close, Error("Page closed"))
-        return await wait_helper.wait_for_event(self, event, predicate)
+        async with self.expect_event(event, predicate, timeout) as event_info:
+            pass
+        return await event_info.value
 
     async def go_back(
         self,
@@ -854,74 +812,99 @@ class Page(ChannelOwner):
         predicate: Callable = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))
+        if timeout is None:
+            timeout = self._timeout_settings.timeout()
+        wait_helper = WaitHelper(self._loop)
+        wait_helper.reject_on_timeout(
+            timeout, f'Timeout while waiting for event "{event}"'
+        )
+        if event != Page.Events.Crash:
+            wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
+        if event != Page.Events.Close:
+            wait_helper.reject_on_event(self, Page.Events.Close, Error("Page closed"))
+        wait_helper.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(wait_helper.result())
 
     def expect_console_message(
         self,
         predicate: Callable[[ConsoleMessage], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[ConsoleMessage]:
-        return EventContextManagerImpl(
-            self.wait_for_event("console", predicate, timeout)
-        )
+        return self.expect_event(Page.Events.Console, predicate, timeout)
 
     def expect_download(
         self,
         predicate: Callable[[Download], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Download]:
-        return EventContextManagerImpl(
-            self.wait_for_event("download", predicate, timeout)
-        )
+        return self.expect_event(Page.Events.Download, predicate, timeout)
 
     def expect_file_chooser(
         self,
         predicate: Callable[[FileChooser], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[FileChooser]:
-        return EventContextManagerImpl(
-            self.wait_for_event("filechooser", predicate, timeout)
-        )
+        return self.expect_event(Page.Events.FileChooser, predicate, timeout)
 
     def expect_navigation(
         self,
         url: URLMatch = None,
-        waitUntil: DocumentLoadState = None,
+        wait_until: DocumentLoadState = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(
-            self.wait_for_navigation(url, waitUntil, timeout)
-        )
+        return self.main_frame.expect_navigation(url, wait_until, timeout)
 
     def expect_popup(
         self,
         predicate: Callable[["Page"], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl["Page"]:
-        return EventContextManagerImpl(self.wait_for_event("popup", predicate, timeout))
+        return self.expect_event(Page.Events.Popup, predicate, timeout)
 
     def expect_request(
         self,
-        urlOrPredicate: URLMatchRequest,
+        url_or_predicate: URLMatchRequest,
         timeout: float = None,
     ) -> EventContextManagerImpl[Request]:
-        return EventContextManagerImpl(self.wait_for_request(urlOrPredicate, timeout))
+        matcher = None if callable(url_or_predicate) else URLMatcher(url_or_predicate)
+        predicate = url_or_predicate if callable(url_or_predicate) else None
+
+        def my_predicate(request: Request) -> bool:
+            if matcher:
+                return matcher.matches(request.url)
+            if predicate:
+                return url_or_predicate(request)
+            return True
+
+        return self.expect_event(
+            Page.Events.Request, predicate=my_predicate, timeout=timeout
+        )
 
     def expect_response(
         self,
-        urlOrPredicate: URLMatchResponse,
+        url_or_predicate: URLMatchResponse,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
-        return EventContextManagerImpl(self.wait_for_response(urlOrPredicate, timeout))
+        matcher = None if callable(url_or_predicate) else URLMatcher(url_or_predicate)
+        predicate = url_or_predicate if callable(url_or_predicate) else None
+
+        def my_predicate(response: Response) -> bool:
+            if matcher:
+                return matcher.matches(response.url)
+            if predicate:
+                return predicate(response)
+            return True
+
+        return self.expect_event(
+            Page.Events.Response, predicate=my_predicate, timeout=timeout
+        )
 
     def expect_worker(
         self,
         predicate: Callable[["Worker"], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl["Worker"]:
-        return EventContextManagerImpl(
-            self.wait_for_event("worker", predicate, timeout)
-        )
+        return self.expect_event("worker", predicate, timeout)
 
 
 class Worker(ChannelOwner):

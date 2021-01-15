@@ -27,10 +27,9 @@ async def test_should_think_that_all_pages_are_focused(page):
 
 async def test_should_focus_popups_by_default(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [popup, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        page.evaluate("url => { window.open(url); }", server.EMPTY_PAGE),
-    )
+    async with page.expect_popup() as popup_info:
+        await page.evaluate("url => { window.open(url); }", server.EMPTY_PAGE)
+    popup = await popup_info.value
     assert await popup.evaluate("document.hasFocus()")
     assert await page.evaluate("document.hasFocus()")
 

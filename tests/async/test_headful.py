@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-import asyncio
-
 import pytest
 from flaky import flaky
 
@@ -163,15 +161,14 @@ async def test_should_not_override_viewport_size_when_passed_null(
     context = await browser.new_context(no_viewport=True)
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    [popup, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        page.evaluate(
+    async with page.expect_popup() as popup_info:
+        await page.evaluate(
             """() => {
-      const win = window.open(window.location.href, 'Title', 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=300,top=0,left=0');
-      win.resizeTo(500, 450);
-    }"""
-        ),
-    )
+                const win = window.open(window.location.href, 'Title', 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=300,top=0,left=0');
+                win.resizeTo(500, 450);
+            }"""
+        )
+    popup = await popup_info.value
     await popup.wait_for_load_state()
     await popup.wait_for_function(
         """() => window.outerWidth === 500 && window.outerHeight === 450"""

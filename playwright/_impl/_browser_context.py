@@ -24,7 +24,6 @@ from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import (
-    PendingWaitEvent,
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
@@ -55,7 +54,6 @@ class BrowserContext(ChannelOwner):
         self._pages: List[Page] = []
         self._routes: List[RouteHandlerEntry] = []
         self._bindings: Dict[str, Any] = {}
-        self._pending_wait_for_events: List[PendingWaitEvent] = []
         self._timeout_settings = TimeoutSettings(None)
         self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
@@ -201,9 +199,12 @@ class BrowserContext(ChannelOwner):
                 "setNetworkInterceptionEnabled", dict(enabled=False)
             )
 
-    async def wait_for_event(
-        self, event: str, predicate: Callable = None, timeout: float = None
-    ) -> Any:
+    def expect_event(
+        self,
+        event: str,
+        predicate: Callable = None,
+        timeout: float = None,
+    ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
         wait_helper = WaitHelper(self._loop)
@@ -214,17 +215,13 @@ class BrowserContext(ChannelOwner):
             wait_helper.reject_on_event(
                 self, BrowserContext.Events.Close, Error("Context closed")
             )
-        return await wait_helper.wait_for_event(self, event, predicate)
+        wait_helper.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(wait_helper.result())
 
     def _on_close(self) -> None:
         self._is_closed_or_closing = True
         if self._browser:
             self._browser._contexts.remove(self)
-
-        for pending_event in self._pending_wait_for_events:
-            if pending_event.event == BrowserContext.Events.Close:
-                continue
-            pending_event.reject(False, "Context")
 
         self.emit(BrowserContext.Events.Close)
 
@@ -245,17 +242,16 @@ class BrowserContext(ChannelOwner):
                 json.dump(result, f)
         return result
 
-    def expect_event(
-        self,
-        event: str,
-        predicate: Callable = None,
-        timeout: float = None,
-    ) -> EventContextManagerImpl:
-        return EventContextManagerImpl(self.wait_for_event(event, predicate, timeout))
+    async def wait_for_event(
+        self, event: str, predicate: Callable = None, timeout: float = None
+    ) -> Any:
+        async with self.expect_event(event, predicate, timeout) as event_info:
+            pass
+        return await event_info.value
 
     def expect_page(
         self,
         predicate: Callable[[Page], bool] = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Page]:
-        return EventContextManagerImpl(self.wait_for_event("page", predicate, timeout))
+        return self.expect_event(BrowserContext.Events.Page, predicate, timeout)

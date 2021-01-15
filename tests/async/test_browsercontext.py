@@ -32,10 +32,9 @@ async def test_window_open_should_use_parent_tab_context(browser, server):
     context = await browser.new_context()
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    [popup, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        page.evaluate("url => window.open(url)", server.EMPTY_PAGE),
-    )
+    async with page.expect_event("popup") as page_info:
+        await page.evaluate("url => window.open(url)", server.EMPTY_PAGE)
+    popup = await page_info.value
     assert popup.context == context
     await context.close()
 
@@ -637,12 +636,12 @@ async def test_page_event_should_report_when_a_new_page_is_created_and_closed(
     context, server
 ):
     page = await context.new_page()
-    [other_page, _] = await asyncio.gather(
-        context.wait_for_event("page"),
-        page.evaluate(
+    async with context.expect_page() as page_info:
+        await page.evaluate(
             "url => window.open(url)", server.CROSS_PROCESS_PREFIX + "/empty.html"
-        ),
-    )
+        )
+    other_page = await page_info.value
+
     # The url is about:blank in FF when 'page' event is fired.
     assert server.CROSS_PROCESS_PREFIX in other_page.url
     assert await other_page.evaluate("['Hello', 'world'].join(' ')") == "Hello world"
@@ -663,50 +662,23 @@ async def test_page_event_should_report_when_a_new_page_is_created_and_closed(
 
 
 async def test_page_event_should_report_initialized_pages(context, server):
-    page_event_promise = asyncio.create_task(context.wait_for_event("page"))
-    asyncio.create_task(context.new_page())
-    newPage = await page_event_promise
-    assert newPage.url == "about:blank"
+    async with context.expect_page() as page_info:
+        await context.new_page()
+    new_page = await page_info.value
+    assert new_page.url == "about:blank"
 
-    popup_event_promise = asyncio.create_task(context.wait_for_event("page"))
-    evaluate_promise = asyncio.create_task(
-        newPage.evaluate("window.open('about:blank')")
-    )
-    popup = await popup_event_promise
+    async with context.expect_page() as popup_info:
+        await new_page.evaluate("window.open('about:blank')")
+    popup = await popup_info.value
     assert popup.url == "about:blank"
-    await evaluate_promise
-
-
-# TODO: fix the server to issue callbacks on the Playwright loop
-# async def test_page_event_should_not_crash_while_redirecting_of_original_request_was_missed(
-#     context, server
-# ):
-#     page = await context.new_page()
-#     requests = []
-#     server.set_route("/one-style.css", lambda request: requests.append(request))
-#     # Open a new page. Use window.open to connect to the page later.
-
-#     [new_page, _, _] = await asyncio.gather(
-#         context.wait_for_event("page"),
-#         page.evaluate("url => window.open(url)", server.PREFIX + "/one-style.html"),
-#         server.wait_for_request("/one-style.css")
-#     )
-#     # Issue a redirect.
-#     requests[0].setResponseCode(302)
-#     requests[0].setHeader("location", "/injectedstyle.css")
-#     requests[0].finish()
-
-#     await new_page.wait_for_load_state("domcontentloaded")
-#     assert new_page.url == server.PREFIX + "/one-style.html"
 
 
 async def test_page_event_should_have_an_opener(context, server):
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    [popup, _] = await asyncio.gather(
-        context.wait_for_event("page"),
-        page.goto(server.PREFIX + "/popup/window-open.html"),
-    )
+    async with context.expect_page() as page_info:
+        await page.goto(server.PREFIX + "/popup/window-open.html"),
+    popup = await page_info.value
     assert popup.url == server.PREFIX + "/popup/popup.html"
     assert await popup.opener() == page
     assert await page.opener() is None
@@ -733,9 +705,9 @@ async def test_page_event_should_work_with_shift_clicking(context, server):
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<a href="/one-style.html">yo</a>')
-    [popup, _] = await asyncio.gather(
-        context.wait_for_event("page"), page.click("a", modifiers=["Shift"])
-    )
+    async with context.expect_page() as page_info:
+        await page.click("a", modifiers=["Shift"])
+    popup = await page_info.value
     assert await popup.opener() is None
 
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar, cast
+from typing import Any, Callable, Generic, TypeVar
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -24,22 +24,17 @@ T = TypeVar("T")
 
 
 class AsyncEventInfo(Generic[T]):
-    def __init__(self, coroutine: Coroutine) -> None:
-        self._value: Optional[T] = None
-        self._future = asyncio.get_event_loop().create_task(coroutine)
-        self._done = False
+    def __init__(self, future: asyncio.Future) -> None:
+        self._future = future
 
     @property
     async def value(self) -> T:
-        if not self._done:
-            self._value = mapping.from_maybe_impl(await self._future)
-            self._done = True
-        return cast(T, self._value)
+        return mapping.from_maybe_impl(await self._future)
 
 
 class AsyncEventContextManager(Generic[T]):
-    def __init__(self, coroutine: Coroutine) -> None:
-        self._event: AsyncEventInfo = AsyncEventInfo(coroutine)
+    def __init__(self, future: asyncio.Future) -> None:
+        self._event: AsyncEventInfo = AsyncEventInfo(future)
 
     async def __aenter__(self) -> AsyncEventInfo[T]:
         return self._event

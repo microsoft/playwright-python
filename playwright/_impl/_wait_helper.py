@@ -13,17 +13,22 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, List
+from asyncio.tasks import Task
+from typing import Any, Callable, Generic, List, Tuple, TypeVar
 
 from pyee import EventEmitter
 
 from playwright._impl._api_types import Error, TimeoutError
 
+T = TypeVar("T")
 
-class WaitHelper:
+
+class WaitHelper(Generic[T]):
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
-        self._failures: List[asyncio.Future] = []
+        self._result: asyncio.Future = asyncio.Future()
         self._loop = loop
+        self._pending_tasks: List[Task] = []
+        self._registered_listeners: List[Tuple[EventEmitter, str, Callable]] = []
 
     def reject_on_event(
         self,
@@ -32,58 +37,52 @@ class WaitHelper:
         error: Error,
         predicate: Callable = None,
     ) -> None:
-        self.reject_on(wait_for_event_future(emitter, event, predicate), error)
+        def listener(event_data: Any = None) -> None:
+            if not predicate or predicate(event_data):
+                self._reject(error)
+
+        emitter.on(event, listener)
+        self._registered_listeners.append((emitter, event, listener))
 
     def reject_on_timeout(self, timeout: float, message: str) -> None:
         if timeout == 0:
             return
-        self.reject_on(
-            self._loop.create_task(asyncio.sleep(timeout / 1000)), TimeoutError(message)
-        )
 
-    def reject_on(self, future: asyncio.Future, error: Error) -> None:
-        async def future_wrapper() -> Error:
-            await future
-            return error
+        async def reject() -> None:
+            await asyncio.sleep(timeout / 1000)
+            self._reject(TimeoutError(message))
 
-        result = self._loop.create_task(future_wrapper())
-        result.add_done_callback(lambda f: future.cancel())
-        self._failures.append(result)
+        self._pending_tasks.append(self._loop.create_task(reject()))
 
-    async def wait_for_event(
+    def _cleanup(self) -> None:
+        for task in self._pending_tasks:
+            if not task.done():
+                task.cancel()
+        for listener in self._registered_listeners:
+            listener[0].remove_listener(listener[1], listener[2])
+
+    def _fulfill(self, result: Any) -> None:
+        self._cleanup()
+        if not self._result.done():
+            self._result.set_result(result)
+
+    def _reject(self, exception: Exception) -> None:
+        self._cleanup()
+        if not self._result.done():
+            self._result.set_exception(exception)
+
+    def wait_for_event(
         self,
         emitter: EventEmitter,
         event: str,
         predicate: Callable = None,
-    ) -> Any:
-        future = wait_for_event_future(emitter, event, predicate)
-        return await self.wait_for_future(future)
+    ) -> None:
+        def listener(event_data: Any = None) -> None:
+            if not predicate or predicate(event_data):
+                self._fulfill(event_data)
 
-    async def wait_for_future(self, future: asyncio.Future) -> Any:
-        done, _ = await asyncio.wait(
-            set([future, *self._failures]), return_when=asyncio.FIRST_COMPLETED
-        )
-        if future not in done:
-            future.cancel()
-        for failure in self._failures:
-            if failure not in done:
-                failure.cancel()
-        for failure in self._failures:
-            if failure in done:
-                raise failure.result()
-        return future.result()
+        emitter.on(event, listener)
+        self._registered_listeners.append((emitter, event, listener))
 
-
-def wait_for_event_future(
-    emitter: EventEmitter, event: str, predicate: Callable = None
-) -> asyncio.Future:
-    future: asyncio.Future = asyncio.Future()
-
-    def listener(event_data: Any = None) -> None:
-        if not predicate or predicate(event_data):
-            future.set_result(event_data)
-
-    emitter.on(event, listener)
-
-    future.add_done_callback(lambda f: emitter.remove_listener(event, listener))
-    return future
+    def result(self) -> asyncio.Future:
+        return self._result

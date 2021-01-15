@@ -112,10 +112,8 @@ async def test_close_should_be_callable_twice(context):
 
 
 async def test_load_should_fire_when_expected(page):
-    await asyncio.gather(
-        page.goto("about:blank"),
-        page.wait_for_event("load"),
-    )
+    async with page.expect_event("load"):
+        await page.goto("about:blank")
 
 
 async def test_async_stacks_should_work(page, server):
@@ -131,19 +129,17 @@ async def test_async_stacks_should_work(page, server):
 
 
 async def test_opener_should_provide_access_to_the_opener_page(page):
-    [popup, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        page.evaluate("window.open('about:blank')"),
-    )
+    async with page.expect_popup() as popup_info:
+        await page.evaluate("window.open('about:blank')"),
+    popup = await popup_info.value
     opener = await popup.opener()
     assert opener == page
 
 
 async def test_opener_should_return_null_if_parent_page_has_been_closed(page):
-    [popup, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        page.evaluate("window.open('about:blank')"),
-    )
+    async with page.expect_popup() as popup_info:
+        await page.evaluate("window.open('about:blank')"),
+    popup = await popup_info.value
     await page.close()
     opener = await popup.opener()
     assert opener is None
@@ -151,76 +147,77 @@ async def test_opener_should_return_null_if_parent_page_has_been_closed(page):
 
 async def test_domcontentloaded_should_fire_when_expected(page, server):
     future = asyncio.create_task(page.goto("about:blank"))
-    await page.wait_for_event("domcontentloaded")
+    async with page.expect_event("domcontentloaded"):
+        pass
     await future
 
 
 async def test_wait_for_request(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [request, _] = await asyncio.gather(
-        page.wait_for_request(server.PREFIX + "/digits/2.png"),
-        page.evaluate(
+    async with page.expect_request(server.PREFIX + "/digits/2.png") as request_info:
+        await page.evaluate(
             """() => {
                 fetch('/digits/1.png')
                 fetch('/digits/2.png')
                 fetch('/digits/3.png')
             }"""
-        ),
-    )
+        )
+    request = await request_info.value
     assert request.url == server.PREFIX + "/digits/2.png"
 
 
 async def test_wait_for_request_should_work_with_predicate(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [request, _] = await asyncio.gather(
-        page.wait_for_event(
-            "request", lambda request: request.url == server.PREFIX + "/digits/2.png"
-        ),
-        page.evaluate(
+    async with page.expect_request(
+        lambda request: request.url == server.PREFIX + "/digits/2.png"
+    ) as request_info:
+        await page.evaluate(
             """() => {
                 fetch('/digits/1.png')
                 fetch('/digits/2.png')
                 fetch('/digits/3.png')
             }"""
-        ),
-    )
+        )
+    request = await request_info.value
     assert request.url == server.PREFIX + "/digits/2.png"
 
 
 async def test_wait_for_request_should_timeout(page, server):
     with pytest.raises(Error) as exc_info:
-        await page.wait_for_event("request", timeout=1)
+        async with page.expect_event("request", timeout=1):
+            pass
     assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_request_should_respect_default_timeout(page, server):
     page.set_default_timeout(1)
     with pytest.raises(Error) as exc_info:
-        await page.wait_for_event("request", lambda _: False)
+        async with page.expect_event("request", lambda _: False):
+            pass
     assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_request_should_work_with_no_timeout(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [request, _] = await asyncio.gather(
-        page.wait_for_request(server.PREFIX + "/digits/2.png", timeout=0),
-        page.evaluate(
+    async with page.expect_request(
+        server.PREFIX + "/digits/2.png", timeout=0
+    ) as request_info:
+        await page.evaluate(
             """() => setTimeout(() => {
                 fetch('/digits/1.png')
                 fetch('/digits/2.png')
                 fetch('/digits/3.png')
             }, 50)"""
-        ),
-    )
+        )
+    request = await request_info.value
     assert request.url == server.PREFIX + "/digits/2.png"
 
 
 async def test_wait_for_request_should_work_with_url_match(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [request, _] = await asyncio.gather(
-        page.wait_for_request(re.compile(r"digits\/\d\.png")),
-        page.evaluate("fetch('/digits/1.png')"),
-    )
+    async with page.expect_request(re.compile(r"digits\/\d\.png")) as request_info:
+        await page.evaluate("fetch('/digits/1.png')")
+    request = await request_info.value
     assert request.url == server.PREFIX + "/digits/1.png"
 
 
@@ -235,61 +232,60 @@ async def test_wait_for_event_should_fail_with_error_upon_disconnect(page):
 
 async def test_wait_for_response_should_work(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [response, _] = await asyncio.gather(
-        page.wait_for_response(server.PREFIX + "/digits/2.png"),
-        page.evaluate(
+    async with page.expect_response(server.PREFIX + "/digits/2.png") as response_info:
+        await page.evaluate(
             """() => {
                 fetch('/digits/1.png')
                 fetch('/digits/2.png')
                 fetch('/digits/3.png')
             }"""
-        ),
-    )
+        )
+    response = await response_info.value
     assert response.url == server.PREFIX + "/digits/2.png"
 
 
-async def test_wait_for_response_should_respect_timeout(page, server):
+async def test_wait_for_response_should_respect_timeout(page):
     with pytest.raises(Error) as exc_info:
-        await page.wait_for_event("response", timeout=1)
+        async with page.expect_response("**/*", timeout=1):
+            pass
     assert exc_info.type is TimeoutError
 
 
-async def test_wait_for_response_should_respect_default_timeout(page, server):
+async def test_wait_for_response_should_respect_default_timeout(page):
     page.set_default_timeout(1)
     with pytest.raises(Error) as exc_info:
-        await page.wait_for_event("response", lambda _: False)
+        async with page.expect_response(lambda _: False):
+            pass
     assert exc_info.type is TimeoutError
 
 
 async def test_wait_for_response_should_work_with_predicate(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [response, _] = await asyncio.gather(
-        page.wait_for_event(
-            "response", lambda response: response.url == server.PREFIX + "/digits/2.png"
-        ),
-        page.evaluate(
+    async with page.expect_response(
+        lambda response: response.url == server.PREFIX + "/digits/2.png"
+    ) as response_info:
+        await page.evaluate(
             """() => {
                 fetch('/digits/1.png')
                 fetch('/digits/2.png')
                 fetch('/digits/3.png')
             }"""
-        ),
-    )
+        )
+    response = await response_info.value
     assert response.url == server.PREFIX + "/digits/2.png"
 
 
 async def test_wait_for_response_should_work_with_no_timeout(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [response, _] = await asyncio.gather(
-        page.wait_for_response(server.PREFIX + "/digits/2.png", timeout=0),
-        page.evaluate(
-            """() => setTimeout(() => {
+    async with page.expect_response(server.PREFIX + "/digits/2.png") as response_info:
+        await page.evaluate(
+            """() => {
                 fetch('/digits/1.png')
                 fetch('/digits/2.png')
                 fetch('/digits/3.png')
-            }, 50)"""
-        ),
-    )
+            }"""
+        )
+    response = await response_info.value
     assert response.url == server.PREFIX + "/digits/2.png"
 
 
@@ -399,10 +395,9 @@ async def test_expose_bindinghandle_should_work(page, server):
 
 
 async def test_page_error_should_fire(page, server, is_webkit):
-    [error, _] = await asyncio.gather(
-        page.wait_for_event("pageerror"),
-        page.goto(server.PREFIX + "/error.html"),
-    )
+    async with page.expect_event("pageerror") as error_info:
+        await page.goto(server.PREFIX + "/error.html")
+    error = await error_info.value
     assert error.message == "Fancy error!"
     stack = await page.evaluate("window.e.stack")
     # Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
@@ -414,10 +409,9 @@ async def test_page_error_should_fire(page, server, is_webkit):
 async def test_page_error_should_handle_odd_values(page, is_firefox):
     cases = [["null", "null"], ["undefined", "undefined"], ["0", "0"], ['""', ""]]
     for [value, message] in cases:
-        [error, _] = await asyncio.gather(
-            page.wait_for_event("pageerror"),
-            page.evaluate(f"() => setTimeout(() => {{ throw {value}; }}, 0)"),
-        )
+        async with page.expect_event("pageerror") as error_info:
+            await page.evaluate(f"() => setTimeout(() => {{ throw {value}; }}, 0)")
+        error = await error_info.value
         assert (
             error.message == ("uncaught exception: " + message) if is_firefox else value
         )
@@ -426,20 +420,18 @@ async def test_page_error_should_handle_odd_values(page, is_firefox):
 @pytest.mark.skip_browser("firefox")
 async def test_page_error_should_handle_object(page, is_chromium):
     # Firefox just does not report this error.
-    [error, _] = await asyncio.gather(
-        page.wait_for_event("pageerror"),
-        page.evaluate("() => setTimeout(() => { throw {}; }, 0)"),
-    )
+    async with page.expect_event("pageerror") as error_info:
+        await page.evaluate("() => setTimeout(() => { throw {}; }, 0)")
+    error = await error_info.value
     assert error.message == "Object" if is_chromium else "[object Object]"
 
 
 @pytest.mark.skip_browser("firefox")
 async def test_page_error_should_handle_window(page, is_chromium):
     # Firefox just does not report this error.
-    [error, _] = await asyncio.gather(
-        page.wait_for_event("pageerror"),
-        page.evaluate("() => setTimeout(() => { throw window; }, 0)"),
-    )
+    async with page.expect_event("pageerror") as error_info:
+        await page.evaluate("() => setTimeout(() => { throw window; }, 0)")
+    error = await error_info.value
     assert error.message == "Window" if is_chromium else "[object Window]"
 
 
@@ -773,10 +765,8 @@ async def test_select_option_should_not_throw_when_select_causes_navigation(
         "select",
         "select => select.addEventListener('input', () => window.location = '/empty.html')",
     )
-    await asyncio.gather(
-        page.wait_for_navigation(),
-        page.select_option("select", "blue"),
-    )
+    async with page.expect_navigation():
+        await page.select_option("select", "blue")
     assert "empty.html" in page.url
 
 

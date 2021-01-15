@@ -189,6 +189,8 @@ class DocumentationProvider:
         return "\n".join(result)
 
     def beautify_method_comment(self, comment: str, indent: str) -> str:
+        comment = comment.replace("\\", "\\\\")
+        comment = comment.replace('"', '\\"')
         lines = comment.split("\n")
         result = []
         skip_example = False

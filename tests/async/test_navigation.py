@@ -429,12 +429,11 @@ async def test_network_idle_should_navigate_to_empty_page_with_networkidle(
 
 async def test_wait_for_nav_should_work(page, server):
     await page.goto(server.EMPTY_PAGE)
-    [response, _] = await asyncio.gather(
-        page.wait_for_navigation(),
-        page.evaluate(
+    async with page.expect_navigation() as response_info:
+        await page.evaluate(
             "url => window.location.href = url", server.PREFIX + "/grid.html"
-        ),
-    )
+        )
+    response = await response_info.value
     assert response.ok
     assert "grid.html" in response.url
 
@@ -480,10 +479,9 @@ async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
 async def test_wait_for_nav_should_work_with_clicking_on_anchor_links(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<a href="#foobar">foobar</a>')
-    [response, _] = await asyncio.gather(
-        page.wait_for_navigation(),
-        page.click("a"),
-    )
+    async with page.expect_navigation() as response_info:
+        await page.click("a"),
+    response = await response_info.value
     assert response is None
     assert page.url == server.EMPTY_PAGE + "#foobar"
 
@@ -494,10 +492,8 @@ async def test_wait_for_nav_should_work_with_clicking_on_links_which_do_not_comm
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(f"<a href='{https_server.EMPTY_PAGE}'>foobar</a>")
     with pytest.raises(Error) as exc_info:
-        await asyncio.gather(
-            page.wait_for_navigation(),
-            page.click("a"),
-        )
+        async with page.expect_navigation():
+            await page.click("a"),
     expect_ssl_error(exc_info.value.message, browser_name)
 
 
@@ -511,10 +507,9 @@ async def test_wait_for_nav_should_work_with_history_push_state(page, server):
         </script>
     """
     )
-    [response, _] = await asyncio.gather(
-        page.wait_for_navigation(),
-        page.click("a"),
-    )
+    async with page.expect_navigation() as response_info:
+        await page.click("a"),
+    response = await response_info.value
     assert response is None
     assert page.url == server.PREFIX + "/wow.html"
 
@@ -529,10 +524,9 @@ async def test_wait_for_nav_should_work_with_history_replace_state(page, server)
         </script>
     """
     )
-    [response, _] = await asyncio.gather(
-        page.wait_for_navigation(),
-        page.click("a"),
-    )
+    async with page.expect_navigation() as response_info:
+        await page.click("a"),
+    response = await response_info.value
     assert response is None
     assert page.url == server.PREFIX + "/replaced.html"
 
@@ -552,16 +546,14 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     """
     )
     assert page.url == server.PREFIX + "/second.html"
-    [back_response, _] = await asyncio.gather(
-        page.wait_for_navigation(),
-        page.click("a#back"),
-    )
+    async with page.expect_navigation() as back_response_info:
+        await page.click("a#back"),
+    back_response = await back_response_info.value
     assert back_response is None
     assert page.url == server.PREFIX + "/first.html"
-    [forward_response, _] = await asyncio.gather(
-        page.wait_for_navigation(),
-        page.click("a#forward"),
-    )
+    async with page.expect_navigation() as forward_response_info:
+        await page.click("a#forward"),
+    forward_response = await forward_response_info.value
     assert forward_response is None
     assert page.url == server.PREFIX + "/second.html"
 
@@ -827,12 +819,13 @@ async def test_wait_for_load_state_should_resolve_after_popup_load(context, serv
     css_requests = []
     server.set_route("/one-style.css", lambda request: css_requests.append(request))
 
-    [popup, _, _] = await asyncio.gather(
-        page.wait_for_event("popup"),
-        server.wait_for_request("/one-style.css"),
-        page.evaluate(
+    async with page.expect_popup() as popup_info:
+        await page.evaluate(
             "url => window.popup = window.open(url)", server.PREFIX + "/one-style.html"
-        ),
+        )
+    [popup, _] = await asyncio.gather(
+        popup_info.value,
+        server.wait_for_request("/one-style.css"),
     )
 
     resolved = []
