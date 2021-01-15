@@ -247,7 +247,7 @@ class BrowserContext(ChannelOwner):
     ) -> Any:
         async with self.expect_event(event, predicate, timeout) as event_info:
             pass
-        return await event_info.value
+        return await event_info
 
     def expect_page(
         self,

@@ -439,41 +439,19 @@ async def test_wait_for_nav_should_work(page, server):
 
 
 async def test_wait_for_nav_should_respect_timeout(page, server):
-    asyncio.create_task(page.goto(server.EMPTY_PAGE))
     with pytest.raises(Error) as exc_info:
-        await page.wait_for_navigation(url="**/frame.html", timeout=5000)
+        async with page.expect_navigation(url="**/frame.html", timeout=5000):
+            await page.goto(server.EMPTY_PAGE)
     assert "Timeout 5000ms exceeded" in exc_info.value.message
-    # TODO: implement logging
-    # assert 'waiting for navigation to "**/frame.html" until "load"' in exc_info.value.message
-    # assert f'navigated to "{server.EMPTY_PAGE}"' in exc_info.value.message
 
 
-@pytest.mark.skip("TODO: needs to be investigated, flaky")
 async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
     page, server
 ):
-    request = []
-
-    def handle(r):
-        request.append(r)
-
-    server.set_route("/one-style.css", handle)
-    navigation_task = asyncio.create_task(page.goto(server.PREFIX + "/one-style.html"))
-    dom_content_loaded_task = asyncio.create_task(
-        page.wait_for_navigation(wait_until="domcontentloaded")
-    )
-
-    both_fired = []
-    both_fired_task = asyncio.gather(
-        page.wait_for_navigation(wait_until="load"), dom_content_loaded_task
-    )
-    both_fired_task.add_done_callback(lambda: both_fired.append(True))
-
-    await server.wait_for_request("/one-style.css")
-    assert both_fired == []
-    request[0].finish()
-    await both_fired_task
-    await navigation_task
+    async with page.expect_navigation(
+        wait_until="domcontentloaded"
+    ), page.expect_navigation(wait_until="load"):
+        await page.goto(server.PREFIX + "/one-style.html")
 
 
 async def test_wait_for_nav_should_work_with_clicking_on_anchor_links(page, server):
@@ -565,8 +543,12 @@ async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(page, s
         page.goto(server.PREFIX + "/frames/one-frame.html")
     )
     await asyncio.sleep(0)
-    frame = await page.wait_for_event("frameattached")
-    await page.wait_for_event("framenavigated", lambda f: f == frame)
+    async with page.expect_event("frameattached") as frame_info:
+        pass
+    frame = await frame_info.value
+
+    async with page.expect_event("framenavigated", lambda f: f == frame):
+        pass
     await asyncio.gather(frame.evaluate("() => window.stop()"), navigation_promise)
 
 
@@ -574,8 +556,9 @@ async def test_wait_for_nav_should_work_with_url_match(page, server):
     responses = [None, None, None]
 
     async def wait_for_nav(url: Any, index: int) -> None:
-        response = await page.wait_for_navigation(url=url)
-        responses[index] = response
+        async with page.expect_navigation(url=url) as response_info:
+            pass
+        responses[index] = await response_info.value
 
     response0_promise = asyncio.create_task(
         wait_for_nav(re.compile(r"one-style\.html"), 0)
@@ -614,38 +597,25 @@ async def test_wait_for_nav_should_work_with_url_match_for_same_document_navigat
     page, server
 ):
     await page.goto(server.EMPTY_PAGE)
-    resolved = []
-    wait_task = asyncio.create_task(
-        page.wait_for_navigation(url=re.compile(r"third\.html"))
-    )
-    wait_task.add_done_callback(lambda _: resolved.append(True))
-    assert resolved == []
-    await page.evaluate("history.pushState({}, '', '/first.html')")
-
-    assert resolved == []
-    await page.evaluate("history.pushState({}, '', '/second.html')")
-
-    assert resolved == []
-    await page.evaluate("history.pushState({}, '', '/third.html')")
-
-    await wait_task
-    await asyncio.sleep(0)  # Let add_done_callback trigger
-    assert resolved == [True]
+    async with page.expect_navigation(url=re.compile(r"third\.html")) as response_info:
+        assert not response_info.is_done()
+        await page.evaluate("history.pushState({}, '', '/first.html')")
+        assert not response_info.is_done()
+        await page.evaluate("history.pushState({}, '', '/second.html')")
+        assert not response_info.is_done()
+        await page.evaluate("history.pushState({}, '', '/third.html')")
+    assert response_info.is_done()
 
 
 async def test_wait_for_nav_should_work_for_cross_process_navigations(page, server):
     await page.goto(server.EMPTY_PAGE)
-    wait_task = asyncio.create_task(
-        page.wait_for_navigation(wait_until="domcontentloaded")
-    )
-    await asyncio.sleep(0)
     url = server.CROSS_PROCESS_PREFIX + "/empty.html"
-    goto_task = asyncio.create_task(page.goto(url))
-    response = await wait_task
+    async with page.expect_navigation(wait_until="domcontentloaded") as response_info:
+        await page.goto(url)
+    response = await response_info.value
     assert response.url == url
     assert page.url == url
     assert await page.evaluate("document.location.href") == url
-    await goto_task
 
 
 async def test_expect_navigation_should_work_for_cross_process_navigations(

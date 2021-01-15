@@ -52,6 +52,9 @@ class EventInfo(Generic[T]):
             raise self._exception
         return cast(T, self._value)
 
+    def is_done(self) -> bool:
+        return self._future.done()
+
 
 class EventContextManager(Generic[T]):
     def __init__(self, sync_base: "SyncBase", future: asyncio.Future) -> None:

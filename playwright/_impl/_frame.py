@@ -529,15 +529,3 @@ class Frame(ChannelOwner):
 
     async def title(self) -> str:
         return await self._channel.send("title")
-
-    async def wait_for_navigation(
-        self,
-        url: URLMatch = None,
-        waitUntil: DocumentLoadState = None,
-        timeout: float = None,
-    ) -> Optional[Response]:
-        async with self.expect_navigation(
-            url, waitUntil, timeout=timeout
-        ) as response_info:
-            pass
-        return await response_info.value

@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
-
 import pytest
 
 from playwright.async_api import Dialog, Page
@@ -85,31 +83,10 @@ async def test_should_dismiss_the_confirm_prompt(page: Page, server):
     assert result
 
 
-# TODO: Logger support not yet here
-# //   it.fail(CHANNEL)('should log prompt actions', async({browser}) => {
-# //     const messages = [];
-# //     const context = await browser.new_context({
-# //       logger: {
-# //         isEnabled: () => true,
-# //         log: (name, severity, message) => messages.push(message),
-# //       }
-# //     });
-# //     const page = await context.new_page();
-# //     const promise = page.evaluate(() => confirm('01234567890123456789012345678901234567890123456789012345678901234567890123456789'));
-# //     const dialog = await page.wait_for_event('dialog');
-# //     expect(messages.join()).toContain('confirm "0123456789012345678901234567890123456789012345678…" was shown');
-# //     await dialog.accept('123');
-# //     await promise;
-# //     expect(messages.join()).toContain('confirm "0123456789012345678901234567890123456789012345678…" was accepted');
-# //     await context.close();
-# //   });
-
-
 @pytest.mark.skip_browser("webkit")
 async def test_should_be_able_to_close_context_with_open_alert(browser):
     context = await browser.new_context()
     page = await context.new_page()
-    alertFuture = asyncio.create_task(page.wait_for_event("dialog"))
-    await page.evaluate("() => setTimeout(() => alert('hello'), 0)", None)
-    await alertFuture
+    async with page.expect_event("dialog"):
+        await page.evaluate("() => setTimeout(() => alert('hello'), 0)", None)
     await context.close()
