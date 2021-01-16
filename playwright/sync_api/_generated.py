@@ -697,7 +697,7 @@ class WebSocket(SyncBase):
     ) -> typing.Any:
         """WebSocket.wait_for_event
 
-        > NOTE: In most cases, you should use `web_socket.wait_for_event()`.
+        > NOTE: In most cases, you should use `web_socket.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
         waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -5629,7 +5629,7 @@ class Page(SyncBase):
         - `page.goto()`
         - `page.reload()`
         - `page.set_content()`
-        - `page.wait_for_navigation()`
+        - `page.expect_navigation()`
 
         > NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
         `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
@@ -5681,7 +5681,7 @@ class Page(SyncBase):
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `null`.
 
-        Shortcut for main frame's `frame.$()`.
+        Shortcut for main frame's `frame.query_selector()`.
 
         Parameters
         ----------
@@ -5710,7 +5710,7 @@ class Page(SyncBase):
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `[]`.
 
-        Shortcut for main frame's `frame.$$()`.
+        Shortcut for main frame's `frame.query_selector_all()`.
 
         Parameters
         ----------
@@ -6212,7 +6212,7 @@ class Page(SyncBase):
         The method finds an element matching the specified selector within the page and passes it as a first argument to
         `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
 
-        If `pageFunction` returns a [Promise], then `page.$eval()` would wait for the promise to resolve and return its
+        If `pageFunction` returns a [Promise], then `page.eval_on_selector()` would wait for the promise to resolve and return its
         value.
 
         Examples:
@@ -6223,7 +6223,7 @@ class Page(SyncBase):
         html = page.eval_on_selector(\".main-container\", \"(e, suffix) => e.outer_html + suffix\", \"hello\")
         ```
 
-        Shortcut for main frame's `frame.$eval()`.
+        Shortcut for main frame's `frame.eval_on_selector()`.
 
         Parameters
         ----------
@@ -6273,7 +6273,7 @@ class Page(SyncBase):
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as
         a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
 
-        If `pageFunction` returns a [Promise], then `page.$$eval()` would wait for the promise to resolve and return its
+        If `pageFunction` returns a [Promise], then `page.eval_on_selector_all()` would wait for the promise to resolve and return its
         value.
 
         Examples:
@@ -6810,7 +6810,7 @@ class Page(SyncBase):
     ) -> typing.Any:
         """Page.wait_for_event
 
-        > NOTE: In most cases, you should use `page.wait_for_event()`.
+        > NOTE: In most cases, you should use `page.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
         waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -7274,7 +7274,7 @@ class Page(SyncBase):
         By default, `page.close()` **does not** run `beforeunload` handlers.
 
         > NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
-        via [`event: Page.dialog`] event.
+        via `page.on('dialog')` event.
 
         Parameters
         ----------
@@ -8601,7 +8601,7 @@ class Page(SyncBase):
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
-        Shortcut for main frame's `frame.wait_for_navigation()`.
+        Shortcut for main frame's `frame.expect_navigation()`.
 
         Parameters
         ----------
@@ -8807,7 +8807,7 @@ class BrowserContext(SyncBase):
         - `page.goto()`
         - `page.reload()`
         - `page.set_content()`
-        - `page.wait_for_navigation()`
+        - `page.expect_navigation()`
 
         > NOTE: `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
         `browser_context.set_default_navigation_timeout()`.
@@ -9470,7 +9470,7 @@ class BrowserContext(SyncBase):
     ) -> typing.Any:
         """BrowserContext.wait_for_event
 
-        > NOTE: In most cases, you should use `browser_context.wait_for_event()`.
+        > NOTE: In most cases, you should use `browser_context.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
         waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is

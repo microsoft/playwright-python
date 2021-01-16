@@ -37,6 +37,7 @@ class DocumentationProvider:
     def __init__(self, is_async: bool) -> None:
         self.is_async = is_async
         self.api: Any = {}
+        self.links: Dict[str, str] = {}
         self.printed_entries: List[str] = []
         process_output = subprocess.run(
             ["python", "-m", "playwright", "print-api-json"],
@@ -53,19 +54,23 @@ class DocumentationProvider:
             members = {}
             self.classes[clazz["name"]] = clazz
             for member in clazz["members"]:
-                if member["kind"] == "event":
-                    continue
-                method_name = member["name"]
-                new_name = to_snake_case(method_name)
+                member_name = member["name"]
                 alias = (
                     member["langs"].get("aliases").get("python")
                     if member["langs"].get("aliases")
                     else None
                 )
+                new_name = member_name
                 if alias:
                     new_name = alias
-                members[new_name] = member
+                self._add_link(member["kind"], clazz["name"], member_name, new_name)
+
+                if member["kind"] == "event":
+                    continue
+
+                new_name = to_snake_case(new_name)
                 member["name"] = new_name
+                members[new_name] = member
                 if member["langs"].get("types") and member["langs"]["types"].get(
                     "python"
                 ):
@@ -89,6 +94,21 @@ class DocumentationProvider:
                     member["args"] = args
 
             clazz["members"] = members
+
+    def _add_link(self, kind: str, clazz: str, member: str, alias: str) -> None:
+        match = re.match(r"(JS|CDP|[A-Z])([^.]+)", clazz)
+        if not match:
+            raise Exception("Invalid class " + clazz)
+        var_name = to_snake_case(f"{match.group(1).lower()}{match.group(2)}")
+        new_name = to_snake_case(alias)
+        if kind == "event":
+            self.links[
+                f"[`event: {clazz}.{member}`]"
+            ] = f"`{var_name}.on('{new_name}')`"
+        elif kind == "property":
+            self.links[f"[`property: {clazz}.{member}`]"] = f"`{var_name}.{new_name}`"
+        else:
+            self.links[f"[`method: {clazz}.{member}`]"] = f"`{var_name}.{new_name}()`"
 
     def print_entry(
         self,
@@ -223,21 +243,8 @@ class DocumentationProvider:
         return self.indent_paragraph("\n".join(result), indent)
 
     def render_links(self, comment: str) -> str:
-        def render(match: Any) -> str:
-            return f"{to_snake_case(match.group(1).lower() + match.group(2))}.{to_snake_case(match.group(3))}"
-
-        def render_property(match: Any) -> str:
-            return f"`{render(match)}`"
-
-        def render_method(match: Any) -> str:
-            return f"`{render(match)}()`"
-
-        comment = re.sub(
-            r"\[`method: (JS|CDP|[A-Z])([^.]+)\.([^`]+)`\]", render_method, comment
-        )
-        comment = re.sub(
-            r"\[`property: (JS|CDP|[A-Z])([^.]+)\.([^`]+)`\]", render_property, comment
-        )
+        for [old, new] in self.links.items():
+            comment = comment.replace(old, new)
         return comment
 
     def make_optional(self, text: str) -> str:
