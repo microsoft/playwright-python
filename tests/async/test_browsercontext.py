@@ -32,7 +32,7 @@ async def test_window_open_should_use_parent_tab_context(browser, server):
     context = await browser.new_context()
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    async with page.expect_event("popup") as page_info:
+    async with page.expect_popup() as page_info:
         await page.evaluate("url => window.open(url)", server.EMPTY_PAGE)
     popup = await page_info.value
     assert popup.context == context
@@ -126,10 +126,9 @@ async def test_close_should_work_for_empty_context(browser):
 
 async def test_close_should_abort_wait_for_event(browser):
     context = await browser.new_context()
-    promise = asyncio.create_task(context.wait_for_event("page"))
-    await context.close()
     with pytest.raises(Error) as exc_info:
-        await promise
+        async with context.expect_page():
+            await context.close()
     assert "Context closed" in exc_info.value.message
 
 
@@ -718,8 +717,7 @@ async def test_page_event_should_work_with_ctrl_clicking(context, server, is_mac
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<a href="/one-style.html">yo</a>')
-    [popup, _] = await asyncio.gather(
-        context.wait_for_event("page"),
-        page.click("a", modifiers=["Meta" if is_mac else "Control"]),
-    )
+    async with context.expect_page() as popup_info:
+        await page.click("a", modifiers=["Meta" if is_mac else "Control"])
+    popup = await popup_info.value
     assert await popup.opener() is None

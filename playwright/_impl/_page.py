@@ -483,38 +483,12 @@ class Page(ChannelOwner):
     ) -> None:
         return await self._main_frame.wait_for_load_state(**locals_to_params(locals()))
 
-    async def wait_for_navigation(
-        self,
-        url: URLMatch = None,
-        waitUntil: DocumentLoadState = None,
-        timeout: float = None,
-    ) -> Optional[Response]:
-        return await self._main_frame.wait_for_navigation(**locals_to_params(locals()))
-
-    async def wait_for_request(
-        self,
-        urlOrPredicate: URLMatchRequest,
-        timeout: float = None,
-    ) -> Request:
-        async with self.expect_request(urlOrPredicate, timeout) as request_info:
-            pass
-        return await request_info.value
-
-    async def wait_for_response(
-        self,
-        urlOrPredicate: URLMatchResponse,
-        timeout: float = None,
-    ) -> Response:
-        async with self.expect_response(urlOrPredicate, timeout) as request_info:
-            pass
-        return await request_info.value
-
     async def wait_for_event(
         self, event: str, predicate: Callable = None, timeout: float = None
     ) -> Any:
         async with self.expect_event(event, predicate, timeout) as event_info:
             pass
-        return await event_info.value
+        return await event_info
 
     async def go_back(
         self,
@@ -851,7 +825,7 @@ class Page(ChannelOwner):
         url: URLMatch = None,
         wait_until: DocumentLoadState = None,
         timeout: float = None,
-    ) -> EventContextManagerImpl:
+    ) -> EventContextManagerImpl[Response]:
         return self.main_frame.expect_navigation(url, wait_until, timeout)
 
     def expect_popup(

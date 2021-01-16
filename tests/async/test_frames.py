@@ -132,9 +132,8 @@ async def test_should_send_events_when_frames_are_manipulated_dynamically(
 
 async def test_framenavigated_when_navigating_on_anchor_urls(page, server):
     await page.goto(server.EMPTY_PAGE)
-    await asyncio.gather(
-        page.goto(server.EMPTY_PAGE + "#foo"), page.wait_for_event("framenavigated")
-    )
+    async with page.expect_event("framenavigated"):
+        await page.goto(server.EMPTY_PAGE + "#foo")
     assert page.url == server.EMPTY_PAGE + "#foo"
 
 
@@ -247,9 +246,9 @@ async def test_should_report_different_frame_instance_when_frame_re_attaches(
     )
 
     assert frame1.is_detached()
-    [frame2, _] = await asyncio.gather(
-        page.wait_for_event("frameattached"),
-        page.evaluate("() => document.body.appendChild(window.frame)"),
-    )
+    async with page.expect_event("frameattached") as frame2_info:
+        await page.evaluate("() => document.body.appendChild(window.frame)")
+
+    frame2 = await frame2_info.value
     assert frame2.is_detached() is False
     assert frame1 != frame2

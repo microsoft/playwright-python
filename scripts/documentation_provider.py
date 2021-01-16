@@ -66,6 +66,10 @@ class DocumentationProvider:
                     new_name = alias
                 members[new_name] = member
                 member["name"] = new_name
+                if member["langs"].get("types") and member["langs"]["types"].get(
+                    "python"
+                ):
+                    member["type"] = member["langs"]["types"]["python"]
 
                 if "args" in member:
                     args = {}

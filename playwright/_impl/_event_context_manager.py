@@ -18,25 +18,16 @@ from typing import Any, Generic, TypeVar
 T = TypeVar("T")
 
 
-class EventInfoImpl(Generic[T]):
-    def __init__(self, future: asyncio.Future) -> None:
-        self._future = future
-
-    @property
-    async def value(self) -> T:
-        return await self._future
-
-
 class EventContextManagerImpl(Generic[T]):
     def __init__(self, future: asyncio.Future) -> None:
-        self._event: EventInfoImpl = EventInfoImpl(future)
+        self._future: asyncio.Future = future
 
     @property
     def future(self) -> asyncio.Future:
-        return self._event._future
+        return self._future
 
-    async def __aenter__(self) -> EventInfoImpl[T]:
-        return self._event
+    async def __aenter__(self) -> asyncio.Future:
+        return self._future
 
     async def __aexit__(self, *args: Any) -> None:
-        await self._event.value
+        await self._future

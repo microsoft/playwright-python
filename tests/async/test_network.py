@@ -190,15 +190,16 @@ async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
 
     server.set_route("/something", handle_something)
 
-    requestPromise = asyncio.create_task(page.wait_for_event("request"))
-    text = await page.evaluate(
-        """async url => {
-      const data = await fetch(url);
-      return data.text();
-    }""",
-        server.CROSS_PROCESS_PREFIX + "/something",
-    )
-    request: Request = await requestPromise
+    text = None
+    async with page.expect_request("**/*") as request_info:
+        text = await page.evaluate(
+            """async url => {
+                const data = await fetch(url);
+                return data.text();
+            }""",
+            server.CROSS_PROCESS_PREFIX + "/something",
+        )
+    request = await request_info.value
     assert text == "done"
     server_headers = await server_request_headers_future
     if is_webkit and is_win:

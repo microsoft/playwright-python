@@ -31,6 +31,9 @@ class AsyncEventInfo(Generic[T]):
     async def value(self) -> T:
         return mapping.from_maybe_impl(await self._future)
 
+    def is_done(self) -> bool:
+        return self._future.done()
+
 
 class AsyncEventContextManager(Generic[T]):
     def __init__(self, future: asyncio.Future) -> None:

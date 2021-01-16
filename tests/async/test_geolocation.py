@@ -86,7 +86,7 @@ async def test_should_use_context_options(browser, server):
     await context.close()
 
 
-async def test_watchPosition_should_be_notified(page, server, context):
+async def test_watch_position_should_be_notified(page, server, context):
     await context.grant_permissions(["geolocation"])
     await page.goto(server.EMPTY_PAGE)
     messages = []
@@ -102,21 +102,19 @@ async def test_watchPosition_should_be_notified(page, server, context):
     }"""
     )
 
-    await context.set_geolocation({"latitude": 0, "longitude": 10})
-    await page.wait_for_event("console", lambda message: "lat=0 lng=10" in message.text)
-    await context.set_geolocation({"latitude": 20, "longitude": 30})
-    await page.wait_for_event(
-        "console", lambda message: "lat=20 lng=30" in message.text
-    )
-    await context.set_geolocation({"latitude": 40, "longitude": 50})
-    await page.wait_for_event(
-        "console", lambda message: "lat=40 lng=50" in message.text
-    )
+    async with page.expect_console_message(lambda m: "lat=0 lng=10" in m.text):
+        await context.set_geolocation({"latitude": 0, "longitude": 10})
 
-    allMessages = "|".join(messages)
-    "latitude=0 lng=10" in allMessages
-    "latitude=20 lng=30" in allMessages
-    "latitude=40 lng=50" in allMessages
+    async with page.expect_console_message(lambda m: "lat=20 lng=30" in m.text):
+        await context.set_geolocation({"latitude": 20, "longitude": 30})
+
+    async with page.expect_console_message(lambda m: "lat=40 lng=50" in m.text):
+        await context.set_geolocation({"latitude": 40, "longitude": 50})
+
+    all_messages = "|".join(messages)
+    "latitude=0 lng=10" in all_messages
+    "latitude=20 lng=30" in all_messages
+    "latitude=40 lng=50" in all_messages
 
 
 async def test_should_use_context_options_for_popup(page, context, server):

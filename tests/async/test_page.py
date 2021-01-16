@@ -45,8 +45,11 @@ async def test_close_should_run_beforeunload_if_asked_for(
     # We have to interact with a page so that 'beforeunload' handlers
     # fire.
     await page.click("body")
-    page_closing_future = asyncio.create_task(page.close(run_before_unload=True))
-    dialog = await page.wait_for_event("dialog")
+
+    async with page.expect_event("dialog") as dialog_info:
+        await page.close(run_before_unload=True)
+    dialog = await dialog_info.value
+
     assert dialog.type == "beforeunload"
     assert dialog.default_value == ""
     if is_chromium:
@@ -58,8 +61,8 @@ async def test_close_should_run_beforeunload_if_asked_for(
             dialog.message
             == "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
         )
-    await dialog.accept()
-    await page_closing_future
+    async with page.expect_event("close"):
+        await dialog.accept()
 
 
 async def test_close_should_not_run_beforeunload_by_default(context, server):
@@ -82,16 +85,16 @@ async def test_close_should_terminate_network_waiters(context, server):
     page = await context.new_page()
 
     async def wait_for_request():
-        try:
-            await page.wait_for_request(server.EMPTY_PAGE)
-        except Error as e:
-            return e
+        with pytest.raises(Error) as exc_info:
+            async with page.expect_request(server.EMPTY_PAGE):
+                pass
+        return exc_info.value
 
     async def wait_for_response():
-        try:
-            await page.wait_for_response(server.EMPTY_PAGE)
-        except Error as e:
-            return e
+        with pytest.raises(Error) as exc_info:
+            async with page.expect_response(server.EMPTY_PAGE):
+                pass
+        return exc_info.value
 
     results = await asyncio.gather(
         wait_for_request(), wait_for_response(), page.close()
@@ -222,11 +225,9 @@ async def test_wait_for_request_should_work_with_url_match(page, server):
 
 
 async def test_wait_for_event_should_fail_with_error_upon_disconnect(page):
-    future = asyncio.create_task(page.wait_for_event("download"))
-    await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
-    await page.close()
     with pytest.raises(Error) as exc_info:
-        await future
+        async with page.expect_download():
+            await page.close()
     assert "Page closed" in exc_info.value.message
 
 

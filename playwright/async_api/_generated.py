@@ -227,13 +227,12 @@ class Request(AsyncBase):
     def failure(self) -> typing.Union[str, NoneType]:
         """Request.failure
 
-        Returns human-readable error message, e.g. `'net::ERR_FAILED'`. The method returns `None` unless this request has
-        failed, as reported by `requestfailed` event.
+        The method returns `null` unless this request has failed, as reported by `requestfailed` event.
 
         Example of logging of all the failed requests:
 
         ```py
-        page.on('requestfailed', lambda request: print(request.url + ' ' + request.failure);
+        page.on(\"requestfailed\", lambda request: print(request.url + \" \" + request.failure))
         ```
 
         Returns
@@ -665,20 +664,13 @@ class WebSocket(AsyncBase):
     ) -> AsyncEventContextManager:
         """WebSocket.expect_event
 
-        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is
-        closed before the `event` is fired.
-
-        ```py
-        async with ws.expect_event(event_name) as event_info:
-            await ws.click(\"button\")
-        value = await event_info.value
-        ```
+        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+        value. Will throw an error if the webSocket is closed before the event is fired. Returns the event data value.
 
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `*.on(event)`.
+            Event name, same one would pass into `webSocket.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -701,15 +693,16 @@ class WebSocket(AsyncBase):
     ) -> typing.Any:
         """WebSocket.wait_for_event
 
-        Returns the event data value.
+        > NOTE: In most cases, you should use `web_socket.wait_for_event()`.
 
-        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
-        value. Will throw an error if the webSocket is closed before the event is fired.
+        Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
+        waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
+        fired.
 
         Parameters
         ----------
         event : str
-            Event name, same one would pass into `webSocket.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -1890,11 +1883,11 @@ class ElementHandle(JSHandle):
 
         ```py
         # single selection matching the value
-        await handle.select_option(\"select#colors\", \"blue\")
+        await handle.select_option(\"blue\")
         # single selection matching the label
-        await handle.select_option(\"select#colors\", label=\"blue\")
+        await handle.select_option(label=\"blue\")
         # multiple selection
-        await handle.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
+        await handle.select_option(value=[\"red\", \"green\", \"blue\"])
         ```
 
         Parameters
@@ -2732,7 +2725,7 @@ class Accessibility(AsyncBase):
             for child in (node.get(\"children\") or []):
                 found_node = find_focused_node(child)
                 return found_node
-            return null
+            return None
 
         snapshot = await page.accessibility.snapshot()
         node = find_focused_node(snapshot)
@@ -3000,18 +2993,17 @@ class Frame(AsyncBase):
     ) -> AsyncEventContextManager["Response"]:
         """Frame.expect_navigation
 
-        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
-        response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
-        navigation will resolve with `null`.
+        Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the navigation
+        will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to
+        History API usage, the navigation will resolve with `null`.
 
-        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
-        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
-        Consider this example:
+        This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
+        the frame to navigate. Consider this example:
 
         ```py
         async with frame.expect_navigation():
-            await frame.click(\"a.delayed-navigation\") # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
+            await frame.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        # Resolves after navigation has finished
         ```
 
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
@@ -3020,7 +3012,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str, NoneType]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+            URL string, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
         wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -4777,9 +4769,8 @@ class Frame(AsyncBase):
             webkit = playwright.webkit
             browser = await webkit.launch()
             page = await browser.new_page()
-            watch_dog = page.main_frame.wait_for_function(\"() => window.innerWidth < 100\")
-            await page.set_viewport_size({\"width\": 50, \"height\": 50})
-            await watch_dog
+            await page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\", force_expr=True)
+            await page.main_frame.wait_for_function(\"() => window.x > 0\")
             await browser.close()
 
         async def main():
@@ -4851,63 +4842,6 @@ class Frame(AsyncBase):
             return result
         except Exception as e:
             log_api("<= frame.title failed")
-            raise e
-
-    async def wait_for_navigation(
-        self,
-        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
-    ) -> typing.Union["Response", NoneType]:
-        """Frame.wait_for_navigation
-
-        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-        last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
-        resolve with `null`.
-
-        This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
-        the frame to navigate. Consider this example:
-
-        ```py
-        async with frame.expect_navigation():
-            await frame.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
-        # Resolves after navigation has finished
-        ```
-
-        > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
-        considered a navigation.
-
-        Parameters
-        ----------
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
-            URL string, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
-            When to consider operation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
-            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-            changed by using the `browser_context.set_default_navigation_timeout()`,
-            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-            `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        Union[Response, NoneType]
-        """
-
-        try:
-            log_api("=> frame.wait_for_navigation started")
-            result = mapping.from_impl_nullable(
-                await self._impl_obj.wait_for_navigation(
-                    url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
-                )
-            )
-            log_api("<= frame.wait_for_navigation succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.wait_for_navigation failed")
             raise e
 
 
@@ -6064,7 +5998,7 @@ class Page(AsyncBase):
         The only difference between `page.evaluate()` and `page.evaluate_handle()` is that
         `page.evaluate_handle()` returns in-page object (JSHandle).
 
-        If the function passed to the `page.evaluate_handle()` returns a [Promise], then [`method:Ppage.EvaluateHandle`]
+        If the function passed to the `page.evaluate_handle()` returns a [Promise], then `page.evaluate_handle()`
         would wait for the promise to resolve and return its value.
 
         ```py
@@ -6710,161 +6644,16 @@ class Page(AsyncBase):
             log_api("<= page.wait_for_load_state failed")
             raise e
 
-    async def wait_for_navigation(
-        self,
-        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
-    ) -> typing.Union["Response", NoneType]:
-        """Page.wait_for_navigation
-
-        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-        last redirect. In case of navigation to a different anchor or navigation due to History API usage, the navigation will
-        resolve with `null`.
-
-        This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
-        cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
-        Consider this example:
-
-        ```py
-        async with page.expect_navigation():
-            await page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
-        # Resolves after navigation has finished
-        ```
-
-        > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
-        considered a navigation.
-
-        Shortcut for main frame's `frame.wait_for_navigation()`.
-
-        Parameters
-        ----------
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
-            When to consider operation succeeded, defaults to `load`. Events can be either:
-            - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
-            - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
-            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
-            changed by using the `browser_context.set_default_navigation_timeout()`,
-            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
-            `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        Union[Response, NoneType]
-        """
-
-        try:
-            log_api("=> page.wait_for_navigation started")
-            result = mapping.from_impl_nullable(
-                await self._impl_obj.wait_for_navigation(
-                    url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
-                )
-            )
-            log_api("<= page.wait_for_navigation succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_navigation failed")
-            raise e
-
-    async def wait_for_request(
-        self,
-        url_or_predicate: typing.Union[
-            str, typing.Pattern, typing.Callable[["Request"], bool]
-        ],
-        timeout: float = None,
-    ) -> "Request":
-        """Page.wait_for_request
-
-        Waits for the matching request and returns it.
-
-        ```py
-        first_request = await page.wait_for_request(\"http://example.com/resource\")
-        final_request = await page.wait_for_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\")
-        return first_request.url
-        ```
-
-        Parameters
-        ----------
-        url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
-            Request URL string, regex or predicate receiving `Request` object.
-        timeout : Union[float, NoneType]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
-            changed by using the `page.set_default_timeout()` method.
-
-        Returns
-        -------
-        Request
-        """
-
-        try:
-            log_api("=> page.wait_for_request started")
-            result = mapping.from_impl(
-                await self._impl_obj.wait_for_request(
-                    urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
-                )
-            )
-            log_api("<= page.wait_for_request succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_request failed")
-            raise e
-
-    async def wait_for_response(
-        self,
-        url_or_predicate: typing.Union[
-            str, typing.Pattern, typing.Callable[["Response"], bool]
-        ],
-        timeout: float = None,
-    ) -> "Response":
-        """Page.wait_for_response
-
-        Returns the matched response.
-
-        ```py
-        first_response = await page.wait_for_response(\"https://example.com/resource\")
-        final_response = await page.wait_for_response(lambda response: response.url == \"https://example.com\" and response.status === 200)
-        return final_response.ok
-        ```
-
-        Parameters
-        ----------
-        url_or_predicate : Union[Callable[[Response], bool], Pattern, str]
-            Request URL string, regex or predicate receiving `Response` object.
-        timeout : Union[float, NoneType]
-            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
-            changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-
-        Returns
-        -------
-        Response
-        """
-
-        try:
-            log_api("=> page.wait_for_response started")
-            result = mapping.from_impl(
-                await self._impl_obj.wait_for_response(
-                    urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
-                )
-            )
-            log_api("<= page.wait_for_response succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_response failed")
-            raise e
-
     async def wait_for_event(
         self, event: str, predicate: typing.Callable = None, timeout: float = None
     ) -> typing.Any:
         """Page.wait_for_event
 
-        Returns the event data value.
+        > NOTE: In most cases, you should use `page.wait_for_event()`.
 
-        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
-        value. Will throw an error if the page is closed before the event is fired.
+        Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
+        waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
+        fired.
 
         Parameters
         ----------
@@ -7156,7 +6945,7 @@ class Page(AsyncBase):
 
         ```py
         page = await browser.new_page()
-        await page.route(r\"(\\.png$)|(\\.jpg$)\", lambda route: route.abort())
+        await page.route(re.compile(r\"(\\.png$)|(\\.jpg$)\"), lambda route: route.abort())
         await page.goto(\"https://example.com\")
         await browser.close()
         ```
@@ -8268,9 +8057,8 @@ class Page(AsyncBase):
             webkit = playwright.webkit
             browser = await webkit.launch()
             page = await browser.new_page()
-            watch_dog = page.wait_for_function(\"() => window.innerWidth < 100\")
-            await page.set_viewport_size({\"width\": 50, \"height\": 50})
-            await watch_dog
+            await page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\", force_expr=True)
+            await page.wait_for_function(\"() => window.x > 0\")
             await browser.close()
 
         async def main():
@@ -8463,14 +8251,13 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager:
         """Page.expect_event
 
-        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the `event` is fired.
+        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+        value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
 
         ```py
-        async with page.expect_event(event_name) as event_info:
+        async with page.expect_event(\"framenavigated\") as event_info:
             await page.click(\"button\")
-        value = await event_info.value
+        frame = await event_info.value
         ```
 
         Parameters
@@ -8589,12 +8376,12 @@ class Page(AsyncBase):
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
-    ) -> AsyncEventContextManager:
+    ) -> AsyncEventContextManager["Response"]:
         """Page.expect_navigation
 
-        Performs action and waits for the next navigation. In case of multiple redirects, the navigation will resolve with the
-        response of the last redirect. In case of navigation to a different anchor or navigation due to History API usage, the
-        navigation will resolve with `null`.
+        Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the
+        navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
+        navigation due to History API usage, the navigation will resolve with `null`.
 
         This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
         cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
@@ -8602,14 +8389,14 @@ class Page(AsyncBase):
 
         ```py
         async with page.expect_navigation():
-            await page.click(\"a.delayed-navigation\") # Clicking the link will indirectly cause a navigation
-        # Context manager waited for the navigation to happen.
+            await page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        # Resolves after navigation has finished
         ```
 
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
-        Shortcut for main frame's `frame.expect_navigation()`.
+        Shortcut for main frame's `frame.wait_for_navigation()`.
 
         Parameters
         ----------
@@ -8628,7 +8415,7 @@ class Page(AsyncBase):
 
         Returns
         -------
-        EventContextManager
+        EventContextManager[Response]
         """
 
         return AsyncEventContextManager(
@@ -8676,17 +8463,25 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request
 
-        Performs action and waits for `response` event to fire. If predicate is provided, it passes `Request` value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the download event is fired.
+        Waits for the matching request and returns it.
+
+        ```py
+        async with page.expect_request(\"http://example.com/resource\") as first:
+            await page.click('button')
+        first_request = await first.value
+
+        async with page.expect_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\") as second:
+            await page.click('img')
+        second_request = await second.value
+        ```
 
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
-            Receives the `Request` object and resolves to truthy value when the waiting should resolve.
+            Request URL string, regex or predicate receiving `Request` object.
         timeout : Union[float, NoneType]
-            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
-            value can be changed by using the `browser_context.set_default_timeout()`.
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
+            changed by using the `page.set_default_timeout()` method.
 
         Returns
         -------
@@ -8708,17 +8503,21 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_response
 
-        Performs action and waits for `response` event to fire. If predicate is provided, it passes `Response` value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the download event is fired.
+        Returns the matched response.
+
+        ```py
+        first_response = await page.wait_for_response(\"https://example.com/resource\")
+        final_response = await page.wait_for_response(lambda response: response.url == \"https://example.com\" and response.status === 200)
+        return final_response.ok
+        ```
 
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Response], bool], Pattern, str]
-            Receives the `Response` object and resolves to truthy value when the waiting should resolve.
+            Request URL string, regex or predicate receiving `Response` object.
         timeout : Union[float, NoneType]
-            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
-            value can be changed by using the `browser_context.set_default_timeout()`.
+            Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
+            changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -9300,7 +9099,8 @@ class BrowserContext(AsyncBase):
         ```py
         context = await browser.new_context()
         page = await context.new_page()
-        await context.route(r\"(\\.png$)|(\\.jpg$)\", lambda page = await context.new_page()
+        await context.route(re.compile(r\"(\\.png$)|(\\.jpg$)\"), lambda route: route.abort())
+        page = await context.new_page()
         await page.goto(\"https://example.com\")
         await browser.close()
         ```
@@ -9371,20 +9171,19 @@ class BrowserContext(AsyncBase):
     ) -> AsyncEventContextManager:
         """BrowserContext.expect_event
 
-        Performs action and waits for given `event` to fire. If predicate is provided, it passes event's value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if browser context
-        is closed before the `event` is fired.
+        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+        value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 
         ```py
         async with context.expect_event(\"page\") as event_info:
-            await context.click(\"button\")
+            await page.click(\"button\")
         page = await event_info.value
         ```
 
         Parameters
         ----------
         event : str
-            Event name, same one typically passed into `*.on(event)`.
+            Event name, same one would pass into `browserContext.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -9452,18 +9251,16 @@ class BrowserContext(AsyncBase):
     ) -> typing.Any:
         """BrowserContext.wait_for_event
 
-        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
-        value. Will throw an error if the context closes before the event is fired. Returns the event data value.
+        > NOTE: In most cases, you should use `browser_context.wait_for_event()`.
 
-        ```py
-        context = await browser.new_context()
-        await context.grant_permissions([\"geolocation\"])
-        ```
+        Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
+        waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
+        fired.
 
         Parameters
         ----------
         event : str
-            Event name, same one would pass into `browserContext.on(event)`.
+            Event name, same one typically passed into `*.on(event)`.
         predicate : Union[Callable, NoneType]
             Receives the event data and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
@@ -9719,12 +9516,12 @@ class Browser(AsyncBase):
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
 
         ```py
-            browser = await playwright.firefox.launch() # or \"chromium\" or \"webkit\".
-            # create a new incognito browser context.
-            context = await browser.new_context()
-            # create a new page in a pristine context.
-            page = await context.new_page()
-            await page.goto(\"https://example.com\")
+        browser = await playwright.firefox.launch() # or \"chromium\" or \"webkit\".
+        # create a new incognito browser context.
+        context = await browser.new_context()
+        # create a new page in a pristine context.
+        page = await context.new_page()
+        await page.goto(\"https://example.com\")
         ```
 
         Parameters
