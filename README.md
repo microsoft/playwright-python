@@ -73,7 +73,7 @@ async def main():
             await page.screenshot(path=f'example-{browser_type.name}.png')
             await browser.close()
 
-asyncio.get_event_loop().run_until_complete(main())
+asyncio.run(main())
 ```
 
 #### With pytest
@@ -152,7 +152,7 @@ async def main():
         await page.screenshot(path='colosseum-iphone.png')
         await browser.close()
 
-asyncio.get_event_loop().run_until_complete(main())
+asyncio.run(main())
 ```
 </details>
 
@@ -199,7 +199,7 @@ async def main():
         print(dimensions)
         await browser.close()
 
-asyncio.get_event_loop().run_until_complete(main())
+asyncio.run(main())
 ```
 </details>
 
@@ -246,7 +246,7 @@ async def main():
         await page.goto('http://todomvc.com')
         await browser.close()
 
-asyncio.get_event_loop().run_until_complete(main())
+asyncio.run(main())
 ```
 </details>
 
