@@ -1441,7 +1441,7 @@ the following fields:</dd>
         - `page.goto()`
         - `page.reload()`
         - `page.set_content()`
-        - `page.wait_for_navigation()`
+        - `page.expect_navigation()`
 
         &gt; NOTE: `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
         `browser_context.set_default_navigation_timeout()`.
@@ -2104,7 +2104,7 @@ the following fields:</dd>
     ) -&gt; typing.Any:
         &#34;&#34;&#34;BrowserContext.wait_for_event
 
-        &gt; NOTE: In most cases, you should use `browser_context.wait_for_event()`.
+        &gt; NOTE: In most cases, you should use `browser_context.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event&#39;s value into the `predicate` function and
         waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -3122,7 +3122,7 @@ handlers.</p>
 - <code>page.goto()</code>
 - <code>page.reload()</code>
 - <code>page.set_content()</code>
-- <code>page.wait_for_navigation()</code></p>
+- <code>page.expect_navigation()</code></p>
 <blockquote>
 <p>NOTE: <code>page.set_default_navigation_timeout()</code> and <code>page.set_default_timeout()</code> take priority over
 <code>browser_context.set_default_navigation_timeout()</code>.</p>
@@ -3145,7 +3145,7 @@ handlers.</p>
     - `page.goto()`
     - `page.reload()`
     - `page.set_content()`
-    - `page.wait_for_navigation()`
+    - `page.expect_navigation()`
 
     &gt; NOTE: `page.set_default_navigation_timeout()` and `page.set_default_timeout()` take priority over
     `browser_context.set_default_navigation_timeout()`.
@@ -3462,7 +3462,7 @@ the <code>url</code>.</p>
 <dd>
 <div class="desc"><p>BrowserContext.wait_for_event</p>
 <blockquote>
-<p>NOTE: In most cases, you should use <code>browser_context.wait_for_event()</code>.</p>
+<p>NOTE: In most cases, you should use <code>browser_context.expect_event()</code>.</p>
 </blockquote>
 <p>Waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the <code>predicate</code> function and
 waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the socket is closed before the <code>event</code> is
@@ -3491,7 +3491,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
 ) -&gt; typing.Any:
     &#34;&#34;&#34;BrowserContext.wait_for_event
 
-    &gt; NOTE: In most cases, you should use `browser_context.wait_for_event()`.
+    &gt; NOTE: In most cases, you should use `browser_context.expect_event()`.
 
     Waits for given `event` to fire. If predicate is provided, it passes event&#39;s value into the `predicate` function and
     waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -17136,7 +17136,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         - `page.goto()`
         - `page.reload()`
         - `page.set_content()`
-        - `page.wait_for_navigation()`
+        - `page.expect_navigation()`
 
         &gt; NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
         `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
@@ -17188,7 +17188,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `null`.
 
-        Shortcut for main frame&#39;s `frame.$()`.
+        Shortcut for main frame&#39;s `frame.query_selector()`.
 
         Parameters
         ----------
@@ -17217,7 +17217,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `[]`.
 
-        Shortcut for main frame&#39;s `frame.$$()`.
+        Shortcut for main frame&#39;s `frame.query_selector_all()`.
 
         Parameters
         ----------
@@ -17719,7 +17719,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         The method finds an element matching the specified selector within the page and passes it as a first argument to
         `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
 
-        If `pageFunction` returns a [Promise], then `page.$eval()` would wait for the promise to resolve and return its
+        If `pageFunction` returns a [Promise], then `page.eval_on_selector()` would wait for the promise to resolve and return its
         value.
 
         Examples:
@@ -17730,7 +17730,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         html = page.eval_on_selector(\&#34;.main-container\&#34;, \&#34;(e, suffix) =&gt; e.outer_html + suffix\&#34;, \&#34;hello\&#34;)
         ```
 
-        Shortcut for main frame&#39;s `frame.$eval()`.
+        Shortcut for main frame&#39;s `frame.eval_on_selector()`.
 
         Parameters
         ----------
@@ -17780,7 +17780,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as
         a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
 
-        If `pageFunction` returns a [Promise], then `page.$$eval()` would wait for the promise to resolve and return its
+        If `pageFunction` returns a [Promise], then `page.eval_on_selector_all()` would wait for the promise to resolve and return its
         value.
 
         Examples:
@@ -18317,7 +18317,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
     ) -&gt; typing.Any:
         &#34;&#34;&#34;Page.wait_for_event
 
-        &gt; NOTE: In most cases, you should use `page.wait_for_event()`.
+        &gt; NOTE: In most cases, you should use `page.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event&#39;s value into the `predicate` function and
         waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -18781,7 +18781,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         By default, `page.close()` **does not** run `beforeunload` handlers.
 
         &gt; NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
-        via [`event: Page.dialog`] event.
+        via `page.on(&#39;dialog&#39;)` event.
 
         Parameters
         ----------
@@ -20108,7 +20108,7 @@ page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a user
         &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
-        Shortcut for main frame&#39;s `frame.wait_for_navigation()`.
+        Shortcut for main frame&#39;s `frame.expect_navigation()`.
 
         Parameters
         ----------
@@ -21044,7 +21044,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 <p>By default, <code>page.close()</code> <strong>does not</strong> run <code>beforeunload</code> handlers.</p>
 <blockquote>
 <p>NOTE: if <code>runBeforeUnload</code> is passed as true, a <code>beforeunload</code> dialog might be summoned and should be handled manually
-via [<code>event: Page.dialog</code>] event.</p>
+via <code>page.on('dialog')</code> event.</p>
 </blockquote>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -21065,7 +21065,7 @@ via [<code>event: Page.dialog</code>] event.</p>
     By default, `page.close()` **does not** run `beforeunload` handlers.
 
     &gt; NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
-    via [`event: Page.dialog`] event.
+    via `page.on(&#39;dialog&#39;)` event.
 
     Parameters
     ----------
@@ -21471,14 +21471,14 @@ value. Optional.</dd>
 <div class="desc"><p>Page.eval_on_selector</p>
 <p>The method finds an element matching the specified selector within the page and passes it as a first argument to
 <code>pageFunction</code>. If no elements match the selector, the method throws an error. Returns the value of <code>pageFunction</code>.</p>
-<p>If <code>pageFunction</code> returns a [Promise], then <code>page.$eval()</code> would wait for the promise to resolve and return its
+<p>If <code>pageFunction</code> returns a [Promise], then <code>page.eval_on_selector()</code> would wait for the promise to resolve and return its
 value.</p>
 <p>Examples:</p>
 <pre><code class="language-py">search_value = page.eval_on_selector(&quot;#search&quot;, &quot;el =&gt; el.value&quot;)
 preload_href = page.eval_on_selector(&quot;link[rel=preload]&quot;, &quot;el =&gt; el.href&quot;)
 html = page.eval_on_selector(&quot;.main-container&quot;, &quot;(e, suffix) =&gt; e.outer_html + suffix&quot;, &quot;hello&quot;)
 </code></pre>
-<p>Shortcut for main frame's <code>frame.$eval()</code>.</p>
+<p>Shortcut for main frame's <code>frame.eval_on_selector()</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
@@ -21513,7 +21513,7 @@ Optional.</dd>
     The method finds an element matching the specified selector within the page and passes it as a first argument to
     `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
 
-    If `pageFunction` returns a [Promise], then `page.$eval()` would wait for the promise to resolve and return its
+    If `pageFunction` returns a [Promise], then `page.eval_on_selector()` would wait for the promise to resolve and return its
     value.
 
     Examples:
@@ -21524,7 +21524,7 @@ Optional.</dd>
     html = page.eval_on_selector(\&#34;.main-container\&#34;, \&#34;(e, suffix) =&gt; e.outer_html + suffix\&#34;, \&#34;hello\&#34;)
     ```
 
-    Shortcut for main frame&#39;s `frame.$eval()`.
+    Shortcut for main frame&#39;s `frame.eval_on_selector()`.
 
     Parameters
     ----------
@@ -21570,7 +21570,7 @@ Optional.</dd>
 <div class="desc"><p>Page.eval_on_selector_all</p>
 <p>The method finds all elements matching the specified selector within the page and passes an array of matched elements as
 a first argument to <code>pageFunction</code>. Returns the result of <code>pageFunction</code> invocation.</p>
-<p>If <code>pageFunction</code> returns a [Promise], then <code>page.$$eval()</code> would wait for the promise to resolve and return its
+<p>If <code>pageFunction</code> returns a [Promise], then <code>page.eval_on_selector_all()</code> would wait for the promise to resolve and return its
 value.</p>
 <p>Examples:</p>
 <pre><code class="language-py">div_counts = page.eval_on_selector_all(&quot;div&quot;, &quot;(divs, min) =&gt; divs.length &gt;= min&quot;, 10)
@@ -21609,7 +21609,7 @@ Optional.</dd>
     The method finds all elements matching the specified selector within the page and passes an array of matched elements as
     a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
 
-    If `pageFunction` returns a [Promise], then `page.$$eval()` would wait for the promise to resolve and return its
+    If `pageFunction` returns a [Promise], then `page.eval_on_selector_all()` would wait for the promise to resolve and return its
     value.
 
     Examples:
@@ -22136,7 +22136,7 @@ Consider this example:</p>
 <p>NOTE: Usage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API">History API</a> to change the URL is
 considered a navigation.</p>
 </blockquote>
-<p>Shortcut for main frame's <code>frame.wait_for_navigation()</code>.</p>
+<p>Shortcut for main frame's <code>frame.expect_navigation()</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>url</code></strong> :&ensp;<code>Union[Callable[[str], bool], Pattern, str, NoneType]</code></dt>
@@ -22186,7 +22186,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     &gt; NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
     considered a navigation.
 
-    Shortcut for main frame&#39;s `frame.wait_for_navigation()`.
+    Shortcut for main frame&#39;s `frame.expect_navigation()`.
 
     Parameters
     ----------
@@ -24247,7 +24247,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 <div class="desc"><p>Page.query_selector</p>
 <p>The method finds an element matching the specified selector within the page. If no elements match the selector, the
 return value resolves to <code>null</code>.</p>
-<p>Shortcut for main frame's <code>frame.$()</code>.</p>
+<p>Shortcut for main frame's <code>frame.query_selector()</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
@@ -24268,7 +24268,7 @@ return value resolves to <code>null</code>.</p>
     The method finds an element matching the specified selector within the page. If no elements match the selector, the
     return value resolves to `null`.
 
-    Shortcut for main frame&#39;s `frame.$()`.
+    Shortcut for main frame&#39;s `frame.query_selector()`.
 
     Parameters
     ----------
@@ -24299,7 +24299,7 @@ return value resolves to <code>null</code>.</p>
 <div class="desc"><p>Page.query_selector_all</p>
 <p>The method finds all elements matching the specified selector within the page. If no elements match the selector, the
 return value resolves to <code>[]</code>.</p>
-<p>Shortcut for main frame's <code>frame.$$()</code>.</p>
+<p>Shortcut for main frame's <code>frame.query_selector_all()</code>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
@@ -24320,7 +24320,7 @@ return value resolves to <code>[]</code>.</p>
     The method finds all elements matching the specified selector within the page. If no elements match the selector, the
     return value resolves to `[]`.
 
-    Shortcut for main frame&#39;s `frame.$$()`.
+    Shortcut for main frame&#39;s `frame.query_selector_all()`.
 
     Parameters
     ----------
@@ -24822,7 +24822,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
 - <code>page.goto()</code>
 - <code>page.reload()</code>
 - <code>page.set_content()</code>
-- <code>page.wait_for_navigation()</code></p>
+- <code>page.expect_navigation()</code></p>
 <blockquote>
 <p>NOTE: <code>page.set_default_navigation_timeout()</code> takes priority over <code>page.set_default_timeout()</code>,
 <code>browser_context.set_default_timeout()</code> and <code>browser_context.set_default_navigation_timeout()</code>.</p>
@@ -24845,7 +24845,7 @@ changed by using the <code>browser_context.set_default_navigation_timeout()</cod
     - `page.goto()`
     - `page.reload()`
     - `page.set_content()`
-    - `page.wait_for_navigation()`
+    - `page.expect_navigation()`
 
     &gt; NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
     `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
@@ -25552,7 +25552,7 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 <dd>
 <div class="desc"><p>Page.wait_for_event</p>
 <blockquote>
-<p>NOTE: In most cases, you should use <code>page.wait_for_event()</code>.</p>
+<p>NOTE: In most cases, you should use <code>page.expect_event()</code>.</p>
 </blockquote>
 <p>Waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the <code>predicate</code> function and
 waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the socket is closed before the <code>event</code> is
@@ -25581,7 +25581,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
 ) -&gt; typing.Any:
     &#34;&#34;&#34;Page.wait_for_event
 
-    &gt; NOTE: In most cases, you should use `page.wait_for_event()`.
+    &gt; NOTE: In most cases, you should use `page.expect_event()`.
 
     Waits for given `event` to fire. If predicate is provided, it passes event&#39;s value into the `predicate` function and
     waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -28790,7 +28790,7 @@ dict(one=1, two=2)</p></div>
     ) -&gt; typing.Any:
         &#34;&#34;&#34;WebSocket.wait_for_event
 
-        &gt; NOTE: In most cases, you should use `web_socket.wait_for_event()`.
+        &gt; NOTE: In most cases, you should use `web_socket.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event&#39;s value into the `predicate` function and
         waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
@@ -28980,7 +28980,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
 <dd>
 <div class="desc"><p>WebSocket.wait_for_event</p>
 <blockquote>
-<p>NOTE: In most cases, you should use <code>web_socket.wait_for_event()</code>.</p>
+<p>NOTE: In most cases, you should use <code>web_socket.expect_event()</code>.</p>
 </blockquote>
 <p>Waits for given <code>event</code> to fire. If predicate is provided, it passes event's value into the <code>predicate</code> function and
 waits for <code>predicate(event)</code> to return a truthy value. Will throw an error if the socket is closed before the <code>event</code> is
@@ -29009,7 +29009,7 @@ value can be changed by using the <code>browser_context.set_default_timeout()</c
 ) -&gt; typing.Any:
     &#34;&#34;&#34;WebSocket.wait_for_event
 
-    &gt; NOTE: In most cases, you should use `web_socket.wait_for_event()`.
+    &gt; NOTE: In most cases, you should use `web_socket.expect_event()`.
 
     Waits for given `event` to fire. If predicate is provided, it passes event&#39;s value into the `predicate` function and
     waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
