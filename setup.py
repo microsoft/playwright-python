@@ -135,4 +135,9 @@ setuptools.setup(
         "write_to_template": 'version = "{version}"\n',
     },
     setup_requires=["setuptools_scm"],
+    entry_points={
+        "console_scripts": [
+            "playwright=playwright.__main__:main",
+        ],
+    },
 )
