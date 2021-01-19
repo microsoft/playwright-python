@@ -810,8 +810,9 @@ async def test_select_option_should_throw_when_element_is_not_a__select_(page, s
 
 async def test_select_option_should_return_on_no_matched_values(page, server):
     await page.goto(server.PREFIX + "/input/select.html")
-    result = await page.select_option("select", ["42", "abc"])
-    assert result == []
+    with pytest.raises(TimeoutError) as exc_info:
+        await page.select_option("select", ["42", "abc"], timeout=1000)
+    assert "Timeout 1000" in exc_info.value.message
 
 
 async def test_select_option_should_return_an_array_of_matched_values(page, server):

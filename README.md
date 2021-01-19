@@ -1,12 +1,12 @@
 # 🎭 [Playwright](https://playwright.dev) for Python [![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://join.slack.com/t/playwright/shared_invite/enQtOTEyMTUxMzgxMjIwLThjMDUxZmIyNTRiMTJjNjIyMzdmZDA3MTQxZWUwZTFjZjQwNGYxZGM5MzRmNzZlMWI5ZWUyOTkzMjE5Njg1NDg)
 
-#### [Docs](#documentation) | [Website](https://playwright.dev/) | [Python API reference](https://microsoft.github.io/playwright-python/)
+#### [Docs](https://playwright.dev/python/docs/intro) | [API](https://playwright.dev/python/docs/api/class-playwright)
 
-Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) browsers with a single API. Playwright delivers automation that is **ever-green**, **capable**, **reliable** and **fast**. [See how Playwright is better](https://playwright.dev/#path=docs%2Fwhy-playwright.md&q=).
+Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) browsers with a single API. Playwright delivers automation that is **ever-green**, **capable**, **reliable** and **fast**. [See how Playwright is better](https://playwright.dev/python/docs/why-playwright).
 
 |          | Linux | macOS | Windows |
 |   :---   | :---: | :---: | :---:   |
-| Chromium <!-- GEN:chromium-version -->89.0.4344.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| Chromium <!-- GEN:chromium-version -->90.0.4392.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 | WebKit <!-- GEN:webkit-version -->14.1<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 | Firefox <!-- GEN:firefox-version -->85.0b5<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 
@@ -23,12 +23,14 @@ Headless execution is supported for all browsers on all platforms.
   - [Evaluate JS in browser](#evaluate-js-in-browser)
   - [Intercept network requests](#intercept-network-requests)
 * [Documentation](#documentation)
+* [Is Playwright ready?](#is-playwright-ready)
+* [Migration from the pre-release versions](#migration-from-the-pre-release-versions)
 
 ## Usage
 
 ```sh
 pip install playwright
-python -m playwright install
+playwright install
 ```
 
 This installs Playwright and browser binaries for Chromium, Firefox and WebKit. Playwright requires Python 3.7+.
@@ -39,20 +41,23 @@ Playwright can record user interactions in a browser and generate code. [See dem
 
 ```sh
 # Pass --help to see all options
-python -m playwright codegen
+playwright codegen
 ```
 
 Playwright offers both sync (blocking) API and async API. They are identical in terms of capabilities and only differ in how one consumes the API.
 
 #### Sync API
 
+This is our default API for short snippets and tests. If you are not using asyncio in your
+application, it is the easiest to use Sync API notation.
+
 ```py
-from playwright import sync_playwright
+from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     for browser_type in [p.chromium, p.firefox, p.webkit]:
         browser = browser_type.launch()
-        page = browser.newPage()
+        page = browser.new_page()
         page.goto('http://whatsmyuseragent.org/')
         page.screenshot(path=f'example-{browser_type.name}.png')
         browser.close()
@@ -60,9 +65,13 @@ with sync_playwright() as p:
 
 #### Async API
 
+If you app is based on the modern asyncio loop and you are used to async/await constructs,
+Playwright exposes Async API for you. You should also use this API inside the Jupyter Notebook
+and other REPL frameworks that are already based on asyncio.
+
 ```py
 import asyncio
-from playwright import async_playwright
+from playwright.async_api import async_playwright
 
 async def main():
     async with async_playwright() as p:
@@ -85,23 +94,38 @@ def test_playwright_is_visible_on_google(page):
     page.goto("https://www.google.com")
     page.type("input[name=q]", "Playwright GitHub")
     page.click("input[type=submit]")
-    page.waitForSelector("text=microsoft/Playwright")
+    page.wait_for_selector("text=microsoft/Playwright")
 ```
 
 #### Interactive mode (REPL)
 
+Blocking REPL, as in CLI:
+
 ```py
->>> from playwright import sync_playwright
+>>> from playwright.sync_api import sync_playwright
 >>> playwright = sync_playwright().start()
 
 # Use playwright.chromium, playwright.firefox or playwright.webkit
 # Pass headless=False to see the browser UI
 >>> browser = playwright.chromium.launch()
->>> page = browser.newPage()
+>>> page = browser.new_page()
 >>> page.goto("http://whatsmyuseragent.org/")
 >>> page.screenshot(path="example.png")
 >>> browser.close()
 >>> playwright.stop()
+```
+
+Async REPL such as Jupyter Notebook:
+
+```py
+>>> from playwright.async_api import async_playwright
+>>> playwright = await async_playwright().start()
+>>> browser = await playwright.chromium.launch()
+>>> page = await browser.new_page()
+>>> await page.goto("http://whatsmyuseragent.org/")
+>>> await page.screenshot(path="example.png")
+>>> await browser.close()
+>>> await playwright.stop()
 ```
 
 ## Examples
@@ -111,21 +135,21 @@ def test_playwright_is_visible_on_google(page):
 This snippet emulates Mobile Safari on a device at a given geolocation, navigates to maps.google.com, performs action and takes a screenshot.
 
 ```py
-from playwright import sync_playwright
+from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
-    iphone_11 = p.devices['iPhone 11 Pro']
+    iphone_11 = p.devices["iPhone 11 Pro"]
     browser = p.webkit.launch(headless=False)
-    context = browser.newContext(
+    context = browser.new_context(
         **iphone_11,
-        locale='en-US',
-        geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
-        permissions=['geolocation']
+        locale="en-US",
+        geolocation={"longitude": 12.492507, "latitude": 41.889938 },
+        permissions=["geolocation"]
     )
-    page = context.newPage()
-    page.goto('https://maps.google.com')
-    page.click('text="Your location"')
-    page.screenshot(path='colosseum-iphone.png')
+    page = context.new_page()
+    page.goto("https://maps.google.com")
+    page.click("text=Your location")
+    page.screenshot(path="colosseum-iphone.png")
     browser.close()
 ```
 
@@ -134,22 +158,22 @@ with sync_playwright() as p:
 
 ```py
 import asyncio
-from playwright import async_playwright
+from playwright.async_api import async_playwright
 
 async def main():
     async with async_playwright() as p:
-        iphone_11 = p.devices['iPhone 11 Pro']
+        iphone_11 = p.devices["iPhone 11 Pro"]
         browser = await p.webkit.launch(headless=False)
         context = await browser.newContext(
             **iphone_11,
-            locale='en-US',
-            geolocation={ 'longitude': 12.492507, 'latitude': 41.889938 },
-            permissions=['geolocation']
+            locale="en-US",
+            geolocation={"longitude": 12.492507, "latitude": 41.889938},
+            permissions=["geolocation"]
         )
         page = await context.newPage()
-        await page.goto('https://maps.google.com')
-        await page.click('text="Your location"')
-        await page.screenshot(path='colosseum-iphone.png')
+        await page.goto("https://maps.google.com")
+        await page.click("text="Your location"")
+        await page.screenshot(path="colosseum-iphone.png")
         await browser.close()
 
 asyncio.run(main())
@@ -161,19 +185,19 @@ asyncio.run(main())
 This code snippet navigates to example.com in Firefox, and executes a script in the page context.
 
 ```py
-from playwright import sync_playwright
+from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.firefox.launch()
-    page = browser.newPage()
-    page.goto('https://www.example.com/')
-    dimensions = page.evaluate('''() => {
+    page = browser.new_page()
+    page.goto("https://www.example.com/")
+    dimensions = page.evaluate("""() => {
       return {
         width: document.documentElement.clientWidth,
         height: document.documentElement.clientHeight,
         deviceScaleFactor: window.devicePixelRatio
       }
-    }''')
+    }""")
     print(dimensions)
     browser.close()
 ```
@@ -182,20 +206,20 @@ with sync_playwright() as p:
 
 ```py
 import asyncio
-from playwright import async_playwright
+from playwright.async_api import async_playwright
 
 async def main():
     async with async_playwright() as p:
         browser = await p.firefox.launch()
-        page = await browser.newPage()
-        await page.goto('https://www.example.com/')
-        dimensions = await page.evaluate('''() => {
+        page = await browser.new_page()
+        await page.goto("https://www.example.com/")
+        dimensions = await page.evaluate("""() => {
           return {
             width: document.documentElement.clientWidth,
             height: document.documentElement.clientHeight,
             deviceScaleFactor: window.devicePixelRatio
           }
-        }''')
+        }""")
         print(dimensions)
         await browser.close()
 
@@ -208,20 +232,20 @@ asyncio.run(main())
 This code snippet sets up request routing for a Chromium page to log all network requests.
 
 ```py
-from playwright import sync_playwright
+from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
-    page = browser.newPage()
+    page = browser.new_page()
 
     def log_and_continue_request(route, request):
-      print(request.url)
-      route.continue_()
+        print(request.url)
+        route.continue_()
 
     # Log and continue all network requests
-    page.route('**', lambda route, request: log_and_continue_request(route, request))
+    page.route("**/*", log_and_continue_request)
 
-    page.goto('http://todomvc.com')
+    page.goto("http://todomvc.com")
     browser.close()
 ```
 <details>
@@ -229,21 +253,20 @@ with sync_playwright() as p:
 
 ```py
 import asyncio
-from playwright import async_playwright
+from playwright.async_api import async_playwright
 
 async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.newPage()
 
-        def log_and_continue_request(route, request):
+        async def log_and_continue_request(route, request):
             print(request.url)
-            asyncio.create_task(route.continue_())
+            await route.continue_()
 
         # Log and continue all network requests
-        await page.route('**', lambda route, request: log_and_continue_request(route, request))
-
-        await page.goto('http://todomvc.com')
+        await page.route("**/*", log_and_continue_request)
+        await page.goto("http://todomvc.com")
         await browser.close()
 
 asyncio.run(main())
@@ -252,91 +275,38 @@ asyncio.run(main())
 
 ## Documentation
 
-We are in the process of converting our [documentation](https://playwright.dev/) from the Node.js form to Python. You can go ahead and use the Node.js documentation since the API is pretty much the same. Playwright uses non-Python naming conventions (`camelCase` instead of `snake_case`) for its methods. We recognize that this is not ideal, but it was done deliberately, so that you could rely upon Stack Overflow answers and existing documentation.
+Check out our [new documentation site](https://playwright.dev/python/docs/intro)!
 
-### Named arguments
+## Is Playwright ready?
 
-Since Python allows named arguments, we didn't need to put the `options` parameter into every call as in the Node.js API. So when you see example like this in JavaScript
+Yes, Playwright for Python is ready! The latest version of Playwright for
+Python is 1.8.0a. We are ready to drop the Alpha bit once we hear from you.
+Once it is gone, we will become semver compatible and the API will be
+frozen in its present form for years. We will still be adding features with
+every release, but we promise to not break it anymore!
 
-```js
-await webkit.launch({ headless: false });
-```
+## Migration from the pre-release versions
 
-It translates into Python like this:
+The API has changed since the last 0.170.0 version:
+- Snake case notation for methods and arguments:
 
-```py
-webkit.launch(headless=False)
-```
+  ```py
+  # old
+  browser.newPage()
+  ```
+  ```py
+  # new
+  browser.new_page()
+  ```
 
-If you are using an IDE, it will suggest parameters that are available in every call.
+- Import has changed to include sync vs async mode explicitly:
+  ```py
+  # old
+  from playwright import sync_playwright
+  ```
+  ```py
+  # new
+  from playwright.sync_api import sync_playwright
+  ```
 
-### Evaluating functions
-
-Another difference is that in the JavaScript version, `page.evaluate` accepts JavaScript functions, while this does not make any sense in the Python version.
-
-In JavaScript it will be documented as:
-
-```js
-const result = await page.evaluate(([x, y]) => {
-  return Promise.resolve(x * y);
-}, [7, 8]);
-console.log(result); // prints "56"
-```
-
-And in Python that would look like:
-
-```py
-result = page.evaluate("""
-    ([x, y]) => {
-        return Promise.resolve(x * y);
-    }""",
-    [7, 8])
-print(result) # prints "56"
-```
-
-The library will detect that what are passing it is a function and will invoke it with the given parameters. You can opt out of this function detection and pass `force_expr=True` to all evaluate functions, but you probably will never need to do that.
-
-### Using context managers
-
-Python enabled us to do some of the things that were not possible in the Node.js version and we used the opportunity. Instead of using the `page.waitFor*` methods, we recommend using corresponding `page.expect_*` context manager.
-
-In JavaScript it will be documented as:
-
-```js
-const [ download ] = await Promise.all([
-  page.waitForEvent('download'), // <-- start waiting for the download
-  page.click('button#delayed-download') // <-- perform the action that directly or indirectly initiates it.
-]);
-const path = await download.path();
-```
-
-And in Python that would look much simpler:
-
-```py
-with page.expect_download() as download_info:
-    page.click("button#delayed-download")
-download = download_info.value
-path = download.path()
-```
-
-Similarly, for waiting for the network response:
-
-```js
-const [response] = await Promise.all([
-  page.waitForResponse('**/api/fetch_data'),
-  page.click('button#update'),
-]);
-```
-
-Becomes
-
-```py
-with page.expect_response("**/api/fetch_data"):
-    page.click("button#update")
-```
-
-## Is Playwright for Python ready?
-
-Yes, Playwright for Python is ready. We are still not at the version v1.0, so minor breaking API changes could potentially happen. But a) this is unlikely and b) we will only do that if we know it improves your experience with the new library. We'd like to collect your feedback before we freeze the API for v1.0.
-
-> Note: We don't yet support some of the edge-cases of the vendor-specific APIs such as collecting Chromium trace, coverage report, etc.
+That's about it! Our new [doc site](https://playwright.dev/python/docs/intro) uses proper notation and examples for the new API.

@@ -40,7 +40,10 @@ class PlaywrightContextManager:
                 own_loop = loop
 
             if loop.is_running():
-                raise Error("Can only run one Playwright at a time.")
+                raise Error(
+                    """It looks like you are using Playwright Sync API inside the asyncio loop.
+Please use the Async API instead."""
+                )
 
             loop.run_until_complete(self._connection.run_as_sync())
 
