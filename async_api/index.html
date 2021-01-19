@@ -6093,6 +6093,8 @@ def url(self) -&gt; str:
         Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `&lt;select&gt;`
         element, the method throws an error.
 
+        Will wait until all specified options are present in the `&lt;select&gt;` element.
+
         ```py
         # single selection matching the value
         await handle.select_option(\&#34;blue\&#34;)
@@ -8516,6 +8518,7 @@ using the <code>browser_context.set_default_timeout()</code> or <code>page.set_d
 <p>Returns the array of option values that have been successfully selected.</p>
 <p>Triggers a <code>change</code> and <code>input</code> event once all the provided options have been selected. If element is not a <code>&lt;select&gt;</code>
 element, the method throws an error.</p>
+<p>Will wait until all specified options are present in the <code>&lt;select&gt;</code> element.</p>
 <pre><code class="language-py"># single selection matching the value
 await handle.select_option(&quot;blue&quot;)
 # single selection matching the label
@@ -8567,6 +8570,8 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 
     Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `&lt;select&gt;`
     element, the method throws an error.
+
+    Will wait until all specified options are present in the `&lt;select&gt;` element.
 
     ```py
     # single selection matching the value
@@ -11144,6 +11149,8 @@ dict(one=1, two=2)</p></div>
 
         Triggers a `change` and `input` event once all the provided options have been selected. If there&#39;s no `&lt;select&gt;` element
         matching `selector`, the method throws an error.
+
+        Will wait until all specified options are present in the `&lt;select&gt;` element.
 
         ```py
         # single selection matching the value
@@ -14016,6 +14023,7 @@ returns empty array.</p>
 <p>Returns the array of option values that have been successfully selected.</p>
 <p>Triggers a <code>change</code> and <code>input</code> event once all the provided options have been selected. If there's no <code>&lt;select&gt;</code> element
 matching <code>selector</code>, the method throws an error.</p>
+<p>Will wait until all specified options are present in the <code>&lt;select&gt;</code> element.</p>
 <pre><code class="language-py"># single selection matching the value
 await frame.select_option(&quot;select#colors&quot;, &quot;blue&quot;)
 # single selection matching the label
@@ -14070,6 +14078,8 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 
     Triggers a `change` and `input` event once all the provided options have been selected. If there&#39;s no `&lt;select&gt;` element
     matching `selector`, the method throws an error.
+
+    Will wait until all specified options are present in the `&lt;select&gt;` element.
 
     ```py
     # single selection matching the value
@@ -18997,6 +19007,8 @@ await page.keyboard.type(&quot;World&quot;, delay=100) # types slower, like a us
 
         Triggers a `change` and `input` event once all the provided options have been selected. If there&#39;s no `&lt;select&gt;` element
         matching `selector`, the method throws an error.
+
+        Will wait until all specified options are present in the `&lt;select&gt;` element.
 
         ```py
         # single selection matching the value
@@ -24227,6 +24239,7 @@ Defaults to <code>false</code>.</dd>
 <p>Returns the array of option values that have been successfully selected.</p>
 <p>Triggers a <code>change</code> and <code>input</code> event once all the provided options have been selected. If there's no <code>&lt;select&gt;</code> element
 matching <code>selector</code>, the method throws an error.</p>
+<p>Will wait until all specified options are present in the <code>&lt;select&gt;</code> element.</p>
 <pre><code class="language-py"># single selection matching the value
 await page.select_option(&quot;select#colors&quot;, &quot;blue&quot;)
 # single selection matching the label
@@ -24283,6 +24296,8 @@ inaccessible pages. Defaults to <code>false</code>.</dd>
 
     Triggers a `change` and `input` event once all the provided options have been selected. If there&#39;s no `&lt;select&gt;` element
     matching `selector`, the method throws an error.
+
+    Will wait until all specified options are present in the `&lt;select&gt;` element.
 
     ```py
     # single selection matching the value
