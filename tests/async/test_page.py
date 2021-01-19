@@ -351,7 +351,7 @@ async def test_expose_function_should_await_returned_promise(page):
     async def mul(a, b):
         return a * b
 
-    await page.expose_function("compute", lambda a, b: asyncio.create_task(mul(a, b)))
+    await page.expose_function("compute", mul)
     assert await page.evaluate("compute(3, 5)") == 15
 
 

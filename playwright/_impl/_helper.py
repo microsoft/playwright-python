@@ -150,7 +150,7 @@ class TimeoutSettings:
 
 
 def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
-    return dict(message=str(ex), stack="".join(traceback.format_tb(tb)))
+    return dict(message=str(ex), name="Error", stack="".join(traceback.format_tb(tb)))
 
 
 def parse_error(error: ErrorPayload) -> Error:

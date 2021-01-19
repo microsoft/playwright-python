@@ -949,11 +949,13 @@ class BindingCall(ChannelOwner):
             else:
                 func_args = list(map(parse_result, self._initializer["args"]))
                 result = func(source, *func_args)
-            if asyncio.isfuture(result):
+            if inspect.iscoroutine(result):
                 result = await result
             await self._channel.send("resolve", dict(result=serialize_argument(result)))
         except Exception as e:
             tb = sys.exc_info()[2]
             asyncio.create_task(
-                self._channel.send("reject", dict(error=serialize_error(e, tb)))
+                self._channel.send(
+                    "reject", dict(error=dict(error=serialize_error(e, tb)))
+                )
             )
