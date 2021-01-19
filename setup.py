@@ -95,6 +95,13 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
                         zip.write(from_path, f"playwright/driver/{to_path}")
+            if platform == "mac":
+                # Ship mac both as 10_13 as and 11_0 universal to work across Macs.
+                universal_location = without_platform + "macosx_11_0_universal2.whl"
+                shutil.copyfile(wheel_location, universal_location)
+                with zipfile.ZipFile(universal_location, "a") as zip:
+                    zip.writestr("playwright/driver/README.md", "Universal Mac package")
+
         os.remove(base_wheel_location)
 
 
@@ -108,7 +115,7 @@ setuptools.setup(
     url="https://github.com/Microsoft/playwright-python",
     packages=["playwright"],
     include_package_data=True,
-    install_requires=["greenlet==1.0a1", "pyee>=8.0.1", "typing-extensions"],
+    install_requires=["greenlet==1.0.0", "pyee>=8.0.1", "typing-extensions"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
