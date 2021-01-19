@@ -177,7 +177,10 @@ def test_sync_playwright_multiple_times():
     with pytest.raises(Error) as exc:
         with sync_playwright() as pw:
             assert pw.chromium
-    assert "Can only run one Playwright at a time." in exc.value.message
+    assert (
+        "It looks like you are using Playwright Sync API inside the asyncio loop."
+        in exc.value.message
+    )
 
 
 def test_sync_set_default_timeout(page):

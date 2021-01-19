@@ -1908,6 +1908,8 @@ class ElementHandle(JSHandle):
         Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
         element, the method throws an error.
 
+        Will wait until all specified options are present in the `<select>` element.
+
         ```py
         # single selection matching the value
         handle.select_option(\"blue\")
@@ -4500,6 +4502,8 @@ class Frame(SyncBase):
 
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
         matching `selector`, the method throws an error.
+
+        Will wait until all specified options are present in the `<select>` element.
 
         ```py
         # single selection matching the value
@@ -7837,6 +7841,8 @@ class Page(SyncBase):
 
         Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
         matching `selector`, the method throws an error.
+
+        Will wait until all specified options are present in the `<select>` element.
 
         ```py
         # single selection matching the value
