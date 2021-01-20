@@ -1920,7 +1920,6 @@ class ElementHandle(JSHandle):
         ```
 
         ```py
-        # FIXME
         # single selection matching the value
         handle.select_option(\"blue\")
         # single selection matching both the value and the label
@@ -9451,9 +9450,8 @@ class BrowserContext(SyncBase):
         Parameters
         ----------
         path : Union[pathlib.Path, str, NoneType]
-            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to
-            [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, storage
-            state is still returned, but won't be saved to the disk.
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
+            working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 
         Returns
         -------

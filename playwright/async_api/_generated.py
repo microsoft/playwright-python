@@ -2548,7 +2548,6 @@ class ElementHandle(JSHandle):
         ```
 
         ```py
-        # FIXME
         feed_handle = await page.query_selector(\".feed\")
         assert await feed_handle.eval_on_selector_all(\".tweet\", \"nodes => nodes.map(n => n.innerText)\") == [\"hello!\", \"hi!\"]
         ```
@@ -3190,7 +3189,6 @@ class Frame(AsyncBase):
         then[ method: Fframe.evaluateHandle`] would wait for the promise to resolve and return its value.
 
         ```py
-        # FIXME
         a_window_handle = await frame.evaluate_handle(\"Promise.resolve(window)\")
         a_window_handle # handle for the window object.
         ```
@@ -6006,7 +6004,6 @@ class Page(AsyncBase):
         would wait for the promise to resolve and return its value.
 
         ```py
-        # FIXME
         a_window_handle = await page.evaluate_handle(\"Promise.resolve(window)\")
         a_window_handle # handle for the window object.
         ```
@@ -9234,9 +9231,8 @@ class BrowserContext(AsyncBase):
         Parameters
         ----------
         path : Union[pathlib.Path, str, NoneType]
-            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to
-            [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, storage
-            state is still returned, but won't be saved to the disk.
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
+            working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 
         Returns
         -------
