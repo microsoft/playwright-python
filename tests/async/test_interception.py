@@ -460,13 +460,6 @@ async def test_page_route_should_work_with_encoded_server(page, server):
     assert response.status == 404
 
 
-async def test_page_route_should_work_with_badly_encoded_server(page, server):
-    server.set_route("/malformed?rnd=%911", lambda req: req.finish())
-    await page.route("**/*", lambda route: route.continue_())
-    response = await page.goto(server.PREFIX + "/malformed?rnd=%911")
-    assert response.status == 200
-
-
 async def test_page_route_should_work_with_encoded_server___2(page, server):
     # The requestWillBeSent will report URL as-is, whereas interception will
     # report encoded URL for stylesheet. @see crbug.com/759388

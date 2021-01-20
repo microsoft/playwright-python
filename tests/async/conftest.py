@@ -48,10 +48,16 @@ def browser_type(playwright, browser_name: str):
 
 @pytest.fixture(scope="session")
 async def browser_factory(launch_arguments, browser_type):
-    async def launch(**kwargs):
-        return await browser_type.launch(**launch_arguments, **kwargs)
+    browsers = []
 
-    return launch
+    async def launch(**kwargs):
+        browser = await browser_type.launch(**launch_arguments, **kwargs)
+        browsers.append(browser)
+        return browser
+
+    yield launch
+    for browser in browsers:
+        await browser.close()
 
 
 @pytest.fixture(scope="session")
@@ -62,8 +68,22 @@ async def browser(browser_factory):
 
 
 @pytest.fixture
-async def context(browser):
-    context = await browser.new_context()
+async def context_factory(browser):
+    contexts = []
+
+    async def launch(**kwargs):
+        context = await browser.new_context(**kwargs)
+        contexts.append(context)
+        return context
+
+    yield launch
+    for context in contexts:
+        await context.close()
+
+
+@pytest.fixture
+async def context(context_factory):
+    context = await context_factory()
     yield context
     await context.close()
 
