@@ -20,6 +20,7 @@ import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
+from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
@@ -78,18 +79,20 @@ class Server:
                 request = self
                 self.post_body = request.content.read()
                 request.content.seek(0, 0)
-                uri = request.uri.decode()
-                if request_subscribers.get(uri):
-                    request_subscribers[uri].set_result(request)
-                    request_subscribers.pop(uri)
+                uri = urlparse(request.uri.decode())
+                path = uri.path
 
-                if auth.get(uri):
+                if request_subscribers.get(path):
+                    request_subscribers[path].set_result(request)
+                    request_subscribers.pop(path)
+
+                if auth.get(path):
                     authorization_header = request.requestHeaders.getRawHeaders(
                         "authorization"
                     )
                     creds_correct = False
                     if authorization_header:
-                        creds_correct = auth.get(uri) == (
+                        creds_correct = auth.get(path) == (
                             request.getUser(),
                             request.getPassword(),
                         )
@@ -100,19 +103,19 @@ class Server:
                         request.setResponseCode(HTTPStatus.UNAUTHORIZED)
                         request.finish()
                         return
-                if csp.get(uri):
-                    request.setHeader(b"Content-Security-Policy", csp[uri])
-                if routes.get(uri):
-                    routes[uri](request)
+                if csp.get(path):
+                    request.setHeader(b"Content-Security-Policy", csp[path])
+                if routes.get(path):
+                    routes[path](request)
                     return
                 file_content = None
                 try:
                     file_content = (
                         static_path / request.path.decode()[1:]
                     ).read_bytes()
-                    request.setHeader(b"Content-Type", mimetypes.guess_type(uri)[0])
+                    request.setHeader(b"Content-Type", mimetypes.guess_type(path)[0])
                     request.setHeader(b"Cache-Control", "no-cache, no-store")
-                    if uri in gzip_routes:
+                    if path in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")
                         request.write(gzip.compress(file_content))
                     else:
