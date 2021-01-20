@@ -782,31 +782,26 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_new_page(
     assert await new_page.evaluate("document.readyState") == "complete"
 
 
-async def test_wait_for_load_state_should_resolve_after_popup_load(context, server):
+async def test_wait_for_load_state_in_popup(context, server):
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    # Stall the 'load' by delaying css.
     css_requests = []
-    server.set_route("/one-style.css", lambda request: css_requests.append(request))
+
+    def handle_request(request):
+        css_requests.append(request)
+        request.write(b"body {}")
+        request.finish()
+
+    server.set_route("/one-style.css", handle_request)
 
     async with page.expect_popup() as popup_info:
         await page.evaluate(
             "url => window.popup = window.open(url)", server.PREFIX + "/one-style.html"
         )
-    [popup, _] = await asyncio.gather(
-        popup_info.value,
-        server.wait_for_request("/one-style.css"),
-    )
 
-    resolved = []
-    load_state_task = asyncio.create_task(popup.wait_for_load_state())
-    # Round trips!
-    for _ in range(5):
-        await page.evaluate("window")
-    assert not resolved
-    css_requests[0].finish()
-    await load_state_task
-    assert popup.url == server.PREFIX + "/one-style.html"
+    popup = await popup_info.value
+    await popup.wait_for_load_state()
+    assert len(css_requests)
 
 
 async def test_go_back_should_work(page, server):
