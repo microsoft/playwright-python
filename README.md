@@ -29,7 +29,7 @@ Headless execution is supported for all browsers on all platforms.
 ## Usage
 
 ```sh
-pip install playwright
+pip install playwright==1.8.0a1
 playwright install
 ```
 
