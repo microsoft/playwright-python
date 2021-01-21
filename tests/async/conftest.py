@@ -47,11 +47,11 @@ def browser_type(playwright, browser_name: str):
 
 
 @pytest.fixture(scope="session")
-async def browser_factory(launch_arguments, browser_type):
+async def browser_factory(browser_type_launch_args, browser_type):
     browsers = []
 
     async def launch(**kwargs):
-        browser = await browser_type.launch(**launch_arguments, **kwargs)
+        browser = await browser_type.launch(**browser_type_launch_args, **kwargs)
         browsers.append(browser)
         return browser
 

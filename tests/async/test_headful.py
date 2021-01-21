@@ -18,10 +18,10 @@ from flaky import flaky
 
 
 async def test_should_have_default_url_when_launching_browser(
-    browser_type, launch_arguments, tmpdir
+    browser_type, browser_type_launch_args, tmpdir
 ):
     browser_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": False}
+        tmpdir, **{**browser_type_launch_args, "headless": False}
     )
     urls = [page.url for page in browser_context.pages]
     assert urls == ["about:blank"]
@@ -29,14 +29,14 @@ async def test_should_have_default_url_when_launching_browser(
 
 
 async def test_headless_should_be_able_to_read_cookies_written_by_headful(
-    browser_type, launch_arguments, server, tmpdir, is_chromium, is_win
+    browser_type, browser_type_launch_args, server, tmpdir, is_chromium, is_win
 ):
     if is_chromium and is_win:
         pytest.skip("see https://github.com/microsoft/playwright/issues/717")
         return
     # Write a cookie in headful chrome
     headful_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": False}
+        tmpdir, **{**browser_type_launch_args, "headless": False}
     )
     headful_page = await headful_context.new_page()
     await headful_page.goto(server.EMPTY_PAGE)
@@ -46,7 +46,7 @@ async def test_headless_should_be_able_to_read_cookies_written_by_headful(
     await headful_context.close()
     # Read the cookie from headless chrome
     headless_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": True}
+        tmpdir, **{**browser_type_launch_args, "headless": True}
     )
     headless_page = await headless_context.new_page()
     await headless_page.goto(server.EMPTY_PAGE)
@@ -57,10 +57,10 @@ async def test_headless_should_be_able_to_read_cookies_written_by_headful(
 
 
 async def test_should_close_browser_with_beforeunload_page(
-    browser_type, launch_arguments, server, tmpdir
+    browser_type, browser_type_launch_args, server, tmpdir
 ):
     browser_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": False}
+        tmpdir, **{**browser_type_launch_args, "headless": False}
     )
     page = await browser_context.new_page()
     await page.goto(server.PREFIX + "/beforeunload.html")
@@ -71,9 +71,11 @@ async def test_should_close_browser_with_beforeunload_page(
 
 
 async def test_should_not_crash_when_creating_second_context(
-    browser_type, launch_arguments, server
+    browser_type, browser_type_launch_args, server
 ):
-    browser = await browser_type.launch(**{**launch_arguments, "headless": False})
+    browser = await browser_type.launch(
+        **{**browser_type_launch_args, "headless": False}
+    )
     browser_context = await browser.new_context()
     await browser_context.new_page()
     await browser_context.close()
@@ -83,8 +85,12 @@ async def test_should_not_crash_when_creating_second_context(
     await browser.close()
 
 
-async def test_should_click_background_tab(browser_type, launch_arguments, server):
-    browser = await browser_type.launch(**{**launch_arguments, "headless": False})
+async def test_should_click_background_tab(
+    browser_type, browser_type_launch_args, server
+):
+    browser = await browser_type.launch(
+        **{**browser_type_launch_args, "headless": False}
+    )
     page = await browser.new_page()
     await page.set_content(
         f'<button>Hello</button><a target=_blank href="{server.EMPTY_PAGE}">empty.html</a>'
@@ -95,9 +101,11 @@ async def test_should_click_background_tab(browser_type, launch_arguments, serve
 
 
 async def test_should_close_browser_after_context_menu_was_triggered(
-    browser_type, launch_arguments, server
+    browser_type, browser_type_launch_args, server
 ):
-    browser = await browser_type.launch(**{**launch_arguments, "headless": False})
+    browser = await browser_type.launch(
+        **{**browser_type_launch_args, "headless": False}
+    )
     page = await browser.new_page()
     await page.goto(server.PREFIX + "/grid.html")
     await page.click("body", button="right")
@@ -105,9 +113,11 @@ async def test_should_close_browser_after_context_menu_was_triggered(
 
 
 async def test_should_not_block_third_party_cookies(
-    browser_type, launch_arguments, server, is_chromium, is_firefox
+    browser_type, browser_type_launch_args, server, is_chromium, is_firefox
 ):
-    browser = await browser_type.launch(**{**launch_arguments, "headless": False})
+    browser = await browser_type.launch(
+        **{**browser_type_launch_args, "headless": False}
+    )
     page = await browser.new_page()
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
@@ -154,10 +164,12 @@ async def test_should_not_block_third_party_cookies(
 
 @pytest.mark.skip_browser("webkit")
 async def test_should_not_override_viewport_size_when_passed_null(
-    browser_type, launch_arguments, server
+    browser_type, browser_type_launch_args, server
 ):
     # Our WebKit embedder does not respect window features.
-    browser = await browser_type.launch(**{**launch_arguments, "headless": False})
+    browser = await browser_type.launch(
+        **{**browser_type_launch_args, "headless": False}
+    )
     context = await browser.new_context(no_viewport=True)
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -178,8 +190,10 @@ async def test_should_not_override_viewport_size_when_passed_null(
 
 
 @flaky
-async def test_page_bring_to_front_should_work(browser_type, launch_arguments):
-    browser = await browser_type.launch(**{**launch_arguments, "headless": False})
+async def test_page_bring_to_front_should_work(browser_type, browser_type_launch_args):
+    browser = await browser_type.launch(
+        **{**browser_type_launch_args, "headless": False}
+    )
     page1 = await browser.new_page()
     await page1.set_content("Page1")
     page2 = await browser.new_page()

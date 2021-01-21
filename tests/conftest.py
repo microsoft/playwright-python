@@ -28,12 +28,6 @@ from .server import test_server
 _dirname = get_file_dirname()
 
 
-def pytest_generate_tests(metafunc):
-    if "browser_name" in metafunc.fixturenames:
-        browsers = metafunc.config.option.browser or ["chromium", "firefox", "webkit"]
-        metafunc.parametrize("browser_name", browsers, scope="session")
-
-
 @pytest.fixture(scope="session")
 def event_loop():
     loop = asyncio.get_event_loop()
@@ -44,13 +38,6 @@ def event_loop():
 @pytest.fixture(scope="session")
 def assetdir():
     return _dirname / "assets"
-
-
-@pytest.fixture(scope="session")
-def launch_arguments(pytestconfig):
-    return {
-        "headless": not pytestconfig.getoption("--headful"),
-    }
 
 
 @pytest.fixture
@@ -79,26 +66,6 @@ async def start_server():
 def after_each_hook():
     yield
     test_server.reset()
-
-
-@pytest.fixture(scope="session")
-def browser_name(pytestconfig):
-    return pytestconfig.getoption("browser")
-
-
-@pytest.fixture(scope="session")
-def is_webkit(browser_name):
-    return browser_name == "webkit"
-
-
-@pytest.fixture(scope="session")
-def is_firefox(browser_name):
-    return browser_name == "firefox"
-
-
-@pytest.fixture(scope="session")
-def is_chromium(browser_name):
-    return browser_name == "chromium"
 
 
 @pytest.fixture(scope="session")
@@ -133,16 +100,6 @@ def _get_skiplist(request, values, value_name):
 
 
 @pytest.fixture(autouse=True)
-def skip_by_browser(request, browser_name):
-    skip_browsers_names = _get_skiplist(
-        request, ["chromium", "firefox", "webkit"], "browser"
-    )
-
-    if browser_name in skip_browsers_names:
-        pytest.skip(f"skipped for this browser: {browser_name}")
-
-
-@pytest.fixture(autouse=True)
 def skip_by_platform(request):
     skip_platform_names = _get_skiplist(
         request, ["win32", "linux", "darwin"], "platform"
@@ -150,22 +107,6 @@ def skip_by_platform(request):
 
     if sys.platform in skip_platform_names:
         pytest.skip(f"skipped on this platform: {sys.platform}")
-
-
-def pytest_addoption(parser):
-    group = parser.getgroup("playwright", "Playwright")
-    group.addoption(
-        "--browser",
-        action="append",
-        default=[],
-        help="Browsers which should be used. By default on all the browsers.",
-    )
-    parser.addoption(
-        "--headful",
-        action="store_true",
-        default=False,
-        help="Run tests in headful mode.",
-    )
 
 
 @pytest.fixture(scope="session")

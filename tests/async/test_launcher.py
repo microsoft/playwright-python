@@ -21,9 +21,9 @@ from playwright.async_api import BrowserType, Error
 
 
 async def test_browser_type_launch_should_reject_all_promises_when_browser_is_closed(
-    browser_type: BrowserType, launch_arguments
+    browser_type: BrowserType, browser_type_launch_args
 ):
-    browser = await browser_type.launch(**launch_arguments)
+    browser = await browser_type.launch(**browser_type_launch_args)
     page = await (await browser.new_context()).new_page()
     never_resolves = asyncio.create_task(page.evaluate("() => new Promise(r => {})"))
     await page.close()
@@ -34,20 +34,22 @@ async def test_browser_type_launch_should_reject_all_promises_when_browser_is_cl
 
 @pytest.mark.skip_browser("firefox")
 async def test_browser_type_launch_should_throw_if_page_argument_is_passed(
-    browser_type, launch_arguments
+    browser_type, browser_type_launch_args
 ):
     with pytest.raises(Error) as exc:
-        await browser_type.launch(**launch_arguments, args=["http://example.com"])
+        await browser_type.launch(
+            **browser_type_launch_args, args=["http://example.com"]
+        )
     assert "can not specify page" in exc.value.message
 
 
 @pytest.mark.skip("currently disabled on upstream")
 async def test_browser_type_launch_should_reject_if_launched_browser_fails_immediately(
-    browser_type, launch_arguments, assetdir
+    browser_type, browser_type_launch_args, assetdir
 ):
     with pytest.raises(Error):
         await browser_type.launch(
-            **launch_arguments,
+            **browser_type_launch_args,
             executable_path=assetdir / "dummy_bad_browser_executable.js"
         )
 
@@ -56,29 +58,29 @@ async def test_browser_type_launch_should_reject_if_launched_browser_fails_immed
     "does not return the expected error"
 )  # TODO: hangs currently on the bots
 async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
-    browser_type, launch_arguments
+    browser_type, browser_type_launch_args
 ):
     with pytest.raises(Error) as exc:
         await browser_type.launch(
-            **launch_arguments, executable_path="random-invalid-path"
+            **browser_type_launch_args, executable_path="random-invalid-path"
         )
     assert "Failed to launch" in exc.value.message
 
 
 @pytest.mark.skip()
 async def test_browser_type_launch_server_should_return_child_process_instance(
-    browser_type, launch_arguments
+    browser_type, browser_type_launch_args
 ):
-    browser_server = await browser_type.launchServer(**launch_arguments)
+    browser_server = await browser_type.launchServer(**browser_type_launch_args)
     assert browser_server.pid > 0
     await browser_server.close()
 
 
 @pytest.mark.skip()
 async def test_browser_type_launch_server_should_fire_close_event(
-    browser_type, launch_arguments
+    browser_type, browser_type_launch_args
 ):
-    browser_server = await browser_type.launchServer(**launch_arguments)
+    browser_server = await browser_type.launchServer(**browser_type_launch_args)
     close_event = asyncio.Future()
     browser_server.on("close", lambda: close_event.set_result(None))
     await asyncio.gather(close_event, browser_server.close())
@@ -104,9 +106,9 @@ async def test_browser_type_name_should_work(
 
 
 async def test_browser_close_should_fire_close_event_for_all_contexts(
-    browser_type, launch_arguments
+    browser_type, browser_type_launch_args
 ):
-    browser = await browser_type.launch(**launch_arguments)
+    browser = await browser_type.launch(**browser_type_launch_args)
     context = await browser.new_context()
     closed = []
     context.on("close", lambda: closed.append(True))
@@ -114,8 +116,10 @@ async def test_browser_close_should_fire_close_event_for_all_contexts(
     assert closed == [True]
 
 
-async def test_browser_close_should_be_callable_twice(browser_type, launch_arguments):
-    browser = await browser_type.launch(**launch_arguments)
+async def test_browser_close_should_be_callable_twice(
+    browser_type, browser_type_launch_args
+):
+    browser = await browser_type.launch(**browser_type_launch_args)
     await asyncio.gather(
         browser.close(),
         browser.close(),

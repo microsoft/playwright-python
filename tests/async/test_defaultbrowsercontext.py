@@ -22,7 +22,7 @@ from playwright._impl._api_types import Error
 
 
 @pytest.fixture()
-async def launch_persistent(tmpdir, launch_arguments, browser_type):
+async def launch_persistent(tmpdir, browser_type_launch_args, browser_type):
     context = None
 
     async def _launch(**options):
@@ -30,7 +30,7 @@ async def launch_persistent(tmpdir, launch_arguments, browser_type):
         if context:
             raise ValueError("can only launch one persitent context")
         context = await browser_type.launch_persistent_context(
-            str(tmpdir), **{**launch_arguments, **options}
+            str(tmpdir), **{**browser_type_launch_args, **options}
         )
         return (context.pages[0], context)
 
@@ -282,11 +282,11 @@ async def test_should_accept_user_data_dir(server, tmpdir, launch_persistent):
 
 @flaky
 async def test_should_restore_state_from_userDataDir(
-    browser_type, launch_arguments, server, tmp_path_factory
+    browser_type, browser_type_launch_args, server, tmp_path_factory
 ):
     user_data_dir1 = tmp_path_factory.mktemp("test")
     browser_context = await browser_type.launch_persistent_context(
-        user_data_dir1, **launch_arguments
+        user_data_dir1, **browser_type_launch_args
     )
     page = await browser_context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -294,7 +294,7 @@ async def test_should_restore_state_from_userDataDir(
     await browser_context.close()
 
     browser_context2 = await browser_type.launch_persistent_context(
-        user_data_dir1, **launch_arguments
+        user_data_dir1, **browser_type_launch_args
     )
     page2 = await browser_context2.new_page()
     await page2.goto(server.EMPTY_PAGE)
@@ -303,7 +303,7 @@ async def test_should_restore_state_from_userDataDir(
 
     user_data_dir2 = tmp_path_factory.mktemp("test")
     browser_context3 = await browser_type.launch_persistent_context(
-        user_data_dir2, **launch_arguments
+        user_data_dir2, **browser_type_launch_args
     )
     page3 = await browser_context3.new_page()
     await page3.goto(server.EMPTY_PAGE)
@@ -313,7 +313,7 @@ async def test_should_restore_state_from_userDataDir(
 
 async def test_should_restore_cookies_from_userDataDir(
     browser_type,
-    launch_arguments,
+    browser_type_launch_args,
     tmp_path_factory,
     server,
     is_chromium,
@@ -324,7 +324,7 @@ async def test_should_restore_cookies_from_userDataDir(
         pytest.skip()
     userDataDir = tmp_path_factory.mktemp("1")
     browser_context = await browser_type.launch_persistent_context(
-        userDataDir, **launch_arguments
+        userDataDir, **browser_type_launch_args
     )
     page = await browser_context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -339,7 +339,7 @@ async def test_should_restore_cookies_from_userDataDir(
     await browser_context.close()
 
     browser_context2 = await browser_type.launch_persistent_context(
-        userDataDir, **launch_arguments
+        userDataDir, **browser_type_launch_args
     )
     page2 = await browser_context2.new_page()
     await page2.goto(server.EMPTY_PAGE)
@@ -348,7 +348,7 @@ async def test_should_restore_cookies_from_userDataDir(
 
     userDataDir2 = tmp_path_factory.mktemp("2")
     browser_context3 = await browser_type.launch_persistent_context(
-        userDataDir2, **launch_arguments
+        userDataDir2, **browser_type_launch_args
     )
     page3 = await browser_context3.new_page()
     await page3.goto(server.EMPTY_PAGE)
@@ -364,9 +364,9 @@ async def test_should_have_default_url_when_launching_browser(launch_persistent)
 
 @pytest.mark.skip_browser("firefox")
 async def test_should_throw_if_page_argument_is_passed(
-    browser_type, server, tmpdir, launch_arguments
+    browser_type, server, tmpdir, browser_type_launch_args
 ):
-    options = {**launch_arguments, "args": [server.EMPTY_PAGE]}
+    options = {**browser_type_launch_args, "args": [server.EMPTY_PAGE]}
     with pytest.raises(Error) as exc:
         await browser_type.launch_persistent_context(tmpdir, **options)
     assert "can not specify page" in exc.value.message
