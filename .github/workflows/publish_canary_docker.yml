@@ -37,6 +37,6 @@ jobs:
     - run: docker build -t playwright-python:localbuild .
     - name: tag & publish
       run: |
-        # ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright/python:next
-        # ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright/python:next-focal
-        ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright/python:sha-${{ github.sha }}
+        ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright-python:next
+        ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright-python:next-focal
+        ./scripts/tag_image_and_push.sh playwright-python:localbuild playwright.azurecr.io/public/playwright-python:sha-${{ github.sha }}
