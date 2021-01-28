@@ -24,7 +24,6 @@ import playwright.sync_api._generated
 from playwright.sync_api._context_manager import PlaywrightContextManager
 from playwright.sync_api._generated import (
     Accessibility,
-    BindingCall,
     Browser,
     BrowserContext,
     BrowserType,
