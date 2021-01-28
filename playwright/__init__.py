@@ -19,37 +19,3 @@ web automation that is ever-green, capable, reliable and fast.
 For more information you'll find the documentation for the sync API [here](sync_api.html)
 and for the async API [here](async_api.html).
 """
-
-__pdoc__ = {
-    "_accessibility": False,
-    "_async_base": False,
-    "_browser": False,
-    "_browser_context": False,
-    "_browser_type": False,
-    "_cdp_session": False,
-    "_chromium_browser_context": False,
-    "_connection": False,
-    "_console_message": False,
-    "_dialog": False,
-    "_download": False,
-    "_element_handle": False,
-    "_event_context_manager": False,
-    "_file_chooser": False,
-    "_frame": False,
-    "_helper": False,
-    "_impl_to_api_mapping": False,
-    "_input": False,
-    "_js_handle": False,
-    "_main": False,
-    "_network": False,
-    "_object_factory": False,
-    "_page": False,
-    "_path_utils": False,
-    "_playwright": False,
-    "_selectors": False,
-    "_sync_base": False,
-    "_transport": False,
-    "_wait_helper": False,
-    "_async_playwright": False,
-    "_sync_playwright": False,
-}
