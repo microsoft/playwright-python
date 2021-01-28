@@ -60,7 +60,6 @@ from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
 from playwright._impl._network import Route as RouteImpl
 from playwright._impl._network import WebSocket as WebSocketImpl
-from playwright._impl._page import BindingCall as BindingCallImpl
 from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
@@ -530,11 +529,12 @@ class Route(AsyncBase):
 
     async def fulfill(
         self,
+        *,
         status: int = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
         path: typing.Union[str, pathlib.Path] = None,
-        content_type: str = None,
+        content_type: str = None
     ) -> NoneType:
         """Route.fulfill
 
@@ -589,10 +589,11 @@ class Route(AsyncBase):
 
     async def continue_(
         self,
+        *,
         url: str = None,
         method: str = None,
         headers: typing.Union[typing.Dict[str, str]] = None,
-        post_data: typing.Union[str, bytes] = None,
+        post_data: typing.Union[str, bytes] = None
     ) -> NoneType:
         """Route.continue_
 
@@ -660,7 +661,7 @@ class WebSocket(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     def expect_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
+        self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> AsyncEventContextManager:
         """WebSocket.expect_event
 
@@ -689,7 +690,7 @@ class WebSocket(AsyncBase):
         )
 
     async def wait_for_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
+        self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> typing.Any:
         """WebSocket.wait_for_event
 
@@ -847,7 +848,7 @@ class Keyboard(AsyncBase):
             log_api("<= keyboard.insert_text failed")
             raise e
 
-    async def type(self, text: str, delay: float = None) -> NoneType:
+    async def type(self, text: str, *, delay: float = None) -> NoneType:
         """Keyboard.type
 
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
@@ -880,7 +881,7 @@ class Keyboard(AsyncBase):
             log_api("<= keyboard.type failed")
             raise e
 
-    async def press(self, key: str, delay: float = None) -> NoneType:
+    async def press(self, key: str, *, delay: float = None) -> NoneType:
         """Keyboard.press
 
         `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
@@ -941,7 +942,7 @@ class Mouse(AsyncBase):
     def __init__(self, obj: MouseImpl):
         super().__init__(obj)
 
-    async def move(self, x: float, y: float, steps: int = None) -> NoneType:
+    async def move(self, x: float, y: float, *, steps: int = None) -> NoneType:
         """Mouse.move
 
         Dispatches a `mousemove` event.
@@ -966,7 +967,10 @@ class Mouse(AsyncBase):
             raise e
 
     async def down(
-        self, button: Literal["left", "middle", "right"] = None, click_count: int = None
+        self,
+        *,
+        button: Literal["left", "middle", "right"] = None,
+        click_count: int = None
     ) -> NoneType:
         """Mouse.down
 
@@ -992,7 +996,10 @@ class Mouse(AsyncBase):
             raise e
 
     async def up(
-        self, button: Literal["left", "middle", "right"] = None, click_count: int = None
+        self,
+        *,
+        button: Literal["left", "middle", "right"] = None,
+        click_count: int = None
     ) -> NoneType:
         """Mouse.up
 
@@ -1021,9 +1028,10 @@ class Mouse(AsyncBase):
         self,
         x: float,
         y: float,
+        *,
         delay: float = None,
         button: Literal["left", "middle", "right"] = None,
-        click_count: int = None,
+        click_count: int = None
     ) -> NoneType:
         """Mouse.click
 
@@ -1058,8 +1066,9 @@ class Mouse(AsyncBase):
         self,
         x: float,
         y: float,
+        *,
         delay: float = None,
-        button: Literal["left", "middle", "right"] = None,
+        button: Literal["left", "middle", "right"] = None
     ) -> NoneType:
         """Mouse.dblclick
 
@@ -1124,7 +1133,7 @@ class JSHandle(AsyncBase):
         super().__init__(obj)
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> typing.Any:
         """JSHandle.evaluate
 
@@ -1174,7 +1183,7 @@ class JSHandle(AsyncBase):
             raise e
 
     async def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> "JSHandle":
         """JSHandle.evaluate_handle
 
@@ -1646,7 +1655,7 @@ class ElementHandle(JSHandle):
             log_api("<= element_handle.dispatch_event failed")
             raise e
 
-    async def scroll_into_view_if_needed(self, timeout: float = None) -> NoneType:
+    async def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
         """ElementHandle.scroll_into_view_if_needed
 
         This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is
@@ -1676,12 +1685,13 @@ class ElementHandle(JSHandle):
 
     async def hover(
         self,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
         timeout: float = None,
-        force: bool = None,
+        force: bool = None
     ) -> NoneType:
         """ElementHandle.hover
 
@@ -1726,6 +1736,7 @@ class ElementHandle(JSHandle):
 
     async def click(
         self,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
@@ -1735,7 +1746,7 @@ class ElementHandle(JSHandle):
         click_count: int = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.click
 
@@ -1797,6 +1808,7 @@ class ElementHandle(JSHandle):
 
     async def dblclick(
         self,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
@@ -1805,7 +1817,7 @@ class ElementHandle(JSHandle):
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.dblclick
 
@@ -1868,11 +1880,12 @@ class ElementHandle(JSHandle):
     async def select_option(
         self,
         value: typing.Union[str, typing.List[str]] = None,
+        *,
         index: typing.Union[int, typing.List[int]] = None,
         label: typing.Union[str, typing.List[str]] = None,
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> typing.List[str]:
         """ElementHandle.select_option
 
@@ -1937,13 +1950,14 @@ class ElementHandle(JSHandle):
 
     async def tap(
         self,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.tap
 
@@ -1997,7 +2011,7 @@ class ElementHandle(JSHandle):
             raise e
 
     async def fill(
-        self, value: str, timeout: float = None, no_wait_after: bool = None
+        self, value: str, *, timeout: float = None, no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.fill
 
@@ -2031,7 +2045,7 @@ class ElementHandle(JSHandle):
             log_api("<= element_handle.fill failed")
             raise e
 
-    async def select_text(self, timeout: float = None) -> NoneType:
+    async def select_text(self, *, timeout: float = None) -> NoneType:
         """ElementHandle.select_text
 
         This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
@@ -2064,8 +2078,9 @@ class ElementHandle(JSHandle):
             typing.List[typing.Union[str, pathlib.Path]],
             typing.List[FilePayload],
         ],
+        *,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.set_input_files
 
@@ -2118,9 +2133,10 @@ class ElementHandle(JSHandle):
     async def type(
         self,
         text: str,
+        *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.type
 
@@ -2172,9 +2188,10 @@ class ElementHandle(JSHandle):
     async def press(
         self,
         key: str,
+        *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.press
 
@@ -2226,7 +2243,7 @@ class ElementHandle(JSHandle):
             raise e
 
     async def check(
-        self, timeout: float = None, force: bool = None, no_wait_after: bool = None
+        self, *, timeout: float = None, force: bool = None, no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.check
 
@@ -2271,7 +2288,7 @@ class ElementHandle(JSHandle):
             raise e
 
     async def uncheck(
-        self, timeout: float = None, force: bool = None, no_wait_after: bool = None
+        self, *, timeout: float = None, force: bool = None, no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.uncheck
 
@@ -2352,11 +2369,12 @@ class ElementHandle(JSHandle):
 
     async def screenshot(
         self,
+        *,
         timeout: float = None,
         type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
-        omit_background: bool = None,
+        omit_background: bool = None
     ) -> bytes:
         """ElementHandle.screenshot
 
@@ -2467,7 +2485,8 @@ class ElementHandle(JSHandle):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = None,
+        *,
+        force_expr: bool = None
     ) -> typing.Any:
         """ElementHandle.eval_on_selector
 
@@ -2526,7 +2545,8 @@ class ElementHandle(JSHandle):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = None,
+        *,
+        force_expr: bool = None
     ) -> typing.Any:
         """ElementHandle.eval_on_selector_all
 
@@ -2592,7 +2612,8 @@ class ElementHandle(JSHandle):
         state: Literal[
             "disabled", "editable", "enabled", "hidden", "stable", "visible"
         ],
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> NoneType:
         """ElementHandle.wait_for_element_state
 
@@ -2636,8 +2657,9 @@ class ElementHandle(JSHandle):
     async def wait_for_selector(
         self,
         selector: str,
+        *,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
-        timeout: float = None,
+        timeout: float = None
     ) -> typing.Union["ElementHandle", NoneType]:
         """ElementHandle.wait_for_selector
 
@@ -2701,7 +2723,7 @@ class Accessibility(AsyncBase):
         super().__init__(obj)
 
     async def snapshot(
-        self, interesting_only: bool = None, root: "ElementHandle" = None
+        self, *, interesting_only: bool = None, root: "ElementHandle" = None
     ) -> typing.Union[typing.Dict, NoneType]:
         """Accessibility.snapshot
 
@@ -2820,8 +2842,9 @@ class FileChooser(AsyncBase):
             typing.List[typing.Union[str, pathlib.Path]],
             typing.List[FilePayload],
         ],
+        *,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """FileChooser.set_files
 
@@ -2926,9 +2949,10 @@ class Frame(AsyncBase):
     async def goto(
         self,
         url: str,
+        *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
-        referer: str = None,
+        referer: str = None
     ) -> typing.Union["Response", NoneType]:
         """Frame.goto
 
@@ -2989,9 +3013,10 @@ class Frame(AsyncBase):
 
     def expect_navigation(
         self,
+        *,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
+        timeout: float = None
     ) -> AsyncEventContextManager["Response"]:
         """Frame.expect_navigation
 
@@ -3040,7 +3065,8 @@ class Frame(AsyncBase):
     async def wait_for_load_state(
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> NoneType:
         """Frame.wait_for_load_state
 
@@ -3111,7 +3137,7 @@ class Frame(AsyncBase):
             raise e
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> typing.Any:
         """Frame.evaluate
 
@@ -3177,7 +3203,7 @@ class Frame(AsyncBase):
             raise e
 
     async def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> "JSHandle":
         """Frame.evaluate_handle
 
@@ -3306,8 +3332,9 @@ class Frame(AsyncBase):
     async def wait_for_selector(
         self,
         selector: str,
+        *,
         timeout: float = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None
     ) -> typing.Union["ElementHandle", NoneType]:
         """Frame.wait_for_selector
 
@@ -3374,7 +3401,7 @@ class Frame(AsyncBase):
             log_api("<= frame.wait_for_selector failed")
             raise e
 
-    async def is_checked(self, selector: str, timeout: float = None) -> bool:
+    async def is_checked(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_checked
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
@@ -3404,7 +3431,7 @@ class Frame(AsyncBase):
             log_api("<= frame.is_checked failed")
             raise e
 
-    async def is_disabled(self, selector: str, timeout: float = None) -> bool:
+    async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
@@ -3434,7 +3461,7 @@ class Frame(AsyncBase):
             log_api("<= frame.is_disabled failed")
             raise e
 
-    async def is_editable(self, selector: str, timeout: float = None) -> bool:
+    async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_editable
 
         Returns whether the element is [editable](./actionability.md#editable).
@@ -3464,7 +3491,7 @@ class Frame(AsyncBase):
             log_api("<= frame.is_editable failed")
             raise e
 
-    async def is_enabled(self, selector: str, timeout: float = None) -> bool:
+    async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_enabled
 
         Returns whether the element is [enabled](./actionability.md#enabled).
@@ -3494,7 +3521,7 @@ class Frame(AsyncBase):
             log_api("<= frame.is_enabled failed")
             raise e
 
-    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+    async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
@@ -3524,7 +3551,7 @@ class Frame(AsyncBase):
             log_api("<= frame.is_hidden failed")
             raise e
 
-    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+    async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible).
@@ -3559,7 +3586,8 @@ class Frame(AsyncBase):
         selector: str,
         type: str,
         event_init: typing.Dict = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> NoneType:
         """Frame.dispatch_event
 
@@ -3626,7 +3654,8 @@ class Frame(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = None,
+        *,
+        force_expr: bool = None
     ) -> typing.Any:
         """Frame.eval_on_selector
 
@@ -3685,7 +3714,8 @@ class Frame(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = None,
+        *,
+        force_expr: bool = None
     ) -> typing.Any:
         """Frame.eval_on_selector_all
 
@@ -3759,8 +3789,9 @@ class Frame(AsyncBase):
     async def set_content(
         self,
         html: str,
+        *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
     ) -> NoneType:
         """Frame.set_content
 
@@ -3814,10 +3845,11 @@ class Frame(AsyncBase):
 
     async def add_script_tag(
         self,
+        *,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
         content: str = None,
-        type: str = None,
+        type: str = None
     ) -> "ElementHandle":
         """Frame.add_script_tag
 
@@ -3858,9 +3890,10 @@ class Frame(AsyncBase):
 
     async def add_style_tag(
         self,
+        *,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
-        content: str = None,
+        content: str = None
     ) -> "ElementHandle":
         """Frame.add_style_tag
 
@@ -3898,6 +3931,7 @@ class Frame(AsyncBase):
     async def click(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
@@ -3907,7 +3941,7 @@ class Frame(AsyncBase):
         click_count: int = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.click
 
@@ -3974,6 +4008,7 @@ class Frame(AsyncBase):
     async def dblclick(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
@@ -3982,7 +4017,7 @@ class Frame(AsyncBase):
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.dblclick
 
@@ -4049,13 +4084,14 @@ class Frame(AsyncBase):
     async def tap(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.tap
 
@@ -4116,8 +4152,9 @@ class Frame(AsyncBase):
         self,
         selector: str,
         value: str,
+        *,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.fill
 
@@ -4160,7 +4197,7 @@ class Frame(AsyncBase):
             log_api("<= frame.fill failed")
             raise e
 
-    async def focus(self, selector: str, timeout: float = None) -> NoneType:
+    async def focus(self, selector: str, *, timeout: float = None) -> NoneType:
         """Frame.focus
 
         This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
@@ -4188,7 +4225,7 @@ class Frame(AsyncBase):
             raise e
 
     async def text_content(
-        self, selector: str, timeout: float = None
+        self, selector: str, *, timeout: float = None
     ) -> typing.Union[str, NoneType]:
         """Frame.text_content
 
@@ -4219,7 +4256,7 @@ class Frame(AsyncBase):
             log_api("<= frame.text_content failed")
             raise e
 
-    async def inner_text(self, selector: str, timeout: float = None) -> str:
+    async def inner_text(self, selector: str, *, timeout: float = None) -> str:
         """Frame.inner_text
 
         Returns `element.innerText`.
@@ -4249,7 +4286,7 @@ class Frame(AsyncBase):
             log_api("<= frame.inner_text failed")
             raise e
 
-    async def inner_html(self, selector: str, timeout: float = None) -> str:
+    async def inner_html(self, selector: str, *, timeout: float = None) -> str:
         """Frame.inner_html
 
         Returns `element.innerHTML`.
@@ -4280,7 +4317,7 @@ class Frame(AsyncBase):
             raise e
 
     async def get_attribute(
-        self, selector: str, name: str, timeout: float = None
+        self, selector: str, name: str, *, timeout: float = None
     ) -> typing.Union[str, NoneType]:
         """Frame.get_attribute
 
@@ -4318,12 +4355,13 @@ class Frame(AsyncBase):
     async def hover(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
         timeout: float = None,
-        force: bool = None,
+        force: bool = None
     ) -> NoneType:
         """Frame.hover
 
@@ -4377,11 +4415,12 @@ class Frame(AsyncBase):
         self,
         selector: str,
         value: typing.Union[str, typing.List[str]] = None,
+        *,
         index: typing.Union[int, typing.List[int]] = None,
         label: typing.Union[str, typing.List[str]] = None,
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> typing.List[str]:
         """Frame.select_option
 
@@ -4457,8 +4496,9 @@ class Frame(AsyncBase):
             typing.List[typing.Union[str, pathlib.Path]],
             typing.List[FilePayload],
         ],
+        *,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.set_input_files
 
@@ -4503,9 +4543,10 @@ class Frame(AsyncBase):
         self,
         selector: str,
         text: str,
+        *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.type
 
@@ -4558,9 +4599,10 @@ class Frame(AsyncBase):
         self,
         selector: str,
         key: str,
+        *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.press
 
@@ -4619,9 +4661,10 @@ class Frame(AsyncBase):
     async def check(
         self,
         selector: str,
+        *,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.check
 
@@ -4674,9 +4717,10 @@ class Frame(AsyncBase):
     async def uncheck(
         self,
         selector: str,
+        *,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Frame.uncheck
 
@@ -4754,10 +4798,11 @@ class Frame(AsyncBase):
     async def wait_for_function(
         self,
         expression: str,
+        *,
         arg: typing.Any = None,
         force_expr: bool = None,
         timeout: float = None,
-        polling: typing.Union[float, Literal["raf"]] = None,
+        polling: typing.Union[float, Literal["raf"]] = None
     ) -> "JSHandle":
         """Frame.wait_for_function
 
@@ -4867,7 +4912,7 @@ class Worker(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> typing.Any:
         """Worker.evaluate
 
@@ -4912,7 +4957,7 @@ class Worker(AsyncBase):
             raise e
 
     async def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> "JSHandle":
         """Worker.evaluate_handle
 
@@ -4967,8 +5012,9 @@ class Selectors(AsyncBase):
         self,
         name: str,
         script: str = None,
+        *,
         path: typing.Union[str, pathlib.Path] = None,
-        content_script: bool = None,
+        content_script: bool = None
     ) -> NoneType:
         """Selectors.register
 
@@ -5280,27 +5326,6 @@ class Video(AsyncBase):
 mapping.register(VideoImpl, Video)
 
 
-class BindingCall(AsyncBase):
-    def __init__(self, obj: BindingCallImpl):
-        super().__init__(obj)
-
-    async def call(self, func: typing.Callable) -> NoneType:
-
-        try:
-            log_api("=> binding_call.call started")
-            result = mapping.from_maybe_impl(
-                await self._impl_obj.call(func=self._wrap_handler(func))
-            )
-            log_api("<= binding_call.call succeded")
-            return result
-        except Exception as e:
-            log_api("<= binding_call.call failed")
-            raise e
-
-
-mapping.register(BindingCallImpl, BindingCall)
-
-
 class Page(AsyncBase):
     def __init__(self, obj: PageImpl):
         super().__init__(obj)
@@ -5452,7 +5477,8 @@ class Page(AsyncBase):
     def frame(
         self,
         name: str = None,
-        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        *,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None
     ) -> typing.Union["Frame", NoneType]:
         """Page.frame
 
@@ -5607,8 +5633,9 @@ class Page(AsyncBase):
     async def wait_for_selector(
         self,
         selector: str,
+        *,
         timeout: float = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None
     ) -> typing.Union["ElementHandle", NoneType]:
         """Page.wait_for_selector
 
@@ -5675,7 +5702,7 @@ class Page(AsyncBase):
             log_api("<= page.wait_for_selector failed")
             raise e
 
-    async def is_checked(self, selector: str, timeout: float = None) -> bool:
+    async def is_checked(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_checked
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
@@ -5705,7 +5732,7 @@ class Page(AsyncBase):
             log_api("<= page.is_checked failed")
             raise e
 
-    async def is_disabled(self, selector: str, timeout: float = None) -> bool:
+    async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
@@ -5735,7 +5762,7 @@ class Page(AsyncBase):
             log_api("<= page.is_disabled failed")
             raise e
 
-    async def is_editable(self, selector: str, timeout: float = None) -> bool:
+    async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_editable
 
         Returns whether the element is [editable](./actionability.md#editable).
@@ -5765,7 +5792,7 @@ class Page(AsyncBase):
             log_api("<= page.is_editable failed")
             raise e
 
-    async def is_enabled(self, selector: str, timeout: float = None) -> bool:
+    async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_enabled
 
         Returns whether the element is [enabled](./actionability.md#enabled).
@@ -5795,7 +5822,7 @@ class Page(AsyncBase):
             log_api("<= page.is_enabled failed")
             raise e
 
-    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+    async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
@@ -5825,7 +5852,7 @@ class Page(AsyncBase):
             log_api("<= page.is_hidden failed")
             raise e
 
-    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+    async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible).
@@ -5860,7 +5887,8 @@ class Page(AsyncBase):
         selector: str,
         type: str,
         event_init: typing.Dict = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> NoneType:
         """Page.dispatch_event
 
@@ -5923,7 +5951,7 @@ class Page(AsyncBase):
             raise e
 
     async def evaluate(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> typing.Any:
         """Page.evaluate
 
@@ -5993,7 +6021,7 @@ class Page(AsyncBase):
             raise e
 
     async def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, force_expr: bool = None
+        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
     ) -> "JSHandle":
         """Page.evaluate_handle
 
@@ -6062,7 +6090,8 @@ class Page(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = None,
+        *,
+        force_expr: bool = None
     ) -> typing.Any:
         """Page.eval_on_selector
 
@@ -6121,7 +6150,8 @@ class Page(AsyncBase):
         selector: str,
         expression: str,
         arg: typing.Any = None,
-        force_expr: bool = None,
+        *,
+        force_expr: bool = None
     ) -> typing.Any:
         """Page.eval_on_selector_all
 
@@ -6173,10 +6203,11 @@ class Page(AsyncBase):
 
     async def add_script_tag(
         self,
+        *,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
         content: str = None,
-        type: str = None,
+        type: str = None
     ) -> "ElementHandle":
         """Page.add_script_tag
 
@@ -6218,9 +6249,10 @@ class Page(AsyncBase):
 
     async def add_style_tag(
         self,
+        *,
         url: str = None,
         path: typing.Union[str, pathlib.Path] = None,
-        content: str = None,
+        content: str = None
     ) -> "ElementHandle":
         """Page.add_style_tag
 
@@ -6323,7 +6355,7 @@ class Page(AsyncBase):
             raise e
 
     async def expose_binding(
-        self, name: str, callback: typing.Callable, handle: bool = None
+        self, name: str, callback: typing.Callable, *, handle: bool = None
     ) -> NoneType:
         """Page.expose_binding
 
@@ -6455,8 +6487,9 @@ class Page(AsyncBase):
     async def set_content(
         self,
         html: str,
+        *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
     ) -> NoneType:
         """Page.set_content
 
@@ -6492,9 +6525,10 @@ class Page(AsyncBase):
     async def goto(
         self,
         url: str,
+        *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
-        referer: str = None,
+        referer: str = None
     ) -> typing.Union["Response", NoneType]:
         """Page.goto
 
@@ -6557,8 +6591,9 @@ class Page(AsyncBase):
 
     async def reload(
         self,
+        *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
     ) -> typing.Union["Response", NoneType]:
         """Page.reload
 
@@ -6597,7 +6632,8 @@ class Page(AsyncBase):
     async def wait_for_load_state(
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> NoneType:
         """Page.wait_for_load_state
 
@@ -6649,7 +6685,7 @@ class Page(AsyncBase):
             raise e
 
     async def wait_for_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
+        self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> typing.Any:
         """Page.wait_for_event
 
@@ -6691,8 +6727,9 @@ class Page(AsyncBase):
 
     async def go_back(
         self,
+        *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
     ) -> typing.Union["Response", NoneType]:
         """Page.go_back
 
@@ -6732,8 +6769,9 @@ class Page(AsyncBase):
 
     async def go_forward(
         self,
+        *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
     ) -> typing.Union["Response", NoneType]:
         """Page.go_forward
 
@@ -6773,8 +6811,9 @@ class Page(AsyncBase):
 
     async def emulate_media(
         self,
+        *,
         media: Literal["print", "screen"] = None,
-        color_scheme: Literal["dark", "light", "no-preference"] = None,
+        color_scheme: Literal["dark", "light", "no-preference"] = None
     ) -> NoneType:
         """Page.emulate_media
 
@@ -6878,7 +6917,7 @@ class Page(AsyncBase):
             raise e
 
     async def add_init_script(
-        self, script: str = None, path: typing.Union[str, pathlib.Path] = None
+        self, script: str = None, *, path: typing.Union[str, pathlib.Path] = None
     ) -> NoneType:
         """Page.add_init_script
 
@@ -7015,13 +7054,14 @@ class Page(AsyncBase):
 
     async def screenshot(
         self,
+        *,
         timeout: float = None,
         type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omit_background: bool = None,
         full_page: bool = None,
-        clip: FloatRect = None,
+        clip: FloatRect = None
     ) -> bytes:
         """Page.screenshot
 
@@ -7095,7 +7135,7 @@ class Page(AsyncBase):
             log_api("<= page.title failed")
             raise e
 
-    async def close(self, run_before_unload: bool = None) -> NoneType:
+    async def close(self, *, run_before_unload: bool = None) -> NoneType:
         """Page.close
 
         If `runBeforeUnload` is `false`, does not run any unload handlers and waits for the page to be closed. If
@@ -7146,6 +7186,7 @@ class Page(AsyncBase):
     async def click(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
@@ -7155,7 +7196,7 @@ class Page(AsyncBase):
         click_count: int = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.click
 
@@ -7224,6 +7265,7 @@ class Page(AsyncBase):
     async def dblclick(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
@@ -7232,7 +7274,7 @@ class Page(AsyncBase):
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.dblclick
 
@@ -7301,13 +7343,14 @@ class Page(AsyncBase):
     async def tap(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.tap
 
@@ -7370,8 +7413,9 @@ class Page(AsyncBase):
         self,
         selector: str,
         value: str,
+        *,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.fill
 
@@ -7416,7 +7460,7 @@ class Page(AsyncBase):
             log_api("<= page.fill failed")
             raise e
 
-    async def focus(self, selector: str, timeout: float = None) -> NoneType:
+    async def focus(self, selector: str, *, timeout: float = None) -> NoneType:
         """Page.focus
 
         This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
@@ -7446,7 +7490,7 @@ class Page(AsyncBase):
             raise e
 
     async def text_content(
-        self, selector: str, timeout: float = None
+        self, selector: str, *, timeout: float = None
     ) -> typing.Union[str, NoneType]:
         """Page.text_content
 
@@ -7477,7 +7521,7 @@ class Page(AsyncBase):
             log_api("<= page.text_content failed")
             raise e
 
-    async def inner_text(self, selector: str, timeout: float = None) -> str:
+    async def inner_text(self, selector: str, *, timeout: float = None) -> str:
         """Page.inner_text
 
         Returns `element.innerText`.
@@ -7507,7 +7551,7 @@ class Page(AsyncBase):
             log_api("<= page.inner_text failed")
             raise e
 
-    async def inner_html(self, selector: str, timeout: float = None) -> str:
+    async def inner_html(self, selector: str, *, timeout: float = None) -> str:
         """Page.inner_html
 
         Returns `element.innerHTML`.
@@ -7538,7 +7582,7 @@ class Page(AsyncBase):
             raise e
 
     async def get_attribute(
-        self, selector: str, name: str, timeout: float = None
+        self, selector: str, name: str, *, timeout: float = None
     ) -> typing.Union[str, NoneType]:
         """Page.get_attribute
 
@@ -7576,12 +7620,13 @@ class Page(AsyncBase):
     async def hover(
         self,
         selector: str,
+        *,
         modifiers: typing.Union[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
         timeout: float = None,
-        force: bool = None,
+        force: bool = None
     ) -> NoneType:
         """Page.hover
 
@@ -7637,11 +7682,12 @@ class Page(AsyncBase):
         self,
         selector: str,
         value: typing.Union[str, typing.List[str]] = None,
+        *,
         index: typing.Union[int, typing.List[int]] = None,
         label: typing.Union[str, typing.List[str]] = None,
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> typing.List[str]:
         """Page.select_option
 
@@ -7720,8 +7766,9 @@ class Page(AsyncBase):
             typing.List[typing.Union[str, pathlib.Path]],
             typing.List[FilePayload],
         ],
+        *,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.set_input_files
 
@@ -7766,9 +7813,10 @@ class Page(AsyncBase):
         self,
         selector: str,
         text: str,
+        *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.type
 
@@ -7823,9 +7871,10 @@ class Page(AsyncBase):
         self,
         selector: str,
         key: str,
+        *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.press
 
@@ -7898,9 +7947,10 @@ class Page(AsyncBase):
     async def check(
         self,
         selector: str,
+        *,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.check
 
@@ -7955,9 +8005,10 @@ class Page(AsyncBase):
     async def uncheck(
         self,
         selector: str,
+        *,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """Page.uncheck
 
@@ -8044,10 +8095,11 @@ class Page(AsyncBase):
     async def wait_for_function(
         self,
         expression: str,
+        *,
         arg: typing.Any = None,
         force_expr: bool = None,
         timeout: float = None,
-        polling: typing.Union[float, Literal["raf"]] = None,
+        polling: typing.Union[float, Literal["raf"]] = None
     ) -> "JSHandle":
         """Page.wait_for_function
 
@@ -8123,6 +8175,7 @@ class Page(AsyncBase):
 
     async def pdf(
         self,
+        *,
         scale: float = None,
         display_header_footer: bool = None,
         header_template: str = None,
@@ -8135,7 +8188,7 @@ class Page(AsyncBase):
         height: typing.Union[str, float] = None,
         prefer_css_page_size: bool = None,
         margin: PdfMargins = None,
-        path: typing.Union[str, pathlib.Path] = None,
+        path: typing.Union[str, pathlib.Path] = None
     ) -> bytes:
         """Page.pdf
 
@@ -8253,7 +8306,7 @@ class Page(AsyncBase):
             raise e
 
     def expect_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
+        self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> AsyncEventContextManager:
         """Page.expect_event
 
@@ -8290,7 +8343,8 @@ class Page(AsyncBase):
     def expect_console_message(
         self,
         predicate: typing.Union[typing.Callable[["ConsoleMessage"], bool]] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["ConsoleMessage"]:
         """Page.expect_console_message
 
@@ -8320,7 +8374,8 @@ class Page(AsyncBase):
     def expect_download(
         self,
         predicate: typing.Union[typing.Callable[["Download"], bool]] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["Download"]:
         """Page.expect_download
 
@@ -8350,7 +8405,8 @@ class Page(AsyncBase):
     def expect_file_chooser(
         self,
         predicate: typing.Union[typing.Callable[["FileChooser"], bool]] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["FileChooser"]:
         """Page.expect_file_chooser
 
@@ -8379,9 +8435,10 @@ class Page(AsyncBase):
 
     def expect_navigation(
         self,
+        *,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
+        timeout: float = None
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_navigation
 
@@ -8433,7 +8490,8 @@ class Page(AsyncBase):
     def expect_popup(
         self,
         predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["Page"]:
         """Page.expect_popup
 
@@ -8465,7 +8523,8 @@ class Page(AsyncBase):
         url_or_predicate: typing.Union[
             str, typing.Pattern, typing.Callable[["Request"], bool]
         ],
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request
 
@@ -8505,7 +8564,8 @@ class Page(AsyncBase):
         url_or_predicate: typing.Union[
             str, typing.Pattern, typing.Callable[["Response"], bool]
         ],
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_response
 
@@ -8539,7 +8599,8 @@ class Page(AsyncBase):
     def expect_worker(
         self,
         predicate: typing.Union[typing.Callable[["Worker"], bool]] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["Worker"]:
         """Page.expect_worker
 
@@ -8743,7 +8804,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def grant_permissions(
-        self, permissions: typing.List[str], origin: str = None
+        self, permissions: typing.List[str], *, origin: str = None
     ) -> NoneType:
         """BrowserContext.grant_permissions
 
@@ -8886,7 +8947,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def add_init_script(
-        self, script: str = None, path: typing.Union[str, pathlib.Path] = None
+        self, script: str = None, *, path: typing.Union[str, pathlib.Path] = None
     ) -> NoneType:
         """BrowserContext.add_init_script
 
@@ -8929,7 +8990,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def expose_binding(
-        self, name: str, callback: typing.Callable, handle: bool = None
+        self, name: str, callback: typing.Callable, *, handle: bool = None
     ) -> NoneType:
         """BrowserContext.expose_binding
 
@@ -9173,7 +9234,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     def expect_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
+        self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> AsyncEventContextManager:
         """BrowserContext.expect_event
 
@@ -9225,7 +9286,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def storage_state(
-        self, path: typing.Union[str, pathlib.Path] = None
+        self, *, path: typing.Union[str, pathlib.Path] = None
     ) -> StorageState:
         """BrowserContext.storage_state
 
@@ -9253,7 +9314,7 @@ class BrowserContext(AsyncBase):
             raise e
 
     async def wait_for_event(
-        self, event: str, predicate: typing.Callable = None, timeout: float = None
+        self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> typing.Any:
         """BrowserContext.wait_for_event
 
@@ -9296,7 +9357,8 @@ class BrowserContext(AsyncBase):
     def expect_page(
         self,
         predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
-        timeout: float = None,
+        *,
+        timeout: float = None
     ) -> AsyncEventContextManager["Page"]:
         """BrowserContext.expect_page
 
@@ -9491,6 +9553,7 @@ class Browser(AsyncBase):
 
     async def new_context(
         self,
+        *,
         viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
@@ -9515,7 +9578,7 @@ class Browser(AsyncBase):
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
-        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -9634,6 +9697,7 @@ class Browser(AsyncBase):
 
     async def new_page(
         self,
+        *,
         viewport: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
@@ -9658,7 +9722,7 @@ class Browser(AsyncBase):
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
-        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None
     ) -> "Page":
         """Browser.new_page
 
@@ -9825,6 +9889,7 @@ class BrowserType(AsyncBase):
 
     async def launch(
         self,
+        *,
         executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
@@ -9841,7 +9906,7 @@ class BrowserType(AsyncBase):
         chromium_sandbox: bool = None,
         firefox_user_prefs: typing.Union[
             typing.Dict[str, typing.Union[str, float, bool]]
-        ] = None,
+        ] = None
     ) -> "Browser":
         """BrowserType.launch
 
@@ -9949,6 +10014,7 @@ class BrowserType(AsyncBase):
     async def launch_persistent_context(
         self,
         user_data_dir: typing.Union[str, pathlib.Path],
+        *,
         executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
@@ -9984,7 +10050,7 @@ class BrowserType(AsyncBase):
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: ViewportSize = None,
+        record_video_size: ViewportSize = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 

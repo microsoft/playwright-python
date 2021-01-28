@@ -41,7 +41,7 @@ from playwright._impl._helper import to_snake_case
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import JSHandle, Serializable
 from playwright._impl._network import Request, Response, Route, WebSocket
-from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._page import Page, Worker
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
 from playwright._impl._video import Video
@@ -64,14 +64,55 @@ def process_type(value: Any, param: bool = False) -> str:
     return value
 
 
+positional_exceptions = [
+    r"abort\.errorCode",
+    r"accept\.promptText",
+    r"add_init_script\.script",
+    r"cookies\.urls",
+    r"dispatch_event\.eventInit",
+    r"eval.*\.arg",
+    r"expect_.*\.predicate",
+    r"evaluate_handle\.arg",
+    r"frame.*\.name",
+    r"register\.script",
+    r"select_option\.value",
+    r"send\.params",
+    r"set_geolocation\.geolocation",
+    r"wait_for_.*\.predicate",
+    r"wait_for_load_state\.state",
+    r"unroute\.handler",
+]
+
+
+def is_positional_exception(key: str) -> bool:
+    for pattern in positional_exceptions:
+        if re.match(pattern, key):
+            return True
+    return False
+
+
 def signature(func: FunctionType, indent: int) -> str:
     hints = get_type_hints(func, globals())
     tokens = ["self"]
     split = ",\n" + " " * indent
 
+    saw_optional = False
     for [name, value] in hints.items():
         if name == "return":
             continue
+        positional_exception = is_positional_exception(f"{func.__name__}.{name}")
+        if saw_optional and positional_exception:
+            raise Exception(
+                "Positional exception is not first in the list "
+                + f"{func.__name__}.{name}"
+            )
+        if (
+            not positional_exception
+            and not saw_optional
+            and str(value).endswith("NoneType]")
+        ):
+            saw_optional = True
+            tokens.append("*")
         processed = process_type(value, True)
         tokens.append(f"{to_snake_case(name)}: {processed}")
     return split.join(tokens)
@@ -174,7 +215,7 @@ from playwright._impl._frame import Frame as FrameImpl
 from playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
 from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
-from playwright._impl._page import BindingCall as BindingCallImpl, Page as PageImpl, Worker as WorkerImpl
+from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
@@ -202,7 +243,6 @@ all_types = [
     Dialog,
     Download,
     Video,
-    BindingCall,
     Page,
     BrowserContext,
     CDPSession,
