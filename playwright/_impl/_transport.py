@@ -29,7 +29,7 @@ def _get_stderr_fileno() -> Optional[int]:
         # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
         # https://docs.python.org/3/library/faulthandler.html#issue-with-file-descriptors
         # This is potentially dangerous, but the best we can do.
-        if not hasattr(sys, "__stderr__"):
+        if not hasattr(sys, "__stderr__") or not sys.__stderr__:
             return None
         return sys.__stderr__.fileno()
 
