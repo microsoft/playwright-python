@@ -59,9 +59,9 @@ async def test_should_provide_target_for_keyboard_events(page, server):
 
 async def test_should_not_affect_mouse_event_target_page(page, server):
     page2 = await page.context.new_page()
-    click_counter = """() {
-    document.onclick = () => window.click_count  = (window.click_count || 0) + 1;
-  }"""
+    click_counter = """() => {
+      document.onclick = () => window.click_count = (window.click_count || 0) + 1;
+    }"""
     await asyncio.gather(
         page.evaluate(click_counter),
         page2.evaluate(click_counter),

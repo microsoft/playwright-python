@@ -52,7 +52,6 @@ from playwright._impl._helper import (
     URLMatcher,
     URLMatchRequest,
     URLMatchResponse,
-    is_function_body,
     is_safe_close_error,
     locals_to_params,
     parse_error,
@@ -139,12 +138,7 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on("crash", lambda _: self._on_crash())
-        self._channel.on(
-            "dialog",
-            lambda params: self.emit(
-                Page.Events.Dialog, from_channel(params["dialog"])
-            ),
-        )
+        self._channel.on("dialog", lambda params: self._on_dialog(params))
         self._channel.on(
             "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded)
         )
@@ -290,6 +284,13 @@ class Page(ChannelOwner):
     def _on_crash(self) -> None:
         self.emit(Page.Events.Crash)
 
+    def _on_dialog(self, params: Any) -> None:
+        dialog = from_channel(params["dialog"])
+        if self.listeners(Page.Events.Dialog):
+            self.emit(Page.Events.Dialog, dialog)
+        else:
+            asyncio.create_task(dialog.dismiss())
+
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
         if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
             self._channel.send_no_reply(
@@ -375,39 +376,29 @@ class Page(ChannelOwner):
     ) -> None:
         return await self._main_frame.dispatch_event(**locals_to_params(locals()))
 
-    async def evaluate(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
-    ) -> Any:
-        return await self._main_frame.evaluate(expression, arg, force_expr=force_expr)
+    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
+        return await self._main_frame.evaluate(expression, arg)
 
     async def evaluate_handle(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None
     ) -> JSHandle:
-        return await self._main_frame.evaluate_handle(
-            expression, arg, force_expr=force_expr
-        )
+        return await self._main_frame.evaluate_handle(expression, arg)
 
     async def eval_on_selector(
         self,
         selector: str,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
     ) -> Any:
-        return await self._main_frame.eval_on_selector(
-            selector, expression, arg, force_expr=force_expr
-        )
+        return await self._main_frame.eval_on_selector(selector, expression, arg)
 
     async def eval_on_selector_all(
         self,
         selector: str,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
     ) -> Any:
-        return await self._main_frame.eval_on_selector_all(
-            selector, expression, arg, force_expr=force_expr
-        )
+        return await self._main_frame.eval_on_selector_all(selector, expression, arg)
 
     async def add_script_tag(
         self,
@@ -729,17 +720,17 @@ class Page(ChannelOwner):
         self,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
         timeout: float = None,
         polling: Union[float, Literal["raf"]] = None,
     ) -> JSHandle:
-        if not is_function_body(expression):
-            force_expr = True
         return await self._main_frame.wait_for_function(**locals_to_params(locals()))
 
     @property
     def workers(self) -> List["Worker"]:
         return self._workers.copy()
+
+    async def pause(self) -> None:
+        await self._browser_context._pause()
 
     async def pdf(
         self,
@@ -903,31 +894,25 @@ class Worker(ChannelOwner):
     def url(self) -> str:
         return self._initializer["url"]
 
-    async def evaluate(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
-    ) -> Any:
-        if not is_function_body(expression):
-            force_expr = True
+    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
                 dict(
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
         )
 
     async def evaluate_handle(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None
     ) -> JSHandle:
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
                 dict(
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )

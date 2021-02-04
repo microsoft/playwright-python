@@ -36,7 +36,6 @@ from playwright._impl._helper import (
     MouseButton,
     URLMatch,
     URLMatcher,
-    is_function_body,
     locals_to_params,
     monotonic_time,
 )
@@ -195,33 +194,25 @@ class Frame(ChannelOwner):
     async def frame_element(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))
 
-    async def evaluate(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
-    ) -> Any:
-        if not is_function_body(expression):
-            force_expr = True
+    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
                 dict(
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
         )
 
     async def evaluate_handle(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None
     ) -> JSHandle:
-        if not is_function_body(expression):
-            force_expr = True
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
                 dict(
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
@@ -281,7 +272,6 @@ class Frame(ChannelOwner):
         selector: str,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -289,7 +279,6 @@ class Frame(ChannelOwner):
                 dict(
                     selector=selector,
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
@@ -300,7 +289,6 @@ class Frame(ChannelOwner):
         selector: str,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -308,7 +296,6 @@ class Frame(ChannelOwner):
                 dict(
                     selector=selector,
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
@@ -516,14 +503,10 @@ class Frame(ChannelOwner):
         self,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
         timeout: float = None,
         polling: Union[float, Literal["raf"]] = None,
     ) -> JSHandle:
-        if not is_function_body(expression):
-            force_expr = True
         params = locals_to_params(locals())
-        params["isFunction"] = not (force_expr)
         params["arg"] = serialize_argument(arg)
         return from_channel(await self._channel.send("waitForFunction", params))
 

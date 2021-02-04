@@ -243,7 +243,6 @@ class ElementHandle(JSHandle):
         selector: str,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -251,7 +250,6 @@ class ElementHandle(JSHandle):
                 dict(
                     selector=selector,
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
@@ -262,7 +260,6 @@ class ElementHandle(JSHandle):
         selector: str,
         expression: str,
         arg: Serializable = None,
-        force_expr: bool = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -270,7 +267,6 @@ class ElementHandle(JSHandle):
                 dict(
                     selector=selector,
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )

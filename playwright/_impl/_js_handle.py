@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._helper import is_function_body
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
@@ -43,33 +42,25 @@ class JSHandle(ChannelOwner):
     def _on_preview_updated(self, preview: str) -> None:
         self._preview = preview
 
-    async def evaluate(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
-    ) -> Any:
-        if not is_function_body(expression):
-            force_expr = True
+    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
                 dict(
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
         )
 
     async def evaluate_handle(
-        self, expression: str, arg: Serializable = None, force_expr: bool = None
+        self, expression: str, arg: Serializable = None
     ) -> "JSHandle":
-        if not is_function_body(expression):
-            force_expr = True
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
                 dict(
                     expression=expression,
-                    isFunction=not (force_expr),
                     arg=serialize_argument(arg),
                 ),
             )
