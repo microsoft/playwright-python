@@ -1142,17 +1142,14 @@ class JSHandle(SyncBase):
     def __init__(self, obj: JSHandleImpl):
         super().__init__(obj)
 
-    def evaluate(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> typing.Any:
+    def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """JSHandle.evaluate
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
-        This method passes this handle as the first argument to `pageFunction`.
+        This method passes this handle as the first argument to `expression`.
 
-        If `pageFunction` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its
-        value.
+        If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its value.
 
         Examples:
 
@@ -1167,10 +1164,7 @@ class JSHandle(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -1182,9 +1176,7 @@ class JSHandle(SyncBase):
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -1194,17 +1186,15 @@ class JSHandle(SyncBase):
             log_api("<= js_handle.evaluate failed")
             raise e
 
-    def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> "JSHandle":
+    def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """JSHandle.evaluate_handle
 
-        Returns the return value of `pageFunction` as in-page object (JSHandle).
+        Returns the return value of `expression` as a `JSHandle`.
 
-        This method passes this handle as the first argument to `pageFunction`.
+        This method passes this handle as the first argument to `expression`.
 
         The only difference between `jsHandle.evaluate` and `jsHandle.evaluateHandle` is that `jsHandle.evaluateHandle` returns
-        in-page object (JSHandle).
+        `JSHandle`.
 
         If the function passed to the `jsHandle.evaluateHandle` returns a [Promise], then `jsHandle.evaluateHandle` would wait
         for the promise to resolve and return its value.
@@ -1217,10 +1207,7 @@ class JSHandle(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -1232,9 +1219,7 @@ class JSHandle(SyncBase):
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -1933,7 +1918,6 @@ class ElementHandle(JSHandle):
         ```
 
         ```py
-        # FIXME
         # single selection matching the value
         handle.select_option(\"blue\")
         # single selection matching both the value and the label
@@ -2059,8 +2043,10 @@ class ElementHandle(JSHandle):
         """ElementHandle.fill
 
         This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
-        event after filling. If the element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws
-        an error. Note that you can pass an empty string to clear the input field.
+        event after filling. If the element is inside the `<label>` element that has associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be filled
+        instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method
+        throws an error. Note that you can pass an empty string to clear the input field.
 
         Parameters
         ----------
@@ -2488,13 +2474,12 @@ class ElementHandle(JSHandle):
         """ElementHandle.query_selector
 
         The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
-        [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-        returns `null`.
+        [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
 
         Returns
         -------
@@ -2516,13 +2501,12 @@ class ElementHandle(JSHandle):
         """ElementHandle.query_selector_all
 
         The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See
-        [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-        returns empty array.
+        [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
 
         Returns
         -------
@@ -2541,22 +2525,18 @@ class ElementHandle(JSHandle):
             raise e
 
     def eval_on_selector(
-        self,
-        selector: str,
-        expression: str,
-        arg: typing.Any = None,
-        *,
-        force_expr: bool = None
+        self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """ElementHandle.eval_on_selector
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
         The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
-        argument to `pageFunction`. See [Working with selectors](./selectors.md#working-with-selectors) for more details. If no
-        elements match the selector, the method throws an error.
+        argument to `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the
+        selector, the method throws an error.
 
-        If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
+        If `expression` returns a [Promise], then `element_handle.eval_on_selector()` would wait for the promise to resolve
+        and return its value.
 
         Examples:
 
@@ -2569,15 +2549,12 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -2592,7 +2569,6 @@ class ElementHandle(JSHandle):
                         selector=selector,
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                     )
                 )
             )
@@ -2603,22 +2579,17 @@ class ElementHandle(JSHandle):
             raise e
 
     def eval_on_selector_all(
-        self,
-        selector: str,
-        expression: str,
-        arg: typing.Any = None,
-        *,
-        force_expr: bool = None
+        self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """ElementHandle.eval_on_selector_all
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
         The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
-        matched elements as a first argument to `pageFunction`. See
-        [Working with selectors](./selectors.md#working-with-selectors) for more details.
+        matched elements as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
 
-        If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
+        If `expression` returns a [Promise], then `element_handle.eval_on_selector_all()` would wait for the promise to
+        resolve and return its value.
 
         Examples:
 
@@ -2637,15 +2608,12 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -2660,7 +2628,6 @@ class ElementHandle(JSHandle):
                         selector=selector,
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                     )
                 )
             )
@@ -2746,7 +2713,7 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         state : Union["attached", "detached", "hidden", "visible", NoneType]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
@@ -3209,19 +3176,17 @@ class Frame(SyncBase):
             log_api("<= frame.frame_element failed")
             raise e
 
-    def evaluate(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> typing.Any:
+    def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Frame.evaluate
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
         If the function passed to the `frame.evaluate()` returns a [Promise], then `frame.evaluate()` would wait
         for the promise to resolve and return its value.
 
-        If the function passed to the `frame.evaluate()` returns a non-[Serializable] value,
-        then[ method: `Frame.evaluate`] returns `undefined`. DevTools Protocol also supports transferring some additional values
-        that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        If the function passed to the `frame.evaluate()` returns a non-[Serializable] value, then
+        `frame.evaluate()` returns `undefined`. Playwright also supports transferring some additional values that are
+        not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 
         ```py
         result = frame.evaluate(\"([x, y]) => Promise.resolve(x * y)\", [7, 8])
@@ -3250,10 +3215,7 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -3265,9 +3227,7 @@ class Frame(SyncBase):
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -3277,18 +3237,16 @@ class Frame(SyncBase):
             log_api("<= frame.evaluate failed")
             raise e
 
-    def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> "JSHandle":
+    def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """Frame.evaluate_handle
 
-        Returns the return value of `pageFunction` as in-page object (JSHandle).
+        Returns the return value of `expression` as a `JSHandle`.
 
-        The only difference between `frame.evaluate()` and `frame.evaluate_handle()` is
-        that[ method: Fframe.evaluateHandle`] returns in-page object (JSHandle).
+        The only difference between `frame.evaluate()` and `frame.evaluate_handle()` is that
+        [method: Frame.evaluateHandle`] returns `JSHandle`.
 
-        If the function, passed to the `frame.evaluate_handle()`, returns a [Promise],
-        then[ method: Fframe.evaluateHandle`] would wait for the promise to resolve and return its value.
+        If the function, passed to the `frame.evaluate_handle()`, returns a [Promise], then
+        `frame.evaluate_handle()` would wait for the promise to resolve and return its value.
 
         ```py
         a_window_handle = frame.evaluate_handle(\"Promise.resolve(window)\")
@@ -3316,10 +3274,7 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -3331,9 +3286,7 @@ class Frame(SyncBase):
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -3349,13 +3302,12 @@ class Frame(SyncBase):
         Returns the ElementHandle pointing to the frame element.
 
         The method finds an element matching the specified selector within the frame. See
-        [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-        returns `null`.
+        [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
 
         Returns
         -------
@@ -3379,13 +3331,12 @@ class Frame(SyncBase):
         Returns the ElementHandles pointing to the frame elements.
 
         The method finds all elements matching the specified selector within the frame. See
-        [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-        returns empty array.
+        [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
 
         Returns
         -------
@@ -3441,7 +3392,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3483,7 +3434,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3515,7 +3466,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3547,7 +3498,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3579,7 +3530,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3611,7 +3562,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3641,7 +3592,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3706,7 +3657,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         event_init : Union[Dict, NoneType]
@@ -3735,22 +3686,18 @@ class Frame(SyncBase):
             raise e
 
     def eval_on_selector(
-        self,
-        selector: str,
-        expression: str,
-        arg: typing.Any = None,
-        *,
-        force_expr: bool = None
+        self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """Frame.eval_on_selector
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
         The method finds an element matching the specified selector within the frame and passes it as a first argument to
-        `pageFunction`. See [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements
-        match the selector, the method throws an error.
+        `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
+        method throws an error.
 
-        If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
+        If `expression` returns a [Promise], then `frame.eval_on_selector()` would wait for the promise to resolve and
+        return its value.
 
         Examples:
 
@@ -3763,15 +3710,12 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -3786,7 +3730,6 @@ class Frame(SyncBase):
                         selector=selector,
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                     )
                 )
             )
@@ -3797,22 +3740,17 @@ class Frame(SyncBase):
             raise e
 
     def eval_on_selector_all(
-        self,
-        selector: str,
-        expression: str,
-        arg: typing.Any = None,
-        *,
-        force_expr: bool = None
+        self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """Frame.eval_on_selector_all
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements
-        as a first argument to `pageFunction`. See [Working with selectors](./selectors.md#working-with-selectors) for more
-        details.
+        as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
 
-        If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
+        If `expression` returns a [Promise], then `frame.eval_on_selector_all()` would wait for the promise to resolve and
+        return its value.
 
         Examples:
 
@@ -3823,15 +3761,12 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -3846,7 +3781,6 @@ class Frame(SyncBase):
                         selector=selector,
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                     )
                 )
             )
@@ -4055,7 +3989,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -4136,7 +4070,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -4211,7 +4145,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -4260,9 +4194,10 @@ class Frame(SyncBase):
         """Frame.fill
 
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-        element, fills it and triggers an `input` event after filling. If the element matching `selector` is not an `<input>`,
-        `<textarea>` or `[contenteditable]` element, this method throws an error. Note that you can pass an empty string to
-        clear the input field.
+        element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
+        associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
+        filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
+        method throws an error. Note that you can pass an empty string to clear the input field.
 
         To send fine-grained keyboard events, use `frame.type()`.
 
@@ -4270,7 +4205,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, NoneType]
@@ -4310,7 +4245,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4338,7 +4273,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4370,7 +4305,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4402,7 +4337,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4436,7 +4371,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
         timeout : Union[float, NoneType]
@@ -4491,7 +4426,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -4556,7 +4491,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         value : Union[List[str], str, NoneType]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
@@ -4627,7 +4562,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4681,7 +4616,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         text : str
             A text to type into a focused element.
         delay : Union[float, NoneType]
@@ -4746,7 +4681,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Union[float, NoneType]
@@ -4807,7 +4742,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4865,7 +4800,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4925,15 +4860,14 @@ class Frame(SyncBase):
         expression: str,
         *,
         arg: typing.Any = None,
-        force_expr: bool = None,
         timeout: float = None,
         polling: typing.Union[float, Literal["raf"]] = None
     ) -> "JSHandle":
         """Frame.wait_for_function
 
-        Returns when the `pageFunction` returns a truthy value, returns that value.
+        Returns when the `expression` returns a truthy value, returns that value.
 
-        The `waitForFunction` can be used to observe viewport size change:
+        The `frame.wait_for_function()` can be used to observe viewport size change:
 
         ```py
         from playwright.sync_api import sync_playwright
@@ -4942,7 +4876,7 @@ class Frame(SyncBase):
             webkit = playwright.webkit
             browser = webkit.launch()
             page = browser.new_page()
-            page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\", force_expr=True)
+            page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\")
             page.main_frame.wait_for_function(\"() => window.x > 0\")
             browser.close()
 
@@ -4963,16 +4897,13 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
         timeout : Union[float, NoneType]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
         polling : Union["raf", float, NoneType]
-            If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is
-            a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+            If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a
+            number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
         Returns
         -------
@@ -4986,7 +4917,6 @@ class Frame(SyncBase):
                     self._impl_obj.wait_for_function(
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                         timeout=timeout,
                         polling=polling,
                     )
@@ -5035,19 +4965,17 @@ class Worker(SyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
-    def evaluate(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> typing.Any:
+    def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Worker.evaluate
 
-        Returns the return value of `pageFunction`
+        Returns the return value of `expression`.
 
-        If the function passed to the `worker.evaluate` returns a [Promise], then `worker.evaluate` would wait for the promise
-        to resolve and return its value.
+        If the function passed to the `worker.evaluate()` returns a [Promise], then `worker.evaluate()` would
+        wait for the promise to resolve and return its value.
 
-        If the function passed to the `worker.evaluate` returns a non-[Serializable] value, then `worker.evaluate` returns
-        `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
-        `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        If the function passed to the `worker.evaluate()` returns a non-[Serializable] value, then
+        `worker.evaluate()` returns `undefined`. Playwright also supports transferring some  additional values that are
+        not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 
         Parameters
         ----------
@@ -5055,10 +4983,7 @@ class Worker(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -5070,9 +4995,7 @@ class Worker(SyncBase):
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -5082,18 +5005,16 @@ class Worker(SyncBase):
             log_api("<= worker.evaluate failed")
             raise e
 
-    def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> "JSHandle":
+    def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """Worker.evaluate_handle
 
-        Returns the return value of `pageFunction` as in-page object (JSHandle).
+        Returns the return value of `expression` as a `JSHandle`.
 
-        The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns
-        in-page object (JSHandle).
+        The only difference between `worker.evaluate()` and `worker.evaluate_handle()` is that
+        `worker.evaluate_handle()` returns `JSHandle`.
 
-        If the function passed to the `worker.evaluateHandle` returns a [Promise], then `worker.evaluateHandle` would wait for
-        the promise to resolve and return its value.
+        If the function passed to the `worker.evaluate_handle()` returns a [Promise], then
+        `worker.evaluate_handle()` would wait for the promise to resolve and return its value.
 
         Parameters
         ----------
@@ -5101,10 +5022,7 @@ class Worker(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -5116,9 +5034,7 @@ class Worker(SyncBase):
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -5716,7 +5632,7 @@ class Page(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
 
         Returns
         -------
@@ -5745,7 +5661,7 @@ class Page(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
 
         Returns
         -------
@@ -5801,7 +5717,7 @@ class Page(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5843,7 +5759,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5875,7 +5791,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5907,7 +5823,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5939,7 +5855,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5971,7 +5887,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -6001,7 +5917,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -6066,7 +5982,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         event_init : Union[Dict, NoneType]
@@ -6094,21 +6010,19 @@ class Page(SyncBase):
             log_api("<= page.dispatch_event failed")
             raise e
 
-    def evaluate(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> typing.Any:
+    def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Page.evaluate
 
-        Returns the value of the `pageFunction` invocation.
+        Returns the value of the `expression` invocation.
 
         If the function passed to the `page.evaluate()` returns a [Promise], then `page.evaluate()` would wait
         for the promise to resolve and return its value.
 
-        If the function passed to the `page.evaluate()` returns a non-[Serializable] value,
-        then[ method: `Page.evaluate`] resolves to `undefined`. DevTools Protocol also supports transferring some additional
-        values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+        If the function passed to the `page.evaluate()` returns a non-[Serializable] value, then
+        `page.evaluate()` resolves to `undefined`. Playwright also supports transferring some additional values that are
+        not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 
-        Passing argument to `pageFunction`:
+        Passing argument to `expression`:
 
         ```py
         result = page.evaluate(\"([x, y]) => Promise.resolve(x * y)\", [7, 8])
@@ -6139,10 +6053,7 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -6154,9 +6065,7 @@ class Page(SyncBase):
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -6166,15 +6075,13 @@ class Page(SyncBase):
             log_api("<= page.evaluate failed")
             raise e
 
-    def evaluate_handle(
-        self, expression: str, arg: typing.Any = None, *, force_expr: bool = None
-    ) -> "JSHandle":
+    def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """Page.evaluate_handle
 
-        Returns the value of the `pageFunction` invocation as in-page object (JSHandle).
+        Returns the value of the `expression` invocation as a `JSHandle`.
 
         The only difference between `page.evaluate()` and `page.evaluate_handle()` is that
-        `page.evaluate_handle()` returns in-page object (JSHandle).
+        `page.evaluate_handle()` returns `JSHandle`.
 
         If the function passed to the `page.evaluate_handle()` returns a [Promise], then `page.evaluate_handle()`
         would wait for the promise to resolve and return its value.
@@ -6205,10 +6112,7 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -6220,9 +6124,7 @@ class Page(SyncBase):
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
+                        expression=expression, arg=mapping.to_impl(arg)
                     )
                 )
             )
@@ -6233,20 +6135,15 @@ class Page(SyncBase):
             raise e
 
     def eval_on_selector(
-        self,
-        selector: str,
-        expression: str,
-        arg: typing.Any = None,
-        *,
-        force_expr: bool = None
+        self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """Page.eval_on_selector
 
         The method finds an element matching the specified selector within the page and passes it as a first argument to
-        `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
+        `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 
-        If `pageFunction` returns a [Promise], then `page.eval_on_selector()` would wait for the promise to resolve and return its
-        value.
+        If `expression` returns a [Promise], then `page.eval_on_selector()` would wait for the promise to resolve and
+        return its value.
 
         Examples:
 
@@ -6261,15 +6158,12 @@ class Page(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -6284,7 +6178,6 @@ class Page(SyncBase):
                         selector=selector,
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                     )
                 )
             )
@@ -6295,20 +6188,15 @@ class Page(SyncBase):
             raise e
 
     def eval_on_selector_all(
-        self,
-        selector: str,
-        expression: str,
-        arg: typing.Any = None,
-        *,
-        force_expr: bool = None
+        self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """Page.eval_on_selector_all
 
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as
-        a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
+        a first argument to `expression`. Returns the result of `expression` invocation.
 
-        If `pageFunction` returns a [Promise], then `page.eval_on_selector_all()` would wait for the promise to resolve and return its
-        value.
+        If `expression` returns a [Promise], then `page.eval_on_selector_all()` would wait for the promise to resolve and
+        return its value.
 
         Examples:
 
@@ -6319,15 +6207,12 @@ class Page(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](./selectors.md#working-with-selectors) for more details.
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
 
         Returns
         -------
@@ -6342,7 +6227,6 @@ class Page(SyncBase):
                         selector=selector,
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                     )
                 )
             )
@@ -7016,11 +6900,10 @@ class Page(SyncBase):
         ----------
         media : Union["print", "screen", NoneType]
             Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null`
-            disables CSS media emulation. Omitting `media` or passing `undefined` does not change the emulated value. Optional.
+            disables CSS media emulation.
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-            `null` disables color scheme emulation. Omitting `colorScheme` or passing `undefined` does not change the emulated
-            value. Optional.
+            `null` disables color scheme emulation.
         """
 
         try:
@@ -7110,7 +6993,6 @@ class Page(SyncBase):
         Parameters
         ----------
         script : Union[str, NoneType]
-            Script to be evaluated in all pages in the browser context. Optional.
         path : Union[pathlib.Path, str, NoneType]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
@@ -7391,7 +7273,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -7474,7 +7356,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -7551,7 +7433,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -7600,9 +7482,10 @@ class Page(SyncBase):
         """Page.fill
 
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-        element, fills it and triggers an `input` event after filling. If the element matching `selector` is not an `<input>`,
-        `<textarea>` or `[contenteditable]` element, this method throws an error. Note that you can pass an empty string to
-        clear the input field.
+        element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
+        associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
+        filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
+        method throws an error. Note that you can pass an empty string to clear the input field.
 
         To send fine-grained keyboard events, use `page.type()`.
 
@@ -7612,7 +7495,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, NoneType]
@@ -7654,7 +7537,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7682,7 +7565,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7714,7 +7597,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7746,7 +7629,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7780,7 +7663,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
         timeout : Union[float, NoneType]
@@ -7837,7 +7720,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
@@ -7905,7 +7788,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         value : Union[List[str], str, NoneType]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
@@ -7976,7 +7859,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8032,7 +7915,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         text : str
             A text to type into a focused element.
         delay : Union[float, NoneType]
@@ -8111,7 +7994,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Union[float, NoneType]
@@ -8174,7 +8057,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -8234,7 +8117,7 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](./selectors.md#working-with-selectors) for more details.
+            [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -8301,15 +8184,14 @@ class Page(SyncBase):
         expression: str,
         *,
         arg: typing.Any = None,
-        force_expr: bool = None,
         timeout: float = None,
         polling: typing.Union[float, Literal["raf"]] = None
     ) -> "JSHandle":
         """Page.wait_for_function
 
-        Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
+        Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
 
-        The `waitForFunction` can be used to observe viewport size change:
+        The `page.wait_for_function()` can be used to observe viewport size change:
 
         ```py
         from playwright.sync_api import sync_playwright
@@ -8318,7 +8200,7 @@ class Page(SyncBase):
             webkit = playwright.webkit
             browser = webkit.launch()
             page = browser.new_page()
-            page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\", force_expr=True)
+            page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\")
             page.wait_for_function(\"() => window.x > 0\")
             browser.close()
 
@@ -8341,16 +8223,13 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `pageFunction`
-        force_expr : Union[bool, NoneType]
-            Whether to treat given `expression` as JavaScript evaluate expression, even though it looks like an arrow function.
-            Optional.
+            Optional argument to pass to `expression`
         timeout : Union[float, NoneType]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
         polling : Union["raf", float, NoneType]
-            If `polling` is `'raf'`, then `pageFunction` is constantly executed in `requestAnimationFrame` callback. If `polling` is
-            a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+            If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a
+            number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
         Returns
         -------
@@ -8364,7 +8243,6 @@ class Page(SyncBase):
                     self._impl_obj.wait_for_function(
                         expression=expression,
                         arg=mapping.to_impl(arg),
-                        force_expr=force_expr,
                         timeout=timeout,
                         polling=polling,
                     )
@@ -8374,6 +8252,28 @@ class Page(SyncBase):
             return result
         except Exception as e:
             log_api("<= page.wait_for_function failed")
+            raise e
+
+    def pause(self) -> NoneType:
+        """Page.pause
+
+        Pauses script execution. Playwright will stop executing the script and wait for the user to either press 'Resume' button
+        in the page overlay or to call `playwright.resume()` in the DevTools console.
+
+        User can inspect selectors or perform manual steps while paused. Resume will continue running the original script from
+        the place it was paused.
+
+        > NOTE: This method requires Playwright to be started in a headed mode, with a falsy [`options: headless`] value in the
+        `browser_type.launch()`.
+        """
+
+        try:
+            log_api("=> page.pause started")
+            result = mapping.from_maybe_impl(self._sync(self._impl_obj.pause()))
+            log_api("<= page.pause succeded")
+            return result
+        except Exception as e:
+            log_api("<= page.pause failed")
             raise e
 
     def pdf(
@@ -9185,7 +9085,6 @@ class BrowserContext(SyncBase):
         Parameters
         ----------
         script : Union[str, NoneType]
-            Script to be evaluated in all pages in the browser context. Optional.
         path : Union[pathlib.Path, str, NoneType]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
@@ -9512,9 +9411,8 @@ class BrowserContext(SyncBase):
         Parameters
         ----------
         path : Union[pathlib.Path, str, NoneType]
-            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to
-            [current working directory](https://nodejs.org/api/process.html#process_process_cwd). If no path is provided, storage
-            state is still returned, but won't be saved to the disk.
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
+            working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 
         Returns
         -------
@@ -9872,7 +9770,7 @@ class Browser(SyncBase):
         record_video_size : Union[{width: int, height: int}, NoneType]
             Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
         storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information
+            Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
 
@@ -10013,7 +9911,7 @@ class Browser(SyncBase):
         record_video_size : Union[{width: int, height: int}, NoneType]
             Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
         storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
-            Populates context with given storage state. This method can be used to initialize context with logged-in information
+            Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
 
@@ -10292,8 +10190,9 @@ class BrowserType(SyncBase):
         ----------
         user_data_dir : Union[pathlib.Path, str]
             Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for
-            [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md) and
-            [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile).
+            [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
+            [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
+            data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
@@ -10302,8 +10201,8 @@ class BrowserType(SyncBase):
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
         ignore_default_args : Union[List[str], bool, NoneType]
-            If `true`, then do not use any of the default arguments. If an array is given, then filter out the given default
-            arguments. Dangerous option; use with care. Defaults to `false`.
+            If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
+            given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
         handle_sigint : Union[bool, NoneType]
             Close the browser process on Ctrl-C. Defaults to `true`.
         handle_sigterm : Union[bool, NoneType]
@@ -10480,8 +10379,8 @@ class Playwright(SyncBase):
     def selectors(self) -> "Selectors":
         """Playwright.selectors
 
-        Selectors can be used to install custom selector engines. See
-        [Working with selectors](./selectors.md#working-with-selectors) for more information.
+        Selectors can be used to install custom selector engines. See [Working with selectors](./selectors.md) for more
+        information.
 
         Returns
         -------
@@ -10537,7 +10436,7 @@ class Playwright(SyncBase):
         >>> playwright = sync_playwright().start()
 
         >>> browser = playwright.chromium.launch()
-        >>> page = browser.newPage()
+        >>> page = browser.new_page()
         >>> page.goto(\"http://whatsmyuseragent.org/\")
         >>> page.screenshot(path=\"example.png\")
         >>> browser.close()

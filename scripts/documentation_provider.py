@@ -51,18 +51,15 @@ class DocumentationProvider:
     def _patch_case(self) -> None:
         self.classes = {}
         for clazz in self.api:
+            if not works_for_python(clazz):
+                continue
             members = {}
             self.classes[clazz["name"]] = clazz
             for member in clazz["members"]:
+                if not works_for_python(member):
+                    continue
                 member_name = member["name"]
-                alias = (
-                    member["langs"].get("aliases").get("python")
-                    if member["langs"].get("aliases")
-                    else None
-                )
-                new_name = member_name
-                if alias:
-                    new_name = alias
+                new_name = name_or_alias(member)
                 self._add_link(member["kind"], clazz["name"], member_name, new_name)
 
                 if member["kind"] == "event":
@@ -71,25 +68,27 @@ class DocumentationProvider:
                 new_name = to_snake_case(new_name)
                 member["name"] = new_name
                 members[new_name] = member
-                if member["langs"].get("types") and member["langs"]["types"].get(
-                    "python"
-                ):
-                    member["type"] = member["langs"]["types"]["python"]
+                apply_type_or_override(member)
 
                 if "args" in member:
                     args = {}
                     for arg in member["args"]:
-                        arg_name = arg["name"]
-                        new_name = to_snake_case(arg_name)
-                        if arg_name == "options":
-                            for opt_property in arg["type"]["properties"]:
-                                opt_name = opt_property["name"]
-                                args[to_snake_case(opt_name)] = opt_property
-                                opt_property["name"] = to_snake_case(opt_name)
-                                opt_property["required"] = False
+                        if not works_for_python(arg):
+                            continue
+                        if arg["name"] == "options":
+                            for option in arg["type"]["properties"]:
+                                if not works_for_python(option):
+                                    continue
+                                option = self_or_override(option)
+                                option_name = to_snake_case(name_or_alias(option))
+                                option["name"] = option_name
+                                option["required"] = False
+                                args[option_name] = option
                         else:
-                            args[new_name] = arg
-                            arg["name"] = new_name
+                            arg = self_or_override(arg)
+                            arg_name = to_snake_case(name_or_alias(arg))
+                            arg["name"] = arg_name
+                            args[arg_name] = arg
 
                     member["args"] = args
 
@@ -195,11 +194,6 @@ class DocumentationProvider:
 
         for name in args:
             if args[name].get("deprecated"):
-                continue
-            if (
-                args[name]["langs"].get("only")
-                and "python" not in args[name]["langs"]["only"]
-            ):
                 continue
             self.errors.add(
                 f"Parameter not implemented: {class_name}.{method_name}({name}=)"
@@ -415,16 +409,8 @@ class DocumentationProvider:
         return type["name"]
 
     def print_remainder(self) -> None:
-        for clazz in self.api:
-            class_name = clazz["name"]
-            if clazz["langs"].get("only") and "python" not in clazz["langs"]["only"]:
-                continue
+        for [class_name, clazz] in self.classes.items():
             for [member_name, member] in clazz["members"].items():
-                if (
-                    member["langs"].get("only")
-                    and "python" not in member["langs"]["only"]
-                ):
-                    continue
                 if member.get("deprecated"):
                     continue
                 entry = f"{class_name}.{member_name}"
@@ -445,3 +431,30 @@ class DocumentationProvider:
             for error in self.errors:
                 print(error, file=stderr)
             exit(1)
+
+
+def works_for_python(item: Any) -> bool:
+    return not item["langs"].get("only") or "python" in item["langs"]["only"]
+
+
+def name_or_alias(item: Any) -> str:
+    alias = (
+        item["langs"].get("aliases").get("python")
+        if item["langs"].get("aliases")
+        else None
+    )
+    return alias or item["name"]
+
+
+def self_or_override(item: Any) -> Any:
+    override = (
+        item["langs"].get("overrides").get("python")
+        if item["langs"].get("overrides")
+        else None
+    )
+    return override or item
+
+
+def apply_type_or_override(member: Any) -> Any:
+    if member["langs"].get("types") and member["langs"]["types"].get("python"):
+        member["type"] = member["langs"]["types"]["python"]

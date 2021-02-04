@@ -235,6 +235,9 @@ class BrowserContext(ChannelOwner):
             if not is_safe_close_error(e):
                 raise e
 
+    async def _pause(self) -> None:
+        await self._channel.send("pause")
+
     async def storage_state(self, path: Union[str, Path] = None) -> StorageState:
         result = await self._channel.send_return_as_dict("storageState")
         if path:

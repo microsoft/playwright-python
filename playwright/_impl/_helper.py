@@ -175,15 +175,6 @@ def patch_error_message(message: Optional[str]) -> Optional[str]:
     return message
 
 
-def is_function_body(expression: str) -> bool:
-    expression = expression.strip()
-    return (
-        expression.startswith("function")
-        or expression.startswith("async ")
-        or "=>" in expression
-    )
-
-
 def locals_to_params(args: Dict) -> Dict:
     copy = {}
     for key in args:

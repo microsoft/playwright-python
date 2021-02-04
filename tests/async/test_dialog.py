@@ -90,3 +90,16 @@ async def test_should_be_able_to_close_context_with_open_alert(browser):
     async with page.expect_event("dialog"):
         await page.evaluate("() => setTimeout(() => alert('hello'), 0)", None)
     await context.close()
+
+
+async def test_should_auto_dismiss_the_prompt_without_listeners(page):
+    result = await page.evaluate('() => prompt("question?")')
+    assert not result
+
+
+async def test_should_auto_dismiss_the_alert_without_listeners(page):
+    await page.set_content(
+        '<div onclick="window.alert(123); window._clicked=true">Click me</div>'
+    )
+    await page.click("div")
+    assert await page.evaluate('"window._clicked"')
