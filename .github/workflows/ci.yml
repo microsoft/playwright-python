@@ -32,8 +32,15 @@ jobs:
       run: python -m playwright install
     - name: Lint
       run: pre-commit run --all-files
-    - name: Test Sync generation script
-      run: bash scripts/verify_api.sh
+    - name: Generate APIs
+      run: bash scripts/update_api.sh
+    - name: Verify API is up to date
+      run: |
+        if [[ -n $(git status -s) ]]; then
+          echo "ERROR: generated code differ from the current sources:"
+          git diff
+          exit 1
+        fi
   build:
     name: Build
     timeout-minutes: 30
