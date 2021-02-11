@@ -14,9 +14,10 @@
 
 import inspect
 from typing import Any, Callable, Dict, List, Optional
-from weakref import WeakKeyDictionary
 
 from playwright._impl._api_types import Error
+
+INSTANCE_ATTR = "_pw_api_instance"
 
 
 class ImplWrapper:
@@ -27,7 +28,6 @@ class ImplWrapper:
 class ImplToApiMapping:
     def __init__(self) -> None:
         self._mapping: Dict[type, type] = {}
-        self._instances: WeakKeyDictionary[Any, Any] = WeakKeyDictionary()
 
     def register(self, impl_class: type, api_class: type) -> None:
         self._mapping[impl_class] = api_class
@@ -39,13 +39,15 @@ class ImplToApiMapping:
             return {name: self.from_maybe_impl(value) for name, value in obj.items()}
         if isinstance(obj, list):
             return [self.from_maybe_impl(item) for item in obj]
-        if obj not in self._instances:
-            api_class = self._mapping.get(type(obj))
-            if not api_class:
-                return obj
-            api_instance = api_class(obj)
-            self._instances[obj] = api_instance
-        return self._instances[obj]
+        api_class = self._mapping.get(type(obj))
+        if api_class:
+            api_instance = getattr(obj, INSTANCE_ATTR, None)
+            if not api_instance:
+                api_instance = api_class(obj)
+                setattr(obj, INSTANCE_ATTR, api_instance)
+            return api_instance
+        else:
+            return obj
 
     def from_impl(self, obj: Any) -> Any:
         assert obj
@@ -77,14 +79,14 @@ class ImplToApiMapping:
             raise Error("Maximum argument depth exceeded")
 
     def wrap_handler(self, handler: Callable[..., None]) -> Callable[..., None]:
-        if handler in self._instances:
-            return self._instances[handler]
-
-        def wrapper(*args: Any) -> Any:
+        def wrapper_func(*args: Any) -> Any:
             arg_count = len(inspect.signature(handler).parameters)
             return handler(
                 *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
             )
 
-        self._instances[handler] = wrapper
+        wrapper = getattr(handler, INSTANCE_ATTR, None)
+        if not wrapper:
+            wrapper = wrapper_func
+        setattr(handler, INSTANCE_ATTR, wrapper)
         return wrapper
