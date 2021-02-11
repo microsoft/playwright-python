@@ -14,14 +14,14 @@
 
 import inspect
 from typing import Any, Callable, Dict, List, Optional
-from weakref import WeakKeyDictionary
+from weakref import WeakKeyDictionary, proxy
 
 from playwright._impl._api_types import Error
 
 
 class ImplWrapper:
     def __init__(self, impl_obj: Any) -> None:
-        self._impl_obj = impl_obj
+        self._impl_obj = proxy(impl_obj)
 
 
 class ImplToApiMapping:
