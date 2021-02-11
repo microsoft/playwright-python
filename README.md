@@ -77,7 +77,7 @@ async def main():
     async with async_playwright() as p:
         for browser_type in [p.chromium, p.firefox, p.webkit]:
             browser = await browser_type.launch()
-            page = await browser.newPage()
+            page = await browser.new_page()
             await page.goto('http://whatsmyuseragent.org/')
             await page.screenshot(path=f'example-{browser_type.name}.png')
             await browser.close()
@@ -164,7 +164,7 @@ async def main():
     async with async_playwright() as p:
         iphone_11 = p.devices["iPhone 11 Pro"]
         browser = await p.webkit.launch(headless=False)
-        context = await browser.newContext(
+        context = await browser.new_context(
             **iphone_11,
             locale="en-US",
             geolocation={"longitude": 12.492507, "latitude": 41.889938},
@@ -258,7 +258,7 @@ from playwright.async_api import async_playwright
 async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        page = await browser.newPage()
+        page = await browser.new_page()
 
         async def log_and_continue_request(route, request):
             print(request.url)
