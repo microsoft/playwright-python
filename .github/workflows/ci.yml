@@ -41,6 +41,8 @@ jobs:
           git diff
           exit 1
         fi
+    - name: Run reference checks
+      run: bash buildbots/test-reference-count.sh
   build:
     name: Build
     timeout-minutes: 30
