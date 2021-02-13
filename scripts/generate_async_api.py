@@ -109,12 +109,12 @@ def generate(t: Any) -> None:
                 print(
                     f"""
         try:
-            log_api("=> {to_snake_case(class_name)}.{name} started")
+            logging.debug("=> {to_snake_case(class_name)}.{name} started")
             result = {prefix}{arguments(value, len(prefix))}{suffix}
-            log_api("<= {to_snake_case(class_name)}.{name} succeded")
+            logging.debug("<= {to_snake_case(class_name)}.{name} succeded")
             return result
         except Exception as e:
-            log_api("<= {to_snake_case(class_name)}.{name} failed")
+            logging.debug("<= {to_snake_case(class_name)}.{name} failed")
             raise e"""
                 )
 

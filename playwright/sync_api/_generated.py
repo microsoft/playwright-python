@@ -54,7 +54,7 @@ from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
 from playwright._impl._input import Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
-from playwright._impl._logger import log_api
+from playwright._impl._logger import logging
 from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
 from playwright._impl._network import Route as RouteImpl
@@ -272,12 +272,12 @@ class Request(SyncBase):
         """
 
         try:
-            log_api("=> request.response started")
+            logging.debug("=> request.response started")
             result = mapping.from_impl_nullable(self._sync(self._impl_obj.response()))
-            log_api("<= request.response succeded")
+            logging.debug("<= request.response succeded")
             return result
         except Exception as e:
-            log_api("<= request.response failed")
+            logging.debug("<= request.response failed")
             raise e
 
     def is_navigation_request(self) -> bool:
@@ -291,12 +291,12 @@ class Request(SyncBase):
         """
 
         try:
-            log_api("=> request.is_navigation_request started")
+            logging.debug("=> request.is_navigation_request started")
             result = mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
-            log_api("<= request.is_navigation_request succeded")
+            logging.debug("<= request.is_navigation_request succeded")
             return result
         except Exception as e:
-            log_api("<= request.is_navigation_request failed")
+            logging.debug("<= request.is_navigation_request failed")
             raise e
 
 
@@ -402,12 +402,12 @@ class Response(SyncBase):
         """
 
         try:
-            log_api("=> response.finished started")
+            logging.debug("=> response.finished started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.finished()))
-            log_api("<= response.finished succeded")
+            logging.debug("<= response.finished succeded")
             return result
         except Exception as e:
-            log_api("<= response.finished failed")
+            logging.debug("<= response.finished failed")
             raise e
 
     def body(self) -> bytes:
@@ -421,12 +421,12 @@ class Response(SyncBase):
         """
 
         try:
-            log_api("=> response.body started")
+            logging.debug("=> response.body started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.body()))
-            log_api("<= response.body succeded")
+            logging.debug("<= response.body succeded")
             return result
         except Exception as e:
-            log_api("<= response.body failed")
+            logging.debug("<= response.body failed")
             raise e
 
     def text(self) -> str:
@@ -440,12 +440,12 @@ class Response(SyncBase):
         """
 
         try:
-            log_api("=> response.text started")
+            logging.debug("=> response.text started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.text()))
-            log_api("<= response.text succeded")
+            logging.debug("<= response.text succeded")
             return result
         except Exception as e:
-            log_api("<= response.text failed")
+            logging.debug("<= response.text failed")
             raise e
 
     def json(self) -> typing.Any:
@@ -461,12 +461,12 @@ class Response(SyncBase):
         """
 
         try:
-            log_api("=> response.json started")
+            logging.debug("=> response.json started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.json()))
-            log_api("<= response.json succeded")
+            logging.debug("<= response.json succeded")
             return result
         except Exception as e:
-            log_api("<= response.json failed")
+            logging.debug("<= response.json failed")
             raise e
 
 
@@ -517,14 +517,14 @@ class Route(SyncBase):
         """
 
         try:
-            log_api("=> route.abort started")
+            logging.debug("=> route.abort started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.abort(errorCode=error_code))
             )
-            log_api("<= route.abort succeded")
+            logging.debug("<= route.abort succeded")
             return result
         except Exception as e:
-            log_api("<= route.abort failed")
+            logging.debug("<= route.abort failed")
             raise e
 
     def fulfill(
@@ -571,7 +571,7 @@ class Route(SyncBase):
         """
 
         try:
-            log_api("=> route.fulfill started")
+            logging.debug("=> route.fulfill started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.fulfill(
@@ -583,10 +583,10 @@ class Route(SyncBase):
                     )
                 )
             )
-            log_api("<= route.fulfill succeded")
+            logging.debug("<= route.fulfill succeded")
             return result
         except Exception as e:
-            log_api("<= route.fulfill failed")
+            logging.debug("<= route.fulfill failed")
             raise e
 
     def continue_(
@@ -627,7 +627,7 @@ class Route(SyncBase):
         """
 
         try:
-            log_api("=> route.continue_ started")
+            logging.debug("=> route.continue_ started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.continue_(
@@ -638,10 +638,10 @@ class Route(SyncBase):
                     )
                 )
             )
-            log_api("<= route.continue_ succeded")
+            logging.debug("<= route.continue_ succeded")
             return result
         except Exception as e:
-            log_api("<= route.continue_ failed")
+            logging.debug("<= route.continue_ failed")
             raise e
 
 
@@ -720,7 +720,7 @@ class WebSocket(SyncBase):
         """
 
         try:
-            log_api("=> web_socket.wait_for_event started")
+            logging.debug("=> web_socket.wait_for_event started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.wait_for_event(
@@ -730,10 +730,10 @@ class WebSocket(SyncBase):
                     )
                 )
             )
-            log_api("<= web_socket.wait_for_event succeded")
+            logging.debug("<= web_socket.wait_for_event succeded")
             return result
         except Exception as e:
-            log_api("<= web_socket.wait_for_event failed")
+            logging.debug("<= web_socket.wait_for_event failed")
             raise e
 
     def is_closed(self) -> bool:
@@ -747,12 +747,12 @@ class WebSocket(SyncBase):
         """
 
         try:
-            log_api("=> web_socket.is_closed started")
+            logging.debug("=> web_socket.is_closed started")
             result = mapping.from_maybe_impl(self._impl_obj.is_closed())
-            log_api("<= web_socket.is_closed succeded")
+            logging.debug("<= web_socket.is_closed succeded")
             return result
         except Exception as e:
-            log_api("<= web_socket.is_closed failed")
+            logging.debug("<= web_socket.is_closed failed")
             raise e
 
 
@@ -798,12 +798,12 @@ class Keyboard(SyncBase):
         """
 
         try:
-            log_api("=> keyboard.down started")
+            logging.debug("=> keyboard.down started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.down(key=key)))
-            log_api("<= keyboard.down succeded")
+            logging.debug("<= keyboard.down succeded")
             return result
         except Exception as e:
-            log_api("<= keyboard.down failed")
+            logging.debug("<= keyboard.down failed")
             raise e
 
     def up(self, key: str) -> NoneType:
@@ -818,12 +818,12 @@ class Keyboard(SyncBase):
         """
 
         try:
-            log_api("=> keyboard.up started")
+            logging.debug("=> keyboard.up started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.up(key=key)))
-            log_api("<= keyboard.up succeded")
+            logging.debug("<= keyboard.up succeded")
             return result
         except Exception as e:
-            log_api("<= keyboard.up failed")
+            logging.debug("<= keyboard.up failed")
             raise e
 
     def insert_text(self, text: str) -> NoneType:
@@ -844,14 +844,14 @@ class Keyboard(SyncBase):
         """
 
         try:
-            log_api("=> keyboard.insert_text started")
+            logging.debug("=> keyboard.insert_text started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.insert_text(text=text))
             )
-            log_api("<= keyboard.insert_text succeded")
+            logging.debug("<= keyboard.insert_text succeded")
             return result
         except Exception as e:
-            log_api("<= keyboard.insert_text failed")
+            logging.debug("<= keyboard.insert_text failed")
             raise e
 
     def type(self, text: str, *, delay: float = None) -> NoneType:
@@ -877,14 +877,14 @@ class Keyboard(SyncBase):
         """
 
         try:
-            log_api("=> keyboard.type started")
+            logging.debug("=> keyboard.type started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.type(text=text, delay=delay))
             )
-            log_api("<= keyboard.type succeded")
+            logging.debug("<= keyboard.type succeded")
             return result
         except Exception as e:
-            log_api("<= keyboard.type failed")
+            logging.debug("<= keyboard.type failed")
             raise e
 
     def press(self, key: str, *, delay: float = None) -> NoneType:
@@ -930,14 +930,14 @@ class Keyboard(SyncBase):
         """
 
         try:
-            log_api("=> keyboard.press started")
+            logging.debug("=> keyboard.press started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.press(key=key, delay=delay))
             )
-            log_api("<= keyboard.press succeded")
+            logging.debug("<= keyboard.press succeded")
             return result
         except Exception as e:
-            log_api("<= keyboard.press failed")
+            logging.debug("<= keyboard.press failed")
             raise e
 
 
@@ -962,14 +962,14 @@ class Mouse(SyncBase):
         """
 
         try:
-            log_api("=> mouse.move started")
+            logging.debug("=> mouse.move started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.move(x=x, y=y, steps=steps))
             )
-            log_api("<= mouse.move succeded")
+            logging.debug("<= mouse.move succeded")
             return result
         except Exception as e:
-            log_api("<= mouse.move failed")
+            logging.debug("<= mouse.move failed")
             raise e
 
     def down(
@@ -991,14 +991,14 @@ class Mouse(SyncBase):
         """
 
         try:
-            log_api("=> mouse.down started")
+            logging.debug("=> mouse.down started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.down(button=button, clickCount=click_count))
             )
-            log_api("<= mouse.down succeded")
+            logging.debug("<= mouse.down succeded")
             return result
         except Exception as e:
-            log_api("<= mouse.down failed")
+            logging.debug("<= mouse.down failed")
             raise e
 
     def up(
@@ -1020,14 +1020,14 @@ class Mouse(SyncBase):
         """
 
         try:
-            log_api("=> mouse.up started")
+            logging.debug("=> mouse.up started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.up(button=button, clickCount=click_count))
             )
-            log_api("<= mouse.up succeded")
+            logging.debug("<= mouse.up succeded")
             return result
         except Exception as e:
-            log_api("<= mouse.up failed")
+            logging.debug("<= mouse.up failed")
             raise e
 
     def click(
@@ -1056,7 +1056,7 @@ class Mouse(SyncBase):
         """
 
         try:
-            log_api("=> mouse.click started")
+            logging.debug("=> mouse.click started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.click(
@@ -1064,10 +1064,10 @@ class Mouse(SyncBase):
                     )
                 )
             )
-            log_api("<= mouse.click succeded")
+            logging.debug("<= mouse.click succeded")
             return result
         except Exception as e:
-            log_api("<= mouse.click failed")
+            logging.debug("<= mouse.click failed")
             raise e
 
     def dblclick(
@@ -1094,16 +1094,16 @@ class Mouse(SyncBase):
         """
 
         try:
-            log_api("=> mouse.dblclick started")
+            logging.debug("=> mouse.dblclick started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button)
                 )
             )
-            log_api("<= mouse.dblclick succeded")
+            logging.debug("<= mouse.dblclick succeded")
             return result
         except Exception as e:
-            log_api("<= mouse.dblclick failed")
+            logging.debug("<= mouse.dblclick failed")
             raise e
 
 
@@ -1126,12 +1126,12 @@ class Touchscreen(SyncBase):
         """
 
         try:
-            log_api("=> touchscreen.tap started")
+            logging.debug("=> touchscreen.tap started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.tap(x=x, y=y)))
-            log_api("<= touchscreen.tap succeded")
+            logging.debug("<= touchscreen.tap succeded")
             return result
         except Exception as e:
-            log_api("<= touchscreen.tap failed")
+            logging.debug("<= touchscreen.tap failed")
             raise e
 
 
@@ -1172,7 +1172,7 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.evaluate started")
+            logging.debug("=> js_handle.evaluate started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
@@ -1180,10 +1180,10 @@ class JSHandle(SyncBase):
                     )
                 )
             )
-            log_api("<= js_handle.evaluate succeded")
+            logging.debug("<= js_handle.evaluate succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.evaluate failed")
+            logging.debug("<= js_handle.evaluate failed")
             raise e
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
@@ -1215,7 +1215,7 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.evaluate_handle started")
+            logging.debug("=> js_handle.evaluate_handle started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
@@ -1223,10 +1223,10 @@ class JSHandle(SyncBase):
                     )
                 )
             )
-            log_api("<= js_handle.evaluate_handle succeded")
+            logging.debug("<= js_handle.evaluate_handle succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.evaluate_handle failed")
+            logging.debug("<= js_handle.evaluate_handle failed")
             raise e
 
     def get_property(self, property_name: str) -> "JSHandle":
@@ -1245,14 +1245,14 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.get_property started")
+            logging.debug("=> js_handle.get_property started")
             result = mapping.from_impl(
                 self._sync(self._impl_obj.get_property(propertyName=property_name))
             )
-            log_api("<= js_handle.get_property succeded")
+            logging.debug("<= js_handle.get_property succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.get_property failed")
+            logging.debug("<= js_handle.get_property failed")
             raise e
 
     def get_properties(self) -> typing.Dict[str, "JSHandle"]:
@@ -1274,12 +1274,12 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.get_properties started")
+            logging.debug("=> js_handle.get_properties started")
             result = mapping.from_impl_dict(self._sync(self._impl_obj.get_properties()))
-            log_api("<= js_handle.get_properties succeded")
+            logging.debug("<= js_handle.get_properties succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.get_properties failed")
+            logging.debug("<= js_handle.get_properties failed")
             raise e
 
     def as_element(self) -> typing.Union["ElementHandle", NoneType]:
@@ -1293,12 +1293,12 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.as_element started")
+            logging.debug("=> js_handle.as_element started")
             result = mapping.from_impl_nullable(self._impl_obj.as_element())
-            log_api("<= js_handle.as_element succeded")
+            logging.debug("<= js_handle.as_element succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.as_element failed")
+            logging.debug("<= js_handle.as_element failed")
             raise e
 
     def dispose(self) -> NoneType:
@@ -1308,12 +1308,12 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.dispose started")
+            logging.debug("=> js_handle.dispose started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
-            log_api("<= js_handle.dispose succeded")
+            logging.debug("<= js_handle.dispose succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.dispose failed")
+            logging.debug("<= js_handle.dispose failed")
             raise e
 
     def json_value(self) -> typing.Any:
@@ -1330,12 +1330,12 @@ class JSHandle(SyncBase):
         """
 
         try:
-            log_api("=> js_handle.json_value started")
+            logging.debug("=> js_handle.json_value started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.json_value()))
-            log_api("<= js_handle.json_value succeded")
+            logging.debug("<= js_handle.json_value succeded")
             return result
         except Exception as e:
-            log_api("<= js_handle.json_value failed")
+            logging.debug("<= js_handle.json_value failed")
             raise e
 
 
@@ -1357,12 +1357,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.as_element started")
+            logging.debug("=> element_handle.as_element started")
             result = mapping.from_impl_nullable(self._impl_obj.as_element())
-            log_api("<= element_handle.as_element succeded")
+            logging.debug("<= element_handle.as_element succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.as_element failed")
+            logging.debug("<= element_handle.as_element failed")
             raise e
 
     def owner_frame(self) -> typing.Union["Frame", NoneType]:
@@ -1376,14 +1376,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.owner_frame started")
+            logging.debug("=> element_handle.owner_frame started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.owner_frame())
             )
-            log_api("<= element_handle.owner_frame succeded")
+            logging.debug("<= element_handle.owner_frame succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.owner_frame failed")
+            logging.debug("<= element_handle.owner_frame failed")
             raise e
 
     def content_frame(self) -> typing.Union["Frame", NoneType]:
@@ -1397,14 +1397,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.content_frame started")
+            logging.debug("=> element_handle.content_frame started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.content_frame())
             )
-            log_api("<= element_handle.content_frame succeded")
+            logging.debug("<= element_handle.content_frame succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.content_frame failed")
+            logging.debug("<= element_handle.content_frame failed")
             raise e
 
     def get_attribute(self, name: str) -> typing.Union[str, NoneType]:
@@ -1423,14 +1423,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.get_attribute started")
+            logging.debug("=> element_handle.get_attribute started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.get_attribute(name=name))
             )
-            log_api("<= element_handle.get_attribute succeded")
+            logging.debug("<= element_handle.get_attribute succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.get_attribute failed")
+            logging.debug("<= element_handle.get_attribute failed")
             raise e
 
     def text_content(self) -> typing.Union[str, NoneType]:
@@ -1444,12 +1444,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.text_content started")
+            logging.debug("=> element_handle.text_content started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.text_content()))
-            log_api("<= element_handle.text_content succeded")
+            logging.debug("<= element_handle.text_content succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.text_content failed")
+            logging.debug("<= element_handle.text_content failed")
             raise e
 
     def inner_text(self) -> str:
@@ -1463,12 +1463,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.inner_text started")
+            logging.debug("=> element_handle.inner_text started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.inner_text()))
-            log_api("<= element_handle.inner_text succeded")
+            logging.debug("<= element_handle.inner_text succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.inner_text failed")
+            logging.debug("<= element_handle.inner_text failed")
             raise e
 
     def inner_html(self) -> str:
@@ -1482,12 +1482,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.inner_html started")
+            logging.debug("=> element_handle.inner_html started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.inner_html()))
-            log_api("<= element_handle.inner_html succeded")
+            logging.debug("<= element_handle.inner_html succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.inner_html failed")
+            logging.debug("<= element_handle.inner_html failed")
             raise e
 
     def is_checked(self) -> bool:
@@ -1501,12 +1501,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.is_checked started")
+            logging.debug("=> element_handle.is_checked started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_checked()))
-            log_api("<= element_handle.is_checked succeded")
+            logging.debug("<= element_handle.is_checked succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.is_checked failed")
+            logging.debug("<= element_handle.is_checked failed")
             raise e
 
     def is_disabled(self) -> bool:
@@ -1520,12 +1520,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.is_disabled started")
+            logging.debug("=> element_handle.is_disabled started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_disabled()))
-            log_api("<= element_handle.is_disabled succeded")
+            logging.debug("<= element_handle.is_disabled succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.is_disabled failed")
+            logging.debug("<= element_handle.is_disabled failed")
             raise e
 
     def is_editable(self) -> bool:
@@ -1539,12 +1539,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.is_editable started")
+            logging.debug("=> element_handle.is_editable started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_editable()))
-            log_api("<= element_handle.is_editable succeded")
+            logging.debug("<= element_handle.is_editable succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.is_editable failed")
+            logging.debug("<= element_handle.is_editable failed")
             raise e
 
     def is_enabled(self) -> bool:
@@ -1558,12 +1558,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.is_enabled started")
+            logging.debug("=> element_handle.is_enabled started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_enabled()))
-            log_api("<= element_handle.is_enabled succeded")
+            logging.debug("<= element_handle.is_enabled succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.is_enabled failed")
+            logging.debug("<= element_handle.is_enabled failed")
             raise e
 
     def is_hidden(self) -> bool:
@@ -1577,12 +1577,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.is_hidden started")
+            logging.debug("=> element_handle.is_hidden started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_hidden()))
-            log_api("<= element_handle.is_hidden succeded")
+            logging.debug("<= element_handle.is_hidden succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.is_hidden failed")
+            logging.debug("<= element_handle.is_hidden failed")
             raise e
 
     def is_visible(self) -> bool:
@@ -1596,12 +1596,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.is_visible started")
+            logging.debug("=> element_handle.is_visible started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_visible()))
-            log_api("<= element_handle.is_visible succeded")
+            logging.debug("<= element_handle.is_visible succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.is_visible failed")
+            logging.debug("<= element_handle.is_visible failed")
             raise e
 
     def dispatch_event(self, type: str, event_init: typing.Dict = None) -> NoneType:
@@ -1644,7 +1644,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.dispatch_event started")
+            logging.debug("=> element_handle.dispatch_event started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dispatch_event(
@@ -1652,10 +1652,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.dispatch_event succeded")
+            logging.debug("<= element_handle.dispatch_event succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.dispatch_event failed")
+            logging.debug("<= element_handle.dispatch_event failed")
             raise e
 
     def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
@@ -1676,14 +1676,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.scroll_into_view_if_needed started")
+            logging.debug("=> element_handle.scroll_into_view_if_needed started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.scroll_into_view_if_needed(timeout=timeout))
             )
-            log_api("<= element_handle.scroll_into_view_if_needed succeded")
+            logging.debug("<= element_handle.scroll_into_view_if_needed succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.scroll_into_view_if_needed failed")
+            logging.debug("<= element_handle.scroll_into_view_if_needed failed")
             raise e
 
     def hover(
@@ -1725,7 +1725,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.hover started")
+            logging.debug("=> element_handle.hover started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.hover(
@@ -1736,10 +1736,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.hover succeded")
+            logging.debug("<= element_handle.hover succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.hover failed")
+            logging.debug("<= element_handle.hover failed")
             raise e
 
     def click(
@@ -1795,7 +1795,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.click started")
+            logging.debug("=> element_handle.click started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.click(
@@ -1810,10 +1810,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.click succeded")
+            logging.debug("<= element_handle.click succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.click failed")
+            logging.debug("<= element_handle.click failed")
             raise e
 
     def dblclick(
@@ -1869,7 +1869,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.dblclick started")
+            logging.debug("=> element_handle.dblclick started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dblclick(
@@ -1883,10 +1883,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.dblclick succeded")
+            logging.debug("<= element_handle.dblclick succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.dblclick failed")
+            logging.debug("<= element_handle.dblclick failed")
             raise e
 
     def select_option(
@@ -1954,7 +1954,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.select_option started")
+            logging.debug("=> element_handle.select_option started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.select_option(
@@ -1967,10 +1967,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.select_option succeded")
+            logging.debug("<= element_handle.select_option succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.select_option failed")
+            logging.debug("<= element_handle.select_option failed")
             raise e
 
     def tap(
@@ -2019,7 +2019,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.tap started")
+            logging.debug("=> element_handle.tap started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.tap(
@@ -2031,10 +2031,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.tap succeded")
+            logging.debug("<= element_handle.tap succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.tap failed")
+            logging.debug("<= element_handle.tap failed")
             raise e
 
     def fill(
@@ -2062,7 +2062,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.fill started")
+            logging.debug("=> element_handle.fill started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.fill(
@@ -2070,10 +2070,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.fill succeded")
+            logging.debug("<= element_handle.fill succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.fill failed")
+            logging.debug("<= element_handle.fill failed")
             raise e
 
     def select_text(self, *, timeout: float = None) -> NoneType:
@@ -2090,14 +2090,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.select_text started")
+            logging.debug("=> element_handle.select_text started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.select_text(timeout=timeout))
             )
-            log_api("<= element_handle.select_text succeded")
+            logging.debug("<= element_handle.select_text succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.select_text failed")
+            logging.debug("<= element_handle.select_text failed")
             raise e
 
     def set_input_files(
@@ -2134,7 +2134,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.set_input_files started")
+            logging.debug("=> element_handle.set_input_files started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_input_files(
@@ -2142,10 +2142,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.set_input_files succeded")
+            logging.debug("<= element_handle.set_input_files succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.set_input_files failed")
+            logging.debug("<= element_handle.set_input_files failed")
             raise e
 
     def focus(self) -> NoneType:
@@ -2155,12 +2155,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.focus started")
+            logging.debug("=> element_handle.focus started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.focus()))
-            log_api("<= element_handle.focus succeded")
+            logging.debug("<= element_handle.focus succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.focus failed")
+            logging.debug("<= element_handle.focus failed")
             raise e
 
     def type(
@@ -2206,7 +2206,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.type started")
+            logging.debug("=> element_handle.type started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.type(
@@ -2217,10 +2217,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.type succeded")
+            logging.debug("<= element_handle.type succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.type failed")
+            logging.debug("<= element_handle.type failed")
             raise e
 
     def press(
@@ -2268,7 +2268,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.press started")
+            logging.debug("=> element_handle.press started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.press(
@@ -2276,10 +2276,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.press succeded")
+            logging.debug("<= element_handle.press succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.press failed")
+            logging.debug("<= element_handle.press failed")
             raise e
 
     def check(
@@ -2315,7 +2315,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.check started")
+            logging.debug("=> element_handle.check started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.check(
@@ -2323,10 +2323,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.check succeded")
+            logging.debug("<= element_handle.check succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.check failed")
+            logging.debug("<= element_handle.check failed")
             raise e
 
     def uncheck(
@@ -2362,7 +2362,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.uncheck started")
+            logging.debug("=> element_handle.uncheck started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.uncheck(
@@ -2370,10 +2370,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.uncheck succeded")
+            logging.debug("<= element_handle.uncheck succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.uncheck failed")
+            logging.debug("<= element_handle.uncheck failed")
             raise e
 
     def bounding_box(self) -> typing.Union[FloatRect, NoneType]:
@@ -2403,14 +2403,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.bounding_box started")
+            logging.debug("=> element_handle.bounding_box started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.bounding_box())
             )
-            log_api("<= element_handle.bounding_box succeded")
+            logging.debug("<= element_handle.bounding_box succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.bounding_box failed")
+            logging.debug("<= element_handle.bounding_box failed")
             raise e
 
     def screenshot(
@@ -2452,7 +2452,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.screenshot started")
+            logging.debug("=> element_handle.screenshot started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.screenshot(
@@ -2464,10 +2464,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.screenshot succeded")
+            logging.debug("<= element_handle.screenshot succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.screenshot failed")
+            logging.debug("<= element_handle.screenshot failed")
             raise e
 
     def query_selector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
@@ -2487,14 +2487,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.query_selector started")
+            logging.debug("=> element_handle.query_selector started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.query_selector(selector=selector))
             )
-            log_api("<= element_handle.query_selector succeded")
+            logging.debug("<= element_handle.query_selector succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.query_selector failed")
+            logging.debug("<= element_handle.query_selector failed")
             raise e
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -2514,14 +2514,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.query_selector_all started")
+            logging.debug("=> element_handle.query_selector_all started")
             result = mapping.from_impl_list(
                 self._sync(self._impl_obj.query_selector_all(selector=selector))
             )
-            log_api("<= element_handle.query_selector_all succeded")
+            logging.debug("<= element_handle.query_selector_all succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.query_selector_all failed")
+            logging.debug("<= element_handle.query_selector_all failed")
             raise e
 
     def eval_on_selector(
@@ -2562,7 +2562,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.eval_on_selector started")
+            logging.debug("=> element_handle.eval_on_selector started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.eval_on_selector(
@@ -2572,10 +2572,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.eval_on_selector succeded")
+            logging.debug("<= element_handle.eval_on_selector succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.eval_on_selector failed")
+            logging.debug("<= element_handle.eval_on_selector failed")
             raise e
 
     def eval_on_selector_all(
@@ -2621,7 +2621,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.eval_on_selector_all started")
+            logging.debug("=> element_handle.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.eval_on_selector_all(
@@ -2631,10 +2631,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.eval_on_selector_all succeded")
+            logging.debug("<= element_handle.eval_on_selector_all succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.eval_on_selector_all failed")
+            logging.debug("<= element_handle.eval_on_selector_all failed")
             raise e
 
     def wait_for_element_state(
@@ -2672,16 +2672,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.wait_for_element_state started")
+            logging.debug("=> element_handle.wait_for_element_state started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.wait_for_element_state(state=state, timeout=timeout)
                 )
             )
-            log_api("<= element_handle.wait_for_element_state succeded")
+            logging.debug("<= element_handle.wait_for_element_state succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.wait_for_element_state failed")
+            logging.debug("<= element_handle.wait_for_element_state failed")
             raise e
 
     def wait_for_selector(
@@ -2732,7 +2732,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            log_api("=> element_handle.wait_for_selector started")
+            logging.debug("=> element_handle.wait_for_selector started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.wait_for_selector(
@@ -2740,10 +2740,10 @@ class ElementHandle(JSHandle):
                     )
                 )
             )
-            log_api("<= element_handle.wait_for_selector succeded")
+            logging.debug("<= element_handle.wait_for_selector succeded")
             return result
         except Exception as e:
-            log_api("<= element_handle.wait_for_selector failed")
+            logging.debug("<= element_handle.wait_for_selector failed")
             raise e
 
 
@@ -2802,7 +2802,7 @@ class Accessibility(SyncBase):
         """
 
         try:
-            log_api("=> accessibility.snapshot started")
+            logging.debug("=> accessibility.snapshot started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.snapshot(
@@ -2810,10 +2810,10 @@ class Accessibility(SyncBase):
                     )
                 )
             )
-            log_api("<= accessibility.snapshot succeded")
+            logging.debug("<= accessibility.snapshot succeded")
             return result
         except Exception as e:
-            log_api("<= accessibility.snapshot failed")
+            logging.debug("<= accessibility.snapshot failed")
             raise e
 
 
@@ -2859,12 +2859,12 @@ class FileChooser(SyncBase):
         """
 
         try:
-            log_api("=> file_chooser.is_multiple started")
+            logging.debug("=> file_chooser.is_multiple started")
             result = mapping.from_maybe_impl(self._impl_obj.is_multiple())
-            log_api("<= file_chooser.is_multiple succeded")
+            logging.debug("<= file_chooser.is_multiple succeded")
             return result
         except Exception as e:
-            log_api("<= file_chooser.is_multiple failed")
+            logging.debug("<= file_chooser.is_multiple failed")
             raise e
 
     def set_files(
@@ -2898,7 +2898,7 @@ class FileChooser(SyncBase):
         """
 
         try:
-            log_api("=> file_chooser.set_files started")
+            logging.debug("=> file_chooser.set_files started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_files(
@@ -2906,10 +2906,10 @@ class FileChooser(SyncBase):
                     )
                 )
             )
-            log_api("<= file_chooser.set_files succeded")
+            logging.debug("<= file_chooser.set_files succeded")
             return result
         except Exception as e:
-            log_api("<= file_chooser.set_files failed")
+            logging.debug("<= file_chooser.set_files failed")
             raise e
 
 
@@ -3035,7 +3035,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.goto started")
+            logging.debug("=> frame.goto started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.goto(
@@ -3043,10 +3043,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.goto succeded")
+            logging.debug("<= frame.goto succeded")
             return result
         except Exception as e:
-            log_api("<= frame.goto failed")
+            logging.debug("<= frame.goto failed")
             raise e
 
     def expect_navigation(
@@ -3134,16 +3134,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.wait_for_load_state started")
+            logging.debug("=> frame.wait_for_load_state started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
                 )
             )
-            log_api("<= frame.wait_for_load_state succeded")
+            logging.debug("<= frame.wait_for_load_state succeded")
             return result
         except Exception as e:
-            log_api("<= frame.wait_for_load_state failed")
+            logging.debug("<= frame.wait_for_load_state failed")
             raise e
 
     def frame_element(self) -> "ElementHandle":
@@ -3168,12 +3168,12 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.frame_element started")
+            logging.debug("=> frame.frame_element started")
             result = mapping.from_impl(self._sync(self._impl_obj.frame_element()))
-            log_api("<= frame.frame_element succeded")
+            logging.debug("<= frame.frame_element succeded")
             return result
         except Exception as e:
-            log_api("<= frame.frame_element failed")
+            logging.debug("<= frame.frame_element failed")
             raise e
 
     def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
@@ -3223,7 +3223,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.evaluate started")
+            logging.debug("=> frame.evaluate started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
@@ -3231,10 +3231,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.evaluate succeded")
+            logging.debug("<= frame.evaluate succeded")
             return result
         except Exception as e:
-            log_api("<= frame.evaluate failed")
+            logging.debug("<= frame.evaluate failed")
             raise e
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
@@ -3282,7 +3282,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.evaluate_handle started")
+            logging.debug("=> frame.evaluate_handle started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
@@ -3290,10 +3290,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.evaluate_handle succeded")
+            logging.debug("<= frame.evaluate_handle succeded")
             return result
         except Exception as e:
-            log_api("<= frame.evaluate_handle failed")
+            logging.debug("<= frame.evaluate_handle failed")
             raise e
 
     def query_selector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
@@ -3315,14 +3315,14 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.query_selector started")
+            logging.debug("=> frame.query_selector started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.query_selector(selector=selector))
             )
-            log_api("<= frame.query_selector succeded")
+            logging.debug("<= frame.query_selector succeded")
             return result
         except Exception as e:
-            log_api("<= frame.query_selector failed")
+            logging.debug("<= frame.query_selector failed")
             raise e
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -3344,14 +3344,14 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.query_selector_all started")
+            logging.debug("=> frame.query_selector_all started")
             result = mapping.from_impl_list(
                 self._sync(self._impl_obj.query_selector_all(selector=selector))
             )
-            log_api("<= frame.query_selector_all succeded")
+            logging.debug("<= frame.query_selector_all succeded")
             return result
         except Exception as e:
-            log_api("<= frame.query_selector_all failed")
+            logging.debug("<= frame.query_selector_all failed")
             raise e
 
     def wait_for_selector(
@@ -3411,7 +3411,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.wait_for_selector started")
+            logging.debug("=> frame.wait_for_selector started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.wait_for_selector(
@@ -3419,10 +3419,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.wait_for_selector succeded")
+            logging.debug("<= frame.wait_for_selector succeded")
             return result
         except Exception as e:
-            log_api("<= frame.wait_for_selector failed")
+            logging.debug("<= frame.wait_for_selector failed")
             raise e
 
     def is_checked(self, selector: str, *, timeout: float = None) -> bool:
@@ -3445,16 +3445,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_checked started")
+            logging.debug("=> frame.is_checked started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_checked(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.is_checked succeded")
+            logging.debug("<= frame.is_checked succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_checked failed")
+            logging.debug("<= frame.is_checked failed")
             raise e
 
     def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -3477,16 +3477,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_disabled started")
+            logging.debug("=> frame.is_disabled started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_disabled(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.is_disabled succeded")
+            logging.debug("<= frame.is_disabled succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_disabled failed")
+            logging.debug("<= frame.is_disabled failed")
             raise e
 
     def is_editable(self, selector: str, *, timeout: float = None) -> bool:
@@ -3509,16 +3509,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_editable started")
+            logging.debug("=> frame.is_editable started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_editable(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.is_editable succeded")
+            logging.debug("<= frame.is_editable succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_editable failed")
+            logging.debug("<= frame.is_editable failed")
             raise e
 
     def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -3541,16 +3541,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_enabled started")
+            logging.debug("=> frame.is_enabled started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_enabled(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.is_enabled succeded")
+            logging.debug("<= frame.is_enabled succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_enabled failed")
+            logging.debug("<= frame.is_enabled failed")
             raise e
 
     def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
@@ -3573,14 +3573,14 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_hidden started")
+            logging.debug("=> frame.is_hidden started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
             )
-            log_api("<= frame.is_hidden succeded")
+            logging.debug("<= frame.is_hidden succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_hidden failed")
+            logging.debug("<= frame.is_hidden failed")
             raise e
 
     def is_visible(self, selector: str, *, timeout: float = None) -> bool:
@@ -3603,16 +3603,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_visible started")
+            logging.debug("=> frame.is_visible started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_visible(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.is_visible succeded")
+            logging.debug("<= frame.is_visible succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_visible failed")
+            logging.debug("<= frame.is_visible failed")
             raise e
 
     def dispatch_event(
@@ -3668,7 +3668,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.dispatch_event started")
+            logging.debug("=> frame.dispatch_event started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dispatch_event(
@@ -3679,10 +3679,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.dispatch_event succeded")
+            logging.debug("<= frame.dispatch_event succeded")
             return result
         except Exception as e:
-            log_api("<= frame.dispatch_event failed")
+            logging.debug("<= frame.dispatch_event failed")
             raise e
 
     def eval_on_selector(
@@ -3723,7 +3723,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.eval_on_selector started")
+            logging.debug("=> frame.eval_on_selector started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.eval_on_selector(
@@ -3733,10 +3733,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.eval_on_selector succeded")
+            logging.debug("<= frame.eval_on_selector succeded")
             return result
         except Exception as e:
-            log_api("<= frame.eval_on_selector failed")
+            logging.debug("<= frame.eval_on_selector failed")
             raise e
 
     def eval_on_selector_all(
@@ -3774,7 +3774,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.eval_on_selector_all started")
+            logging.debug("=> frame.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.eval_on_selector_all(
@@ -3784,10 +3784,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.eval_on_selector_all succeded")
+            logging.debug("<= frame.eval_on_selector_all succeded")
             return result
         except Exception as e:
-            log_api("<= frame.eval_on_selector_all failed")
+            logging.debug("<= frame.eval_on_selector_all failed")
             raise e
 
     def content(self) -> str:
@@ -3801,12 +3801,12 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.content started")
+            logging.debug("=> frame.content started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.content()))
-            log_api("<= frame.content succeded")
+            logging.debug("<= frame.content succeded")
             return result
         except Exception as e:
-            log_api("<= frame.content failed")
+            logging.debug("<= frame.content failed")
             raise e
 
     def set_content(
@@ -3835,7 +3835,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.set_content started")
+            logging.debug("=> frame.set_content started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_content(
@@ -3843,10 +3843,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.set_content succeded")
+            logging.debug("<= frame.set_content succeded")
             return result
         except Exception as e:
-            log_api("<= frame.set_content failed")
+            logging.debug("<= frame.set_content failed")
             raise e
 
     def is_detached(self) -> bool:
@@ -3860,12 +3860,12 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.is_detached started")
+            logging.debug("=> frame.is_detached started")
             result = mapping.from_maybe_impl(self._impl_obj.is_detached())
-            log_api("<= frame.is_detached succeded")
+            logging.debug("<= frame.is_detached succeded")
             return result
         except Exception as e:
-            log_api("<= frame.is_detached failed")
+            logging.debug("<= frame.is_detached failed")
             raise e
 
     def add_script_tag(
@@ -3901,7 +3901,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.add_script_tag started")
+            logging.debug("=> frame.add_script_tag started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.add_script_tag(
@@ -3909,10 +3909,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.add_script_tag succeded")
+            logging.debug("<= frame.add_script_tag succeded")
             return result
         except Exception as e:
-            log_api("<= frame.add_script_tag failed")
+            logging.debug("<= frame.add_script_tag failed")
             raise e
 
     def add_style_tag(
@@ -3945,16 +3945,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.add_style_tag started")
+            logging.debug("=> frame.add_style_tag started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.add_style_tag(url=url, path=path, content=content)
                 )
             )
-            log_api("<= frame.add_style_tag succeded")
+            logging.debug("<= frame.add_style_tag succeded")
             return result
         except Exception as e:
-            log_api("<= frame.add_style_tag failed")
+            logging.debug("<= frame.add_style_tag failed")
             raise e
 
     def click(
@@ -4014,7 +4014,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.click started")
+            logging.debug("=> frame.click started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.click(
@@ -4030,10 +4030,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.click succeded")
+            logging.debug("<= frame.click succeded")
             return result
         except Exception as e:
-            log_api("<= frame.click failed")
+            logging.debug("<= frame.click failed")
             raise e
 
     def dblclick(
@@ -4093,7 +4093,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.dblclick started")
+            logging.debug("=> frame.dblclick started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dblclick(
@@ -4108,10 +4108,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.dblclick succeded")
+            logging.debug("<= frame.dblclick succeded")
             return result
         except Exception as e:
-            log_api("<= frame.dblclick failed")
+            logging.debug("<= frame.dblclick failed")
             raise e
 
     def tap(
@@ -4164,7 +4164,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.tap started")
+            logging.debug("=> frame.tap started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.tap(
@@ -4177,10 +4177,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.tap succeded")
+            logging.debug("<= frame.tap succeded")
             return result
         except Exception as e:
-            log_api("<= frame.tap failed")
+            logging.debug("<= frame.tap failed")
             raise e
 
     def fill(
@@ -4218,7 +4218,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.fill started")
+            logging.debug("=> frame.fill started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.fill(
@@ -4229,10 +4229,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.fill succeded")
+            logging.debug("<= frame.fill succeded")
             return result
         except Exception as e:
-            log_api("<= frame.fill failed")
+            logging.debug("<= frame.fill failed")
             raise e
 
     def focus(self, selector: str, *, timeout: float = None) -> NoneType:
@@ -4252,14 +4252,14 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.focus started")
+            logging.debug("=> frame.focus started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.focus(selector=selector, timeout=timeout))
             )
-            log_api("<= frame.focus succeded")
+            logging.debug("<= frame.focus succeded")
             return result
         except Exception as e:
-            log_api("<= frame.focus failed")
+            logging.debug("<= frame.focus failed")
             raise e
 
     def text_content(
@@ -4284,16 +4284,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.text_content started")
+            logging.debug("=> frame.text_content started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.text_content(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.text_content succeded")
+            logging.debug("<= frame.text_content succeded")
             return result
         except Exception as e:
-            log_api("<= frame.text_content failed")
+            logging.debug("<= frame.text_content failed")
             raise e
 
     def inner_text(self, selector: str, *, timeout: float = None) -> str:
@@ -4316,16 +4316,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.inner_text started")
+            logging.debug("=> frame.inner_text started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.inner_text(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.inner_text succeded")
+            logging.debug("<= frame.inner_text succeded")
             return result
         except Exception as e:
-            log_api("<= frame.inner_text failed")
+            logging.debug("<= frame.inner_text failed")
             raise e
 
     def inner_html(self, selector: str, *, timeout: float = None) -> str:
@@ -4348,16 +4348,16 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.inner_html started")
+            logging.debug("=> frame.inner_html started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.inner_html(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= frame.inner_html succeded")
+            logging.debug("<= frame.inner_html succeded")
             return result
         except Exception as e:
-            log_api("<= frame.inner_html failed")
+            logging.debug("<= frame.inner_html failed")
             raise e
 
     def get_attribute(
@@ -4384,7 +4384,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.get_attribute started")
+            logging.debug("=> frame.get_attribute started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.get_attribute(
@@ -4392,10 +4392,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.get_attribute succeded")
+            logging.debug("<= frame.get_attribute succeded")
             return result
         except Exception as e:
-            log_api("<= frame.get_attribute failed")
+            logging.debug("<= frame.get_attribute failed")
             raise e
 
     def hover(
@@ -4441,7 +4441,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.hover started")
+            logging.debug("=> frame.hover started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.hover(
@@ -4453,10 +4453,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.hover succeded")
+            logging.debug("<= frame.hover succeded")
             return result
         except Exception as e:
-            log_api("<= frame.hover failed")
+            logging.debug("<= frame.hover failed")
             raise e
 
     def select_option(
@@ -4516,7 +4516,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.select_option started")
+            logging.debug("=> frame.select_option started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.select_option(
@@ -4530,10 +4530,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.select_option succeded")
+            logging.debug("<= frame.select_option succeded")
             return result
         except Exception as e:
-            log_api("<= frame.select_option failed")
+            logging.debug("<= frame.select_option failed")
             raise e
 
     def set_input_files(
@@ -4574,7 +4574,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.set_input_files started")
+            logging.debug("=> frame.set_input_files started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_input_files(
@@ -4585,10 +4585,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.set_input_files succeded")
+            logging.debug("<= frame.set_input_files succeded")
             return result
         except Exception as e:
-            log_api("<= frame.set_input_files failed")
+            logging.debug("<= frame.set_input_files failed")
             raise e
 
     def type(
@@ -4631,7 +4631,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.type started")
+            logging.debug("=> frame.type started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.type(
@@ -4643,10 +4643,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.type succeded")
+            logging.debug("<= frame.type succeded")
             return result
         except Exception as e:
-            log_api("<= frame.type failed")
+            logging.debug("<= frame.type failed")
             raise e
 
     def press(
@@ -4696,7 +4696,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.press started")
+            logging.debug("=> frame.press started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.press(
@@ -4708,10 +4708,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.press succeded")
+            logging.debug("<= frame.press succeded")
             return result
         except Exception as e:
-            log_api("<= frame.press failed")
+            logging.debug("<= frame.press failed")
             raise e
 
     def check(
@@ -4755,7 +4755,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.check started")
+            logging.debug("=> frame.check started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.check(
@@ -4766,10 +4766,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.check succeded")
+            logging.debug("<= frame.check succeded")
             return result
         except Exception as e:
-            log_api("<= frame.check failed")
+            logging.debug("<= frame.check failed")
             raise e
 
     def uncheck(
@@ -4813,7 +4813,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.uncheck started")
+            logging.debug("=> frame.uncheck started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.uncheck(
@@ -4824,10 +4824,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.uncheck succeded")
+            logging.debug("<= frame.uncheck succeded")
             return result
         except Exception as e:
-            log_api("<= frame.uncheck failed")
+            logging.debug("<= frame.uncheck failed")
             raise e
 
     def wait_for_timeout(self, timeout: float) -> NoneType:
@@ -4845,14 +4845,14 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.wait_for_timeout started")
+            logging.debug("=> frame.wait_for_timeout started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
             )
-            log_api("<= frame.wait_for_timeout succeded")
+            logging.debug("<= frame.wait_for_timeout succeded")
             return result
         except Exception as e:
-            log_api("<= frame.wait_for_timeout failed")
+            logging.debug("<= frame.wait_for_timeout failed")
             raise e
 
     def wait_for_function(
@@ -4911,7 +4911,7 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.wait_for_function started")
+            logging.debug("=> frame.wait_for_function started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.wait_for_function(
@@ -4922,10 +4922,10 @@ class Frame(SyncBase):
                     )
                 )
             )
-            log_api("<= frame.wait_for_function succeded")
+            logging.debug("<= frame.wait_for_function succeded")
             return result
         except Exception as e:
-            log_api("<= frame.wait_for_function failed")
+            logging.debug("<= frame.wait_for_function failed")
             raise e
 
     def title(self) -> str:
@@ -4939,12 +4939,12 @@ class Frame(SyncBase):
         """
 
         try:
-            log_api("=> frame.title started")
+            logging.debug("=> frame.title started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
-            log_api("<= frame.title succeded")
+            logging.debug("<= frame.title succeded")
             return result
         except Exception as e:
-            log_api("<= frame.title failed")
+            logging.debug("<= frame.title failed")
             raise e
 
 
@@ -4991,7 +4991,7 @@ class Worker(SyncBase):
         """
 
         try:
-            log_api("=> worker.evaluate started")
+            logging.debug("=> worker.evaluate started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
@@ -4999,10 +4999,10 @@ class Worker(SyncBase):
                     )
                 )
             )
-            log_api("<= worker.evaluate succeded")
+            logging.debug("<= worker.evaluate succeded")
             return result
         except Exception as e:
-            log_api("<= worker.evaluate failed")
+            logging.debug("<= worker.evaluate failed")
             raise e
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
@@ -5030,7 +5030,7 @@ class Worker(SyncBase):
         """
 
         try:
-            log_api("=> worker.evaluate_handle started")
+            logging.debug("=> worker.evaluate_handle started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
@@ -5038,10 +5038,10 @@ class Worker(SyncBase):
                     )
                 )
             )
-            log_api("<= worker.evaluate_handle succeded")
+            logging.debug("<= worker.evaluate_handle succeded")
             return result
         except Exception as e:
-            log_api("<= worker.evaluate_handle failed")
+            logging.debug("<= worker.evaluate_handle failed")
             raise e
 
 
@@ -5085,7 +5085,7 @@ class Selectors(SyncBase):
         """
 
         try:
-            log_api("=> selectors.register started")
+            logging.debug("=> selectors.register started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.register(
@@ -5096,10 +5096,10 @@ class Selectors(SyncBase):
                     )
                 )
             )
-            log_api("<= selectors.register succeded")
+            logging.debug("<= selectors.register succeded")
             return result
         except Exception as e:
-            log_api("<= selectors.register failed")
+            logging.debug("<= selectors.register failed")
             raise e
 
 
@@ -5210,14 +5210,14 @@ class Dialog(SyncBase):
         """
 
         try:
-            log_api("=> dialog.accept started")
+            logging.debug("=> dialog.accept started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.accept(promptText=prompt_text))
             )
-            log_api("<= dialog.accept succeded")
+            logging.debug("<= dialog.accept succeded")
             return result
         except Exception as e:
-            log_api("<= dialog.accept failed")
+            logging.debug("<= dialog.accept failed")
             raise e
 
     def dismiss(self) -> NoneType:
@@ -5227,12 +5227,12 @@ class Dialog(SyncBase):
         """
 
         try:
-            log_api("=> dialog.dismiss started")
+            logging.debug("=> dialog.dismiss started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.dismiss()))
-            log_api("<= dialog.dismiss succeded")
+            logging.debug("<= dialog.dismiss succeded")
             return result
         except Exception as e:
-            log_api("<= dialog.dismiss failed")
+            logging.debug("<= dialog.dismiss failed")
             raise e
 
 
@@ -5277,12 +5277,12 @@ class Download(SyncBase):
         """
 
         try:
-            log_api("=> download.delete started")
+            logging.debug("=> download.delete started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.delete()))
-            log_api("<= download.delete succeded")
+            logging.debug("<= download.delete succeded")
             return result
         except Exception as e:
-            log_api("<= download.delete failed")
+            logging.debug("<= download.delete failed")
             raise e
 
     def failure(self) -> typing.Union[str, NoneType]:
@@ -5296,12 +5296,12 @@ class Download(SyncBase):
         """
 
         try:
-            log_api("=> download.failure started")
+            logging.debug("=> download.failure started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.failure()))
-            log_api("<= download.failure succeded")
+            logging.debug("<= download.failure succeded")
             return result
         except Exception as e:
-            log_api("<= download.failure failed")
+            logging.debug("<= download.failure failed")
             raise e
 
     def path(self) -> typing.Union[pathlib.Path, NoneType]:
@@ -5315,12 +5315,12 @@ class Download(SyncBase):
         """
 
         try:
-            log_api("=> download.path started")
+            logging.debug("=> download.path started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
-            log_api("<= download.path succeded")
+            logging.debug("<= download.path succeded")
             return result
         except Exception as e:
-            log_api("<= download.path failed")
+            logging.debug("<= download.path failed")
             raise e
 
     def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
@@ -5335,14 +5335,14 @@ class Download(SyncBase):
         """
 
         try:
-            log_api("=> download.save_as started")
+            logging.debug("=> download.save_as started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.save_as(path=path))
             )
-            log_api("<= download.save_as succeded")
+            logging.debug("<= download.save_as succeded")
             return result
         except Exception as e:
-            log_api("<= download.save_as failed")
+            logging.debug("<= download.save_as failed")
             raise e
 
 
@@ -5365,12 +5365,12 @@ class Video(SyncBase):
         """
 
         try:
-            log_api("=> video.path started")
+            logging.debug("=> video.path started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
-            log_api("<= video.path succeded")
+            logging.debug("<= video.path succeded")
             return result
         except Exception as e:
-            log_api("<= video.path failed")
+            logging.debug("<= video.path failed")
             raise e
 
 
@@ -5517,12 +5517,12 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.opener started")
+            logging.debug("=> page.opener started")
             result = mapping.from_impl_nullable(self._sync(self._impl_obj.opener()))
-            log_api("<= page.opener succeded")
+            logging.debug("<= page.opener succeded")
             return result
         except Exception as e:
-            log_api("<= page.opener failed")
+            logging.debug("<= page.opener failed")
             raise e
 
     def frame(
@@ -5556,14 +5556,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.frame started")
+            logging.debug("=> page.frame started")
             result = mapping.from_impl_nullable(
                 self._impl_obj.frame(name=name, url=self._wrap_handler(url))
             )
-            log_api("<= page.frame succeded")
+            logging.debug("<= page.frame succeded")
             return result
         except Exception as e:
-            log_api("<= page.frame failed")
+            logging.debug("<= page.frame failed")
             raise e
 
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
@@ -5587,14 +5587,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.set_default_navigation_timeout started")
+            logging.debug("=> page.set_default_navigation_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_navigation_timeout(timeout=timeout)
             )
-            log_api("<= page.set_default_navigation_timeout succeded")
+            logging.debug("<= page.set_default_navigation_timeout succeded")
             return result
         except Exception as e:
-            log_api("<= page.set_default_navigation_timeout failed")
+            logging.debug("<= page.set_default_navigation_timeout failed")
             raise e
 
     def set_default_timeout(self, timeout: float) -> NoneType:
@@ -5611,14 +5611,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.set_default_timeout started")
+            logging.debug("=> page.set_default_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_timeout(timeout=timeout)
             )
-            log_api("<= page.set_default_timeout succeded")
+            logging.debug("<= page.set_default_timeout succeded")
             return result
         except Exception as e:
-            log_api("<= page.set_default_timeout failed")
+            logging.debug("<= page.set_default_timeout failed")
             raise e
 
     def query_selector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
@@ -5640,14 +5640,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.query_selector started")
+            logging.debug("=> page.query_selector started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.query_selector(selector=selector))
             )
-            log_api("<= page.query_selector succeded")
+            logging.debug("<= page.query_selector succeded")
             return result
         except Exception as e:
-            log_api("<= page.query_selector failed")
+            logging.debug("<= page.query_selector failed")
             raise e
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -5669,14 +5669,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.query_selector_all started")
+            logging.debug("=> page.query_selector_all started")
             result = mapping.from_impl_list(
                 self._sync(self._impl_obj.query_selector_all(selector=selector))
             )
-            log_api("<= page.query_selector_all succeded")
+            logging.debug("<= page.query_selector_all succeded")
             return result
         except Exception as e:
-            log_api("<= page.query_selector_all failed")
+            logging.debug("<= page.query_selector_all failed")
             raise e
 
     def wait_for_selector(
@@ -5736,7 +5736,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.wait_for_selector started")
+            logging.debug("=> page.wait_for_selector started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.wait_for_selector(
@@ -5744,10 +5744,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.wait_for_selector succeded")
+            logging.debug("<= page.wait_for_selector succeded")
             return result
         except Exception as e:
-            log_api("<= page.wait_for_selector failed")
+            logging.debug("<= page.wait_for_selector failed")
             raise e
 
     def is_checked(self, selector: str, *, timeout: float = None) -> bool:
@@ -5770,16 +5770,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_checked started")
+            logging.debug("=> page.is_checked started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_checked(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.is_checked succeded")
+            logging.debug("<= page.is_checked succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_checked failed")
+            logging.debug("<= page.is_checked failed")
             raise e
 
     def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -5802,16 +5802,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_disabled started")
+            logging.debug("=> page.is_disabled started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_disabled(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.is_disabled succeded")
+            logging.debug("<= page.is_disabled succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_disabled failed")
+            logging.debug("<= page.is_disabled failed")
             raise e
 
     def is_editable(self, selector: str, *, timeout: float = None) -> bool:
@@ -5834,16 +5834,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_editable started")
+            logging.debug("=> page.is_editable started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_editable(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.is_editable succeded")
+            logging.debug("<= page.is_editable succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_editable failed")
+            logging.debug("<= page.is_editable failed")
             raise e
 
     def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -5866,16 +5866,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_enabled started")
+            logging.debug("=> page.is_enabled started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_enabled(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.is_enabled succeded")
+            logging.debug("<= page.is_enabled succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_enabled failed")
+            logging.debug("<= page.is_enabled failed")
             raise e
 
     def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
@@ -5898,14 +5898,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_hidden started")
+            logging.debug("=> page.is_hidden started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
             )
-            log_api("<= page.is_hidden succeded")
+            logging.debug("<= page.is_hidden succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_hidden failed")
+            logging.debug("<= page.is_hidden failed")
             raise e
 
     def is_visible(self, selector: str, *, timeout: float = None) -> bool:
@@ -5928,16 +5928,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_visible started")
+            logging.debug("=> page.is_visible started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.is_visible(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.is_visible succeded")
+            logging.debug("<= page.is_visible succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_visible failed")
+            logging.debug("<= page.is_visible failed")
             raise e
 
     def dispatch_event(
@@ -5993,7 +5993,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.dispatch_event started")
+            logging.debug("=> page.dispatch_event started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dispatch_event(
@@ -6004,10 +6004,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.dispatch_event succeded")
+            logging.debug("<= page.dispatch_event succeded")
             return result
         except Exception as e:
-            log_api("<= page.dispatch_event failed")
+            logging.debug("<= page.dispatch_event failed")
             raise e
 
     def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
@@ -6061,7 +6061,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.evaluate started")
+            logging.debug("=> page.evaluate started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.evaluate(
@@ -6069,10 +6069,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.evaluate succeded")
+            logging.debug("<= page.evaluate succeded")
             return result
         except Exception as e:
-            log_api("<= page.evaluate failed")
+            logging.debug("<= page.evaluate failed")
             raise e
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
@@ -6120,7 +6120,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.evaluate_handle started")
+            logging.debug("=> page.evaluate_handle started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.evaluate_handle(
@@ -6128,10 +6128,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.evaluate_handle succeded")
+            logging.debug("<= page.evaluate_handle succeded")
             return result
         except Exception as e:
-            log_api("<= page.evaluate_handle failed")
+            logging.debug("<= page.evaluate_handle failed")
             raise e
 
     def eval_on_selector(
@@ -6171,7 +6171,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.eval_on_selector started")
+            logging.debug("=> page.eval_on_selector started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.eval_on_selector(
@@ -6181,10 +6181,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.eval_on_selector succeded")
+            logging.debug("<= page.eval_on_selector succeded")
             return result
         except Exception as e:
-            log_api("<= page.eval_on_selector failed")
+            logging.debug("<= page.eval_on_selector failed")
             raise e
 
     def eval_on_selector_all(
@@ -6220,7 +6220,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.eval_on_selector_all started")
+            logging.debug("=> page.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.eval_on_selector_all(
@@ -6230,10 +6230,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.eval_on_selector_all succeded")
+            logging.debug("<= page.eval_on_selector_all succeded")
             return result
         except Exception as e:
-            log_api("<= page.eval_on_selector_all failed")
+            logging.debug("<= page.eval_on_selector_all failed")
             raise e
 
     def add_script_tag(
@@ -6270,7 +6270,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.add_script_tag started")
+            logging.debug("=> page.add_script_tag started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.add_script_tag(
@@ -6278,10 +6278,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.add_script_tag succeded")
+            logging.debug("<= page.add_script_tag succeded")
             return result
         except Exception as e:
-            log_api("<= page.add_script_tag failed")
+            logging.debug("<= page.add_script_tag failed")
             raise e
 
     def add_style_tag(
@@ -6314,16 +6314,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.add_style_tag started")
+            logging.debug("=> page.add_style_tag started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.add_style_tag(url=url, path=path, content=content)
                 )
             )
-            log_api("<= page.add_style_tag succeded")
+            logging.debug("<= page.add_style_tag succeded")
             return result
         except Exception as e:
-            log_api("<= page.add_style_tag failed")
+            logging.debug("<= page.add_style_tag failed")
             raise e
 
     def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
@@ -6378,7 +6378,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.expose_function started")
+            logging.debug("=> page.expose_function started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.expose_function(
@@ -6386,10 +6386,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.expose_function succeded")
+            logging.debug("<= page.expose_function succeded")
             return result
         except Exception as e:
-            log_api("<= page.expose_function failed")
+            logging.debug("<= page.expose_function failed")
             raise e
 
     def expose_binding(
@@ -6462,7 +6462,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.expose_binding started")
+            logging.debug("=> page.expose_binding started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.expose_binding(
@@ -6470,10 +6470,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.expose_binding succeded")
+            logging.debug("<= page.expose_binding succeded")
             return result
         except Exception as e:
-            log_api("<= page.expose_binding failed")
+            logging.debug("<= page.expose_binding failed")
             raise e
 
     def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
@@ -6490,7 +6490,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.set_extra_http_headers started")
+            logging.debug("=> page.set_extra_http_headers started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_extra_http_headers(
@@ -6498,10 +6498,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.set_extra_http_headers succeded")
+            logging.debug("<= page.set_extra_http_headers succeded")
             return result
         except Exception as e:
-            log_api("<= page.set_extra_http_headers failed")
+            logging.debug("<= page.set_extra_http_headers failed")
             raise e
 
     def content(self) -> str:
@@ -6515,12 +6515,12 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.content started")
+            logging.debug("=> page.content started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.content()))
-            log_api("<= page.content succeded")
+            logging.debug("<= page.content succeded")
             return result
         except Exception as e:
-            log_api("<= page.content failed")
+            logging.debug("<= page.content failed")
             raise e
 
     def set_content(
@@ -6549,7 +6549,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.set_content started")
+            logging.debug("=> page.set_content started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_content(
@@ -6557,10 +6557,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.set_content succeded")
+            logging.debug("<= page.set_content succeded")
             return result
         except Exception as e:
-            log_api("<= page.set_content failed")
+            logging.debug("<= page.set_content failed")
             raise e
 
     def goto(
@@ -6618,7 +6618,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.goto started")
+            logging.debug("=> page.goto started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.goto(
@@ -6626,10 +6626,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.goto succeded")
+            logging.debug("<= page.goto succeded")
             return result
         except Exception as e:
-            log_api("<= page.goto failed")
+            logging.debug("<= page.goto failed")
             raise e
 
     def reload(
@@ -6662,14 +6662,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.reload started")
+            logging.debug("=> page.reload started")
             result = mapping.from_impl_nullable(
                 self._sync(self._impl_obj.reload(timeout=timeout, waitUntil=wait_until))
             )
-            log_api("<= page.reload succeded")
+            logging.debug("<= page.reload succeded")
             return result
         except Exception as e:
-            log_api("<= page.reload failed")
+            logging.debug("<= page.reload failed")
             raise e
 
     def wait_for_load_state(
@@ -6717,16 +6717,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.wait_for_load_state started")
+            logging.debug("=> page.wait_for_load_state started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
                 )
             )
-            log_api("<= page.wait_for_load_state succeded")
+            logging.debug("<= page.wait_for_load_state succeded")
             return result
         except Exception as e:
-            log_api("<= page.wait_for_load_state failed")
+            logging.debug("<= page.wait_for_load_state failed")
             raise e
 
     def wait_for_event(
@@ -6756,7 +6756,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.wait_for_event started")
+            logging.debug("=> page.wait_for_event started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.wait_for_event(
@@ -6766,10 +6766,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.wait_for_event succeded")
+            logging.debug("<= page.wait_for_event succeded")
             return result
         except Exception as e:
-            log_api("<= page.wait_for_event failed")
+            logging.debug("<= page.wait_for_event failed")
             raise e
 
     def go_back(
@@ -6804,16 +6804,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.go_back started")
+            logging.debug("=> page.go_back started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until)
                 )
             )
-            log_api("<= page.go_back succeded")
+            logging.debug("<= page.go_back succeded")
             return result
         except Exception as e:
-            log_api("<= page.go_back failed")
+            logging.debug("<= page.go_back failed")
             raise e
 
     def go_forward(
@@ -6848,16 +6848,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.go_forward started")
+            logging.debug("=> page.go_forward started")
             result = mapping.from_impl_nullable(
                 self._sync(
                     self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until)
                 )
             )
-            log_api("<= page.go_forward succeded")
+            logging.debug("<= page.go_forward succeded")
             return result
         except Exception as e:
-            log_api("<= page.go_forward failed")
+            logging.debug("<= page.go_forward failed")
             raise e
 
     def emulate_media(
@@ -6907,16 +6907,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.emulate_media started")
+            logging.debug("=> page.emulate_media started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.emulate_media(media=media, colorScheme=color_scheme)
                 )
             )
-            log_api("<= page.emulate_media succeded")
+            logging.debug("<= page.emulate_media succeded")
             return result
         except Exception as e:
-            log_api("<= page.emulate_media failed")
+            logging.debug("<= page.emulate_media failed")
             raise e
 
     def set_viewport_size(self, viewport_size: ViewportSize) -> NoneType:
@@ -6940,14 +6940,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.set_viewport_size started")
+            logging.debug("=> page.set_viewport_size started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.set_viewport_size(viewportSize=viewport_size))
             )
-            log_api("<= page.set_viewport_size succeded")
+            logging.debug("<= page.set_viewport_size succeded")
             return result
         except Exception as e:
-            log_api("<= page.set_viewport_size failed")
+            logging.debug("<= page.set_viewport_size failed")
             raise e
 
     def bring_to_front(self) -> NoneType:
@@ -6957,14 +6957,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.bring_to_front started")
+            logging.debug("=> page.bring_to_front started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.bring_to_front())
             )
-            log_api("<= page.bring_to_front succeded")
+            logging.debug("<= page.bring_to_front succeded")
             return result
         except Exception as e:
-            log_api("<= page.bring_to_front failed")
+            logging.debug("<= page.bring_to_front failed")
             raise e
 
     def add_init_script(
@@ -6999,14 +6999,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.add_init_script started")
+            logging.debug("=> page.add_init_script started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.add_init_script(script=script, path=path))
             )
-            log_api("<= page.add_init_script succeded")
+            logging.debug("<= page.add_init_script succeded")
             return result
         except Exception as e:
-            log_api("<= page.add_init_script failed")
+            logging.debug("<= page.add_init_script failed")
             raise e
 
     def route(
@@ -7057,7 +7057,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.route started")
+            logging.debug("=> page.route started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.route(
@@ -7065,10 +7065,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.route succeded")
+            logging.debug("<= page.route succeded")
             return result
         except Exception as e:
-            log_api("<= page.route failed")
+            logging.debug("<= page.route failed")
             raise e
 
     def unroute(
@@ -7092,7 +7092,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.unroute started")
+            logging.debug("=> page.unroute started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.unroute(
@@ -7100,10 +7100,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.unroute succeded")
+            logging.debug("<= page.unroute succeded")
             return result
         except Exception as e:
-            log_api("<= page.unroute failed")
+            logging.debug("<= page.unroute failed")
             raise e
 
     def screenshot(
@@ -7152,7 +7152,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.screenshot started")
+            logging.debug("=> page.screenshot started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.screenshot(
@@ -7166,10 +7166,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.screenshot succeded")
+            logging.debug("<= page.screenshot succeded")
             return result
         except Exception as e:
-            log_api("<= page.screenshot failed")
+            logging.debug("<= page.screenshot failed")
             raise e
 
     def title(self) -> str:
@@ -7183,12 +7183,12 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.title started")
+            logging.debug("=> page.title started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
-            log_api("<= page.title succeded")
+            logging.debug("<= page.title succeded")
             return result
         except Exception as e:
-            log_api("<= page.title failed")
+            logging.debug("<= page.title failed")
             raise e
 
     def close(self, *, run_before_unload: bool = None) -> NoneType:
@@ -7210,14 +7210,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.close started")
+            logging.debug("=> page.close started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.close(runBeforeUnload=run_before_unload))
             )
-            log_api("<= page.close succeded")
+            logging.debug("<= page.close succeded")
             return result
         except Exception as e:
-            log_api("<= page.close failed")
+            logging.debug("<= page.close failed")
             raise e
 
     def is_closed(self) -> bool:
@@ -7231,12 +7231,12 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.is_closed started")
+            logging.debug("=> page.is_closed started")
             result = mapping.from_maybe_impl(self._impl_obj.is_closed())
-            log_api("<= page.is_closed succeded")
+            logging.debug("<= page.is_closed succeded")
             return result
         except Exception as e:
-            log_api("<= page.is_closed failed")
+            logging.debug("<= page.is_closed failed")
             raise e
 
     def click(
@@ -7298,7 +7298,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.click started")
+            logging.debug("=> page.click started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.click(
@@ -7314,10 +7314,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.click succeded")
+            logging.debug("<= page.click succeded")
             return result
         except Exception as e:
-            log_api("<= page.click failed")
+            logging.debug("<= page.click failed")
             raise e
 
     def dblclick(
@@ -7379,7 +7379,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.dblclick started")
+            logging.debug("=> page.dblclick started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.dblclick(
@@ -7394,10 +7394,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.dblclick succeded")
+            logging.debug("<= page.dblclick succeded")
             return result
         except Exception as e:
-            log_api("<= page.dblclick failed")
+            logging.debug("<= page.dblclick failed")
             raise e
 
     def tap(
@@ -7452,7 +7452,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.tap started")
+            logging.debug("=> page.tap started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.tap(
@@ -7465,10 +7465,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.tap succeded")
+            logging.debug("<= page.tap succeded")
             return result
         except Exception as e:
-            log_api("<= page.tap failed")
+            logging.debug("<= page.tap failed")
             raise e
 
     def fill(
@@ -7508,7 +7508,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.fill started")
+            logging.debug("=> page.fill started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.fill(
@@ -7519,10 +7519,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.fill succeded")
+            logging.debug("<= page.fill succeded")
             return result
         except Exception as e:
-            log_api("<= page.fill failed")
+            logging.debug("<= page.fill failed")
             raise e
 
     def focus(self, selector: str, *, timeout: float = None) -> NoneType:
@@ -7544,14 +7544,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.focus started")
+            logging.debug("=> page.focus started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.focus(selector=selector, timeout=timeout))
             )
-            log_api("<= page.focus succeded")
+            logging.debug("<= page.focus succeded")
             return result
         except Exception as e:
-            log_api("<= page.focus failed")
+            logging.debug("<= page.focus failed")
             raise e
 
     def text_content(
@@ -7576,16 +7576,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.text_content started")
+            logging.debug("=> page.text_content started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.text_content(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.text_content succeded")
+            logging.debug("<= page.text_content succeded")
             return result
         except Exception as e:
-            log_api("<= page.text_content failed")
+            logging.debug("<= page.text_content failed")
             raise e
 
     def inner_text(self, selector: str, *, timeout: float = None) -> str:
@@ -7608,16 +7608,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.inner_text started")
+            logging.debug("=> page.inner_text started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.inner_text(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.inner_text succeded")
+            logging.debug("<= page.inner_text succeded")
             return result
         except Exception as e:
-            log_api("<= page.inner_text failed")
+            logging.debug("<= page.inner_text failed")
             raise e
 
     def inner_html(self, selector: str, *, timeout: float = None) -> str:
@@ -7640,16 +7640,16 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.inner_html started")
+            logging.debug("=> page.inner_html started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.inner_html(selector=selector, timeout=timeout)
                 )
             )
-            log_api("<= page.inner_html succeded")
+            logging.debug("<= page.inner_html succeded")
             return result
         except Exception as e:
-            log_api("<= page.inner_html failed")
+            logging.debug("<= page.inner_html failed")
             raise e
 
     def get_attribute(
@@ -7676,7 +7676,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.get_attribute started")
+            logging.debug("=> page.get_attribute started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.get_attribute(
@@ -7684,10 +7684,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.get_attribute succeded")
+            logging.debug("<= page.get_attribute succeded")
             return result
         except Exception as e:
-            log_api("<= page.get_attribute failed")
+            logging.debug("<= page.get_attribute failed")
             raise e
 
     def hover(
@@ -7735,7 +7735,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.hover started")
+            logging.debug("=> page.hover started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.hover(
@@ -7747,10 +7747,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.hover succeded")
+            logging.debug("<= page.hover succeded")
             return result
         except Exception as e:
-            log_api("<= page.hover failed")
+            logging.debug("<= page.hover failed")
             raise e
 
     def select_option(
@@ -7813,7 +7813,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.select_option started")
+            logging.debug("=> page.select_option started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.select_option(
@@ -7827,10 +7827,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.select_option succeded")
+            logging.debug("<= page.select_option succeded")
             return result
         except Exception as e:
-            log_api("<= page.select_option failed")
+            logging.debug("<= page.select_option failed")
             raise e
 
     def set_input_files(
@@ -7871,7 +7871,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.set_input_files started")
+            logging.debug("=> page.set_input_files started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_input_files(
@@ -7882,10 +7882,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.set_input_files succeded")
+            logging.debug("<= page.set_input_files succeded")
             return result
         except Exception as e:
-            log_api("<= page.set_input_files failed")
+            logging.debug("<= page.set_input_files failed")
             raise e
 
     def type(
@@ -7930,7 +7930,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.type started")
+            logging.debug("=> page.type started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.type(
@@ -7942,10 +7942,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.type succeded")
+            logging.debug("<= page.type succeded")
             return result
         except Exception as e:
-            log_api("<= page.type failed")
+            logging.debug("<= page.type failed")
             raise e
 
     def press(
@@ -8009,7 +8009,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.press started")
+            logging.debug("=> page.press started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.press(
@@ -8021,10 +8021,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.press succeded")
+            logging.debug("<= page.press succeded")
             return result
         except Exception as e:
-            log_api("<= page.press failed")
+            logging.debug("<= page.press failed")
             raise e
 
     def check(
@@ -8070,7 +8070,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.check started")
+            logging.debug("=> page.check started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.check(
@@ -8081,10 +8081,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.check succeded")
+            logging.debug("<= page.check succeded")
             return result
         except Exception as e:
-            log_api("<= page.check failed")
+            logging.debug("<= page.check failed")
             raise e
 
     def uncheck(
@@ -8130,7 +8130,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.uncheck started")
+            logging.debug("=> page.uncheck started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.uncheck(
@@ -8141,10 +8141,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.uncheck succeded")
+            logging.debug("<= page.uncheck succeded")
             return result
         except Exception as e:
-            log_api("<= page.uncheck failed")
+            logging.debug("<= page.uncheck failed")
             raise e
 
     def wait_for_timeout(self, timeout: float) -> NoneType:
@@ -8169,14 +8169,14 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.wait_for_timeout started")
+            logging.debug("=> page.wait_for_timeout started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
             )
-            log_api("<= page.wait_for_timeout succeded")
+            logging.debug("<= page.wait_for_timeout succeded")
             return result
         except Exception as e:
-            log_api("<= page.wait_for_timeout failed")
+            logging.debug("<= page.wait_for_timeout failed")
             raise e
 
     def wait_for_function(
@@ -8237,7 +8237,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.wait_for_function started")
+            logging.debug("=> page.wait_for_function started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.wait_for_function(
@@ -8248,10 +8248,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.wait_for_function succeded")
+            logging.debug("<= page.wait_for_function succeded")
             return result
         except Exception as e:
-            log_api("<= page.wait_for_function failed")
+            logging.debug("<= page.wait_for_function failed")
             raise e
 
     def pause(self) -> NoneType:
@@ -8268,12 +8268,12 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.pause started")
+            logging.debug("=> page.pause started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.pause()))
-            log_api("<= page.pause succeded")
+            logging.debug("<= page.pause succeded")
             return result
         except Exception as e:
-            log_api("<= page.pause failed")
+            logging.debug("<= page.pause failed")
             raise e
 
     def pdf(
@@ -8384,7 +8384,7 @@ class Page(SyncBase):
         """
 
         try:
-            log_api("=> page.pdf started")
+            logging.debug("=> page.pdf started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.pdf(
@@ -8404,10 +8404,10 @@ class Page(SyncBase):
                     )
                 )
             )
-            log_api("<= page.pdf succeded")
+            logging.debug("<= page.pdf succeded")
             return result
         except Exception as e:
-            log_api("<= page.pdf failed")
+            logging.debug("<= page.pdf failed")
             raise e
 
     def expect_event(
@@ -8786,14 +8786,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.set_default_navigation_timeout started")
+            logging.debug("=> browser_context.set_default_navigation_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_navigation_timeout(timeout=timeout)
             )
-            log_api("<= browser_context.set_default_navigation_timeout succeded")
+            logging.debug("<= browser_context.set_default_navigation_timeout succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.set_default_navigation_timeout failed")
+            logging.debug("<= browser_context.set_default_navigation_timeout failed")
             raise e
 
     def set_default_timeout(self, timeout: float) -> NoneType:
@@ -8811,14 +8811,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.set_default_timeout started")
+            logging.debug("=> browser_context.set_default_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_timeout(timeout=timeout)
             )
-            log_api("<= browser_context.set_default_timeout succeded")
+            logging.debug("<= browser_context.set_default_timeout succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.set_default_timeout failed")
+            logging.debug("<= browser_context.set_default_timeout failed")
             raise e
 
     def new_page(self) -> "Page":
@@ -8832,12 +8832,12 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.new_page started")
+            logging.debug("=> browser_context.new_page started")
             result = mapping.from_impl(self._sync(self._impl_obj.new_page()))
-            log_api("<= browser_context.new_page succeded")
+            logging.debug("<= browser_context.new_page succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.new_page failed")
+            logging.debug("<= browser_context.new_page failed")
             raise e
 
     def cookies(
@@ -8859,14 +8859,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.cookies started")
+            logging.debug("=> browser_context.cookies started")
             result = mapping.from_impl_list(
                 self._sync(self._impl_obj.cookies(urls=urls))
             )
-            log_api("<= browser_context.cookies succeded")
+            logging.debug("<= browser_context.cookies succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.cookies failed")
+            logging.debug("<= browser_context.cookies failed")
             raise e
 
     def add_cookies(self, cookies: typing.List[Cookie]) -> NoneType:
@@ -8885,14 +8885,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.add_cookies started")
+            logging.debug("=> browser_context.add_cookies started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.add_cookies(cookies=cookies))
             )
-            log_api("<= browser_context.add_cookies succeded")
+            logging.debug("<= browser_context.add_cookies succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.add_cookies failed")
+            logging.debug("<= browser_context.add_cookies failed")
             raise e
 
     def clear_cookies(self) -> NoneType:
@@ -8902,12 +8902,12 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.clear_cookies started")
+            logging.debug("=> browser_context.clear_cookies started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.clear_cookies()))
-            log_api("<= browser_context.clear_cookies succeded")
+            logging.debug("<= browser_context.clear_cookies succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.clear_cookies failed")
+            logging.debug("<= browser_context.clear_cookies failed")
             raise e
 
     def grant_permissions(
@@ -8943,7 +8943,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.grant_permissions started")
+            logging.debug("=> browser_context.grant_permissions started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.grant_permissions(
@@ -8951,10 +8951,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.grant_permissions succeded")
+            logging.debug("<= browser_context.grant_permissions succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.grant_permissions failed")
+            logging.debug("<= browser_context.grant_permissions failed")
             raise e
 
     def clear_permissions(self) -> NoneType:
@@ -8971,14 +8971,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.clear_permissions started")
+            logging.debug("=> browser_context.clear_permissions started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.clear_permissions())
             )
-            log_api("<= browser_context.clear_permissions succeded")
+            logging.debug("<= browser_context.clear_permissions succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.clear_permissions failed")
+            logging.debug("<= browser_context.clear_permissions failed")
             raise e
 
     def set_geolocation(self, geolocation: Geolocation = None) -> NoneType:
@@ -8999,14 +8999,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.set_geolocation started")
+            logging.debug("=> browser_context.set_geolocation started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.set_geolocation(geolocation=geolocation))
             )
-            log_api("<= browser_context.set_geolocation succeded")
+            logging.debug("<= browser_context.set_geolocation succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.set_geolocation failed")
+            logging.debug("<= browser_context.set_geolocation failed")
             raise e
 
     def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
@@ -9025,7 +9025,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.set_extra_http_headers started")
+            logging.debug("=> browser_context.set_extra_http_headers started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.set_extra_http_headers(
@@ -9033,10 +9033,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.set_extra_http_headers succeded")
+            logging.debug("<= browser_context.set_extra_http_headers succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.set_extra_http_headers failed")
+            logging.debug("<= browser_context.set_extra_http_headers failed")
             raise e
 
     def set_offline(self, offline: bool) -> NoneType:
@@ -9049,14 +9049,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.set_offline started")
+            logging.debug("=> browser_context.set_offline started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.set_offline(offline=offline))
             )
-            log_api("<= browser_context.set_offline succeded")
+            logging.debug("<= browser_context.set_offline succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.set_offline failed")
+            logging.debug("<= browser_context.set_offline failed")
             raise e
 
     def add_init_script(
@@ -9091,14 +9091,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.add_init_script started")
+            logging.debug("=> browser_context.add_init_script started")
             result = mapping.from_maybe_impl(
                 self._sync(self._impl_obj.add_init_script(script=script, path=path))
             )
-            log_api("<= browser_context.add_init_script succeded")
+            logging.debug("<= browser_context.add_init_script succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.add_init_script failed")
+            logging.debug("<= browser_context.add_init_script failed")
             raise e
 
     def expose_binding(
@@ -9169,7 +9169,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.expose_binding started")
+            logging.debug("=> browser_context.expose_binding started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.expose_binding(
@@ -9177,10 +9177,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.expose_binding succeded")
+            logging.debug("<= browser_context.expose_binding succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.expose_binding failed")
+            logging.debug("<= browser_context.expose_binding failed")
             raise e
 
     def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
@@ -9235,7 +9235,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.expose_function started")
+            logging.debug("=> browser_context.expose_function started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.expose_function(
@@ -9243,10 +9243,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.expose_function succeded")
+            logging.debug("<= browser_context.expose_function succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.expose_function failed")
+            logging.debug("<= browser_context.expose_function failed")
             raise e
 
     def route(
@@ -9298,7 +9298,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.route started")
+            logging.debug("=> browser_context.route started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.route(
@@ -9306,10 +9306,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.route succeded")
+            logging.debug("<= browser_context.route succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.route failed")
+            logging.debug("<= browser_context.route failed")
             raise e
 
     def unroute(
@@ -9335,7 +9335,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.unroute started")
+            logging.debug("=> browser_context.unroute started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.unroute(
@@ -9343,10 +9343,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.unroute succeded")
+            logging.debug("<= browser_context.unroute succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.unroute failed")
+            logging.debug("<= browser_context.unroute failed")
             raise e
 
     def expect_event(
@@ -9393,12 +9393,12 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.close started")
+            logging.debug("=> browser_context.close started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
-            log_api("<= browser_context.close succeded")
+            logging.debug("<= browser_context.close succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.close failed")
+            logging.debug("<= browser_context.close failed")
             raise e
 
     def storage_state(
@@ -9420,14 +9420,14 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.storage_state started")
+            logging.debug("=> browser_context.storage_state started")
             result = mapping.from_impl(
                 self._sync(self._impl_obj.storage_state(path=path))
             )
-            log_api("<= browser_context.storage_state succeded")
+            logging.debug("<= browser_context.storage_state succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.storage_state failed")
+            logging.debug("<= browser_context.storage_state failed")
             raise e
 
     def wait_for_event(
@@ -9457,7 +9457,7 @@ class BrowserContext(SyncBase):
         """
 
         try:
-            log_api("=> browser_context.wait_for_event started")
+            logging.debug("=> browser_context.wait_for_event started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.wait_for_event(
@@ -9467,10 +9467,10 @@ class BrowserContext(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_context.wait_for_event succeded")
+            logging.debug("<= browser_context.wait_for_event succeded")
             return result
         except Exception as e:
-            log_api("<= browser_context.wait_for_event failed")
+            logging.debug("<= browser_context.wait_for_event failed")
             raise e
 
     def expect_page(
@@ -9528,16 +9528,16 @@ class CDPSession(SyncBase):
         """
 
         try:
-            log_api("=> cdp_session.send started")
+            logging.debug("=> cdp_session.send started")
             result = mapping.from_maybe_impl(
                 self._sync(
                     self._impl_obj.send(method=method, params=mapping.to_impl(params))
                 )
             )
-            log_api("<= cdp_session.send succeded")
+            logging.debug("<= cdp_session.send succeded")
             return result
         except Exception as e:
-            log_api("<= cdp_session.send failed")
+            logging.debug("<= cdp_session.send failed")
             raise e
 
     def detach(self) -> NoneType:
@@ -9548,12 +9548,12 @@ class CDPSession(SyncBase):
         """
 
         try:
-            log_api("=> cdp_session.detach started")
+            logging.debug("=> cdp_session.detach started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.detach()))
-            log_api("<= cdp_session.detach succeded")
+            logging.debug("<= cdp_session.detach succeded")
             return result
         except Exception as e:
-            log_api("<= cdp_session.detach failed")
+            logging.debug("<= cdp_session.detach failed")
             raise e
 
 
@@ -9604,14 +9604,14 @@ class ChromiumBrowserContext(BrowserContext):
         """
 
         try:
-            log_api("=> chromium_browser_context.new_cdp_session started")
+            logging.debug("=> chromium_browser_context.new_cdp_session started")
             result = mapping.from_impl(
                 self._sync(self._impl_obj.new_cdp_session(page=page._impl_obj))
             )
-            log_api("<= chromium_browser_context.new_cdp_session succeded")
+            logging.debug("<= chromium_browser_context.new_cdp_session succeded")
             return result
         except Exception as e:
-            log_api("<= chromium_browser_context.new_cdp_session failed")
+            logging.debug("<= chromium_browser_context.new_cdp_session failed")
             raise e
 
 
@@ -9664,12 +9664,12 @@ class Browser(SyncBase):
         """
 
         try:
-            log_api("=> browser.is_connected started")
+            logging.debug("=> browser.is_connected started")
             result = mapping.from_maybe_impl(self._impl_obj.is_connected())
-            log_api("<= browser.is_connected succeded")
+            logging.debug("<= browser.is_connected succeded")
             return result
         except Exception as e:
-            log_api("<= browser.is_connected failed")
+            logging.debug("<= browser.is_connected failed")
             raise e
 
     def new_context(
@@ -9780,7 +9780,7 @@ class Browser(SyncBase):
         """
 
         try:
-            log_api("=> browser.new_context started")
+            logging.debug("=> browser.new_context started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.new_context(
@@ -9812,10 +9812,10 @@ class Browser(SyncBase):
                     )
                 )
             )
-            log_api("<= browser.new_context succeded")
+            logging.debug("<= browser.new_context succeded")
             return result
         except Exception as e:
-            log_api("<= browser.new_context failed")
+            logging.debug("<= browser.new_context failed")
             raise e
 
     def new_page(
@@ -9921,7 +9921,7 @@ class Browser(SyncBase):
         """
 
         try:
-            log_api("=> browser.new_page started")
+            logging.debug("=> browser.new_page started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.new_page(
@@ -9953,10 +9953,10 @@ class Browser(SyncBase):
                     )
                 )
             )
-            log_api("<= browser.new_page succeded")
+            logging.debug("<= browser.new_page succeded")
             return result
         except Exception as e:
-            log_api("<= browser.new_page failed")
+            logging.debug("<= browser.new_page failed")
             raise e
 
     def close(self) -> NoneType:
@@ -9972,12 +9972,12 @@ class Browser(SyncBase):
         """
 
         try:
-            log_api("=> browser.close started")
+            logging.debug("=> browser.close started")
             result = mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
-            log_api("<= browser.close succeded")
+            logging.debug("<= browser.close succeded")
             return result
         except Exception as e:
-            log_api("<= browser.close failed")
+            logging.debug("<= browser.close failed")
             raise e
 
 
@@ -10110,7 +10110,7 @@ class BrowserType(SyncBase):
         """
 
         try:
-            log_api("=> browser_type.launch started")
+            logging.debug("=> browser_type.launch started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.launch(
@@ -10132,10 +10132,10 @@ class BrowserType(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_type.launch succeded")
+            logging.debug("<= browser_type.launch succeded")
             return result
         except Exception as e:
-            log_api("<= browser_type.launch failed")
+            logging.debug("<= browser_type.launch failed")
             raise e
 
     def launch_persistent_context(
@@ -10288,7 +10288,7 @@ class BrowserType(SyncBase):
         """
 
         try:
-            log_api("=> browser_type.launch_persistent_context started")
+            logging.debug("=> browser_type.launch_persistent_context started")
             result = mapping.from_impl(
                 self._sync(
                     self._impl_obj.launch_persistent_context(
@@ -10332,10 +10332,10 @@ class BrowserType(SyncBase):
                     )
                 )
             )
-            log_api("<= browser_type.launch_persistent_context succeded")
+            logging.debug("<= browser_type.launch_persistent_context succeded")
             return result
         except Exception as e:
-            log_api("<= browser_type.launch_persistent_context failed")
+            logging.debug("<= browser_type.launch_persistent_context failed")
             raise e
 
 
@@ -10446,12 +10446,12 @@ class Playwright(SyncBase):
         """
 
         try:
-            log_api("=> playwright.stop started")
+            logging.debug("=> playwright.stop started")
             result = mapping.from_maybe_impl(self._impl_obj.stop())
-            log_api("<= playwright.stop succeded")
+            logging.debug("<= playwright.stop succeded")
             return result
         except Exception as e:
-            log_api("<= playwright.stop failed")
+            logging.debug("<= playwright.stop failed")
             raise e
 
 

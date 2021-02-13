@@ -11,9 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 
 import playwright
 from playwright.sync_api import Playwright
+
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 def main(playwright: Playwright) -> None:
@@ -21,7 +24,7 @@ def main(playwright: Playwright) -> None:
 
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Creating context...")
-    context = browser.new_context(viewport=0)
+    context = browser.new_context()
     print("Contexts in browser: %d" % len(browser.contexts))
     print("Pages in context: %d" % len(context.pages))
 

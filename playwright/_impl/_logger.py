@@ -12,21 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import sys
+import logging
 
-debug_enabled = os.environ.get("PWDEBUG") or (
-    "DEBUG" in os.environ and "pw:api" in os.environ["DEBUG"]
-)
-
-
-def init_logger() -> None:
-    if os.environ.get("PWDEBUG"):
-        os.environ["DEBUG"] = (
-            os.environ["DEBUG"] + ",pw:api" if "DEBUG" in os.environ else "pw:api"
-        )
-
-
-def log_api(text: str) -> None:
-    if debug_enabled:
-        print(f"  \033[1m\033[96mpw:api\033[0m {text}", file=sys.stderr)
+logging.basicConfig(format="    \033[1m\033[96mpw:api\033[0m  %(message)s")
