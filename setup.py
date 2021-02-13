@@ -32,7 +32,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
     for name in zip.namelist():
         member = zip.getinfo(name)
-        extracted_path = zip.extract(member, path, None)
+        extracted_path = zip.extract(member, path)
         attr = member.external_attr >> 16
         if attr != 0:
             os.chmod(extracted_path, attr)
