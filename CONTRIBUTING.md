@@ -4,20 +4,44 @@
 
 ### Configuring python environment
 
-The project requires python version 3.8+. To set it as default in the environment run the following commands:
+The project requires Python version 3.7+. To set it as default in the environment run the following commands:
 
-```bash
-python3.8 -m venv env
+```sh
+python -m venv env
 source ./env/bin/activate
 ```
 
 Install required dependencies:
 
-```bash
+```sh
 python -m pip install --upgrade pip wheel
 pip install -r local-requirements.txt
-pip install -e .
+```
+
+Build and install drivers:
+
+```sh
+pip install -e.
 python setup.py bdist_wheel
+```
+
+Run tests:
+
+```sh
+pytest
+```
+
+Checking for typing errors
+
+```sh
+mypy playwright
+```
+
+Format the code
+
+```sh
+pre-commit install
+pre-commit run --all-files
 ```
 
 For more details look at the [CI configuration](./blob/master/.github/workflows/ci.yml).
@@ -31,7 +55,7 @@ pre-commit run --all-files
 
 ## Contributor License Agreement
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
