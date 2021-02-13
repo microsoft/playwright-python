@@ -18,15 +18,12 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from pathlib import Path
 
 import setuptools
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
 driver_version = "1.9.0-next-1612400196000"
-
-
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -107,7 +104,7 @@ setuptools.setup(
     author="Microsoft Corporation",
     author_email="",
     description="A high-level API to automate web browsers",
-    long_description=long_description,
+    long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     url="https://github.com/Microsoft/playwright-python",
     packages=["playwright"],
