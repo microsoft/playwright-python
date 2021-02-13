@@ -17,7 +17,6 @@ import os
 import shutil
 import subprocess
 import sys
-import typing
 import zipfile
 
 import setuptools
@@ -29,13 +28,11 @@ driver_version = "1.9.0-next-1612400196000"
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-NoneType = type(None)
 
-
-def extractall(zip: typing.Any, path: str) -> NoneType:
+def extractall(zip: zipfile.ZipFile, path: str) -> None:
     for name in zip.namelist():
         member = zip.getinfo(name)
-        extracted_path = zip._extract_member(member, path, None)
+        extracted_path = zip.extract(member, path, None)
         attr = member.external_attr >> 16
         if attr != 0:
             os.chmod(extracted_path, attr)
@@ -90,7 +87,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
                 driver_root = os.path.abspath(f"driver/{platform}")
-                for dir_path, dirs, files in os.walk(driver_root):
+                for dir_path, _, files in os.walk(driver_root):
                     for file in files:
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
@@ -115,7 +112,11 @@ setuptools.setup(
     url="https://github.com/Microsoft/playwright-python",
     packages=["playwright"],
     include_package_data=True,
-    install_requires=["greenlet==1.0.0", "pyee>=8.0.1", "typing-extensions"],
+    install_requires=[
+        "greenlet==1.0.0",
+        "pyee>=8.0.1",
+        "typing-extensions;python_version<='3.8'",
+    ],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
@@ -134,7 +135,7 @@ setuptools.setup(
         "write_to": "playwright/_repo_version.py",
         "write_to_template": 'version = "{version}"\n',
     },
-    setup_requires=["setuptools_scm"],
+    setup_requires=["setuptools_scm", "wheel"],
     entry_points={
         "console_scripts": [
             "playwright=playwright.__main__:main",
