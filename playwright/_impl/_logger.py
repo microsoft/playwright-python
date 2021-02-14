@@ -14,4 +14,8 @@
 
 import logging
 
-logging.basicConfig(format="    \033[1m\033[96mpw:api\033[0m  %(message)s")
+logger = logging.getLogger("playwright")
+handler = logging.StreamHandler()
+formatter = logging.Formatter("    \033[1m\033[96mpw:api\033[0m  %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)

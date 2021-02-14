@@ -16,7 +16,7 @@ import logging
 import playwright
 from playwright.sync_api import Playwright
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("playwright").setLevel(logging.DEBUG)
 
 
 def main(playwright: Playwright) -> None:

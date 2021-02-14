@@ -55,7 +55,7 @@ from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
 from playwright._impl._input import Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
-from playwright._impl._logger import logging
+from playwright._impl._logger import logger
 from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
 from playwright._impl._network import Route as RouteImpl
@@ -272,12 +272,12 @@ class Request(AsyncBase):
         """
 
         try:
-            logging.debug("=> request.response started")
+            logger.debug("=> request.response started")
             result = mapping.from_impl_nullable(await self._impl_obj.response())
-            logging.debug("<= request.response succeded")
+            logger.debug("<= request.response succeded")
             return result
         except Exception as e:
-            logging.debug("<= request.response failed")
+            logger.debug("<= request.response failed")
             raise e
 
     def is_navigation_request(self) -> bool:
@@ -291,12 +291,12 @@ class Request(AsyncBase):
         """
 
         try:
-            logging.debug("=> request.is_navigation_request started")
+            logger.debug("=> request.is_navigation_request started")
             result = mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
-            logging.debug("<= request.is_navigation_request succeded")
+            logger.debug("<= request.is_navigation_request succeded")
             return result
         except Exception as e:
-            logging.debug("<= request.is_navigation_request failed")
+            logger.debug("<= request.is_navigation_request failed")
             raise e
 
 
@@ -402,12 +402,12 @@ class Response(AsyncBase):
         """
 
         try:
-            logging.debug("=> response.finished started")
+            logger.debug("=> response.finished started")
             result = mapping.from_maybe_impl(await self._impl_obj.finished())
-            logging.debug("<= response.finished succeded")
+            logger.debug("<= response.finished succeded")
             return result
         except Exception as e:
-            logging.debug("<= response.finished failed")
+            logger.debug("<= response.finished failed")
             raise e
 
     async def body(self) -> bytes:
@@ -421,12 +421,12 @@ class Response(AsyncBase):
         """
 
         try:
-            logging.debug("=> response.body started")
+            logger.debug("=> response.body started")
             result = mapping.from_maybe_impl(await self._impl_obj.body())
-            logging.debug("<= response.body succeded")
+            logger.debug("<= response.body succeded")
             return result
         except Exception as e:
-            logging.debug("<= response.body failed")
+            logger.debug("<= response.body failed")
             raise e
 
     async def text(self) -> str:
@@ -440,12 +440,12 @@ class Response(AsyncBase):
         """
 
         try:
-            logging.debug("=> response.text started")
+            logger.debug("=> response.text started")
             result = mapping.from_maybe_impl(await self._impl_obj.text())
-            logging.debug("<= response.text succeded")
+            logger.debug("<= response.text succeded")
             return result
         except Exception as e:
-            logging.debug("<= response.text failed")
+            logger.debug("<= response.text failed")
             raise e
 
     async def json(self) -> typing.Any:
@@ -461,12 +461,12 @@ class Response(AsyncBase):
         """
 
         try:
-            logging.debug("=> response.json started")
+            logger.debug("=> response.json started")
             result = mapping.from_maybe_impl(await self._impl_obj.json())
-            logging.debug("<= response.json succeded")
+            logger.debug("<= response.json succeded")
             return result
         except Exception as e:
-            logging.debug("<= response.json failed")
+            logger.debug("<= response.json failed")
             raise e
 
 
@@ -517,14 +517,14 @@ class Route(AsyncBase):
         """
 
         try:
-            logging.debug("=> route.abort started")
+            logger.debug("=> route.abort started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.abort(errorCode=error_code)
             )
-            logging.debug("<= route.abort succeded")
+            logger.debug("<= route.abort succeded")
             return result
         except Exception as e:
-            logging.debug("<= route.abort failed")
+            logger.debug("<= route.abort failed")
             raise e
 
     async def fulfill(
@@ -571,7 +571,7 @@ class Route(AsyncBase):
         """
 
         try:
-            logging.debug("=> route.fulfill started")
+            logger.debug("=> route.fulfill started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.fulfill(
                     status=status,
@@ -581,10 +581,10 @@ class Route(AsyncBase):
                     contentType=content_type,
                 )
             )
-            logging.debug("<= route.fulfill succeded")
+            logger.debug("<= route.fulfill succeded")
             return result
         except Exception as e:
-            logging.debug("<= route.fulfill failed")
+            logger.debug("<= route.fulfill failed")
             raise e
 
     async def continue_(
@@ -625,7 +625,7 @@ class Route(AsyncBase):
         """
 
         try:
-            logging.debug("=> route.continue_ started")
+            logger.debug("=> route.continue_ started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.continue_(
                     url=url,
@@ -634,10 +634,10 @@ class Route(AsyncBase):
                     postData=post_data,
                 )
             )
-            logging.debug("<= route.continue_ succeded")
+            logger.debug("<= route.continue_ succeded")
             return result
         except Exception as e:
-            logging.debug("<= route.continue_ failed")
+            logger.debug("<= route.continue_ failed")
             raise e
 
 
@@ -716,7 +716,7 @@ class WebSocket(AsyncBase):
         """
 
         try:
-            logging.debug("=> web_socket.wait_for_event started")
+            logger.debug("=> web_socket.wait_for_event started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_event(
                     event=event,
@@ -724,10 +724,10 @@ class WebSocket(AsyncBase):
                     timeout=timeout,
                 )
             )
-            logging.debug("<= web_socket.wait_for_event succeded")
+            logger.debug("<= web_socket.wait_for_event succeded")
             return result
         except Exception as e:
-            logging.debug("<= web_socket.wait_for_event failed")
+            logger.debug("<= web_socket.wait_for_event failed")
             raise e
 
     def is_closed(self) -> bool:
@@ -741,12 +741,12 @@ class WebSocket(AsyncBase):
         """
 
         try:
-            logging.debug("=> web_socket.is_closed started")
+            logger.debug("=> web_socket.is_closed started")
             result = mapping.from_maybe_impl(self._impl_obj.is_closed())
-            logging.debug("<= web_socket.is_closed succeded")
+            logger.debug("<= web_socket.is_closed succeded")
             return result
         except Exception as e:
-            logging.debug("<= web_socket.is_closed failed")
+            logger.debug("<= web_socket.is_closed failed")
             raise e
 
 
@@ -792,12 +792,12 @@ class Keyboard(AsyncBase):
         """
 
         try:
-            logging.debug("=> keyboard.down started")
+            logger.debug("=> keyboard.down started")
             result = mapping.from_maybe_impl(await self._impl_obj.down(key=key))
-            logging.debug("<= keyboard.down succeded")
+            logger.debug("<= keyboard.down succeded")
             return result
         except Exception as e:
-            logging.debug("<= keyboard.down failed")
+            logger.debug("<= keyboard.down failed")
             raise e
 
     async def up(self, key: str) -> NoneType:
@@ -812,12 +812,12 @@ class Keyboard(AsyncBase):
         """
 
         try:
-            logging.debug("=> keyboard.up started")
+            logger.debug("=> keyboard.up started")
             result = mapping.from_maybe_impl(await self._impl_obj.up(key=key))
-            logging.debug("<= keyboard.up succeded")
+            logger.debug("<= keyboard.up succeded")
             return result
         except Exception as e:
-            logging.debug("<= keyboard.up failed")
+            logger.debug("<= keyboard.up failed")
             raise e
 
     async def insert_text(self, text: str) -> NoneType:
@@ -838,14 +838,14 @@ class Keyboard(AsyncBase):
         """
 
         try:
-            logging.debug("=> keyboard.insert_text started")
+            logger.debug("=> keyboard.insert_text started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.insert_text(text=text)
             )
-            logging.debug("<= keyboard.insert_text succeded")
+            logger.debug("<= keyboard.insert_text succeded")
             return result
         except Exception as e:
-            logging.debug("<= keyboard.insert_text failed")
+            logger.debug("<= keyboard.insert_text failed")
             raise e
 
     async def type(self, text: str, *, delay: float = None) -> NoneType:
@@ -871,14 +871,14 @@ class Keyboard(AsyncBase):
         """
 
         try:
-            logging.debug("=> keyboard.type started")
+            logger.debug("=> keyboard.type started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.type(text=text, delay=delay)
             )
-            logging.debug("<= keyboard.type succeded")
+            logger.debug("<= keyboard.type succeded")
             return result
         except Exception as e:
-            logging.debug("<= keyboard.type failed")
+            logger.debug("<= keyboard.type failed")
             raise e
 
     async def press(self, key: str, *, delay: float = None) -> NoneType:
@@ -924,14 +924,14 @@ class Keyboard(AsyncBase):
         """
 
         try:
-            logging.debug("=> keyboard.press started")
+            logger.debug("=> keyboard.press started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.press(key=key, delay=delay)
             )
-            logging.debug("<= keyboard.press succeded")
+            logger.debug("<= keyboard.press succeded")
             return result
         except Exception as e:
-            logging.debug("<= keyboard.press failed")
+            logger.debug("<= keyboard.press failed")
             raise e
 
 
@@ -956,14 +956,14 @@ class Mouse(AsyncBase):
         """
 
         try:
-            logging.debug("=> mouse.move started")
+            logger.debug("=> mouse.move started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.move(x=x, y=y, steps=steps)
             )
-            logging.debug("<= mouse.move succeded")
+            logger.debug("<= mouse.move succeded")
             return result
         except Exception as e:
-            logging.debug("<= mouse.move failed")
+            logger.debug("<= mouse.move failed")
             raise e
 
     async def down(
@@ -985,14 +985,14 @@ class Mouse(AsyncBase):
         """
 
         try:
-            logging.debug("=> mouse.down started")
+            logger.debug("=> mouse.down started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.down(button=button, clickCount=click_count)
             )
-            logging.debug("<= mouse.down succeded")
+            logger.debug("<= mouse.down succeded")
             return result
         except Exception as e:
-            logging.debug("<= mouse.down failed")
+            logger.debug("<= mouse.down failed")
             raise e
 
     async def up(
@@ -1014,14 +1014,14 @@ class Mouse(AsyncBase):
         """
 
         try:
-            logging.debug("=> mouse.up started")
+            logger.debug("=> mouse.up started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.up(button=button, clickCount=click_count)
             )
-            logging.debug("<= mouse.up succeded")
+            logger.debug("<= mouse.up succeded")
             return result
         except Exception as e:
-            logging.debug("<= mouse.up failed")
+            logger.debug("<= mouse.up failed")
             raise e
 
     async def click(
@@ -1050,16 +1050,16 @@ class Mouse(AsyncBase):
         """
 
         try:
-            logging.debug("=> mouse.click started")
+            logger.debug("=> mouse.click started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.click(
                     x=x, y=y, delay=delay, button=button, clickCount=click_count
                 )
             )
-            logging.debug("<= mouse.click succeded")
+            logger.debug("<= mouse.click succeded")
             return result
         except Exception as e:
-            logging.debug("<= mouse.click failed")
+            logger.debug("<= mouse.click failed")
             raise e
 
     async def dblclick(
@@ -1086,14 +1086,14 @@ class Mouse(AsyncBase):
         """
 
         try:
-            logging.debug("=> mouse.dblclick started")
+            logger.debug("=> mouse.dblclick started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button)
             )
-            logging.debug("<= mouse.dblclick succeded")
+            logger.debug("<= mouse.dblclick succeded")
             return result
         except Exception as e:
-            logging.debug("<= mouse.dblclick failed")
+            logger.debug("<= mouse.dblclick failed")
             raise e
 
 
@@ -1116,12 +1116,12 @@ class Touchscreen(AsyncBase):
         """
 
         try:
-            logging.debug("=> touchscreen.tap started")
+            logger.debug("=> touchscreen.tap started")
             result = mapping.from_maybe_impl(await self._impl_obj.tap(x=x, y=y))
-            logging.debug("<= touchscreen.tap succeded")
+            logger.debug("<= touchscreen.tap succeded")
             return result
         except Exception as e:
-            logging.debug("<= touchscreen.tap failed")
+            logger.debug("<= touchscreen.tap failed")
             raise e
 
 
@@ -1162,16 +1162,16 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.evaluate started")
+            logger.debug("=> js_handle.evaluate started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.evaluate(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= js_handle.evaluate succeded")
+            logger.debug("<= js_handle.evaluate succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.evaluate failed")
+            logger.debug("<= js_handle.evaluate failed")
             raise e
 
     async def evaluate_handle(
@@ -1205,16 +1205,16 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.evaluate_handle started")
+            logger.debug("=> js_handle.evaluate_handle started")
             result = mapping.from_impl(
                 await self._impl_obj.evaluate_handle(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= js_handle.evaluate_handle succeded")
+            logger.debug("<= js_handle.evaluate_handle succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.evaluate_handle failed")
+            logger.debug("<= js_handle.evaluate_handle failed")
             raise e
 
     async def get_property(self, property_name: str) -> "JSHandle":
@@ -1233,14 +1233,14 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.get_property started")
+            logger.debug("=> js_handle.get_property started")
             result = mapping.from_impl(
                 await self._impl_obj.get_property(propertyName=property_name)
             )
-            logging.debug("<= js_handle.get_property succeded")
+            logger.debug("<= js_handle.get_property succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.get_property failed")
+            logger.debug("<= js_handle.get_property failed")
             raise e
 
     async def get_properties(self) -> typing.Dict[str, "JSHandle"]:
@@ -1262,12 +1262,12 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.get_properties started")
+            logger.debug("=> js_handle.get_properties started")
             result = mapping.from_impl_dict(await self._impl_obj.get_properties())
-            logging.debug("<= js_handle.get_properties succeded")
+            logger.debug("<= js_handle.get_properties succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.get_properties failed")
+            logger.debug("<= js_handle.get_properties failed")
             raise e
 
     def as_element(self) -> typing.Union["ElementHandle", NoneType]:
@@ -1281,12 +1281,12 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.as_element started")
+            logger.debug("=> js_handle.as_element started")
             result = mapping.from_impl_nullable(self._impl_obj.as_element())
-            logging.debug("<= js_handle.as_element succeded")
+            logger.debug("<= js_handle.as_element succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.as_element failed")
+            logger.debug("<= js_handle.as_element failed")
             raise e
 
     async def dispose(self) -> NoneType:
@@ -1296,12 +1296,12 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.dispose started")
+            logger.debug("=> js_handle.dispose started")
             result = mapping.from_maybe_impl(await self._impl_obj.dispose())
-            logging.debug("<= js_handle.dispose succeded")
+            logger.debug("<= js_handle.dispose succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.dispose failed")
+            logger.debug("<= js_handle.dispose failed")
             raise e
 
     async def json_value(self) -> typing.Any:
@@ -1318,12 +1318,12 @@ class JSHandle(AsyncBase):
         """
 
         try:
-            logging.debug("=> js_handle.json_value started")
+            logger.debug("=> js_handle.json_value started")
             result = mapping.from_maybe_impl(await self._impl_obj.json_value())
-            logging.debug("<= js_handle.json_value succeded")
+            logger.debug("<= js_handle.json_value succeded")
             return result
         except Exception as e:
-            logging.debug("<= js_handle.json_value failed")
+            logger.debug("<= js_handle.json_value failed")
             raise e
 
 
@@ -1345,12 +1345,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.as_element started")
+            logger.debug("=> element_handle.as_element started")
             result = mapping.from_impl_nullable(self._impl_obj.as_element())
-            logging.debug("<= element_handle.as_element succeded")
+            logger.debug("<= element_handle.as_element succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.as_element failed")
+            logger.debug("<= element_handle.as_element failed")
             raise e
 
     async def owner_frame(self) -> typing.Union["Frame", NoneType]:
@@ -1364,12 +1364,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.owner_frame started")
+            logger.debug("=> element_handle.owner_frame started")
             result = mapping.from_impl_nullable(await self._impl_obj.owner_frame())
-            logging.debug("<= element_handle.owner_frame succeded")
+            logger.debug("<= element_handle.owner_frame succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.owner_frame failed")
+            logger.debug("<= element_handle.owner_frame failed")
             raise e
 
     async def content_frame(self) -> typing.Union["Frame", NoneType]:
@@ -1383,12 +1383,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.content_frame started")
+            logger.debug("=> element_handle.content_frame started")
             result = mapping.from_impl_nullable(await self._impl_obj.content_frame())
-            logging.debug("<= element_handle.content_frame succeded")
+            logger.debug("<= element_handle.content_frame succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.content_frame failed")
+            logger.debug("<= element_handle.content_frame failed")
             raise e
 
     async def get_attribute(self, name: str) -> typing.Union[str, NoneType]:
@@ -1407,14 +1407,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.get_attribute started")
+            logger.debug("=> element_handle.get_attribute started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.get_attribute(name=name)
             )
-            logging.debug("<= element_handle.get_attribute succeded")
+            logger.debug("<= element_handle.get_attribute succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.get_attribute failed")
+            logger.debug("<= element_handle.get_attribute failed")
             raise e
 
     async def text_content(self) -> typing.Union[str, NoneType]:
@@ -1428,12 +1428,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.text_content started")
+            logger.debug("=> element_handle.text_content started")
             result = mapping.from_maybe_impl(await self._impl_obj.text_content())
-            logging.debug("<= element_handle.text_content succeded")
+            logger.debug("<= element_handle.text_content succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.text_content failed")
+            logger.debug("<= element_handle.text_content failed")
             raise e
 
     async def inner_text(self) -> str:
@@ -1447,12 +1447,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.inner_text started")
+            logger.debug("=> element_handle.inner_text started")
             result = mapping.from_maybe_impl(await self._impl_obj.inner_text())
-            logging.debug("<= element_handle.inner_text succeded")
+            logger.debug("<= element_handle.inner_text succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.inner_text failed")
+            logger.debug("<= element_handle.inner_text failed")
             raise e
 
     async def inner_html(self) -> str:
@@ -1466,12 +1466,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.inner_html started")
+            logger.debug("=> element_handle.inner_html started")
             result = mapping.from_maybe_impl(await self._impl_obj.inner_html())
-            logging.debug("<= element_handle.inner_html succeded")
+            logger.debug("<= element_handle.inner_html succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.inner_html failed")
+            logger.debug("<= element_handle.inner_html failed")
             raise e
 
     async def is_checked(self) -> bool:
@@ -1485,12 +1485,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.is_checked started")
+            logger.debug("=> element_handle.is_checked started")
             result = mapping.from_maybe_impl(await self._impl_obj.is_checked())
-            logging.debug("<= element_handle.is_checked succeded")
+            logger.debug("<= element_handle.is_checked succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.is_checked failed")
+            logger.debug("<= element_handle.is_checked failed")
             raise e
 
     async def is_disabled(self) -> bool:
@@ -1504,12 +1504,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.is_disabled started")
+            logger.debug("=> element_handle.is_disabled started")
             result = mapping.from_maybe_impl(await self._impl_obj.is_disabled())
-            logging.debug("<= element_handle.is_disabled succeded")
+            logger.debug("<= element_handle.is_disabled succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.is_disabled failed")
+            logger.debug("<= element_handle.is_disabled failed")
             raise e
 
     async def is_editable(self) -> bool:
@@ -1523,12 +1523,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.is_editable started")
+            logger.debug("=> element_handle.is_editable started")
             result = mapping.from_maybe_impl(await self._impl_obj.is_editable())
-            logging.debug("<= element_handle.is_editable succeded")
+            logger.debug("<= element_handle.is_editable succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.is_editable failed")
+            logger.debug("<= element_handle.is_editable failed")
             raise e
 
     async def is_enabled(self) -> bool:
@@ -1542,12 +1542,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.is_enabled started")
+            logger.debug("=> element_handle.is_enabled started")
             result = mapping.from_maybe_impl(await self._impl_obj.is_enabled())
-            logging.debug("<= element_handle.is_enabled succeded")
+            logger.debug("<= element_handle.is_enabled succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.is_enabled failed")
+            logger.debug("<= element_handle.is_enabled failed")
             raise e
 
     async def is_hidden(self) -> bool:
@@ -1561,12 +1561,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.is_hidden started")
+            logger.debug("=> element_handle.is_hidden started")
             result = mapping.from_maybe_impl(await self._impl_obj.is_hidden())
-            logging.debug("<= element_handle.is_hidden succeded")
+            logger.debug("<= element_handle.is_hidden succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.is_hidden failed")
+            logger.debug("<= element_handle.is_hidden failed")
             raise e
 
     async def is_visible(self) -> bool:
@@ -1580,12 +1580,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.is_visible started")
+            logger.debug("=> element_handle.is_visible started")
             result = mapping.from_maybe_impl(await self._impl_obj.is_visible())
-            logging.debug("<= element_handle.is_visible succeded")
+            logger.debug("<= element_handle.is_visible succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.is_visible failed")
+            logger.debug("<= element_handle.is_visible failed")
             raise e
 
     async def dispatch_event(
@@ -1630,16 +1630,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.dispatch_event started")
+            logger.debug("=> element_handle.dispatch_event started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dispatch_event(
                     type=type, eventInit=mapping.to_impl(event_init)
                 )
             )
-            logging.debug("<= element_handle.dispatch_event succeded")
+            logger.debug("<= element_handle.dispatch_event succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.dispatch_event failed")
+            logger.debug("<= element_handle.dispatch_event failed")
             raise e
 
     async def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
@@ -1660,14 +1660,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.scroll_into_view_if_needed started")
+            logger.debug("=> element_handle.scroll_into_view_if_needed started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.scroll_into_view_if_needed(timeout=timeout)
             )
-            logging.debug("<= element_handle.scroll_into_view_if_needed succeded")
+            logger.debug("<= element_handle.scroll_into_view_if_needed succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.scroll_into_view_if_needed failed")
+            logger.debug("<= element_handle.scroll_into_view_if_needed failed")
             raise e
 
     async def hover(
@@ -1709,16 +1709,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.hover started")
+            logger.debug("=> element_handle.hover started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.hover(
                     modifiers=modifiers, position=position, timeout=timeout, force=force
                 )
             )
-            logging.debug("<= element_handle.hover succeded")
+            logger.debug("<= element_handle.hover succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.hover failed")
+            logger.debug("<= element_handle.hover failed")
             raise e
 
     async def click(
@@ -1774,7 +1774,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.click started")
+            logger.debug("=> element_handle.click started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.click(
                     modifiers=modifiers,
@@ -1787,10 +1787,10 @@ class ElementHandle(JSHandle):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= element_handle.click succeded")
+            logger.debug("<= element_handle.click succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.click failed")
+            logger.debug("<= element_handle.click failed")
             raise e
 
     async def dblclick(
@@ -1846,7 +1846,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.dblclick started")
+            logger.debug("=> element_handle.dblclick started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dblclick(
                     modifiers=modifiers,
@@ -1858,10 +1858,10 @@ class ElementHandle(JSHandle):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= element_handle.dblclick succeded")
+            logger.debug("<= element_handle.dblclick succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.dblclick failed")
+            logger.debug("<= element_handle.dblclick failed")
             raise e
 
     async def select_option(
@@ -1918,7 +1918,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.select_option started")
+            logger.debug("=> element_handle.select_option started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.select_option(
                     value=value,
@@ -1929,10 +1929,10 @@ class ElementHandle(JSHandle):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= element_handle.select_option succeded")
+            logger.debug("<= element_handle.select_option succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.select_option failed")
+            logger.debug("<= element_handle.select_option failed")
             raise e
 
     async def tap(
@@ -1981,7 +1981,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.tap started")
+            logger.debug("=> element_handle.tap started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.tap(
                     modifiers=modifiers,
@@ -1991,10 +1991,10 @@ class ElementHandle(JSHandle):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= element_handle.tap succeded")
+            logger.debug("<= element_handle.tap succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.tap failed")
+            logger.debug("<= element_handle.tap failed")
             raise e
 
     async def fill(
@@ -2022,16 +2022,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.fill started")
+            logger.debug("=> element_handle.fill started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.fill(
                     value=value, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= element_handle.fill succeded")
+            logger.debug("<= element_handle.fill succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.fill failed")
+            logger.debug("<= element_handle.fill failed")
             raise e
 
     async def select_text(self, *, timeout: float = None) -> NoneType:
@@ -2048,14 +2048,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.select_text started")
+            logger.debug("=> element_handle.select_text started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.select_text(timeout=timeout)
             )
-            logging.debug("<= element_handle.select_text succeded")
+            logger.debug("<= element_handle.select_text succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.select_text failed")
+            logger.debug("<= element_handle.select_text failed")
             raise e
 
     async def set_input_files(
@@ -2092,16 +2092,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.set_input_files started")
+            logger.debug("=> element_handle.set_input_files started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_input_files(
                     files=files, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= element_handle.set_input_files succeded")
+            logger.debug("<= element_handle.set_input_files succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.set_input_files failed")
+            logger.debug("<= element_handle.set_input_files failed")
             raise e
 
     async def focus(self) -> NoneType:
@@ -2111,12 +2111,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.focus started")
+            logger.debug("=> element_handle.focus started")
             result = mapping.from_maybe_impl(await self._impl_obj.focus())
-            logging.debug("<= element_handle.focus succeded")
+            logger.debug("<= element_handle.focus succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.focus failed")
+            logger.debug("<= element_handle.focus failed")
             raise e
 
     async def type(
@@ -2162,16 +2162,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.type started")
+            logger.debug("=> element_handle.type started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.type(
                     text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= element_handle.type succeded")
+            logger.debug("<= element_handle.type succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.type failed")
+            logger.debug("<= element_handle.type failed")
             raise e
 
     async def press(
@@ -2219,16 +2219,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.press started")
+            logger.debug("=> element_handle.press started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.press(
                     key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= element_handle.press succeded")
+            logger.debug("<= element_handle.press succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.press failed")
+            logger.debug("<= element_handle.press failed")
             raise e
 
     async def check(
@@ -2264,16 +2264,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.check started")
+            logger.debug("=> element_handle.check started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.check(
                     timeout=timeout, force=force, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= element_handle.check succeded")
+            logger.debug("<= element_handle.check succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.check failed")
+            logger.debug("<= element_handle.check failed")
             raise e
 
     async def uncheck(
@@ -2309,16 +2309,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.uncheck started")
+            logger.debug("=> element_handle.uncheck started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.uncheck(
                     timeout=timeout, force=force, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= element_handle.uncheck succeded")
+            logger.debug("<= element_handle.uncheck succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.uncheck failed")
+            logger.debug("<= element_handle.uncheck failed")
             raise e
 
     async def bounding_box(self) -> typing.Union[FloatRect, NoneType]:
@@ -2348,12 +2348,12 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.bounding_box started")
+            logger.debug("=> element_handle.bounding_box started")
             result = mapping.from_impl_nullable(await self._impl_obj.bounding_box())
-            logging.debug("<= element_handle.bounding_box succeded")
+            logger.debug("<= element_handle.bounding_box succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.bounding_box failed")
+            logger.debug("<= element_handle.bounding_box failed")
             raise e
 
     async def screenshot(
@@ -2395,7 +2395,7 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.screenshot started")
+            logger.debug("=> element_handle.screenshot started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.screenshot(
                     timeout=timeout,
@@ -2405,10 +2405,10 @@ class ElementHandle(JSHandle):
                     omitBackground=omit_background,
                 )
             )
-            logging.debug("<= element_handle.screenshot succeded")
+            logger.debug("<= element_handle.screenshot succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.screenshot failed")
+            logger.debug("<= element_handle.screenshot failed")
             raise e
 
     async def query_selector(
@@ -2430,14 +2430,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.query_selector started")
+            logger.debug("=> element_handle.query_selector started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.query_selector(selector=selector)
             )
-            logging.debug("<= element_handle.query_selector succeded")
+            logger.debug("<= element_handle.query_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.query_selector failed")
+            logger.debug("<= element_handle.query_selector failed")
             raise e
 
     async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -2457,14 +2457,14 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.query_selector_all started")
+            logger.debug("=> element_handle.query_selector_all started")
             result = mapping.from_impl_list(
                 await self._impl_obj.query_selector_all(selector=selector)
             )
-            logging.debug("<= element_handle.query_selector_all succeded")
+            logger.debug("<= element_handle.query_selector_all succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.query_selector_all failed")
+            logger.debug("<= element_handle.query_selector_all failed")
             raise e
 
     async def eval_on_selector(
@@ -2505,16 +2505,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.eval_on_selector started")
+            logger.debug("=> element_handle.eval_on_selector started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.eval_on_selector(
                     selector=selector, expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= element_handle.eval_on_selector succeded")
+            logger.debug("<= element_handle.eval_on_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.eval_on_selector failed")
+            logger.debug("<= element_handle.eval_on_selector failed")
             raise e
 
     async def eval_on_selector_all(
@@ -2560,16 +2560,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.eval_on_selector_all started")
+            logger.debug("=> element_handle.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.eval_on_selector_all(
                     selector=selector, expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= element_handle.eval_on_selector_all succeded")
+            logger.debug("<= element_handle.eval_on_selector_all succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.eval_on_selector_all failed")
+            logger.debug("<= element_handle.eval_on_selector_all failed")
             raise e
 
     async def wait_for_element_state(
@@ -2607,16 +2607,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.wait_for_element_state started")
+            logger.debug("=> element_handle.wait_for_element_state started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_element_state(
                     state=state, timeout=timeout
                 )
             )
-            logging.debug("<= element_handle.wait_for_element_state succeded")
+            logger.debug("<= element_handle.wait_for_element_state succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.wait_for_element_state failed")
+            logger.debug("<= element_handle.wait_for_element_state failed")
             raise e
 
     async def wait_for_selector(
@@ -2667,16 +2667,16 @@ class ElementHandle(JSHandle):
         """
 
         try:
-            logging.debug("=> element_handle.wait_for_selector started")
+            logger.debug("=> element_handle.wait_for_selector started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.wait_for_selector(
                     selector=selector, state=state, timeout=timeout
                 )
             )
-            logging.debug("<= element_handle.wait_for_selector succeded")
+            logger.debug("<= element_handle.wait_for_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= element_handle.wait_for_selector failed")
+            logger.debug("<= element_handle.wait_for_selector failed")
             raise e
 
 
@@ -2735,16 +2735,16 @@ class Accessibility(AsyncBase):
         """
 
         try:
-            logging.debug("=> accessibility.snapshot started")
+            logger.debug("=> accessibility.snapshot started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.snapshot(
                     interestingOnly=interesting_only, root=mapping.to_impl(root)
                 )
             )
-            logging.debug("<= accessibility.snapshot succeded")
+            logger.debug("<= accessibility.snapshot succeded")
             return result
         except Exception as e:
-            logging.debug("<= accessibility.snapshot failed")
+            logger.debug("<= accessibility.snapshot failed")
             raise e
 
 
@@ -2790,12 +2790,12 @@ class FileChooser(AsyncBase):
         """
 
         try:
-            logging.debug("=> file_chooser.is_multiple started")
+            logger.debug("=> file_chooser.is_multiple started")
             result = mapping.from_maybe_impl(self._impl_obj.is_multiple())
-            logging.debug("<= file_chooser.is_multiple succeded")
+            logger.debug("<= file_chooser.is_multiple succeded")
             return result
         except Exception as e:
-            logging.debug("<= file_chooser.is_multiple failed")
+            logger.debug("<= file_chooser.is_multiple failed")
             raise e
 
     async def set_files(
@@ -2829,16 +2829,16 @@ class FileChooser(AsyncBase):
         """
 
         try:
-            logging.debug("=> file_chooser.set_files started")
+            logger.debug("=> file_chooser.set_files started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_files(
                     files=files, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
-            logging.debug("<= file_chooser.set_files succeded")
+            logger.debug("<= file_chooser.set_files succeded")
             return result
         except Exception as e:
-            logging.debug("<= file_chooser.set_files failed")
+            logger.debug("<= file_chooser.set_files failed")
             raise e
 
 
@@ -2964,16 +2964,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.goto started")
+            logger.debug("=> frame.goto started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.goto(
                     url=url, timeout=timeout, waitUntil=wait_until, referer=referer
                 )
             )
-            logging.debug("<= frame.goto succeded")
+            logger.debug("<= frame.goto succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.goto failed")
+            logger.debug("<= frame.goto failed")
             raise e
 
     def expect_navigation(
@@ -3061,14 +3061,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.wait_for_load_state started")
+            logger.debug("=> frame.wait_for_load_state started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
             )
-            logging.debug("<= frame.wait_for_load_state succeded")
+            logger.debug("<= frame.wait_for_load_state succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.wait_for_load_state failed")
+            logger.debug("<= frame.wait_for_load_state failed")
             raise e
 
     async def frame_element(self) -> "ElementHandle":
@@ -3093,12 +3093,12 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.frame_element started")
+            logger.debug("=> frame.frame_element started")
             result = mapping.from_impl(await self._impl_obj.frame_element())
-            logging.debug("<= frame.frame_element succeded")
+            logger.debug("<= frame.frame_element succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.frame_element failed")
+            logger.debug("<= frame.frame_element failed")
             raise e
 
     async def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
@@ -3148,16 +3148,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.evaluate started")
+            logger.debug("=> frame.evaluate started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.evaluate(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= frame.evaluate succeded")
+            logger.debug("<= frame.evaluate succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.evaluate failed")
+            logger.debug("<= frame.evaluate failed")
             raise e
 
     async def evaluate_handle(
@@ -3207,16 +3207,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.evaluate_handle started")
+            logger.debug("=> frame.evaluate_handle started")
             result = mapping.from_impl(
                 await self._impl_obj.evaluate_handle(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= frame.evaluate_handle succeded")
+            logger.debug("<= frame.evaluate_handle succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.evaluate_handle failed")
+            logger.debug("<= frame.evaluate_handle failed")
             raise e
 
     async def query_selector(
@@ -3240,14 +3240,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.query_selector started")
+            logger.debug("=> frame.query_selector started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.query_selector(selector=selector)
             )
-            logging.debug("<= frame.query_selector succeded")
+            logger.debug("<= frame.query_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.query_selector failed")
+            logger.debug("<= frame.query_selector failed")
             raise e
 
     async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -3269,14 +3269,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.query_selector_all started")
+            logger.debug("=> frame.query_selector_all started")
             result = mapping.from_impl_list(
                 await self._impl_obj.query_selector_all(selector=selector)
             )
-            logging.debug("<= frame.query_selector_all succeded")
+            logger.debug("<= frame.query_selector_all succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.query_selector_all failed")
+            logger.debug("<= frame.query_selector_all failed")
             raise e
 
     async def wait_for_selector(
@@ -3339,16 +3339,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.wait_for_selector started")
+            logger.debug("=> frame.wait_for_selector started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.wait_for_selector(
                     selector=selector, timeout=timeout, state=state
                 )
             )
-            logging.debug("<= frame.wait_for_selector succeded")
+            logger.debug("<= frame.wait_for_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.wait_for_selector failed")
+            logger.debug("<= frame.wait_for_selector failed")
             raise e
 
     async def is_checked(self, selector: str, *, timeout: float = None) -> bool:
@@ -3371,14 +3371,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_checked started")
+            logger.debug("=> frame.is_checked started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_checked(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.is_checked succeded")
+            logger.debug("<= frame.is_checked succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_checked failed")
+            logger.debug("<= frame.is_checked failed")
             raise e
 
     async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -3401,14 +3401,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_disabled started")
+            logger.debug("=> frame.is_disabled started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_disabled(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.is_disabled succeded")
+            logger.debug("<= frame.is_disabled succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_disabled failed")
+            logger.debug("<= frame.is_disabled failed")
             raise e
 
     async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
@@ -3431,14 +3431,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_editable started")
+            logger.debug("=> frame.is_editable started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_editable(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.is_editable succeded")
+            logger.debug("<= frame.is_editable succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_editable failed")
+            logger.debug("<= frame.is_editable failed")
             raise e
 
     async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -3461,14 +3461,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_enabled started")
+            logger.debug("=> frame.is_enabled started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_enabled(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.is_enabled succeded")
+            logger.debug("<= frame.is_enabled succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_enabled failed")
+            logger.debug("<= frame.is_enabled failed")
             raise e
 
     async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
@@ -3491,14 +3491,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_hidden started")
+            logger.debug("=> frame.is_hidden started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_hidden(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.is_hidden succeded")
+            logger.debug("<= frame.is_hidden succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_hidden failed")
+            logger.debug("<= frame.is_hidden failed")
             raise e
 
     async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
@@ -3521,14 +3521,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_visible started")
+            logger.debug("=> frame.is_visible started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_visible(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.is_visible succeded")
+            logger.debug("<= frame.is_visible succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_visible failed")
+            logger.debug("<= frame.is_visible failed")
             raise e
 
     async def dispatch_event(
@@ -3584,7 +3584,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.dispatch_event started")
+            logger.debug("=> frame.dispatch_event started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dispatch_event(
                     selector=selector,
@@ -3593,10 +3593,10 @@ class Frame(AsyncBase):
                     timeout=timeout,
                 )
             )
-            logging.debug("<= frame.dispatch_event succeded")
+            logger.debug("<= frame.dispatch_event succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.dispatch_event failed")
+            logger.debug("<= frame.dispatch_event failed")
             raise e
 
     async def eval_on_selector(
@@ -3637,16 +3637,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.eval_on_selector started")
+            logger.debug("=> frame.eval_on_selector started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.eval_on_selector(
                     selector=selector, expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= frame.eval_on_selector succeded")
+            logger.debug("<= frame.eval_on_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.eval_on_selector failed")
+            logger.debug("<= frame.eval_on_selector failed")
             raise e
 
     async def eval_on_selector_all(
@@ -3684,16 +3684,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.eval_on_selector_all started")
+            logger.debug("=> frame.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.eval_on_selector_all(
                     selector=selector, expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= frame.eval_on_selector_all succeded")
+            logger.debug("<= frame.eval_on_selector_all succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.eval_on_selector_all failed")
+            logger.debug("<= frame.eval_on_selector_all failed")
             raise e
 
     async def content(self) -> str:
@@ -3707,12 +3707,12 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.content started")
+            logger.debug("=> frame.content started")
             result = mapping.from_maybe_impl(await self._impl_obj.content())
-            logging.debug("<= frame.content succeded")
+            logger.debug("<= frame.content succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.content failed")
+            logger.debug("<= frame.content failed")
             raise e
 
     async def set_content(
@@ -3741,16 +3741,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.set_content started")
+            logger.debug("=> frame.set_content started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_content(
                     html=html, timeout=timeout, waitUntil=wait_until
                 )
             )
-            logging.debug("<= frame.set_content succeded")
+            logger.debug("<= frame.set_content succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.set_content failed")
+            logger.debug("<= frame.set_content failed")
             raise e
 
     def is_detached(self) -> bool:
@@ -3764,12 +3764,12 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.is_detached started")
+            logger.debug("=> frame.is_detached started")
             result = mapping.from_maybe_impl(self._impl_obj.is_detached())
-            logging.debug("<= frame.is_detached succeded")
+            logger.debug("<= frame.is_detached succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.is_detached failed")
+            logger.debug("<= frame.is_detached failed")
             raise e
 
     async def add_script_tag(
@@ -3805,16 +3805,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.add_script_tag started")
+            logger.debug("=> frame.add_script_tag started")
             result = mapping.from_impl(
                 await self._impl_obj.add_script_tag(
                     url=url, path=path, content=content, type=type
                 )
             )
-            logging.debug("<= frame.add_script_tag succeded")
+            logger.debug("<= frame.add_script_tag succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.add_script_tag failed")
+            logger.debug("<= frame.add_script_tag failed")
             raise e
 
     async def add_style_tag(
@@ -3847,14 +3847,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.add_style_tag started")
+            logger.debug("=> frame.add_style_tag started")
             result = mapping.from_impl(
                 await self._impl_obj.add_style_tag(url=url, path=path, content=content)
             )
-            logging.debug("<= frame.add_style_tag succeded")
+            logger.debug("<= frame.add_style_tag succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.add_style_tag failed")
+            logger.debug("<= frame.add_style_tag failed")
             raise e
 
     async def click(
@@ -3914,7 +3914,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.click started")
+            logger.debug("=> frame.click started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.click(
                     selector=selector,
@@ -3928,10 +3928,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.click succeded")
+            logger.debug("<= frame.click succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.click failed")
+            logger.debug("<= frame.click failed")
             raise e
 
     async def dblclick(
@@ -3991,7 +3991,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.dblclick started")
+            logger.debug("=> frame.dblclick started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dblclick(
                     selector=selector,
@@ -4004,10 +4004,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.dblclick succeded")
+            logger.debug("<= frame.dblclick succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.dblclick failed")
+            logger.debug("<= frame.dblclick failed")
             raise e
 
     async def tap(
@@ -4060,7 +4060,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.tap started")
+            logger.debug("=> frame.tap started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.tap(
                     selector=selector,
@@ -4071,10 +4071,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.tap succeded")
+            logger.debug("<= frame.tap succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.tap failed")
+            logger.debug("<= frame.tap failed")
             raise e
 
     async def fill(
@@ -4112,7 +4112,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.fill started")
+            logger.debug("=> frame.fill started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.fill(
                     selector=selector,
@@ -4121,10 +4121,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.fill succeded")
+            logger.debug("<= frame.fill succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.fill failed")
+            logger.debug("<= frame.fill failed")
             raise e
 
     async def focus(self, selector: str, *, timeout: float = None) -> NoneType:
@@ -4144,14 +4144,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.focus started")
+            logger.debug("=> frame.focus started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.focus(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.focus succeded")
+            logger.debug("<= frame.focus succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.focus failed")
+            logger.debug("<= frame.focus failed")
             raise e
 
     async def text_content(
@@ -4176,14 +4176,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.text_content started")
+            logger.debug("=> frame.text_content started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.text_content(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.text_content succeded")
+            logger.debug("<= frame.text_content succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.text_content failed")
+            logger.debug("<= frame.text_content failed")
             raise e
 
     async def inner_text(self, selector: str, *, timeout: float = None) -> str:
@@ -4206,14 +4206,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.inner_text started")
+            logger.debug("=> frame.inner_text started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.inner_text(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.inner_text succeded")
+            logger.debug("<= frame.inner_text succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.inner_text failed")
+            logger.debug("<= frame.inner_text failed")
             raise e
 
     async def inner_html(self, selector: str, *, timeout: float = None) -> str:
@@ -4236,14 +4236,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.inner_html started")
+            logger.debug("=> frame.inner_html started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.inner_html(selector=selector, timeout=timeout)
             )
-            logging.debug("<= frame.inner_html succeded")
+            logger.debug("<= frame.inner_html succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.inner_html failed")
+            logger.debug("<= frame.inner_html failed")
             raise e
 
     async def get_attribute(
@@ -4270,16 +4270,16 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.get_attribute started")
+            logger.debug("=> frame.get_attribute started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.get_attribute(
                     selector=selector, name=name, timeout=timeout
                 )
             )
-            logging.debug("<= frame.get_attribute succeded")
+            logger.debug("<= frame.get_attribute succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.get_attribute failed")
+            logger.debug("<= frame.get_attribute failed")
             raise e
 
     async def hover(
@@ -4325,7 +4325,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.hover started")
+            logger.debug("=> frame.hover started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.hover(
                     selector=selector,
@@ -4335,10 +4335,10 @@ class Frame(AsyncBase):
                     force=force,
                 )
             )
-            logging.debug("<= frame.hover succeded")
+            logger.debug("<= frame.hover succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.hover failed")
+            logger.debug("<= frame.hover failed")
             raise e
 
     async def select_option(
@@ -4398,7 +4398,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.select_option started")
+            logger.debug("=> frame.select_option started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.select_option(
                     selector=selector,
@@ -4410,10 +4410,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.select_option succeded")
+            logger.debug("<= frame.select_option succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.select_option failed")
+            logger.debug("<= frame.select_option failed")
             raise e
 
     async def set_input_files(
@@ -4454,7 +4454,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.set_input_files started")
+            logger.debug("=> frame.set_input_files started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_input_files(
                     selector=selector,
@@ -4463,10 +4463,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.set_input_files succeded")
+            logger.debug("<= frame.set_input_files succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.set_input_files failed")
+            logger.debug("<= frame.set_input_files failed")
             raise e
 
     async def type(
@@ -4509,7 +4509,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.type started")
+            logger.debug("=> frame.type started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.type(
                     selector=selector,
@@ -4519,10 +4519,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.type succeded")
+            logger.debug("<= frame.type succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.type failed")
+            logger.debug("<= frame.type failed")
             raise e
 
     async def press(
@@ -4572,7 +4572,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.press started")
+            logger.debug("=> frame.press started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.press(
                     selector=selector,
@@ -4582,10 +4582,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.press succeded")
+            logger.debug("<= frame.press succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.press failed")
+            logger.debug("<= frame.press failed")
             raise e
 
     async def check(
@@ -4629,7 +4629,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.check started")
+            logger.debug("=> frame.check started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.check(
                     selector=selector,
@@ -4638,10 +4638,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.check succeded")
+            logger.debug("<= frame.check succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.check failed")
+            logger.debug("<= frame.check failed")
             raise e
 
     async def uncheck(
@@ -4685,7 +4685,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.uncheck started")
+            logger.debug("=> frame.uncheck started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.uncheck(
                     selector=selector,
@@ -4694,10 +4694,10 @@ class Frame(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= frame.uncheck succeded")
+            logger.debug("<= frame.uncheck succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.uncheck failed")
+            logger.debug("<= frame.uncheck failed")
             raise e
 
     async def wait_for_timeout(self, timeout: float) -> NoneType:
@@ -4715,14 +4715,14 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.wait_for_timeout started")
+            logger.debug("=> frame.wait_for_timeout started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_timeout(timeout=timeout)
             )
-            logging.debug("<= frame.wait_for_timeout succeded")
+            logger.debug("<= frame.wait_for_timeout succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.wait_for_timeout failed")
+            logger.debug("<= frame.wait_for_timeout failed")
             raise e
 
     async def wait_for_function(
@@ -4784,7 +4784,7 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.wait_for_function started")
+            logger.debug("=> frame.wait_for_function started")
             result = mapping.from_impl(
                 await self._impl_obj.wait_for_function(
                     expression=expression,
@@ -4793,10 +4793,10 @@ class Frame(AsyncBase):
                     polling=polling,
                 )
             )
-            logging.debug("<= frame.wait_for_function succeded")
+            logger.debug("<= frame.wait_for_function succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.wait_for_function failed")
+            logger.debug("<= frame.wait_for_function failed")
             raise e
 
     async def title(self) -> str:
@@ -4810,12 +4810,12 @@ class Frame(AsyncBase):
         """
 
         try:
-            logging.debug("=> frame.title started")
+            logger.debug("=> frame.title started")
             result = mapping.from_maybe_impl(await self._impl_obj.title())
-            logging.debug("<= frame.title succeded")
+            logger.debug("<= frame.title succeded")
             return result
         except Exception as e:
-            logging.debug("<= frame.title failed")
+            logger.debug("<= frame.title failed")
             raise e
 
 
@@ -4862,16 +4862,16 @@ class Worker(AsyncBase):
         """
 
         try:
-            logging.debug("=> worker.evaluate started")
+            logger.debug("=> worker.evaluate started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.evaluate(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= worker.evaluate succeded")
+            logger.debug("<= worker.evaluate succeded")
             return result
         except Exception as e:
-            logging.debug("<= worker.evaluate failed")
+            logger.debug("<= worker.evaluate failed")
             raise e
 
     async def evaluate_handle(
@@ -4901,16 +4901,16 @@ class Worker(AsyncBase):
         """
 
         try:
-            logging.debug("=> worker.evaluate_handle started")
+            logger.debug("=> worker.evaluate_handle started")
             result = mapping.from_impl(
                 await self._impl_obj.evaluate_handle(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= worker.evaluate_handle succeded")
+            logger.debug("<= worker.evaluate_handle succeded")
             return result
         except Exception as e:
-            logging.debug("<= worker.evaluate_handle failed")
+            logger.debug("<= worker.evaluate_handle failed")
             raise e
 
 
@@ -4954,16 +4954,16 @@ class Selectors(AsyncBase):
         """
 
         try:
-            logging.debug("=> selectors.register started")
+            logger.debug("=> selectors.register started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.register(
                     name=name, script=script, path=path, contentScript=content_script
                 )
             )
-            logging.debug("<= selectors.register succeded")
+            logger.debug("<= selectors.register succeded")
             return result
         except Exception as e:
-            logging.debug("<= selectors.register failed")
+            logger.debug("<= selectors.register failed")
             raise e
 
 
@@ -5074,14 +5074,14 @@ class Dialog(AsyncBase):
         """
 
         try:
-            logging.debug("=> dialog.accept started")
+            logger.debug("=> dialog.accept started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.accept(promptText=prompt_text)
             )
-            logging.debug("<= dialog.accept succeded")
+            logger.debug("<= dialog.accept succeded")
             return result
         except Exception as e:
-            logging.debug("<= dialog.accept failed")
+            logger.debug("<= dialog.accept failed")
             raise e
 
     async def dismiss(self) -> NoneType:
@@ -5091,12 +5091,12 @@ class Dialog(AsyncBase):
         """
 
         try:
-            logging.debug("=> dialog.dismiss started")
+            logger.debug("=> dialog.dismiss started")
             result = mapping.from_maybe_impl(await self._impl_obj.dismiss())
-            logging.debug("<= dialog.dismiss succeded")
+            logger.debug("<= dialog.dismiss succeded")
             return result
         except Exception as e:
-            logging.debug("<= dialog.dismiss failed")
+            logger.debug("<= dialog.dismiss failed")
             raise e
 
 
@@ -5141,12 +5141,12 @@ class Download(AsyncBase):
         """
 
         try:
-            logging.debug("=> download.delete started")
+            logger.debug("=> download.delete started")
             result = mapping.from_maybe_impl(await self._impl_obj.delete())
-            logging.debug("<= download.delete succeded")
+            logger.debug("<= download.delete succeded")
             return result
         except Exception as e:
-            logging.debug("<= download.delete failed")
+            logger.debug("<= download.delete failed")
             raise e
 
     async def failure(self) -> typing.Union[str, NoneType]:
@@ -5160,12 +5160,12 @@ class Download(AsyncBase):
         """
 
         try:
-            logging.debug("=> download.failure started")
+            logger.debug("=> download.failure started")
             result = mapping.from_maybe_impl(await self._impl_obj.failure())
-            logging.debug("<= download.failure succeded")
+            logger.debug("<= download.failure succeded")
             return result
         except Exception as e:
-            logging.debug("<= download.failure failed")
+            logger.debug("<= download.failure failed")
             raise e
 
     async def path(self) -> typing.Union[pathlib.Path, NoneType]:
@@ -5179,12 +5179,12 @@ class Download(AsyncBase):
         """
 
         try:
-            logging.debug("=> download.path started")
+            logger.debug("=> download.path started")
             result = mapping.from_maybe_impl(await self._impl_obj.path())
-            logging.debug("<= download.path succeded")
+            logger.debug("<= download.path succeded")
             return result
         except Exception as e:
-            logging.debug("<= download.path failed")
+            logger.debug("<= download.path failed")
             raise e
 
     async def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
@@ -5199,12 +5199,12 @@ class Download(AsyncBase):
         """
 
         try:
-            logging.debug("=> download.save_as started")
+            logger.debug("=> download.save_as started")
             result = mapping.from_maybe_impl(await self._impl_obj.save_as(path=path))
-            logging.debug("<= download.save_as succeded")
+            logger.debug("<= download.save_as succeded")
             return result
         except Exception as e:
-            logging.debug("<= download.save_as failed")
+            logger.debug("<= download.save_as failed")
             raise e
 
 
@@ -5227,12 +5227,12 @@ class Video(AsyncBase):
         """
 
         try:
-            logging.debug("=> video.path started")
+            logger.debug("=> video.path started")
             result = mapping.from_maybe_impl(await self._impl_obj.path())
-            logging.debug("<= video.path succeded")
+            logger.debug("<= video.path succeded")
             return result
         except Exception as e:
-            logging.debug("<= video.path failed")
+            logger.debug("<= video.path failed")
             raise e
 
 
@@ -5379,12 +5379,12 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.opener started")
+            logger.debug("=> page.opener started")
             result = mapping.from_impl_nullable(await self._impl_obj.opener())
-            logging.debug("<= page.opener succeded")
+            logger.debug("<= page.opener succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.opener failed")
+            logger.debug("<= page.opener failed")
             raise e
 
     def frame(
@@ -5418,14 +5418,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.frame started")
+            logger.debug("=> page.frame started")
             result = mapping.from_impl_nullable(
                 self._impl_obj.frame(name=name, url=self._wrap_handler(url))
             )
-            logging.debug("<= page.frame succeded")
+            logger.debug("<= page.frame succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.frame failed")
+            logger.debug("<= page.frame failed")
             raise e
 
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
@@ -5449,14 +5449,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.set_default_navigation_timeout started")
+            logger.debug("=> page.set_default_navigation_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_navigation_timeout(timeout=timeout)
             )
-            logging.debug("<= page.set_default_navigation_timeout succeded")
+            logger.debug("<= page.set_default_navigation_timeout succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.set_default_navigation_timeout failed")
+            logger.debug("<= page.set_default_navigation_timeout failed")
             raise e
 
     def set_default_timeout(self, timeout: float) -> NoneType:
@@ -5473,14 +5473,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.set_default_timeout started")
+            logger.debug("=> page.set_default_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_timeout(timeout=timeout)
             )
-            logging.debug("<= page.set_default_timeout succeded")
+            logger.debug("<= page.set_default_timeout succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.set_default_timeout failed")
+            logger.debug("<= page.set_default_timeout failed")
             raise e
 
     async def query_selector(
@@ -5504,14 +5504,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.query_selector started")
+            logger.debug("=> page.query_selector started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.query_selector(selector=selector)
             )
-            logging.debug("<= page.query_selector succeded")
+            logger.debug("<= page.query_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.query_selector failed")
+            logger.debug("<= page.query_selector failed")
             raise e
 
     async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -5533,14 +5533,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.query_selector_all started")
+            logger.debug("=> page.query_selector_all started")
             result = mapping.from_impl_list(
                 await self._impl_obj.query_selector_all(selector=selector)
             )
-            logging.debug("<= page.query_selector_all succeded")
+            logger.debug("<= page.query_selector_all succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.query_selector_all failed")
+            logger.debug("<= page.query_selector_all failed")
             raise e
 
     async def wait_for_selector(
@@ -5603,16 +5603,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.wait_for_selector started")
+            logger.debug("=> page.wait_for_selector started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.wait_for_selector(
                     selector=selector, timeout=timeout, state=state
                 )
             )
-            logging.debug("<= page.wait_for_selector succeded")
+            logger.debug("<= page.wait_for_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.wait_for_selector failed")
+            logger.debug("<= page.wait_for_selector failed")
             raise e
 
     async def is_checked(self, selector: str, *, timeout: float = None) -> bool:
@@ -5635,14 +5635,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_checked started")
+            logger.debug("=> page.is_checked started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_checked(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.is_checked succeded")
+            logger.debug("<= page.is_checked succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_checked failed")
+            logger.debug("<= page.is_checked failed")
             raise e
 
     async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -5665,14 +5665,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_disabled started")
+            logger.debug("=> page.is_disabled started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_disabled(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.is_disabled succeded")
+            logger.debug("<= page.is_disabled succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_disabled failed")
+            logger.debug("<= page.is_disabled failed")
             raise e
 
     async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
@@ -5695,14 +5695,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_editable started")
+            logger.debug("=> page.is_editable started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_editable(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.is_editable succeded")
+            logger.debug("<= page.is_editable succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_editable failed")
+            logger.debug("<= page.is_editable failed")
             raise e
 
     async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -5725,14 +5725,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_enabled started")
+            logger.debug("=> page.is_enabled started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_enabled(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.is_enabled succeded")
+            logger.debug("<= page.is_enabled succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_enabled failed")
+            logger.debug("<= page.is_enabled failed")
             raise e
 
     async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
@@ -5755,14 +5755,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_hidden started")
+            logger.debug("=> page.is_hidden started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_hidden(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.is_hidden succeded")
+            logger.debug("<= page.is_hidden succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_hidden failed")
+            logger.debug("<= page.is_hidden failed")
             raise e
 
     async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
@@ -5785,14 +5785,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_visible started")
+            logger.debug("=> page.is_visible started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.is_visible(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.is_visible succeded")
+            logger.debug("<= page.is_visible succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_visible failed")
+            logger.debug("<= page.is_visible failed")
             raise e
 
     async def dispatch_event(
@@ -5848,7 +5848,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.dispatch_event started")
+            logger.debug("=> page.dispatch_event started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dispatch_event(
                     selector=selector,
@@ -5857,10 +5857,10 @@ class Page(AsyncBase):
                     timeout=timeout,
                 )
             )
-            logging.debug("<= page.dispatch_event succeded")
+            logger.debug("<= page.dispatch_event succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.dispatch_event failed")
+            logger.debug("<= page.dispatch_event failed")
             raise e
 
     async def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
@@ -5914,16 +5914,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.evaluate started")
+            logger.debug("=> page.evaluate started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.evaluate(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= page.evaluate succeded")
+            logger.debug("<= page.evaluate succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.evaluate failed")
+            logger.debug("<= page.evaluate failed")
             raise e
 
     async def evaluate_handle(
@@ -5973,16 +5973,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.evaluate_handle started")
+            logger.debug("=> page.evaluate_handle started")
             result = mapping.from_impl(
                 await self._impl_obj.evaluate_handle(
                     expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= page.evaluate_handle succeded")
+            logger.debug("<= page.evaluate_handle succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.evaluate_handle failed")
+            logger.debug("<= page.evaluate_handle failed")
             raise e
 
     async def eval_on_selector(
@@ -6022,16 +6022,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.eval_on_selector started")
+            logger.debug("=> page.eval_on_selector started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.eval_on_selector(
                     selector=selector, expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= page.eval_on_selector succeded")
+            logger.debug("<= page.eval_on_selector succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.eval_on_selector failed")
+            logger.debug("<= page.eval_on_selector failed")
             raise e
 
     async def eval_on_selector_all(
@@ -6067,16 +6067,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.eval_on_selector_all started")
+            logger.debug("=> page.eval_on_selector_all started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.eval_on_selector_all(
                     selector=selector, expression=expression, arg=mapping.to_impl(arg)
                 )
             )
-            logging.debug("<= page.eval_on_selector_all succeded")
+            logger.debug("<= page.eval_on_selector_all succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.eval_on_selector_all failed")
+            logger.debug("<= page.eval_on_selector_all failed")
             raise e
 
     async def add_script_tag(
@@ -6113,16 +6113,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.add_script_tag started")
+            logger.debug("=> page.add_script_tag started")
             result = mapping.from_impl(
                 await self._impl_obj.add_script_tag(
                     url=url, path=path, content=content, type=type
                 )
             )
-            logging.debug("<= page.add_script_tag succeded")
+            logger.debug("<= page.add_script_tag succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.add_script_tag failed")
+            logger.debug("<= page.add_script_tag failed")
             raise e
 
     async def add_style_tag(
@@ -6155,14 +6155,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.add_style_tag started")
+            logger.debug("=> page.add_style_tag started")
             result = mapping.from_impl(
                 await self._impl_obj.add_style_tag(url=url, path=path, content=content)
             )
-            logging.debug("<= page.add_style_tag succeded")
+            logger.debug("<= page.add_style_tag succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.add_style_tag failed")
+            logger.debug("<= page.add_style_tag failed")
             raise e
 
     async def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
@@ -6220,16 +6220,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.expose_function started")
+            logger.debug("=> page.expose_function started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
                 )
             )
-            logging.debug("<= page.expose_function succeded")
+            logger.debug("<= page.expose_function succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.expose_function failed")
+            logger.debug("<= page.expose_function failed")
             raise e
 
     async def expose_binding(
@@ -6305,16 +6305,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.expose_binding started")
+            logger.debug("=> page.expose_binding started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
                 )
             )
-            logging.debug("<= page.expose_binding succeded")
+            logger.debug("<= page.expose_binding succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.expose_binding failed")
+            logger.debug("<= page.expose_binding failed")
             raise e
 
     async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
@@ -6331,16 +6331,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.set_extra_http_headers started")
+            logger.debug("=> page.set_extra_http_headers started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_extra_http_headers(
                     headers=mapping.to_impl(headers)
                 )
             )
-            logging.debug("<= page.set_extra_http_headers succeded")
+            logger.debug("<= page.set_extra_http_headers succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.set_extra_http_headers failed")
+            logger.debug("<= page.set_extra_http_headers failed")
             raise e
 
     async def content(self) -> str:
@@ -6354,12 +6354,12 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.content started")
+            logger.debug("=> page.content started")
             result = mapping.from_maybe_impl(await self._impl_obj.content())
-            logging.debug("<= page.content succeded")
+            logger.debug("<= page.content succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.content failed")
+            logger.debug("<= page.content failed")
             raise e
 
     async def set_content(
@@ -6388,16 +6388,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.set_content started")
+            logger.debug("=> page.set_content started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_content(
                     html=html, timeout=timeout, waitUntil=wait_until
                 )
             )
-            logging.debug("<= page.set_content succeded")
+            logger.debug("<= page.set_content succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.set_content failed")
+            logger.debug("<= page.set_content failed")
             raise e
 
     async def goto(
@@ -6455,16 +6455,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.goto started")
+            logger.debug("=> page.goto started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.goto(
                     url=url, timeout=timeout, waitUntil=wait_until, referer=referer
                 )
             )
-            logging.debug("<= page.goto succeded")
+            logger.debug("<= page.goto succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.goto failed")
+            logger.debug("<= page.goto failed")
             raise e
 
     async def reload(
@@ -6497,14 +6497,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.reload started")
+            logger.debug("=> page.reload started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.reload(timeout=timeout, waitUntil=wait_until)
             )
-            logging.debug("<= page.reload succeded")
+            logger.debug("<= page.reload succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.reload failed")
+            logger.debug("<= page.reload failed")
             raise e
 
     async def wait_for_load_state(
@@ -6552,14 +6552,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.wait_for_load_state started")
+            logger.debug("=> page.wait_for_load_state started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
             )
-            logging.debug("<= page.wait_for_load_state succeded")
+            logger.debug("<= page.wait_for_load_state succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.wait_for_load_state failed")
+            logger.debug("<= page.wait_for_load_state failed")
             raise e
 
     async def wait_for_event(
@@ -6589,7 +6589,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.wait_for_event started")
+            logger.debug("=> page.wait_for_event started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_event(
                     event=event,
@@ -6597,10 +6597,10 @@ class Page(AsyncBase):
                     timeout=timeout,
                 )
             )
-            logging.debug("<= page.wait_for_event succeded")
+            logger.debug("<= page.wait_for_event succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.wait_for_event failed")
+            logger.debug("<= page.wait_for_event failed")
             raise e
 
     async def go_back(
@@ -6635,14 +6635,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.go_back started")
+            logger.debug("=> page.go_back started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until)
             )
-            logging.debug("<= page.go_back succeded")
+            logger.debug("<= page.go_back succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.go_back failed")
+            logger.debug("<= page.go_back failed")
             raise e
 
     async def go_forward(
@@ -6677,14 +6677,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.go_forward started")
+            logger.debug("=> page.go_forward started")
             result = mapping.from_impl_nullable(
                 await self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until)
             )
-            logging.debug("<= page.go_forward succeded")
+            logger.debug("<= page.go_forward succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.go_forward failed")
+            logger.debug("<= page.go_forward failed")
             raise e
 
     async def emulate_media(
@@ -6735,16 +6735,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.emulate_media started")
+            logger.debug("=> page.emulate_media started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.emulate_media(
                     media=media, colorScheme=color_scheme
                 )
             )
-            logging.debug("<= page.emulate_media succeded")
+            logger.debug("<= page.emulate_media succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.emulate_media failed")
+            logger.debug("<= page.emulate_media failed")
             raise e
 
     async def set_viewport_size(self, viewport_size: ViewportSize) -> NoneType:
@@ -6768,14 +6768,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.set_viewport_size started")
+            logger.debug("=> page.set_viewport_size started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_viewport_size(viewportSize=viewport_size)
             )
-            logging.debug("<= page.set_viewport_size succeded")
+            logger.debug("<= page.set_viewport_size succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.set_viewport_size failed")
+            logger.debug("<= page.set_viewport_size failed")
             raise e
 
     async def bring_to_front(self) -> NoneType:
@@ -6785,12 +6785,12 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.bring_to_front started")
+            logger.debug("=> page.bring_to_front started")
             result = mapping.from_maybe_impl(await self._impl_obj.bring_to_front())
-            logging.debug("<= page.bring_to_front succeded")
+            logger.debug("<= page.bring_to_front succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.bring_to_front failed")
+            logger.debug("<= page.bring_to_front failed")
             raise e
 
     async def add_init_script(
@@ -6825,14 +6825,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.add_init_script started")
+            logger.debug("=> page.add_init_script started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.add_init_script(script=script, path=path)
             )
-            logging.debug("<= page.add_init_script succeded")
+            logger.debug("<= page.add_init_script succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.add_init_script failed")
+            logger.debug("<= page.add_init_script failed")
             raise e
 
     async def route(
@@ -6883,16 +6883,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.route started")
+            logger.debug("=> page.route started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.route(
                     url=self._wrap_handler(url), handler=self._wrap_handler(handler)
                 )
             )
-            logging.debug("<= page.route succeded")
+            logger.debug("<= page.route succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.route failed")
+            logger.debug("<= page.route failed")
             raise e
 
     async def unroute(
@@ -6916,16 +6916,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.unroute started")
+            logger.debug("=> page.unroute started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.unroute(
                     url=self._wrap_handler(url), handler=self._wrap_handler(handler)
                 )
             )
-            logging.debug("<= page.unroute succeded")
+            logger.debug("<= page.unroute succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.unroute failed")
+            logger.debug("<= page.unroute failed")
             raise e
 
     async def screenshot(
@@ -6974,7 +6974,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.screenshot started")
+            logger.debug("=> page.screenshot started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.screenshot(
                     timeout=timeout,
@@ -6986,10 +6986,10 @@ class Page(AsyncBase):
                     clip=clip,
                 )
             )
-            logging.debug("<= page.screenshot succeded")
+            logger.debug("<= page.screenshot succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.screenshot failed")
+            logger.debug("<= page.screenshot failed")
             raise e
 
     async def title(self) -> str:
@@ -7003,12 +7003,12 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.title started")
+            logger.debug("=> page.title started")
             result = mapping.from_maybe_impl(await self._impl_obj.title())
-            logging.debug("<= page.title succeded")
+            logger.debug("<= page.title succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.title failed")
+            logger.debug("<= page.title failed")
             raise e
 
     async def close(self, *, run_before_unload: bool = None) -> NoneType:
@@ -7030,14 +7030,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.close started")
+            logger.debug("=> page.close started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.close(runBeforeUnload=run_before_unload)
             )
-            logging.debug("<= page.close succeded")
+            logger.debug("<= page.close succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.close failed")
+            logger.debug("<= page.close failed")
             raise e
 
     def is_closed(self) -> bool:
@@ -7051,12 +7051,12 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.is_closed started")
+            logger.debug("=> page.is_closed started")
             result = mapping.from_maybe_impl(self._impl_obj.is_closed())
-            logging.debug("<= page.is_closed succeded")
+            logger.debug("<= page.is_closed succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.is_closed failed")
+            logger.debug("<= page.is_closed failed")
             raise e
 
     async def click(
@@ -7118,7 +7118,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.click started")
+            logger.debug("=> page.click started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.click(
                     selector=selector,
@@ -7132,10 +7132,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.click succeded")
+            logger.debug("<= page.click succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.click failed")
+            logger.debug("<= page.click failed")
             raise e
 
     async def dblclick(
@@ -7197,7 +7197,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.dblclick started")
+            logger.debug("=> page.dblclick started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.dblclick(
                     selector=selector,
@@ -7210,10 +7210,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.dblclick succeded")
+            logger.debug("<= page.dblclick succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.dblclick failed")
+            logger.debug("<= page.dblclick failed")
             raise e
 
     async def tap(
@@ -7268,7 +7268,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.tap started")
+            logger.debug("=> page.tap started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.tap(
                     selector=selector,
@@ -7279,10 +7279,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.tap succeded")
+            logger.debug("<= page.tap succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.tap failed")
+            logger.debug("<= page.tap failed")
             raise e
 
     async def fill(
@@ -7322,7 +7322,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.fill started")
+            logger.debug("=> page.fill started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.fill(
                     selector=selector,
@@ -7331,10 +7331,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.fill succeded")
+            logger.debug("<= page.fill succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.fill failed")
+            logger.debug("<= page.fill failed")
             raise e
 
     async def focus(self, selector: str, *, timeout: float = None) -> NoneType:
@@ -7356,14 +7356,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.focus started")
+            logger.debug("=> page.focus started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.focus(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.focus succeded")
+            logger.debug("<= page.focus succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.focus failed")
+            logger.debug("<= page.focus failed")
             raise e
 
     async def text_content(
@@ -7388,14 +7388,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.text_content started")
+            logger.debug("=> page.text_content started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.text_content(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.text_content succeded")
+            logger.debug("<= page.text_content succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.text_content failed")
+            logger.debug("<= page.text_content failed")
             raise e
 
     async def inner_text(self, selector: str, *, timeout: float = None) -> str:
@@ -7418,14 +7418,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.inner_text started")
+            logger.debug("=> page.inner_text started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.inner_text(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.inner_text succeded")
+            logger.debug("<= page.inner_text succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.inner_text failed")
+            logger.debug("<= page.inner_text failed")
             raise e
 
     async def inner_html(self, selector: str, *, timeout: float = None) -> str:
@@ -7448,14 +7448,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.inner_html started")
+            logger.debug("=> page.inner_html started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.inner_html(selector=selector, timeout=timeout)
             )
-            logging.debug("<= page.inner_html succeded")
+            logger.debug("<= page.inner_html succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.inner_html failed")
+            logger.debug("<= page.inner_html failed")
             raise e
 
     async def get_attribute(
@@ -7482,16 +7482,16 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.get_attribute started")
+            logger.debug("=> page.get_attribute started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.get_attribute(
                     selector=selector, name=name, timeout=timeout
                 )
             )
-            logging.debug("<= page.get_attribute succeded")
+            logger.debug("<= page.get_attribute succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.get_attribute failed")
+            logger.debug("<= page.get_attribute failed")
             raise e
 
     async def hover(
@@ -7539,7 +7539,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.hover started")
+            logger.debug("=> page.hover started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.hover(
                     selector=selector,
@@ -7549,10 +7549,10 @@ class Page(AsyncBase):
                     force=force,
                 )
             )
-            logging.debug("<= page.hover succeded")
+            logger.debug("<= page.hover succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.hover failed")
+            logger.debug("<= page.hover failed")
             raise e
 
     async def select_option(
@@ -7615,7 +7615,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.select_option started")
+            logger.debug("=> page.select_option started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.select_option(
                     selector=selector,
@@ -7627,10 +7627,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.select_option succeded")
+            logger.debug("<= page.select_option succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.select_option failed")
+            logger.debug("<= page.select_option failed")
             raise e
 
     async def set_input_files(
@@ -7671,7 +7671,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.set_input_files started")
+            logger.debug("=> page.set_input_files started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_input_files(
                     selector=selector,
@@ -7680,10 +7680,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.set_input_files succeded")
+            logger.debug("<= page.set_input_files succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.set_input_files failed")
+            logger.debug("<= page.set_input_files failed")
             raise e
 
     async def type(
@@ -7728,7 +7728,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.type started")
+            logger.debug("=> page.type started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.type(
                     selector=selector,
@@ -7738,10 +7738,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.type succeded")
+            logger.debug("<= page.type succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.type failed")
+            logger.debug("<= page.type failed")
             raise e
 
     async def press(
@@ -7805,7 +7805,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.press started")
+            logger.debug("=> page.press started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.press(
                     selector=selector,
@@ -7815,10 +7815,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.press succeded")
+            logger.debug("<= page.press succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.press failed")
+            logger.debug("<= page.press failed")
             raise e
 
     async def check(
@@ -7864,7 +7864,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.check started")
+            logger.debug("=> page.check started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.check(
                     selector=selector,
@@ -7873,10 +7873,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.check succeded")
+            logger.debug("<= page.check succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.check failed")
+            logger.debug("<= page.check failed")
             raise e
 
     async def uncheck(
@@ -7922,7 +7922,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.uncheck started")
+            logger.debug("=> page.uncheck started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.uncheck(
                     selector=selector,
@@ -7931,10 +7931,10 @@ class Page(AsyncBase):
                     noWaitAfter=no_wait_after,
                 )
             )
-            logging.debug("<= page.uncheck succeded")
+            logger.debug("<= page.uncheck succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.uncheck failed")
+            logger.debug("<= page.uncheck failed")
             raise e
 
     async def wait_for_timeout(self, timeout: float) -> NoneType:
@@ -7959,14 +7959,14 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.wait_for_timeout started")
+            logger.debug("=> page.wait_for_timeout started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_timeout(timeout=timeout)
             )
-            logging.debug("<= page.wait_for_timeout succeded")
+            logger.debug("<= page.wait_for_timeout succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.wait_for_timeout failed")
+            logger.debug("<= page.wait_for_timeout failed")
             raise e
 
     async def wait_for_function(
@@ -8030,7 +8030,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.wait_for_function started")
+            logger.debug("=> page.wait_for_function started")
             result = mapping.from_impl(
                 await self._impl_obj.wait_for_function(
                     expression=expression,
@@ -8039,10 +8039,10 @@ class Page(AsyncBase):
                     polling=polling,
                 )
             )
-            logging.debug("<= page.wait_for_function succeded")
+            logger.debug("<= page.wait_for_function succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.wait_for_function failed")
+            logger.debug("<= page.wait_for_function failed")
             raise e
 
     async def pause(self) -> NoneType:
@@ -8059,12 +8059,12 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.pause started")
+            logger.debug("=> page.pause started")
             result = mapping.from_maybe_impl(await self._impl_obj.pause())
-            logging.debug("<= page.pause succeded")
+            logger.debug("<= page.pause succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.pause failed")
+            logger.debug("<= page.pause failed")
             raise e
 
     async def pdf(
@@ -8175,7 +8175,7 @@ class Page(AsyncBase):
         """
 
         try:
-            logging.debug("=> page.pdf started")
+            logger.debug("=> page.pdf started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.pdf(
                     scale=scale,
@@ -8193,10 +8193,10 @@ class Page(AsyncBase):
                     path=path,
                 )
             )
-            logging.debug("<= page.pdf succeded")
+            logger.debug("<= page.pdf succeded")
             return result
         except Exception as e:
-            logging.debug("<= page.pdf failed")
+            logger.debug("<= page.pdf failed")
             raise e
 
     def expect_event(
@@ -8575,14 +8575,14 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.set_default_navigation_timeout started")
+            logger.debug("=> browser_context.set_default_navigation_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_navigation_timeout(timeout=timeout)
             )
-            logging.debug("<= browser_context.set_default_navigation_timeout succeded")
+            logger.debug("<= browser_context.set_default_navigation_timeout succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.set_default_navigation_timeout failed")
+            logger.debug("<= browser_context.set_default_navigation_timeout failed")
             raise e
 
     def set_default_timeout(self, timeout: float) -> NoneType:
@@ -8600,14 +8600,14 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.set_default_timeout started")
+            logger.debug("=> browser_context.set_default_timeout started")
             result = mapping.from_maybe_impl(
                 self._impl_obj.set_default_timeout(timeout=timeout)
             )
-            logging.debug("<= browser_context.set_default_timeout succeded")
+            logger.debug("<= browser_context.set_default_timeout succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.set_default_timeout failed")
+            logger.debug("<= browser_context.set_default_timeout failed")
             raise e
 
     async def new_page(self) -> "Page":
@@ -8621,12 +8621,12 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.new_page started")
+            logger.debug("=> browser_context.new_page started")
             result = mapping.from_impl(await self._impl_obj.new_page())
-            logging.debug("<= browser_context.new_page succeded")
+            logger.debug("<= browser_context.new_page succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.new_page failed")
+            logger.debug("<= browser_context.new_page failed")
             raise e
 
     async def cookies(
@@ -8648,12 +8648,12 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.cookies started")
+            logger.debug("=> browser_context.cookies started")
             result = mapping.from_impl_list(await self._impl_obj.cookies(urls=urls))
-            logging.debug("<= browser_context.cookies succeded")
+            logger.debug("<= browser_context.cookies succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.cookies failed")
+            logger.debug("<= browser_context.cookies failed")
             raise e
 
     async def add_cookies(self, cookies: typing.List[Cookie]) -> NoneType:
@@ -8672,14 +8672,14 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.add_cookies started")
+            logger.debug("=> browser_context.add_cookies started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.add_cookies(cookies=cookies)
             )
-            logging.debug("<= browser_context.add_cookies succeded")
+            logger.debug("<= browser_context.add_cookies succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.add_cookies failed")
+            logger.debug("<= browser_context.add_cookies failed")
             raise e
 
     async def clear_cookies(self) -> NoneType:
@@ -8689,12 +8689,12 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.clear_cookies started")
+            logger.debug("=> browser_context.clear_cookies started")
             result = mapping.from_maybe_impl(await self._impl_obj.clear_cookies())
-            logging.debug("<= browser_context.clear_cookies succeded")
+            logger.debug("<= browser_context.clear_cookies succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.clear_cookies failed")
+            logger.debug("<= browser_context.clear_cookies failed")
             raise e
 
     async def grant_permissions(
@@ -8730,16 +8730,16 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.grant_permissions started")
+            logger.debug("=> browser_context.grant_permissions started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.grant_permissions(
                     permissions=permissions, origin=origin
                 )
             )
-            logging.debug("<= browser_context.grant_permissions succeded")
+            logger.debug("<= browser_context.grant_permissions succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.grant_permissions failed")
+            logger.debug("<= browser_context.grant_permissions failed")
             raise e
 
     async def clear_permissions(self) -> NoneType:
@@ -8756,12 +8756,12 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.clear_permissions started")
+            logger.debug("=> browser_context.clear_permissions started")
             result = mapping.from_maybe_impl(await self._impl_obj.clear_permissions())
-            logging.debug("<= browser_context.clear_permissions succeded")
+            logger.debug("<= browser_context.clear_permissions succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.clear_permissions failed")
+            logger.debug("<= browser_context.clear_permissions failed")
             raise e
 
     async def set_geolocation(self, geolocation: Geolocation = None) -> NoneType:
@@ -8782,14 +8782,14 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.set_geolocation started")
+            logger.debug("=> browser_context.set_geolocation started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_geolocation(geolocation=geolocation)
             )
-            logging.debug("<= browser_context.set_geolocation succeded")
+            logger.debug("<= browser_context.set_geolocation succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.set_geolocation failed")
+            logger.debug("<= browser_context.set_geolocation failed")
             raise e
 
     async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
@@ -8808,16 +8808,16 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.set_extra_http_headers started")
+            logger.debug("=> browser_context.set_extra_http_headers started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_extra_http_headers(
                     headers=mapping.to_impl(headers)
                 )
             )
-            logging.debug("<= browser_context.set_extra_http_headers succeded")
+            logger.debug("<= browser_context.set_extra_http_headers succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.set_extra_http_headers failed")
+            logger.debug("<= browser_context.set_extra_http_headers failed")
             raise e
 
     async def set_offline(self, offline: bool) -> NoneType:
@@ -8830,14 +8830,14 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.set_offline started")
+            logger.debug("=> browser_context.set_offline started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.set_offline(offline=offline)
             )
-            logging.debug("<= browser_context.set_offline succeded")
+            logger.debug("<= browser_context.set_offline succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.set_offline failed")
+            logger.debug("<= browser_context.set_offline failed")
             raise e
 
     async def add_init_script(
@@ -8872,14 +8872,14 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.add_init_script started")
+            logger.debug("=> browser_context.add_init_script started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.add_init_script(script=script, path=path)
             )
-            logging.debug("<= browser_context.add_init_script succeded")
+            logger.debug("<= browser_context.add_init_script succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.add_init_script failed")
+            logger.debug("<= browser_context.add_init_script failed")
             raise e
 
     async def expose_binding(
@@ -8953,16 +8953,16 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.expose_binding started")
+            logger.debug("=> browser_context.expose_binding started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
                 )
             )
-            logging.debug("<= browser_context.expose_binding succeded")
+            logger.debug("<= browser_context.expose_binding succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.expose_binding failed")
+            logger.debug("<= browser_context.expose_binding failed")
             raise e
 
     async def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
@@ -9019,16 +9019,16 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.expose_function started")
+            logger.debug("=> browser_context.expose_function started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
                 )
             )
-            logging.debug("<= browser_context.expose_function succeded")
+            logger.debug("<= browser_context.expose_function succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.expose_function failed")
+            logger.debug("<= browser_context.expose_function failed")
             raise e
 
     async def route(
@@ -9079,16 +9079,16 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.route started")
+            logger.debug("=> browser_context.route started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.route(
                     url=self._wrap_handler(url), handler=self._wrap_handler(handler)
                 )
             )
-            logging.debug("<= browser_context.route succeded")
+            logger.debug("<= browser_context.route succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.route failed")
+            logger.debug("<= browser_context.route failed")
             raise e
 
     async def unroute(
@@ -9114,16 +9114,16 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.unroute started")
+            logger.debug("=> browser_context.unroute started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.unroute(
                     url=self._wrap_handler(url), handler=self._wrap_handler(handler)
                 )
             )
-            logging.debug("<= browser_context.unroute succeded")
+            logger.debug("<= browser_context.unroute succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.unroute failed")
+            logger.debug("<= browser_context.unroute failed")
             raise e
 
     def expect_event(
@@ -9170,12 +9170,12 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.close started")
+            logger.debug("=> browser_context.close started")
             result = mapping.from_maybe_impl(await self._impl_obj.close())
-            logging.debug("<= browser_context.close succeded")
+            logger.debug("<= browser_context.close succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.close failed")
+            logger.debug("<= browser_context.close failed")
             raise e
 
     async def storage_state(
@@ -9197,12 +9197,12 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.storage_state started")
+            logger.debug("=> browser_context.storage_state started")
             result = mapping.from_impl(await self._impl_obj.storage_state(path=path))
-            logging.debug("<= browser_context.storage_state succeded")
+            logger.debug("<= browser_context.storage_state succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.storage_state failed")
+            logger.debug("<= browser_context.storage_state failed")
             raise e
 
     async def wait_for_event(
@@ -9232,7 +9232,7 @@ class BrowserContext(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_context.wait_for_event started")
+            logger.debug("=> browser_context.wait_for_event started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.wait_for_event(
                     event=event,
@@ -9240,10 +9240,10 @@ class BrowserContext(AsyncBase):
                     timeout=timeout,
                 )
             )
-            logging.debug("<= browser_context.wait_for_event succeded")
+            logger.debug("<= browser_context.wait_for_event succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_context.wait_for_event failed")
+            logger.debug("<= browser_context.wait_for_event failed")
             raise e
 
     def expect_page(
@@ -9301,14 +9301,14 @@ class CDPSession(AsyncBase):
         """
 
         try:
-            logging.debug("=> cdp_session.send started")
+            logger.debug("=> cdp_session.send started")
             result = mapping.from_maybe_impl(
                 await self._impl_obj.send(method=method, params=mapping.to_impl(params))
             )
-            logging.debug("<= cdp_session.send succeded")
+            logger.debug("<= cdp_session.send succeded")
             return result
         except Exception as e:
-            logging.debug("<= cdp_session.send failed")
+            logger.debug("<= cdp_session.send failed")
             raise e
 
     async def detach(self) -> NoneType:
@@ -9319,12 +9319,12 @@ class CDPSession(AsyncBase):
         """
 
         try:
-            logging.debug("=> cdp_session.detach started")
+            logger.debug("=> cdp_session.detach started")
             result = mapping.from_maybe_impl(await self._impl_obj.detach())
-            logging.debug("<= cdp_session.detach succeded")
+            logger.debug("<= cdp_session.detach succeded")
             return result
         except Exception as e:
-            logging.debug("<= cdp_session.detach failed")
+            logger.debug("<= cdp_session.detach failed")
             raise e
 
 
@@ -9375,14 +9375,14 @@ class ChromiumBrowserContext(BrowserContext):
         """
 
         try:
-            logging.debug("=> chromium_browser_context.new_cdp_session started")
+            logger.debug("=> chromium_browser_context.new_cdp_session started")
             result = mapping.from_impl(
                 await self._impl_obj.new_cdp_session(page=page._impl_obj)
             )
-            logging.debug("<= chromium_browser_context.new_cdp_session succeded")
+            logger.debug("<= chromium_browser_context.new_cdp_session succeded")
             return result
         except Exception as e:
-            logging.debug("<= chromium_browser_context.new_cdp_session failed")
+            logger.debug("<= chromium_browser_context.new_cdp_session failed")
             raise e
 
 
@@ -9435,12 +9435,12 @@ class Browser(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser.is_connected started")
+            logger.debug("=> browser.is_connected started")
             result = mapping.from_maybe_impl(self._impl_obj.is_connected())
-            logging.debug("<= browser.is_connected succeded")
+            logger.debug("<= browser.is_connected succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser.is_connected failed")
+            logger.debug("<= browser.is_connected failed")
             raise e
 
     async def new_context(
@@ -9551,7 +9551,7 @@ class Browser(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser.new_context started")
+            logger.debug("=> browser.new_context started")
             result = mapping.from_impl(
                 await self._impl_obj.new_context(
                     viewport=viewport,
@@ -9581,10 +9581,10 @@ class Browser(AsyncBase):
                     storageState=storage_state,
                 )
             )
-            logging.debug("<= browser.new_context succeded")
+            logger.debug("<= browser.new_context succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser.new_context failed")
+            logger.debug("<= browser.new_context failed")
             raise e
 
     async def new_page(
@@ -9690,7 +9690,7 @@ class Browser(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser.new_page started")
+            logger.debug("=> browser.new_page started")
             result = mapping.from_impl(
                 await self._impl_obj.new_page(
                     viewport=viewport,
@@ -9720,10 +9720,10 @@ class Browser(AsyncBase):
                     storageState=storage_state,
                 )
             )
-            logging.debug("<= browser.new_page succeded")
+            logger.debug("<= browser.new_page succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser.new_page failed")
+            logger.debug("<= browser.new_page failed")
             raise e
 
     async def close(self) -> NoneType:
@@ -9739,12 +9739,12 @@ class Browser(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser.close started")
+            logger.debug("=> browser.close started")
             result = mapping.from_maybe_impl(await self._impl_obj.close())
-            logging.debug("<= browser.close succeded")
+            logger.debug("<= browser.close succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser.close failed")
+            logger.debug("<= browser.close failed")
             raise e
 
 
@@ -9877,7 +9877,7 @@ class BrowserType(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_type.launch started")
+            logger.debug("=> browser_type.launch started")
             result = mapping.from_impl(
                 await self._impl_obj.launch(
                     executablePath=executable_path,
@@ -9897,10 +9897,10 @@ class BrowserType(AsyncBase):
                     firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
                 )
             )
-            logging.debug("<= browser_type.launch succeded")
+            logger.debug("<= browser_type.launch succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_type.launch failed")
+            logger.debug("<= browser_type.launch failed")
             raise e
 
     async def launch_persistent_context(
@@ -10053,7 +10053,7 @@ class BrowserType(AsyncBase):
         """
 
         try:
-            logging.debug("=> browser_type.launch_persistent_context started")
+            logger.debug("=> browser_type.launch_persistent_context started")
             result = mapping.from_impl(
                 await self._impl_obj.launch_persistent_context(
                     userDataDir=user_data_dir,
@@ -10095,10 +10095,10 @@ class BrowserType(AsyncBase):
                     recordVideoSize=record_video_size,
                 )
             )
-            logging.debug("<= browser_type.launch_persistent_context succeded")
+            logger.debug("<= browser_type.launch_persistent_context succeded")
             return result
         except Exception as e:
-            logging.debug("<= browser_type.launch_persistent_context failed")
+            logger.debug("<= browser_type.launch_persistent_context failed")
             raise e
 
 
@@ -10212,12 +10212,12 @@ class Playwright(AsyncBase):
         """
 
         try:
-            logging.debug("=> playwright.stop started")
+            logger.debug("=> playwright.stop started")
             result = mapping.from_maybe_impl(self._impl_obj.stop())
-            logging.debug("<= playwright.stop succeded")
+            logger.debug("<= playwright.stop succeded")
             return result
         except Exception as e:
-            logging.debug("<= playwright.stop failed")
+            logger.debug("<= playwright.stop failed")
             raise e
 
 
