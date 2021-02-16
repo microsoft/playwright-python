@@ -66,10 +66,10 @@ with sync_playwright() as p:
 #### Async API
 
 If you app is based on the modern asyncio loop and you are used to async/await constructs,
-Playwright exposes Async API for you. You should also use this API inside the Jupyter Notebook
-and other REPL frameworks that are already based on asyncio.
+Playwright exposes Async API for you. You should use this API inside a Python REPL supporting `asyncio` like with `python -m asyncio`
 
 ```py
+$ python -m asyncio
 import asyncio
 from playwright.async_api import async_playwright
 
@@ -115,9 +115,10 @@ Blocking REPL, as in CLI:
 >>> playwright.stop()
 ```
 
-Async REPL such as Jupyter Notebook:
+Async REPL such as `asyncio` REPL:
 
 ```py
+$ python -m asyncio
 >>> from playwright.async_api import async_playwright
 >>> playwright = await async_playwright().start()
 >>> browser = await playwright.chromium.launch()
