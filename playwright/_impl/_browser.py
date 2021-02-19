@@ -92,7 +92,7 @@ class Browser(ChannelOwner):
         storageState: Union[StorageState, str, Path] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        normalize_context_params(params)
+        normalize_context_params(self._connection._is_sync, params)
 
         channel = await self._channel.send("newContext", params)
         context = from_channel(channel)
@@ -151,7 +151,8 @@ class Browser(ChannelOwner):
         return self._initializer["version"]
 
 
-def normalize_context_params(params: Dict) -> None:
+def normalize_context_params(is_sync: bool, params: Dict) -> None:
+    params["sdkLanguage"] = "python" if is_sync else "python-async"
     if params.get("noViewport"):
         del params["noViewport"]
         params["noDefaultViewport"] = True

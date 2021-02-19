@@ -18,7 +18,6 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
-from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -108,14 +107,7 @@ def generate(t: Any) -> None:
                 suffix = ")" + suffix
                 print(
                     f"""
-        try:
-            log_api("=> {to_snake_case(class_name)}.{name} started")
-            result = {prefix}{arguments(value, len(prefix))}{suffix}
-            log_api("<= {to_snake_case(class_name)}.{name} succeded")
-            return result
-        except Exception as e:
-            log_api("<= {to_snake_case(class_name)}.{name} failed")
-            raise e"""
+        return {prefix}{arguments(value, len(prefix))}{suffix}"""
                 )
 
     print("")

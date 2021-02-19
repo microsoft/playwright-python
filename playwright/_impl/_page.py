@@ -779,7 +779,7 @@ class Page(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
-        wait_helper = WaitHelper(self._loop)
+        wait_helper = WaitHelper(self, f"expect_event({event})")
         wait_helper.reject_on_timeout(
             timeout, f'Timeout while waiting for event "{event}"'
         )

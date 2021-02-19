@@ -13,7 +13,18 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, cast
+import traceback
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TypeVar,
+    cast,
+)
 
 import greenlet
 
@@ -70,24 +81,26 @@ class EventContextManager(Generic[T]):
 class SyncBase(ImplWrapper):
     def __init__(self, impl_obj: Any) -> None:
         super().__init__(impl_obj)
-        self._loop = impl_obj._loop
+        self._loop: asyncio.BaseEventLoop = impl_obj._loop
         self._dispatcher_fiber = impl_obj._dispatcher_fiber
 
     def __str__(self) -> str:
         return self._impl_obj.__str__()
 
-    def _sync(self, task: asyncio.Future) -> Any:
+    def _sync(self, coro: Awaitable) -> Any:
+        stack_trace = traceback.extract_stack()
         g_self = greenlet.getcurrent()
-        future = self._loop.create_task(task)
+        task = self._loop.create_task(coro)
+        setattr(task, "__pw_stack_trace__", stack_trace)
 
         def callback(result: Any) -> None:
             g_self.switch()
 
-        future.add_done_callback(callback)
-        while not future.done():
+        task.add_done_callback(callback)
+        while not task.done():
             self._dispatcher_fiber.switch()
         asyncio._set_running_loop(self._loop)
-        return future.result()
+        return task.result()
 
     def _wrap_handler(self, handler: Any) -> Callable[..., None]:
         if callable(handler):
