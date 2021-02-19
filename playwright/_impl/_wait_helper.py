@@ -13,22 +13,27 @@
 # limitations under the License.
 
 import asyncio
+import uuid
 from asyncio.tasks import Task
 from typing import Any, Callable, Generic, List, Tuple, TypeVar
 
 from pyee import EventEmitter
 
 from playwright._impl._api_types import Error, TimeoutError
+from playwright._impl._connection import ChannelOwner
 
 T = TypeVar("T")
 
 
 class WaitHelper(Generic[T]):
-    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(self, channel_owner: ChannelOwner, name: str) -> None:
         self._result: asyncio.Future = asyncio.Future()
-        self._loop = loop
+        self._wait_id = uuid.uuid4().hex
+        self._loop = channel_owner._loop
         self._pending_tasks: List[Task] = []
+        self._channel_owner = channel_owner
         self._registered_listeners: List[Tuple[EventEmitter, str, Callable]] = []
+        channel_owner._wait_for_event_info_before(self._wait_id, name)
 
     def reject_on_event(
         self,
@@ -65,11 +70,13 @@ class WaitHelper(Generic[T]):
         self._cleanup()
         if not self._result.done():
             self._result.set_result(result)
+        self._channel_owner._wait_for_event_info_after(self._wait_id)
 
     def _reject(self, exception: Exception) -> None:
         self._cleanup()
         if not self._result.done():
             self._result.set_exception(exception)
+        self._channel_owner._wait_for_event_info_after(self._wait_id, exception)
 
     def wait_for_event(
         self,

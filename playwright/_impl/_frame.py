@@ -115,8 +115,10 @@ class Frame(ChannelOwner):
             ),
         )
 
-    def _setup_navigation_wait_helper(self, timeout: float = None) -> WaitHelper:
-        wait_helper = WaitHelper(self._loop)
+    def _setup_navigation_wait_helper(
+        self, wait_name: str, timeout: float = None
+    ) -> WaitHelper:
+        wait_helper = WaitHelper(self, wait_name)
         wait_helper.reject_on_event(
             self._page, "close", Error("Navigation failed because page was closed!")
         )
@@ -146,7 +148,7 @@ class Frame(ChannelOwner):
         if timeout is None:
             timeout = self._page._timeout_settings.navigation_timeout()
         deadline = monotonic_time() + timeout
-        wait_helper = self._setup_navigation_wait_helper(timeout)
+        wait_helper = self._setup_navigation_wait_helper("expect_navigation", timeout)
         matcher = URLMatcher(url) if url else None
 
         def predicate(event: Any) -> bool:
@@ -185,7 +187,7 @@ class Frame(ChannelOwner):
             raise Error("state: expected one of (load|domcontentloaded|networkidle)")
         if state in self._load_states:
             return
-        wait_helper = self._setup_navigation_wait_helper(timeout)
+        wait_helper = self._setup_navigation_wait_helper("wait_for_load_state", timeout)
         wait_helper.wait_for_event(
             self._event_emitter, "loadstate", lambda s: s == state
         )

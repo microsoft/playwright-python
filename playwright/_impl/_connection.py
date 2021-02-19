@@ -16,7 +16,7 @@ import asyncio
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
@@ -92,6 +92,32 @@ class ChannelOwner(AsyncIOEventEmitter):
         if self._parent:
             self._parent._objects[guid] = self
 
+    def _wait_for_event_info_before(self, wait_id: str, name: str) -> None:
+        self._connection._send_message_to_server(
+            self._guid,
+            "waitForEventInfo",
+            {
+                "info": {
+                    "name": name,
+                    "waitId": wait_id,
+                    "phase": "before",
+                    "stack": capture_call_stack(),
+                }
+            },
+        )
+
+    def _wait_for_event_info_after(
+        self, wait_id: str, exception: Exception = None
+    ) -> None:
+        info = {"waitId": wait_id, "phase": "after"}
+        if exception:
+            info["error"] = str(exception)
+        self._connection._send_message_to_server(
+            self._guid,
+            "waitForEventInfo",
+            {"info": info},
+        )
+
     def _dispose(self) -> None:
         # Clean up from parent and connection.
         if self._parent:
@@ -106,7 +132,7 @@ class ChannelOwner(AsyncIOEventEmitter):
 
 class ProtocolCallback:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
-        self.stack_trace = "".join(traceback.format_stack()[-10:])
+        self.stack_trace: traceback.StackSummary = traceback.StackSummary()
         self.future = loop.create_future()
 
 
@@ -166,14 +192,23 @@ class Connection:
     ) -> ProtocolCallback:
         self._last_id += 1
         id = self._last_id
+        callback = ProtocolCallback(self._loop)
+        if self._is_sync:
+            task = asyncio.current_task(self._loop)
+            callback.stack_trace = (
+                getattr(task, "__pw_stack_trace__", None) if task else None
+            )
+        if not callback.stack_trace:
+            callback.stack_trace = traceback.extract_stack()
+
         message = dict(
             id=id,
             guid=guid,
             method=method,
             params=self._replace_channels_with_guids(params, "params"),
+            metadata={"stack": serialize_call_stack(callback.stack_trace)},
         )
         self._transport.send(message)
-        callback = ProtocolCallback(self._loop)
         self._callbacks[id] = callback
         return callback
 
@@ -184,7 +219,9 @@ class Connection:
             error = msg.get("error")
             if error:
                 parsed_error = parse_error(error["error"])  # type: ignore
-                parsed_error.stack = callback.stack_trace
+                parsed_error.stack = "".join(
+                    traceback.format_list(callback.stack_trace)[-10:]
+                )
                 callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
@@ -267,3 +304,19 @@ def from_channel(channel: Channel) -> Any:
 
 def from_nullable_channel(channel: Optional[Channel]) -> Optional[Any]:
     return channel._object if channel else None
+
+
+def serialize_call_stack(stack_trace: traceback.StackSummary) -> List[Dict]:
+    stack: List[Dict] = []
+    for frame in stack_trace:
+        if "_generated.py" in frame.filename:
+            break
+        stack.append(
+            {"file": frame.filename, "line": frame.lineno, "function": frame.name}
+        )
+    stack.reverse()
+    return stack
+
+
+def capture_call_stack() -> List[Dict]:
+    return serialize_call_stack(traceback.extract_stack())
