@@ -18,6 +18,7 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
+from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -87,7 +88,6 @@ def generate(t: Any) -> None:
             )
             print("")
             async_prefix = "async " if is_async else ""
-            await_prefix = "await " if is_async else ""
             print(
                 f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
@@ -103,7 +103,12 @@ def generate(t: Any) -> None:
                 [prefix, suffix] = return_value(
                     get_type_hints(value, api_globals)["return"]
                 )
-                prefix = prefix + f"{await_prefix}self._impl_obj.{name}("
+                if is_async:
+                    prefix += (
+                        f'await self._async("{to_snake_case(class_name)}.{name}", '
+                    )
+                    suffix += ")"
+                prefix = prefix + f"self._impl_obj.{name}("
                 suffix = ")" + suffix
                 print(
                     f"""

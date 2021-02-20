@@ -154,6 +154,7 @@ class Connection:
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._object_factory = object_factory
         self._is_sync = False
+        self._api_name = ""
 
     async def run_as_sync(self) -> None:
         self._is_sync = True
@@ -194,20 +195,22 @@ class Connection:
         self._last_id += 1
         id = self._last_id
         callback = ProtocolCallback(self._loop)
-        if self._is_sync:
-            task = asyncio.current_task(self._loop)
-            callback.stack_trace = (
-                getattr(task, "__pw_stack_trace__", None) if task else None
-            )
+        task = asyncio.current_task(self._loop)
+        callback.stack_trace = getattr(task, "__pw_stack_trace__", None)
         if not callback.stack_trace:
             callback.stack_trace = traceback.extract_stack()
+
+        metadata = {"stack": serialize_call_stack(callback.stack_trace)}
+        api_name = getattr(task, "__pw_api_name__", None)
+        if api_name:
+            metadata["apiName"] = api_name
 
         message = dict(
             id=id,
             guid=guid,
             method=method,
             params=self._replace_channels_with_guids(params, "params"),
-            metadata={"stack": serialize_call_stack(callback.stack_trace)},
+            metadata=metadata,
         )
         self._transport.send(message)
         self._callbacks[id] = callback
