@@ -168,8 +168,9 @@ class Connection:
         self._transport.stop()
         self._dispatcher_fiber.switch()
 
-    def stop_async(self) -> None:
+    async def stop_async(self) -> None:
         self._transport.stop()
+        await self._transport.wait_until_stopped()
 
     async def wait_for_object_with_known_name(self, guid: str) -> Any:
         if guid in self._objects:
