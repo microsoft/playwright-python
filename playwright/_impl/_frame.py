@@ -118,7 +118,7 @@ class Frame(ChannelOwner):
     def _setup_navigation_wait_helper(
         self, wait_name: str, timeout: float = None
     ) -> WaitHelper:
-        wait_helper = WaitHelper(self, wait_name)
+        wait_helper = WaitHelper(self, f"frame.{wait_name}")
         wait_helper.reject_on_event(
             self._page, "close", Error("Navigation failed because page was closed!")
         )

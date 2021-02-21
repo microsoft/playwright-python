@@ -301,7 +301,7 @@ class WebSocket(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
-        wait_helper = WaitHelper(self, f"expect_event({event})")
+        wait_helper = WaitHelper(self, f"web_socket.expect_event({event})")
         wait_helper.reject_on_timeout(
             timeout, f'Timeout while waiting for event "{event}"'
         )

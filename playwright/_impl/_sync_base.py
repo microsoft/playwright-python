@@ -87,11 +87,11 @@ class SyncBase(ImplWrapper):
     def __str__(self) -> str:
         return self._impl_obj.__str__()
 
-    def _sync(self, coro: Awaitable) -> Any:
-        stack_trace = traceback.extract_stack()
+    def _sync(self, api_name: str, coro: Awaitable) -> Any:
         g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)
-        setattr(task, "__pw_stack_trace__", stack_trace)
+        setattr(task, "__pw_api_name__", api_name)
+        setattr(task, "__pw_stack_trace__", traceback.extract_stack())
 
         def callback(result: Any) -> None:
             g_self.switch()

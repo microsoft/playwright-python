@@ -270,7 +270,9 @@ class Request(AsyncBase):
         Union[Response, NoneType]
         """
 
-        return mapping.from_impl_nullable(await self._impl_obj.response())
+        return mapping.from_impl_nullable(
+            await self._async("request.response", self._impl_obj.response())
+        )
 
     def is_navigation_request(self) -> bool:
         """Request.is_navigation_request
@@ -386,7 +388,9 @@ class Response(AsyncBase):
         Union[str, NoneType]
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.finished())
+        return mapping.from_maybe_impl(
+            await self._async("response.finished", self._impl_obj.finished())
+        )
 
     async def body(self) -> bytes:
         """Response.body
@@ -398,7 +402,9 @@ class Response(AsyncBase):
         bytes
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.body())
+        return mapping.from_maybe_impl(
+            await self._async("response.body", self._impl_obj.body())
+        )
 
     async def text(self) -> str:
         """Response.text
@@ -410,7 +416,9 @@ class Response(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.text())
+        return mapping.from_maybe_impl(
+            await self._async("response.text", self._impl_obj.text())
+        )
 
     async def json(self) -> typing.Any:
         """Response.json
@@ -424,7 +432,9 @@ class Response(AsyncBase):
         Any
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.json())
+        return mapping.from_maybe_impl(
+            await self._async("response.json", self._impl_obj.json())
+        )
 
 
 mapping.register(ResponseImpl, Response)
@@ -473,7 +483,9 @@ class Route(AsyncBase):
             - `'failed'` - A generic failure occurred.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.abort(errorCode=error_code))
+        return mapping.from_maybe_impl(
+            await self._async("route.abort", self._impl_obj.abort(errorCode=error_code))
+        )
 
     async def fulfill(
         self,
@@ -519,12 +531,15 @@ class Route(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.fulfill(
-                status=status,
-                headers=mapping.to_impl(headers),
-                body=body,
-                path=path,
-                contentType=content_type,
+            await self._async(
+                "route.fulfill",
+                self._impl_obj.fulfill(
+                    status=status,
+                    headers=mapping.to_impl(headers),
+                    body=body,
+                    path=path,
+                    contentType=content_type,
+                ),
             )
         )
 
@@ -566,11 +581,14 @@ class Route(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.continue_(
-                url=url,
-                method=method,
-                headers=mapping.to_impl(headers),
-                postData=post_data,
+            await self._async(
+                "route.continue_",
+                self._impl_obj.continue_(
+                    url=url,
+                    method=method,
+                    headers=mapping.to_impl(headers),
+                    postData=post_data,
+                ),
             )
         )
 
@@ -650,8 +668,13 @@ class WebSocket(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            await self._async(
+                "web_socket.wait_for_event",
+                self._impl_obj.wait_for_event(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                ),
             )
         )
 
@@ -709,7 +732,9 @@ class Keyboard(AsyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.down(key=key))
+        return mapping.from_maybe_impl(
+            await self._async("keyboard.down", self._impl_obj.down(key=key))
+        )
 
     async def up(self, key: str) -> NoneType:
         """Keyboard.up
@@ -722,7 +747,9 @@ class Keyboard(AsyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.up(key=key))
+        return mapping.from_maybe_impl(
+            await self._async("keyboard.up", self._impl_obj.up(key=key))
+        )
 
     async def insert_text(self, text: str) -> NoneType:
         """Keyboard.insert_text
@@ -741,7 +768,11 @@ class Keyboard(AsyncBase):
             Sets input to the specified text value.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.insert_text(text=text))
+        return mapping.from_maybe_impl(
+            await self._async(
+                "keyboard.insert_text", self._impl_obj.insert_text(text=text)
+            )
+        )
 
     async def type(self, text: str, *, delay: float = None) -> NoneType:
         """Keyboard.type
@@ -766,7 +797,9 @@ class Keyboard(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.type(text=text, delay=delay)
+            await self._async(
+                "keyboard.type", self._impl_obj.type(text=text, delay=delay)
+            )
         )
 
     async def press(self, key: str, *, delay: float = None) -> NoneType:
@@ -811,7 +844,11 @@ class Keyboard(AsyncBase):
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.press(key=key, delay=delay))
+        return mapping.from_maybe_impl(
+            await self._async(
+                "keyboard.press", self._impl_obj.press(key=key, delay=delay)
+            )
+        )
 
 
 mapping.register(KeyboardImpl, Keyboard)
@@ -834,7 +871,9 @@ class Mouse(AsyncBase):
             defaults to 1. Sends intermediate `mousemove` events.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.move(x=x, y=y, steps=steps))
+        return mapping.from_maybe_impl(
+            await self._async("mouse.move", self._impl_obj.move(x=x, y=y, steps=steps))
+        )
 
     async def down(
         self,
@@ -855,7 +894,9 @@ class Mouse(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.down(button=button, clickCount=click_count)
+            await self._async(
+                "mouse.down", self._impl_obj.down(button=button, clickCount=click_count)
+            )
         )
 
     async def up(
@@ -877,7 +918,9 @@ class Mouse(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.up(button=button, clickCount=click_count)
+            await self._async(
+                "mouse.up", self._impl_obj.up(button=button, clickCount=click_count)
+            )
         )
 
     async def click(
@@ -906,8 +949,11 @@ class Mouse(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                x=x, y=y, delay=delay, button=button, clickCount=click_count
+            await self._async(
+                "mouse.click",
+                self._impl_obj.click(
+                    x=x, y=y, delay=delay, button=button, clickCount=click_count
+                ),
             )
         )
 
@@ -935,7 +981,10 @@ class Mouse(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button)
+            await self._async(
+                "mouse.dblclick",
+                self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button),
+            )
         )
 
 
@@ -957,7 +1006,9 @@ class Touchscreen(AsyncBase):
         y : float
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.tap(x=x, y=y))
+        return mapping.from_maybe_impl(
+            await self._async("touchscreen.tap", self._impl_obj.tap(x=x, y=y))
+        )
 
 
 mapping.register(TouchscreenImpl, Touchscreen)
@@ -997,8 +1048,11 @@ class JSHandle(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.evaluate(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "js_handle.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -1033,8 +1087,11 @@ class JSHandle(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.evaluate_handle(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "js_handle.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -1054,7 +1111,10 @@ class JSHandle(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.get_property(propertyName=property_name)
+            await self._async(
+                "js_handle.get_property",
+                self._impl_obj.get_property(propertyName=property_name),
+            )
         )
 
     async def get_properties(self) -> typing.Dict[str, "JSHandle"]:
@@ -1075,7 +1135,11 @@ class JSHandle(AsyncBase):
         Dict[str, JSHandle]
         """
 
-        return mapping.from_impl_dict(await self._impl_obj.get_properties())
+        return mapping.from_impl_dict(
+            await self._async(
+                "js_handle.get_properties", self._impl_obj.get_properties()
+            )
+        )
 
     def as_element(self) -> typing.Union["ElementHandle", NoneType]:
         """JSHandle.as_element
@@ -1095,7 +1159,9 @@ class JSHandle(AsyncBase):
         The `jsHandle.dispose` method stops referencing the element handle.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dispose())
+        return mapping.from_maybe_impl(
+            await self._async("js_handle.dispose", self._impl_obj.dispose())
+        )
 
     async def json_value(self) -> typing.Any:
         """JSHandle.json_value
@@ -1110,7 +1176,9 @@ class JSHandle(AsyncBase):
         Any
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.json_value())
+        return mapping.from_maybe_impl(
+            await self._async("js_handle.json_value", self._impl_obj.json_value())
+        )
 
 
 mapping.register(JSHandleImpl, JSHandle)
@@ -1142,7 +1210,11 @@ class ElementHandle(JSHandle):
         Union[Frame, NoneType]
         """
 
-        return mapping.from_impl_nullable(await self._impl_obj.owner_frame())
+        return mapping.from_impl_nullable(
+            await self._async(
+                "element_handle.owner_frame", self._impl_obj.owner_frame()
+            )
+        )
 
     async def content_frame(self) -> typing.Union["Frame", NoneType]:
         """ElementHandle.content_frame
@@ -1154,7 +1226,11 @@ class ElementHandle(JSHandle):
         Union[Frame, NoneType]
         """
 
-        return mapping.from_impl_nullable(await self._impl_obj.content_frame())
+        return mapping.from_impl_nullable(
+            await self._async(
+                "element_handle.content_frame", self._impl_obj.content_frame()
+            )
+        )
 
     async def get_attribute(self, name: str) -> typing.Union[str, NoneType]:
         """ElementHandle.get_attribute
@@ -1171,7 +1247,11 @@ class ElementHandle(JSHandle):
         Union[str, NoneType]
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.get_attribute(name=name))
+        return mapping.from_maybe_impl(
+            await self._async(
+                "element_handle.get_attribute", self._impl_obj.get_attribute(name=name)
+            )
+        )
 
     async def text_content(self) -> typing.Union[str, NoneType]:
         """ElementHandle.text_content
@@ -1183,7 +1263,11 @@ class ElementHandle(JSHandle):
         Union[str, NoneType]
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.text_content())
+        return mapping.from_maybe_impl(
+            await self._async(
+                "element_handle.text_content", self._impl_obj.text_content()
+            )
+        )
 
     async def inner_text(self) -> str:
         """ElementHandle.inner_text
@@ -1195,7 +1279,9 @@ class ElementHandle(JSHandle):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.inner_text())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.inner_text", self._impl_obj.inner_text())
+        )
 
     async def inner_html(self) -> str:
         """ElementHandle.inner_html
@@ -1207,7 +1293,9 @@ class ElementHandle(JSHandle):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.inner_html())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.inner_html", self._impl_obj.inner_html())
+        )
 
     async def is_checked(self) -> bool:
         """ElementHandle.is_checked
@@ -1219,7 +1307,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_checked())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.is_checked", self._impl_obj.is_checked())
+        )
 
     async def is_disabled(self) -> bool:
         """ElementHandle.is_disabled
@@ -1231,7 +1321,11 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_disabled())
+        return mapping.from_maybe_impl(
+            await self._async(
+                "element_handle.is_disabled", self._impl_obj.is_disabled()
+            )
+        )
 
     async def is_editable(self) -> bool:
         """ElementHandle.is_editable
@@ -1243,7 +1337,11 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_editable())
+        return mapping.from_maybe_impl(
+            await self._async(
+                "element_handle.is_editable", self._impl_obj.is_editable()
+            )
+        )
 
     async def is_enabled(self) -> bool:
         """ElementHandle.is_enabled
@@ -1255,7 +1353,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_enabled())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.is_enabled", self._impl_obj.is_enabled())
+        )
 
     async def is_hidden(self) -> bool:
         """ElementHandle.is_hidden
@@ -1267,7 +1367,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_hidden())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.is_hidden", self._impl_obj.is_hidden())
+        )
 
     async def is_visible(self) -> bool:
         """ElementHandle.is_visible
@@ -1279,7 +1381,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_visible())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.is_visible", self._impl_obj.is_visible())
+        )
 
     async def dispatch_event(
         self, type: str, event_init: typing.Dict = None
@@ -1323,8 +1427,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                type=type, eventInit=mapping.to_impl(event_init)
+            await self._async(
+                "element_handle.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    type=type, eventInit=mapping.to_impl(event_init)
+                ),
             )
         )
 
@@ -1346,7 +1453,10 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.scroll_into_view_if_needed(timeout=timeout)
+            await self._async(
+                "element_handle.scroll_into_view_if_needed",
+                self._impl_obj.scroll_into_view_if_needed(timeout=timeout),
+            )
         )
 
     async def hover(
@@ -1388,8 +1498,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                modifiers=modifiers, position=position, timeout=timeout, force=force
+            await self._async(
+                "element_handle.hover",
+                self._impl_obj.hover(
+                    modifiers=modifiers, position=position, timeout=timeout, force=force
+                ),
             )
         )
 
@@ -1446,15 +1559,18 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                modifiers=modifiers,
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "element_handle.click",
+                self._impl_obj.click(
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -1511,14 +1627,17 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                modifiers=modifiers,
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "element_handle.dblclick",
+                self._impl_obj.dblclick(
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -1576,13 +1695,16 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.select_option(
-                value=value,
-                index=index,
-                label=label,
-                element=mapping.to_impl(element),
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "element_handle.select_option",
+                self._impl_obj.select_option(
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -1632,12 +1754,15 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                modifiers=modifiers,
-                position=position,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "element_handle.tap",
+                self._impl_obj.tap(
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -1666,8 +1791,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                value=value, timeout=timeout, noWaitAfter=no_wait_after
+            await self._async(
+                "element_handle.fill",
+                self._impl_obj.fill(
+                    value=value, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -1685,7 +1813,10 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.select_text(timeout=timeout)
+            await self._async(
+                "element_handle.select_text",
+                self._impl_obj.select_text(timeout=timeout),
+            )
         )
 
     async def set_input_files(
@@ -1722,8 +1853,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                files=files, timeout=timeout, noWaitAfter=no_wait_after
+            await self._async(
+                "element_handle.set_input_files",
+                self._impl_obj.set_input_files(
+                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -1733,7 +1867,9 @@ class ElementHandle(JSHandle):
         Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.focus())
+        return mapping.from_maybe_impl(
+            await self._async("element_handle.focus", self._impl_obj.focus())
+        )
 
     async def type(
         self,
@@ -1778,8 +1914,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+            await self._async(
+                "element_handle.type",
+                self._impl_obj.type(
+                    text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -1828,8 +1967,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+            await self._async(
+                "element_handle.press",
+                self._impl_obj.press(
+                    key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -1866,8 +2008,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                timeout=timeout, force=force, noWaitAfter=no_wait_after
+            await self._async(
+                "element_handle.check",
+                self._impl_obj.check(
+                    timeout=timeout, force=force, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -1904,8 +2049,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                timeout=timeout, force=force, noWaitAfter=no_wait_after
+            await self._async(
+                "element_handle.uncheck",
+                self._impl_obj.uncheck(
+                    timeout=timeout, force=force, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -1935,7 +2083,11 @@ class ElementHandle(JSHandle):
         Union[{x: float, y: float, width: float, height: float}, NoneType]
         """
 
-        return mapping.from_impl_nullable(await self._impl_obj.bounding_box())
+        return mapping.from_impl_nullable(
+            await self._async(
+                "element_handle.bounding_box", self._impl_obj.bounding_box()
+            )
+        )
 
     async def screenshot(
         self,
@@ -1976,12 +2128,15 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.screenshot(
-                timeout=timeout,
-                type=type,
-                path=path,
-                quality=quality,
-                omitBackground=omit_background,
+            await self._async(
+                "element_handle.screenshot",
+                self._impl_obj.screenshot(
+                    timeout=timeout,
+                    type=type,
+                    path=path,
+                    quality=quality,
+                    omitBackground=omit_background,
+                ),
             )
         )
 
@@ -2004,7 +2159,10 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.query_selector(selector=selector)
+            await self._async(
+                "element_handle.query_selector",
+                self._impl_obj.query_selector(selector=selector),
+            )
         )
 
     async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -2024,7 +2182,10 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_impl_list(
-            await self._impl_obj.query_selector_all(selector=selector)
+            await self._async(
+                "element_handle.query_selector_all",
+                self._impl_obj.query_selector_all(selector=selector),
+            )
         )
 
     async def eval_on_selector(
@@ -2065,8 +2226,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.eval_on_selector(
-                selector=selector, expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "element_handle.eval_on_selector",
+                self._impl_obj.eval_on_selector(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -2113,8 +2277,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.eval_on_selector_all(
-                selector=selector, expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "element_handle.eval_on_selector_all",
+                self._impl_obj.eval_on_selector_all(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -2153,7 +2320,10 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_element_state(state=state, timeout=timeout)
+            await self._async(
+                "element_handle.wait_for_element_state",
+                self._impl_obj.wait_for_element_state(state=state, timeout=timeout),
+            )
         )
 
     async def wait_for_selector(
@@ -2204,8 +2374,11 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.wait_for_selector(
-                selector=selector, state=state, timeout=timeout
+            await self._async(
+                "element_handle.wait_for_selector",
+                self._impl_obj.wait_for_selector(
+                    selector=selector, state=state, timeout=timeout
+                ),
             )
         )
 
@@ -2265,8 +2438,11 @@ class Accessibility(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.snapshot(
-                interestingOnly=interesting_only, root=mapping.to_impl(root)
+            await self._async(
+                "accessibility.snapshot",
+                self._impl_obj.snapshot(
+                    interestingOnly=interesting_only, root=mapping.to_impl(root)
+                ),
             )
         )
 
@@ -2345,8 +2521,11 @@ class FileChooser(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_files(
-                files=files, timeout=timeout, noWaitAfter=no_wait_after
+            await self._async(
+                "file_chooser.set_files",
+                self._impl_obj.set_files(
+                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
         )
 
@@ -2473,8 +2652,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.goto(
-                url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+            await self._async(
+                "frame.goto",
+                self._impl_obj.goto(
+                    url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+                ),
             )
         )
 
@@ -2563,7 +2745,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
+            await self._async(
+                "frame.wait_for_load_state",
+                self._impl_obj.wait_for_load_state(state=state, timeout=timeout),
+            )
         )
 
     async def frame_element(self) -> "ElementHandle":
@@ -2587,7 +2772,9 @@ class Frame(AsyncBase):
         ElementHandle
         """
 
-        return mapping.from_impl(await self._impl_obj.frame_element())
+        return mapping.from_impl(
+            await self._async("frame.frame_element", self._impl_obj.frame_element())
+        )
 
     async def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Frame.evaluate
@@ -2636,8 +2823,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.evaluate(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "frame.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -2688,8 +2878,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.evaluate_handle(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "frame.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -2714,7 +2907,9 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.query_selector(selector=selector)
+            await self._async(
+                "frame.query_selector", self._impl_obj.query_selector(selector=selector)
+            )
         )
 
     async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -2736,7 +2931,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl_list(
-            await self._impl_obj.query_selector_all(selector=selector)
+            await self._async(
+                "frame.query_selector_all",
+                self._impl_obj.query_selector_all(selector=selector),
+            )
         )
 
     async def wait_for_selector(
@@ -2799,8 +2997,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.wait_for_selector(
-                selector=selector, timeout=timeout, state=state
+            await self._async(
+                "frame.wait_for_selector",
+                self._impl_obj.wait_for_selector(
+                    selector=selector, timeout=timeout, state=state
+                ),
             )
         )
 
@@ -2824,7 +3025,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_checked(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.is_checked",
+                self._impl_obj.is_checked(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -2847,7 +3051,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.is_disabled",
+                self._impl_obj.is_disabled(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
@@ -2870,7 +3077,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_editable(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.is_editable",
+                self._impl_obj.is_editable(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -2893,7 +3103,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.is_enabled",
+                self._impl_obj.is_enabled(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
@@ -2917,7 +3130,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_hidden(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.is_hidden",
+                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
@@ -2941,7 +3157,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_visible(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.is_visible",
+                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+            )
         )
 
     async def dispatch_event(
@@ -2997,11 +3216,14 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                selector=selector,
-                type=type,
-                eventInit=mapping.to_impl(event_init),
-                timeout=timeout,
+            await self._async(
+                "frame.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    selector=selector,
+                    type=type,
+                    eventInit=mapping.to_impl(event_init),
+                    timeout=timeout,
+                ),
             )
         )
 
@@ -3043,8 +3265,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.eval_on_selector(
-                selector=selector, expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "frame.eval_on_selector",
+                self._impl_obj.eval_on_selector(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -3083,8 +3308,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.eval_on_selector_all(
-                selector=selector, expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "frame.eval_on_selector_all",
+                self._impl_obj.eval_on_selector_all(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -3098,7 +3326,9 @@ class Frame(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.content())
+        return mapping.from_maybe_impl(
+            await self._async("frame.content", self._impl_obj.content())
+        )
 
     async def set_content(
         self,
@@ -3126,8 +3356,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_content(
-                html=html, timeout=timeout, waitUntil=wait_until
+            await self._async(
+                "frame.set_content",
+                self._impl_obj.set_content(
+                    html=html, timeout=timeout, waitUntil=wait_until
+                ),
             )
         )
 
@@ -3176,8 +3409,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.add_script_tag(
-                url=url, path=path, content=content, type=type
+            await self._async(
+                "frame.add_script_tag",
+                self._impl_obj.add_script_tag(
+                    url=url, path=path, content=content, type=type
+                ),
             )
         )
 
@@ -3211,7 +3447,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.add_style_tag(url=url, path=path, content=content)
+            await self._async(
+                "frame.add_style_tag",
+                self._impl_obj.add_style_tag(url=url, path=path, content=content),
+            )
         )
 
     async def click(
@@ -3271,16 +3510,19 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.click",
+                self._impl_obj.click(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3341,15 +3583,18 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.dblclick",
+                self._impl_obj.dblclick(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3403,13 +3648,16 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.tap",
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3448,11 +3696,14 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                selector=selector,
-                value=value,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.fill",
+                self._impl_obj.fill(
+                    selector=selector,
+                    value=value,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3473,7 +3724,9 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.focus(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.focus", self._impl_obj.focus(selector=selector, timeout=timeout)
+            )
         )
 
     async def text_content(
@@ -3498,7 +3751,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.text_content(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.text_content",
+                self._impl_obj.text_content(selector=selector, timeout=timeout),
+            )
         )
 
     async def inner_text(self, selector: str, *, timeout: float = None) -> str:
@@ -3521,7 +3777,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.inner_text(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.inner_text",
+                self._impl_obj.inner_text(selector=selector, timeout=timeout),
+            )
         )
 
     async def inner_html(self, selector: str, *, timeout: float = None) -> str:
@@ -3544,7 +3803,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.inner_html(selector=selector, timeout=timeout)
+            await self._async(
+                "frame.inner_html",
+                self._impl_obj.inner_html(selector=selector, timeout=timeout),
+            )
         )
 
     async def get_attribute(
@@ -3571,8 +3833,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.get_attribute(
-                selector=selector, name=name, timeout=timeout
+            await self._async(
+                "frame.get_attribute",
+                self._impl_obj.get_attribute(
+                    selector=selector, name=name, timeout=timeout
+                ),
             )
         )
 
@@ -3619,12 +3884,15 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                timeout=timeout,
-                force=force,
+            await self._async(
+                "frame.hover",
+                self._impl_obj.hover(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                ),
             )
         )
 
@@ -3685,14 +3953,17 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.select_option(
-                selector=selector,
-                value=value,
-                index=index,
-                label=label,
-                element=mapping.to_impl(element),
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.select_option",
+                self._impl_obj.select_option(
+                    selector=selector,
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3734,11 +4005,14 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                selector=selector,
-                files=files,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.set_input_files",
+                self._impl_obj.set_input_files(
+                    selector=selector,
+                    files=files,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3782,12 +4056,15 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                selector=selector,
-                text=text,
-                delay=delay,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.type",
+                self._impl_obj.type(
+                    selector=selector,
+                    text=text,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3838,12 +4115,15 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                selector=selector,
-                key=key,
-                delay=delay,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.press",
+                self._impl_obj.press(
+                    selector=selector,
+                    key=key,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3888,11 +4168,14 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                selector=selector,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.check",
+                self._impl_obj.check(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3937,11 +4220,14 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                selector=selector,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "frame.uncheck",
+                self._impl_obj.uncheck(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -3960,7 +4246,10 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_timeout(timeout=timeout)
+            await self._async(
+                "frame.wait_for_timeout",
+                self._impl_obj.wait_for_timeout(timeout=timeout),
+            )
         )
 
     async def wait_for_function(
@@ -4022,11 +4311,14 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.wait_for_function(
-                expression=expression,
-                arg=mapping.to_impl(arg),
-                timeout=timeout,
-                polling=polling,
+            await self._async(
+                "frame.wait_for_function",
+                self._impl_obj.wait_for_function(
+                    expression=expression,
+                    arg=mapping.to_impl(arg),
+                    timeout=timeout,
+                    polling=polling,
+                ),
             )
         )
 
@@ -4040,7 +4332,9 @@ class Frame(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.title())
+        return mapping.from_maybe_impl(
+            await self._async("frame.title", self._impl_obj.title())
+        )
 
 
 mapping.register(FrameImpl, Frame)
@@ -4086,8 +4380,11 @@ class Worker(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.evaluate(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "worker.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -4118,8 +4415,11 @@ class Worker(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.evaluate_handle(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "worker.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -4164,8 +4464,11 @@ class Selectors(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.register(
-                name=name, script=script, path=path, contentScript=content_script
+            await self._async(
+                "selectors.register",
+                self._impl_obj.register(
+                    name=name, script=script, path=path, contentScript=content_script
+                ),
             )
         )
 
@@ -4277,7 +4580,9 @@ class Dialog(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.accept(promptText=prompt_text)
+            await self._async(
+                "dialog.accept", self._impl_obj.accept(promptText=prompt_text)
+            )
         )
 
     async def dismiss(self) -> NoneType:
@@ -4286,7 +4591,9 @@ class Dialog(AsyncBase):
         Returns when the dialog has been dismissed.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dismiss())
+        return mapping.from_maybe_impl(
+            await self._async("dialog.dismiss", self._impl_obj.dismiss())
+        )
 
 
 mapping.register(DialogImpl, Dialog)
@@ -4329,7 +4636,9 @@ class Download(AsyncBase):
         Deletes the downloaded file.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.delete())
+        return mapping.from_maybe_impl(
+            await self._async("download.delete", self._impl_obj.delete())
+        )
 
     async def failure(self) -> typing.Union[str, NoneType]:
         """Download.failure
@@ -4341,7 +4650,9 @@ class Download(AsyncBase):
         Union[str, NoneType]
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.failure())
+        return mapping.from_maybe_impl(
+            await self._async("download.failure", self._impl_obj.failure())
+        )
 
     async def path(self) -> typing.Union[pathlib.Path, NoneType]:
         """Download.path
@@ -4353,7 +4664,9 @@ class Download(AsyncBase):
         Union[pathlib.Path, NoneType]
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.path())
+        return mapping.from_maybe_impl(
+            await self._async("download.path", self._impl_obj.path())
+        )
 
     async def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
         """Download.save_as
@@ -4366,7 +4679,9 @@ class Download(AsyncBase):
             Path where the download should be saved.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.save_as(path=path))
+        return mapping.from_maybe_impl(
+            await self._async("download.save_as", self._impl_obj.save_as(path=path))
+        )
 
 
 mapping.register(DownloadImpl, Download)
@@ -4387,7 +4702,9 @@ class Video(AsyncBase):
         pathlib.Path
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.path())
+        return mapping.from_maybe_impl(
+            await self._async("video.path", self._impl_obj.path())
+        )
 
 
 mapping.register(VideoImpl, Video)
@@ -4532,7 +4849,9 @@ class Page(AsyncBase):
         Union[Page, NoneType]
         """
 
-        return mapping.from_impl_nullable(await self._impl_obj.opener())
+        return mapping.from_impl_nullable(
+            await self._async("page.opener", self._impl_obj.opener())
+        )
 
     def frame(
         self,
@@ -4630,7 +4949,9 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.query_selector(selector=selector)
+            await self._async(
+                "page.query_selector", self._impl_obj.query_selector(selector=selector)
+            )
         )
 
     async def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
@@ -4652,7 +4973,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_list(
-            await self._impl_obj.query_selector_all(selector=selector)
+            await self._async(
+                "page.query_selector_all",
+                self._impl_obj.query_selector_all(selector=selector),
+            )
         )
 
     async def wait_for_selector(
@@ -4715,8 +5039,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.wait_for_selector(
-                selector=selector, timeout=timeout, state=state
+            await self._async(
+                "page.wait_for_selector",
+                self._impl_obj.wait_for_selector(
+                    selector=selector, timeout=timeout, state=state
+                ),
             )
         )
 
@@ -4740,7 +5067,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_checked(selector=selector, timeout=timeout)
+            await self._async(
+                "page.is_checked",
+                self._impl_obj.is_checked(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -4763,7 +5093,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_disabled(selector=selector, timeout=timeout)
+            await self._async(
+                "page.is_disabled",
+                self._impl_obj.is_disabled(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
@@ -4786,7 +5119,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_editable(selector=selector, timeout=timeout)
+            await self._async(
+                "page.is_editable",
+                self._impl_obj.is_editable(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
@@ -4809,7 +5145,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_enabled(selector=selector, timeout=timeout)
+            await self._async(
+                "page.is_enabled",
+                self._impl_obj.is_enabled(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
@@ -4833,7 +5172,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_hidden(selector=selector, timeout=timeout)
+            await self._async(
+                "page.is_hidden",
+                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+            )
         )
 
     async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
@@ -4857,7 +5199,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_visible(selector=selector, timeout=timeout)
+            await self._async(
+                "page.is_visible",
+                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+            )
         )
 
     async def dispatch_event(
@@ -4913,11 +5258,14 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                selector=selector,
-                type=type,
-                eventInit=mapping.to_impl(event_init),
-                timeout=timeout,
+            await self._async(
+                "page.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    selector=selector,
+                    type=type,
+                    eventInit=mapping.to_impl(event_init),
+                    timeout=timeout,
+                ),
             )
         )
 
@@ -4972,8 +5320,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.evaluate(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "page.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -5024,8 +5375,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.evaluate_handle(
-                expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "page.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -5066,8 +5420,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.eval_on_selector(
-                selector=selector, expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "page.eval_on_selector",
+                self._impl_obj.eval_on_selector(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -5104,8 +5461,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.eval_on_selector_all(
-                selector=selector, expression=expression, arg=mapping.to_impl(arg)
+            await self._async(
+                "page.eval_on_selector_all",
+                self._impl_obj.eval_on_selector_all(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
         )
 
@@ -5143,8 +5503,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.add_script_tag(
-                url=url, path=path, content=content, type=type
+            await self._async(
+                "page.add_script_tag",
+                self._impl_obj.add_script_tag(
+                    url=url, path=path, content=content, type=type
+                ),
             )
         )
 
@@ -5178,7 +5541,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.add_style_tag(url=url, path=path, content=content)
+            await self._async(
+                "page.add_style_tag",
+                self._impl_obj.add_style_tag(url=url, path=path, content=content),
+            )
         )
 
     async def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
@@ -5236,8 +5602,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.expose_function(
-                name=name, callback=self._wrap_handler(callback)
+            await self._async(
+                "page.expose_function",
+                self._impl_obj.expose_function(
+                    name=name, callback=self._wrap_handler(callback)
+                ),
             )
         )
 
@@ -5314,8 +5683,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.expose_binding(
-                name=name, callback=self._wrap_handler(callback), handle=handle
+            await self._async(
+                "page.expose_binding",
+                self._impl_obj.expose_binding(
+                    name=name, callback=self._wrap_handler(callback), handle=handle
+                ),
             )
         )
 
@@ -5333,8 +5705,9 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_extra_http_headers(
-                headers=mapping.to_impl(headers)
+            await self._async(
+                "page.set_extra_http_headers",
+                self._impl_obj.set_extra_http_headers(headers=mapping.to_impl(headers)),
             )
         )
 
@@ -5348,7 +5721,9 @@ class Page(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.content())
+        return mapping.from_maybe_impl(
+            await self._async("page.content", self._impl_obj.content())
+        )
 
     async def set_content(
         self,
@@ -5376,8 +5751,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_content(
-                html=html, timeout=timeout, waitUntil=wait_until
+            await self._async(
+                "page.set_content",
+                self._impl_obj.set_content(
+                    html=html, timeout=timeout, waitUntil=wait_until
+                ),
             )
         )
 
@@ -5436,8 +5814,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.goto(
-                url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+            await self._async(
+                "page.goto",
+                self._impl_obj.goto(
+                    url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+                ),
             )
         )
 
@@ -5471,7 +5852,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.reload(timeout=timeout, waitUntil=wait_until)
+            await self._async(
+                "page.reload",
+                self._impl_obj.reload(timeout=timeout, waitUntil=wait_until),
+            )
         )
 
     async def wait_for_load_state(
@@ -5519,7 +5903,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
+            await self._async(
+                "page.wait_for_load_state",
+                self._impl_obj.wait_for_load_state(state=state, timeout=timeout),
+            )
         )
 
     async def wait_for_event(
@@ -5549,8 +5936,13 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            await self._async(
+                "page.wait_for_event",
+                self._impl_obj.wait_for_event(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                ),
             )
         )
 
@@ -5586,7 +5978,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until)
+            await self._async(
+                "page.go_back",
+                self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until),
+            )
         )
 
     async def go_forward(
@@ -5621,7 +6016,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until)
+            await self._async(
+                "page.go_forward",
+                self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until),
+            )
         )
 
     async def emulate_media(
@@ -5672,7 +6070,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.emulate_media(media=media, colorScheme=color_scheme)
+            await self._async(
+                "page.emulate_media",
+                self._impl_obj.emulate_media(media=media, colorScheme=color_scheme),
+            )
         )
 
     async def set_viewport_size(self, viewport_size: ViewportSize) -> NoneType:
@@ -5696,7 +6097,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_viewport_size(viewportSize=viewport_size)
+            await self._async(
+                "page.set_viewport_size",
+                self._impl_obj.set_viewport_size(viewportSize=viewport_size),
+            )
         )
 
     async def bring_to_front(self) -> NoneType:
@@ -5705,7 +6109,9 @@ class Page(AsyncBase):
         Brings page to front (activates tab).
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.bring_to_front())
+        return mapping.from_maybe_impl(
+            await self._async("page.bring_to_front", self._impl_obj.bring_to_front())
+        )
 
     async def add_init_script(
         self, script: str = None, *, path: typing.Union[str, pathlib.Path] = None
@@ -5740,7 +6146,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.add_init_script(script=script, path=path)
+            await self._async(
+                "page.add_init_script",
+                self._impl_obj.add_init_script(script=script, path=path),
+            )
         )
 
     async def route(
@@ -5791,8 +6200,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.route(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+            await self._async(
+                "page.route",
+                self._impl_obj.route(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
         )
 
@@ -5817,8 +6229,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.unroute(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+            await self._async(
+                "page.unroute",
+                self._impl_obj.unroute(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
         )
 
@@ -5868,14 +6283,17 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.screenshot(
-                timeout=timeout,
-                type=type,
-                path=path,
-                quality=quality,
-                omitBackground=omit_background,
-                fullPage=full_page,
-                clip=clip,
+            await self._async(
+                "page.screenshot",
+                self._impl_obj.screenshot(
+                    timeout=timeout,
+                    type=type,
+                    path=path,
+                    quality=quality,
+                    omitBackground=omit_background,
+                    fullPage=full_page,
+                    clip=clip,
+                ),
             )
         )
 
@@ -5889,7 +6307,9 @@ class Page(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.title())
+        return mapping.from_maybe_impl(
+            await self._async("page.title", self._impl_obj.title())
+        )
 
     async def close(self, *, run_before_unload: bool = None) -> NoneType:
         """Page.close
@@ -5910,7 +6330,9 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.close(runBeforeUnload=run_before_unload)
+            await self._async(
+                "page.close", self._impl_obj.close(runBeforeUnload=run_before_unload)
+            )
         )
 
     def is_closed(self) -> bool:
@@ -5984,16 +6406,19 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.click",
+                self._impl_obj.click(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6056,15 +6481,18 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.dblclick",
+                self._impl_obj.dblclick(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6120,13 +6548,16 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.tap",
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6167,11 +6598,14 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                selector=selector,
-                value=value,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.fill",
+                self._impl_obj.fill(
+                    selector=selector,
+                    value=value,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6194,7 +6628,9 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.focus(selector=selector, timeout=timeout)
+            await self._async(
+                "page.focus", self._impl_obj.focus(selector=selector, timeout=timeout)
+            )
         )
 
     async def text_content(
@@ -6219,7 +6655,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.text_content(selector=selector, timeout=timeout)
+            await self._async(
+                "page.text_content",
+                self._impl_obj.text_content(selector=selector, timeout=timeout),
+            )
         )
 
     async def inner_text(self, selector: str, *, timeout: float = None) -> str:
@@ -6242,7 +6681,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.inner_text(selector=selector, timeout=timeout)
+            await self._async(
+                "page.inner_text",
+                self._impl_obj.inner_text(selector=selector, timeout=timeout),
+            )
         )
 
     async def inner_html(self, selector: str, *, timeout: float = None) -> str:
@@ -6265,7 +6707,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.inner_html(selector=selector, timeout=timeout)
+            await self._async(
+                "page.inner_html",
+                self._impl_obj.inner_html(selector=selector, timeout=timeout),
+            )
         )
 
     async def get_attribute(
@@ -6292,8 +6737,11 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.get_attribute(
-                selector=selector, name=name, timeout=timeout
+            await self._async(
+                "page.get_attribute",
+                self._impl_obj.get_attribute(
+                    selector=selector, name=name, timeout=timeout
+                ),
             )
         )
 
@@ -6342,12 +6790,15 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                selector=selector,
-                modifiers=modifiers,
-                position=position,
-                timeout=timeout,
-                force=force,
+            await self._async(
+                "page.hover",
+                self._impl_obj.hover(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                ),
             )
         )
 
@@ -6411,14 +6862,17 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.select_option(
-                selector=selector,
-                value=value,
-                index=index,
-                label=label,
-                element=mapping.to_impl(element),
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.select_option",
+                self._impl_obj.select_option(
+                    selector=selector,
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6460,11 +6914,14 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                selector=selector,
-                files=files,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.set_input_files",
+                self._impl_obj.set_input_files(
+                    selector=selector,
+                    files=files,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6510,12 +6967,15 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                selector=selector,
-                text=text,
-                delay=delay,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.type",
+                self._impl_obj.type(
+                    selector=selector,
+                    text=text,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6580,12 +7040,15 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                selector=selector,
-                key=key,
-                delay=delay,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.press",
+                self._impl_obj.press(
+                    selector=selector,
+                    key=key,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6632,11 +7095,14 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                selector=selector,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.check",
+                self._impl_obj.check(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6683,11 +7149,14 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                selector=selector,
-                timeout=timeout,
-                force=force,
-                noWaitAfter=no_wait_after,
+            await self._async(
+                "page.uncheck",
+                self._impl_obj.uncheck(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
         )
 
@@ -6713,7 +7182,10 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_timeout(timeout=timeout)
+            await self._async(
+                "page.wait_for_timeout",
+                self._impl_obj.wait_for_timeout(timeout=timeout),
+            )
         )
 
     async def wait_for_function(
@@ -6777,11 +7249,14 @@ class Page(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.wait_for_function(
-                expression=expression,
-                arg=mapping.to_impl(arg),
-                timeout=timeout,
-                polling=polling,
+            await self._async(
+                "page.wait_for_function",
+                self._impl_obj.wait_for_function(
+                    expression=expression,
+                    arg=mapping.to_impl(arg),
+                    timeout=timeout,
+                    polling=polling,
+                ),
             )
         )
 
@@ -6798,7 +7273,9 @@ class Page(AsyncBase):
         `browser_type.launch()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.pause())
+        return mapping.from_maybe_impl(
+            await self._async("page.pause", self._impl_obj.pause())
+        )
 
     async def pdf(
         self,
@@ -6908,20 +7385,23 @@ class Page(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.pdf(
-                scale=scale,
-                displayHeaderFooter=display_header_footer,
-                headerTemplate=header_template,
-                footerTemplate=footer_template,
-                printBackground=print_background,
-                landscape=landscape,
-                pageRanges=page_ranges,
-                format=format,
-                width=width,
-                height=height,
-                preferCSSPageSize=prefer_css_page_size,
-                margin=margin,
-                path=path,
+            await self._async(
+                "page.pdf",
+                self._impl_obj.pdf(
+                    scale=scale,
+                    displayHeaderFooter=display_header_footer,
+                    headerTemplate=header_template,
+                    footerTemplate=footer_template,
+                    printBackground=print_background,
+                    landscape=landscape,
+                    pageRanges=page_ranges,
+                    format=format,
+                    width=width,
+                    height=height,
+                    preferCSSPageSize=prefer_css_page_size,
+                    margin=margin,
+                    path=path,
+                ),
             )
         )
 
@@ -7259,8 +7739,7 @@ class BrowserContext(AsyncBase):
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
 
-        Returns all open pages in the context. Non visible pages, such as `\"background_page\"`, will not be listed here. You can
-        find them using `chromium_browser_context.background_pages()`.
+        Returns all open pages in the context.
 
         Returns
         -------
@@ -7332,7 +7811,9 @@ class BrowserContext(AsyncBase):
         Page
         """
 
-        return mapping.from_impl(await self._impl_obj.new_page())
+        return mapping.from_impl(
+            await self._async("browser_context.new_page", self._impl_obj.new_page())
+        )
 
     async def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
@@ -7352,7 +7833,11 @@ class BrowserContext(AsyncBase):
         List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
         """
 
-        return mapping.from_impl_list(await self._impl_obj.cookies(urls=urls))
+        return mapping.from_impl_list(
+            await self._async(
+                "browser_context.cookies", self._impl_obj.cookies(urls=urls)
+            )
+        )
 
     async def add_cookies(self, cookies: typing.List[Cookie]) -> NoneType:
         """BrowserContext.add_cookies
@@ -7370,7 +7855,10 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.add_cookies(cookies=cookies)
+            await self._async(
+                "browser_context.add_cookies",
+                self._impl_obj.add_cookies(cookies=cookies),
+            )
         )
 
     async def clear_cookies(self) -> NoneType:
@@ -7379,7 +7867,11 @@ class BrowserContext(AsyncBase):
         Clears context cookies.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear_cookies())
+        return mapping.from_maybe_impl(
+            await self._async(
+                "browser_context.clear_cookies", self._impl_obj.clear_cookies()
+            )
+        )
 
     async def grant_permissions(
         self, permissions: typing.List[str], *, origin: str = None
@@ -7414,8 +7906,11 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.grant_permissions(
-                permissions=permissions, origin=origin
+            await self._async(
+                "browser_context.grant_permissions",
+                self._impl_obj.grant_permissions(
+                    permissions=permissions, origin=origin
+                ),
             )
         )
 
@@ -7432,7 +7927,11 @@ class BrowserContext(AsyncBase):
         ```
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear_permissions())
+        return mapping.from_maybe_impl(
+            await self._async(
+                "browser_context.clear_permissions", self._impl_obj.clear_permissions()
+            )
+        )
 
     async def set_geolocation(self, geolocation: Geolocation = None) -> NoneType:
         """BrowserContext.set_geolocation
@@ -7452,7 +7951,10 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_geolocation(geolocation=geolocation)
+            await self._async(
+                "browser_context.set_geolocation",
+                self._impl_obj.set_geolocation(geolocation=geolocation),
+            )
         )
 
     async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
@@ -7471,8 +7973,9 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_extra_http_headers(
-                headers=mapping.to_impl(headers)
+            await self._async(
+                "browser_context.set_extra_http_headers",
+                self._impl_obj.set_extra_http_headers(headers=mapping.to_impl(headers)),
             )
         )
 
@@ -7486,7 +7989,10 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.set_offline(offline=offline)
+            await self._async(
+                "browser_context.set_offline",
+                self._impl_obj.set_offline(offline=offline),
+            )
         )
 
     async def add_init_script(
@@ -7522,7 +8028,10 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.add_init_script(script=script, path=path)
+            await self._async(
+                "browser_context.add_init_script",
+                self._impl_obj.add_init_script(script=script, path=path),
+            )
         )
 
     async def expose_binding(
@@ -7596,8 +8105,11 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.expose_binding(
-                name=name, callback=self._wrap_handler(callback), handle=handle
+            await self._async(
+                "browser_context.expose_binding",
+                self._impl_obj.expose_binding(
+                    name=name, callback=self._wrap_handler(callback), handle=handle
+                ),
             )
         )
 
@@ -7655,8 +8167,11 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.expose_function(
-                name=name, callback=self._wrap_handler(callback)
+            await self._async(
+                "browser_context.expose_function",
+                self._impl_obj.expose_function(
+                    name=name, callback=self._wrap_handler(callback)
+                ),
             )
         )
 
@@ -7708,8 +8223,11 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.route(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+            await self._async(
+                "browser_context.route",
+                self._impl_obj.route(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
         )
 
@@ -7736,8 +8254,11 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.unroute(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+            await self._async(
+                "browser_context.unroute",
+                self._impl_obj.unroute(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
         )
 
@@ -7784,7 +8305,9 @@ class BrowserContext(AsyncBase):
         > NOTE: The default browser context cannot be closed.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.close())
+        return mapping.from_maybe_impl(
+            await self._async("browser_context.close", self._impl_obj.close())
+        )
 
     async def storage_state(
         self, *, path: typing.Union[str, pathlib.Path] = None
@@ -7804,7 +8327,11 @@ class BrowserContext(AsyncBase):
         {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}
         """
 
-        return mapping.from_impl(await self._impl_obj.storage_state(path=path))
+        return mapping.from_impl(
+            await self._async(
+                "browser_context.storage_state", self._impl_obj.storage_state(path=path)
+            )
+        )
 
     async def wait_for_event(
         self, event: str, predicate: typing.Callable = None, *, timeout: float = None
@@ -7833,8 +8360,13 @@ class BrowserContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            await self._async(
+                "browser_context.wait_for_event",
+                self._impl_obj.wait_for_event(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                ),
             )
         )
 
@@ -7893,7 +8425,10 @@ class CDPSession(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.send(method=method, params=mapping.to_impl(params))
+            await self._async(
+                "cdp_session.send",
+                self._impl_obj.send(method=method, params=mapping.to_impl(params)),
+            )
         )
 
     async def detach(self) -> NoneType:
@@ -7903,7 +8438,9 @@ class CDPSession(AsyncBase):
         send messages.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.detach())
+        return mapping.from_maybe_impl(
+            await self._async("cdp_session.detach", self._impl_obj.detach())
+        )
 
 
 mapping.register(CDPSessionImpl, CDPSession)
@@ -7953,7 +8490,10 @@ class ChromiumBrowserContext(BrowserContext):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.new_cdp_session(page=page._impl_obj)
+            await self._async(
+                "chromium_browser_context.new_cdp_session",
+                self._impl_obj.new_cdp_session(page=page._impl_obj),
+            )
         )
 
 
@@ -8117,32 +8657,35 @@ class Browser(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.new_context(
-                viewport=viewport,
-                noViewport=no_viewport,
-                ignoreHTTPSErrors=ignore_https_errors,
-                javaScriptEnabled=java_script_enabled,
-                bypassCSP=bypass_csp,
-                userAgent=user_agent,
-                locale=locale,
-                timezoneId=timezone_id,
-                geolocation=geolocation,
-                permissions=permissions,
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                offline=offline,
-                httpCredentials=http_credentials,
-                deviceScaleFactor=device_scale_factor,
-                isMobile=is_mobile,
-                hasTouch=has_touch,
-                colorScheme=color_scheme,
-                acceptDownloads=accept_downloads,
-                defaultBrowserType=default_browser_type,
-                proxy=proxy,
-                recordHarPath=record_har_path,
-                recordHarOmitContent=record_har_omit_content,
-                recordVideoDir=record_video_dir,
-                recordVideoSize=record_video_size,
-                storageState=storage_state,
+            await self._async(
+                "browser.new_context",
+                self._impl_obj.new_context(
+                    viewport=viewport,
+                    noViewport=no_viewport,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    javaScriptEnabled=java_script_enabled,
+                    bypassCSP=bypass_csp,
+                    userAgent=user_agent,
+                    locale=locale,
+                    timezoneId=timezone_id,
+                    geolocation=geolocation,
+                    permissions=permissions,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    offline=offline,
+                    httpCredentials=http_credentials,
+                    deviceScaleFactor=device_scale_factor,
+                    isMobile=is_mobile,
+                    hasTouch=has_touch,
+                    colorScheme=color_scheme,
+                    acceptDownloads=accept_downloads,
+                    defaultBrowserType=default_browser_type,
+                    proxy=proxy,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
+                    storageState=storage_state,
+                ),
             )
         )
 
@@ -8251,32 +8794,35 @@ class Browser(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.new_page(
-                viewport=viewport,
-                noViewport=no_viewport,
-                ignoreHTTPSErrors=ignore_https_errors,
-                javaScriptEnabled=java_script_enabled,
-                bypassCSP=bypass_csp,
-                userAgent=user_agent,
-                locale=locale,
-                timezoneId=timezone_id,
-                geolocation=geolocation,
-                permissions=permissions,
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                offline=offline,
-                httpCredentials=http_credentials,
-                deviceScaleFactor=device_scale_factor,
-                isMobile=is_mobile,
-                hasTouch=has_touch,
-                colorScheme=color_scheme,
-                acceptDownloads=accept_downloads,
-                defaultBrowserType=default_browser_type,
-                proxy=proxy,
-                recordHarPath=record_har_path,
-                recordHarOmitContent=record_har_omit_content,
-                recordVideoDir=record_video_dir,
-                recordVideoSize=record_video_size,
-                storageState=storage_state,
+            await self._async(
+                "browser.new_page",
+                self._impl_obj.new_page(
+                    viewport=viewport,
+                    noViewport=no_viewport,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    javaScriptEnabled=java_script_enabled,
+                    bypassCSP=bypass_csp,
+                    userAgent=user_agent,
+                    locale=locale,
+                    timezoneId=timezone_id,
+                    geolocation=geolocation,
+                    permissions=permissions,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    offline=offline,
+                    httpCredentials=http_credentials,
+                    deviceScaleFactor=device_scale_factor,
+                    isMobile=is_mobile,
+                    hasTouch=has_touch,
+                    colorScheme=color_scheme,
+                    acceptDownloads=accept_downloads,
+                    defaultBrowserType=default_browser_type,
+                    proxy=proxy,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
+                    storageState=storage_state,
+                ),
             )
         )
 
@@ -8292,7 +8838,9 @@ class Browser(AsyncBase):
         The `Browser` object itself is considered to be disposed and cannot be used anymore.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.close())
+        return mapping.from_maybe_impl(
+            await self._async("browser.close", self._impl_obj.close())
+        )
 
 
 mapping.register(BrowserImpl, Browser)
@@ -8424,22 +8972,25 @@ class BrowserType(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.launch(
-                executablePath=executable_path,
-                args=args,
-                ignoreDefaultArgs=ignore_default_args,
-                handleSIGINT=handle_sigint,
-                handleSIGTERM=handle_sigterm,
-                handleSIGHUP=handle_sighup,
-                timeout=timeout,
-                env=mapping.to_impl(env),
-                headless=headless,
-                devtools=devtools,
-                proxy=proxy,
-                downloadsPath=downloads_path,
-                slowMo=slow_mo,
-                chromiumSandbox=chromium_sandbox,
-                firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
+            await self._async(
+                "browser_type.launch",
+                self._impl_obj.launch(
+                    executablePath=executable_path,
+                    args=args,
+                    ignoreDefaultArgs=ignore_default_args,
+                    handleSIGINT=handle_sigint,
+                    handleSIGTERM=handle_sigterm,
+                    handleSIGHUP=handle_sighup,
+                    timeout=timeout,
+                    env=mapping.to_impl(env),
+                    headless=headless,
+                    devtools=devtools,
+                    proxy=proxy,
+                    downloadsPath=downloads_path,
+                    slowMo=slow_mo,
+                    chromiumSandbox=chromium_sandbox,
+                    firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
+                ),
             )
         )
 
@@ -8595,44 +9146,47 @@ class BrowserType(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.launch_persistent_context(
-                userDataDir=user_data_dir,
-                executablePath=executable_path,
-                args=args,
-                ignoreDefaultArgs=ignore_default_args,
-                handleSIGINT=handle_sigint,
-                handleSIGTERM=handle_sigterm,
-                handleSIGHUP=handle_sighup,
-                timeout=timeout,
-                env=mapping.to_impl(env),
-                headless=headless,
-                devtools=devtools,
-                proxy=proxy,
-                downloadsPath=downloads_path,
-                slowMo=slow_mo,
-                viewport=viewport,
-                noViewport=no_viewport,
-                ignoreHTTPSErrors=ignore_https_errors,
-                javaScriptEnabled=java_script_enabled,
-                bypassCSP=bypass_csp,
-                userAgent=user_agent,
-                locale=locale,
-                timezoneId=timezone_id,
-                geolocation=geolocation,
-                permissions=permissions,
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                offline=offline,
-                httpCredentials=http_credentials,
-                deviceScaleFactor=device_scale_factor,
-                isMobile=is_mobile,
-                hasTouch=has_touch,
-                colorScheme=color_scheme,
-                acceptDownloads=accept_downloads,
-                chromiumSandbox=chromium_sandbox,
-                recordHarPath=record_har_path,
-                recordHarOmitContent=record_har_omit_content,
-                recordVideoDir=record_video_dir,
-                recordVideoSize=record_video_size,
+            await self._async(
+                "browser_type.launch_persistent_context",
+                self._impl_obj.launch_persistent_context(
+                    userDataDir=user_data_dir,
+                    executablePath=executable_path,
+                    args=args,
+                    ignoreDefaultArgs=ignore_default_args,
+                    handleSIGINT=handle_sigint,
+                    handleSIGTERM=handle_sigterm,
+                    handleSIGHUP=handle_sighup,
+                    timeout=timeout,
+                    env=mapping.to_impl(env),
+                    headless=headless,
+                    devtools=devtools,
+                    proxy=proxy,
+                    downloadsPath=downloads_path,
+                    slowMo=slow_mo,
+                    viewport=viewport,
+                    noViewport=no_viewport,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    javaScriptEnabled=java_script_enabled,
+                    bypassCSP=bypass_csp,
+                    userAgent=user_agent,
+                    locale=locale,
+                    timezoneId=timezone_id,
+                    geolocation=geolocation,
+                    permissions=permissions,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    offline=offline,
+                    httpCredentials=http_credentials,
+                    deviceScaleFactor=device_scale_factor,
+                    isMobile=is_mobile,
+                    hasTouch=has_touch,
+                    colorScheme=color_scheme,
+                    acceptDownloads=accept_downloads,
+                    chromiumSandbox=chromium_sandbox,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
+                ),
             )
         )
 
