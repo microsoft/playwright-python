@@ -23,8 +23,7 @@ import zipfile
 import setuptools
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.9.0-next-1613860579000"
-
+driver_version = "1.9.0-1614037901000"
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -56,8 +55,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             zip_file = f"playwright-{driver_version}-{platform}.zip"
             if not os.path.exists("driver/" + zip_file):
                 url = "https://playwright.azureedge.net/builds/driver/"
-                if "-next" in driver_version:
-                    url = url + "next/"
+                url = url + "next/"
                 url = url + zip_file
                 print("Fetching ", url)
                 subprocess.check_call(

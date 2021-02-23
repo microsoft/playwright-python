@@ -61,6 +61,12 @@ def process_type(value: Any, param: bool = False) -> str:
         value = re.sub(
             r"^typing.Union\[(.+), NoneType\]$", r"typing.Union[\1] = None", value
         )
+
+        value = re.sub(r"^typing.Optional\[([^,]+)\]$", r"\1 = None", value)
+        value = re.sub(r"typing.Optional\[(Literal\[[^\]]+\])\]", r"\1 = None", value)
+        value = re.sub(
+            r"^typing.Optional\[(.+)\]$", r"typing.Optional[\1] = None", value
+        )
     return value
 
 
@@ -109,7 +115,10 @@ def signature(func: FunctionType, indent: int) -> str:
         if (
             not positional_exception
             and not saw_optional
-            and str(value).endswith("NoneType]")
+            and (
+                str(value).endswith("NoneType]")
+                or str(value).startswith("typing.Optional")
+            )
         ):
             saw_optional = True
             tokens.append("*")
