@@ -19,3 +19,5 @@ flake8==3.8.3
 twine==3.2.0
 pyOpenSSL==19.1.0
 service_identity==18.1.0
+pandas==1.2.2
+objgraph==3.5.0
