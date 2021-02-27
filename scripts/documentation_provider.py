@@ -101,6 +101,7 @@ class DocumentationProvider:
         var_name = to_snake_case(f"{match.group(1).lower()}{match.group(2)}")
         new_name = to_snake_case(alias)
         if kind == "event":
+            new_name = new_name.lower()
             self.links[
                 f"[`event: {clazz}.{member}`]"
             ] = f"`{var_name}.on('{new_name}')`"

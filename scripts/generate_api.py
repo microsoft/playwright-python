@@ -61,6 +61,12 @@ def process_type(value: Any, param: bool = False) -> str:
         value = re.sub(
             r"^typing.Union\[(.+), NoneType\]$", r"typing.Union[\1] = None", value
         )
+
+        value = re.sub(r"^typing.Optional\[([^,]+)\]$", r"\1 = None", value)
+        value = re.sub(r"typing.Optional\[(Literal\[[^\]]+\])\]", r"\1 = None", value)
+        value = re.sub(
+            r"^typing.Optional\[(.+)\]$", r"typing.Optional[\1] = None", value
+        )
     return value
 
 
@@ -109,7 +115,10 @@ def signature(func: FunctionType, indent: int) -> str:
         if (
             not positional_exception
             and not saw_optional
-            and str(value).endswith("NoneType]")
+            and (
+                str(value).endswith("NoneType]")
+                or str(value).startswith("typing.Optional")
+            )
         ):
             saw_optional = True
             tokens.append("*")
@@ -219,7 +228,6 @@ from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
-from playwright._impl._logger import log_api
 
 """
 

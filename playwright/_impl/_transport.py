@@ -46,8 +46,12 @@ class Transport:
         self._stopped = True
         self._output.close()
 
+    async def wait_until_stopped(self) -> None:
+        await self._stopped_future
+
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
+        self._stopped_future: asyncio.Future = asyncio.Future()
 
         driver_env = os.environ.copy()
         # VSCode's JavaScript Debug Terminal provides it but driver/pkg does not support it
@@ -87,6 +91,7 @@ class Transport:
             except asyncio.IncompleteReadError:
                 break
             await asyncio.sleep(0)
+        self._stopped_future.set_result(None)
 
     def send(self, message: Dict) -> None:
         msg = json.dumps(message)

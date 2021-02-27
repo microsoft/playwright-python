@@ -42,4 +42,4 @@ class PlaywrightContextManager:
         return await self.__aenter__()
 
     async def __aexit__(self, *args: Any) -> None:
-        self._connection.stop_async()
+        await self._connection.stop_async()

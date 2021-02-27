@@ -99,7 +99,10 @@ def generate(t: Any) -> None:
                     get_type_hints(value, api_globals)["return"]
                 )
                 if is_async:
-                    prefix = prefix + f"self._sync(self._impl_obj.{name}("
+                    prefix = (
+                        prefix
+                        + f'self._sync("{to_snake_case(class_name)}.{name}", self._impl_obj.{name}('
+                    )
                     suffix = "))" + suffix
                 else:
                     prefix = prefix + f"self._impl_obj.{name}("
@@ -107,14 +110,7 @@ def generate(t: Any) -> None:
 
                 print(
                     f"""
-        try:
-            log_api("=> {to_snake_case(class_name)}.{name} started")
-            result = {prefix}{arguments(value, len(prefix))}{suffix}
-            log_api("<= {to_snake_case(class_name)}.{name} succeded")
-            return result
-        except Exception as e:
-            log_api("<= {to_snake_case(class_name)}.{name} failed")
-            raise e"""
+        return {prefix}{arguments(value, len(prefix))}{suffix}"""
                 )
 
     print("")

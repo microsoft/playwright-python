@@ -226,7 +226,7 @@ async def test_timeout_waiting_for_display_none_to_be_gone(page, server):
     except Error as e:
         error = e
     assert "Timeout 5000ms exceeded" in error.message
-    assert "waiting for element to be visible, enabled and not moving" in error.message
+    assert "waiting for element to be visible, enabled and stable" in error.message
     assert "element is not visible - waiting" in error.message
 
 
@@ -238,7 +238,7 @@ async def test_timeout_waiting_for_visbility_hidden_to_be_gone(page, server):
     except Error as e:
         error = e
     assert "Timeout 5000ms exceeded" in error.message
-    assert "waiting for element to be visible, enabled and not moving" in error.message
+    assert "waiting for element to be visible, enabled and stable" in error.message
     assert "element is not visible - waiting" in error.message
 
 
@@ -533,8 +533,8 @@ async def test_timeout_waiting_for_stable_position(page, server):
     except Error as e:
         error = e
     assert "Timeout 5000ms exceeded." in error.message
-    assert "waiting for element to be visible, enabled and not moving" in error.message
-    assert "element is moving - waiting" in error.message
+    assert "waiting for element to be visible, enabled and stable" in error.message
+    assert "element is not stable - waiting" in error.message
 
 
 async def test_wait_for_becoming_hit_target(page, server):
@@ -654,7 +654,7 @@ async def test_timeout_waiting_for_button_to_be_enabled(page, server):
         error = e
     assert await page.evaluate("window.__CLICKED") is None
     assert "Timeout 3000ms exceeded" in error.message
-    assert "element is disabled - waiting" in error.message
+    assert "element is not enabled - waiting" in error.message
 
 
 async def test_wait_for_input_to_be_enabled(page, server):

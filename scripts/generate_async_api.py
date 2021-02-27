@@ -88,7 +88,6 @@ def generate(t: Any) -> None:
             )
             print("")
             async_prefix = "async " if is_async else ""
-            await_prefix = "await " if is_async else ""
             print(
                 f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
@@ -104,18 +103,16 @@ def generate(t: Any) -> None:
                 [prefix, suffix] = return_value(
                     get_type_hints(value, api_globals)["return"]
                 )
-                prefix = prefix + f"{await_prefix}self._impl_obj.{name}("
+                if is_async:
+                    prefix += (
+                        f'await self._async("{to_snake_case(class_name)}.{name}", '
+                    )
+                    suffix += ")"
+                prefix = prefix + f"self._impl_obj.{name}("
                 suffix = ")" + suffix
                 print(
                     f"""
-        try:
-            log_api("=> {to_snake_case(class_name)}.{name} started")
-            result = {prefix}{arguments(value, len(prefix))}{suffix}
-            log_api("<= {to_snake_case(class_name)}.{name} succeded")
-            return result
-        except Exception as e:
-            log_api("<= {to_snake_case(class_name)}.{name} failed")
-            raise e"""
+        return {prefix}{arguments(value, len(prefix))}{suffix}"""
                 )
 
     print("")

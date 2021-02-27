@@ -54,7 +54,6 @@ from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
 from playwright._impl._input import Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
-from playwright._impl._logger import log_api
 from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
 from playwright._impl._network import Route as RouteImpl
@@ -112,7 +111,7 @@ class Request(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.method)
 
     @property
-    def post_data(self) -> typing.Union[str, NoneType]:
+    def post_data(self) -> typing.Optional[str]:
         """Request.post_data
 
         Request's post body, if any.
@@ -124,7 +123,7 @@ class Request(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.post_data)
 
     @property
-    def post_data_json(self) -> typing.Union[typing.Any, NoneType]:
+    def post_data_json(self) -> typing.Optional[typing.Any]:
         """Request.post_data_json
 
         Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
@@ -139,7 +138,7 @@ class Request(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.post_data_json)
 
     @property
-    def post_data_buffer(self) -> typing.Union[bytes, NoneType]:
+    def post_data_buffer(self) -> typing.Optional[bytes]:
         """Request.post_data_buffer
 
         Request's post body in a binary form, if any.
@@ -175,7 +174,7 @@ class Request(SyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
-    def redirected_from(self) -> typing.Union["Request", NoneType]:
+    def redirected_from(self) -> typing.Optional["Request"]:
         """Request.redirected_from
 
         Request that was redirected by the server to this one, if any.
@@ -205,7 +204,7 @@ class Request(SyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirected_from)
 
     @property
-    def redirected_to(self) -> typing.Union["Request", NoneType]:
+    def redirected_to(self) -> typing.Optional["Request"]:
         """Request.redirected_to
 
         New request issued by the browser if the server responded with redirect.
@@ -223,7 +222,7 @@ class Request(SyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirected_to)
 
     @property
-    def failure(self) -> typing.Union[str, NoneType]:
+    def failure(self) -> typing.Optional[str]:
         """Request.failure
 
         The method returns `null` unless this request has failed, as reported by `requestfailed` event.
@@ -261,7 +260,7 @@ class Request(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.timing)
 
-    def response(self) -> typing.Union["Response", NoneType]:
+    def response(self) -> typing.Optional["Response"]:
         """Request.response
 
         Returns the matching `Response` object, or `null` if the response was not received due to error.
@@ -271,14 +270,9 @@ class Request(SyncBase):
         Union[Response, NoneType]
         """
 
-        try:
-            log_api("=> request.response started")
-            result = mapping.from_impl_nullable(self._sync(self._impl_obj.response()))
-            log_api("<= request.response succeded")
-            return result
-        except Exception as e:
-            log_api("<= request.response failed")
-            raise e
+        return mapping.from_impl_nullable(
+            self._sync("request.response", self._impl_obj.response())
+        )
 
     def is_navigation_request(self) -> bool:
         """Request.is_navigation_request
@@ -290,14 +284,7 @@ class Request(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> request.is_navigation_request started")
-            result = mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
-            log_api("<= request.is_navigation_request succeded")
-            return result
-        except Exception as e:
-            log_api("<= request.is_navigation_request failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
 
 
 mapping.register(RequestImpl, Request)
@@ -391,7 +378,7 @@ class Response(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.frame)
 
-    def finished(self) -> typing.Union[str, NoneType]:
+    def finished(self) -> typing.Optional[str]:
         """Response.finished
 
         Waits for this response to finish, returns failure error if request failed.
@@ -401,14 +388,9 @@ class Response(SyncBase):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> response.finished started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.finished()))
-            log_api("<= response.finished succeded")
-            return result
-        except Exception as e:
-            log_api("<= response.finished failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("response.finished", self._impl_obj.finished())
+        )
 
     def body(self) -> bytes:
         """Response.body
@@ -420,14 +402,9 @@ class Response(SyncBase):
         bytes
         """
 
-        try:
-            log_api("=> response.body started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.body()))
-            log_api("<= response.body succeded")
-            return result
-        except Exception as e:
-            log_api("<= response.body failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("response.body", self._impl_obj.body())
+        )
 
     def text(self) -> str:
         """Response.text
@@ -439,14 +416,9 @@ class Response(SyncBase):
         str
         """
 
-        try:
-            log_api("=> response.text started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.text()))
-            log_api("<= response.text succeded")
-            return result
-        except Exception as e:
-            log_api("<= response.text failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("response.text", self._impl_obj.text())
+        )
 
     def json(self) -> typing.Any:
         """Response.json
@@ -460,14 +432,9 @@ class Response(SyncBase):
         Any
         """
 
-        try:
-            log_api("=> response.json started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.json()))
-            log_api("<= response.json succeded")
-            return result
-        except Exception as e:
-            log_api("<= response.json failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("response.json", self._impl_obj.json())
+        )
 
 
 mapping.register(ResponseImpl, Response)
@@ -516,22 +483,15 @@ class Route(SyncBase):
             - `'failed'` - A generic failure occurred.
         """
 
-        try:
-            log_api("=> route.abort started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.abort(errorCode=error_code))
-            )
-            log_api("<= route.abort succeded")
-            return result
-        except Exception as e:
-            log_api("<= route.abort failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("route.abort", self._impl_obj.abort(errorCode=error_code))
+        )
 
     def fulfill(
         self,
         *,
         status: int = None,
-        headers: typing.Union[typing.Dict[str, str]] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
         path: typing.Union[str, pathlib.Path] = None,
         content_type: str = None
@@ -570,31 +530,25 @@ class Route(SyncBase):
             If set, equals to setting `Content-Type` response header.
         """
 
-        try:
-            log_api("=> route.fulfill started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.fulfill(
-                        status=status,
-                        headers=mapping.to_impl(headers),
-                        body=body,
-                        path=path,
-                        contentType=content_type,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "route.fulfill",
+                self._impl_obj.fulfill(
+                    status=status,
+                    headers=mapping.to_impl(headers),
+                    body=body,
+                    path=path,
+                    contentType=content_type,
+                ),
             )
-            log_api("<= route.fulfill succeded")
-            return result
-        except Exception as e:
-            log_api("<= route.fulfill failed")
-            raise e
+        )
 
     def continue_(
         self,
         *,
         url: str = None,
         method: str = None,
-        headers: typing.Union[typing.Dict[str, str]] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
         post_data: typing.Union[str, bytes] = None
     ) -> NoneType:
         """Route.continue_
@@ -626,23 +580,17 @@ class Route(SyncBase):
             If set changes the post data of request
         """
 
-        try:
-            log_api("=> route.continue_ started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.continue_(
-                        url=url,
-                        method=method,
-                        headers=mapping.to_impl(headers),
-                        postData=post_data,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "route.continue_",
+                self._impl_obj.continue_(
+                    url=url,
+                    method=method,
+                    headers=mapping.to_impl(headers),
+                    postData=post_data,
+                ),
             )
-            log_api("<= route.continue_ succeded")
-            return result
-        except Exception as e:
-            log_api("<= route.continue_ failed")
-            raise e
+        )
 
 
 mapping.register(RouteImpl, Route)
@@ -719,22 +667,16 @@ class WebSocket(SyncBase):
         Any
         """
 
-        try:
-            log_api("=> web_socket.wait_for_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_event(
-                        event=event,
-                        predicate=self._wrap_handler(predicate),
-                        timeout=timeout,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "web_socket.wait_for_event",
+                self._impl_obj.wait_for_event(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                ),
             )
-            log_api("<= web_socket.wait_for_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= web_socket.wait_for_event failed")
-            raise e
+        )
 
     def is_closed(self) -> bool:
         """WebSocket.is_closed
@@ -746,14 +688,7 @@ class WebSocket(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> web_socket.is_closed started")
-            result = mapping.from_maybe_impl(self._impl_obj.is_closed())
-            log_api("<= web_socket.is_closed succeded")
-            return result
-        except Exception as e:
-            log_api("<= web_socket.is_closed failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.is_closed())
 
 
 mapping.register(WebSocketImpl, WebSocket)
@@ -797,14 +732,9 @@ class Keyboard(SyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         """
 
-        try:
-            log_api("=> keyboard.down started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.down(key=key)))
-            log_api("<= keyboard.down succeded")
-            return result
-        except Exception as e:
-            log_api("<= keyboard.down failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("keyboard.down", self._impl_obj.down(key=key))
+        )
 
     def up(self, key: str) -> NoneType:
         """Keyboard.up
@@ -817,14 +747,9 @@ class Keyboard(SyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         """
 
-        try:
-            log_api("=> keyboard.up started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.up(key=key)))
-            log_api("<= keyboard.up succeded")
-            return result
-        except Exception as e:
-            log_api("<= keyboard.up failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("keyboard.up", self._impl_obj.up(key=key))
+        )
 
     def insert_text(self, text: str) -> NoneType:
         """Keyboard.insert_text
@@ -843,16 +768,9 @@ class Keyboard(SyncBase):
             Sets input to the specified text value.
         """
 
-        try:
-            log_api("=> keyboard.insert_text started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.insert_text(text=text))
-            )
-            log_api("<= keyboard.insert_text succeded")
-            return result
-        except Exception as e:
-            log_api("<= keyboard.insert_text failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("keyboard.insert_text", self._impl_obj.insert_text(text=text))
+        )
 
     def type(self, text: str, *, delay: float = None) -> NoneType:
         """Keyboard.type
@@ -876,16 +794,9 @@ class Keyboard(SyncBase):
             Time to wait between key presses in milliseconds. Defaults to 0.
         """
 
-        try:
-            log_api("=> keyboard.type started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.type(text=text, delay=delay))
-            )
-            log_api("<= keyboard.type succeded")
-            return result
-        except Exception as e:
-            log_api("<= keyboard.type failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("keyboard.type", self._impl_obj.type(text=text, delay=delay))
+        )
 
     def press(self, key: str, *, delay: float = None) -> NoneType:
         """Keyboard.press
@@ -929,16 +840,9 @@ class Keyboard(SyncBase):
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         """
 
-        try:
-            log_api("=> keyboard.press started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.press(key=key, delay=delay))
-            )
-            log_api("<= keyboard.press succeded")
-            return result
-        except Exception as e:
-            log_api("<= keyboard.press failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("keyboard.press", self._impl_obj.press(key=key, delay=delay))
+        )
 
 
 mapping.register(KeyboardImpl, Keyboard)
@@ -961,16 +865,9 @@ class Mouse(SyncBase):
             defaults to 1. Sends intermediate `mousemove` events.
         """
 
-        try:
-            log_api("=> mouse.move started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.move(x=x, y=y, steps=steps))
-            )
-            log_api("<= mouse.move succeded")
-            return result
-        except Exception as e:
-            log_api("<= mouse.move failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("mouse.move", self._impl_obj.move(x=x, y=y, steps=steps))
+        )
 
     def down(
         self,
@@ -990,16 +887,11 @@ class Mouse(SyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        try:
-            log_api("=> mouse.down started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.down(button=button, clickCount=click_count))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "mouse.down", self._impl_obj.down(button=button, clickCount=click_count)
             )
-            log_api("<= mouse.down succeded")
-            return result
-        except Exception as e:
-            log_api("<= mouse.down failed")
-            raise e
+        )
 
     def up(
         self,
@@ -1019,16 +911,11 @@ class Mouse(SyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        try:
-            log_api("=> mouse.up started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.up(button=button, clickCount=click_count))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "mouse.up", self._impl_obj.up(button=button, clickCount=click_count)
             )
-            log_api("<= mouse.up succeded")
-            return result
-        except Exception as e:
-            log_api("<= mouse.up failed")
-            raise e
+        )
 
     def click(
         self,
@@ -1055,20 +942,14 @@ class Mouse(SyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        try:
-            log_api("=> mouse.click started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.click(
-                        x=x, y=y, delay=delay, button=button, clickCount=click_count
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "mouse.click",
+                self._impl_obj.click(
+                    x=x, y=y, delay=delay, button=button, clickCount=click_count
+                ),
             )
-            log_api("<= mouse.click succeded")
-            return result
-        except Exception as e:
-            log_api("<= mouse.click failed")
-            raise e
+        )
 
     def dblclick(
         self,
@@ -1093,18 +974,12 @@ class Mouse(SyncBase):
             Defaults to `left`.
         """
 
-        try:
-            log_api("=> mouse.dblclick started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "mouse.dblclick",
+                self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button),
             )
-            log_api("<= mouse.dblclick succeded")
-            return result
-        except Exception as e:
-            log_api("<= mouse.dblclick failed")
-            raise e
+        )
 
 
 mapping.register(MouseImpl, Mouse)
@@ -1125,14 +1000,9 @@ class Touchscreen(SyncBase):
         y : float
         """
 
-        try:
-            log_api("=> touchscreen.tap started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.tap(x=x, y=y)))
-            log_api("<= touchscreen.tap succeded")
-            return result
-        except Exception as e:
-            log_api("<= touchscreen.tap failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("touchscreen.tap", self._impl_obj.tap(x=x, y=y))
+        )
 
 
 mapping.register(TouchscreenImpl, Touchscreen)
@@ -1164,27 +1034,21 @@ class JSHandle(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> js_handle.evaluate started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.evaluate(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "js_handle.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= js_handle.evaluate succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.evaluate failed")
-            raise e
+        )
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """JSHandle.evaluate_handle
@@ -1207,27 +1071,21 @@ class JSHandle(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         JSHandle
         """
 
-        try:
-            log_api("=> js_handle.evaluate_handle started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.evaluate_handle(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "js_handle.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= js_handle.evaluate_handle succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.evaluate_handle failed")
-            raise e
+        )
 
     def get_property(self, property_name: str) -> "JSHandle":
         """JSHandle.get_property
@@ -1244,16 +1102,12 @@ class JSHandle(SyncBase):
         JSHandle
         """
 
-        try:
-            log_api("=> js_handle.get_property started")
-            result = mapping.from_impl(
-                self._sync(self._impl_obj.get_property(propertyName=property_name))
+        return mapping.from_impl(
+            self._sync(
+                "js_handle.get_property",
+                self._impl_obj.get_property(propertyName=property_name),
             )
-            log_api("<= js_handle.get_property succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.get_property failed")
-            raise e
+        )
 
     def get_properties(self) -> typing.Dict[str, "JSHandle"]:
         """JSHandle.get_properties
@@ -1273,16 +1127,11 @@ class JSHandle(SyncBase):
         Dict[str, JSHandle]
         """
 
-        try:
-            log_api("=> js_handle.get_properties started")
-            result = mapping.from_impl_dict(self._sync(self._impl_obj.get_properties()))
-            log_api("<= js_handle.get_properties succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.get_properties failed")
-            raise e
+        return mapping.from_impl_dict(
+            self._sync("js_handle.get_properties", self._impl_obj.get_properties())
+        )
 
-    def as_element(self) -> typing.Union["ElementHandle", NoneType]:
+    def as_element(self) -> typing.Optional["ElementHandle"]:
         """JSHandle.as_element
 
         Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
@@ -1292,14 +1141,7 @@ class JSHandle(SyncBase):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> js_handle.as_element started")
-            result = mapping.from_impl_nullable(self._impl_obj.as_element())
-            log_api("<= js_handle.as_element succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.as_element failed")
-            raise e
+        return mapping.from_impl_nullable(self._impl_obj.as_element())
 
     def dispose(self) -> NoneType:
         """JSHandle.dispose
@@ -1307,14 +1149,9 @@ class JSHandle(SyncBase):
         The `jsHandle.dispose` method stops referencing the element handle.
         """
 
-        try:
-            log_api("=> js_handle.dispose started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
-            log_api("<= js_handle.dispose succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.dispose failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("js_handle.dispose", self._impl_obj.dispose())
+        )
 
     def json_value(self) -> typing.Any:
         """JSHandle.json_value
@@ -1329,14 +1166,9 @@ class JSHandle(SyncBase):
         Any
         """
 
-        try:
-            log_api("=> js_handle.json_value started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.json_value()))
-            log_api("<= js_handle.json_value succeded")
-            return result
-        except Exception as e:
-            log_api("<= js_handle.json_value failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("js_handle.json_value", self._impl_obj.json_value())
+        )
 
 
 mapping.register(JSHandleImpl, JSHandle)
@@ -1346,7 +1178,7 @@ class ElementHandle(JSHandle):
     def __init__(self, obj: ElementHandleImpl):
         super().__init__(obj)
 
-    def as_element(self) -> typing.Union["ElementHandle", NoneType]:
+    def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
 
         Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
@@ -1356,16 +1188,9 @@ class ElementHandle(JSHandle):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.as_element started")
-            result = mapping.from_impl_nullable(self._impl_obj.as_element())
-            log_api("<= element_handle.as_element succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.as_element failed")
-            raise e
+        return mapping.from_impl_nullable(self._impl_obj.as_element())
 
-    def owner_frame(self) -> typing.Union["Frame", NoneType]:
+    def owner_frame(self) -> typing.Optional["Frame"]:
         """ElementHandle.owner_frame
 
         Returns the frame containing the given element.
@@ -1375,18 +1200,11 @@ class ElementHandle(JSHandle):
         Union[Frame, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.owner_frame started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.owner_frame())
-            )
-            log_api("<= element_handle.owner_frame succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.owner_frame failed")
-            raise e
+        return mapping.from_impl_nullable(
+            self._sync("element_handle.owner_frame", self._impl_obj.owner_frame())
+        )
 
-    def content_frame(self) -> typing.Union["Frame", NoneType]:
+    def content_frame(self) -> typing.Optional["Frame"]:
         """ElementHandle.content_frame
 
         Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
@@ -1396,18 +1214,11 @@ class ElementHandle(JSHandle):
         Union[Frame, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.content_frame started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.content_frame())
-            )
-            log_api("<= element_handle.content_frame succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.content_frame failed")
-            raise e
+        return mapping.from_impl_nullable(
+            self._sync("element_handle.content_frame", self._impl_obj.content_frame())
+        )
 
-    def get_attribute(self, name: str) -> typing.Union[str, NoneType]:
+    def get_attribute(self, name: str) -> typing.Optional[str]:
         """ElementHandle.get_attribute
 
         Returns element attribute value.
@@ -1422,18 +1233,13 @@ class ElementHandle(JSHandle):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.get_attribute started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.get_attribute(name=name))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.get_attribute", self._impl_obj.get_attribute(name=name)
             )
-            log_api("<= element_handle.get_attribute succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.get_attribute failed")
-            raise e
+        )
 
-    def text_content(self) -> typing.Union[str, NoneType]:
+    def text_content(self) -> typing.Optional[str]:
         """ElementHandle.text_content
 
         Returns the `node.textContent`.
@@ -1443,14 +1249,9 @@ class ElementHandle(JSHandle):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.text_content started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.text_content()))
-            log_api("<= element_handle.text_content succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.text_content failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.text_content", self._impl_obj.text_content())
+        )
 
     def inner_text(self) -> str:
         """ElementHandle.inner_text
@@ -1462,14 +1263,9 @@ class ElementHandle(JSHandle):
         str
         """
 
-        try:
-            log_api("=> element_handle.inner_text started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.inner_text()))
-            log_api("<= element_handle.inner_text succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.inner_text failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.inner_text", self._impl_obj.inner_text())
+        )
 
     def inner_html(self) -> str:
         """ElementHandle.inner_html
@@ -1481,14 +1277,9 @@ class ElementHandle(JSHandle):
         str
         """
 
-        try:
-            log_api("=> element_handle.inner_html started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.inner_html()))
-            log_api("<= element_handle.inner_html succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.inner_html failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.inner_html", self._impl_obj.inner_html())
+        )
 
     def is_checked(self) -> bool:
         """ElementHandle.is_checked
@@ -1500,14 +1291,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        try:
-            log_api("=> element_handle.is_checked started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_checked()))
-            log_api("<= element_handle.is_checked succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.is_checked failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.is_checked", self._impl_obj.is_checked())
+        )
 
     def is_disabled(self) -> bool:
         """ElementHandle.is_disabled
@@ -1519,14 +1305,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        try:
-            log_api("=> element_handle.is_disabled started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_disabled()))
-            log_api("<= element_handle.is_disabled succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.is_disabled failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.is_disabled", self._impl_obj.is_disabled())
+        )
 
     def is_editable(self) -> bool:
         """ElementHandle.is_editable
@@ -1538,14 +1319,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        try:
-            log_api("=> element_handle.is_editable started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_editable()))
-            log_api("<= element_handle.is_editable succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.is_editable failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.is_editable", self._impl_obj.is_editable())
+        )
 
     def is_enabled(self) -> bool:
         """ElementHandle.is_enabled
@@ -1557,14 +1333,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        try:
-            log_api("=> element_handle.is_enabled started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_enabled()))
-            log_api("<= element_handle.is_enabled succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.is_enabled failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.is_enabled", self._impl_obj.is_enabled())
+        )
 
     def is_hidden(self) -> bool:
         """ElementHandle.is_hidden
@@ -1576,14 +1347,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        try:
-            log_api("=> element_handle.is_hidden started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_hidden()))
-            log_api("<= element_handle.is_hidden succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.is_hidden failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.is_hidden", self._impl_obj.is_hidden())
+        )
 
     def is_visible(self) -> bool:
         """ElementHandle.is_visible
@@ -1595,14 +1361,9 @@ class ElementHandle(JSHandle):
         bool
         """
 
-        try:
-            log_api("=> element_handle.is_visible started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.is_visible()))
-            log_api("<= element_handle.is_visible succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.is_visible failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.is_visible", self._impl_obj.is_visible())
+        )
 
     def dispatch_event(self, type: str, event_init: typing.Dict = None) -> NoneType:
         """ElementHandle.dispatch_event
@@ -1643,20 +1404,14 @@ class ElementHandle(JSHandle):
             Optional event-specific initialization properties.
         """
 
-        try:
-            log_api("=> element_handle.dispatch_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dispatch_event(
-                        type=type, eventInit=mapping.to_impl(event_init)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    type=type, eventInit=mapping.to_impl(event_init)
+                ),
             )
-            log_api("<= element_handle.dispatch_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.dispatch_event failed")
-            raise e
+        )
 
     def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
         """ElementHandle.scroll_into_view_if_needed
@@ -1675,21 +1430,17 @@ class ElementHandle(JSHandle):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> element_handle.scroll_into_view_if_needed started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.scroll_into_view_if_needed(timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.scroll_into_view_if_needed",
+                self._impl_obj.scroll_into_view_if_needed(timeout=timeout),
             )
-            log_api("<= element_handle.scroll_into_view_if_needed succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.scroll_into_view_if_needed failed")
-            raise e
+        )
 
     def hover(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -1724,28 +1475,19 @@ class ElementHandle(JSHandle):
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.hover started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.hover(
-                        modifiers=modifiers,
-                        position=position,
-                        timeout=timeout,
-                        force=force,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.hover",
+                self._impl_obj.hover(
+                    modifiers=modifiers, position=position, timeout=timeout, force=force
+                ),
             )
-            log_api("<= element_handle.hover succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.hover failed")
-            raise e
+        )
 
     def click(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -1794,32 +1536,26 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.click started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.click(
-                        modifiers=modifiers,
-                        position=position,
-                        delay=delay,
-                        button=button,
-                        clickCount=click_count,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.click",
+                self._impl_obj.click(
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= element_handle.click succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.click failed")
-            raise e
+        )
 
     def dblclick(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -1868,26 +1604,20 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.dblclick started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dblclick(
-                        modifiers=modifiers,
-                        position=position,
-                        delay=delay,
-                        button=button,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.dblclick",
+                self._impl_obj.dblclick(
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= element_handle.dblclick succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.dblclick failed")
-            raise e
+        )
 
     def select_option(
         self,
@@ -1953,30 +1683,24 @@ class ElementHandle(JSHandle):
         List[str]
         """
 
-        try:
-            log_api("=> element_handle.select_option started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.select_option(
-                        value=value,
-                        index=index,
-                        label=label,
-                        element=mapping.to_impl(element),
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.select_option",
+                self._impl_obj.select_option(
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= element_handle.select_option succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.select_option failed")
-            raise e
+        )
 
     def tap(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -2018,24 +1742,18 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.tap started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.tap(
-                        modifiers=modifiers,
-                        position=position,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.tap",
+                self._impl_obj.tap(
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= element_handle.tap succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.tap failed")
-            raise e
+        )
 
     def fill(
         self, value: str, *, timeout: float = None, no_wait_after: bool = None
@@ -2061,20 +1779,14 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.fill started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.fill(
-                        value=value, timeout=timeout, noWaitAfter=no_wait_after
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.fill",
+                self._impl_obj.fill(
+                    value=value, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= element_handle.fill succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.fill failed")
-            raise e
+        )
 
     def select_text(self, *, timeout: float = None) -> NoneType:
         """ElementHandle.select_text
@@ -2089,16 +1801,12 @@ class ElementHandle(JSHandle):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> element_handle.select_text started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.select_text(timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.select_text",
+                self._impl_obj.select_text(timeout=timeout),
             )
-            log_api("<= element_handle.select_text succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.select_text failed")
-            raise e
+        )
 
     def set_input_files(
         self,
@@ -2133,20 +1841,14 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.set_input_files started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_input_files(
-                        files=files, timeout=timeout, noWaitAfter=no_wait_after
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.set_input_files",
+                self._impl_obj.set_input_files(
+                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= element_handle.set_input_files succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.set_input_files failed")
-            raise e
+        )
 
     def focus(self) -> NoneType:
         """ElementHandle.focus
@@ -2154,14 +1856,9 @@ class ElementHandle(JSHandle):
         Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
         """
 
-        try:
-            log_api("=> element_handle.focus started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.focus()))
-            log_api("<= element_handle.focus succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.focus failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("element_handle.focus", self._impl_obj.focus())
+        )
 
     def type(
         self,
@@ -2205,23 +1902,14 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.type started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.type(
-                        text=text,
-                        delay=delay,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.type",
+                self._impl_obj.type(
+                    text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= element_handle.type succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.type failed")
-            raise e
+        )
 
     def press(
         self,
@@ -2267,20 +1955,14 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.press started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.press(
-                        key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.press",
+                self._impl_obj.press(
+                    key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= element_handle.press succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.press failed")
-            raise e
+        )
 
     def check(
         self, *, timeout: float = None, force: bool = None, no_wait_after: bool = None
@@ -2314,20 +1996,14 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.check started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.check(
-                        timeout=timeout, force=force, noWaitAfter=no_wait_after
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.check",
+                self._impl_obj.check(
+                    timeout=timeout, force=force, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= element_handle.check succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.check failed")
-            raise e
+        )
 
     def uncheck(
         self, *, timeout: float = None, force: bool = None, no_wait_after: bool = None
@@ -2361,22 +2037,16 @@ class ElementHandle(JSHandle):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> element_handle.uncheck started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.uncheck(
-                        timeout=timeout, force=force, noWaitAfter=no_wait_after
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.uncheck",
+                self._impl_obj.uncheck(
+                    timeout=timeout, force=force, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= element_handle.uncheck succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.uncheck failed")
-            raise e
+        )
 
-    def bounding_box(self) -> typing.Union[FloatRect, NoneType]:
+    def bounding_box(self) -> typing.Optional[FloatRect]:
         """ElementHandle.bounding_box
 
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -2402,16 +2072,9 @@ class ElementHandle(JSHandle):
         Union[{x: float, y: float, width: float, height: float}, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.bounding_box started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.bounding_box())
-            )
-            log_api("<= element_handle.bounding_box succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.bounding_box failed")
-            raise e
+        return mapping.from_impl_nullable(
+            self._sync("element_handle.bounding_box", self._impl_obj.bounding_box())
+        )
 
     def screenshot(
         self,
@@ -2451,26 +2114,20 @@ class ElementHandle(JSHandle):
         bytes
         """
 
-        try:
-            log_api("=> element_handle.screenshot started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.screenshot(
-                        timeout=timeout,
-                        type=type,
-                        path=path,
-                        quality=quality,
-                        omitBackground=omit_background,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.screenshot",
+                self._impl_obj.screenshot(
+                    timeout=timeout,
+                    type=type,
+                    path=path,
+                    quality=quality,
+                    omitBackground=omit_background,
+                ),
             )
-            log_api("<= element_handle.screenshot succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.screenshot failed")
-            raise e
+        )
 
-    def query_selector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
+    def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """ElementHandle.query_selector
 
         The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
@@ -2486,16 +2143,12 @@ class ElementHandle(JSHandle):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.query_selector started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.query_selector(selector=selector))
+        return mapping.from_impl_nullable(
+            self._sync(
+                "element_handle.query_selector",
+                self._impl_obj.query_selector(selector=selector),
             )
-            log_api("<= element_handle.query_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.query_selector failed")
-            raise e
+        )
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
         """ElementHandle.query_selector_all
@@ -2513,16 +2166,12 @@ class ElementHandle(JSHandle):
         List[ElementHandle]
         """
 
-        try:
-            log_api("=> element_handle.query_selector_all started")
-            result = mapping.from_impl_list(
-                self._sync(self._impl_obj.query_selector_all(selector=selector))
+        return mapping.from_impl_list(
+            self._sync(
+                "element_handle.query_selector_all",
+                self._impl_obj.query_selector_all(selector=selector),
             )
-            log_api("<= element_handle.query_selector_all succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.query_selector_all failed")
-            raise e
+        )
 
     def eval_on_selector(
         self, selector: str, expression: str, arg: typing.Any = None
@@ -2554,29 +2203,21 @@ class ElementHandle(JSHandle):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> element_handle.eval_on_selector started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.eval_on_selector(
-                        selector=selector,
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.eval_on_selector",
+                self._impl_obj.eval_on_selector(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= element_handle.eval_on_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.eval_on_selector failed")
-            raise e
+        )
 
     def eval_on_selector_all(
         self, selector: str, expression: str, arg: typing.Any = None
@@ -2613,29 +2254,21 @@ class ElementHandle(JSHandle):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> element_handle.eval_on_selector_all started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.eval_on_selector_all(
-                        selector=selector,
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.eval_on_selector_all",
+                self._impl_obj.eval_on_selector_all(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= element_handle.eval_on_selector_all succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.eval_on_selector_all failed")
-            raise e
+        )
 
     def wait_for_element_state(
         self,
@@ -2671,18 +2304,12 @@ class ElementHandle(JSHandle):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> element_handle.wait_for_element_state started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_element_state(state=state, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.wait_for_element_state",
+                self._impl_obj.wait_for_element_state(state=state, timeout=timeout),
             )
-            log_api("<= element_handle.wait_for_element_state succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.wait_for_element_state failed")
-            raise e
+        )
 
     def wait_for_selector(
         self,
@@ -2690,7 +2317,7 @@ class ElementHandle(JSHandle):
         *,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         timeout: float = None
-    ) -> typing.Union["ElementHandle", NoneType]:
+    ) -> typing.Optional["ElementHandle"]:
         """ElementHandle.wait_for_selector
 
         Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -2731,20 +2358,14 @@ class ElementHandle(JSHandle):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> element_handle.wait_for_selector started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.wait_for_selector(
-                        selector=selector, state=state, timeout=timeout
-                    )
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "element_handle.wait_for_selector",
+                self._impl_obj.wait_for_selector(
+                    selector=selector, state=state, timeout=timeout
+                ),
             )
-            log_api("<= element_handle.wait_for_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= element_handle.wait_for_selector failed")
-            raise e
+        )
 
 
 mapping.register(ElementHandleImpl, ElementHandle)
@@ -2756,7 +2377,7 @@ class Accessibility(SyncBase):
 
     def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
-    ) -> typing.Union[typing.Dict, NoneType]:
+    ) -> typing.Optional[typing.Dict]:
         """Accessibility.snapshot
 
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
@@ -2801,20 +2422,14 @@ class Accessibility(SyncBase):
         Union[Dict, NoneType]
         """
 
-        try:
-            log_api("=> accessibility.snapshot started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.snapshot(
-                        interestingOnly=interesting_only, root=mapping.to_impl(root)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "accessibility.snapshot",
+                self._impl_obj.snapshot(
+                    interestingOnly=interesting_only, root=mapping.to_impl(root)
+                ),
             )
-            log_api("<= accessibility.snapshot succeded")
-            return result
-        except Exception as e:
-            log_api("<= accessibility.snapshot failed")
-            raise e
+        )
 
 
 mapping.register(AccessibilityImpl, Accessibility)
@@ -2858,14 +2473,7 @@ class FileChooser(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> file_chooser.is_multiple started")
-            result = mapping.from_maybe_impl(self._impl_obj.is_multiple())
-            log_api("<= file_chooser.is_multiple succeded")
-            return result
-        except Exception as e:
-            log_api("<= file_chooser.is_multiple failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.is_multiple())
 
     def set_files(
         self,
@@ -2897,20 +2505,14 @@ class FileChooser(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> file_chooser.set_files started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_files(
-                        files=files, timeout=timeout, noWaitAfter=no_wait_after
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "file_chooser.set_files",
+                self._impl_obj.set_files(
+                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                ),
             )
-            log_api("<= file_chooser.set_files succeded")
-            return result
-        except Exception as e:
-            log_api("<= file_chooser.set_files failed")
-            raise e
+        )
 
 
 mapping.register(FileChooserImpl, FileChooser)
@@ -2961,7 +2563,7 @@ class Frame(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def parent_frame(self) -> typing.Union["Frame", NoneType]:
+    def parent_frame(self) -> typing.Optional["Frame"]:
         """Frame.parent_frame
 
         Parent frame, if any. Detached frames and main frames return `null`.
@@ -2989,7 +2591,7 @@ class Frame(SyncBase):
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Frame.goto
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -3034,20 +2636,14 @@ class Frame(SyncBase):
         Union[Response, NoneType]
         """
 
-        try:
-            log_api("=> frame.goto started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.goto(
-                        url=url, timeout=timeout, waitUntil=wait_until, referer=referer
-                    )
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "frame.goto",
+                self._impl_obj.goto(
+                    url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+                ),
             )
-            log_api("<= frame.goto succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.goto failed")
-            raise e
+        )
 
     def expect_navigation(
         self,
@@ -3077,7 +2673,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str, NoneType]
-            URL string, URL regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
         wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -3133,18 +2729,12 @@ class Frame(SyncBase):
             `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> frame.wait_for_load_state started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.wait_for_load_state",
+                self._impl_obj.wait_for_load_state(state=state, timeout=timeout),
             )
-            log_api("<= frame.wait_for_load_state succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.wait_for_load_state failed")
-            raise e
+        )
 
     def frame_element(self) -> "ElementHandle":
         """Frame.frame_element
@@ -3167,14 +2757,9 @@ class Frame(SyncBase):
         ElementHandle
         """
 
-        try:
-            log_api("=> frame.frame_element started")
-            result = mapping.from_impl(self._sync(self._impl_obj.frame_element()))
-            log_api("<= frame.frame_element succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.frame_element failed")
-            raise e
+        return mapping.from_impl(
+            self._sync("frame.frame_element", self._impl_obj.frame_element())
+        )
 
     def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Frame.evaluate
@@ -3215,27 +2800,21 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> frame.evaluate started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.evaluate(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= frame.evaluate succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.evaluate failed")
-            raise e
+        )
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """Frame.evaluate_handle
@@ -3274,29 +2853,23 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         JSHandle
         """
 
-        try:
-            log_api("=> frame.evaluate_handle started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.evaluate_handle(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "frame.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= frame.evaluate_handle succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.evaluate_handle failed")
-            raise e
+        )
 
-    def query_selector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
+    def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """Frame.query_selector
 
         Returns the ElementHandle pointing to the frame element.
@@ -3314,16 +2887,11 @@ class Frame(SyncBase):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> frame.query_selector started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.query_selector(selector=selector))
+        return mapping.from_impl_nullable(
+            self._sync(
+                "frame.query_selector", self._impl_obj.query_selector(selector=selector)
             )
-            log_api("<= frame.query_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.query_selector failed")
-            raise e
+        )
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
         """Frame.query_selector_all
@@ -3343,16 +2911,12 @@ class Frame(SyncBase):
         List[ElementHandle]
         """
 
-        try:
-            log_api("=> frame.query_selector_all started")
-            result = mapping.from_impl_list(
-                self._sync(self._impl_obj.query_selector_all(selector=selector))
+        return mapping.from_impl_list(
+            self._sync(
+                "frame.query_selector_all",
+                self._impl_obj.query_selector_all(selector=selector),
             )
-            log_api("<= frame.query_selector_all succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.query_selector_all failed")
-            raise e
+        )
 
     def wait_for_selector(
         self,
@@ -3360,7 +2924,7 @@ class Frame(SyncBase):
         *,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
-    ) -> typing.Union["ElementHandle", NoneType]:
+    ) -> typing.Optional["ElementHandle"]:
         """Frame.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -3410,20 +2974,14 @@ class Frame(SyncBase):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> frame.wait_for_selector started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.wait_for_selector(
-                        selector=selector, timeout=timeout, state=state
-                    )
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "frame.wait_for_selector",
+                self._impl_obj.wait_for_selector(
+                    selector=selector, timeout=timeout, state=state
+                ),
             )
-            log_api("<= frame.wait_for_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.wait_for_selector failed")
-            raise e
+        )
 
     def is_checked(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_checked
@@ -3444,18 +3002,12 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_checked started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_checked(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.is_checked",
+                self._impl_obj.is_checked(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.is_checked succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_checked failed")
-            raise e
+        )
 
     def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_disabled
@@ -3476,18 +3028,12 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_disabled started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_disabled(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.is_disabled",
+                self._impl_obj.is_disabled(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.is_disabled succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_disabled failed")
-            raise e
+        )
 
     def is_editable(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_editable
@@ -3508,18 +3054,12 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_editable started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_editable(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.is_editable",
+                self._impl_obj.is_editable(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.is_editable succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_editable failed")
-            raise e
+        )
 
     def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_enabled
@@ -3540,23 +3080,18 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_enabled started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_enabled(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.is_enabled",
+                self._impl_obj.is_enabled(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.is_enabled succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_enabled failed")
-            raise e
+        )
 
     def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_hidden
 
-        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
+        match any elements is considered hidden.
 
         Parameters
         ----------
@@ -3572,21 +3107,18 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_hidden started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.is_hidden",
+                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.is_hidden succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_hidden failed")
-            raise e
+        )
 
     def is_visible(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_visible
 
-        Returns whether the element is [visible](./actionability.md#visible).
+        Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
+        considered not visible.
 
         Parameters
         ----------
@@ -3602,18 +3134,12 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_visible started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_visible(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.is_visible",
+                self._impl_obj.is_visible(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.is_visible succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_visible failed")
-            raise e
+        )
 
     def dispatch_event(
         self,
@@ -3667,23 +3193,17 @@ class Frame(SyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> frame.dispatch_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dispatch_event(
-                        selector=selector,
-                        type=type,
-                        eventInit=mapping.to_impl(event_init),
-                        timeout=timeout,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    selector=selector,
+                    type=type,
+                    eventInit=mapping.to_impl(event_init),
+                    timeout=timeout,
+                ),
             )
-            log_api("<= frame.dispatch_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.dispatch_event failed")
-            raise e
+        )
 
     def eval_on_selector(
         self, selector: str, expression: str, arg: typing.Any = None
@@ -3715,29 +3235,21 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> frame.eval_on_selector started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.eval_on_selector(
-                        selector=selector,
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.eval_on_selector",
+                self._impl_obj.eval_on_selector(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= frame.eval_on_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.eval_on_selector failed")
-            raise e
+        )
 
     def eval_on_selector_all(
         self, selector: str, expression: str, arg: typing.Any = None
@@ -3766,29 +3278,21 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> frame.eval_on_selector_all started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.eval_on_selector_all(
-                        selector=selector,
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.eval_on_selector_all",
+                self._impl_obj.eval_on_selector_all(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= frame.eval_on_selector_all succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.eval_on_selector_all failed")
-            raise e
+        )
 
     def content(self) -> str:
         """Frame.content
@@ -3800,14 +3304,9 @@ class Frame(SyncBase):
         str
         """
 
-        try:
-            log_api("=> frame.content started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.content()))
-            log_api("<= frame.content succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.content failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("frame.content", self._impl_obj.content())
+        )
 
     def set_content(
         self,
@@ -3834,20 +3333,14 @@ class Frame(SyncBase):
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         """
 
-        try:
-            log_api("=> frame.set_content started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_content(
-                        html=html, timeout=timeout, waitUntil=wait_until
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.set_content",
+                self._impl_obj.set_content(
+                    html=html, timeout=timeout, waitUntil=wait_until
+                ),
             )
-            log_api("<= frame.set_content succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.set_content failed")
-            raise e
+        )
 
     def is_detached(self) -> bool:
         """Frame.is_detached
@@ -3859,14 +3352,7 @@ class Frame(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> frame.is_detached started")
-            result = mapping.from_maybe_impl(self._impl_obj.is_detached())
-            log_api("<= frame.is_detached succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.is_detached failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.is_detached())
 
     def add_script_tag(
         self,
@@ -3900,20 +3386,14 @@ class Frame(SyncBase):
         ElementHandle
         """
 
-        try:
-            log_api("=> frame.add_script_tag started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.add_script_tag(
-                        url=url, path=path, content=content, type=type
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "frame.add_script_tag",
+                self._impl_obj.add_script_tag(
+                    url=url, path=path, content=content, type=type
+                ),
             )
-            log_api("<= frame.add_script_tag succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.add_script_tag failed")
-            raise e
+        )
 
     def add_style_tag(
         self,
@@ -3944,24 +3424,18 @@ class Frame(SyncBase):
         ElementHandle
         """
 
-        try:
-            log_api("=> frame.add_style_tag started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.add_style_tag(url=url, path=path, content=content)
-                )
+        return mapping.from_impl(
+            self._sync(
+                "frame.add_style_tag",
+                self._impl_obj.add_style_tag(url=url, path=path, content=content),
             )
-            log_api("<= frame.add_style_tag succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.add_style_tag failed")
-            raise e
+        )
 
     def click(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -4013,34 +3487,28 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.click started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.click(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        delay=delay,
-                        button=button,
-                        clickCount=click_count,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.click",
+                self._impl_obj.click(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.click succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.click failed")
-            raise e
+        )
 
     def dblclick(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -4092,33 +3560,27 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.dblclick started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dblclick(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        delay=delay,
-                        button=button,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.dblclick",
+                self._impl_obj.dblclick(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.dblclick succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.dblclick failed")
-            raise e
+        )
 
     def tap(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -4163,25 +3625,19 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.tap started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.tap(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.tap",
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.tap succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.tap failed")
-            raise e
+        )
 
     def fill(
         self,
@@ -4217,23 +3673,17 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.fill started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.fill(
-                        selector=selector,
-                        value=value,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.fill",
+                self._impl_obj.fill(
+                    selector=selector,
+                    value=value,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.fill succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.fill failed")
-            raise e
+        )
 
     def focus(self, selector: str, *, timeout: float = None) -> NoneType:
         """Frame.focus
@@ -4251,20 +3701,15 @@ class Frame(SyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> frame.focus started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.focus(selector=selector, timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.focus", self._impl_obj.focus(selector=selector, timeout=timeout)
             )
-            log_api("<= frame.focus succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.focus failed")
-            raise e
+        )
 
     def text_content(
         self, selector: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Frame.text_content
 
         Returns `element.textContent`.
@@ -4283,18 +3728,12 @@ class Frame(SyncBase):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> frame.text_content started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.text_content(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.text_content",
+                self._impl_obj.text_content(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.text_content succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.text_content failed")
-            raise e
+        )
 
     def inner_text(self, selector: str, *, timeout: float = None) -> str:
         """Frame.inner_text
@@ -4315,18 +3754,12 @@ class Frame(SyncBase):
         str
         """
 
-        try:
-            log_api("=> frame.inner_text started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.inner_text(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.inner_text",
+                self._impl_obj.inner_text(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.inner_text succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.inner_text failed")
-            raise e
+        )
 
     def inner_html(self, selector: str, *, timeout: float = None) -> str:
         """Frame.inner_html
@@ -4347,22 +3780,16 @@ class Frame(SyncBase):
         str
         """
 
-        try:
-            log_api("=> frame.inner_html started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.inner_html(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.inner_html",
+                self._impl_obj.inner_html(selector=selector, timeout=timeout),
             )
-            log_api("<= frame.inner_html succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.inner_html failed")
-            raise e
+        )
 
     def get_attribute(
         self, selector: str, name: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Frame.get_attribute
 
         Returns element attribute value.
@@ -4383,26 +3810,20 @@ class Frame(SyncBase):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> frame.get_attribute started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.get_attribute(
-                        selector=selector, name=name, timeout=timeout
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.get_attribute",
+                self._impl_obj.get_attribute(
+                    selector=selector, name=name, timeout=timeout
+                ),
             )
-            log_api("<= frame.get_attribute succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.get_attribute failed")
-            raise e
+        )
 
     def hover(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -4440,24 +3861,18 @@ class Frame(SyncBase):
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.hover started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.hover(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        timeout=timeout,
-                        force=force,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.hover",
+                self._impl_obj.hover(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                ),
             )
-            log_api("<= frame.hover succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.hover failed")
-            raise e
+        )
 
     def select_option(
         self,
@@ -4515,26 +3930,20 @@ class Frame(SyncBase):
         List[str]
         """
 
-        try:
-            log_api("=> frame.select_option started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.select_option(
-                        selector=selector,
-                        value=value,
-                        index=index,
-                        label=label,
-                        element=mapping.to_impl(element),
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.select_option",
+                self._impl_obj.select_option(
+                    selector=selector,
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.select_option succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.select_option failed")
-            raise e
+        )
 
     def set_input_files(
         self,
@@ -4573,23 +3982,17 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.set_input_files started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_input_files(
-                        selector=selector,
-                        files=files,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.set_input_files",
+                self._impl_obj.set_input_files(
+                    selector=selector,
+                    files=files,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.set_input_files succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.set_input_files failed")
-            raise e
+        )
 
     def type(
         self,
@@ -4630,24 +4033,18 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.type started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.type(
-                        selector=selector,
-                        text=text,
-                        delay=delay,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.type",
+                self._impl_obj.type(
+                    selector=selector,
+                    text=text,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.type succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.type failed")
-            raise e
+        )
 
     def press(
         self,
@@ -4695,24 +4092,18 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.press started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.press(
-                        selector=selector,
-                        key=key,
-                        delay=delay,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.press",
+                self._impl_obj.press(
+                    selector=selector,
+                    key=key,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.press succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.press failed")
-            raise e
+        )
 
     def check(
         self,
@@ -4754,23 +4145,17 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.check started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.check(
-                        selector=selector,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.check",
+                self._impl_obj.check(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.check succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.check failed")
-            raise e
+        )
 
     def uncheck(
         self,
@@ -4812,23 +4197,17 @@ class Frame(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> frame.uncheck started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.uncheck(
-                        selector=selector,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.uncheck",
+                self._impl_obj.uncheck(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= frame.uncheck succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.uncheck failed")
-            raise e
+        )
 
     def wait_for_timeout(self, timeout: float) -> NoneType:
         """Frame.wait_for_timeout
@@ -4844,16 +4223,12 @@ class Frame(SyncBase):
             A timeout to wait for
         """
 
-        try:
-            log_api("=> frame.wait_for_timeout started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.wait_for_timeout",
+                self._impl_obj.wait_for_timeout(timeout=timeout),
             )
-            log_api("<= frame.wait_for_timeout succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.wait_for_timeout failed")
-            raise e
+        )
 
     def wait_for_function(
         self,
@@ -4897,7 +4272,7 @@ class Frame(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
         timeout : Union[float, NoneType]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
@@ -4910,23 +4285,17 @@ class Frame(SyncBase):
         JSHandle
         """
 
-        try:
-            log_api("=> frame.wait_for_function started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.wait_for_function(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        timeout=timeout,
-                        polling=polling,
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "frame.wait_for_function",
+                self._impl_obj.wait_for_function(
+                    expression=expression,
+                    arg=mapping.to_impl(arg),
+                    timeout=timeout,
+                    polling=polling,
+                ),
             )
-            log_api("<= frame.wait_for_function succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.wait_for_function failed")
-            raise e
+        )
 
     def title(self) -> str:
         """Frame.title
@@ -4938,14 +4307,9 @@ class Frame(SyncBase):
         str
         """
 
-        try:
-            log_api("=> frame.title started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
-            log_api("<= frame.title succeded")
-            return result
-        except Exception as e:
-            log_api("<= frame.title failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("frame.title", self._impl_obj.title())
+        )
 
 
 mapping.register(FrameImpl, Frame)
@@ -4983,27 +4347,21 @@ class Worker(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> worker.evaluate started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.evaluate(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "worker.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= worker.evaluate succeded")
-            return result
-        except Exception as e:
-            log_api("<= worker.evaluate failed")
-            raise e
+        )
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """Worker.evaluate_handle
@@ -5022,27 +4380,21 @@ class Worker(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         JSHandle
         """
 
-        try:
-            log_api("=> worker.evaluate_handle started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.evaluate_handle(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "worker.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= worker.evaluate_handle succeded")
-            return result
-        except Exception as e:
-            log_api("<= worker.evaluate_handle failed")
-            raise e
+        )
 
 
 mapping.register(WorkerImpl, Worker)
@@ -5084,23 +4436,14 @@ class Selectors(SyncBase):
             guaranteed when this engine is used together with other registered engines.
         """
 
-        try:
-            log_api("=> selectors.register started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.register(
-                        name=name,
-                        script=script,
-                        path=path,
-                        contentScript=content_script,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "selectors.register",
+                self._impl_obj.register(
+                    name=name, script=script, path=path, contentScript=content_script
+                ),
             )
-            log_api("<= selectors.register succeded")
-            return result
-        except Exception as e:
-            log_api("<= selectors.register failed")
-            raise e
+        )
 
 
 mapping.register(SelectorsImpl, Selectors)
@@ -5209,16 +4552,9 @@ class Dialog(SyncBase):
             A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
 
-        try:
-            log_api("=> dialog.accept started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.accept(promptText=prompt_text))
-            )
-            log_api("<= dialog.accept succeded")
-            return result
-        except Exception as e:
-            log_api("<= dialog.accept failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("dialog.accept", self._impl_obj.accept(promptText=prompt_text))
+        )
 
     def dismiss(self) -> NoneType:
         """Dialog.dismiss
@@ -5226,14 +4562,9 @@ class Dialog(SyncBase):
         Returns when the dialog has been dismissed.
         """
 
-        try:
-            log_api("=> dialog.dismiss started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.dismiss()))
-            log_api("<= dialog.dismiss succeded")
-            return result
-        except Exception as e:
-            log_api("<= dialog.dismiss failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("dialog.dismiss", self._impl_obj.dismiss())
+        )
 
 
 mapping.register(DialogImpl, Dialog)
@@ -5276,16 +4607,11 @@ class Download(SyncBase):
         Deletes the downloaded file.
         """
 
-        try:
-            log_api("=> download.delete started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.delete()))
-            log_api("<= download.delete succeded")
-            return result
-        except Exception as e:
-            log_api("<= download.delete failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("download.delete", self._impl_obj.delete())
+        )
 
-    def failure(self) -> typing.Union[str, NoneType]:
+    def failure(self) -> typing.Optional[str]:
         """Download.failure
 
         Returns download error if any.
@@ -5295,16 +4621,11 @@ class Download(SyncBase):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> download.failure started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.failure()))
-            log_api("<= download.failure succeded")
-            return result
-        except Exception as e:
-            log_api("<= download.failure failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("download.failure", self._impl_obj.failure())
+        )
 
-    def path(self) -> typing.Union[pathlib.Path, NoneType]:
+    def path(self) -> typing.Optional[pathlib.Path]:
         """Download.path
 
         Returns path to the downloaded file in case of successful download.
@@ -5314,14 +4635,9 @@ class Download(SyncBase):
         Union[pathlib.Path, NoneType]
         """
 
-        try:
-            log_api("=> download.path started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
-            log_api("<= download.path succeded")
-            return result
-        except Exception as e:
-            log_api("<= download.path failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("download.path", self._impl_obj.path())
+        )
 
     def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
         """Download.save_as
@@ -5334,16 +4650,9 @@ class Download(SyncBase):
             Path where the download should be saved.
         """
 
-        try:
-            log_api("=> download.save_as started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.save_as(path=path))
-            )
-            log_api("<= download.save_as succeded")
-            return result
-        except Exception as e:
-            log_api("<= download.save_as failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("download.save_as", self._impl_obj.save_as(path=path))
+        )
 
 
 mapping.register(DownloadImpl, Download)
@@ -5364,14 +4673,7 @@ class Video(SyncBase):
         pathlib.Path
         """
 
-        try:
-            log_api("=> video.path started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
-            log_api("<= video.path succeded")
-            return result
-        except Exception as e:
-            log_api("<= video.path failed")
-            raise e
+        return mapping.from_maybe_impl(self._sync("video.path", self._impl_obj.path()))
 
 
 mapping.register(VideoImpl, Video)
@@ -5470,7 +4772,7 @@ class Page(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def viewport_size(self) -> typing.Union[ViewportSize, NoneType]:
+    def viewport_size(self) -> typing.Optional[ViewportSize]:
         """Page.viewport_size
 
         Returns
@@ -5495,7 +4797,7 @@ class Page(SyncBase):
         return mapping.from_impl_list(self._impl_obj.workers)
 
     @property
-    def video(self) -> typing.Union["Video", NoneType]:
+    def video(self) -> typing.Optional["Video"]:
         """Page.video
 
         Video object associated with this page.
@@ -5506,7 +4808,7 @@ class Page(SyncBase):
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
 
-    def opener(self) -> typing.Union["Page", NoneType]:
+    def opener(self) -> typing.Optional["Page"]:
         """Page.opener
 
         Returns the opener for popup pages and `null` for others. If the opener has been closed already the returns `null`.
@@ -5516,21 +4818,16 @@ class Page(SyncBase):
         Union[Page, NoneType]
         """
 
-        try:
-            log_api("=> page.opener started")
-            result = mapping.from_impl_nullable(self._sync(self._impl_obj.opener()))
-            log_api("<= page.opener succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.opener failed")
-            raise e
+        return mapping.from_impl_nullable(
+            self._sync("page.opener", self._impl_obj.opener())
+        )
 
     def frame(
         self,
         name: str = None,
         *,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None
-    ) -> typing.Union["Frame", NoneType]:
+    ) -> typing.Optional["Frame"]:
         """Page.frame
 
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
@@ -5555,16 +4852,9 @@ class Page(SyncBase):
         Union[Frame, NoneType]
         """
 
-        try:
-            log_api("=> page.frame started")
-            result = mapping.from_impl_nullable(
-                self._impl_obj.frame(name=name, url=self._wrap_handler(url))
-            )
-            log_api("<= page.frame succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.frame failed")
-            raise e
+        return mapping.from_impl_nullable(
+            self._impl_obj.frame(name=name, url=self._wrap_handler(url))
+        )
 
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
         """Page.set_default_navigation_timeout
@@ -5586,16 +4876,9 @@ class Page(SyncBase):
             Maximum navigation time in milliseconds
         """
 
-        try:
-            log_api("=> page.set_default_navigation_timeout started")
-            result = mapping.from_maybe_impl(
-                self._impl_obj.set_default_navigation_timeout(timeout=timeout)
-            )
-            log_api("<= page.set_default_navigation_timeout succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.set_default_navigation_timeout failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._impl_obj.set_default_navigation_timeout(timeout=timeout)
+        )
 
     def set_default_timeout(self, timeout: float) -> NoneType:
         """Page.set_default_timeout
@@ -5610,18 +4893,11 @@ class Page(SyncBase):
             Maximum time in milliseconds
         """
 
-        try:
-            log_api("=> page.set_default_timeout started")
-            result = mapping.from_maybe_impl(
-                self._impl_obj.set_default_timeout(timeout=timeout)
-            )
-            log_api("<= page.set_default_timeout succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.set_default_timeout failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._impl_obj.set_default_timeout(timeout=timeout)
+        )
 
-    def query_selector(self, selector: str) -> typing.Union["ElementHandle", NoneType]:
+    def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """Page.query_selector
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
@@ -5639,16 +4915,11 @@ class Page(SyncBase):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> page.query_selector started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.query_selector(selector=selector))
+        return mapping.from_impl_nullable(
+            self._sync(
+                "page.query_selector", self._impl_obj.query_selector(selector=selector)
             )
-            log_api("<= page.query_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.query_selector failed")
-            raise e
+        )
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
         """Page.query_selector_all
@@ -5668,16 +4939,12 @@ class Page(SyncBase):
         List[ElementHandle]
         """
 
-        try:
-            log_api("=> page.query_selector_all started")
-            result = mapping.from_impl_list(
-                self._sync(self._impl_obj.query_selector_all(selector=selector))
+        return mapping.from_impl_list(
+            self._sync(
+                "page.query_selector_all",
+                self._impl_obj.query_selector_all(selector=selector),
             )
-            log_api("<= page.query_selector_all succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.query_selector_all failed")
-            raise e
+        )
 
     def wait_for_selector(
         self,
@@ -5685,7 +4952,7 @@ class Page(SyncBase):
         *,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
-    ) -> typing.Union["ElementHandle", NoneType]:
+    ) -> typing.Optional["ElementHandle"]:
         """Page.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -5735,20 +5002,14 @@ class Page(SyncBase):
         Union[ElementHandle, NoneType]
         """
 
-        try:
-            log_api("=> page.wait_for_selector started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.wait_for_selector(
-                        selector=selector, timeout=timeout, state=state
-                    )
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "page.wait_for_selector",
+                self._impl_obj.wait_for_selector(
+                    selector=selector, timeout=timeout, state=state
+                ),
             )
-            log_api("<= page.wait_for_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_selector failed")
-            raise e
+        )
 
     def is_checked(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_checked
@@ -5769,18 +5030,12 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_checked started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_checked(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.is_checked",
+                self._impl_obj.is_checked(selector=selector, timeout=timeout),
             )
-            log_api("<= page.is_checked succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_checked failed")
-            raise e
+        )
 
     def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_disabled
@@ -5801,18 +5056,12 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_disabled started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_disabled(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.is_disabled",
+                self._impl_obj.is_disabled(selector=selector, timeout=timeout),
             )
-            log_api("<= page.is_disabled succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_disabled failed")
-            raise e
+        )
 
     def is_editable(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_editable
@@ -5833,18 +5082,12 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_editable started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_editable(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.is_editable",
+                self._impl_obj.is_editable(selector=selector, timeout=timeout),
             )
-            log_api("<= page.is_editable succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_editable failed")
-            raise e
+        )
 
     def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_enabled
@@ -5865,23 +5108,18 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_enabled started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_enabled(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.is_enabled",
+                self._impl_obj.is_enabled(selector=selector, timeout=timeout),
             )
-            log_api("<= page.is_enabled succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_enabled failed")
-            raise e
+        )
 
     def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_hidden
 
-        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
+        match any elements is considered hidden.
 
         Parameters
         ----------
@@ -5897,21 +5135,18 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_hidden started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.is_hidden(selector=selector, timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.is_hidden",
+                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
             )
-            log_api("<= page.is_hidden succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_hidden failed")
-            raise e
+        )
 
     def is_visible(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_visible
 
-        Returns whether the element is [visible](./actionability.md#visible).
+        Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
+        considered not visible.
 
         Parameters
         ----------
@@ -5927,18 +5162,12 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_visible started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.is_visible(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.is_visible",
+                self._impl_obj.is_visible(selector=selector, timeout=timeout),
             )
-            log_api("<= page.is_visible succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_visible failed")
-            raise e
+        )
 
     def dispatch_event(
         self,
@@ -5992,23 +5221,17 @@ class Page(SyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> page.dispatch_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dispatch_event(
-                        selector=selector,
-                        type=type,
-                        eventInit=mapping.to_impl(event_init),
-                        timeout=timeout,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    selector=selector,
+                    type=type,
+                    eventInit=mapping.to_impl(event_init),
+                    timeout=timeout,
+                ),
             )
-            log_api("<= page.dispatch_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.dispatch_event failed")
-            raise e
+        )
 
     def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Page.evaluate
@@ -6053,27 +5276,21 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> page.evaluate started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.evaluate(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= page.evaluate succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.evaluate failed")
-            raise e
+        )
 
     def evaluate_handle(self, expression: str, arg: typing.Any = None) -> "JSHandle":
         """Page.evaluate_handle
@@ -6112,27 +5329,21 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         JSHandle
         """
 
-        try:
-            log_api("=> page.evaluate_handle started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.evaluate_handle(
-                        expression=expression, arg=mapping.to_impl(arg)
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "page.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= page.evaluate_handle succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.evaluate_handle failed")
-            raise e
+        )
 
     def eval_on_selector(
         self, selector: str, expression: str, arg: typing.Any = None
@@ -6163,29 +5374,21 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> page.eval_on_selector started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.eval_on_selector(
-                        selector=selector,
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.eval_on_selector",
+                self._impl_obj.eval_on_selector(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= page.eval_on_selector succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.eval_on_selector failed")
-            raise e
+        )
 
     def eval_on_selector_all(
         self, selector: str, expression: str, arg: typing.Any = None
@@ -6212,29 +5415,21 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
 
         Returns
         -------
         Any
         """
 
-        try:
-            log_api("=> page.eval_on_selector_all started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.eval_on_selector_all(
-                        selector=selector,
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.eval_on_selector_all",
+                self._impl_obj.eval_on_selector_all(
+                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                ),
             )
-            log_api("<= page.eval_on_selector_all succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.eval_on_selector_all failed")
-            raise e
+        )
 
     def add_script_tag(
         self,
@@ -6269,20 +5464,14 @@ class Page(SyncBase):
         ElementHandle
         """
 
-        try:
-            log_api("=> page.add_script_tag started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.add_script_tag(
-                        url=url, path=path, content=content, type=type
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "page.add_script_tag",
+                self._impl_obj.add_script_tag(
+                    url=url, path=path, content=content, type=type
+                ),
             )
-            log_api("<= page.add_script_tag succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.add_script_tag failed")
-            raise e
+        )
 
     def add_style_tag(
         self,
@@ -6313,18 +5502,12 @@ class Page(SyncBase):
         ElementHandle
         """
 
-        try:
-            log_api("=> page.add_style_tag started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.add_style_tag(url=url, path=path, content=content)
-                )
+        return mapping.from_impl(
+            self._sync(
+                "page.add_style_tag",
+                self._impl_obj.add_style_tag(url=url, path=path, content=content),
             )
-            log_api("<= page.add_style_tag succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.add_style_tag failed")
-            raise e
+        )
 
     def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
         """Page.expose_function
@@ -6377,20 +5560,14 @@ class Page(SyncBase):
             Callback function which will be called in Playwright's context.
         """
 
-        try:
-            log_api("=> page.expose_function started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.expose_function(
-                        name=name, callback=self._wrap_handler(callback)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.expose_function",
+                self._impl_obj.expose_function(
+                    name=name, callback=self._wrap_handler(callback)
+                ),
             )
-            log_api("<= page.expose_function succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.expose_function failed")
-            raise e
+        )
 
     def expose_binding(
         self, name: str, callback: typing.Callable, *, handle: bool = None
@@ -6461,20 +5638,14 @@ class Page(SyncBase):
             supported. When passing by value, multiple arguments are supported.
         """
 
-        try:
-            log_api("=> page.expose_binding started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.expose_binding(
-                        name=name, callback=self._wrap_handler(callback), handle=handle
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.expose_binding",
+                self._impl_obj.expose_binding(
+                    name=name, callback=self._wrap_handler(callback), handle=handle
+                ),
             )
-            log_api("<= page.expose_binding succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.expose_binding failed")
-            raise e
+        )
 
     def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
         """Page.set_extra_http_headers
@@ -6489,20 +5660,12 @@ class Page(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
 
-        try:
-            log_api("=> page.set_extra_http_headers started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_extra_http_headers(
-                        headers=mapping.to_impl(headers)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.set_extra_http_headers",
+                self._impl_obj.set_extra_http_headers(headers=mapping.to_impl(headers)),
             )
-            log_api("<= page.set_extra_http_headers succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.set_extra_http_headers failed")
-            raise e
+        )
 
     def content(self) -> str:
         """Page.content
@@ -6514,14 +5677,9 @@ class Page(SyncBase):
         str
         """
 
-        try:
-            log_api("=> page.content started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.content()))
-            log_api("<= page.content succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.content failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("page.content", self._impl_obj.content())
+        )
 
     def set_content(
         self,
@@ -6548,20 +5706,14 @@ class Page(SyncBase):
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
         """
 
-        try:
-            log_api("=> page.set_content started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_content(
-                        html=html, timeout=timeout, waitUntil=wait_until
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.set_content",
+                self._impl_obj.set_content(
+                    html=html, timeout=timeout, waitUntil=wait_until
+                ),
             )
-            log_api("<= page.set_content succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.set_content failed")
-            raise e
+        )
 
     def goto(
         self,
@@ -6570,7 +5722,7 @@ class Page(SyncBase):
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.goto
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6617,27 +5769,21 @@ class Page(SyncBase):
         Union[Response, NoneType]
         """
 
-        try:
-            log_api("=> page.goto started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.goto(
-                        url=url, timeout=timeout, waitUntil=wait_until, referer=referer
-                    )
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "page.goto",
+                self._impl_obj.goto(
+                    url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+                ),
             )
-            log_api("<= page.goto succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.goto failed")
-            raise e
+        )
 
     def reload(
         self,
         *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.reload
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6661,16 +5807,12 @@ class Page(SyncBase):
         Union[Response, NoneType]
         """
 
-        try:
-            log_api("=> page.reload started")
-            result = mapping.from_impl_nullable(
-                self._sync(self._impl_obj.reload(timeout=timeout, waitUntil=wait_until))
+        return mapping.from_impl_nullable(
+            self._sync(
+                "page.reload",
+                self._impl_obj.reload(timeout=timeout, waitUntil=wait_until),
             )
-            log_api("<= page.reload succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.reload failed")
-            raise e
+        )
 
     def wait_for_load_state(
         self,
@@ -6716,18 +5858,12 @@ class Page(SyncBase):
             `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> page.wait_for_load_state started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.wait_for_load_state",
+                self._impl_obj.wait_for_load_state(state=state, timeout=timeout),
             )
-            log_api("<= page.wait_for_load_state succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_load_state failed")
-            raise e
+        )
 
     def wait_for_event(
         self, event: str, predicate: typing.Callable = None, *, timeout: float = None
@@ -6755,29 +5891,23 @@ class Page(SyncBase):
         Any
         """
 
-        try:
-            log_api("=> page.wait_for_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_event(
-                        event=event,
-                        predicate=self._wrap_handler(predicate),
-                        timeout=timeout,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.wait_for_event",
+                self._impl_obj.wait_for_event(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                ),
             )
-            log_api("<= page.wait_for_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_event failed")
-            raise e
+        )
 
     def go_back(
         self,
         *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.go_back
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6803,25 +5933,19 @@ class Page(SyncBase):
         Union[Response, NoneType]
         """
 
-        try:
-            log_api("=> page.go_back started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until)
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "page.go_back",
+                self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until),
             )
-            log_api("<= page.go_back succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.go_back failed")
-            raise e
+        )
 
     def go_forward(
         self,
         *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.go_forward
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6847,18 +5971,12 @@ class Page(SyncBase):
         Union[Response, NoneType]
         """
 
-        try:
-            log_api("=> page.go_forward started")
-            result = mapping.from_impl_nullable(
-                self._sync(
-                    self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until)
-                )
+        return mapping.from_impl_nullable(
+            self._sync(
+                "page.go_forward",
+                self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until),
             )
-            log_api("<= page.go_forward succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.go_forward failed")
-            raise e
+        )
 
     def emulate_media(
         self,
@@ -6906,18 +6024,12 @@ class Page(SyncBase):
             `null` disables color scheme emulation.
         """
 
-        try:
-            log_api("=> page.emulate_media started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.emulate_media(media=media, colorScheme=color_scheme)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.emulate_media",
+                self._impl_obj.emulate_media(media=media, colorScheme=color_scheme),
             )
-            log_api("<= page.emulate_media succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.emulate_media failed")
-            raise e
+        )
 
     def set_viewport_size(self, viewport_size: ViewportSize) -> NoneType:
         """Page.set_viewport_size
@@ -6939,16 +6051,12 @@ class Page(SyncBase):
         viewport_size : {width: int, height: int}
         """
 
-        try:
-            log_api("=> page.set_viewport_size started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.set_viewport_size(viewportSize=viewport_size))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.set_viewport_size",
+                self._impl_obj.set_viewport_size(viewportSize=viewport_size),
             )
-            log_api("<= page.set_viewport_size succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.set_viewport_size failed")
-            raise e
+        )
 
     def bring_to_front(self) -> NoneType:
         """Page.bring_to_front
@@ -6956,16 +6064,9 @@ class Page(SyncBase):
         Brings page to front (activates tab).
         """
 
-        try:
-            log_api("=> page.bring_to_front started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.bring_to_front())
-            )
-            log_api("<= page.bring_to_front succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.bring_to_front failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("page.bring_to_front", self._impl_obj.bring_to_front())
+        )
 
     def add_init_script(
         self, script: str = None, *, path: typing.Union[str, pathlib.Path] = None
@@ -6993,21 +6094,18 @@ class Page(SyncBase):
         Parameters
         ----------
         script : Union[str, NoneType]
+            Script to be evaluated in all pages in the browser context. Optional.
         path : Union[pathlib.Path, str, NoneType]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
         """
 
-        try:
-            log_api("=> page.add_init_script started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.add_init_script(script=script, path=path))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.add_init_script",
+                self._impl_obj.add_init_script(script=script, path=path),
             )
-            log_api("<= page.add_init_script succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.add_init_script failed")
-            raise e
+        )
 
     def route(
         self,
@@ -7056,20 +6154,14 @@ class Page(SyncBase):
             handler function to route the request.
         """
 
-        try:
-            log_api("=> page.route started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.route(
-                        url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.route",
+                self._impl_obj.route(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
-            log_api("<= page.route succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.route failed")
-            raise e
+        )
 
     def unroute(
         self,
@@ -7091,20 +6183,14 @@ class Page(SyncBase):
             Optional handler function to route the request.
         """
 
-        try:
-            log_api("=> page.unroute started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.unroute(
-                        url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.unroute",
+                self._impl_obj.unroute(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
-            log_api("<= page.unroute succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.unroute failed")
-            raise e
+        )
 
     def screenshot(
         self,
@@ -7151,26 +6237,20 @@ class Page(SyncBase):
         bytes
         """
 
-        try:
-            log_api("=> page.screenshot started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.screenshot(
-                        timeout=timeout,
-                        type=type,
-                        path=path,
-                        quality=quality,
-                        omitBackground=omit_background,
-                        fullPage=full_page,
-                        clip=clip,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.screenshot",
+                self._impl_obj.screenshot(
+                    timeout=timeout,
+                    type=type,
+                    path=path,
+                    quality=quality,
+                    omitBackground=omit_background,
+                    fullPage=full_page,
+                    clip=clip,
+                ),
             )
-            log_api("<= page.screenshot succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.screenshot failed")
-            raise e
+        )
 
     def title(self) -> str:
         """Page.title
@@ -7182,14 +6262,7 @@ class Page(SyncBase):
         str
         """
 
-        try:
-            log_api("=> page.title started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
-            log_api("<= page.title succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.title failed")
-            raise e
+        return mapping.from_maybe_impl(self._sync("page.title", self._impl_obj.title()))
 
     def close(self, *, run_before_unload: bool = None) -> NoneType:
         """Page.close
@@ -7209,16 +6282,11 @@ class Page(SyncBase):
             [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload) page handlers.
         """
 
-        try:
-            log_api("=> page.close started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.close(runBeforeUnload=run_before_unload))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.close", self._impl_obj.close(runBeforeUnload=run_before_unload)
             )
-            log_api("<= page.close succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.close failed")
-            raise e
+        )
 
     def is_closed(self) -> bool:
         """Page.is_closed
@@ -7230,20 +6298,13 @@ class Page(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> page.is_closed started")
-            result = mapping.from_maybe_impl(self._impl_obj.is_closed())
-            log_api("<= page.is_closed succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.is_closed failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.is_closed())
 
     def click(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -7297,34 +6358,28 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.click started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.click(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        delay=delay,
-                        button=button,
-                        clickCount=click_count,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.click",
+                self._impl_obj.click(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.click succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.click failed")
-            raise e
+        )
 
     def dblclick(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -7378,33 +6433,27 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.dblclick started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.dblclick(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        delay=delay,
-                        button=button,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.dblclick",
+                self._impl_obj.dblclick(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.dblclick succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.dblclick failed")
-            raise e
+        )
 
     def tap(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -7451,25 +6500,19 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.tap started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.tap(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.tap",
+                self._impl_obj.tap(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.tap succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.tap failed")
-            raise e
+        )
 
     def fill(
         self,
@@ -7507,23 +6550,17 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.fill started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.fill(
-                        selector=selector,
-                        value=value,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.fill",
+                self._impl_obj.fill(
+                    selector=selector,
+                    value=value,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.fill succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.fill failed")
-            raise e
+        )
 
     def focus(self, selector: str, *, timeout: float = None) -> NoneType:
         """Page.focus
@@ -7543,20 +6580,15 @@ class Page(SyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        try:
-            log_api("=> page.focus started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.focus(selector=selector, timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.focus", self._impl_obj.focus(selector=selector, timeout=timeout)
             )
-            log_api("<= page.focus succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.focus failed")
-            raise e
+        )
 
     def text_content(
         self, selector: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Page.text_content
 
         Returns `element.textContent`.
@@ -7575,18 +6607,12 @@ class Page(SyncBase):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> page.text_content started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.text_content(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.text_content",
+                self._impl_obj.text_content(selector=selector, timeout=timeout),
             )
-            log_api("<= page.text_content succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.text_content failed")
-            raise e
+        )
 
     def inner_text(self, selector: str, *, timeout: float = None) -> str:
         """Page.inner_text
@@ -7607,18 +6633,12 @@ class Page(SyncBase):
         str
         """
 
-        try:
-            log_api("=> page.inner_text started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.inner_text(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.inner_text",
+                self._impl_obj.inner_text(selector=selector, timeout=timeout),
             )
-            log_api("<= page.inner_text succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.inner_text failed")
-            raise e
+        )
 
     def inner_html(self, selector: str, *, timeout: float = None) -> str:
         """Page.inner_html
@@ -7639,22 +6659,16 @@ class Page(SyncBase):
         str
         """
 
-        try:
-            log_api("=> page.inner_html started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.inner_html(selector=selector, timeout=timeout)
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.inner_html",
+                self._impl_obj.inner_html(selector=selector, timeout=timeout),
             )
-            log_api("<= page.inner_html succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.inner_html failed")
-            raise e
+        )
 
     def get_attribute(
         self, selector: str, name: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Page.get_attribute
 
         Returns element attribute value.
@@ -7675,26 +6689,20 @@ class Page(SyncBase):
         Union[str, NoneType]
         """
 
-        try:
-            log_api("=> page.get_attribute started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.get_attribute(
-                        selector=selector, name=name, timeout=timeout
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.get_attribute",
+                self._impl_obj.get_attribute(
+                    selector=selector, name=name, timeout=timeout
+                ),
             )
-            log_api("<= page.get_attribute succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.get_attribute failed")
-            raise e
+        )
 
     def hover(
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -7734,24 +6742,18 @@ class Page(SyncBase):
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.hover started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.hover(
-                        selector=selector,
-                        modifiers=modifiers,
-                        position=position,
-                        timeout=timeout,
-                        force=force,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.hover",
+                self._impl_obj.hover(
+                    selector=selector,
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                ),
             )
-            log_api("<= page.hover succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.hover failed")
-            raise e
+        )
 
     def select_option(
         self,
@@ -7812,26 +6814,20 @@ class Page(SyncBase):
         List[str]
         """
 
-        try:
-            log_api("=> page.select_option started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.select_option(
-                        selector=selector,
-                        value=value,
-                        index=index,
-                        label=label,
-                        element=mapping.to_impl(element),
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.select_option",
+                self._impl_obj.select_option(
+                    selector=selector,
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.select_option succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.select_option failed")
-            raise e
+        )
 
     def set_input_files(
         self,
@@ -7870,23 +6866,17 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.set_input_files started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_input_files(
-                        selector=selector,
-                        files=files,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.set_input_files",
+                self._impl_obj.set_input_files(
+                    selector=selector,
+                    files=files,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.set_input_files succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.set_input_files failed")
-            raise e
+        )
 
     def type(
         self,
@@ -7929,24 +6919,18 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.type started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.type(
-                        selector=selector,
-                        text=text,
-                        delay=delay,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.type",
+                self._impl_obj.type(
+                    selector=selector,
+                    text=text,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.type succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.type failed")
-            raise e
+        )
 
     def press(
         self,
@@ -8008,24 +6992,18 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.press started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.press(
-                        selector=selector,
-                        key=key,
-                        delay=delay,
-                        timeout=timeout,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.press",
+                self._impl_obj.press(
+                    selector=selector,
+                    key=key,
+                    delay=delay,
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.press succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.press failed")
-            raise e
+        )
 
     def check(
         self,
@@ -8069,23 +7047,17 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.check started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.check(
-                        selector=selector,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.check",
+                self._impl_obj.check(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.check succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.check failed")
-            raise e
+        )
 
     def uncheck(
         self,
@@ -8129,23 +7101,17 @@ class Page(SyncBase):
             inaccessible pages. Defaults to `false`.
         """
 
-        try:
-            log_api("=> page.uncheck started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.uncheck(
-                        selector=selector,
-                        timeout=timeout,
-                        force=force,
-                        noWaitAfter=no_wait_after,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.uncheck",
+                self._impl_obj.uncheck(
+                    selector=selector,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                ),
             )
-            log_api("<= page.uncheck succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.uncheck failed")
-            raise e
+        )
 
     def wait_for_timeout(self, timeout: float) -> NoneType:
         """Page.wait_for_timeout
@@ -8168,16 +7134,12 @@ class Page(SyncBase):
             A timeout to wait for
         """
 
-        try:
-            log_api("=> page.wait_for_timeout started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.wait_for_timeout",
+                self._impl_obj.wait_for_timeout(timeout=timeout),
             )
-            log_api("<= page.wait_for_timeout succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_timeout failed")
-            raise e
+        )
 
     def wait_for_function(
         self,
@@ -8223,7 +7185,7 @@ class Page(SyncBase):
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
-            Optional argument to pass to `expression`
+            Optional argument to pass to `expression`.
         timeout : Union[float, NoneType]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
@@ -8236,23 +7198,17 @@ class Page(SyncBase):
         JSHandle
         """
 
-        try:
-            log_api("=> page.wait_for_function started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.wait_for_function(
-                        expression=expression,
-                        arg=mapping.to_impl(arg),
-                        timeout=timeout,
-                        polling=polling,
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "page.wait_for_function",
+                self._impl_obj.wait_for_function(
+                    expression=expression,
+                    arg=mapping.to_impl(arg),
+                    timeout=timeout,
+                    polling=polling,
+                ),
             )
-            log_api("<= page.wait_for_function succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.wait_for_function failed")
-            raise e
+        )
 
     def pause(self) -> NoneType:
         """Page.pause
@@ -8263,18 +7219,11 @@ class Page(SyncBase):
         User can inspect selectors or perform manual steps while paused. Resume will continue running the original script from
         the place it was paused.
 
-        > NOTE: This method requires Playwright to be started in a headed mode, with a falsy [`options: headless`] value in the
+        > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
         `browser_type.launch()`.
         """
 
-        try:
-            log_api("=> page.pause started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.pause()))
-            log_api("<= page.pause succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.pause failed")
-            raise e
+        return mapping.from_maybe_impl(self._sync("page.pause", self._impl_obj.pause()))
 
     def pdf(
         self,
@@ -8383,32 +7332,26 @@ class Page(SyncBase):
         bytes
         """
 
-        try:
-            log_api("=> page.pdf started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.pdf(
-                        scale=scale,
-                        displayHeaderFooter=display_header_footer,
-                        headerTemplate=header_template,
-                        footerTemplate=footer_template,
-                        printBackground=print_background,
-                        landscape=landscape,
-                        pageRanges=page_ranges,
-                        format=format,
-                        width=width,
-                        height=height,
-                        preferCSSPageSize=prefer_css_page_size,
-                        margin=margin,
-                        path=path,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.pdf",
+                self._impl_obj.pdf(
+                    scale=scale,
+                    displayHeaderFooter=display_header_footer,
+                    headerTemplate=header_template,
+                    footerTemplate=footer_template,
+                    printBackground=print_background,
+                    landscape=landscape,
+                    pageRanges=page_ranges,
+                    format=format,
+                    width=width,
+                    height=height,
+                    preferCSSPageSize=prefer_css_page_size,
+                    margin=margin,
+                    path=path,
+                ),
             )
-            log_api("<= page.pdf succeded")
-            return result
-        except Exception as e:
-            log_api("<= page.pdf failed")
-            raise e
+        )
 
     def expect_event(
         self, event: str, predicate: typing.Callable = None, *, timeout: float = None
@@ -8447,15 +7390,15 @@ class Page(SyncBase):
 
     def expect_console_message(
         self,
-        predicate: typing.Union[typing.Callable[["ConsoleMessage"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
         *,
         timeout: float = None
     ) -> EventContextManager["ConsoleMessage"]:
         """Page.expect_console_message
 
-        Performs action and waits for `console` event to fire. If predicate is provided, it passes `ConsoleMessage` value into
-        the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the worker event is fired.
+        Performs action and waits for a [ConoleMessage] to be logged by in the page. If predicate is provided, it passes
+        `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to return a truthy value. Will
+        throw an error if the page is closed before the console event is fired.
 
         Parameters
         ----------
@@ -8478,14 +7421,14 @@ class Page(SyncBase):
 
     def expect_download(
         self,
-        predicate: typing.Union[typing.Callable[["Download"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
         *,
         timeout: float = None
     ) -> EventContextManager["Download"]:
         """Page.expect_download
 
-        Performs action and waits for `download` event to fire. If predicate is provided, it passes `Download` value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
+        Performs action and waits for a new `Download`. If predicate is provided, it passes `Download` value into the
+        `predicate` function and waits for `predicate(download)` to return a truthy value. Will throw an error if the page is
         closed before the download event is fired.
 
         Parameters
@@ -8509,15 +7452,15 @@ class Page(SyncBase):
 
     def expect_file_chooser(
         self,
-        predicate: typing.Union[typing.Callable[["FileChooser"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
         *,
         timeout: float = None
     ) -> EventContextManager["FileChooser"]:
         """Page.expect_file_chooser
 
-        Performs action and waits for `filechooser` event to fire. If predicate is provided, it passes `FileChooser` value into
-        the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the worker event is fired.
+        Performs action and waits for a new `FileChooser` to be created. If predicate is provided, it passes `FileChooser` value
+        into the `predicate` function and waits for `predicate(fileChooser)` to return a truthy value. Will throw an error if
+        the page is closed before the file chooser is opened.
 
         Parameters
         ----------
@@ -8594,20 +7537,20 @@ class Page(SyncBase):
 
     def expect_popup(
         self,
-        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
         timeout: float = None
     ) -> EventContextManager["Page"]:
         """Page.expect_popup
 
-        Performs action and waits for `popup` event to fire. If predicate is provided, it passes [Popup] value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the popup event is fired.
+        Performs action and waits for a popup `Page`. If predicate is provided, it passes [Popup] value into the `predicate`
+        function and waits for `predicate(page)` to return a truthy value. Will throw an error if the page is closed before the
+        popup event is fired.
 
         Parameters
         ----------
         predicate : Union[Callable[[Page], bool], NoneType]
-            Receives the [Popup] object and resolves to truthy value when the waiting should resolve.
+            Receives the `Page` object and resolves to truthy value when the waiting should resolve.
         timeout : Union[float, NoneType]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
@@ -8703,15 +7646,15 @@ class Page(SyncBase):
 
     def expect_worker(
         self,
-        predicate: typing.Union[typing.Callable[["Worker"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
         *,
         timeout: float = None
     ) -> EventContextManager["Worker"]:
         """Page.expect_worker
 
-        Performs action and waits for `worker` event to fire. If predicate is provided, it passes `Worker` value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the worker event is fired.
+        Performs action and waits for a new `Worker`. If predicate is provided, it passes `Worker` value into the `predicate`
+        function and waits for `predicate(worker)` to return a truthy value. Will throw an error if the page is closed before
+        the worker event is fired.
 
         Parameters
         ----------
@@ -8744,8 +7687,7 @@ class BrowserContext(SyncBase):
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
 
-        Returns all open pages in the context. Non visible pages, such as `\"background_page\"`, will not be listed here. You can
-        find them using `chromium_browser_context.background_pages()`.
+        Returns all open pages in the context.
 
         Returns
         -------
@@ -8754,7 +7696,7 @@ class BrowserContext(SyncBase):
         return mapping.from_impl_list(self._impl_obj.pages)
 
     @property
-    def browser(self) -> typing.Union["Browser", NoneType]:
+    def browser(self) -> typing.Optional["Browser"]:
         """BrowserContext.browser
 
         Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
@@ -8785,16 +7727,9 @@ class BrowserContext(SyncBase):
             Maximum navigation time in milliseconds
         """
 
-        try:
-            log_api("=> browser_context.set_default_navigation_timeout started")
-            result = mapping.from_maybe_impl(
-                self._impl_obj.set_default_navigation_timeout(timeout=timeout)
-            )
-            log_api("<= browser_context.set_default_navigation_timeout succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.set_default_navigation_timeout failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._impl_obj.set_default_navigation_timeout(timeout=timeout)
+        )
 
     def set_default_timeout(self, timeout: float) -> NoneType:
         """BrowserContext.set_default_timeout
@@ -8810,16 +7745,9 @@ class BrowserContext(SyncBase):
             Maximum time in milliseconds
         """
 
-        try:
-            log_api("=> browser_context.set_default_timeout started")
-            result = mapping.from_maybe_impl(
-                self._impl_obj.set_default_timeout(timeout=timeout)
-            )
-            log_api("<= browser_context.set_default_timeout succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.set_default_timeout failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._impl_obj.set_default_timeout(timeout=timeout)
+        )
 
     def new_page(self) -> "Page":
         """BrowserContext.new_page
@@ -8831,14 +7759,9 @@ class BrowserContext(SyncBase):
         Page
         """
 
-        try:
-            log_api("=> browser_context.new_page started")
-            result = mapping.from_impl(self._sync(self._impl_obj.new_page()))
-            log_api("<= browser_context.new_page succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.new_page failed")
-            raise e
+        return mapping.from_impl(
+            self._sync("browser_context.new_page", self._impl_obj.new_page())
+        )
 
     def cookies(
         self, urls: typing.Union[str, typing.List[str]] = None
@@ -8858,16 +7781,9 @@ class BrowserContext(SyncBase):
         List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
         """
 
-        try:
-            log_api("=> browser_context.cookies started")
-            result = mapping.from_impl_list(
-                self._sync(self._impl_obj.cookies(urls=urls))
-            )
-            log_api("<= browser_context.cookies succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.cookies failed")
-            raise e
+        return mapping.from_impl_list(
+            self._sync("browser_context.cookies", self._impl_obj.cookies(urls=urls))
+        )
 
     def add_cookies(self, cookies: typing.List[Cookie]) -> NoneType:
         """BrowserContext.add_cookies
@@ -8884,16 +7800,12 @@ class BrowserContext(SyncBase):
         cookies : List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
         """
 
-        try:
-            log_api("=> browser_context.add_cookies started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.add_cookies(cookies=cookies))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.add_cookies",
+                self._impl_obj.add_cookies(cookies=cookies),
             )
-            log_api("<= browser_context.add_cookies succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.add_cookies failed")
-            raise e
+        )
 
     def clear_cookies(self) -> NoneType:
         """BrowserContext.clear_cookies
@@ -8901,14 +7813,9 @@ class BrowserContext(SyncBase):
         Clears context cookies.
         """
 
-        try:
-            log_api("=> browser_context.clear_cookies started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.clear_cookies()))
-            log_api("<= browser_context.clear_cookies succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.clear_cookies failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("browser_context.clear_cookies", self._impl_obj.clear_cookies())
+        )
 
     def grant_permissions(
         self, permissions: typing.List[str], *, origin: str = None
@@ -8942,20 +7849,14 @@ class BrowserContext(SyncBase):
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
 
-        try:
-            log_api("=> browser_context.grant_permissions started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.grant_permissions(
-                        permissions=permissions, origin=origin
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.grant_permissions",
+                self._impl_obj.grant_permissions(
+                    permissions=permissions, origin=origin
+                ),
             )
-            log_api("<= browser_context.grant_permissions succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.grant_permissions failed")
-            raise e
+        )
 
     def clear_permissions(self) -> NoneType:
         """BrowserContext.clear_permissions
@@ -8970,16 +7871,11 @@ class BrowserContext(SyncBase):
         ```
         """
 
-        try:
-            log_api("=> browser_context.clear_permissions started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.clear_permissions())
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.clear_permissions", self._impl_obj.clear_permissions()
             )
-            log_api("<= browser_context.clear_permissions succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.clear_permissions failed")
-            raise e
+        )
 
     def set_geolocation(self, geolocation: Geolocation = None) -> NoneType:
         """BrowserContext.set_geolocation
@@ -8998,16 +7894,12 @@ class BrowserContext(SyncBase):
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
         """
 
-        try:
-            log_api("=> browser_context.set_geolocation started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.set_geolocation(geolocation=geolocation))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.set_geolocation",
+                self._impl_obj.set_geolocation(geolocation=geolocation),
             )
-            log_api("<= browser_context.set_geolocation succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.set_geolocation failed")
-            raise e
+        )
 
     def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> NoneType:
         """BrowserContext.set_extra_http_headers
@@ -9024,20 +7916,12 @@ class BrowserContext(SyncBase):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
 
-        try:
-            log_api("=> browser_context.set_extra_http_headers started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.set_extra_http_headers(
-                        headers=mapping.to_impl(headers)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.set_extra_http_headers",
+                self._impl_obj.set_extra_http_headers(headers=mapping.to_impl(headers)),
             )
-            log_api("<= browser_context.set_extra_http_headers succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.set_extra_http_headers failed")
-            raise e
+        )
 
     def set_offline(self, offline: bool) -> NoneType:
         """BrowserContext.set_offline
@@ -9048,16 +7932,12 @@ class BrowserContext(SyncBase):
             Whether to emulate network being offline for the browser context.
         """
 
-        try:
-            log_api("=> browser_context.set_offline started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.set_offline(offline=offline))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.set_offline",
+                self._impl_obj.set_offline(offline=offline),
             )
-            log_api("<= browser_context.set_offline succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.set_offline failed")
-            raise e
+        )
 
     def add_init_script(
         self, script: str = None, *, path: typing.Union[str, pathlib.Path] = None
@@ -9085,21 +7965,18 @@ class BrowserContext(SyncBase):
         Parameters
         ----------
         script : Union[str, NoneType]
+            Script to be evaluated in all pages in the browser context. Optional.
         path : Union[pathlib.Path, str, NoneType]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
         """
 
-        try:
-            log_api("=> browser_context.add_init_script started")
-            result = mapping.from_maybe_impl(
-                self._sync(self._impl_obj.add_init_script(script=script, path=path))
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.add_init_script",
+                self._impl_obj.add_init_script(script=script, path=path),
             )
-            log_api("<= browser_context.add_init_script succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.add_init_script failed")
-            raise e
+        )
 
     def expose_binding(
         self, name: str, callback: typing.Callable, *, handle: bool = None
@@ -9168,20 +8045,14 @@ class BrowserContext(SyncBase):
             supported. When passing by value, multiple arguments are supported.
         """
 
-        try:
-            log_api("=> browser_context.expose_binding started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.expose_binding(
-                        name=name, callback=self._wrap_handler(callback), handle=handle
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.expose_binding",
+                self._impl_obj.expose_binding(
+                    name=name, callback=self._wrap_handler(callback), handle=handle
+                ),
             )
-            log_api("<= browser_context.expose_binding succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.expose_binding failed")
-            raise e
+        )
 
     def expose_function(self, name: str, callback: typing.Callable) -> NoneType:
         """BrowserContext.expose_function
@@ -9234,20 +8105,14 @@ class BrowserContext(SyncBase):
             Callback function that will be called in the Playwright's context.
         """
 
-        try:
-            log_api("=> browser_context.expose_function started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.expose_function(
-                        name=name, callback=self._wrap_handler(callback)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.expose_function",
+                self._impl_obj.expose_function(
+                    name=name, callback=self._wrap_handler(callback)
+                ),
             )
-            log_api("<= browser_context.expose_function succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.expose_function failed")
-            raise e
+        )
 
     def route(
         self,
@@ -9297,20 +8162,14 @@ class BrowserContext(SyncBase):
             handler function to route the request.
         """
 
-        try:
-            log_api("=> browser_context.route started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.route(
-                        url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.route",
+                self._impl_obj.route(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
-            log_api("<= browser_context.route succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.route failed")
-            raise e
+        )
 
     def unroute(
         self,
@@ -9334,20 +8193,14 @@ class BrowserContext(SyncBase):
             Optional handler function used to register a routing with `browser_context.route()`.
         """
 
-        try:
-            log_api("=> browser_context.unroute started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.unroute(
-                        url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.unroute",
+                self._impl_obj.unroute(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                ),
             )
-            log_api("<= browser_context.unroute succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.unroute failed")
-            raise e
+        )
 
     def expect_event(
         self, event: str, predicate: typing.Callable = None, *, timeout: float = None
@@ -9392,14 +8245,9 @@ class BrowserContext(SyncBase):
         > NOTE: The default browser context cannot be closed.
         """
 
-        try:
-            log_api("=> browser_context.close started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
-            log_api("<= browser_context.close succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.close failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("browser_context.close", self._impl_obj.close())
+        )
 
     def storage_state(
         self, *, path: typing.Union[str, pathlib.Path] = None
@@ -9419,16 +8267,11 @@ class BrowserContext(SyncBase):
         {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}
         """
 
-        try:
-            log_api("=> browser_context.storage_state started")
-            result = mapping.from_impl(
-                self._sync(self._impl_obj.storage_state(path=path))
+        return mapping.from_impl(
+            self._sync(
+                "browser_context.storage_state", self._impl_obj.storage_state(path=path)
             )
-            log_api("<= browser_context.storage_state succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.storage_state failed")
-            raise e
+        )
 
     def wait_for_event(
         self, event: str, predicate: typing.Callable = None, *, timeout: float = None
@@ -9456,34 +8299,28 @@ class BrowserContext(SyncBase):
         Any
         """
 
-        try:
-            log_api("=> browser_context.wait_for_event started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.wait_for_event(
-                        event=event,
-                        predicate=self._wrap_handler(predicate),
-                        timeout=timeout,
-                    )
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.wait_for_event",
+                self._impl_obj.wait_for_event(
+                    event=event,
+                    predicate=self._wrap_handler(predicate),
+                    timeout=timeout,
+                ),
             )
-            log_api("<= browser_context.wait_for_event succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_context.wait_for_event failed")
-            raise e
+        )
 
     def expect_page(
         self,
-        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
         timeout: float = None
     ) -> EventContextManager["Page"]:
         """BrowserContext.expect_page
 
-        Performs action and waits for `page` event to fire. If predicate is provided, it passes `Page` value into the
-        `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-        closed before the worker event is fired.
+        Performs action and waits for a new `Page` to be created in the context. If predicate is provided, it passes `Page`
+        value into the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if
+        the context closes before new `Page` is created.
 
         Parameters
         ----------
@@ -9527,18 +8364,12 @@ class CDPSession(SyncBase):
         Dict
         """
 
-        try:
-            log_api("=> cdp_session.send started")
-            result = mapping.from_maybe_impl(
-                self._sync(
-                    self._impl_obj.send(method=method, params=mapping.to_impl(params))
-                )
+        return mapping.from_maybe_impl(
+            self._sync(
+                "cdp_session.send",
+                self._impl_obj.send(method=method, params=mapping.to_impl(params)),
             )
-            log_api("<= cdp_session.send succeded")
-            return result
-        except Exception as e:
-            log_api("<= cdp_session.send failed")
-            raise e
+        )
 
     def detach(self) -> NoneType:
         """CDPSession.detach
@@ -9547,14 +8378,9 @@ class CDPSession(SyncBase):
         send messages.
         """
 
-        try:
-            log_api("=> cdp_session.detach started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.detach()))
-            log_api("<= cdp_session.detach succeded")
-            return result
-        except Exception as e:
-            log_api("<= cdp_session.detach failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("cdp_session.detach", self._impl_obj.detach())
+        )
 
 
 mapping.register(CDPSessionImpl, CDPSession)
@@ -9603,16 +8429,12 @@ class ChromiumBrowserContext(BrowserContext):
         CDPSession
         """
 
-        try:
-            log_api("=> chromium_browser_context.new_cdp_session started")
-            result = mapping.from_impl(
-                self._sync(self._impl_obj.new_cdp_session(page=page._impl_obj))
+        return mapping.from_impl(
+            self._sync(
+                "chromium_browser_context.new_cdp_session",
+                self._impl_obj.new_cdp_session(page=page._impl_obj),
             )
-            log_api("<= chromium_browser_context.new_cdp_session succeded")
-            return result
-        except Exception as e:
-            log_api("<= chromium_browser_context.new_cdp_session failed")
-            raise e
+        )
 
 
 mapping.register(ChromiumBrowserContextImpl, ChromiumBrowserContext)
@@ -9663,14 +8485,7 @@ class Browser(SyncBase):
         bool
         """
 
-        try:
-            log_api("=> browser.is_connected started")
-            result = mapping.from_maybe_impl(self._impl_obj.is_connected())
-            log_api("<= browser.is_connected succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser.is_connected failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.is_connected())
 
     def new_context(
         self,
@@ -9685,7 +8500,7 @@ class Browser(SyncBase):
         timezone_id: str = None,
         geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
-        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
@@ -9768,7 +8583,9 @@ class Browser(SyncBase):
         record_video_dir : Union[pathlib.Path, str, NoneType]
             Path to the directory to put videos into.
         record_video_size : Union[{width: int, height: int}, NoneType]
-            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
+            Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
+            800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
+            be scaled down if necessary to fit the specified size.
         storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
             Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
@@ -9779,44 +8596,38 @@ class Browser(SyncBase):
         BrowserContext
         """
 
-        try:
-            log_api("=> browser.new_context started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.new_context(
-                        viewport=viewport,
-                        noViewport=no_viewport,
-                        ignoreHTTPSErrors=ignore_https_errors,
-                        javaScriptEnabled=java_script_enabled,
-                        bypassCSP=bypass_csp,
-                        userAgent=user_agent,
-                        locale=locale,
-                        timezoneId=timezone_id,
-                        geolocation=geolocation,
-                        permissions=permissions,
-                        extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                        offline=offline,
-                        httpCredentials=http_credentials,
-                        deviceScaleFactor=device_scale_factor,
-                        isMobile=is_mobile,
-                        hasTouch=has_touch,
-                        colorScheme=color_scheme,
-                        acceptDownloads=accept_downloads,
-                        defaultBrowserType=default_browser_type,
-                        proxy=proxy,
-                        recordHarPath=record_har_path,
-                        recordHarOmitContent=record_har_omit_content,
-                        recordVideoDir=record_video_dir,
-                        recordVideoSize=record_video_size,
-                        storageState=storage_state,
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "browser.new_context",
+                self._impl_obj.new_context(
+                    viewport=viewport,
+                    noViewport=no_viewport,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    javaScriptEnabled=java_script_enabled,
+                    bypassCSP=bypass_csp,
+                    userAgent=user_agent,
+                    locale=locale,
+                    timezoneId=timezone_id,
+                    geolocation=geolocation,
+                    permissions=permissions,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    offline=offline,
+                    httpCredentials=http_credentials,
+                    deviceScaleFactor=device_scale_factor,
+                    isMobile=is_mobile,
+                    hasTouch=has_touch,
+                    colorScheme=color_scheme,
+                    acceptDownloads=accept_downloads,
+                    defaultBrowserType=default_browser_type,
+                    proxy=proxy,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
+                    storageState=storage_state,
+                ),
             )
-            log_api("<= browser.new_context succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser.new_context failed")
-            raise e
+        )
 
     def new_page(
         self,
@@ -9831,7 +8642,7 @@ class Browser(SyncBase):
         timezone_id: str = None,
         geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
-        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
@@ -9909,7 +8720,9 @@ class Browser(SyncBase):
         record_video_dir : Union[pathlib.Path, str, NoneType]
             Path to the directory to put videos into.
         record_video_size : Union[{width: int, height: int}, NoneType]
-            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
+            Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
+            800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
+            be scaled down if necessary to fit the specified size.
         storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
             Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
@@ -9920,44 +8733,38 @@ class Browser(SyncBase):
         Page
         """
 
-        try:
-            log_api("=> browser.new_page started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.new_page(
-                        viewport=viewport,
-                        noViewport=no_viewport,
-                        ignoreHTTPSErrors=ignore_https_errors,
-                        javaScriptEnabled=java_script_enabled,
-                        bypassCSP=bypass_csp,
-                        userAgent=user_agent,
-                        locale=locale,
-                        timezoneId=timezone_id,
-                        geolocation=geolocation,
-                        permissions=permissions,
-                        extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                        offline=offline,
-                        httpCredentials=http_credentials,
-                        deviceScaleFactor=device_scale_factor,
-                        isMobile=is_mobile,
-                        hasTouch=has_touch,
-                        colorScheme=color_scheme,
-                        acceptDownloads=accept_downloads,
-                        defaultBrowserType=default_browser_type,
-                        proxy=proxy,
-                        recordHarPath=record_har_path,
-                        recordHarOmitContent=record_har_omit_content,
-                        recordVideoDir=record_video_dir,
-                        recordVideoSize=record_video_size,
-                        storageState=storage_state,
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "browser.new_page",
+                self._impl_obj.new_page(
+                    viewport=viewport,
+                    noViewport=no_viewport,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    javaScriptEnabled=java_script_enabled,
+                    bypassCSP=bypass_csp,
+                    userAgent=user_agent,
+                    locale=locale,
+                    timezoneId=timezone_id,
+                    geolocation=geolocation,
+                    permissions=permissions,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    offline=offline,
+                    httpCredentials=http_credentials,
+                    deviceScaleFactor=device_scale_factor,
+                    isMobile=is_mobile,
+                    hasTouch=has_touch,
+                    colorScheme=color_scheme,
+                    acceptDownloads=accept_downloads,
+                    defaultBrowserType=default_browser_type,
+                    proxy=proxy,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
+                    storageState=storage_state,
+                ),
             )
-            log_api("<= browser.new_page succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser.new_page failed")
-            raise e
+        )
 
     def close(self) -> NoneType:
         """Browser.close
@@ -9971,14 +8778,9 @@ class Browser(SyncBase):
         The `Browser` object itself is considered to be disposed and cannot be used anymore.
         """
 
-        try:
-            log_api("=> browser.close started")
-            result = mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
-            log_api("<= browser.close succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser.close failed")
-            raise e
+        return mapping.from_maybe_impl(
+            self._sync("browser.close", self._impl_obj.close())
+        )
 
 
 mapping.register(BrowserImpl, Browser)
@@ -10022,14 +8824,14 @@ class BrowserType(SyncBase):
         handle_sigterm: bool = None,
         handle_sighup: bool = None,
         timeout: float = None,
-        env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
         chromium_sandbox: bool = None,
-        firefox_user_prefs: typing.Union[
+        firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None
     ) -> "Browser":
@@ -10045,19 +8847,19 @@ class BrowserType(SyncBase):
         )
         ```
 
-        > **Chromium-only** Playwright can also be used to control the Chrome browser, but it works best with the version of
-        Chromium it is bundled with. There is no guarantee it will work with any other version. Use `executablePath` option with
-        extreme caution.
+        > **Chromium-only** Playwright can also be used to control the Google Chrome or Microsoft Edge browsers, but it works
+        best with the version of Chromium it is bundled with. There is no guarantee it will work with any other version. Use
+        `executablePath` option with extreme caution.
         >
         > If Google Chrome (rather than Chromium) is preferred, a
         [Chrome Canary](https://www.google.com/chrome/browser/canary.html) or
         [Dev Channel](https://www.chromium.org/getting-involved/dev-channel) build is suggested.
         >
-        > In `browser_type.launch()` above, any mention of Chromium also applies to Chrome.
-        >
-        > See [`this article`](https://www.howtogeek.com/202825/what%E2%80%99s-the-difference-between-chromium-and-chrome/) for
-        a description of the differences between Chromium and Chrome.
-        [`This article`](https://chromium.googlesource.com/chromium/src/+/lkgr/docs/chromium_browser_vs_google_chrome.md)
+        > Stock browsers like Google Chrome and Microsoft Edge are suitable for tests that require proprietary media codecs for
+        video playback. See
+        [this article](https://www.howtogeek.com/202825/what%E2%80%99s-the-difference-between-chromium-and-chrome/) for other
+        differences between Chromium and Chrome.
+        [This article](https://chromium.googlesource.com/chromium/src/+/lkgr/docs/chromium_browser_vs_google_chrome.md)
         describes some differences for Linux users.
 
         Parameters
@@ -10109,34 +8911,28 @@ class BrowserType(SyncBase):
         Browser
         """
 
-        try:
-            log_api("=> browser_type.launch started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.launch(
-                        executablePath=executable_path,
-                        args=args,
-                        ignoreDefaultArgs=ignore_default_args,
-                        handleSIGINT=handle_sigint,
-                        handleSIGTERM=handle_sigterm,
-                        handleSIGHUP=handle_sighup,
-                        timeout=timeout,
-                        env=mapping.to_impl(env),
-                        headless=headless,
-                        devtools=devtools,
-                        proxy=proxy,
-                        downloadsPath=downloads_path,
-                        slowMo=slow_mo,
-                        chromiumSandbox=chromium_sandbox,
-                        firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "browser_type.launch",
+                self._impl_obj.launch(
+                    executablePath=executable_path,
+                    args=args,
+                    ignoreDefaultArgs=ignore_default_args,
+                    handleSIGINT=handle_sigint,
+                    handleSIGTERM=handle_sigterm,
+                    handleSIGHUP=handle_sighup,
+                    timeout=timeout,
+                    env=mapping.to_impl(env),
+                    headless=headless,
+                    devtools=devtools,
+                    proxy=proxy,
+                    downloadsPath=downloads_path,
+                    slowMo=slow_mo,
+                    chromiumSandbox=chromium_sandbox,
+                    firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
+                ),
             )
-            log_api("<= browser_type.launch succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_type.launch failed")
-            raise e
+        )
 
     def launch_persistent_context(
         self,
@@ -10149,7 +8945,7 @@ class BrowserType(SyncBase):
         handle_sigterm: bool = None,
         handle_sighup: bool = None,
         timeout: float = None,
-        env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxySettings = None,
@@ -10165,7 +8961,7 @@ class BrowserType(SyncBase):
         timezone_id: str = None,
         geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
-        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
@@ -10280,63 +9076,59 @@ class BrowserType(SyncBase):
         record_video_dir : Union[pathlib.Path, str, NoneType]
             Path to the directory to put videos into.
         record_video_size : Union[{width: int, height: int}, NoneType]
-            Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`.
+            Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
+            800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
+            be scaled down if necessary to fit the specified size.
 
         Returns
         -------
         BrowserContext
         """
 
-        try:
-            log_api("=> browser_type.launch_persistent_context started")
-            result = mapping.from_impl(
-                self._sync(
-                    self._impl_obj.launch_persistent_context(
-                        userDataDir=user_data_dir,
-                        executablePath=executable_path,
-                        args=args,
-                        ignoreDefaultArgs=ignore_default_args,
-                        handleSIGINT=handle_sigint,
-                        handleSIGTERM=handle_sigterm,
-                        handleSIGHUP=handle_sighup,
-                        timeout=timeout,
-                        env=mapping.to_impl(env),
-                        headless=headless,
-                        devtools=devtools,
-                        proxy=proxy,
-                        downloadsPath=downloads_path,
-                        slowMo=slow_mo,
-                        viewport=viewport,
-                        noViewport=no_viewport,
-                        ignoreHTTPSErrors=ignore_https_errors,
-                        javaScriptEnabled=java_script_enabled,
-                        bypassCSP=bypass_csp,
-                        userAgent=user_agent,
-                        locale=locale,
-                        timezoneId=timezone_id,
-                        geolocation=geolocation,
-                        permissions=permissions,
-                        extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                        offline=offline,
-                        httpCredentials=http_credentials,
-                        deviceScaleFactor=device_scale_factor,
-                        isMobile=is_mobile,
-                        hasTouch=has_touch,
-                        colorScheme=color_scheme,
-                        acceptDownloads=accept_downloads,
-                        chromiumSandbox=chromium_sandbox,
-                        recordHarPath=record_har_path,
-                        recordHarOmitContent=record_har_omit_content,
-                        recordVideoDir=record_video_dir,
-                        recordVideoSize=record_video_size,
-                    )
-                )
+        return mapping.from_impl(
+            self._sync(
+                "browser_type.launch_persistent_context",
+                self._impl_obj.launch_persistent_context(
+                    userDataDir=user_data_dir,
+                    executablePath=executable_path,
+                    args=args,
+                    ignoreDefaultArgs=ignore_default_args,
+                    handleSIGINT=handle_sigint,
+                    handleSIGTERM=handle_sigterm,
+                    handleSIGHUP=handle_sighup,
+                    timeout=timeout,
+                    env=mapping.to_impl(env),
+                    headless=headless,
+                    devtools=devtools,
+                    proxy=proxy,
+                    downloadsPath=downloads_path,
+                    slowMo=slow_mo,
+                    viewport=viewport,
+                    noViewport=no_viewport,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    javaScriptEnabled=java_script_enabled,
+                    bypassCSP=bypass_csp,
+                    userAgent=user_agent,
+                    locale=locale,
+                    timezoneId=timezone_id,
+                    geolocation=geolocation,
+                    permissions=permissions,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    offline=offline,
+                    httpCredentials=http_credentials,
+                    deviceScaleFactor=device_scale_factor,
+                    isMobile=is_mobile,
+                    hasTouch=has_touch,
+                    colorScheme=color_scheme,
+                    acceptDownloads=accept_downloads,
+                    chromiumSandbox=chromium_sandbox,
+                    recordHarPath=record_har_path,
+                    recordHarOmitContent=record_har_omit_content,
+                    recordVideoDir=record_video_dir,
+                    recordVideoSize=record_video_size,
+                ),
             )
-            log_api("<= browser_type.launch_persistent_context succeded")
-            return result
-        except Exception as e:
-            log_api("<= browser_type.launch_persistent_context failed")
-            raise e
+        )
 
 
 mapping.register(BrowserTypeImpl, BrowserType)
@@ -10445,14 +9237,7 @@ class Playwright(SyncBase):
         ```
         """
 
-        try:
-            log_api("=> playwright.stop started")
-            result = mapping.from_maybe_impl(self._impl_obj.stop())
-            log_api("<= playwright.stop succeded")
-            return result
-        except Exception as e:
-            log_api("<= playwright.stop failed")
-            raise e
+        return mapping.from_maybe_impl(self._impl_obj.stop())
 
 
 mapping.register(PlaywrightImpl, Playwright)
