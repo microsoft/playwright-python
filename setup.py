@@ -17,8 +17,8 @@ import os
 import shutil
 import subprocess
 import sys
+import typing
 import zipfile
-from pathlib import Path
 
 import setuptools
 from auditwheel.wheeltools import InWheel
@@ -27,10 +27,17 @@ from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 driver_version = "1.9.0-1614037901000"
 
 
-def extractall(zip: zipfile.ZipFile, path: str) -> None:
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+
+NoneType = type(None)
+
+
+def extractall(zip: typing.Any, path: str) -> NoneType:
     for name in zip.namelist():
         member = zip.getinfo(name)
-        extracted_path = zip.extract(member, path)
+        extracted_path = zip._extract_member(member, path, None)
         attr = member.external_attr >> 16
         if attr != 0:
             os.chmod(extracted_path, attr)
@@ -84,7 +91,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
                 driver_root = os.path.abspath(f"driver/{platform}")
-                for dir_path, _, files in os.walk(driver_root):
+                for dir_path, dirs, files in os.walk(driver_root):
                     for file in files:
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
@@ -116,16 +123,12 @@ setuptools.setup(
     author="Microsoft Corporation",
     author_email="",
     description="A high-level API to automate web browsers",
-    long_description=Path("README.md").read_text(encoding="utf-8"),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Microsoft/playwright-python",
     packages=["playwright"],
     include_package_data=True,
-    install_requires=[
-        "greenlet==1.0.0",
-        "pyee>=8.0.1",
-        "typing-extensions;python_version<='3.8'",
-    ],
+    install_requires=["greenlet==1.0.0", "pyee>=8.0.1", "typing-extensions"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
@@ -144,7 +147,7 @@ setuptools.setup(
         "write_to": "playwright/_repo_version.py",
         "write_to_template": 'version = "{version}"\n',
     },
-    setup_requires=["setuptools_scm", "wheel"],
+    setup_requires=["setuptools_scm"],
     entry_points={
         "console_scripts": [
             "playwright=playwright.__main__:main",
