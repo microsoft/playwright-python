@@ -220,6 +220,8 @@ class Connection:
         id = msg.get("id")
         if id:
             callback = self._callbacks.pop(id)
+            if callback.future.cancelled():
+                return
             error = msg.get("error")
             if error:
                 parsed_error = parse_error(error["error"])  # type: ignore
