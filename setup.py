@@ -25,6 +25,7 @@ from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
 driver_version = "1.9.0-1614037901000"
 
+
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
     for name in zip.namelist():
         member = zip.getinfo(name)
