@@ -9,7 +9,7 @@ flaky==3.7.0
 pixelmatch==0.2.3
 Pillow==8.1.0
 mypy==0.812
-setuptools==53.1.0
+setuptools==54.0.0
 # TODO: use PyPi version after >20.3.0 is released
 git+https://github.com/twisted/twisted.git@4ff22287cab3b54f51cee41ea2619e72d1bff2e4
 wheel==0.36.2
