@@ -73,6 +73,20 @@ async def test_page_events_request_should_fire_for_navigation_requests(
     assert len(requests) == 1
 
 
+async def test_page_events_request_should_accept_method(page: Page, server):
+    class Log:
+        def __init__(self):
+            self.requests = []
+
+        def handle(self, request):
+            self.requests.append(request)
+
+    log = Log()
+    page.on("request", log.handle)
+    await page.goto(server.EMPTY_PAGE)
+    assert len(log.requests) == 1
+
+
 async def test_page_events_request_should_fire_for_iframes(page, server, utils):
     requests = []
     page.on("request", lambda r: requests.append(r))
