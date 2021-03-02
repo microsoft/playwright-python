@@ -157,7 +157,7 @@ class BrowserContext(ChannelOwner):
             with open(path, "r") as file:
                 script = file.read()
         if not isinstance(script, str):
-            raise Error("Either path or source parameter must be specified")
+            raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
 
     async def expose_binding(
