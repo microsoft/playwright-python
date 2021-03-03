@@ -13,11 +13,13 @@
 # limitations under the License.
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional
+from types import MethodType
+from typing import Any, Callable, Dict, List, Optional, cast
 
 from playwright._impl._api_types import Error
 
-INSTANCE_ATTR = "_pw_api_instance"
+API_ATTR = "_pw_api_instance_"
+IMPL_ATTR = "_pw_impl_instance_"
 
 
 class ImplWrapper:
@@ -41,10 +43,10 @@ class ImplToApiMapping:
             return [self.from_maybe_impl(item) for item in obj]
         api_class = self._mapping.get(type(obj))
         if api_class:
-            api_instance = getattr(obj, INSTANCE_ATTR, None)
+            api_instance = getattr(obj, API_ATTR, None)
             if not api_instance:
                 api_instance = api_class(obj)
-                setattr(obj, INSTANCE_ATTR, api_instance)
+                setattr(obj, API_ATTR, api_instance)
             return api_instance
         else:
             return obj
@@ -85,8 +87,21 @@ class ImplToApiMapping:
                 *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
             )
 
-        wrapper = getattr(handler, INSTANCE_ATTR, None)
+        if inspect.ismethod(handler):
+            wrapper = getattr(
+                cast(MethodType, handler).__self__, IMPL_ATTR + handler.__name__, None
+            )
+            if not wrapper:
+                wrapper = wrapper_func
+                setattr(
+                    cast(MethodType, handler).__self__,
+                    IMPL_ATTR + handler.__name__,
+                    wrapper,
+                )
+            return wrapper
+
+        wrapper = getattr(handler, IMPL_ATTR, None)
         if not wrapper:
             wrapper = wrapper_func
-        setattr(handler, INSTANCE_ATTR, wrapper)
+            setattr(handler, IMPL_ATTR, wrapper)
         return wrapper

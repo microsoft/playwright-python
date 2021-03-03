@@ -39,7 +39,7 @@ def test_add_init_script_throw_without_path_and_content(page):
         page.add_init_script({"foo": "bar"})
     except Error as e:
         error = e
-    assert error.message == "Either path or source parameter must be specified"
+    assert error.message == "Either path or script parameter must be specified"
 
 
 def test_add_init_script_work_with_browser_context_scripts(page, context):
