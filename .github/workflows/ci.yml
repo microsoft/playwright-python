@@ -31,7 +31,7 @@ jobs:
     - name: Install browsers
       run: python -m playwright install
     - name: Lint
-      run: pre-commit run --all-files
+      uses: pre-commit/action@v2.0.0
     - name: Generate APIs
       run: bash scripts/update_api.sh
     - name: Verify API is up to date
