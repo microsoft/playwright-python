@@ -4,27 +4,27 @@
 
 Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) browsers with a single API. Playwright delivers automation that is **ever-green**, **capable**, **reliable** and **fast**. [See how Playwright is better](https://playwright.dev/python/docs/why-playwright).
 
-|          | Linux | macOS | Windows |
-|   :---   | :---: | :---: | :---:   |
-| Chromium <!-- GEN:chromium-version -->90.0.4421.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
-| WebKit <!-- GEN:webkit-version -->14.1<!-- GEN:stop --> | ✅ | ✅ | ✅ |
-| Firefox <!-- GEN:firefox-version -->86.0b10<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+|                                                                    | Linux | macOS | Windows |
+| :----------------------------------------------------------------- | :---: | :---: | :-----: |
+| Chromium <!-- GEN:chromium-version -->90.0.4421.0<!-- GEN:stop --> |  ✅   |  ✅   |   ✅    |
+| WebKit <!-- GEN:webkit-version -->14.1<!-- GEN:stop -->            |  ✅   |  ✅   |   ✅    |
+| Firefox <!-- GEN:firefox-version -->86.0b10<!-- GEN:stop -->       |  ✅   |  ✅   |   ✅    |
 
 Headless execution is supported for all browsers on all platforms.
 
-* [Usage](#usage)
+- [Usage](#usage)
   - [Record and generate code](#record-and-generate-code)
   - [Sync API](#sync-api)
   - [Async API](#async-api)
   - [With pytest](#with-pytest)
   - [Interactive mode (REPL)](#interactive-mode-repl)
-* [Examples](#examples)
+- [Examples](#examples)
   - [Mobile and geolocation](#mobile-and-geolocation)
   - [Evaluate JS in browser](#evaluate-js-in-browser)
   - [Intercept network requests](#intercept-network-requests)
-* [Documentation](#documentation)
-* [Is Playwright ready?](#is-playwright-ready)
-* [Migration from the pre-release versions](#migration-from-the-pre-release-versions)
+- [Documentation](#documentation)
+- [Is Playwright ready?](#is-playwright-ready)
+- [Migration from the pre-release versions](#migration-from-the-pre-release-versions)
 
 ## Usage
 
@@ -68,8 +68,11 @@ with sync_playwright() as p:
 If you app is based on the modern asyncio loop and you are used to async/await constructs,
 Playwright exposes Async API for you. You should use this API inside a Python REPL supporting `asyncio` like with `python -m asyncio`
 
-```py
+```console
 $ python -m asyncio
+```
+
+```py
 import asyncio
 from playwright.async_api import async_playwright
 
@@ -117,8 +120,11 @@ Blocking REPL, as in CLI:
 
 Async REPL such as `asyncio` REPL:
 
-```py
+```console
 $ python -m asyncio
+```
+
+```py
 >>> from playwright.async_api import async_playwright
 >>> playwright = await async_playwright().start()
 >>> browser = await playwright.chromium.launch()
@@ -179,6 +185,7 @@ async def main():
 
 asyncio.run(main())
 ```
+
 </details>
 
 #### Evaluate JS in browser
@@ -202,6 +209,7 @@ with sync_playwright() as p:
     print(dimensions)
     browser.close()
 ```
+
 <details>
 <summary>Async variant</summary>
 
@@ -226,6 +234,7 @@ async def main():
 
 asyncio.run(main())
 ```
+
 </details>
 
 #### Intercept network requests
@@ -249,6 +258,7 @@ with sync_playwright() as p:
     page.goto("http://todomvc.com")
     browser.close()
 ```
+
 <details>
 <summary>Async variant</summary>
 
@@ -272,6 +282,7 @@ async def main():
 
 asyncio.run(main())
 ```
+
 </details>
 
 ## Documentation
@@ -289,12 +300,14 @@ every release, but we promise to not break it anymore!
 ## Migration from the pre-release versions
 
 The API has changed since the last 0.170.0 version:
+
 - Snake case notation for methods and arguments:
 
   ```py
   # old
   browser.newPage()
   ```
+
   ```py
   # new
   browser.new_page()
