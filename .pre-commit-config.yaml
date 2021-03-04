@@ -8,6 +8,7 @@ repos:
       - id: end-of-file-fixer
         exclude: ^playwright/drivers/browsers.json$
       - id: check-yaml
+      - id: check-toml
       - id: requirements-txt-fixer
   - repo: https://github.com/psf/black
     rev: 20.8b1
