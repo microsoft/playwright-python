@@ -19,3 +19,48 @@ web automation that is ever-green, capable, reliable and fast.
 For more information you'll find the documentation for the sync API [here](sync_api.html)
 and for the async API [here](async_api.html).
 """
+from contextlib import contextmanager
+
+from playwright.sync_api import sync_playwright
+
+
+@contextmanager
+def chromium(url=None, incognito=False, *args, **kwargs):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(**kwargs)
+        context = browser.new_context(**kwargs) if incognito else browser
+        page = context.new_page()
+        if url is not None:
+            page.goto(url)
+        try:
+            yield page
+        finally:
+            browser.close()
+
+
+@contextmanager
+def firefox(url=None, incognito=False, *args, **kwargs):
+    with sync_playwright() as p:
+        browser = p.firefox.launch(**kwargs)
+        context = browser.new_context(**kwargs) if incognito else browser
+        page = context.new_page()
+        if url is not None:
+            page.goto(url)
+        try:
+            yield page
+        finally:
+            browser.close()
+
+
+@contextmanager
+def webkit(url=None, incognito=False, *args, **kwargs):
+    with sync_playwright() as p:
+        browser = p.webkit.launch(**kwargs)
+        context = browser.new_context(**kwargs) if incognito else browser
+        page = context.new_page()
+        if url is not None:
+            page.goto(url)
+        try:
+            yield page
+        finally:
+            browser.close()
