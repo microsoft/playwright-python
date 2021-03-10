@@ -1,0 +1,14 @@
+test: tests/**/*
+
+dependencies: local-requirements.txt
+
+build:
+  - scripts/*
+  - buildbots/*
+  - setup*
+
+ci: .github/**/*
+
+docker: Dockerfile
+
+core: playwright/**/*
