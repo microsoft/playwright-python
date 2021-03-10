@@ -4,10 +4,11 @@
 
 ### Configuring python environment
 
-The project requires Python version 3.7+. To set it as default in the environment run the following commands:
+The project development requires Python version 3.9+. To set it as default in the environment run the following commands:
 
 ```sh
-python -m venv env
+sudo apt-get install python3.9-venv
+python3.9 -m venv env
 source ./env/bin/activate
 ```
 
