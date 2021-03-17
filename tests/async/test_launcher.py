@@ -41,7 +41,6 @@ async def test_browser_type_launch_should_throw_if_page_argument_is_passed(
     assert "can not specify page" in exc.value.message
 
 
-@pytest.mark.skip("currently disabled on upstream")
 async def test_browser_type_launch_should_reject_if_launched_browser_fails_immediately(
     browser_type, launch_arguments, assetdir
 ):
@@ -52,9 +51,6 @@ async def test_browser_type_launch_should_reject_if_launched_browser_fails_immed
         )
 
 
-@pytest.mark.skip(
-    "does not return the expected error"
-)  # TODO: hangs currently on the bots
 async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
     browser_type, launch_arguments
 ):
