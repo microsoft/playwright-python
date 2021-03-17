@@ -85,11 +85,12 @@ class Request(ChannelOwner):
         if not post_data:
             return None
         content_type = self.headers["content-type"]
-        if not content_type:
-            return None
         if content_type == "application/x-www-form-urlencoded":
             return dict(parse.parse_qsl(post_data))
-        return json.loads(post_data)
+        try:
+            return json.loads(post_data)
+        except Exception:
+            raise Error(f"POST data is not a valid JSON object: {post_data}")
 
     @property
     def post_data_buffer(self) -> Optional[bytes]:
