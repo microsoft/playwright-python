@@ -103,6 +103,55 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest -vv tests/async --browser=${{ matrix.browser }} --timeout 90
 
+  stable:
+    name: Stable
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        browser-channel: [chrome]
+        include:
+        - os: windows-latest
+          browser-channel: msedge
+        - os: macos-latest
+          browser-channel: msedge
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Media Pack
+      if: matrix.os == 'windows-latest'
+      shell: powershell
+      run: Install-WindowsFeature Server-Media-Foundation
+    - uses: actions/checkout@v2
+    - uses: microsoft/playwright-github-action@v1
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip wheel
+        pip install -r local-requirements.txt
+        pip install -e .
+    - name: Build package
+      run: python setup.py bdist_wheel
+    - name: Install ffmpeg
+      run: python -m playwright install ffmpeg
+    - name: Common Tests
+      run: pytest -vv tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+    - name: Test Sync API
+      if: matrix.os != 'ubuntu-latest'
+      run: pytest -vv tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+    - name: Test Sync API
+      if: matrix.os == 'ubuntu-latest'
+      run: xvfb-run pytest -vv tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+    - name: Test Async API
+      if: matrix.os != 'ubuntu-latest'
+      run: pytest -vv tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+    - name: Test Async API
+      if: matrix.os == 'ubuntu-latest'
+      run: xvfb-run pytest -vv tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+
   test-package-installations:
     name: Test package installations
     runs-on: ubuntu-latest

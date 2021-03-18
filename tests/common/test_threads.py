@@ -17,13 +17,13 @@ import threading
 from playwright.sync_api import sync_playwright
 
 
-def test_running_in_thread(browser_name):
+def test_running_in_thread(browser_name, launch_arguments):
     result = []
 
     class TestThread(threading.Thread):
         def run(self):
             with sync_playwright() as playwright:
-                browser = getattr(playwright, browser_name).launch()
+                browser = getattr(playwright, browser_name).launch(**launch_arguments)
                 # This should not throw ^^.
                 browser.new_page()
                 browser.close()

@@ -80,7 +80,9 @@ async def test_browser_type_launch_server_should_fire_close_event(
     await asyncio.gather(close_event, browser_server.close())
 
 
-async def test_browser_type_executable_path_should_work(browser_type):
+async def test_browser_type_executable_path_should_work(browser_type, browser_channel):
+    if browser_channel:
+        return
     executable_path = browser_type.executable_path
     assert os.path.exists(executable_path)
     assert os.path.realpath(executable_path) == os.path.realpath(executable_path)

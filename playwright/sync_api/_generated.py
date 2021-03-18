@@ -92,6 +92,8 @@ class Request(SyncBase):
         following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`,
         `websocket`, `manifest`, `other`.
 
+        > NOTE: The resource types are available as constants in [ResourceTypes].
+
         Returns
         -------
         str
@@ -2822,7 +2824,7 @@ class Frame(SyncBase):
         Returns the return value of `expression` as a `JSHandle`.
 
         The only difference between `frame.evaluate()` and `frame.evaluate_handle()` is that
-        [method: Frame.evaluateHandle`] returns `JSHandle`.
+        `frame.evaluate_handle()` returns `JSHandle`.
 
         If the function, passed to the `frame.evaluate_handle()`, returns a [Promise], then
         `frame.evaluate_handle()` would wait for the promise to resolve and return its value.
@@ -4338,7 +4340,7 @@ class Worker(SyncBase):
         wait for the promise to resolve and return its value.
 
         If the function passed to the `worker.evaluate()` returns a non-[Serializable] value, then
-        `worker.evaluate()` returns `undefined`. Playwright also supports transferring some  additional values that are
+        `worker.evaluate()` returns `undefined`. Playwright also supports transferring some additional values that are
         not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 
         Parameters
@@ -4604,7 +4606,7 @@ class Download(SyncBase):
     def delete(self) -> NoneType:
         """Download.delete
 
-        Deletes the downloaded file.
+        Deletes the downloaded file. Will wait for the download to finish if necessary.
         """
 
         return mapping.from_maybe_impl(
@@ -4614,7 +4616,7 @@ class Download(SyncBase):
     def failure(self) -> typing.Optional[str]:
         """Download.failure
 
-        Returns download error if any.
+        Returns download error if any. Will wait for the download to finish if necessary.
 
         Returns
         -------
@@ -4628,7 +4630,8 @@ class Download(SyncBase):
     def path(self) -> typing.Optional[pathlib.Path]:
         """Download.path
 
-        Returns path to the downloaded file in case of successful download.
+        Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
+        necessary.
 
         Returns
         -------
@@ -4642,7 +4645,7 @@ class Download(SyncBase):
     def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
         """Download.save_as
 
-        Saves the download to a user-specified path.
+        Saves the download to a user-specified path. It is safe to call this method while the download is still in progress.
 
         Parameters
         ----------
@@ -7620,9 +7623,16 @@ class Page(SyncBase):
         Returns the matched response.
 
         ```py
-        first_response = page.wait_for_response(\"https://example.com/resource\")
-        final_response = page.wait_for_response(lambda response: response.url == \"https://example.com\" and response.status === 200)
-        return final_response.ok
+        with page.expect_response(\"https://example.com/resource\") as response_info:
+            page.click(\"input\")
+        response = response_info.value
+        return response.ok
+
+        # or with a lambda
+        with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status === 200) as response_info:
+            page.click(\"input\")
+        response = response_info.value
+        return response.ok
         ```
 
         Parameters
@@ -8569,7 +8579,7 @@ class Browser(SyncBase):
             Specifies if viewport supports touch events. Defaults to false.
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to '`light`'.
+            `page.emulate_media()` for more details. Defaults to `'light'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
@@ -8706,7 +8716,7 @@ class Browser(SyncBase):
             Specifies if viewport supports touch events. Defaults to false.
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to '`light`'.
+            `page.emulate_media()` for more details. Defaults to `'light'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
@@ -8818,6 +8828,7 @@ class BrowserType(SyncBase):
         self,
         *,
         executable_path: typing.Union[str, pathlib.Path] = None,
+        channel: str = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
         handle_sigint: bool = None,
@@ -8868,6 +8879,16 @@ class BrowserType(SyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
+        channel : Union[str, NoneType]
+            Chromium distribution channel, one of
+            - chrome
+            - chrome-beta
+            - chrome-dev
+            - chrome-canary
+            - msedge
+            - msedge-beta
+            - msedge-dev
+            - msedge-canary
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -8916,6 +8937,7 @@ class BrowserType(SyncBase):
                 "browser_type.launch",
                 self._impl_obj.launch(
                     executablePath=executable_path,
+                    channel=channel,
                     args=args,
                     ignoreDefaultArgs=ignore_default_args,
                     handleSIGINT=handle_sigint,
@@ -8938,6 +8960,7 @@ class BrowserType(SyncBase):
         self,
         user_data_dir: typing.Union[str, pathlib.Path],
         *,
+        channel: str = None,
         executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
@@ -8989,6 +9012,16 @@ class BrowserType(SyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
+        channel : Union[str, NoneType]
+            Chromium distribution channel, one of
+            - chrome
+            - chrome-beta
+            - chrome-dev
+            - chrome-canary
+            - msedge
+            - msedge-beta
+            - msedge-dev
+            - msedge-canary
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
@@ -9064,7 +9097,7 @@ class BrowserType(SyncBase):
             Specifies if viewport supports touch events. Defaults to false.
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to '`light`'.
+            `page.emulate_media()` for more details. Defaults to `'light'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         chromium_sandbox : Union[bool, NoneType]
@@ -9090,6 +9123,7 @@ class BrowserType(SyncBase):
                 "browser_type.launch_persistent_context",
                 self._impl_obj.launch_persistent_context(
                     userDataDir=user_data_dir,
+                    channel=channel,
                     executablePath=executable_path,
                     args=args,
                     ignoreDefaultArgs=ignore_default_args,

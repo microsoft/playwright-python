@@ -480,6 +480,7 @@ async def test_should_be_able_to_prevent_select_all(page, server, is_mac):
 
 
 @pytest.mark.only_platform("darwin")
+@pytest.mark.skip_browser("firefox")  # Upstream issue
 async def test_should_support_macos_shortcuts(page, server, is_firefox, is_mac):
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
