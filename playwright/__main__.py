@@ -22,8 +22,6 @@ from playwright._impl._driver import compute_driver_executable
 def main() -> None:
     driver_executable = compute_driver_executable()
     my_env = os.environ.copy()
-    # VSCode's JavaScript Debug Terminal provides it but driver/pkg does not support it
-    my_env.pop("NODE_OPTIONS", None)
     my_env["PW_CLI_TARGET_LANG"] = "python"
     subprocess.run([str(driver_executable), *sys.argv[1:]], env=my_env)
 
