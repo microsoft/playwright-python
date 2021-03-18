@@ -49,6 +49,7 @@ class BrowserType(ChannelOwner):
     async def launch(
         self,
         executablePath: Union[str, Path] = None,
+        channel: str = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -76,6 +77,7 @@ class BrowserType(ChannelOwner):
     async def launch_persistent_context(
         self,
         userDataDir: Union[str, Path],
+        channel: str = None,
         executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,

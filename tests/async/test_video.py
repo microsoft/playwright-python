@@ -32,9 +32,12 @@ async def test_short_video_should_exist(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
-async def test_short_video_should_exist_persistent_context(browser_type, tmpdir):
+async def test_short_video_should_exist_persistent_context(
+    browser_type, tmpdir, launch_arguments
+):
     context = await browser_type.launch_persistent_context(
         str(tmpdir),
+        **launch_arguments,
         viewport={"width": 320, "height": 240},
         record_video_dir=str(tmpdir) + "1",
     )

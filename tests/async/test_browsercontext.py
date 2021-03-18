@@ -409,8 +409,10 @@ async def test_expose_function_should_be_callable_from_inside_add_init_script(
     await context.expose_function("woof", lambda arg: args.append(arg))
     await context.add_init_script("woof('context')")
     page = await context.new_page()
-    await page.add_init_script("woof('page')")
+    await page.evaluate("undefined")
+    assert args == ["context"]
     args = []
+    await page.add_init_script("woof('page')")
     await page.reload()
     assert args == ["context", "page"]
 

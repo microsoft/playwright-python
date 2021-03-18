@@ -43,8 +43,12 @@ def test_record_video_to_path(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
-def test_record_video_to_path_persistent(browser_type, tmpdir, server):
-    context = browser_type.launch_persistent_context(tmpdir, record_video_dir=tmpdir)
+def test_record_video_to_path_persistent(
+    browser_type, tmpdir, server, launch_arguments
+):
+    context = browser_type.launch_persistent_context(
+        tmpdir, **launch_arguments, record_video_dir=tmpdir
+    )
     page = context.pages[0]
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()

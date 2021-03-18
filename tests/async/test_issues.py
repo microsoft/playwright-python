@@ -16,8 +16,10 @@ import pytest
 
 
 @pytest.mark.only_browser("chromium")
-async def test_issue_189(browser_type):
-    browser = await browser_type.launch(ignore_default_args=["--mute-audio"])
+async def test_issue_189(browser_type, launch_arguments):
+    browser = await browser_type.launch(
+        **launch_arguments, ignore_default_args=["--mute-audio"]
+    )
     page = await browser.new_page()
     assert await page.evaluate("1 + 1") == 2
     await browser.close()

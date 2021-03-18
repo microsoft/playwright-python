@@ -48,8 +48,10 @@ def assetdir():
 
 @pytest.fixture(scope="session")
 def launch_arguments(pytestconfig):
+    print(pytestconfig.getoption("--browser-channel"))
     return {
         "headless": not pytestconfig.getoption("--headful"),
+        "channel": pytestconfig.getoption("--browser-channel"),
     }
 
 
@@ -84,6 +86,11 @@ def after_each_hook():
 @pytest.fixture(scope="session")
 def browser_name(pytestconfig):
     return pytestconfig.getoption("browser")
+
+
+@pytest.fixture(scope="session")
+def browser_channel(pytestconfig):
+    return pytestconfig.getoption("--browser-channel")
 
 
 @pytest.fixture(scope="session")
@@ -159,6 +166,12 @@ def pytest_addoption(parser):
         action="append",
         default=[],
         help="Browsers which should be used. By default on all the browsers.",
+    )
+    group.addoption(
+        "--browser-channel",
+        action="store",
+        default=None,
+        help="Browser channel to be used.",
     )
     parser.addoption(
         "--headful",
