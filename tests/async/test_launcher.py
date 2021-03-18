@@ -58,7 +58,7 @@ async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
         await browser_type.launch(
             **launch_arguments, executable_path="random-invalid-path"
         )
-    assert "Failed to launch" in exc.value.message
+    assert "browser was not found" in exc.value.message
 
 
 @pytest.mark.skip()
