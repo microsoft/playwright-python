@@ -117,3 +117,12 @@ async def test_browser_close_should_be_callable_twice(browser_type, launch_argum
         browser.close(),
     )
     await browser.close()
+
+
+async def test_browser_launch_non_existing_executable_path_shows_install_msg(
+    browser_type,
+    tmpdir,
+):
+    with pytest.raises(Error) as exc_info:
+        await browser_type.launch(executable_path=tmpdir.join("executable"))
+    assert "python -m playwright install" in exc_info.value.message
