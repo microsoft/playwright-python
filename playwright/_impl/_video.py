@@ -41,3 +41,6 @@ class Video:
                 )
             )
         )
+
+    def __repr__(self) -> str:
+        return f"<Video page={self._page}>"

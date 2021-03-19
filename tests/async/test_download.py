@@ -55,6 +55,10 @@ async def test_should_report_downloads_with_accept_downloads_false(page: Page, s
     download = await download_info.value
     assert download.url == f"{server.PREFIX}/downloadWithFilename"
     assert download.suggested_filename == "file.txt"
+    assert (
+        repr(download)
+        == f"<Download url={download.url!r} suggested_filename={download.suggested_filename!r}>"
+    )
     error: Optional[Error] = None
     try:
         await download.path()

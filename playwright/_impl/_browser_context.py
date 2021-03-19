@@ -75,6 +75,9 @@ class BrowserContext(ChannelOwner):
             ),
         )
 
+    def __repr__(self) -> str:
+        return f"<BrowserContext browser={self.browser}>"
+
     def _on_page(self, page: Page) -> None:
         page._set_browser_context(self)
         self._pages.append(page)

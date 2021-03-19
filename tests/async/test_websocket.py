@@ -46,6 +46,7 @@ async def test_should_emit_close_events(page, ws_server):
         )
     ws = await ws_info.value
     assert ws.url == f"ws://localhost:{ws_server.PORT}/ws"
+    assert repr(ws) == f"<WebSocket url={ws.url!r}>"
     if not ws.is_closed():
         await ws.wait_for_event("close")
     assert ws.is_closed()

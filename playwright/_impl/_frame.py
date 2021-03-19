@@ -81,6 +81,9 @@ class Frame(ChannelOwner):
             lambda params: self._on_frame_navigated(params),
         )
 
+    def __repr__(self) -> str:
+        return f"<Frame name={self.name} url={self.url!r}>"
+
     def _on_load_state(
         self, add: DocumentLoadState = None, remove: DocumentLoadState = None
     ) -> None:

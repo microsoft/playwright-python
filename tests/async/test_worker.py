@@ -20,11 +20,12 @@ import pytest
 from playwright.async_api import Error, Page, Worker
 
 
-async def test_workers_page_workers(page, server):
+async def test_workers_page_workers(page: Page, server):
     async with page.expect_worker() as worker_info:
         await page.goto(server.PREFIX + "/worker/worker.html")
     worker = await worker_info.value
     assert "worker.js" in worker.url
+    assert repr(worker) == f"<Worker url={worker.url!r}>"
 
     assert (
         await worker.evaluate('() => self["workerFunction"]()')

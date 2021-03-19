@@ -224,6 +224,9 @@ class Page(ChannelOwner):
             "worker", lambda params: self._on_worker(from_channel(params["worker"]))
         )
 
+    def __repr__(self) -> str:
+        return f"<Page url={self.url!r}>"
+
     def _set_browser_context(self, context: "BrowserContext") -> None:
         self._browser_context = context
         self._timeout_settings = TimeoutSettings(context._timeout_settings)
@@ -882,6 +885,9 @@ class Worker(ChannelOwner):
         self._channel.on("close", lambda _: self._on_close())
         self._page: Optional[Page] = None
         self._context: Optional["BrowserContext"] = None
+
+    def __repr__(self) -> str:
+        return f"<Worker url={self.url!r}>"
 
     def _on_close(self) -> None:
         if self._page:

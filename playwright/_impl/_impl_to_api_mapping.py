@@ -26,6 +26,9 @@ class ImplWrapper:
     def __init__(self, impl_obj: Any) -> None:
         self._impl_obj = impl_obj
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
 
 class ImplToApiMapping:
     def __init__(self) -> None:

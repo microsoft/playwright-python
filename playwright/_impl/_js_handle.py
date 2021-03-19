@@ -36,6 +36,9 @@ class JSHandle(ChannelOwner):
             "previewUpdated", lambda params: self._on_preview_updated(params["preview"])
         )
 
+    def __repr__(self) -> str:
+        return f"<JSHandle preview={self._preview}>"
+
     def __str__(self) -> str:
         return self._preview
 
