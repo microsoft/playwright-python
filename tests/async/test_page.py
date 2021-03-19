@@ -313,7 +313,6 @@ async def test_expose_function(page, server):
     assert result == 36
 
 
-@pytest.mark.skip("todo mxschmitt")
 async def test_expose_function_should_throw_exception_in_page_context(page, server):
     def throw():
         raise Exception("WOOF WOOF")

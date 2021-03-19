@@ -1,26 +1,27 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
     hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
         exclude: ^playwright/drivers/browsers.json$
-    -   id: check-yaml
--   repo: https://github.com/psf/black
+      - id: check-yaml
+      - id: requirements-txt-fixer
+  - repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:
-    -   id: black
--   repo: https://github.com/pre-commit/mirrors-mypy
+      - id: black
+  - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.812
     hooks:
-    -   id: mypy
--   repo: https://gitlab.com/pycqa/flake8
+      - id: mypy
+  - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.4
     hooks:
-    -   id: flake8
--   repo: https://github.com/pycqa/isort
+      - id: flake8
+  - repo: https://github.com/pycqa/isort
     rev: 5.7.0
     hooks:
-    -   id: isort
+      - id: isort

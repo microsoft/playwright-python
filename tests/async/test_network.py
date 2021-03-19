@@ -279,6 +279,44 @@ async def test_should_be_undefined_when_there_is_no_post_data(page, server):
     assert response.request.post_data_json is None
 
 
+async def test_should_return_post_data_without_content_type(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_request("**/*") as request_info:
+        await page.evaluate(
+            """({url}) => {
+            const request = new Request(url, {
+                method: 'POST',
+                body: JSON.stringify({ value: 42 }),
+            });
+            request.headers.set('content-type', '');
+            return fetch(request);
+        }""",
+            {"url": server.PREFIX + "/title.html"},
+        )
+    request = await request_info.value
+    assert request.post_data_json == {"value": 42}
+
+
+async def test_should_throw_on_invalid_json_in_post_data(page, server):
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_request("**/*") as request_info:
+        await page.evaluate(
+            """({url}) => {
+            const request = new Request(url, {
+                method: 'POST',
+                body: '<not a json>',
+            });
+            request.headers.set('content-type', '');
+            return fetch(request);
+        }""",
+            {"url": server.PREFIX + "/title.html"},
+        )
+    request = await request_info.value
+    with pytest.raises(Error) as exc_info:
+        print(request.post_data_json)
+    assert "POST data is not a valid JSON object: <not a json>" in str(exc_info.value)
+
+
 async def test_should_work_with_binary_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     server.set_route("/post", lambda req: req.finish())

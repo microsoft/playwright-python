@@ -4,11 +4,11 @@
 
 Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) browsers with a single API. Playwright delivers automation that is **ever-green**, **capable**, **reliable** and **fast**. [See how Playwright is better](https://playwright.dev/python/docs/why-playwright).
 
-|                                                                    | Linux | macOS | Windows |
-| :----------------------------------------------------------------- | :---: | :---: | :-----: |
-| Chromium <!-- GEN:chromium-version -->90.0.4421.0<!-- GEN:stop --> |  ✅   |  ✅   |   ✅    |
-| WebKit <!-- GEN:webkit-version -->14.1<!-- GEN:stop -->            |  ✅   |  ✅   |   ✅    |
-| Firefox <!-- GEN:firefox-version -->86.0b10<!-- GEN:stop -->       |  ✅   |  ✅   |   ✅    |
+|          | Linux | macOS | Windows |
+|   :---   | :---: | :---: | :---:   |
+| Chromium <!-- GEN:chromium-version -->90.0.4430.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| WebKit <!-- GEN:webkit-version -->14.2<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| Firefox <!-- GEN:firefox-version -->87.0b10<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 
 Headless execution is supported for all browsers on all platforms.
 

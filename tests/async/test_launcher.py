@@ -41,7 +41,6 @@ async def test_browser_type_launch_should_throw_if_page_argument_is_passed(
     assert "can not specify page" in exc.value.message
 
 
-@pytest.mark.skip("currently disabled on upstream")
 async def test_browser_type_launch_should_reject_if_launched_browser_fails_immediately(
     browser_type, launch_arguments, assetdir
 ):
@@ -52,9 +51,6 @@ async def test_browser_type_launch_should_reject_if_launched_browser_fails_immed
         )
 
 
-@pytest.mark.skip(
-    "does not return the expected error"
-)  # TODO: hangs currently on the bots
 async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
     browser_type, launch_arguments
 ):
@@ -62,7 +58,7 @@ async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
         await browser_type.launch(
             **launch_arguments, executable_path="random-invalid-path"
         )
-    assert "Failed to launch" in exc.value.message
+    assert "browser was not found" in exc.value.message
 
 
 @pytest.mark.skip()
@@ -84,7 +80,9 @@ async def test_browser_type_launch_server_should_fire_close_event(
     await asyncio.gather(close_event, browser_server.close())
 
 
-async def test_browser_type_executable_path_should_work(browser_type):
+async def test_browser_type_executable_path_should_work(browser_type, browser_channel):
+    if browser_channel:
+        return
     executable_path = browser_type.executable_path
     assert os.path.exists(executable_path)
     assert os.path.realpath(executable_path) == os.path.realpath(executable_path)
@@ -121,3 +119,12 @@ async def test_browser_close_should_be_callable_twice(browser_type, launch_argum
         browser.close(),
     )
     await browser.close()
+
+
+async def test_browser_launch_non_existing_executable_path_shows_install_msg(
+    browser_type,
+    tmpdir,
+):
+    with pytest.raises(Error) as exc_info:
+        await browser_type.launch(executable_path=tmpdir.join("executable"))
+    assert "python -m playwright install" in exc_info.value.message

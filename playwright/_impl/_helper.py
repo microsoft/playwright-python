@@ -203,7 +203,7 @@ def is_safe_close_error(error: Exception) -> bool:
 
 
 def not_installed_error(message: str) -> Exception:
-    return Exception(
+    return Error(
         f"""
 ================================================================================
 {message}
