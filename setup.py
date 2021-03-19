@@ -15,8 +15,8 @@
 import glob
 import os
 import shutil
-import subprocess
 import sys
+import urllib.request
 import zipfile
 from pathlib import Path
 
@@ -54,9 +54,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 url = url + "next/"
                 url = url + zip_file
                 print("Fetching ", url)
-                subprocess.check_call(
-                    ["curl", "--http1.1", url, "-o", "driver/" + zip_file]
-                )
+                urllib.request.urlretrieve(url, "driver/" + zip_file)
         base_wheel_location = glob.glob("dist/*.whl")[0]
         without_platform = base_wheel_location[:-7]
         platform_map = {
