@@ -72,6 +72,9 @@ class Request(AsyncBase):
     def __init__(self, obj: RequestImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     @property
     def url(self) -> str:
         """Request.url
@@ -296,6 +299,9 @@ class Response(AsyncBase):
     def __init__(self, obj: ResponseImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     @property
     def url(self) -> str:
         """Response.url
@@ -445,6 +451,9 @@ mapping.register(ResponseImpl, Response)
 class Route(AsyncBase):
     def __init__(self, obj: RouteImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def request(self) -> "Request":
@@ -602,6 +611,9 @@ class WebSocket(AsyncBase):
     def __init__(self, obj: WebSocketImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     @property
     def url(self) -> str:
         """WebSocket.url
@@ -699,6 +711,9 @@ mapping.register(WebSocketImpl, WebSocket)
 class Keyboard(AsyncBase):
     def __init__(self, obj: KeyboardImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     async def down(self, key: str) -> NoneType:
         """Keyboard.down
@@ -860,6 +875,9 @@ class Mouse(AsyncBase):
     def __init__(self, obj: MouseImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     async def move(self, x: float, y: float, *, steps: int = None) -> NoneType:
         """Mouse.move
 
@@ -997,6 +1015,9 @@ class Touchscreen(AsyncBase):
     def __init__(self, obj: TouchscreenImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     async def tap(self, x: float, y: float) -> NoneType:
         """Touchscreen.tap
 
@@ -1019,6 +1040,9 @@ mapping.register(TouchscreenImpl, Touchscreen)
 class JSHandle(AsyncBase):
     def __init__(self, obj: JSHandleImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     async def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """JSHandle.evaluate
@@ -1189,6 +1213,9 @@ mapping.register(JSHandleImpl, JSHandle)
 class ElementHandle(JSHandle):
     def __init__(self, obj: ElementHandleImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
@@ -2390,6 +2417,9 @@ class Accessibility(AsyncBase):
     def __init__(self, obj: AccessibilityImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     async def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
     ) -> typing.Optional[typing.Dict]:
@@ -2453,6 +2483,9 @@ mapping.register(AccessibilityImpl, Accessibility)
 class FileChooser(AsyncBase):
     def __init__(self, obj: FileChooserImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def page(self) -> "Page":
@@ -2536,6 +2569,9 @@ mapping.register(FileChooserImpl, FileChooser)
 class Frame(AsyncBase):
     def __init__(self, obj: FrameImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def page(self) -> "Page":
@@ -4342,6 +4378,9 @@ class Worker(AsyncBase):
     def __init__(self, obj: WorkerImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     @property
     def url(self) -> str:
         """Worker.url
@@ -4429,6 +4468,9 @@ class Selectors(AsyncBase):
     def __init__(self, obj: SelectorsImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     async def register(
         self,
         name: str,
@@ -4477,6 +4519,9 @@ mapping.register(SelectorsImpl, Selectors)
 class ConsoleMessage(AsyncBase):
     def __init__(self, obj: ConsoleMessageImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def type(self) -> str:
@@ -4529,6 +4574,9 @@ mapping.register(ConsoleMessageImpl, ConsoleMessage)
 class Dialog(AsyncBase):
     def __init__(self, obj: DialogImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def type(self) -> str:
@@ -4600,6 +4648,9 @@ mapping.register(DialogImpl, Dialog)
 class Download(AsyncBase):
     def __init__(self, obj: DownloadImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def url(self) -> str:
@@ -4690,6 +4741,9 @@ class Video(AsyncBase):
     def __init__(self, obj: VideoImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     async def path(self) -> pathlib.Path:
         """Video.path
 
@@ -4712,6 +4766,9 @@ mapping.register(VideoImpl, Video)
 class Page(AsyncBase):
     def __init__(self, obj: PageImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def accessibility(self) -> "Accessibility":
@@ -7739,6 +7796,9 @@ class BrowserContext(AsyncBase):
     def __init__(self, obj: BrowserContextImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     @property
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
@@ -8413,6 +8473,9 @@ class CDPSession(AsyncBase):
     def __init__(self, obj: CDPSessionImpl):
         super().__init__(obj)
 
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
+
     async def send(self, method: str, params: typing.Dict = None) -> typing.Dict:
         """CDPSession.send
 
@@ -8453,6 +8516,9 @@ mapping.register(CDPSessionImpl, CDPSession)
 class ChromiumBrowserContext(BrowserContext):
     def __init__(self, obj: ChromiumBrowserContextImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def background_pages(self) -> typing.List["Page"]:
@@ -8507,6 +8573,9 @@ mapping.register(ChromiumBrowserContextImpl, ChromiumBrowserContext)
 class Browser(AsyncBase):
     def __init__(self, obj: BrowserImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def contexts(self) -> typing.List["BrowserContext"]:
@@ -8853,6 +8922,9 @@ mapping.register(BrowserImpl, Browser)
 class BrowserType(AsyncBase):
     def __init__(self, obj: BrowserTypeImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def name(self) -> str:
@@ -9225,6 +9297,9 @@ mapping.register(BrowserTypeImpl, BrowserType)
 class Playwright(AsyncBase):
     def __init__(self, obj: PlaywrightImpl):
         super().__init__(obj)
+
+    def __repr__(self) -> str:
+        return self._impl_obj.__repr__()
 
     @property
     def devices(self) -> typing.Dict:

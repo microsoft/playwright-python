@@ -48,6 +48,10 @@ def generate(t: Any) -> None:
     print("")
     print(f"    def __init__(self, obj: {class_name}Impl):")
     print("        super().__init__(obj)")
+    print("")
+    print("    def __repr__(self) -> str:")
+    print("        return self._impl_obj.__repr__()")
+    print("")
     for [name, type] in get_type_hints(t, api_globals).items():
         print("")
         print("    @property")
