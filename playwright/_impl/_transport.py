@@ -48,12 +48,13 @@ class Transport:
 
     async def wait_until_stopped(self) -> None:
         await self._stopped_future
+        await self._proc.wait()
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
         self._stopped_future: asyncio.Future = asyncio.Future()
 
-        proc = await asyncio.create_subprocess_exec(
+        self._proc = proc = await asyncio.create_subprocess_exec(
             str(self._driver_executable),
             "run-driver",
             stdin=asyncio.subprocess.PIPE,
