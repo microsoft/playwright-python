@@ -25,6 +25,7 @@ from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
+    BrowserChannel,
     ColorScheme,
     Env,
     locals_to_params,
@@ -52,7 +53,7 @@ class BrowserType(ChannelOwner):
     async def launch(
         self,
         executablePath: Union[str, Path] = None,
-        channel: str = None,
+        channel: BrowserChannel = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -80,7 +81,7 @@ class BrowserType(ChannelOwner):
     async def launch_persistent_context(
         self,
         userDataDir: Union[str, Path],
-        channel: str = None,
+        channel: BrowserChannel = None,
         executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
