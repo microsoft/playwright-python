@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: microsoft/playwright-github-action@v1
     - name: Set up Node.js
       uses: actions/setup-node@v1
       with:
@@ -21,8 +20,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
-    - name: Build package
-      run: python setup.py bdist_wheel
+        python setup.py bdist_wheel
+        python -m playwright install-deps
     - name: Publish package
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
