@@ -36,4 +36,9 @@ if sys.version_info.major == 3 and sys.version_info.minor == 7:
         # Prevent Python 3.7 from throwing on Linux:
         # RuntimeError: Cannot add child handler, the child watcher does not have a loop attached
         asyncio.get_event_loop()
-        asyncio.get_child_watcher()
+        try:
+            asyncio.get_child_watcher()
+        except Exception:
+            # uvloop does not support child watcher
+            # see https://github.com/microsoft/playwright-python/issues/582
+            pass
