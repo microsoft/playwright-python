@@ -25,6 +25,9 @@ class ConsoleMessage(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    def __repr__(self) -> str:
+        return f"<ConsoleMessage type={self.type} text={self.text}>"
+
     def __str__(self) -> str:
         return self.text
 

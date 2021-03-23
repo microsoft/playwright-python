@@ -14,17 +14,18 @@
 
 import asyncio
 import json
-from asyncio.futures import Future
+from asyncio import Future
 from typing import Dict, List, cast
 
 import pytest
 
-from playwright.async_api import Error, Page, Request, Response
+from playwright.async_api import Error, Page, Request, Response, Route
 
 
 async def test_request_fulfill(page, server):
-    async def handle_request(route, request):
+    async def handle_request(route: Route, request: Request):
         assert route.request == request
+        assert repr(route) == f"<Route request={route.request}>"
         assert "empty.html" in request.url
         assert request.headers["user-agent"]
         assert request.method == "GET"
@@ -33,6 +34,9 @@ async def test_request_fulfill(page, server):
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
+        assert (
+            repr(request) == f"<Request url={request.url!r} method={request.method!r}>"
+        )
         await route.fulfill(body="Text")
 
     await page.route(
@@ -41,7 +45,11 @@ async def test_request_fulfill(page, server):
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+
     assert response.ok
+    assert (
+        repr(response) == f"<Response url={response.url!r} request={response.request}>"
+    )
     assert await response.text() == "Text"
 
 

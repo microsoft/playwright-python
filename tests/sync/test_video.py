@@ -21,6 +21,7 @@ def test_should_expose_video_path(browser, tmpdir, server):
     )
     page.goto(server.PREFIX + "/grid.html")
     path = page.video.path()
+    assert repr(page.video) == f"<Video page={page}>"
     assert str(tmpdir) in str(path)
     page.context.close()
 

@@ -26,6 +26,9 @@ class Download(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    def __repr__(self) -> str:
+        return f"<Download url={self.url!r} suggested_filename={self.suggested_filename!r}>"
+
     @property
     def url(self) -> str:
         return self._initializer["url"]

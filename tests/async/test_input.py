@@ -76,6 +76,10 @@ async def test_should_emit_event(page: Page):
     await page.click("input")
     file_chooser = await fc_done
     assert file_chooser
+    assert (
+        repr(file_chooser)
+        == f"<FileChooser page={file_chooser.page} element={file_chooser.element}>"
+    )
 
 
 async def test_should_work_when_file_input_is_attached_to_dom(page: Page):

@@ -35,6 +35,9 @@ class FileChooser:
         self._element_handle = element_handle
         self._is_multiple = is_multiple
 
+    def __repr__(self) -> str:
+        return f"<FileChooser page={self._page} element={self._element_handle}>"
+
     @property
     def page(self) -> "Page":
         return self._page

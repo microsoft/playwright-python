@@ -16,7 +16,15 @@ import os
 
 import pytest
 
-from playwright.sync_api import Browser, Error, Page, TimeoutError, sync_playwright
+from playwright.sync_api import (
+    Browser,
+    BrowserContext,
+    Dialog,
+    Error,
+    Page,
+    TimeoutError,
+    sync_playwright,
+)
 
 
 def test_sync_query_selector(page):
@@ -29,6 +37,58 @@ def test_sync_query_selector(page):
         page.query_selector("#foo").inner_text()
         == page.query_selector("h1").inner_text()
     )
+
+
+def test_page_repr(page):
+    page.goto("https://example.com")
+    assert repr(page) == f"<Page url={page.url!r}>"
+
+
+def test_frame_repr(page: Page):
+    page.goto("https://example.com")
+    assert (
+        repr(page.main_frame)
+        == f"<Frame name={page.main_frame.name} url={page.main_frame.url!r}>"
+    )
+
+
+def test_browser_context_repr(context: BrowserContext):
+    assert repr(context) == f"<BrowserContext browser={context.browser}>"
+
+
+def test_browser_repr(browser: Browser):
+    assert (
+        repr(browser)
+        == f"<Browser type={browser._impl_obj._browser_type} version={browser.version}>"
+    )
+
+
+def test_browser_type_repr(browser: Browser):
+    browser_type = browser._impl_obj._browser_type
+    assert (
+        repr(browser_type)
+        == f"<BrowserType name={browser_type.name} executable_path={browser_type.executable_path}>"
+    )
+
+
+def test_dialog_repr(page: Page, server):
+    def on_dialog(dialog: Dialog):
+        dialog.accept()
+        assert (
+            repr(dialog)
+            == f"<Dialog type={dialog.type} message={dialog.message} default_value={dialog.default_value}>"
+        )
+
+    page.on("dialog", on_dialog)
+    page.evaluate("alert('yo')")
+
+
+def test_console_repr(page: Page, server):
+    messages = []
+    page.on("console", lambda m: messages.append(m))
+    page.evaluate('() => console.log("Hello world")')
+    message = messages[0]
+    assert repr(message) == f"<ConsoleMessage type={message.type} text={message.text}>"
 
 
 def test_sync_click(page):

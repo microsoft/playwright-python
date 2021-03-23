@@ -38,6 +38,9 @@ class BrowserType(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    def __repr__(self) -> str:
+        return f"<BrowserType name={self.name} executable_path={self.executable_path}>"
+
     @property
     def name(self) -> str:
         return self._initializer["name"]

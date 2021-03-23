@@ -16,12 +16,15 @@ import json
 import math
 from datetime import datetime
 
-from playwright.async_api import Error
+from playwright.async_api import Error, Page
 
 
-async def test_jshandle_evaluate_work(page):
+async def test_jshandle_evaluate_work(page: Page):
     window_handle = await page.evaluate_handle("window")
     assert window_handle
+    assert (
+        repr(window_handle) == f"<JSHandle preview={window_handle._impl_obj._preview}>"
+    )
 
 
 async def test_jshandle_evaluate_accept_object_handle_as_argument(page):

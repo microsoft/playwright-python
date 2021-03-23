@@ -51,6 +51,9 @@ class Browser(ChannelOwner):
         self._contexts: List[BrowserContext] = []
         self._channel.on("close", lambda _: self._on_close())
 
+    def __repr__(self) -> str:
+        return f"<Browser type={self._browser_type} version={self.version}>"
+
     def _on_close(self) -> None:
         self._is_connected = False
         self.emit(Browser.Events.Disconnected)

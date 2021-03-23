@@ -24,6 +24,9 @@ class Dialog(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    def __repr__(self) -> str:
+        return f"<Dialog type={self.type} message={self.message} default_value={self.default_value}>"
+
     @property
     def type(self) -> str:
         return self._initializer["type"]
