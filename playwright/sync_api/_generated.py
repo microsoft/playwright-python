@@ -8828,7 +8828,16 @@ class BrowserType(SyncBase):
         self,
         *,
         executable_path: typing.Union[str, pathlib.Path] = None,
-        channel: str = None,
+        channel: Literal[
+            "chrome",
+            "chrome-beta",
+            "chrome-dev",
+            "chrome-canary",
+            "msedge",
+            "msedge-beta",
+            "msedge-dev",
+            "msedge-canary",
+        ] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
         handle_sigint: bool = None,
@@ -8879,16 +8888,8 @@ class BrowserType(SyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union[str, NoneType]
-            Chromium distribution channel, one of
-            - chrome
-            - chrome-beta
-            - chrome-dev
-            - chrome-canary
-            - msedge
-            - msedge-beta
-            - msedge-dev
-            - msedge-canary
+        channel : Union["chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", "msedge-canary", NoneType]
+            Chromium distribution channel
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -8960,7 +8961,16 @@ class BrowserType(SyncBase):
         self,
         user_data_dir: typing.Union[str, pathlib.Path],
         *,
-        channel: str = None,
+        channel: Literal[
+            "chrome",
+            "chrome-beta",
+            "chrome-dev",
+            "chrome-canary",
+            "msedge",
+            "msedge-beta",
+            "msedge-dev",
+            "msedge-canary",
+        ] = None,
         executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
@@ -9012,16 +9022,8 @@ class BrowserType(SyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union[str, NoneType]
-            Chromium distribution channel, one of
-            - chrome
-            - chrome-beta
-            - chrome-dev
-            - chrome-canary
-            - msedge
-            - msedge-beta
-            - msedge-dev
-            - msedge-canary
+        channel : Union["chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", "msedge-canary", NoneType]
+            Chromium distribution channel
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
