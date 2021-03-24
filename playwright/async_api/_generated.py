@@ -92,8 +92,6 @@ class Request(AsyncBase):
         following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`,
         `websocket`, `manifest`, `other`.
 
-        > NOTE: The resource types are available as constants in [ResourceTypes].
-
         Returns
         -------
         str
@@ -8641,11 +8639,14 @@ class Browser(AsyncBase):
             option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example
             `launch({ proxy: { server: 'per-context' } })`.
         record_har_path : Union[pathlib.Path, str, NoneType]
-            Path on the filesystem to write the HAR file to.
+            Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
+            filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
+            be saved.
         record_har_omit_content : Union[bool, NoneType]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, NoneType]
-            Path to the directory to put videos into.
+            Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
+            to call `browser_context.close()` for videos to be saved.
         record_video_size : Union[{width: int, height: int}, NoneType]
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
@@ -8778,11 +8779,14 @@ class Browser(AsyncBase):
             option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example
             `launch({ proxy: { server: 'per-context' } })`.
         record_har_path : Union[pathlib.Path, str, NoneType]
-            Path on the filesystem to write the HAR file to.
+            Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
+            filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
+            be saved.
         record_har_omit_content : Union[bool, NoneType]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, NoneType]
-            Path to the directory to put videos into.
+            Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
+            to call `browser_context.close()` for videos to be saved.
         record_video_size : Union[{width: int, height: int}, NoneType]
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
@@ -8882,7 +8886,16 @@ class BrowserType(AsyncBase):
         self,
         *,
         executable_path: typing.Union[str, pathlib.Path] = None,
-        channel: str = None,
+        channel: Literal[
+            "chrome",
+            "chrome-beta",
+            "chrome-canary",
+            "chrome-dev",
+            "msedge",
+            "msedge-beta",
+            "msedge-canary",
+            "msedge-dev",
+        ] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
         handle_sigint: bool = None,
@@ -8933,16 +8946,8 @@ class BrowserType(AsyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union[str, NoneType]
-            Chromium distribution channel, one of
-            - chrome
-            - chrome-beta
-            - chrome-dev
-            - chrome-canary
-            - msedge
-            - msedge-beta
-            - msedge-dev
-            - msedge-canary
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+            Browser distribution channel.
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -9014,7 +9019,16 @@ class BrowserType(AsyncBase):
         self,
         user_data_dir: typing.Union[str, pathlib.Path],
         *,
-        channel: str = None,
+        channel: Literal[
+            "chrome",
+            "chrome-beta",
+            "chrome-canary",
+            "chrome-dev",
+            "msedge",
+            "msedge-beta",
+            "msedge-canary",
+            "msedge-dev",
+        ] = None,
         executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
@@ -9066,16 +9080,8 @@ class BrowserType(AsyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union[str, NoneType]
-            Chromium distribution channel, one of
-            - chrome
-            - chrome-beta
-            - chrome-dev
-            - chrome-canary
-            - msedge
-            - msedge-beta
-            - msedge-dev
-            - msedge-canary
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+            Browser distribution channel.
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
@@ -9157,11 +9163,14 @@ class BrowserType(AsyncBase):
         chromium_sandbox : Union[bool, NoneType]
             Enable Chromium sandboxing. Defaults to `true`.
         record_har_path : Union[pathlib.Path, str, NoneType]
-            Path on the filesystem to write the HAR file to.
+            Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
+            filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
+            be saved.
         record_har_omit_content : Union[bool, NoneType]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, NoneType]
-            Path to the directory to put videos into.
+            Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
+            to call `browser_context.close()` for videos to be saved.
         record_video_size : Union[{width: int, height: int}, NoneType]
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will

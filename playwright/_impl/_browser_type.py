@@ -31,6 +31,12 @@ from playwright._impl._helper import (
     not_installed_error,
 )
 
+import sys
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import Literal
+else:  # pragma: no cover
+    from typing_extensions import Literal
+
 
 class BrowserType(ChannelOwner):
     def __init__(
@@ -52,7 +58,7 @@ class BrowserType(ChannelOwner):
     async def launch(
         self,
         executablePath: Union[str, Path] = None,
-        channel: str = None,
+        channel: Literal["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev"] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -80,7 +86,7 @@ class BrowserType(ChannelOwner):
     async def launch_persistent_context(
         self,
         userDataDir: Union[str, Path],
-        channel: str = None,
+        channel: Literal["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev"] = None,
         executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
