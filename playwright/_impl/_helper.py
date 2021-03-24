@@ -52,6 +52,17 @@ DocumentLoadState = Literal["domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
 
+BrowserChannel = Literal[
+    "chrome",
+    "chrome-beta",
+    "chrome-canary",
+    "chrome-dev",
+    "msedge",
+    "msedge-beta",
+    "msedge-canary",
+    "msedge-dev",
+]
+
 
 class ErrorPayload(TypedDict, total=False):
     message: str
