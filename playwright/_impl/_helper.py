@@ -55,12 +55,12 @@ MouseButton = Literal["left", "middle", "right"]
 BrowserChannel = Literal[
     "chrome",
     "chrome-beta",
-    "chrome-dev",
     "chrome-canary",
+    "chrome-dev",
     "msedge",
     "msedge-beta",
-    "msedge-dev",
     "msedge-canary",
+    "msedge-dev",
 ]
 
 
