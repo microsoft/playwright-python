@@ -69,6 +69,7 @@ class ErrorPayload(TypedDict, total=False):
     name: str
     stack: str
     value: Any
+    error: Any
 
 
 class Header(TypedDict):

@@ -13,7 +13,7 @@
 # limitations under the License.
 import asyncio
 import os
-from asyncio.futures import Future
+from asyncio import Future
 from pathlib import Path
 from typing import Optional
 

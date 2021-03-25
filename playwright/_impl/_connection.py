@@ -222,7 +222,7 @@ class Connection:
             callback = self._callbacks.pop(id)
             error = msg.get("error")
             if error:
-                parsed_error = parse_error(error["error"])  # type: ignore
+                parsed_error = parse_error(error["error"])
                 parsed_error.stack = "".join(
                     traceback.format_list(callback.stack_trace)[-10:]
                 )

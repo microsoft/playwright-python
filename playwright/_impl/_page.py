@@ -837,11 +837,11 @@ class Page(ChannelOwner):
         matcher = None if callable(url_or_predicate) else URLMatcher(url_or_predicate)
         predicate = url_or_predicate if callable(url_or_predicate) else None
 
-        def my_predicate(request: Request) -> bool:
+        def my_predicate(request: Request) -> Union[bool, URLMatchRequest]:
             if matcher:
                 return matcher.matches(request.url)
             if predicate:
-                return url_or_predicate(request)
+                return url_or_predicate(request)  # type: ignore
             return True
 
         return self.expect_event(

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from asyncio.futures import Future
+from asyncio import Future
 
 import pytest
 
