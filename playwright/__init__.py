@@ -16,6 +16,4 @@
 Python package `playwright` is a Python library to automate Chromium,
 Firefox and WebKit with a single API. Playwright is built to enable cross-browser
 web automation that is ever-green, capable, reliable and fast.
-For more information you'll find the documentation for the sync API [here](sync_api.html)
-and for the async API [here](async_api.html).
 """

@@ -288,39 +288,3 @@ asyncio.run(main())
 ## Documentation
 
 Check out our [new documentation site](https://playwright.dev/python/docs/intro)!
-
-## Is Playwright ready?
-
-Yes, Playwright for Python is ready! The latest version of Playwright for
-Python is 1.8.0a. We are ready to drop the Alpha bit once we hear from you.
-Once it is gone, we will become semver compatible and the API will be
-frozen in its present form for years. We will still be adding features with
-every release, but we promise to not break it anymore!
-
-## Migration from the pre-release versions
-
-The API has changed since the last 0.170.0 version:
-
-- Snake case notation for methods and arguments:
-
-  ```py
-  # old
-  browser.newPage()
-  ```
-
-  ```py
-  # new
-  browser.new_page()
-  ```
-
-- Import has changed to include sync vs async mode explicitly:
-  ```py
-  # old
-  from playwright import sync_playwright
-  ```
-  ```py
-  # new
-  from playwright.sync_api import sync_playwright
-  ```
-
-That's about it! Our new [doc site](https://playwright.dev/python/docs/intro) uses proper notation and examples for the new API.
