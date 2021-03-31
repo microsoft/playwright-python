@@ -477,6 +477,14 @@ class Page(ChannelOwner):
     ) -> None:
         return await self._main_frame.wait_for_load_state(**locals_to_params(locals()))
 
+    async def wait_for_url(
+        self,
+        url: URLMatch,
+        wait_until: DocumentLoadState = None,
+        timeout: float = None,
+    ) -> None:
+        return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+
     async def wait_for_event(
         self, event: str, predicate: Callable = None, timeout: float = None
     ) -> Any:

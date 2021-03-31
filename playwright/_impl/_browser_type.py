@@ -96,6 +96,7 @@ class BrowserType(ChannelOwner):
         downloadsPath: Union[str, Path] = None,
         slowMo: float = None,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,

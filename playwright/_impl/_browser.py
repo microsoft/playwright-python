@@ -69,6 +69,7 @@ class Browser(ChannelOwner):
     async def new_context(
         self,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
@@ -107,6 +108,7 @@ class Browser(ChannelOwner):
     async def new_page(
         self,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,

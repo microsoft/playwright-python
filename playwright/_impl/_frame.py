@@ -181,6 +181,21 @@ class Frame(ChannelOwner):
 
         return EventContextManagerImpl(asyncio.create_task(continuation()))
 
+    async def wait_for_url(
+        self,
+        url: URLMatch,
+        wait_until: DocumentLoadState = None,
+        timeout: float = None,
+    ) -> None:
+        matcher = URLMatcher(url)
+        if matcher.matches(self.url):
+            await self.wait_for_load_state(state=wait_until, timeout=timeout)
+            return
+        async with self.expect_navigation(
+            url=url, wait_until=wait_until, timeout=timeout
+        ):
+            pass
+
     async def wait_for_load_state(
         self, state: DocumentLoadState = None, timeout: float = None
     ) -> None:

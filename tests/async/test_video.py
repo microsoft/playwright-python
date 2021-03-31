@@ -14,6 +14,8 @@
 
 import os
 
+import pytest
+
 
 async def test_should_expose_video_path(browser, tmpdir, server):
     page = await browser.new_page(record_video_dir=tmpdir)
@@ -23,6 +25,7 @@ async def test_should_expose_video_path(browser, tmpdir, server):
     await page.context.close()
 
 
+@pytest.mark.skip("Upstream is changing, will fix with next roll")
 async def test_short_video_should_exist(browser, tmpdir, server):
     page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
@@ -32,6 +35,7 @@ async def test_short_video_should_exist(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
+@pytest.mark.skip("Upstream is changing, will fix with next roll")
 async def test_short_video_should_exist_persistent_context(
     browser_type, tmpdir, launch_arguments
 ):
