@@ -47,6 +47,7 @@ class Browser(ChannelOwner):
         self._browser_type = parent
         self._is_connected = True
         self._is_closed_or_closing = False
+        self._is_remote = False
 
         self._contexts: List[BrowserContext] = []
         self._channel.on("close", lambda _: self._on_close())

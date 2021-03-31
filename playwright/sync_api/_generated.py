@@ -4670,7 +4670,7 @@ class Download(SyncBase):
         """Download.path
 
         Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
-        necessary.
+        necessary. The method throws when connected remotely via [`method: BrowserType.connect`].
 
         Returns
         -------
@@ -4708,7 +4708,7 @@ class Video(SyncBase):
         """Video.path
 
         Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
-        upon closing the browser context.
+        upon closing the browser context. This method throws when connected remotely via [`method: BrowserType.connect`].
 
         Returns
         -------
@@ -4716,6 +4716,32 @@ class Video(SyncBase):
         """
 
         return mapping.from_maybe_impl(self._sync("video.path", self._impl_obj.path()))
+
+    def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
+        """Video.save_as
+
+        Saves the video to a user-specified path. It is safe to call this method while the video is still in progress, or after
+        the page has closed. This method waits until the page is closed and the video is fully saved.
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str]
+            Path where the video should be saved.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("video.save_as", self._impl_obj.save_as(path=path))
+        )
+
+    def delete(self) -> NoneType:
+        """Video.delete
+
+        Deletes the video file. Will wait for the video to finish if necessary.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("video.delete", self._impl_obj.delete())
+        )
 
 
 mapping.register(VideoImpl, Video)

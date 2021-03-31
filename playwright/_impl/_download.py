@@ -14,38 +14,43 @@
 
 import pathlib
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
-from playwright._impl._connection import ChannelOwner
-from playwright._impl._helper import patch_error_message
+from playwright._impl._artifact import Artifact
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._page import Page
 
 
-class Download(ChannelOwner):
+class Download:
     def __init__(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+        self, page: "Page", url: str, suggested_filename: str, artifact: Artifact
     ) -> None:
-        super().__init__(parent, type, guid, initializer)
+        self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
+        self._url = url
+        self._suggested_filename = suggested_filename
+        self._artifact = artifact
 
     def __repr__(self) -> str:
         return f"<Download url={self.url!r} suggested_filename={self.suggested_filename!r}>"
 
     @property
     def url(self) -> str:
-        return self._initializer["url"]
+        return self._url
 
     @property
     def suggested_filename(self) -> str:
-        return self._initializer["suggestedFilename"]
+        return self._suggested_filename
 
     async def delete(self) -> None:
-        await self._channel.send("delete")
+        await self._artifact.delete()
 
     async def failure(self) -> Optional[str]:
-        return patch_error_message(await self._channel.send("failure"))
+        return await self._artifact.failure()
 
     async def path(self) -> Optional[pathlib.Path]:
-        return pathlib.Path(await self._channel.send("path"))
+        return await self._artifact.path_after_finished()
 
     async def save_as(self, path: Union[str, Path]) -> None:
-        path = str(Path(path))
-        return await self._channel.send("saveAs", dict(path=path))
+        await self._artifact.save_as(path)
