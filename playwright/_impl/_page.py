@@ -126,6 +126,7 @@ class Page(ChannelOwner):
         self._owned_context: Optional["BrowserContext"] = None
         self._timeout_settings: TimeoutSettings = TimeoutSettings(None)
         self._video: Optional[Video] = None
+        self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
 
         self._channel.on(
             "bindingCall",
@@ -167,10 +168,6 @@ class Page(ChannelOwner):
             lambda params: self.emit(
                 Page.Events.PageError, parse_error(params["error"]["error"])
             ),
-        )
-        self._channel.on(
-            "popup",
-            lambda params: self.emit(Page.Events.Popup, from_channel(params["page"])),
         )
         self._channel.on(
             "request",
@@ -316,7 +313,9 @@ class Page(ChannelOwner):
         return self._browser_context
 
     async def opener(self) -> Optional["Page"]:
-        return from_nullable_channel(await self._channel.send("opener"))
+        if self._opener and self._opener.is_closed():
+            return None
+        return self._opener
 
     @property
     def main_frame(self) -> Frame:

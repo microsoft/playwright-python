@@ -567,7 +567,6 @@ async def test_request_is_navigation_request_should_work(page, server):
     page.on("request", handle_request)
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
     await page.goto(server.PREFIX + "/rrredirect")
-    print("kek")
     assert requests.get("rrredirect").is_navigation_request()
     assert requests.get("one-frame.html").is_navigation_request()
     assert requests.get("frame.html").is_navigation_request()

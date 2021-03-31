@@ -36,6 +36,8 @@ async def test_short_video_should_throw(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
+# RELEASE BLOCKER: Temporary upstream issue https://github.com/microsoft/playwright-python/issues/608
+@pytest.mark.skip()
 async def test_short_video_should_throw_persistent_context(
     browser_type, tmpdir, launch_arguments
 ):

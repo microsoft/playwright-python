@@ -41,9 +41,6 @@ from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
-from playwright._impl._chromium_browser_context import (
-    ChromiumBrowserContext as ChromiumBrowserContextImpl,
-)
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._download import Download as DownloadImpl
@@ -4670,7 +4667,7 @@ class Download(SyncBase):
         """Download.path
 
         Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
-        necessary. The method throws when connected remotely via [`method: BrowserType.connect`].
+        necessary. The method throws when connected remotely.
 
         Returns
         -------
@@ -4708,7 +4705,7 @@ class Video(SyncBase):
         """Video.path
 
         Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
-        upon closing the browser context. This method throws when connected remotely via [`method: BrowserType.connect`].
+        upon closing the browser context. This method throws when connected remotely.
 
         Returns
         -------
@@ -7825,6 +7822,34 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_impl_nullable(self._impl_obj.browser)
 
+    @property
+    def background_pages(self) -> typing.List["Page"]:
+        """BrowserContext.background_pages
+
+        > NOTE: Background pages are only supported on Chromium-based browsers.
+
+        All existing background pages in the context.
+
+        Returns
+        -------
+        List[Page]
+        """
+        return mapping.from_impl_list(self._impl_obj.background_pages)
+
+    @property
+    def service_workers(self) -> typing.List["Worker"]:
+        """BrowserContext.service_workers
+
+        > NOTE: Service workers are only supported on Chromium-based browsers.
+
+        All existing service workers in the context.
+
+        Returns
+        -------
+        List[Worker]
+        """
+        return mapping.from_impl_list(self._impl_obj.service_workers)
+
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
         """BrowserContext.set_default_navigation_timeout
 
@@ -8461,6 +8486,30 @@ class BrowserContext(SyncBase):
             ).future,
         )
 
+    def new_cdp_session(self, page: "Page") -> "CDPSession":
+        """BrowserContext.new_cdp_session
+
+        > NOTE: CDP sessions are only supported on Chromium-based browsers.
+
+        Returns the newly created session.
+
+        Parameters
+        ----------
+        page : Page
+            Page to create new session for.
+
+        Returns
+        -------
+        CDPSession
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "browser_context.new_cdp_session",
+                self._impl_obj.new_cdp_session(page=page._impl_obj),
+            )
+        )
+
 
 mapping.register(BrowserContextImpl, BrowserContext)
 
@@ -8504,60 +8553,6 @@ class CDPSession(SyncBase):
 
 
 mapping.register(CDPSessionImpl, CDPSession)
-
-
-class ChromiumBrowserContext(BrowserContext):
-    def __init__(self, obj: ChromiumBrowserContextImpl):
-        super().__init__(obj)
-
-    @property
-    def background_pages(self) -> typing.List["Page"]:
-        """ChromiumBrowserContext.background_pages
-
-        All existing background pages in the context.
-
-        Returns
-        -------
-        List[Page]
-        """
-        return mapping.from_impl_list(self._impl_obj.background_pages)
-
-    @property
-    def service_workers(self) -> typing.List["Worker"]:
-        """ChromiumBrowserContext.service_workers
-
-        All existing service workers in the context.
-
-        Returns
-        -------
-        List[Worker]
-        """
-        return mapping.from_impl_list(self._impl_obj.service_workers)
-
-    def new_cdp_session(self, page: "Page") -> "CDPSession":
-        """ChromiumBrowserContext.new_cdp_session
-
-        Returns the newly created session.
-
-        Parameters
-        ----------
-        page : Page
-            Page to create new session for.
-
-        Returns
-        -------
-        CDPSession
-        """
-
-        return mapping.from_impl(
-            self._sync(
-                "chromium_browser_context.new_cdp_session",
-                self._impl_obj.new_cdp_session(page=page._impl_obj),
-            )
-        )
-
-
-mapping.register(ChromiumBrowserContextImpl, ChromiumBrowserContext)
 
 
 class Browser(SyncBase):
@@ -8918,6 +8913,86 @@ class Browser(SyncBase):
             self._sync("browser.close", self._impl_obj.close())
         )
 
+    def new_browser_cdp_session(self) -> "CDPSession":
+        """Browser.new_browser_cdp_session
+
+        > NOTE: CDP Sessions are only supported on Chromium-based browsers.
+
+        Returns the newly created browser session.
+
+        Returns
+        -------
+        CDPSession
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "browser.new_browser_cdp_session",
+                self._impl_obj.new_browser_cdp_session(),
+            )
+        )
+
+    def start_tracing(
+        self,
+        *,
+        page: "Page" = None,
+        path: typing.Union[str, pathlib.Path] = None,
+        screenshots: bool = None,
+        categories: typing.List[str] = None
+    ) -> NoneType:
+        """Browser.start_tracing
+
+        > NOTE: Tracing is only supported on Chromium-based browsers.
+
+        You can use `browser.start_tracing()` and `browser.stop_tracing()` to create a trace file that can be
+        opened in Chrome DevTools performance panel.
+
+        ```py
+        browser.start_tracing(page, path=\"trace.json\")
+        page.goto(\"https://www.google.com\")
+        browser.stop_tracing()
+        ```
+
+        Parameters
+        ----------
+        page : Union[Page, NoneType]
+            Optional, if specified, tracing includes screenshots of the given page.
+        path : Union[pathlib.Path, str, NoneType]
+            A path to write the trace file to.
+        screenshots : Union[bool, NoneType]
+            captures screenshots in the trace.
+        categories : Union[List[str], NoneType]
+            specify custom categories to use instead of default.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser.start_tracing",
+                self._impl_obj.start_tracing(
+                    page=page._impl_obj if page else None,
+                    path=path,
+                    screenshots=screenshots,
+                    categories=categories,
+                ),
+            )
+        )
+
+    def stop_tracing(self) -> bytes:
+        """Browser.stop_tracing
+
+        > NOTE: Tracing is only supported on Chromium-based browsers.
+
+        Returns the buffer with trace data.
+
+        Returns
+        -------
+        bytes
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("browser.stop_tracing", self._impl_obj.stop_tracing())
+        )
+
 
 mapping.register(BrowserImpl, Browser)
 
@@ -9016,7 +9091,7 @@ class BrowserType(SyncBase):
             or WebKit, use at your own risk.
         channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
-            [Google Chrome and Microsoft Edge](./browsers#google-chrome--microsoft-edge).
+            [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -9355,7 +9430,7 @@ class Playwright(SyncBase):
     def chromium(self) -> "BrowserType":
         """Playwright.chromium
 
-        This object can be used to launch or connect to Chromium, returning instances of `ChromiumBrowser`.
+        This object can be used to launch or connect to Chromium, returning instances of `Browser`.
 
         Returns
         -------
@@ -9367,7 +9442,7 @@ class Playwright(SyncBase):
     def firefox(self) -> "BrowserType":
         """Playwright.firefox
 
-        This object can be used to launch or connect to Firefox, returning instances of `FirefoxBrowser`.
+        This object can be used to launch or connect to Firefox, returning instances of `Browser`.
 
         Returns
         -------
@@ -9379,7 +9454,7 @@ class Playwright(SyncBase):
     def webkit(self) -> "BrowserType":
         """Playwright.webkit
 
-        This object can be used to launch or connect to WebKit, returning instances of `WebKitBrowser`.
+        This object can be used to launch or connect to WebKit, returning instances of `Browser`.
 
         Returns
         -------

@@ -30,7 +30,6 @@ from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._cdp_session import CDPSession
-from playwright._impl._chromium_browser_context import ChromiumBrowserContext
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._dialog import Dialog
 from playwright._impl._download import Download
@@ -148,6 +147,13 @@ def arguments(func: FunctionType, indent: int) -> str:
             and "_api_structures" not in value_str
         ):
             tokens.append(f"{name}={to_snake_case(name)}._impl_obj")
+        elif (
+            re.match(r"typing\.Optional\[playwright\._impl\.[\w]+\.[\w]+\]", value_str)
+            and "_api_structures" not in value_str
+        ):
+            tokens.append(
+                f"{name}={to_snake_case(name)}._impl_obj if {to_snake_case(name)} else None"
+            )
         else:
             tokens.append(f"{name}={to_snake_case(name)}")
     return split.join(tokens)
@@ -214,7 +220,6 @@ from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
-from playwright._impl._chromium_browser_context import ChromiumBrowserContext as ChromiumBrowserContextImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._download import Download as DownloadImpl
@@ -254,7 +259,6 @@ all_types = [
     Page,
     BrowserContext,
     CDPSession,
-    ChromiumBrowserContext,
     Browser,
     BrowserType,
     Playwright,
