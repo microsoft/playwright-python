@@ -815,7 +815,7 @@ class Keyboard(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         ```py
@@ -1368,8 +1368,8 @@ class ElementHandle(JSHandle):
     def dispatch_event(self, type: str, event_init: typing.Dict = None) -> NoneType:
         """ElementHandle.dispatch_event
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
-        is dispatched. This is equivalend to calling
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+        `click` is dispatched. This is equivalent to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
         ```py
@@ -1937,7 +1937,7 @@ class ElementHandle(JSHandle):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
@@ -2696,6 +2696,47 @@ class Frame(SyncBase):
             ).future,
         )
 
+    def wait_for_url(
+        self,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
+        *,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        timeout: float = None
+    ) -> NoneType:
+        """Frame.wait_for_url
+
+        Waits for the frame to navigate to the given URL.
+
+        ```py
+        frame.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        frame.wait_for_url(\"**/target.html\")
+        ```
+
+        Parameters
+        ----------
+        url : Union[Callable[[str], bool], Pattern, str]
+            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+            - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+            - `'load'` - consider operation to be finished when the `load` event is fired.
+            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+        timeout : Union[float, NoneType]
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
+            changed by using the `browser_context.set_default_navigation_timeout()`,
+            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
+            `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.wait_for_url",
+                self._impl_obj.wait_for_url(
+                    url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                ),
+            )
+        )
+
     def wait_for_load_state(
         self,
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
@@ -3151,8 +3192,8 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.dispatch_event
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
-        is dispatched. This is equivalend to calling
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+        `click` is dispatched. This is equivalent to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
         ```py
@@ -4071,7 +4112,7 @@ class Frame(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
@@ -4867,6 +4908,7 @@ class Page(SyncBase):
         - `page.reload()`
         - `page.set_content()`
         - `page.expect_navigation()`
+        - `page.wait_for_url()`
 
         > NOTE: `page.set_default_navigation_timeout()` takes priority over `page.set_default_timeout()`,
         `browser_context.set_default_timeout()` and `browser_context.set_default_navigation_timeout()`.
@@ -5180,8 +5222,8 @@ class Page(SyncBase):
     ) -> NoneType:
         """Page.dispatch_event
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
-        is dispatched. This is equivalend to calling
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+        `click` is dispatched. This is equivalent to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
         ```py
@@ -5866,6 +5908,49 @@ class Page(SyncBase):
             )
         )
 
+    def wait_for_url(
+        self,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
+        *,
+        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        timeout: float = None
+    ) -> NoneType:
+        """Page.wait_for_url
+
+        Waits for the main frame to navigate to the given URL.
+
+        ```py
+        page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        page.wait_for_url(\"**/target.html\")
+        ```
+
+        Shortcut for main frame's `frame.wait_for_url()`.
+
+        Parameters
+        ----------
+        url : Union[Callable[[str], bool], Pattern, str]
+            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+            When to consider operation succeeded, defaults to `load`. Events can be either:
+            - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
+            - `'load'` - consider operation to be finished when the `load` event is fired.
+            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+        timeout : Union[float, NoneType]
+            Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
+            changed by using the `browser_context.set_default_navigation_timeout()`,
+            `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
+            `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.wait_for_url",
+                self._impl_obj.wait_for_url(
+                    url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                ),
+            )
+        )
+
     def wait_for_event(
         self, event: str, predicate: typing.Callable = None, *, timeout: float = None
     ) -> typing.Any:
@@ -6124,7 +6209,7 @@ class Page(SyncBase):
 
         > NOTE: The handler will only be called for the first url if the response is a redirect.
 
-        An example of a naïve handler that aborts all image requests:
+        An example of a naive handler that aborts all image requests:
 
         ```py
         page = browser.new_page()
@@ -6144,6 +6229,8 @@ class Page(SyncBase):
 
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
         matches both handlers.
+
+        To remove a route with its handler you can use `page.unroute()`.
 
         > NOTE: Enabling routing disables http cache.
 
@@ -6207,9 +6294,6 @@ class Page(SyncBase):
         """Page.screenshot
 
         Returns the buffer with the captured screenshot.
-
-        > NOTE: Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
-        discussion.
 
         Parameters
         ----------
@@ -6960,7 +7044,7 @@ class Page(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When speficied with the
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
         modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         ```py
@@ -8135,7 +8219,7 @@ class BrowserContext(SyncBase):
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
         is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 
-        An example of a naïve handler that aborts all image requests:
+        An example of a naive handler that aborts all image requests:
 
         ```py
         context = browser.new_context()
@@ -8159,6 +8243,8 @@ class BrowserContext(SyncBase):
 
         Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
         handlers.
+
+        To remove a route with its handler you can use `browser_context.unroute()`.
 
         > NOTE: Enabling routing disables http cache.
 
@@ -8499,6 +8585,7 @@ class Browser(SyncBase):
         self,
         *,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -8541,6 +8628,9 @@ class Browser(SyncBase):
         ----------
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+        screen : Union[{width: int, height: int}, NoneType]
+            Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport`
+            is set.
         no_viewport : Union[bool, NoneType]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
@@ -8612,6 +8702,7 @@ class Browser(SyncBase):
                 "browser.new_context",
                 self._impl_obj.new_context(
                     viewport=viewport,
+                    screen=screen,
                     noViewport=no_viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
@@ -8644,6 +8735,7 @@ class Browser(SyncBase):
         self,
         *,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -8681,6 +8773,9 @@ class Browser(SyncBase):
         ----------
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+        screen : Union[{width: int, height: int}, NoneType]
+            Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport`
+            is set.
         no_viewport : Union[bool, NoneType]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
@@ -8752,6 +8847,7 @@ class Browser(SyncBase):
                 "browser.new_page",
                 self._impl_obj.new_page(
                     viewport=viewport,
+                    screen=screen,
                     noViewport=no_viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,
@@ -8893,7 +8989,8 @@ class BrowserType(SyncBase):
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
         channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
-            Browser distribution channel.
+            Browser distribution channel. Read more about using
+            [Google Chrome and Microsoft Edge](./browsers#google-chrome--microsoft-edge).
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -8989,6 +9086,7 @@ class BrowserType(SyncBase):
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         no_viewport: bool = None,
         ignore_https_errors: bool = None,
         java_script_enabled: bool = None,
@@ -9067,6 +9165,9 @@ class BrowserType(SyncBase):
             Defaults to 0.
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+        screen : Union[{width: int, height: int}, NoneType]
+            Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport`
+            is set.
         no_viewport : Union[bool, NoneType]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
@@ -9147,6 +9248,7 @@ class BrowserType(SyncBase):
                     downloadsPath=downloads_path,
                     slowMo=slow_mo,
                     viewport=viewport,
+                    screen=screen,
                     noViewport=no_viewport,
                     ignoreHTTPSErrors=ignore_https_errors,
                     javaScriptEnabled=java_script_enabled,

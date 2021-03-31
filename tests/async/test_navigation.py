@@ -440,9 +440,9 @@ async def test_wait_for_nav_should_work(page, server):
 
 async def test_wait_for_nav_should_respect_timeout(page, server):
     with pytest.raises(Error) as exc_info:
-        async with page.expect_navigation(url="**/frame.html", timeout=5000):
+        async with page.expect_navigation(url="**/frame.html", timeout=2500):
             await page.goto(server.EMPTY_PAGE)
-    assert "Timeout 5000ms exceeded" in exc_info.value.message
+    assert "Timeout 2500ms exceeded" in exc_info.value.message
 
 
 async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
@@ -866,9 +866,9 @@ async def test_frame_goto_should_continue_after_client_redirect(page, server):
     url = server.PREFIX + "/frames/child-redirect.html"
 
     with pytest.raises(Error) as exc_info:
-        await page.goto(url, timeout=5000, wait_until="networkidle")
+        await page.goto(url, timeout=2500, wait_until="networkidle")
 
-    assert "Timeout 5000ms exceeded." in exc_info.value.message
+    assert "Timeout 2500ms exceeded." in exc_info.value.message
     assert (
         f'navigating to "{url}", waiting until "networkidle"' in exc_info.value.message
     )
