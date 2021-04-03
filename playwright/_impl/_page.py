@@ -54,6 +54,7 @@ from playwright._impl._helper import (
     URLMatchResponse,
     is_safe_close_error,
     locals_to_params,
+    make_dirs_for_file,
     parse_error,
     serialize_error,
 )
@@ -142,12 +143,7 @@ class Page(ChannelOwner):
         self._channel.on(
             "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded)
         )
-        self._channel.on(
-            "download",
-            lambda params: self.emit(
-                Page.Events.Download, from_channel(params["download"])
-            ),
-        )
+        self._channel.on("download", lambda params: self._on_download(params))
         self._channel.on(
             "fileChooser",
             lambda params: self.emit(
@@ -208,12 +204,7 @@ class Page(ChannelOwner):
                 from_channel(params["route"]), from_channel(params["request"])
             ),
         )
-        self._channel.on(
-            "video",
-            lambda params: cast(Video, self.video)._set_relative_path(
-                params["relativePath"]
-            ),
-        )
+        self._channel.on("video", lambda params: self._on_video(params))
         self._channel.on(
             "webSocket",
             lambda params: self.emit(
@@ -293,6 +284,18 @@ class Page(ChannelOwner):
             self.emit(Page.Events.Dialog, dialog)
         else:
             asyncio.create_task(dialog.dismiss())
+
+    def _on_download(self, params: Any) -> None:
+        url = params["url"]
+        suggested_filename = params["suggestedFilename"]
+        artifact = from_channel(params["artifact"])
+        self.emit(
+            Page.Events.Download, Download(self, url, suggested_filename, artifact)
+        )
+
+    def _on_video(self, params: Any) -> None:
+        artifact = from_channel(params["artifact"])
+        cast(Video, self.video)._artifact_ready(artifact)
 
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
         if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
@@ -575,6 +578,7 @@ class Page(ChannelOwner):
         encoded_binary = await self._channel.send("screenshot", params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
+            make_dirs_for_file(path)
             with open(path, "wb") as fd:
                 fd.write(decoded_binary)
         return decoded_binary
@@ -765,6 +769,7 @@ class Page(ChannelOwner):
         encoded_binary = await self._channel.send("pdf", params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
+            make_dirs_for_file(path)
             with open(path, "wb") as fd:
                 fd.write(decoded_binary)
         return decoded_binary
@@ -773,13 +778,10 @@ class Page(ChannelOwner):
     def video(
         self,
     ) -> Optional[Video]:
-        context_options = self._browser_context._options
-        if "recordVideo" not in context_options:
+        if "recordVideo" not in self._browser_context._options:
             return None
         if not self._video:
             self._video = Video(self)
-            if "videoRelativePath" in self._initializer:
-                self._video._set_relative_path(self._initializer["videoRelativePath"])
         return self._video
 
     def expect_event(

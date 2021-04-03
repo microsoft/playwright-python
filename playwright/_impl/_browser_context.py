@@ -79,6 +79,7 @@ class BrowserContext(ChannelOwner):
         return f"<BrowserContext browser={self.browser}>"
 
     def _on_page(self, page: Page) -> None:
+        print("ON PAGE ARRIVED")
         page._set_browser_context(self)
         self._pages.append(page)
         self.emit(BrowserContext.Events.Page, page)

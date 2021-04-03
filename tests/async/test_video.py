@@ -16,6 +16,8 @@ import os
 
 import pytest
 
+from playwright.async_api import Error
+
 
 async def test_should_expose_video_path(browser, tmpdir, server):
     page = await browser.new_page(record_video_dir=tmpdir)
@@ -25,8 +27,7 @@ async def test_should_expose_video_path(browser, tmpdir, server):
     await page.context.close()
 
 
-@pytest.mark.skip("Upstream is changing, will fix with next roll")
-async def test_short_video_should_exist(browser, tmpdir, server):
+async def test_short_video_should_throw(browser, tmpdir, server):
     page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
     path = await page.video.path()
@@ -35,8 +36,7 @@ async def test_short_video_should_exist(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
-@pytest.mark.skip("Upstream is changing, will fix with next roll")
-async def test_short_video_should_exist_persistent_context(
+async def test_short_video_should_throw_persistent_context(
     browser_type, tmpdir, launch_arguments
 ):
     context = await browser_type.launch_persistent_context(
@@ -47,6 +47,6 @@ async def test_short_video_should_exist_persistent_context(
     )
     page = context.pages[0]
     await context.close()
-    path = await page.video.path()
-    assert str(tmpdir) in str(path)
-    assert os.path.exists(path)
+    with pytest.raises(Error) as exc_info:
+        await page.video.path()
+    assert "Page closed" in exc_info.value.message

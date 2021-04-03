@@ -580,6 +580,8 @@ async def test_page_route_should_support_cors_with_GET(page, server):
     assert "failed" in exc.value.message
 
 
+# RELEASE BLOCKER: Temporary upstream issue https://github.com/microsoft/playwright-python/issues/608
+@pytest.mark.skip_browser("chromium")
 async def test_page_route_should_support_cors_with_POST(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
@@ -607,6 +609,8 @@ async def test_page_route_should_support_cors_with_POST(page, server):
     assert resp == ["electric", "gas"]
 
 
+# RELEASE BLOCKER: Temporary upstream issue https://github.com/microsoft/playwright-python/issues/608
+@pytest.mark.skip_browser("chromium")
 async def test_page_route_should_support_cors_for_different_methods(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(

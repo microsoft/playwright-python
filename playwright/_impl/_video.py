@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import pathlib
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Union
+
+from playwright._impl._artifact import Artifact
+from playwright._impl._helper import Error
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._page import Page
@@ -25,22 +27,37 @@ class Video:
         self._loop = page._loop
         self._dispatcher_fiber = page._dispatcher_fiber
         self._page = page
-        self._path_future = page._loop.create_future()
-
-    async def path(self) -> pathlib.Path:
-        return await self._path_future
-
-    def _set_relative_path(self, relative_path: str) -> None:
-        self._path_future.set_result(
-            pathlib.Path(
-                os.path.join(
-                    cast(
-                        str, self._page._browser_context._options["recordVideo"]["dir"]
-                    ),
-                    relative_path,
-                )
-            )
-        )
+        self._artifact_future = page._loop.create_future()
+        if page.is_closed():
+            self._page_closed()
+        else:
+            page.on("close", lambda: self._page_closed())
 
     def __repr__(self) -> str:
         return f"<Video page={self._page}>"
+
+    def _page_closed(self) -> None:
+        if not self._artifact_future.done():
+            self._artifact_future.set_exception(Error("Page closed"))
+
+    def _artifact_ready(self, artifact: Artifact) -> None:
+        if not self._artifact_future.done():
+            self._artifact_future.set_result(artifact)
+
+    async def path(self) -> pathlib.Path:
+        artifact = await self._artifact_future
+        if not artifact:
+            raise Error("Page did not produce any video frames")
+        return artifact.absolute_path
+
+    async def save_as(self, path: Union[str, pathlib.Path]) -> None:
+        artifact = await self._artifact_future
+        if not artifact:
+            raise Error("Page did not produce any video frames")
+        await artifact.save_as(path)
+
+    async def delete(self) -> None:
+        artifact = await self._artifact_future
+        if not artifact:
+            raise Error("Page did not produce any video frames")
+        await artifact.delete()
