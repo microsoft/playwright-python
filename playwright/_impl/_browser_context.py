@@ -17,10 +17,11 @@ import inspect
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union, cast
 
 from playwright._impl._api_structures import Cookie, Geolocation, StorageState
 from playwright._impl._api_types import Error
+from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import (
@@ -33,7 +34,7 @@ from playwright._impl._helper import (
     locals_to_params,
 )
 from playwright._impl._network import Request, Route, serialize_headers
-from playwright._impl._page import BindingCall, Page
+from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -43,8 +44,10 @@ if TYPE_CHECKING:  # pragma: no cover
 class BrowserContext(ChannelOwner):
 
     Events = SimpleNamespace(
+        BackgroundPage="backgroundpage",
         Close="close",
         Page="page",
+        ServiceWorker="serviceworker",
     )
 
     def __init__(
@@ -59,6 +62,8 @@ class BrowserContext(ChannelOwner):
         self._owner_page: Optional[Page] = None
         self._is_closed_or_closing = False
         self._options: Dict[str, Any] = {}
+        self._background_pages: Set[Page] = set()
+        self._service_workers: Set[Worker] = set()
 
         self._channel.on(
             "bindingCall",
@@ -75,14 +80,25 @@ class BrowserContext(ChannelOwner):
             ),
         )
 
+        self._channel.on(
+            "backgroundPage",
+            lambda params: self._on_background_page(from_channel(params["page"])),
+        )
+
+        self._channel.on(
+            "serviceWorker",
+            lambda params: self._on_service_worker(from_channel(params["worker"])),
+        )
+
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
 
     def _on_page(self, page: Page) -> None:
-        print("ON PAGE ARRIVED")
         page._set_browser_context(self)
         self._pages.append(page)
         self.emit(BrowserContext.Events.Page, page)
+        if page._opener and not page._opener.is_closed():
+            page._opener.emit(Page.Events.Popup, page)
 
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
@@ -262,3 +278,25 @@ class BrowserContext(ChannelOwner):
         timeout: float = None,
     ) -> EventContextManagerImpl[Page]:
         return self.expect_event(BrowserContext.Events.Page, predicate, timeout)
+
+    def _on_background_page(self, page: Page) -> None:
+        self._background_pages.add(page)
+        self.emit(BrowserContext.Events.BackgroundPage, page)
+
+    def _on_service_worker(self, worker: Worker) -> None:
+        worker._context = self
+        self._service_workers.add(worker)
+        self.emit(BrowserContext.Events.ServiceWorker, worker)
+
+    @property
+    def background_pages(self) -> List[Page]:
+        return list(self._background_pages)
+
+    @property
+    def service_workers(self) -> List[Worker]:
+        return list(self._service_workers)
+
+    async def new_cdp_session(self, page: Page) -> CDPSession:
+        return from_channel(
+            await self._channel.send("newCDPSession", {"page": page._channel})
+        )

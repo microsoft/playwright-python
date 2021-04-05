@@ -59,7 +59,7 @@ async def test_close_should_run_beforeunload_if_asked_for(
     else:
         assert (
             dialog.message
-            == "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
+            == "This page is asking you to confirm that you want to leave — information you’ve entered may not be saved."
         )
     async with page.expect_event("close"):
         await dialog.accept()

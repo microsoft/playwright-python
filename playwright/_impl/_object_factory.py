@@ -19,7 +19,6 @@ from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._cdp_session import CDPSession
-from playwright._impl._chromium_browser_context import ChromiumBrowserContext
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._dialog import Dialog
@@ -52,13 +51,6 @@ def create_remote_object(
     if type == "BrowserType":
         return BrowserType(parent, type, guid, initializer)
     if type == "BrowserContext":
-        browser_name: str = ""
-        if isinstance(parent, Browser):
-            browser_name = parent._browser_type.name
-        if isinstance(parent, BrowserType):
-            browser_name = parent.name
-        if browser_name == "chromium":
-            return ChromiumBrowserContext(parent, type, guid, initializer)
         return BrowserContext(parent, type, guid, initializer)
     if type == "CDPSession":
         return CDPSession(parent, type, guid, initializer)
