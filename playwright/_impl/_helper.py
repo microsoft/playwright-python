@@ -14,10 +14,12 @@
 
 import fnmatch
 import math
+import os
 import re
 import sys
 import time
 import traceback
+from pathlib import Path
 from types import TracebackType
 from typing import (
     TYPE_CHECKING,
@@ -232,3 +234,9 @@ to_snake_case_regex = re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
 
 def to_snake_case(name: str) -> str:
     return to_snake_case_regex.sub(r"_\1", name).lower()
+
+
+def make_dirs_for_file(path: Union[Path, str]) -> None:
+    if not os.path.isabs(path):
+        path = Path.cwd() / path
+    os.makedirs(os.path.dirname(path), exist_ok=True)

@@ -14,15 +14,14 @@
 
 from typing import Any, Dict, cast
 
+from playwright._impl._artifact import Artifact
 from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._cdp_session import CDPSession
-from playwright._impl._chromium_browser_context import ChromiumBrowserContext
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._dialog import Dialog
-from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._frame import Frame
 from playwright._impl._js_handle import JSHandle
@@ -30,6 +29,7 @@ from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
+from playwright._impl._stream import Stream
 
 
 class DummyObject(ChannelOwner):
@@ -42,6 +42,8 @@ class DummyObject(ChannelOwner):
 def create_remote_object(
     parent: ChannelOwner, type: str, guid: str, initializer: Dict
 ) -> Any:
+    if type == "Artifact":
+        return Artifact(parent, type, guid, initializer)
     if type == "BindingCall":
         return BindingCall(parent, type, guid, initializer)
     if type == "Browser":
@@ -49,13 +51,6 @@ def create_remote_object(
     if type == "BrowserType":
         return BrowserType(parent, type, guid, initializer)
     if type == "BrowserContext":
-        browser_name: str = ""
-        if isinstance(parent, Browser):
-            browser_name = parent._browser_type.name
-        if isinstance(parent, BrowserType):
-            browser_name = parent.name
-        if browser_name == "chromium":
-            return ChromiumBrowserContext(parent, type, guid, initializer)
         return BrowserContext(parent, type, guid, initializer)
     if type == "CDPSession":
         return CDPSession(parent, type, guid, initializer)
@@ -63,8 +58,6 @@ def create_remote_object(
         return ConsoleMessage(parent, type, guid, initializer)
     if type == "Dialog":
         return Dialog(parent, type, guid, initializer)
-    if type == "Download":
-        return Download(parent, type, guid, initializer)
     if type == "ElementHandle":
         return ElementHandle(parent, type, guid, initializer)
     if type == "Frame":
@@ -81,6 +74,8 @@ def create_remote_object(
         return Response(parent, type, guid, initializer)
     if type == "Route":
         return Route(parent, type, guid, initializer)
+    if type == "Stream":
+        return Stream(parent, type, guid, initializer)
     if type == "WebSocket":
         return WebSocket(parent, type, guid, initializer)
     if type == "Worker":

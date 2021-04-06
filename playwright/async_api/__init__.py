@@ -28,7 +28,6 @@ from playwright.async_api._generated import (
     BrowserContext,
     BrowserType,
     CDPSession,
-    ChromiumBrowserContext,
     ConsoleMessage,
     Dialog,
     Download,
@@ -49,6 +48,8 @@ from playwright.async_api._generated import (
     WebSocket,
     Worker,
 )
+
+ChromiumBrowserContext = BrowserContext
 
 Cookie = playwright._impl._api_structures.Cookie
 FilePayload = playwright._impl._api_structures.FilePayload

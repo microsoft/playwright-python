@@ -96,6 +96,7 @@ class BrowserType(ChannelOwner):
         downloadsPath: Union[str, Path] = None,
         slowMo: float = None,
         viewport: ViewportSize = None,
+        screen: ViewportSize = None,
         noViewport: bool = None,
         ignoreHTTPSErrors: bool = None,
         javaScriptEnabled: bool = None,
@@ -137,7 +138,10 @@ class BrowserType(ChannelOwner):
 
 def normalize_launch_params(params: Dict) -> None:
     if "env" in params:
-        params["env"] = {name: str(value) for [name, value] in params["env"].items()}
+        params["env"] = [
+            {"name": name, "value": str(value)}
+            for [name, value] in params["env"].items()
+        ]
     if "ignoreDefaultArgs" in params:
         if params["ignoreDefaultArgs"] is True:
             params["ignoreAllDefaultArgs"] = True

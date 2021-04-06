@@ -20,7 +20,12 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, ca
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._file_chooser import normalize_file_payloads
-from playwright._impl._helper import KeyboardModifier, MouseButton, locals_to_params
+from playwright._impl._helper import (
+    KeyboardModifier,
+    MouseButton,
+    locals_to_params,
+    make_dirs_for_file,
+)
 from playwright._impl._js_handle import (
     JSHandle,
     Serializable,
@@ -221,6 +226,7 @@ class ElementHandle(JSHandle):
         encoded_binary = await self._channel.send("screenshot", params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
+            make_dirs_for_file(path)
             with open(path, "wb") as fd:
                 fd.write(decoded_binary)
         return decoded_binary

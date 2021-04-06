@@ -75,8 +75,8 @@ def test_should_wait_for_hidden_when_detached(page):
 def test_should_wait_for_enabled_button(page, server):
     page.set_content("<button id=button disabled><span>Target</span></button>")
     span = page.query_selector("text=Target")
-    page.evaluate("setTimeout(() => button.disabled = false, 250)")
     assert span.is_enabled() is False
+    page.evaluate("setTimeout(() => button.disabled = false, 250)")
     span.wait_for_element_state("enabled")
     assert span.is_enabled()
 
