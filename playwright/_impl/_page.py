@@ -712,6 +712,7 @@ class Page(ChannelOwner):
     async def check(
         self,
         selector: str,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -721,6 +722,7 @@ class Page(ChannelOwner):
     async def uncheck(
         self,
         selector: str,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,

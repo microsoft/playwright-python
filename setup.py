@@ -24,7 +24,7 @@ import setuptools
 from auditwheel.wheeltools import InWheel
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.11.0-next-1617404897000"
+driver_version = "1.11.0-next-1618513089000"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
