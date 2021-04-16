@@ -14,8 +14,6 @@
 
 import os
 
-import pytest
-
 
 def test_should_expose_video_path(browser, tmpdir, server):
     page = browser.new_page(
@@ -46,8 +44,6 @@ def test_record_video_to_path(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
-# RELEASE BLOCKER: Temporary upstream issue https://github.com/microsoft/playwright-python/issues/608
-@pytest.mark.skip()
 def test_record_video_to_path_persistent(
     browser_type, tmpdir, server, launch_arguments
 ):
