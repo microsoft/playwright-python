@@ -200,12 +200,20 @@ class ElementHandle(JSHandle):
         await self._channel.send("press", locals_to_params(locals()))
 
     async def check(
-        self, timeout: float = None, force: bool = None, noWaitAfter: bool = None
+        self,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("check", locals_to_params(locals()))
 
     async def uncheck(
-        self, timeout: float = None, force: bool = None, noWaitAfter: bool = None
+        self,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 

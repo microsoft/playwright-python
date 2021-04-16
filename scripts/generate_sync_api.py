@@ -15,6 +15,7 @@
 
 import inspect
 import re
+import sys
 from types import FunctionType
 from typing import Any, get_type_hints  # type: ignore
 
@@ -118,6 +119,8 @@ def generate(t: Any) -> None:
 
 
 def main() -> None:
+    assert sys.version_info >= (3, 9)
+
     print(header)
     print(
         "from playwright._impl._sync_base import EventContextManager, SyncBase, mapping"

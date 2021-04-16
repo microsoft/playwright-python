@@ -1452,10 +1452,10 @@ class ElementHandle(JSHandle):
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        If the element is detached from the DOM at any moment during the action, this method rejects.
+        If the element is detached from the DOM at any moment during the action, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
@@ -1503,10 +1503,10 @@ class ElementHandle(JSHandle):
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        If the element is detached from the DOM at any moment during the action, this method rejects.
+        If the element is detached from the DOM at any moment during the action, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
@@ -1569,12 +1569,12 @@ class ElementHandle(JSHandle):
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
-           first click of the `dblclick()` triggers a navigation event, this method will reject.
+           first click of the `dblclick()` triggers a navigation event, this method will throw.
 
-        If the element is detached from the DOM at any moment during the action, this method rejects.
+        If the element is detached from the DOM at any moment during the action, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         > NOTE: `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
@@ -1713,10 +1713,10 @@ class ElementHandle(JSHandle):
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        If the element is detached from the DOM at any moment during the action, this method rejects.
+        If the element is detached from the DOM at any moment during the action, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         > NOTE: `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
@@ -1962,26 +1962,34 @@ class ElementHandle(JSHandle):
         )
 
     def check(
-        self, *, timeout: float = None, force: bool = None, no_wait_after: bool = None
+        self,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.check
 
         This method checks the element by performing the following steps:
-        1. Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already
-           checked, this method returns immediately.
+        1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
+           this method returns immediately.
         1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-        1. Ensure that the element is now checked. If not, this method rejects.
+        1. Ensure that the element is now checked. If not, this method throws.
 
-        If the element is detached from the DOM at any moment during the action, this method rejects.
+        If the element is detached from the DOM at any moment during the action, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -1997,32 +2005,43 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.check",
                 self._impl_obj.check(
-                    timeout=timeout, force=force, noWaitAfter=no_wait_after
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
                 ),
             )
         )
 
     def uncheck(
-        self, *, timeout: float = None, force: bool = None, no_wait_after: bool = None
+        self,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None
     ) -> NoneType:
         """ElementHandle.uncheck
 
         This method checks the element by performing the following steps:
-        1. Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already
+        1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
         1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-        1. Ensure that the element is now unchecked. If not, this method rejects.
+        1. Ensure that the element is now unchecked. If not, this method throws.
 
-        If the element is detached from the DOM at any moment during the action, this method rejects.
+        If the element is detached from the DOM at any moment during the action, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -2038,7 +2057,10 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.uncheck",
                 self._impl_obj.uncheck(
-                    timeout=timeout, force=force, noWaitAfter=no_wait_after
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
                 ),
             )
         )
@@ -3487,15 +3509,15 @@ class Frame(SyncBase):
         """Frame.click
 
         This method clicks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
@@ -3559,16 +3581,16 @@ class Frame(SyncBase):
         """Frame.dblclick
 
         This method double clicks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
-           first click of the `dblclick()` triggers a navigation event, this method will reject.
+           first click of the `dblclick()` triggers a navigation event, this method will throw.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         > NOTE: `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
@@ -3629,15 +3651,15 @@ class Frame(SyncBase):
         """Frame.tap
 
         This method taps an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         > NOTE: `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
@@ -3871,15 +3893,15 @@ class Frame(SyncBase):
         """Frame.hover
 
         This method hovers over an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
@@ -4147,6 +4169,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         *,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None
@@ -4154,24 +4177,27 @@ class Frame(SyncBase):
         """Frame.check
 
         This method checks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            checked, this method returns immediately.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-        1. Ensure that the element is now checked. If not, this method rejects.
+        1. Ensure that the element is now checked. If not, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4188,6 +4214,7 @@ class Frame(SyncBase):
                 "frame.check",
                 self._impl_obj.check(
                     selector=selector,
+                    position=position,
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
@@ -4199,6 +4226,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         *,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None
@@ -4206,24 +4234,27 @@ class Frame(SyncBase):
         """Frame.uncheck
 
         This method checks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-        1. Ensure that the element is now unchecked. If not, this method rejects.
+        1. Ensure that the element is now unchecked. If not, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Parameters
         ----------
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4240,6 +4271,7 @@ class Frame(SyncBase):
                 "frame.uncheck",
                 self._impl_obj.uncheck(
                     selector=selector,
+                    position=position,
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
@@ -6426,15 +6458,15 @@ class Page(SyncBase):
         """Page.click
 
         This method clicks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Shortcut for main frame's `frame.click()`.
 
@@ -6500,16 +6532,16 @@ class Page(SyncBase):
         """Page.dblclick
 
         This method double clicks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
-           first click of the `dblclick()` triggers a navigation event, this method will reject.
+           first click of the `dblclick()` triggers a navigation event, this method will throw.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         > NOTE: `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 
@@ -6572,15 +6604,15 @@ class Page(SyncBase):
         """Page.tap
 
         This method taps an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         > NOTE: `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
 
@@ -6820,15 +6852,15 @@ class Page(SyncBase):
         """Page.hover
 
         This method hovers over an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Shortcut for main frame's `frame.hover()`.
 
@@ -7117,6 +7149,7 @@ class Page(SyncBase):
         self,
         selector: str,
         *,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None
@@ -7124,18 +7157,18 @@ class Page(SyncBase):
         """Page.check
 
         This method checks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            checked, this method returns immediately.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-        1. Ensure that the element is now checked. If not, this method rejects.
+        1. Ensure that the element is now checked. If not, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Shortcut for main frame's `frame.check()`.
 
@@ -7144,6 +7177,9 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7160,6 +7196,7 @@ class Page(SyncBase):
                 "page.check",
                 self._impl_obj.check(
                     selector=selector,
+                    position=position,
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
@@ -7171,6 +7208,7 @@ class Page(SyncBase):
         self,
         selector: str,
         *,
+        position: Position = None,
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None
@@ -7178,18 +7216,18 @@ class Page(SyncBase):
         """Page.uncheck
 
         This method unchecks an element matching `selector` by performing the following steps:
-        1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
         1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-        1. Ensure that the element is now unchecked. If not, this method rejects.
+        1. Ensure that the element is now unchecked. If not, this method throws.
 
-        When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-        Passing zero timeout disables this.
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
 
         Shortcut for main frame's `frame.uncheck()`.
 
@@ -7198,6 +7236,9 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7214,6 +7255,7 @@ class Page(SyncBase):
                 "page.uncheck",
                 self._impl_obj.uncheck(
                     selector=selector,
+                    position=position,
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
@@ -7504,7 +7546,7 @@ class Page(SyncBase):
     ) -> EventContextManager["ConsoleMessage"]:
         """Page.expect_console_message
 
-        Performs action and waits for a [ConoleMessage] to be logged by in the page. If predicate is provided, it passes
+        Performs action and waits for a `ConsoleMessage` to be logged by in the page. If predicate is provided, it passes
         `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to return a truthy value. Will
         throw an error if the page is closed before the console event is fired.
 
