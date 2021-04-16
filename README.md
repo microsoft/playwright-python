@@ -23,8 +23,6 @@ Headless execution is supported for all browsers on all platforms.
   - [Evaluate JS in browser](#evaluate-js-in-browser)
   - [Intercept network requests](#intercept-network-requests)
 - [Documentation](#documentation)
-- [Is Playwright ready?](#is-playwright-ready)
-- [Migration from the pre-release versions](#migration-from-the-pre-release-versions)
 
 ## Usage
 
