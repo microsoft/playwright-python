@@ -108,7 +108,7 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.method)
 
     @property
-    def post_data(self) -> typing.Union[str, NoneType]:
+    def post_data(self) -> typing.Optional[str]:
         """Request.post_data
 
         Request's post body, if any.
@@ -120,7 +120,7 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.post_data)
 
     @property
-    def post_data_json(self) -> typing.Union[typing.Any, NoneType]:
+    def post_data_json(self) -> typing.Optional[typing.Any]:
         """Request.post_data_json
 
         Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
@@ -135,7 +135,7 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.post_data_json)
 
     @property
-    def post_data_buffer(self) -> typing.Union[bytes, NoneType]:
+    def post_data_buffer(self) -> typing.Optional[bytes]:
         """Request.post_data_buffer
 
         Request's post body in a binary form, if any.
@@ -171,7 +171,7 @@ class Request(AsyncBase):
         return mapping.from_impl(self._impl_obj.frame)
 
     @property
-    def redirected_from(self) -> typing.Union["Request", NoneType]:
+    def redirected_from(self) -> typing.Optional["Request"]:
         """Request.redirected_from
 
         Request that was redirected by the server to this one, if any.
@@ -201,7 +201,7 @@ class Request(AsyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirected_from)
 
     @property
-    def redirected_to(self) -> typing.Union["Request", NoneType]:
+    def redirected_to(self) -> typing.Optional["Request"]:
         """Request.redirected_to
 
         New request issued by the browser if the server responded with redirect.
@@ -219,7 +219,7 @@ class Request(AsyncBase):
         return mapping.from_impl_nullable(self._impl_obj.redirected_to)
 
     @property
-    def failure(self) -> typing.Union[str, NoneType]:
+    def failure(self) -> typing.Optional[str]:
         """Request.failure
 
         The method returns `null` unless this request has failed, as reported by `requestfailed` event.
@@ -257,7 +257,7 @@ class Request(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.timing)
 
-    async def response(self) -> typing.Union["Response", NoneType]:
+    async def response(self) -> typing.Optional["Response"]:
         """Request.response
 
         Returns the matching `Response` object, or `null` if the response was not received due to error.
@@ -375,7 +375,7 @@ class Response(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.frame)
 
-    async def finished(self) -> typing.Union[str, NoneType]:
+    async def finished(self) -> typing.Optional[str]:
         """Response.finished
 
         Waits for this response to finish, returns failure error if request failed.
@@ -488,7 +488,7 @@ class Route(AsyncBase):
         self,
         *,
         status: int = None,
-        headers: typing.Union[typing.Dict[str, str]] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
         path: typing.Union[str, pathlib.Path] = None,
         content_type: str = None
@@ -545,7 +545,7 @@ class Route(AsyncBase):
         *,
         url: str = None,
         method: str = None,
-        headers: typing.Union[typing.Dict[str, str]] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
         post_data: typing.Union[str, bytes] = None
     ) -> NoneType:
         """Route.continue_
@@ -1138,7 +1138,7 @@ class JSHandle(AsyncBase):
             )
         )
 
-    def as_element(self) -> typing.Union["ElementHandle", NoneType]:
+    def as_element(self) -> typing.Optional["ElementHandle"]:
         """JSHandle.as_element
 
         Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
@@ -1185,7 +1185,7 @@ class ElementHandle(JSHandle):
     def __init__(self, obj: ElementHandleImpl):
         super().__init__(obj)
 
-    def as_element(self) -> typing.Union["ElementHandle", NoneType]:
+    def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
 
         Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
@@ -1197,7 +1197,7 @@ class ElementHandle(JSHandle):
 
         return mapping.from_impl_nullable(self._impl_obj.as_element())
 
-    async def owner_frame(self) -> typing.Union["Frame", NoneType]:
+    async def owner_frame(self) -> typing.Optional["Frame"]:
         """ElementHandle.owner_frame
 
         Returns the frame containing the given element.
@@ -1213,7 +1213,7 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def content_frame(self) -> typing.Union["Frame", NoneType]:
+    async def content_frame(self) -> typing.Optional["Frame"]:
         """ElementHandle.content_frame
 
         Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
@@ -1229,7 +1229,7 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def get_attribute(self, name: str) -> typing.Union[str, NoneType]:
+    async def get_attribute(self, name: str) -> typing.Optional[str]:
         """ElementHandle.get_attribute
 
         Returns element attribute value.
@@ -1250,7 +1250,7 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def text_content(self) -> typing.Union[str, NoneType]:
+    async def text_content(self) -> typing.Optional[str]:
         """ElementHandle.text_content
 
         Returns the `node.textContent`.
@@ -1459,7 +1459,7 @@ class ElementHandle(JSHandle):
     async def hover(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -1506,7 +1506,7 @@ class ElementHandle(JSHandle):
     async def click(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -1574,7 +1574,7 @@ class ElementHandle(JSHandle):
     async def dblclick(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -1708,7 +1708,7 @@ class ElementHandle(JSHandle):
     async def tap(
         self,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -2076,7 +2076,7 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def bounding_box(self) -> typing.Union[FloatRect, NoneType]:
+    async def bounding_box(self) -> typing.Optional[FloatRect]:
         """ElementHandle.bounding_box
 
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -2159,9 +2159,7 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def query_selector(
-        self, selector: str
-    ) -> typing.Union["ElementHandle", NoneType]:
+    async def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """ElementHandle.query_selector
 
         The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
@@ -2351,7 +2349,7 @@ class ElementHandle(JSHandle):
         *,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         timeout: float = None
-    ) -> typing.Union["ElementHandle", NoneType]:
+    ) -> typing.Optional["ElementHandle"]:
         """ElementHandle.wait_for_selector
 
         Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -2411,7 +2409,7 @@ class Accessibility(AsyncBase):
 
     async def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
-    ) -> typing.Union[typing.Dict, NoneType]:
+    ) -> typing.Optional[typing.Dict]:
         """Accessibility.snapshot
 
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
@@ -2597,7 +2595,7 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def parent_frame(self) -> typing.Union["Frame", NoneType]:
+    def parent_frame(self) -> typing.Optional["Frame"]:
         """Frame.parent_frame
 
         Parent frame, if any. Detached frames and main frames return `null`.
@@ -2625,7 +2623,7 @@ class Frame(AsyncBase):
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Frame.goto
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -2946,9 +2944,7 @@ class Frame(AsyncBase):
             )
         )
 
-    async def query_selector(
-        self, selector: str
-    ) -> typing.Union["ElementHandle", NoneType]:
+    async def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """Frame.query_selector
 
         Returns the ElementHandle pointing to the frame element.
@@ -3003,7 +2999,7 @@ class Frame(AsyncBase):
         *,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
-    ) -> typing.Union["ElementHandle", NoneType]:
+    ) -> typing.Optional["ElementHandle"]:
         """Frame.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -3517,7 +3513,7 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -3590,7 +3586,7 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -3662,7 +3658,7 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -3791,7 +3787,7 @@ class Frame(AsyncBase):
 
     async def text_content(
         self, selector: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Frame.text_content
 
         Returns `element.textContent`.
@@ -3871,7 +3867,7 @@ class Frame(AsyncBase):
 
     async def get_attribute(
         self, selector: str, name: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Frame.get_attribute
 
         Returns element attribute value.
@@ -3905,7 +3901,7 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -4710,7 +4706,7 @@ class Download(AsyncBase):
             await self._async("download.delete", self._impl_obj.delete())
         )
 
-    async def failure(self) -> typing.Union[str, NoneType]:
+    async def failure(self) -> typing.Optional[str]:
         """Download.failure
 
         Returns download error if any. Will wait for the download to finish if necessary.
@@ -4724,7 +4720,7 @@ class Download(AsyncBase):
             await self._async("download.failure", self._impl_obj.failure())
         )
 
-    async def path(self) -> typing.Union[pathlib.Path, NoneType]:
+    async def path(self) -> typing.Optional[pathlib.Path]:
         """Download.path
 
         Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
@@ -4900,7 +4896,7 @@ class Page(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
-    def viewport_size(self) -> typing.Union[ViewportSize, NoneType]:
+    def viewport_size(self) -> typing.Optional[ViewportSize]:
         """Page.viewport_size
 
         Returns
@@ -4925,7 +4921,7 @@ class Page(AsyncBase):
         return mapping.from_impl_list(self._impl_obj.workers)
 
     @property
-    def video(self) -> typing.Union["Video", NoneType]:
+    def video(self) -> typing.Optional["Video"]:
         """Page.video
 
         Video object associated with this page.
@@ -4936,7 +4932,7 @@ class Page(AsyncBase):
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
 
-    async def opener(self) -> typing.Union["Page", NoneType]:
+    async def opener(self) -> typing.Optional["Page"]:
         """Page.opener
 
         Returns the opener for popup pages and `null` for others. If the opener has been closed already the returns `null`.
@@ -4955,7 +4951,7 @@ class Page(AsyncBase):
         name: str = None,
         *,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None
-    ) -> typing.Union["Frame", NoneType]:
+    ) -> typing.Optional["Frame"]:
         """Page.frame
 
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
@@ -5026,9 +5022,7 @@ class Page(AsyncBase):
             self._impl_obj.set_default_timeout(timeout=timeout)
         )
 
-    async def query_selector(
-        self, selector: str
-    ) -> typing.Union["ElementHandle", NoneType]:
+    async def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """Page.query_selector
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
@@ -5083,7 +5077,7 @@ class Page(AsyncBase):
         *,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
-    ) -> typing.Union["ElementHandle", NoneType]:
+    ) -> typing.Optional["ElementHandle"]:
         """Page.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -5864,7 +5858,7 @@ class Page(AsyncBase):
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
         referer: str = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.goto
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -5925,7 +5919,7 @@ class Page(AsyncBase):
         *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.reload
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6092,7 +6086,7 @@ class Page(AsyncBase):
         *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.go_back
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6130,7 +6124,7 @@ class Page(AsyncBase):
         *,
         timeout: float = None,
         wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
-    ) -> typing.Union["Response", NoneType]:
+    ) -> typing.Optional["Response"]:
         """Page.go_forward
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -6491,7 +6485,7 @@ class Page(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -6566,7 +6560,7 @@ class Page(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -6640,7 +6634,7 @@ class Page(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -6775,7 +6769,7 @@ class Page(AsyncBase):
 
     async def text_content(
         self, selector: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Page.text_content
 
         Returns `element.textContent`.
@@ -6855,7 +6849,7 @@ class Page(AsyncBase):
 
     async def get_attribute(
         self, selector: str, name: str, *, timeout: float = None
-    ) -> typing.Union[str, NoneType]:
+    ) -> typing.Optional[str]:
         """Page.get_attribute
 
         Returns element attribute value.
@@ -6889,7 +6883,7 @@ class Page(AsyncBase):
         self,
         selector: str,
         *,
-        modifiers: typing.Union[
+        modifiers: typing.Optional[
             typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: Position = None,
@@ -7592,7 +7586,7 @@ class Page(AsyncBase):
 
     def expect_console_message(
         self,
-        predicate: typing.Union[typing.Callable[["ConsoleMessage"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
         *,
         timeout: float = None
     ) -> AsyncEventContextManager["ConsoleMessage"]:
@@ -7623,7 +7617,7 @@ class Page(AsyncBase):
 
     def expect_download(
         self,
-        predicate: typing.Union[typing.Callable[["Download"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
         *,
         timeout: float = None
     ) -> AsyncEventContextManager["Download"]:
@@ -7654,7 +7648,7 @@ class Page(AsyncBase):
 
     def expect_file_chooser(
         self,
-        predicate: typing.Union[typing.Callable[["FileChooser"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
         *,
         timeout: float = None
     ) -> AsyncEventContextManager["FileChooser"]:
@@ -7739,7 +7733,7 @@ class Page(AsyncBase):
 
     def expect_popup(
         self,
-        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
         timeout: float = None
     ) -> AsyncEventContextManager["Page"]:
@@ -7855,7 +7849,7 @@ class Page(AsyncBase):
 
     def expect_worker(
         self,
-        predicate: typing.Union[typing.Callable[["Worker"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
         *,
         timeout: float = None
     ) -> AsyncEventContextManager["Worker"]:
@@ -7905,7 +7899,7 @@ class BrowserContext(AsyncBase):
         return mapping.from_impl_list(self._impl_obj.pages)
 
     @property
-    def browser(self) -> typing.Union["Browser", NoneType]:
+    def browser(self) -> typing.Optional["Browser"]:
         """BrowserContext.browser
 
         Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
@@ -8559,7 +8553,7 @@ class BrowserContext(AsyncBase):
 
     def expect_page(
         self,
-        predicate: typing.Union[typing.Callable[["Page"], bool]] = None,
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
         timeout: float = None
     ) -> AsyncEventContextManager["Page"]:
@@ -8718,7 +8712,7 @@ class Browser(AsyncBase):
         timezone_id: str = None,
         geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
-        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
@@ -8868,7 +8862,7 @@ class Browser(AsyncBase):
         timezone_id: str = None,
         geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
-        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
@@ -9071,7 +9065,10 @@ class Browser(AsyncBase):
             await self._async(
                 "browser.start_tracing",
                 self._impl_obj.start_tracing(
-                    page=page, path=path, screenshots=screenshots, categories=categories
+                    page=page._impl_obj if page else None,
+                    path=path,
+                    screenshots=screenshots,
+                    categories=categories,
                 ),
             )
         )
@@ -9144,14 +9141,14 @@ class BrowserType(AsyncBase):
         handle_sigterm: bool = None,
         handle_sighup: bool = None,
         timeout: float = None,
-        env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
         chromium_sandbox: bool = None,
-        firefox_user_prefs: typing.Union[
+        firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None
     ) -> "Browser":
@@ -9279,7 +9276,7 @@ class BrowserType(AsyncBase):
         handle_sigterm: bool = None,
         handle_sighup: bool = None,
         timeout: float = None,
-        env: typing.Union[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: bool = None,
         devtools: bool = None,
         proxy: ProxySettings = None,
@@ -9296,7 +9293,7 @@ class BrowserType(AsyncBase):
         timezone_id: str = None,
         geolocation: Geolocation = None,
         permissions: typing.List[str] = None,
-        extra_http_headers: typing.Union[typing.Dict[str, str]] = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
         device_scale_factor: float = None,
