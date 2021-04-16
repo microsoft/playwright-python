@@ -1,4 +1,4 @@
-playwright/__pycache__/
+**/__pycache__/
 driver/
 playwright/driver/
 playwright.egg-info/
@@ -7,7 +7,7 @@ dist/
 **/*.pyc
 env/
 htmlcov/
-.coverage
+.coverage*
 .DS_Store
 .vscode/
 .eggs
