@@ -56,3 +56,16 @@ def test_record_video_to_path_persistent(
     assert str(tmpdir) in str(path)
     context.close()
     assert os.path.exists(path)
+
+
+def test_record_video_can_get_video_path_immediately(
+    browser_type, tmpdir, launch_arguments
+):
+    context = browser_type.launch_persistent_context(
+        tmpdir, **launch_arguments, record_video_dir=tmpdir
+    )
+    page = context.pages[0]
+    path = page.video.path()
+    assert str(tmpdir) in str(path)
+    context.close()
+    assert os.path.exists(path)

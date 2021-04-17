@@ -779,8 +779,6 @@ class Page(ChannelOwner):
     def video(
         self,
     ) -> Optional[Video]:
-        if "recordVideo" not in self._browser_context._options:
-            return None
         if not self._video:
             self._video = Video(self)
         return self._video
