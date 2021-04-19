@@ -26,14 +26,14 @@ T = TypeVar("T")
 
 
 class WaitHelper(Generic[T]):
-    def __init__(self, channel_owner: ChannelOwner, name: str) -> None:
+    def __init__(self, channel_owner: ChannelOwner, api_name: str) -> None:
         self._result: asyncio.Future = asyncio.Future()
         self._wait_id = uuid.uuid4().hex
         self._loop = channel_owner._loop
         self._pending_tasks: List[Task] = []
         self._channel_owner = channel_owner
         self._registered_listeners: List[Tuple[EventEmitter, str, Callable]] = []
-        channel_owner._wait_for_event_info_before(self._wait_id, name)
+        channel_owner._wait_for_event_info_before(self._wait_id, api_name)
 
     def reject_on_event(
         self,
