@@ -37,6 +37,15 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
 
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
+    user_options = BDistWheelCommand.user_options + [
+        ("all", "a", "create wheels for all platforms")
+    ]
+    boolean_options = BDistWheelCommand.boolean_options + ["all"]
+
+    def initialize_options(self) -> None:
+        super().initialize_options()
+        self.all = False
+
     def run(self) -> None:
         if os.path.exists("build"):
             shutil.rmtree("build")
@@ -47,7 +56,16 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
-        for platform in ["mac", "linux", "win32", "win32_x64"]:
+        platform_map = {
+            "darwin": "mac",
+            "linux": "linux",
+            "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
+        }
+        if self.all:
+            platforms = ["mac", "linux", "win32", "win32_x64"]
+        else:
+            platforms = [platform_map[sys.platform]]
+        for platform in platforms:
             zip_file = f"playwright-{driver_version}-{platform}.zip"
             if not os.path.exists("driver/" + zip_file):
                 url = "https://playwright.azureedge.net/builds/driver/"
@@ -56,14 +74,10 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 print("Fetching ", url)
                 # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
                 subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
-        base_wheel_location = glob.glob("dist/*.whl")[0]
+        base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
-        platform_map = {
-            "darwin": "mac",
-            "linux": "linux",
-            "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
-        }
-        for platform in ["mac", "linux", "win32", "win32_x64"]:
+
+        for platform in platforms:
             zip_file = f"driver/playwright-{driver_version}-{platform}.zip"
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{platform}")
@@ -88,7 +102,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
                         zip.write(from_path, f"playwright/driver/{to_path}")
-            if platform == "mac":
+            if platform == "mac" and self.all:
                 # Ship mac both as 10_13 as and 11_0 universal to work across Macs.
                 universal_location = without_platform + "macosx_11_0_universal2.whl"
                 shutil.copyfile(wheel_location, universal_location)
@@ -96,8 +110,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     zip.writestr("playwright/driver/README.md", "Universal Mac package")
 
         os.remove(base_wheel_location)
-        for whlfile in glob.glob("dist/*.whl"):
-
+        for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
             os.makedirs("wheelhouse", exist_ok=True)
             with InWheel(
                 in_wheel=whlfile,
@@ -105,9 +118,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 ret_self=True,
             ):
                 print("Updating RECORD file of %s" % whlfile)
-        shutil.rmtree("dist")
+        shutil.rmtree(self.dist_dir)
         print("Copying new wheels")
-        shutil.move("wheelhouse", "dist")
+        shutil.move("wheelhouse", self.dist_dir)
 
 
 setuptools.setup(
