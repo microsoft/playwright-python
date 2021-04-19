@@ -92,13 +92,13 @@ class ChannelOwner(AsyncIOEventEmitter):
         if self._parent:
             self._parent._objects[guid] = self
 
-    def _wait_for_event_info_before(self, wait_id: str, name: str) -> None:
+    def _wait_for_event_info_before(self, wait_id: str, api_name: str) -> None:
         self._connection._send_message_to_server(
             self._guid,
             "waitForEventInfo",
             {
                 "info": {
-                    "name": name,
+                    "apiName": api_name,
                     "waitId": wait_id,
                     "phase": "before",
                     "stack": capture_call_stack(),
