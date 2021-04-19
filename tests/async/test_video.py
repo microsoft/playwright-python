@@ -14,10 +14,6 @@
 
 import os
 
-import pytest
-
-from playwright.async_api import Error
-
 
 async def test_should_expose_video_path(browser, tmpdir, server):
     page = await browser.new_page(record_video_dir=tmpdir)
@@ -36,10 +32,8 @@ async def test_short_video_should_throw(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
-# RELEASE BLOCKER: Temporary upstream issue https://github.com/microsoft/playwright-python/issues/608
-@pytest.mark.skip()
 async def test_short_video_should_throw_persistent_context(
-    browser_type, tmpdir, launch_arguments
+    browser_type, tmpdir, launch_arguments, server
 ):
     context = await browser_type.launch_persistent_context(
         str(tmpdir),
@@ -48,7 +42,8 @@ async def test_short_video_should_throw_persistent_context(
         record_video_dir=str(tmpdir) + "1",
     )
     page = context.pages[0]
+    await page.goto(server.PREFIX + "/grid.html")
     await context.close()
-    with pytest.raises(Error) as exc_info:
-        await page.video.path()
-    assert "Page closed" in exc_info.value.message
+
+    path = await page.video.path()
+    assert str(tmpdir) in str(path)

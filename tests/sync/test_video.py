@@ -14,8 +14,6 @@
 
 import os
 
-import pytest
-
 
 def test_should_expose_video_path(browser, tmpdir, server):
     page = browser.new_page(
@@ -46,8 +44,6 @@ def test_record_video_to_path(browser, tmpdir, server):
     assert os.path.exists(path)
 
 
-# RELEASE BLOCKER: Temporary upstream issue https://github.com/microsoft/playwright-python/issues/608
-@pytest.mark.skip()
 def test_record_video_to_path_persistent(
     browser_type, tmpdir, server, launch_arguments
 ):
@@ -56,6 +52,19 @@ def test_record_video_to_path_persistent(
     )
     page = context.pages[0]
     page.goto(server.PREFIX + "/grid.html")
+    path = page.video.path()
+    assert str(tmpdir) in str(path)
+    context.close()
+    assert os.path.exists(path)
+
+
+def test_record_video_can_get_video_path_immediately(
+    browser_type, tmpdir, launch_arguments
+):
+    context = browser_type.launch_persistent_context(
+        tmpdir, **launch_arguments, record_video_dir=tmpdir
+    )
+    page = context.pages[0]
     path = page.video.path()
     assert str(tmpdir) in str(path)
     context.close()
