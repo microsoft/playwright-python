@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from asyncio import FIRST_COMPLETED, CancelledError, create_task, wait
+
 import pytest
+
+from playwright.async_api import Page
 
 
 @pytest.mark.only_browser("chromium")
@@ -30,3 +34,21 @@ async def test_issue_195(playwright, browser):
     iphone_11 = playwright.devices["iPhone 11"]
     context = await browser.new_context(**iphone_11)
     await context.close()
+
+
+async def test_connection_task_cancel(page: Page):
+    await page.set_content("<input />")
+    done, pending = await wait(
+        {
+            create_task(page.wait_for_selector("input")),
+            create_task(page.wait_for_selector("#will-never-resolve")),
+        },
+        return_when=FIRST_COMPLETED,
+    )
+    assert len(done) == 1
+    assert len(pending) == 1
+    for task in pending:
+        task.cancel()
+        with pytest.raises(CancelledError):
+            await task
+    assert list(pending)[0].cancelled()
