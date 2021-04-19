@@ -134,7 +134,7 @@ setuptools.setup(
     packages=["playwright"],
     include_package_data=True,
     install_requires=[
-        "greenlet==1.0.0",
+        "greenlet>=0.4",
         "pyee>=8.0.1",
         "typing-extensions;python_version<='3.8'",
     ],
