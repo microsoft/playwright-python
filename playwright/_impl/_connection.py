@@ -44,7 +44,12 @@ class Channel(AsyncIOEventEmitter):
         if params is None:
             params = {}
         callback = self._connection._send_message_to_server(self._guid, method, params)
-        result = await callback.future
+
+        done, pending = await asyncio.wait(
+            {callback.future, self._connection._transport.on_error_future},
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        result = next(iter(done)).result()
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:
@@ -143,10 +148,13 @@ class RootChannelOwner(ChannelOwner):
 
 class Connection:
     def __init__(
-        self, dispatcher_fiber: Any, object_factory: Any, driver_executable: Path
+        self,
+        dispatcher_fiber: Any,
+        object_factory: Callable[[ChannelOwner, str, str, Dict], Any],
+        transport: Transport,
     ) -> None:
-        self._dispatcher_fiber: Any = dispatcher_fiber
-        self._transport = Transport(driver_executable)
+        self._dispatcher_fiber = dispatcher_fiber
+        self._transport = transport
         self._transport.on_message = lambda msg: self._dispatch(msg)
         self._waiting_for_object: Dict[str, Any] = {}
         self._last_id = 0

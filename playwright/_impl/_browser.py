@@ -50,6 +50,7 @@ class Browser(ChannelOwner):
         self._is_connected = True
         self._is_closed_or_closing = False
         self._is_remote = False
+        self._is_connected_over_websocket = False
 
         self._contexts: List[BrowserContext] = []
         self._channel.on("close", lambda _: self._on_close())
@@ -59,7 +60,7 @@ class Browser(ChannelOwner):
 
     def _on_close(self) -> None:
         self._is_connected = False
-        self.emit(Browser.Events.Disconnected)
+        self.emit(Browser.Events.Disconnected, self)
         self._is_closed_or_closing = True
 
     @property
@@ -145,6 +146,10 @@ class Browser(ChannelOwner):
         return page
 
     async def close(self) -> None:
+        if self._is_connected_over_websocket:
+            await self._connection.stop_async()
+            self._notify_remote_closed()
+            return
         if self._is_closed_or_closing:
             return
         self._is_closed_or_closing = True
@@ -153,6 +158,14 @@ class Browser(ChannelOwner):
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
+
+    def _notify_remote_closed(self) -> None:
+        # Emulate all pages, contexts and the browser closing upon disconnect.
+        for context in self.contexts:
+            for page in context.pages:
+                page._on_close()
+            context._on_close()
+        self._on_close()
 
     @property
     def version(self) -> str:

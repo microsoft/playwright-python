@@ -14,6 +14,9 @@
 
 import asyncio
 import io
+import os
+import signal
+import subprocess
 import sys
 
 import pytest
@@ -21,6 +24,7 @@ from PIL import Image
 from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
+from playwright._impl._driver import compute_driver_executable
 from playwright._impl._path_utils import get_file_dirname
 
 from .server import test_server
@@ -48,7 +52,6 @@ def assetdir():
 
 @pytest.fixture(scope="session")
 def launch_arguments(pytestconfig):
-    print(pytestconfig.getoption("--browser-channel"))
     return {
         "headless": not pytestconfig.getoption("--headful"),
         "channel": pytestconfig.getoption("--browser-channel"),
@@ -201,3 +204,33 @@ def assert_to_be_golden(browser_name: str):
         assert diff_pixels == 0
 
     return compare
+
+
+class RemoteServer:
+    def __init__(self, browser_name: str) -> None:
+        self.process = subprocess.Popen(
+            [compute_driver_executable(), "launch-server", browser_name],
+            stdout=subprocess.PIPE,
+            preexec_fn=os.setsid,
+        )
+        assert self.process.stdout
+        self.ws_endpoint = self.process.stdout.readline().decode().strip()
+
+    def kill(self):
+        # Send the signal to all the process groups
+        os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+
+
+@pytest.fixture
+def launch_server(browser_name: str):
+    remotes = []
+
+    def _launch_server():
+        remote = RemoteServer(browser_name)
+        remotes.append(remote)
+        return remote
+
+    yield _launch_server
+
+    for remote in remotes:
+        remote.kill()
