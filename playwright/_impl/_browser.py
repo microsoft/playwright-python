@@ -28,7 +28,12 @@ from playwright._impl._api_structures import (
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._helper import ColorScheme, is_safe_close_error, locals_to_params
+from playwright._impl._helper import (
+    BrowserPermission,
+    ColorScheme,
+    is_safe_close_error,
+    locals_to_params,
+)
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
 
@@ -81,7 +86,7 @@ class Browser(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: List[BrowserPermission] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
@@ -120,7 +125,7 @@ class Browser(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: List[BrowserPermission] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,

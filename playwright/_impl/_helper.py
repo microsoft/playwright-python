@@ -64,6 +64,24 @@ BrowserChannel = Literal[
     "msedge-canary",
     "msedge-dev",
 ]
+BrowserPermission = Literal[
+    "geolocation",
+    "midi",
+    "midi-sysex",
+    "notifications",
+    "push",
+    "camera",
+    "microphone",
+    "background-sync",
+    "ambient-light-sensor",
+    "accelerometer",
+    "gyroscope",
+    "magnetometer",
+    "accessibility-events",
+    "clipboard-read",
+    "clipboard-write",
+    "payment-handler",
+]
 
 
 class ErrorPayload(TypedDict, total=False):

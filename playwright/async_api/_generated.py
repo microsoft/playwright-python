@@ -8053,7 +8053,29 @@ class BrowserContext(AsyncBase):
         )
 
     async def grant_permissions(
-        self, permissions: typing.List[str], *, origin: str = None
+        self,
+        permissions: typing.List[
+            Literal[
+                "geolocation",
+                "midi",
+                "midi-sysex",
+                "notifications",
+                "push",
+                "camera",
+                "microphone",
+                "background-sync",
+                "ambient-light-sensor",
+                "accelerometer",
+                "gyroscope",
+                "magnetometer",
+                "accessibility-events",
+                "clipboard-read",
+                "clipboard-write",
+                "payment-handler",
+            ]
+        ] = None,
+        *,
+        origin: str = None
     ) -> NoneType:
         """BrowserContext.grant_permissions
 
@@ -8062,7 +8084,7 @@ class BrowserContext(AsyncBase):
 
         Parameters
         ----------
-        permissions : List[str]
+        permissions : Union[List[Union["geolocation", "midi", "midi-sysex", "notifications", "push", "camera", "microphone", "background-sync", "ambient-light-sensor", "accelerometer", "gyroscope", "magnetometer", "accessibility-events", "clipboard-read", "clipboard-write", "payment-handler"]], NoneType]
             A permission or an array of permissions to grant. Permissions can be one of the following values:
             - `'geolocation'`
             - `'midi'`
@@ -8711,7 +8733,26 @@ class Browser(AsyncBase):
         locale: str = None,
         timezone_id: str = None,
         geolocation: Geolocation = None,
-        permissions: typing.List[str] = None,
+        permissions: typing.List[
+            Literal[
+                "geolocation",
+                "midi",
+                "midi-sysex",
+                "notifications",
+                "push",
+                "camera",
+                "microphone",
+                "background-sync",
+                "ambient-light-sensor",
+                "accelerometer",
+                "gyroscope",
+                "magnetometer",
+                "accessibility-events",
+                "clipboard-read",
+                "clipboard-write",
+                "payment-handler",
+            ]
+        ] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
@@ -8766,7 +8807,7 @@ class Browser(AsyncBase):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
-        permissions : Union[List[str], NoneType]
+        permissions : Union[List[Union["geolocation", "midi", "midi-sysex", "notifications", "push", "camera", "microphone", "background-sync", "ambient-light-sensor", "accelerometer", "gyroscope", "magnetometer", "accessibility-events", "clipboard-read", "clipboard-write", "payment-handler"]], NoneType]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
         extra_http_headers : Union[Dict[str, str], NoneType]
@@ -8861,7 +8902,26 @@ class Browser(AsyncBase):
         locale: str = None,
         timezone_id: str = None,
         geolocation: Geolocation = None,
-        permissions: typing.List[str] = None,
+        permissions: typing.List[
+            Literal[
+                "geolocation",
+                "midi",
+                "midi-sysex",
+                "notifications",
+                "push",
+                "camera",
+                "microphone",
+                "background-sync",
+                "ambient-light-sensor",
+                "accelerometer",
+                "gyroscope",
+                "magnetometer",
+                "accessibility-events",
+                "clipboard-read",
+                "clipboard-write",
+                "payment-handler",
+            ]
+        ] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
@@ -8911,7 +8971,7 @@ class Browser(AsyncBase):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
-        permissions : Union[List[str], NoneType]
+        permissions : Union[List[Union["geolocation", "midi", "midi-sysex", "notifications", "push", "camera", "microphone", "background-sync", "ambient-light-sensor", "accelerometer", "gyroscope", "magnetometer", "accessibility-events", "clipboard-read", "clipboard-write", "payment-handler"]], NoneType]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
         extra_http_headers : Union[Dict[str, str], NoneType]
@@ -9292,7 +9352,26 @@ class BrowserType(AsyncBase):
         locale: str = None,
         timezone_id: str = None,
         geolocation: Geolocation = None,
-        permissions: typing.List[str] = None,
+        permissions: typing.List[
+            Literal[
+                "geolocation",
+                "midi",
+                "midi-sysex",
+                "notifications",
+                "push",
+                "camera",
+                "microphone",
+                "background-sync",
+                "ambient-light-sensor",
+                "accelerometer",
+                "gyroscope",
+                "magnetometer",
+                "accessibility-events",
+                "clipboard-read",
+                "clipboard-write",
+                "payment-handler",
+            ]
+        ] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: bool = None,
         http_credentials: HttpCredentials = None,
@@ -9383,7 +9462,7 @@ class BrowserType(AsyncBase):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
-        permissions : Union[List[str], NoneType]
+        permissions : Union[List[Union["geolocation", "midi", "midi-sysex", "notifications", "push", "camera", "microphone", "background-sync", "ambient-light-sensor", "accelerometer", "gyroscope", "magnetometer", "accessibility-events", "clipboard-read", "clipboard-write", "payment-handler"]], NoneType]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
         extra_http_headers : Union[Dict[str, str], NoneType]

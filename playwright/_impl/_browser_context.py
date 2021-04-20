@@ -25,6 +25,7 @@ from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import (
+    BrowserPermission,
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
@@ -152,7 +153,7 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("clearCookies")
 
     async def grant_permissions(
-        self, permissions: List[str], origin: str = None
+        self, permissions: List[BrowserPermission], origin: str = None
     ) -> None:
         await self._channel.send("grantPermissions", locals_to_params(locals()))
 

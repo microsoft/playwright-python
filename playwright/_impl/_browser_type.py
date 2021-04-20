@@ -26,6 +26,7 @@ from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
     BrowserChannel,
+    BrowserPermission,
     ColorScheme,
     Env,
     locals_to_params,
@@ -105,7 +106,7 @@ class BrowserType(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: List[BrowserPermission] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
