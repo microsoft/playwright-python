@@ -61,25 +61,6 @@ async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
     assert "browser was not found" in exc.value.message
 
 
-@pytest.mark.skip()
-async def test_browser_type_launch_server_should_return_child_process_instance(
-    browser_type, launch_arguments
-):
-    browser_server = await browser_type.launchServer(**launch_arguments)
-    assert browser_server.pid > 0
-    await browser_server.close()
-
-
-@pytest.mark.skip()
-async def test_browser_type_launch_server_should_fire_close_event(
-    browser_type, launch_arguments
-):
-    browser_server = await browser_type.launchServer(**launch_arguments)
-    close_event = asyncio.Future()
-    browser_server.on("close", lambda: close_event.set_result(None))
-    await asyncio.gather(close_event, browser_server.close())
-
-
 async def test_browser_type_executable_path_should_work(browser_type, browser_channel):
     if browser_channel:
         return

@@ -55,7 +55,6 @@ def test_should_include_content(browser, server, tmpdir):
         log = data["log"]
 
         content1 = log["entries"][0]["response"]["content"]
-        print(content1)
         assert content1["encoding"] == "base64"
         assert content1["mimeType"] == "text/html"
         s = base64.b64decode(content1["text"]).decode()

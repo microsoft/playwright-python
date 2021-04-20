@@ -73,7 +73,6 @@ async def test_should_work_with_ip_port_notion(context_factory, server):
 
 async def test_should_authenticate(context_factory, server):
     def handler(req):
-        print(req)
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(
@@ -102,7 +101,6 @@ async def test_should_authenticate(context_factory, server):
 
 async def test_should_authenticate_with_empty_password(context_factory, server):
     def handler(req):
-        print(req)
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(
