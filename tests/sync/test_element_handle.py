@@ -182,7 +182,6 @@ def test_owner_frame_for_iframe_elements(page, server, utils):
     utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     frame = page.main_frame
     element_handle = frame.evaluate_handle('document.querySelector("#frame1")')
-    print(element_handle)
     assert element_handle.owner_frame() == frame
 
 
