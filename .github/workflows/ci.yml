@@ -33,13 +33,8 @@ jobs:
       uses: pre-commit/action@v2.0.0
     - name: Generate APIs
       run: bash scripts/update_api.sh
-    - name: Verify API is up to date
-      run: |
-        if [[ -n $(git status -s) ]]; then
-          echo "ERROR: generated code differ from the current sources:"
-          git diff
-          exit 1
-        fi
+    - name: Verify generated API is up to date
+      run: git diff --exit-code
   build:
     name: Build
     timeout-minutes: 30

@@ -14,6 +14,7 @@ function update_api {
         echo "Regenerated APIs"
     else
         echo "Exited due to errors"
+        exit 1
     fi
 }
 
