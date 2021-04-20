@@ -59,6 +59,7 @@ BrowserChannel = Literal[
     "chrome-beta",
     "chrome-canary",
     "chrome-dev",
+    "firefox-stable",
     "msedge",
     "msedge-beta",
     "msedge-canary",

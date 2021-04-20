@@ -784,6 +784,7 @@ class Keyboard(AsyncBase):
         ```
 
         > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
+        > NOTE: For characters that are not on a US keyboard, only an `input` event will be sent.
 
         Parameters
         ----------
@@ -6228,6 +6229,9 @@ class Page(AsyncBase):
     ) -> NoneType:
         """Page.emulate_media
 
+        This method changes the `CSS media type` through the `media` argument, and/or the `'prefers-colors-scheme'` media
+        feature, using the `colorScheme` argument.
+
         ```py
         await page.evaluate(\"matchMedia('screen').matches\")
         # → True
@@ -8907,9 +8911,11 @@ class Browser(AsyncBase):
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
-            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this
-            option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example
-            `launch({ proxy: { server: 'per-context' } })`.
+            Network proxy settings to use with this context.
+
+            > NOTE: For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If all
+            contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: {
+            server: 'http://per-context' } })`.
         record_har_path : Union[pathlib.Path, str, NoneType]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
             filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
@@ -9052,9 +9058,11 @@ class Browser(AsyncBase):
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
-            Network proxy settings to use with this context. Note that browser needs to be launched with the global proxy for this
-            option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example
-            `launch({ proxy: { server: 'per-context' } })`.
+            Network proxy settings to use with this context.
+
+            > NOTE: For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If all
+            contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: {
+            server: 'http://per-context' } })`.
         record_har_path : Union[pathlib.Path, str, NoneType]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
             filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
@@ -9249,6 +9257,7 @@ class BrowserType(AsyncBase):
             "chrome-beta",
             "chrome-canary",
             "chrome-dev",
+            "firefox-stable",
             "msedge",
             "msedge-beta",
             "msedge-canary",
@@ -9304,7 +9313,7 @@ class BrowserType(AsyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         args : Union[List[str], NoneType]
@@ -9383,6 +9392,7 @@ class BrowserType(AsyncBase):
             "chrome-beta",
             "chrome-canary",
             "chrome-dev",
+            "firefox-stable",
             "msedge",
             "msedge-beta",
             "msedge-canary",
@@ -9440,7 +9450,7 @@ class BrowserType(AsyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, NoneType]
