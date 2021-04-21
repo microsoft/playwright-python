@@ -20,7 +20,7 @@ from playwright.async_api import Error
 def test_should_wait_for_visible(page):
     page.set_content('<div id=div style="display:none">content</div>')
     div = page.query_selector("div")
-    page.evaluate('setTimeout(() => div.style.display = "block", 250)')
+    page.evaluate('setTimeout(() => div.style.display = "block", 1000)')
     assert div.is_visible() is False
     div.wait_for_element_state("visible")
     assert div.is_visible()
