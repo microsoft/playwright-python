@@ -13,18 +13,21 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import io
+import json
 import os
-import signal
 import subprocess
 import sys
+from pathlib import Path
+from typing import Dict, List
 
 import pytest
 from PIL import Image
 from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
-from playwright._impl._driver import compute_driver_executable
+import playwright
 from playwright._impl._path_utils import get_file_dirname
 
 from .server import test_server
@@ -207,26 +210,53 @@ def assert_to_be_golden(browser_name: str):
 
 
 class RemoteServer:
-    def __init__(self, browser_name: str) -> None:
-        self.process = subprocess.Popen(
-            [compute_driver_executable(), "launch-server", browser_name],
+    def __init__(
+        self, browser_name: str, launch_server_options: Dict, tmpfile: Path
+    ) -> None:
+        driver_dir = Path(inspect.getfile(playwright)).parent / "driver"
+        if sys.platform == "win32":
+            node_executable = driver_dir / "node.exe"
+        else:
+            node_executable = driver_dir / "node"
+        cli_js = driver_dir / "package" / "lib" / "cli" / "cli.js"
+        tmpfile.write_text(json.dumps(launch_server_options))
+        self.process = subprocess.Popen(  # type: ignore
+            [
+                str(node_executable),
+                str(cli_js),
+                "launch-server",
+                browser_name,
+                str(tmpfile),
+            ],
             stdout=subprocess.PIPE,
-            preexec_fn=os.setsid,
+            stderr=sys.stderr,
+            cwd=driver_dir,
         )
         assert self.process.stdout
         self.ws_endpoint = self.process.stdout.readline().decode().strip()
 
     def kill(self):
         # Send the signal to all the process groups
-        os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+        if sys.platform == "win32":
+            os.system(f"taskkill /F /PID {self.process.pid}")
+        else:
+            self.process.kill()
+        self.process.wait()
 
 
 @pytest.fixture
-def launch_server(browser_name: str):
-    remotes = []
+def launch_server(browser_name: str, launch_arguments: Dict, tmp_path: Path):
+    remotes: List[RemoteServer] = []
 
-    def _launch_server():
-        remote = RemoteServer(browser_name)
+    def _launch_server(override_launch_options: Dict = {}):
+        remote = RemoteServer(
+            browser_name,
+            {
+                **launch_arguments,
+                **override_launch_options,
+            },
+            tmp_path / f"settings-{len(remotes)}.json",
+        )
         remotes.append(remote)
         return remote
 

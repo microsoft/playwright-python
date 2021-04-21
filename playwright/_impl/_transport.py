@@ -49,13 +49,16 @@ class Transport(ABC):
     def stop(self) -> None:
         pass
 
+    def cleanup(self) -> None:
+        pass
+
     @abstractmethod
     async def wait_until_stopped(self) -> None:
         pass
 
-    @abstractmethod
     async def run(self) -> None:
-        pass
+        self._loop = asyncio.get_running_loop()
+        self.on_error_future: asyncio.Future[bool] = asyncio.Future()
 
     @abstractmethod
     def send(self, message: Dict) -> None:
@@ -91,7 +94,7 @@ class PipeTransport(Transport):
         await self._proc.wait()
 
     async def run(self) -> None:
-        self._loop = asyncio.get_running_loop()
+        await super().run()
         self._stopped_future: asyncio.Future = asyncio.Future()
 
         self._proc = proc = await asyncio.create_subprocess_exec(
@@ -148,11 +151,14 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         self._stopped = True
         self._loop.create_task(self._connection.close())
 
+    def cleanup(self) -> None:
+        self.on_error_future.cancel()
+
     async def wait_until_stopped(self) -> None:
         await self._connection.wait_closed()
 
     async def run(self) -> None:
-        self._loop = asyncio.get_running_loop()
+        await super().run()
 
         options = {}
         if self.timeout is not None:
@@ -166,7 +172,8 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
                 obj = self.deserialize_message(message)
                 self.on_message(obj)
             except websockets.exceptions.ConnectionClosed:
-                self.emit("close")
+                if not self._stopped:
+                    self.emit("close")
                 self.on_error_future.set_exception(
                     Error("Playwright connection closed")
                 )
@@ -180,6 +187,6 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         data = self.serialize_message(message)
         self._loop.create_task(self._connection.send(data))
 
-    def test_if_closed(self):
+    def test_if_closed(self) -> None:
         if self._stopped or self._connection.closed:
             raise Error("Playwright connection closed")

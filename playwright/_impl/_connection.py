@@ -163,6 +163,7 @@ class Connection:
         self._object_factory = object_factory
         self._is_sync = False
         self._api_name = ""
+        self._child_ws_connections: List["Connection"] = []
 
     async def run_as_sync(self) -> None:
         self._is_sync = True
@@ -176,10 +177,16 @@ class Connection:
     def stop_sync(self) -> None:
         self._transport.stop()
         self._dispatcher_fiber.switch()
+        self.cleanup()
 
     async def stop_async(self) -> None:
         self._transport.stop()
         await self._transport.wait_until_stopped()
+        self.cleanup()
+
+    def cleanup(self) -> None:
+        for ws_connection in self._child_ws_connections:
+            ws_connection._transport.cleanup()
 
     async def wait_for_object_with_known_name(self, guid: str) -> Any:
         if guid in self._objects:

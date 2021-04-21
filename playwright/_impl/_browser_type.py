@@ -161,9 +161,14 @@ class BrowserType(ChannelOwner):
     ) -> Browser:
         transport = WebSocketTransport(ws_endpoint, timeout)
 
-        connection = Connection(None, self._connection._object_factory, transport)
+        connection = Connection(
+            self._connection._dispatcher_fiber,
+            self._connection._object_factory,
+            transport,
+        )
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
+        self._connection._child_ws_connections.append(connection)
         playwright = await connection.wait_for_object_with_known_name("Playwright")
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
@@ -171,7 +176,15 @@ class BrowserType(ChannelOwner):
         browser._is_remote = True
         browser._is_connected_over_websocket = True
 
-        transport.on("close", browser._on_close)
+        def handle_transport_close() -> None:
+            browser._on_close()
+
+        transport.on("close", handle_transport_close)
+
+        browser.once(
+            Browser.Events.Disconnected,
+            lambda b: transport.remove_listener("close", handle_transport_close),
+        )
 
         return browser
 
