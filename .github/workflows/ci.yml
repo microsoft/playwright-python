@@ -82,8 +82,6 @@ jobs:
         python -m playwright install-deps
     - name: Install browsers
       run: python -m playwright install
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
     - name: Common Tests
       run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
     - name: Test Reference count

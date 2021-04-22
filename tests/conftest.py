@@ -16,7 +16,6 @@ import asyncio
 import inspect
 import io
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -237,8 +236,10 @@ class RemoteServer:
 
     def kill(self):
         # Send the signal to all the process groups
+        if self.process.poll() is not None:
+            return
         if sys.platform == "win32":
-            os.system(f"taskkill /F /PID {self.process.pid}")
+            subprocess.check_call(["taskkill", "/F", "/PID", str(self.process.pid)])
         else:
             self.process.kill()
         self.process.wait()

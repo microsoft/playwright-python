@@ -64,7 +64,7 @@ class Transport(ABC):
     def send(self, message: Dict) -> None:
         pass
 
-    def serialize_message(self, message: Dict) -> Any:
+    def serialize_message(self, message: Dict) -> bytes:
         msg = json.dumps(message)
         if "DEBUGP" in os.environ:  # pragma: no cover
             print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
@@ -183,10 +183,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
                 self.on_error_future.set_exception(exc)
 
     def send(self, message: Dict) -> None:
-        self.test_if_closed()
-        data = self.serialize_message(message)
-        self._loop.create_task(self._connection.send(data))
-
-    def test_if_closed(self) -> None:
         if self._stopped or self._connection.closed:
             raise Error("Playwright connection closed")
+        data = self.serialize_message(message)
+        self._loop.create_task(self._connection.send(data))

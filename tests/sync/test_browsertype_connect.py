@@ -126,7 +126,6 @@ def test_browser_type_connect_should_throw_when_used_after_is_connected_returns_
     assert browser.is_connected() is False
 
 
-@pytest.mark.skip
 def test_browser_type_connect_should_reject_navigation_when_browser_closes(
     server: Server, browser_type: BrowserType, launch_server
 ):
