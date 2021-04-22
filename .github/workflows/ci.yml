@@ -107,6 +107,9 @@ jobs:
       with:
         name: ${{ matrix.browser }}-${{ matrix.os }}-${{ matrix.python-version }}
         path: pw-log.txt
+    - if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 45
 
   test-stable:
     name: Stable

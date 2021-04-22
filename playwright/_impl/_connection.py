@@ -46,7 +46,7 @@ class Channel(AsyncIOEventEmitter):
         callback = self._connection._send_message_to_server(self._guid, method, params)
 
         done, pending = await asyncio.wait(
-            {callback.future, self._connection._transport.on_error_future},
+            {self._connection._transport.on_error_future, callback.future},
             return_when=asyncio.FIRST_COMPLETED,
         )
         result = next(iter(done)).result()
