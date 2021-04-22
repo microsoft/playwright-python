@@ -49,6 +49,8 @@ class Channel(AsyncIOEventEmitter):
             {self._connection._transport.on_error_future, callback.future},
             return_when=asyncio.FIRST_COMPLETED,
         )
+        if not callback.future.done():
+            callback.future.cancel()
         result = next(iter(done)).result()
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
