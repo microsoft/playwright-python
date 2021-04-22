@@ -169,6 +169,11 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         while not self._stopped:
             try:
                 message = await self._connection.recv()
+                if self._stopped:
+                    self.on_error_future.set_exception(
+                        Error("Playwright connection closed")
+                    )
+                    break
                 obj = self.deserialize_message(message)
                 self.on_message(obj)
             except websockets.exceptions.ConnectionClosed:
