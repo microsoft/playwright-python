@@ -46,10 +46,10 @@ class Transport(ABC):
         self.on_error_future: asyncio.Future = asyncio.Future()
 
     @abstractmethod
-    def stop(self) -> None:
+    def request_stop(self) -> None:
         pass
 
-    def cleanup(self) -> None:
+    def dispose(self) -> None:
         pass
 
     @abstractmethod
@@ -58,7 +58,7 @@ class Transport(ABC):
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
-        self.on_error_future: asyncio.Future[bool] = asyncio.Future()
+        self.on_error_future: asyncio.Future = asyncio.Future()
 
     @abstractmethod
     def send(self, message: Dict) -> None:
@@ -85,7 +85,7 @@ class PipeTransport(Transport):
         self._driver_executable = driver_executable
         self._loop: asyncio.AbstractEventLoop
 
-    def stop(self) -> None:
+    def request_stop(self) -> None:
         self._stopped = True
         self._output.close()
 
@@ -147,11 +147,11 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         self.timeout = timeout
         self._loop: asyncio.AbstractEventLoop
 
-    def stop(self) -> None:
+    def request_stop(self) -> None:
         self._stopped = True
         self._loop.create_task(self._connection.close())
 
-    def cleanup(self) -> None:
+    def dispose(self) -> None:
         self.on_error_future.cancel()
 
     async def wait_until_stopped(self) -> None:

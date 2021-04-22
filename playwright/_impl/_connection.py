@@ -177,18 +177,18 @@ class Connection:
         await self._transport.run()
 
     def stop_sync(self) -> None:
-        self._transport.stop()
+        self._transport.request_stop()
         self._dispatcher_fiber.switch()
         self.cleanup()
 
     async def stop_async(self) -> None:
-        self._transport.stop()
+        self._transport.request_stop()
         await self._transport.wait_until_stopped()
         self.cleanup()
 
     def cleanup(self) -> None:
         for ws_connection in self._child_ws_connections:
-            ws_connection._transport.cleanup()
+            ws_connection._transport.dispose()
 
     async def wait_for_object_with_known_name(self, guid: str) -> Any:
         if guid in self._objects:

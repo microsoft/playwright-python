@@ -180,12 +180,7 @@ class BrowserType(ChannelOwner):
         def handle_transport_close() -> None:
             browser._on_close()
 
-        transport.on("close", handle_transport_close)
-
-        browser.once(
-            Browser.Events.Disconnected,
-            lambda b: transport.remove_listener("close", handle_transport_close),
-        )
+        transport.once("close", handle_transport_close)
 
         return browser
 
