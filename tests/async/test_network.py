@@ -123,6 +123,7 @@ async def test_page_events_request_should_report_requests_and_responses_handled_
     assert sw_response == "responseFromServiceWorker:foo"
     assert request.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
     response = await request.response()
+    assert response
     assert response.url == server.PREFIX + "/serviceworkers/fetchdummy/foo"
     assert await response.text() == "responseFromServiceWorker:foo"
 

@@ -14,7 +14,7 @@
 
 import base64
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 from playwright._impl._connection import ChannelOwner
 
@@ -25,7 +25,7 @@ class Stream(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
-    async def save_as(self, path: Path) -> None:
+    async def save_as(self, path: Union[str, Path]) -> None:
         with open(path, mode="wb") as file:
             while True:
                 binary = await self._channel.send("read")

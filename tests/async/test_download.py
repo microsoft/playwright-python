@@ -64,7 +64,9 @@ async def test_should_report_downloads_with_accept_downloads_false(page: Page, s
         await download.path()
     except Error as exc:
         error = exc
-    assert "accept_downloads" in await download.failure()
+    failure_reason = await download.failure()
+    assert failure_reason
+    assert "accept_downloads" in failure_reason
     assert error
     assert "accept_downloads: True" in error.message
 

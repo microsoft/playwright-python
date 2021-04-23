@@ -850,7 +850,7 @@ class Page(ChannelOwner):
             if matcher:
                 return matcher.matches(request.url)
             if predicate:
-                return url_or_predicate(request)
+                return predicate(request)
             return True
 
         return self.expect_event(

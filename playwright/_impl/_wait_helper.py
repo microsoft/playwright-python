@@ -15,17 +15,15 @@
 import asyncio
 import uuid
 from asyncio.tasks import Task
-from typing import Any, Callable, Generic, List, Tuple, TypeVar
+from typing import Any, Callable, List, Tuple
 
 from pyee import EventEmitter
 
 from playwright._impl._api_types import Error, TimeoutError
 from playwright._impl._connection import ChannelOwner
 
-T = TypeVar("T")
 
-
-class WaitHelper(Generic[T]):
+class WaitHelper:
     def __init__(self, channel_owner: ChannelOwner, api_name: str) -> None:
         self._result: asyncio.Future = asyncio.Future()
         self._wait_id = uuid.uuid4().hex
