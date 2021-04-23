@@ -63,7 +63,7 @@ with sync_playwright() as p:
 
 #### Async API
 
-If you app is based on the modern asyncio loop and you are used to async/await constructs,
+If your app is based on the modern asyncio loop and you are used to async/await constructs,
 Playwright exposes Async API for you. You should use this API inside a Python REPL supporting `asyncio` like with `python -m asyncio`
 
 ```console
