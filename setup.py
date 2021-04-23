@@ -21,7 +21,12 @@ import zipfile
 from pathlib import Path
 
 import setuptools
-from auditwheel.wheeltools import InWheel
+
+try:
+
+    from auditwheel.wheeltools import InWheel
+except ImportError:
+    InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
 driver_version = "1.11.0-next-1618801354000"
@@ -110,17 +115,20 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     zip.writestr("playwright/driver/README.md", "Universal Mac package")
 
         os.remove(base_wheel_location)
-        for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
-            os.makedirs("wheelhouse", exist_ok=True)
-            with InWheel(
-                in_wheel=whlfile,
-                out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
-                ret_self=True,
-            ):
-                print("Updating RECORD file of %s" % whlfile)
-        shutil.rmtree(self.dist_dir)
-        print("Copying new wheels")
-        shutil.move("wheelhouse", self.dist_dir)
+        if InWheel:
+            for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
+                os.makedirs("wheelhouse", exist_ok=True)
+                with InWheel(
+                    in_wheel=whlfile,
+                    out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
+                    ret_self=True,
+                ):
+                    print("Updating RECORD file of %s" % whlfile)
+            shutil.rmtree(self.dist_dir)
+            print("Copying new wheels")
+            shutil.move("wheelhouse", self.dist_dir)
+        else:
+            print("auditwheel not installed, not updating RECORD file")
 
 
 setuptools.setup(
