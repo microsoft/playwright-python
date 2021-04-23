@@ -176,7 +176,7 @@ def parse_error(error: ErrorPayload) -> Error:
 
 
 def patch_error_message(message: Optional[str]) -> Optional[str]:
-    if not message:
+    if message is None:
         return None
 
     match = re.match(r"(\w+)(: expected .*)", message)

@@ -1464,7 +1464,8 @@ class ElementHandle(JSHandle):
         ] = None,
         position: Position = None,
         timeout: float = None,
-        force: bool = None
+        force: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """ElementHandle.hover
 
@@ -1492,13 +1493,20 @@ class ElementHandle(JSHandle):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
             await self._async(
                 "element_handle.hover",
                 self._impl_obj.hover(
-                    modifiers=modifiers, position=position, timeout=timeout, force=force
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    trial=trial,
                 ),
             )
         )
@@ -1515,7 +1523,8 @@ class ElementHandle(JSHandle):
         click_count: int = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """ElementHandle.click
 
@@ -1553,6 +1562,9 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -1567,6 +1579,7 @@ class ElementHandle(JSHandle):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -1582,7 +1595,8 @@ class ElementHandle(JSHandle):
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """ElementHandle.dblclick
 
@@ -1621,6 +1635,9 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -1634,6 +1651,7 @@ class ElementHandle(JSHandle):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -1714,7 +1732,8 @@ class ElementHandle(JSHandle):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """ElementHandle.tap
 
@@ -1748,6 +1767,9 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -1759,6 +1781,7 @@ class ElementHandle(JSHandle):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -1978,7 +2001,8 @@ class ElementHandle(JSHandle):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """ElementHandle.check
 
@@ -2010,6 +2034,9 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -2020,6 +2047,7 @@ class ElementHandle(JSHandle):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -2030,7 +2058,8 @@ class ElementHandle(JSHandle):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """ElementHandle.uncheck
 
@@ -2062,6 +2091,9 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -2072,6 +2104,7 @@ class ElementHandle(JSHandle):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -3522,7 +3555,8 @@ class Frame(AsyncBase):
         click_count: int = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Frame.click
 
@@ -3563,6 +3597,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -3578,6 +3615,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -3594,7 +3632,8 @@ class Frame(AsyncBase):
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Frame.dblclick
 
@@ -3636,6 +3675,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -3650,6 +3692,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -3664,7 +3707,8 @@ class Frame(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Frame.tap
 
@@ -3701,6 +3745,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -3713,6 +3760,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -3906,7 +3954,8 @@ class Frame(AsyncBase):
         ] = None,
         position: Position = None,
         timeout: float = None,
-        force: bool = None
+        force: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Frame.hover
 
@@ -3937,6 +3986,9 @@ class Frame(AsyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -3948,6 +4000,7 @@ class Frame(AsyncBase):
                     position=position,
                     timeout=timeout,
                     force=force,
+                    trial=trial,
                 ),
             )
         )
@@ -4190,7 +4243,8 @@ class Frame(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Frame.check
 
@@ -4225,6 +4279,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -4236,6 +4293,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -4247,7 +4305,8 @@ class Frame(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Frame.uncheck
 
@@ -4282,6 +4341,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -4293,6 +4355,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -6494,7 +6557,8 @@ class Page(AsyncBase):
         click_count: int = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Page.click
 
@@ -6537,6 +6601,9 @@ class Page(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -6552,6 +6619,7 @@ class Page(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -6568,7 +6636,8 @@ class Page(AsyncBase):
         button: Literal["left", "middle", "right"] = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Page.dblclick
 
@@ -6612,6 +6681,9 @@ class Page(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -6626,6 +6698,7 @@ class Page(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -6640,7 +6713,8 @@ class Page(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Page.tap
 
@@ -6679,6 +6753,9 @@ class Page(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -6691,6 +6768,7 @@ class Page(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -6888,7 +6966,8 @@ class Page(AsyncBase):
         ] = None,
         position: Position = None,
         timeout: float = None,
-        force: bool = None
+        force: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Page.hover
 
@@ -6921,6 +7000,9 @@ class Page(AsyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -6932,6 +7014,7 @@ class Page(AsyncBase):
                     position=position,
                     timeout=timeout,
                     force=force,
+                    trial=trial,
                 ),
             )
         )
@@ -7193,7 +7276,8 @@ class Page(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Page.check
 
@@ -7230,6 +7314,9 @@ class Page(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -7241,6 +7328,7 @@ class Page(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -7252,7 +7340,8 @@ class Page(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        trial: bool = None
     ) -> NoneType:
         """Page.uncheck
 
@@ -7289,6 +7378,9 @@ class Page(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
         """
 
         return mapping.from_maybe_impl(
@@ -7300,6 +7392,7 @@ class Page(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    trial=trial,
                 ),
             )
         )
@@ -9322,7 +9415,8 @@ class BrowserType(AsyncBase):
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
         channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
-            Browser distribution channel.
+            Browser distribution channel. Read more about using
+            [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
@@ -9468,6 +9562,43 @@ class BrowserType(AsyncBase):
                     recordHarOmitContent=record_har_omit_content,
                     recordVideoDir=record_video_dir,
                     recordVideoSize=record_video_size,
+                ),
+            )
+        )
+
+    async def connect_over_cdp(
+        self, endpoint_url: str, *, timeout: float = None, slow_mo: float = None
+    ) -> "Browser":
+        """BrowserType.connect_over_cdp
+
+        This methods attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
+
+        The default browser context is accessible via `browser.contexts()`.
+
+        > NOTE: Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
+
+        Parameters
+        ----------
+        endpoint_url : str
+            A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
+            `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to
+            disable timeout.
+        slow_mo : Union[float, NoneType]
+            Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
+            Defaults to 0.
+
+        Returns
+        -------
+        Browser
+        """
+
+        return mapping.from_impl(
+            await self._async(
+                "browser_type.connect_over_cdp",
+                self._impl_obj.connect_over_cdp(
+                    endpointURL=endpoint_url, timeout=timeout, slow_mo=slow_mo
                 ),
             )
         )

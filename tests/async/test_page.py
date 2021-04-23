@@ -406,15 +406,13 @@ async def test_page_error_should_fire(page, server, is_webkit):
     assert error.stack == stack
 
 
-async def test_page_error_should_handle_odd_values(page, is_firefox):
+async def test_page_error_should_handle_odd_values(page):
     cases = [["null", "null"], ["undefined", "undefined"], ["0", "0"], ['""', ""]]
     for [value, message] in cases:
         async with page.expect_event("pageerror") as error_info:
             await page.evaluate(f"() => setTimeout(() => {{ throw {value}; }}, 0)")
         error = await error_info.value
-        assert (
-            error.message == ("uncaught exception: " + message) if is_firefox else value
-        )
+        assert error.message == message
 
 
 async def test_page_error_should_handle_object(page, is_chromium):
