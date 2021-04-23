@@ -417,9 +417,7 @@ async def test_page_error_should_handle_odd_values(page, is_firefox):
         )
 
 
-@pytest.mark.skip_browser("firefox")
 async def test_page_error_should_handle_object(page, is_chromium):
-    # Firefox just does not report this error.
     async with page.expect_event("pageerror") as error_info:
         await page.evaluate("() => setTimeout(() => { throw {}; }, 0)")
     error = await error_info.value
@@ -903,9 +901,7 @@ async def test_fill_should_fill_textarea(page, server):
     assert await page.evaluate("result") == "some value"
 
 
-@pytest.mark.skip_browser("webkit")
 async def test_fill_should_fill_input(page, server):
-    # Disabled as in upstream, we should validate time in the Playwright lib
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.fill("input", "some value")
     assert await page.evaluate("result") == "some value"

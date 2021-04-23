@@ -62,7 +62,6 @@ async def test_workers_should_report_console_logs(page):
     assert message.text == "1"
 
 
-@pytest.mark.skip_browser("firefox")  # TODO: investigate further @pavelfeldman
 async def test_workers_should_have_JSHandles_for_console_logs(page):
     log_promise = asyncio.Future()
     page.on("console", lambda m: log_promise.set_result(m))
@@ -100,7 +99,6 @@ async def test_workers_should_report_errors(page):
     assert "this is my error" in error_log.message
 
 
-@pytest.mark.skip_browser("firefox")  # TODO: fails upstream
 async def test_workers_should_clear_upon_navigation(server, page):
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:
@@ -116,7 +114,6 @@ async def test_workers_should_clear_upon_navigation(server, page):
     assert len(page.workers) == 0
 
 
-@pytest.mark.skip_browser("firefox")  # TODO: fails upstream
 async def test_workers_should_clear_upon_cross_process_navigation(server, page):
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:
