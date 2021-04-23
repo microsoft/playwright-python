@@ -249,12 +249,12 @@ class RemoteServer:
 def launch_server(browser_name: str, launch_arguments: Dict, tmp_path: Path):
     remotes: List[RemoteServer] = []
 
-    def _launch_server(override_launch_options: Dict = {}):
+    def _launch_server(**kwargs: Dict):
         remote = RemoteServer(
             browser_name,
             {
                 **launch_arguments,
-                **override_launch_options,
+                **kwargs,
             },
             tmp_path / f"settings-{len(remotes)}.json",
         )

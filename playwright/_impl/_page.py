@@ -29,6 +29,7 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._api_types import Error
+from playwright._impl._artifact import Artifact
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -285,7 +286,9 @@ class Page(ChannelOwner):
     def _on_download(self, params: Any) -> None:
         url = params["url"]
         suggested_filename = params["suggestedFilename"]
-        artifact = from_channel(params["artifact"])
+        artifact = cast(Artifact, from_channel(params["artifact"]))
+        if self._browser_context._browser:
+            artifact._is_remote = self._browser_context._browser._is_remote
         self.emit(
             Page.Events.Download, Download(self, url, suggested_filename, artifact)
         )
