@@ -18,6 +18,7 @@ import gzip
 import mimetypes
 import socket
 import threading
+import time
 from contextlib import closing
 from http import HTTPStatus
 from urllib.parse import urlparse
@@ -32,18 +33,42 @@ from playwright._impl._path_utils import get_file_dirname
 _dirname = get_file_dirname()
 
 
-def _find_free_port():
+def find_free_port():
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
 
 
+def wait_for_port(port, host="localhost", timeout=5.0):
+    """Wait until a port starts accepting TCP connections.
+    Args:
+        port (int): Port number.
+        host (str): Host address on which the port should exist.
+        timeout (float): In seconds. How long to wait before raising errors.
+    Raises:
+        TimeoutError: The port isn't accepting connection after time specified in `timeout`.
+    Reference: https://gist.github.com/butla/2d9a4c0f35ea47b7452156c96a4e7b12
+    """
+    start_time = time.perf_counter()
+    while True:
+        try:
+            with socket.create_connection((host, port), timeout=timeout):
+                break
+        except OSError as ex:
+            time.sleep(0.01)
+            if time.perf_counter() - start_time >= timeout:
+                raise TimeoutError(
+                    "Waited too long for the port {} on host {} to start accepting "
+                    "connections.".format(port, host)
+                ) from ex
+
+
 class Server:
     protocol = "http"
 
     def __init__(self):
-        self.PORT = _find_free_port()
+        self.PORT = find_free_port()
         self.EMPTY_PAGE = f"{self.protocol}://localhost:{self.PORT}/empty.html"
         self.PREFIX = f"{self.protocol}://localhost:{self.PORT}"
         self.CROSS_PROCESS_PREFIX = f"{self.protocol}://127.0.0.1:{self.PORT}"
@@ -192,7 +217,7 @@ class HTTPSServer(Server):
 class WebSocketServerServer(WebSocketServerProtocol):
     def __init__(self) -> None:
         super().__init__()
-        self.PORT = _find_free_port()
+        self.PORT = find_free_port()
 
     def start(self):
         ws = WebSocketServerFactory("ws://127.0.0.1:" + str(self.PORT))

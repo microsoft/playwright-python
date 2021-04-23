@@ -608,6 +608,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
+        trial: bool = None,
     ) -> None:
         return await self._main_frame.click(**locals_to_params(locals()))
 
@@ -621,6 +622,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
+        trial: bool = None,
     ) -> None:
         return await self._main_frame.dblclick(**locals_to_params(locals()))
 
@@ -632,6 +634,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
+        trial: bool = None,
     ) -> None:
         return await self._main_frame.tap(**locals_to_params(locals()))
 
@@ -664,6 +667,7 @@ class Page(ChannelOwner):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
+        trial: bool = None,
     ) -> None:
         return await self._main_frame.hover(**locals_to_params(locals()))
 
@@ -716,6 +720,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
+        trial: bool = None,
     ) -> None:
         return await self._main_frame.check(**locals_to_params(locals()))
 
@@ -726,6 +731,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
+        trial: bool = None,
     ) -> None:
         return await self._main_frame.uncheck(**locals_to_params(locals()))
 

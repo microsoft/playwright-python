@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -23,7 +23,11 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
-from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._connection import (
+    ChannelOwner,
+    from_channel,
+    from_nullable_channel,
+)
 from playwright._impl._helper import (
     BrowserChannel,
     ColorScheme,
@@ -134,6 +138,27 @@ class BrowserType(ChannelOwner):
             if "because executable doesn't exist" in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
+
+    async def connect_over_cdp(
+        self, endpointURL: str, timeout: float = None, slow_mo: float = None
+    ) -> Browser:
+        params = locals_to_params(locals())
+        params["sdkLanguage"] = (
+            "python" if self._connection._is_sync else "python-async"
+        )
+        response = await self._channel.send_return_as_dict("connectOverCDP", params)
+        browser = cast(Browser, from_channel(response["browser"]))
+        browser._is_remote = True
+
+        default_context = cast(
+            Optional[BrowserContext],
+            from_nullable_channel(response.get("defaultContext")),
+        )
+        if default_context:
+            browser._contexts.append(default_context)
+            default_context._browser = browser
+
+        return browser
 
 
 def normalize_launch_params(params: Dict) -> None:
