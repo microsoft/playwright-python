@@ -101,7 +101,6 @@ class ChannelOwner(AsyncIOEventEmitter):
                     "apiName": api_name,
                     "waitId": wait_id,
                     "phase": "before",
-                    "stack": capture_call_stack(),
                 }
             },
         )

@@ -23,7 +23,6 @@ from pathlib import Path
 import setuptools
 
 try:
-
     from auditwheel.wheeltools import InWheel
 except ImportError:
     InWheel = None
