@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-
 from playwright.async_api import Dialog, Page
 
 
@@ -83,7 +81,6 @@ async def test_should_dismiss_the_confirm_prompt(page: Page, server):
     assert result
 
 
-@pytest.mark.skip_browser("webkit")
 async def test_should_be_able_to_close_context_with_open_alert(browser):
     context = await browser.new_context()
     page = await context.new_page()

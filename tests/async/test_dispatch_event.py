@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-
 
 async def test_should_dispatch_click_event(page, server):
     await page.goto(server.PREFIX + "/input/button.html")
@@ -137,7 +135,6 @@ async def test_should_be_atomic(selectors, page, utils):
     assert await page.evaluate("() => window._clicked")
 
 
-@pytest.mark.skip_browser("webkit")
 async def test_should_dispatch_drag_drop_events(page, server):
     await page.goto(server.PREFIX + "/drag-n-drop.html")
     dataTransfer = await page.evaluate_handle("() => new DataTransfer()")
@@ -150,7 +147,6 @@ async def test_should_dispatch_drag_drop_events(page, server):
     )
 
 
-@pytest.mark.skip_browser("webkit")
 async def test_should_dispatch_drag_and_drop_events_element_handle(page, server):
     await page.goto(server.PREFIX + "/drag-n-drop.html")
     dataTransfer = await page.evaluate_handle("() => new DataTransfer()")
