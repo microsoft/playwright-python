@@ -126,15 +126,22 @@ def test_browser_type_connect_should_throw_when_used_after_is_connected_returns_
     assert browser.is_connected() is False
 
 
-def test_browser_type_connect_should_reject_navigation_when_browser_closes(
-    server: Server, browser_type: BrowserType, launch_server
+def test_browser_type_connect_should_forward_close_events_to_pages(
+    browser_type: BrowserType, launch_server
 ):
-    remote_server = launch_server()
-    browser = browser_type.connect(remote_server.ws_endpoint)
-    page = browser.new_page()
-    server.set_route("/one-style.css", lambda r: None)
-    page.on("request", lambda: browser.close())
+    # Launch another server to not affect other tests.
+    remote = launch_server()
 
-    with pytest.raises(Error) as exc_info:
-        page.goto(server.PREFIX + "/one-style.html")
-    assert "Playwright connection closed" in exc_info.value.message
+    browser = browser_type.connect(remote.ws_endpoint)
+    context = browser.new_context()
+    page = context.new_page()
+
+    events = []
+    browser.on("disconnected", lambda: events.append("browser::disconnected"))
+    context.on("close", lambda: events.append("context::close"))
+    page.on("close", lambda: events.append("page::close"))
+
+    browser.close()
+    assert events == ["page::close", "context::close", "browser::disconnected"]
+    remote.kill()
+    assert events == ["page::close", "context::close", "browser::disconnected"]

@@ -149,23 +149,13 @@ class Browser(ChannelOwner):
         if self._is_closed_or_closing:
             return
         self._is_closed_or_closing = True
-        if self._is_connected_over_websocket:
-            await self._connection.stop_async()
-            self._notify_remote_closed()
-            return
         try:
             await self._channel.send("close")
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
-
-    def _notify_remote_closed(self) -> None:
-        # Emulate all pages, contexts and the browser closing upon disconnect.
-        for context in self.contexts:
-            for page in context.pages:
-                page._on_close()
-            context._on_close()
-        self._on_close()
+        if self._is_connected_over_websocket:
+            await self._connection.stop_async()
 
     @property
     def version(self) -> str:

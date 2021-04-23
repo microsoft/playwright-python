@@ -43,7 +43,6 @@ def _get_stderr_fileno() -> Optional[int]:
 class Transport(ABC):
     def __init__(self) -> None:
         self.on_message = lambda _: None
-        self.on_error_future: asyncio.Future = asyncio.Future()
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -138,7 +137,7 @@ class PipeTransport(Transport):
 
 
 class WebSocketTransport(AsyncIOEventEmitter, Transport):
-    def __init__(self, ws_endpoint: str, timeout: float) -> None:
+    def __init__(self, ws_endpoint: str, timeout: float = None) -> None:
         super().__init__()
         Transport.__init__(self)
 

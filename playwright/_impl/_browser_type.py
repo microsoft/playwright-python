@@ -23,7 +23,12 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
-from playwright._impl._connection import ChannelOwner, Connection, from_channel
+from playwright._impl._connection import (
+    ChannelOwner,
+    Connection,
+    from_channel,
+    from_nullable_channel,
+)
 from playwright._impl._helper import (
     BrowserChannel,
     ColorScheme,
@@ -177,10 +182,7 @@ class BrowserType(ChannelOwner):
         browser._is_remote = True
         browser._is_connected_over_websocket = True
 
-        def handle_transport_close() -> None:
-            browser._on_close()
-
-        transport.once("close", handle_transport_close)
+        transport.once("close", browser._on_close)
 
         return browser
 

@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
-
 import pytest
 
 from playwright.async_api import BrowserType, Error
@@ -134,8 +132,11 @@ async def test_browser_type_connect_should_reject_navigation_when_browser_closes
     remote_server = launch_server()
     browser = await browser_type.connect(remote_server.ws_endpoint)
     page = await browser.new_page()
-    server.set_route("/one-style.css", lambda r: None)
-    page.on("request", lambda: asyncio.create_task(browser.close()))
+    await browser.close()
+
+    with pytest.raises(Error) as exc_info:
+        await page.goto(server.PREFIX + "/one-style.html")
+    assert "Playwright connection closed" in exc_info.value.message
 
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/one-style.html")
