@@ -111,6 +111,7 @@ class Page(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._browser_context: BrowserContext = None  # type: ignore
         self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)

@@ -28,8 +28,8 @@ class Video:
         self._dispatcher_fiber = page._dispatcher_fiber
         self._page = page
         self._artifact_future = page._loop.create_future()
-        if page.context.browser:
-            self._is_remote = page.context.browser._is_remote
+        if page._browser_context and page._browser_context._browser:
+            self._is_remote = page._browser_context._browser._is_remote
         else:
             self._is_remote = False
         if page.is_closed():
