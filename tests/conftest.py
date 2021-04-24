@@ -13,14 +13,20 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import io
+import json
+import subprocess
 import sys
+from pathlib import Path
+from typing import Dict, List
 
 import pytest
 from PIL import Image
 from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
+import playwright
 from playwright._impl._path_utils import get_file_dirname
 
 from .server import test_server
@@ -48,7 +54,6 @@ def assetdir():
 
 @pytest.fixture(scope="session")
 def launch_arguments(pytestconfig):
-    print(pytestconfig.getoption("--browser-channel"))
     return {
         "headless": not pytestconfig.getoption("--headful"),
         "channel": pytestconfig.getoption("--browser-channel"),
@@ -201,3 +206,62 @@ def assert_to_be_golden(browser_name: str):
         assert diff_pixels == 0
 
     return compare
+
+
+class RemoteServer:
+    def __init__(
+        self, browser_name: str, launch_server_options: Dict, tmpfile: Path
+    ) -> None:
+        driver_dir = Path(inspect.getfile(playwright)).parent / "driver"
+        if sys.platform == "win32":
+            node_executable = driver_dir / "node.exe"
+        else:
+            node_executable = driver_dir / "node"
+        cli_js = driver_dir / "package" / "lib" / "cli" / "cli.js"
+        tmpfile.write_text(json.dumps(launch_server_options))
+        self.process = subprocess.Popen(  # type: ignore
+            [
+                str(node_executable),
+                str(cli_js),
+                "launch-server",
+                browser_name,
+                str(tmpfile),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=sys.stderr,
+            cwd=driver_dir,
+        )
+        assert self.process.stdout
+        self.ws_endpoint = self.process.stdout.readline().decode().strip()
+
+    def kill(self):
+        # Send the signal to all the process groups
+        if self.process.poll() is not None:
+            return
+        if sys.platform == "win32":
+            subprocess.check_call(["taskkill", "/F", "/PID", str(self.process.pid)])
+        else:
+            self.process.kill()
+        self.process.wait()
+
+
+@pytest.fixture
+def launch_server(browser_name: str, launch_arguments: Dict, tmp_path: Path):
+    remotes: List[RemoteServer] = []
+
+    def _launch_server(**kwargs: Dict):
+        remote = RemoteServer(
+            browser_name,
+            {
+                **launch_arguments,
+                **kwargs,
+            },
+            tmp_path / f"settings-{len(remotes)}.json",
+        )
+        remotes.append(remote)
+        return remote
+
+    yield _launch_server
+
+    for remote in remotes:
+        remote.kill()

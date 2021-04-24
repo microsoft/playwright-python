@@ -25,6 +25,7 @@ from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import (
     ChannelOwner,
+    Connection,
     from_channel,
     from_nullable_channel,
 )
@@ -35,6 +36,7 @@ from playwright._impl._helper import (
     locals_to_params,
     not_installed_error,
 )
+from playwright._impl._transport import WebSocketTransport
 
 
 class BrowserType(ChannelOwner):
@@ -157,6 +159,30 @@ class BrowserType(ChannelOwner):
         if default_context:
             browser._contexts.append(default_context)
             default_context._browser = browser
+        return browser
+
+    async def connect(
+        self, ws_endpoint: str, timeout: float = None, slow_mo: float = None
+    ) -> Browser:
+        transport = WebSocketTransport(ws_endpoint, timeout)
+
+        connection = Connection(
+            self._connection._dispatcher_fiber,
+            self._connection._object_factory,
+            transport,
+        )
+        connection._is_sync = self._connection._is_sync
+        connection._loop = self._connection._loop
+        connection._loop.create_task(connection.run())
+        self._connection._child_ws_connections.append(connection)
+        playwright = await connection.wait_for_object_with_known_name("Playwright")
+        pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
+        assert pre_launched_browser
+        browser = cast(Browser, from_channel(pre_launched_browser))
+        browser._is_remote = True
+        browser._is_connected_over_websocket = True
+
+        transport.once("close", browser._on_close)
 
         return browser
 

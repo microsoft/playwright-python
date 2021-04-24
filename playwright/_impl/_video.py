@@ -28,6 +28,10 @@ class Video:
         self._dispatcher_fiber = page._dispatcher_fiber
         self._page = page
         self._artifact_future = page._loop.create_future()
+        if page._browser_context and page._browser_context._browser:
+            self._is_remote = page._browser_context._browser._is_remote
+        else:
+            self._is_remote = False
         if page.is_closed():
             self._page_closed()
         else:
@@ -42,9 +46,14 @@ class Video:
 
     def _artifact_ready(self, artifact: Artifact) -> None:
         if not self._artifact_future.done():
+            artifact._is_remote = self._is_remote
             self._artifact_future.set_result(artifact)
 
     async def path(self) -> pathlib.Path:
+        if self._is_remote:
+            raise Error(
+                "Path is not available when using browserType.connect(). Use save_as() to save a local copy."
+            )
         artifact = await self._artifact_future
         if not artifact:
             raise Error("Page did not produce any video frames")

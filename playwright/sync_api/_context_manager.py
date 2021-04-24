@@ -22,6 +22,7 @@ from playwright._impl._connection import Connection
 from playwright._impl._driver import compute_driver_executable
 from playwright._impl._object_factory import create_remote_object
 from playwright._impl._playwright import Playwright
+from playwright._impl._transport import PipeTransport
 from playwright.sync_api._generated import Playwright as SyncPlaywright
 
 
@@ -53,7 +54,9 @@ Please use the Async API instead."""
 
         dispatcher_fiber = greenlet(greenlet_main)
         self._connection = Connection(
-            dispatcher_fiber, create_remote_object, compute_driver_executable()
+            dispatcher_fiber,
+            create_remote_object,
+            PipeTransport(compute_driver_executable()),
         )
 
         g_self = greenlet.getcurrent()
