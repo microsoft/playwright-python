@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union, cast
 
@@ -126,7 +127,7 @@ class BrowserType(ChannelOwner):
         recordVideoDir: Union[Path, str] = None,
         recordVideoSize: ViewportSize = None,
     ) -> BrowserContext:
-        userDataDir = str(Path(userDataDir))
+        userDataDir = os.fspath(userDataDir)
         params = locals_to_params(locals())
         normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
@@ -142,7 +143,11 @@ class BrowserType(ChannelOwner):
             raise e
 
     async def connect_over_cdp(
-        self, endpointURL: str, timeout: float = None, slow_mo: float = None
+        self,
+        endpointURL: str,
+        timeout: float = None,
+        slow_mo: float = None,
+        headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         params["sdkLanguage"] = (
@@ -162,9 +167,13 @@ class BrowserType(ChannelOwner):
         return browser
 
     async def connect(
-        self, ws_endpoint: str, timeout: float = None, slow_mo: float = None
+        self,
+        ws_endpoint: str,
+        timeout: float = None,
+        slow_mo: float = None,
+        headers: Dict[str, str] = None,
     ) -> Browser:
-        transport = WebSocketTransport(ws_endpoint, timeout)
+        transport = WebSocketTransport(ws_endpoint, timeout, headers)
 
         connection = Connection(
             self._connection._dispatcher_fiber,
@@ -198,6 +207,6 @@ def normalize_launch_params(params: Dict) -> None:
             params["ignoreAllDefaultArgs"] = True
             del params["ignoreDefaultArgs"]
     if "executablePath" in params:
-        params["executablePath"] = str(Path(params["executablePath"]))
+        params["executablePath"] = os.fspath(params["executablePath"])
     if "downloadsPath" in params:
-        params["downloadsPath"] = str(Path(params["downloadsPath"]))
+        params["downloadsPath"] = os.fspath(params["downloadsPath"])

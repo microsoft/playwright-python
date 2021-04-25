@@ -15,6 +15,7 @@
 import base64
 import json
 import mimetypes
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
@@ -179,7 +180,7 @@ class Route(ChannelOwner):
             headers["content-type"] = params["contentType"]
         elif path:
             headers["content-type"] = (
-                mimetypes.guess_type(str(Path(path)))[0] or "application/octet-stream"
+                mimetypes.guess_type(os.fspath(path))[0] or "application/octet-stream"
             )
         if length and "content-length" not in headers:
             headers["content-length"] = str(length)

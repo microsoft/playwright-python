@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import os
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
@@ -361,7 +362,7 @@ class Frame(ChannelOwner):
         params = locals_to_params(locals())
         if path:
             with open(path, "r") as file:
-                params["content"] = file.read() + "\n//# sourceURL=" + str(Path(path))
+                params["content"] = file.read() + "\n//# sourceURL=" + os.fspath(path)
                 del params["path"]
         return from_channel(await self._channel.send("addScriptTag", params))
 
@@ -372,7 +373,7 @@ class Frame(ChannelOwner):
         if path:
             with open(path, "r") as file:
                 params["content"] = (
-                    file.read() + "\n/*# sourceURL=" + str(Path(path)) + "*/"
+                    file.read() + "\n/*# sourceURL=" + os.fspath(path) + "*/"
                 )
                 del params["path"]
         return from_channel(await self._channel.send("addStyleTag", params))
