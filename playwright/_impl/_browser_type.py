@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union, cast
 
@@ -127,7 +126,7 @@ class BrowserType(ChannelOwner):
         recordVideoDir: Union[Path, str] = None,
         recordVideoSize: ViewportSize = None,
     ) -> BrowserContext:
-        userDataDir = os.fspath(userDataDir)
+        userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
         normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
@@ -207,6 +206,6 @@ def normalize_launch_params(params: Dict) -> None:
             params["ignoreAllDefaultArgs"] = True
             del params["ignoreDefaultArgs"]
     if "executablePath" in params:
-        params["executablePath"] = os.fspath(params["executablePath"])
+        params["executablePath"] = str(Path(params["executablePath"]))
     if "downloadsPath" in params:
-        params["downloadsPath"] = os.fspath(params["downloadsPath"])
+        params["downloadsPath"] = str(Path(params["downloadsPath"]))

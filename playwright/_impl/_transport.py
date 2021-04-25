@@ -162,7 +162,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     async def run(self) -> None:
         await super().run()
 
-        options = {}
+        options: Dict[str, Any] = {}
         if self.timeout is not None:
             options["close_timeout"] = self.timeout / 1000
             options["ping_timeout"] = self.timeout / 1000

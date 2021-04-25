@@ -69,7 +69,7 @@ def normalize_file_payloads(
                 file_payloads.append(
                     {
                         "name": os.path.basename(item),
-                        "mimeType": mimetypes.guess_type(os.fspath(item))[0]
+                        "mimeType": mimetypes.guess_type(str(Path(item)))[0]
                         or "application/octet-stream",
                         "buffer": base64.b64encode(fd.read()).decode(),
                     }

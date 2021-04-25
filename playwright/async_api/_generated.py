@@ -560,7 +560,7 @@ class Route(AsyncBase):
                 \"foo\": \"bar\" # set \"foo\" header
                 \"origin\": None # remove \"origin\" header
             }
-            await route.continue(headers=headers)
+            await route.continue_(headers=headers)
         }
         await page.route(\"**/*\", handle)
         ```
@@ -6384,6 +6384,18 @@ class Page(AsyncBase):
         await browser.close()
         ```
 
+        It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
+        post data, and leaving all other requests as is:
+
+        ```py
+        def handle_route(route):
+          if (\"my-string\" in route.request.post_data)
+            route.fulfill(body=\"mocked-data\")
+          else
+            route.continue_()
+        await page.route(\"/api/**\", handle_route)
+        ```
+
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
         matches both handlers.
 
@@ -7865,13 +7877,15 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request
 
-        Waits for the matching request and returns it.
+        Waits for the matching request and returns it.  See [waiting for event](./events.md#waiting-for-event) for more details
+        about events.
 
         ```py
         async with page.expect_request(\"http://example.com/resource\") as first:
             await page.click('button')
         first_request = await first.value
 
+        # or with a lambda
         async with page.expect_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\") as second:
             await page.click('img')
         second_request = await second.value
@@ -7906,7 +7920,7 @@ class Page(AsyncBase):
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_response
 
-        Returns the matched response.
+        Returns the matched response. See [waiting for event](./events.md#waiting-for-event) for more details about events.
 
         ```py
         async with page.expect_response(\"https://example.com/resource\") as response_info:
@@ -8479,6 +8493,18 @@ class BrowserContext(AsyncBase):
         page = await context.new_page()
         await page.goto(\"https://example.com\")
         await browser.close()
+        ```
+
+        It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
+        post data, and leaving all other requests as is:
+
+        ```py
+        def handle_route(route):
+          if (\"my-string\" in route.request.post_data)
+            route.fulfill(body=\"mocked-data\")
+          else
+            route.continue_()
+        await context.route(\"/api/**\", handle_route)
         ```
 
         Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
@@ -9567,7 +9593,12 @@ class BrowserType(AsyncBase):
         )
 
     async def connect_over_cdp(
-        self, endpoint_url: str, *, timeout: float = None, slow_mo: float = None
+        self,
+        endpoint_url: str,
+        *,
+        timeout: float = None,
+        slow_mo: float = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None
     ) -> "Browser":
         """BrowserType.connect_over_cdp
 
@@ -9588,6 +9619,8 @@ class BrowserType(AsyncBase):
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
             Defaults to 0.
+        headers : Union[Dict[str, str], NoneType]
+            Additional HTTP headers to be sent with connect request. Optional.
 
         Returns
         -------
@@ -9598,13 +9631,21 @@ class BrowserType(AsyncBase):
             await self._async(
                 "browser_type.connect_over_cdp",
                 self._impl_obj.connect_over_cdp(
-                    endpointURL=endpoint_url, timeout=timeout, slow_mo=slow_mo
+                    endpointURL=endpoint_url,
+                    timeout=timeout,
+                    slow_mo=slow_mo,
+                    headers=mapping.to_impl(headers),
                 ),
             )
         )
 
     async def connect(
-        self, ws_endpoint: str, *, timeout: float = None, slow_mo: float = None
+        self,
+        ws_endpoint: str,
+        *,
+        timeout: float = None,
+        slow_mo: float = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None
     ) -> "Browser":
         """BrowserType.connect
 
@@ -9620,6 +9661,8 @@ class BrowserType(AsyncBase):
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
             Defaults to 0.
+        headers : Union[Dict[str, str], NoneType]
+            Additional HTTP headers to be sent with web socket connect request. Optional.
 
         Returns
         -------
@@ -9630,7 +9673,10 @@ class BrowserType(AsyncBase):
             await self._async(
                 "browser_type.connect",
                 self._impl_obj.connect(
-                    ws_endpoint=ws_endpoint, timeout=timeout, slow_mo=slow_mo
+                    ws_endpoint=ws_endpoint,
+                    timeout=timeout,
+                    slow_mo=slow_mo,
+                    headers=mapping.to_impl(headers),
                 ),
             )
         )
