@@ -33,9 +33,15 @@ class PlaywrightContextManager:
         loop = asyncio.get_running_loop()
         self._connection._loop = loop
         loop.create_task(self._connection.run())
-        playwright = AsyncPlaywright(
-            await self._connection.wait_for_object_with_known_name("Playwright")
+        done, pending = await asyncio.wait(
+            {
+                self._connection._transport.on_error_future,  # type: ignore
+                self._connection.wait_for_object_with_known_name("Playwright"),
+            },
+            return_when=asyncio.FIRST_COMPLETED,
         )
+        obj = next(iter(done)).result()
+        playwright = AsyncPlaywright(obj)
         playwright.stop = self.__aexit__  # type: ignore
         return playwright
 
