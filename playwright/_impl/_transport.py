@@ -106,7 +106,11 @@ class PipeTransport(Transport):
                 limit=32768,
             )
         except FileNotFoundError:
-            self.on_error_future.set_exception(Error("playwright's driver is not found"))
+            self.on_error_future.set_exception(Error(
+                "playwright's driver is not found, You can read the contributing guide "
+                "for some guidance on how to get everything setup for working on the code "
+                "https://github.com/microsoft/playwright-python/blob/master/CONTRIBUTING.md"
+            ))
             return
 
         assert proc.stdout
