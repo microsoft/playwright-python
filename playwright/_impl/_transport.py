@@ -106,11 +106,13 @@ class PipeTransport(Transport):
                 limit=32768,
             )
         except FileNotFoundError:
-            self.on_error_future.set_exception(Error(
-                "playwright's driver is not found, You can read the contributing guide "
-                "for some guidance on how to get everything setup for working on the code "
-                "https://github.com/microsoft/playwright-python/blob/master/CONTRIBUTING.md"
-            ))
+            self.on_error_future.set_exception(
+                Error(
+                    "playwright's driver is not found, You can read the contributing guide "
+                    "for some guidance on how to get everything setup for working on the code "
+                    "https://github.com/microsoft/playwright-python/blob/master/CONTRIBUTING.md"
+                )
+            )
             return
 
         assert proc.stdout
@@ -175,7 +177,9 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         try:
             self._connection = await websockets.connect(self.ws_endpoint, **options)
         except Exception as err:
-            self.on_error_future.set_exception(Error(f"playwright's websocket endpoint connection error: {err}"))
+            self.on_error_future.set_exception(
+                Error(f"playwright's websocket endpoint connection error: {err}")
+            )
             return
 
         while not self._stopped:
