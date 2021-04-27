@@ -61,6 +61,7 @@ class Transport(ABC):
             self.on_error_future = asyncio.Future()
         self._loop = asyncio.get_running_loop()
 
+    @abstractmethod
     async def run(self) -> None:
         pass
 
