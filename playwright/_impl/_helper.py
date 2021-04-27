@@ -170,9 +170,10 @@ def parse_error(error: ErrorPayload) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
-    return base_error_class(
-        cast(str, patch_error_message(error.get("message"))), error["stack"]
-    )
+    exc = base_error_class(cast(str, patch_error_message(error.get("message"))))
+    exc.name = error["name"]
+    exc.stack = error["stack"]
+    return exc
 
 
 def patch_error_message(message: Optional[str]) -> Optional[str]:
