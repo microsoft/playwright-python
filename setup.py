@@ -20,7 +20,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-import setuptools
+from setuptools import find_packages, setup
 
 try:
     from auditwheel.wheeltools import InWheel
@@ -130,7 +130,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             print("auditwheel not installed, not updating RECORD file")
 
 
-setuptools.setup(
+setup(
     name="playwright",
     author="Microsoft Corporation",
     author_email="",
@@ -138,7 +138,7 @@ setuptools.setup(
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     url="https://github.com/Microsoft/playwright-python",
-    packages=["playwright"],
+    packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
     install_requires=[
         "websockets>=8.1",
