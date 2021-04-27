@@ -176,7 +176,7 @@ class BrowserType(ChannelOwner):
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
-        obj = asyncio.ensure_future(
+        obj = asyncio.create_task(
             connection.wait_for_object_with_known_name("Playwright")
         )
         done, pending = await asyncio.wait(
