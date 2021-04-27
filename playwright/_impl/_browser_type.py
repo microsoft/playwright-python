@@ -172,6 +172,7 @@ class BrowserType(ChannelOwner):
             self._connection._object_factory,
             transport,
         )
+        await connection._transport.start()
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())

@@ -32,10 +32,11 @@ class PlaywrightContextManager:
         )
         loop = asyncio.get_running_loop()
         self._connection._loop = loop
-        loop.create_task(self._connection.run())
         obj = asyncio.ensure_future(
             self._connection.wait_for_object_with_known_name("Playwright")
         )
+        await self._connection._transport.start()
+        loop.create_task(self._connection.run())
         done, pending = await asyncio.wait(
             {
                 obj,

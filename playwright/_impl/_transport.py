@@ -42,8 +42,8 @@ def _get_stderr_fileno() -> Optional[int]:
 
 class Transport(ABC):
     def __init__(self) -> None:
+        self.on_error_future: asyncio.Future
         self.on_message = lambda _: None
-        self.on_error_future: asyncio.Future = asyncio.Future()
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -56,8 +56,13 @@ class Transport(ABC):
     async def wait_until_stopped(self) -> None:
         pass
 
-    async def run(self) -> None:
+    async def start(self) -> None:
+        if not hasattr(self, "on_error_future"):
+            self.on_error_future = asyncio.Future()
         self._loop = asyncio.get_running_loop()
+
+    async def run(self) -> None:
+        pass
 
     @abstractmethod
     def send(self, message: Dict) -> None:
@@ -93,7 +98,7 @@ class PipeTransport(Transport):
         await self._proc.wait()
 
     async def run(self) -> None:
-        await super().run()
+        await self.start()
         self._stopped_future: asyncio.Future = asyncio.Future()
 
         try:
@@ -168,7 +173,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         await self._connection.wait_closed()
 
     async def run(self) -> None:
-        await super().run()
+        await self.start()
 
         options = {}
         if self.timeout is not None:
