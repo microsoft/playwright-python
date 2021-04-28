@@ -137,13 +137,16 @@ class PipeTransport(Transport):
 
 
 class WebSocketTransport(AsyncIOEventEmitter, Transport):
-    def __init__(self, ws_endpoint: str, timeout: float = None) -> None:
+    def __init__(
+        self, ws_endpoint: str, timeout: float = None, headers: Dict[str, str] = None
+    ) -> None:
         super().__init__()
         Transport.__init__(self)
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.timeout = timeout
+        self.headers = headers
         self._loop: asyncio.AbstractEventLoop
 
     def request_stop(self) -> None:
@@ -159,10 +162,12 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     async def run(self) -> None:
         await super().run()
 
-        options = {}
+        options: Dict[str, Any] = {}
         if self.timeout is not None:
             options["close_timeout"] = self.timeout / 1000
             options["ping_timeout"] = self.timeout / 1000
+        if self.headers is not None:
+            options["extra_headers"] = self.headers
         self._connection = await websockets.connect(self.ws_endpoint, **options)
 
         while not self._stopped:
