@@ -398,6 +398,7 @@ async def test_page_error_should_fire(page, server, is_webkit):
     async with page.expect_event("pageerror") as error_info:
         await page.goto(server.PREFIX + "/error.html")
     error = await error_info.value
+    assert error.name == "Error"
     assert error.message == "Fancy error!"
     stack = await page.evaluate("window.e.stack")
     # Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
@@ -422,13 +423,26 @@ async def test_page_error_should_handle_object(page, is_chromium):
     assert error.message == "Object" if is_chromium else "[object Object]"
 
 
-@pytest.mark.skip_browser("firefox")
 async def test_page_error_should_handle_window(page, is_chromium):
-    # Firefox just does not report this error.
     async with page.expect_event("pageerror") as error_info:
         await page.evaluate("() => setTimeout(() => { throw window; }, 0)")
     error = await error_info.value
     assert error.message == "Window" if is_chromium else "[object Window]"
+
+
+async def test_page_error_should_pass_error_name_property(page):
+    async with page.expect_event("pageerror") as error_info:
+        await page.evaluate(
+            """() => setTimeout(() => {
+            const error = new Error("my-message");
+            error.name = "my-name";
+            throw error;
+        }, 0)
+        """
+        )
+    error = await error_info.value
+    assert error.message == "my-message"
+    assert error.name == "my-name"
 
 
 expected_output = "<html><head></head><body><div>hello</div></body></html>"
