@@ -194,7 +194,7 @@ async def test_should_error_when_saving_after_deletion(tmpdir, browser, server):
     await download.delete()
     with pytest.raises(Error) as exc:
         await download.save_as(user_path)
-    assert "File already deleted. Save before deleting." in exc.value.message
+    assert "Target page, context or browser has been closed" in exc.value.message
     await page.close()
 
 

@@ -143,7 +143,11 @@ class BrowserType(ChannelOwner):
             raise e
 
     async def connect_over_cdp(
-        self, endpointURL: str, timeout: float = None, slow_mo: float = None
+        self,
+        endpointURL: str,
+        timeout: float = None,
+        slow_mo: float = None,
+        headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         params["sdkLanguage"] = (
@@ -163,9 +167,13 @@ class BrowserType(ChannelOwner):
         return browser
 
     async def connect(
-        self, ws_endpoint: str, timeout: float = None, slow_mo: float = None
+        self,
+        ws_endpoint: str,
+        timeout: float = None,
+        slow_mo: float = None,
+        headers: Dict[str, str] = None,
     ) -> Browser:
-        transport = WebSocketTransport(ws_endpoint, timeout)
+        transport = WebSocketTransport(ws_endpoint, timeout, headers)
 
         connection = Connection(
             self._connection._dispatcher_fiber,
