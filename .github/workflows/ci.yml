@@ -134,7 +134,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -163,3 +163,25 @@ jobs:
       with:
         name: ${{ matrix.browser-channel }}-${{ matrix.os }}
         path: pw-log.txt
+
+  build-conda:
+    name: Conda Build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.7, 3.8]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Get conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge
+      - name: Prepare
+        run: conda install conda-build conda-verify
+      - name: Build
+        run: conda build .
