@@ -17,6 +17,7 @@ import traceback
 from typing import Any, Awaitable, Callable, Generic, TypeVar
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
+from playwright._impl._logger import logger
 
 mapping = ImplToApiMapping()
 
@@ -55,11 +56,18 @@ class AsyncBase(ImplWrapper):
     def __str__(self) -> str:
         return self._impl_obj.__str__()
 
-    def _async(self, api_name: str, coro: Awaitable) -> Any:
-        task = asyncio.current_task()
-        setattr(task, "__pw_api_name__", api_name)
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack())
-        return coro
+    async def _async(self, api_name: str, coro: Awaitable) -> Any:
+        try:
+            logger.debug(f"=> {api_name} started")
+            task = asyncio.current_task()
+            setattr(task, "__pw_api_name__", api_name)
+            setattr(task, "__pw_stack_trace__", traceback.extract_stack())
+            result = await coro
+            logger.debug(f"<= {api_name} succeeded")
+            return result
+        except Exception as e:
+            logger.debug(f"<= {api_name} failed")
+            raise e
 
     def _wrap_handler(self, handler: Any) -> Callable[..., None]:
         if callable(handler):

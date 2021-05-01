@@ -29,6 +29,7 @@ from typing import (
 import greenlet
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
+from playwright._impl._logger import logger
 
 mapping = ImplToApiMapping()
 
@@ -88,19 +89,26 @@ class SyncBase(ImplWrapper):
         return self._impl_obj.__str__()
 
     def _sync(self, api_name: str, coro: Awaitable) -> Any:
-        g_self = greenlet.getcurrent()
-        task = self._loop.create_task(coro)
-        setattr(task, "__pw_api_name__", api_name)
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack())
+        try:
+            logger.debug(f"=> {api_name} started")
+            g_self = greenlet.getcurrent()
+            task = self._loop.create_task(coro)
+            setattr(task, "__pw_api_name__", api_name)
+            setattr(task, "__pw_stack_trace__", traceback.extract_stack())
 
-        def callback(result: Any) -> None:
-            g_self.switch()
+            def callback(result: Any) -> None:
+                g_self.switch()
 
-        task.add_done_callback(callback)
-        while not task.done():
-            self._dispatcher_fiber.switch()
-        asyncio._set_running_loop(self._loop)
-        return task.result()
+            task.add_done_callback(callback)
+            while not task.done():
+                self._dispatcher_fiber.switch()
+            asyncio._set_running_loop(self._loop)
+            result = task.result()
+            logger.debug(f"<= {api_name} succeeded")
+            return result
+        except Exception as e:
+            logger.debug(f"<= {api_name} failed")
+            raise e
 
     def _wrap_handler(self, handler: Any) -> Callable[..., None]:
         if callable(handler):
