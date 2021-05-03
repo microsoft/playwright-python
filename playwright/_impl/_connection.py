@@ -169,11 +169,15 @@ class Connection:
     async def run_as_sync(self) -> None:
         self._is_sync = True
         await self.run()
+        await self.wait_until_started()
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
         await self._transport.run()
+
+    async def wait_until_started(self) -> None:
+        await self._transport.wait_until_started
 
     def stop_sync(self) -> None:
         self._transport.request_stop()

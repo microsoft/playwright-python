@@ -527,12 +527,10 @@ async def test_timeout_waiting_for_stable_position(page, server):
         }"""
     )
 
-    error = None
-    try:
-        await button.click(timeout=5000)
-    except Error as e:
-        error = e
-    assert "Timeout 5000ms exceeded." in error.message
+    with pytest.raises(Error) as exc_info:
+        await button.click(timeout=3000)
+    error = exc_info.value
+    assert "Timeout 3000ms exceeded." in error.message
     assert "waiting for element to be visible, enabled and stable" in error.message
     assert "element is not stable - waiting" in error.message
 

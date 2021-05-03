@@ -56,7 +56,7 @@ Please use the Async API instead."""
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
-            PipeTransport(compute_driver_executable()),
+            PipeTransport(asyncio.new_event_loop(), compute_driver_executable()),
         )
 
         g_self = greenlet.getcurrent()

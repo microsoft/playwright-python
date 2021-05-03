@@ -172,7 +172,7 @@ class BrowserType(ChannelOwner):
         slow_mo: float = None,
         headers: Dict[str, str] = None,
     ) -> Browser:
-        transport = WebSocketTransport(ws_endpoint, timeout, headers)
+        transport = WebSocketTransport(self._connection._loop, ws_endpoint, timeout, headers)
 
         connection = Connection(
             self._connection._dispatcher_fiber,
@@ -182,8 +182,9 @@ class BrowserType(ChannelOwner):
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
-        self._connection._child_ws_connections.append(connection)
+        await connection.wait_until_started()
         playwright = await connection.wait_for_object_with_known_name("Playwright")
+        self._connection._child_ws_connections.append(connection)
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))

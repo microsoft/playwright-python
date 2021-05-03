@@ -28,11 +28,12 @@ class PlaywrightContextManager:
 
     async def __aenter__(self) -> AsyncPlaywright:
         self._connection = Connection(
-            None, create_remote_object, PipeTransport(compute_driver_executable())
+            None, create_remote_object, PipeTransport(asyncio.get_event_loop(), compute_driver_executable())
         )
         loop = asyncio.get_running_loop()
         self._connection._loop = loop
         loop.create_task(self._connection.run())
+        await self._connection.wait_until_started()
         playwright = AsyncPlaywright(
             await self._connection.wait_for_object_with_known_name("Playwright")
         )

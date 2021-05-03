@@ -41,8 +41,18 @@ def _get_stderr_fileno() -> Optional[int]:
 
 
 class Transport(ABC):
-    def __init__(self) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+        self._loop = loop
+        self.on_error_future: asyncio.Future
         self.on_message = lambda _: None
+
+        self.wait_until_started: asyncio.Future = loop.create_future()
+        self._wait_until_started_set_success = (
+            lambda: self.wait_until_started.set_result(True)
+        )
+        self._wait_until_started_set_exception = (
+            lambda exc: self.wait_until_started.set_exception(exc)
+        )
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -57,7 +67,7 @@ class Transport(ABC):
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
-        self.on_error_future: asyncio.Future = asyncio.Future()
+        self.on_error_future = asyncio.Future()
 
     @abstractmethod
     def send(self, message: Dict) -> None:
@@ -78,8 +88,8 @@ class Transport(ABC):
 
 
 class PipeTransport(Transport):
-    def __init__(self, driver_executable: Path) -> None:
-        super().__init__()
+    def __init__(self, loop: asyncio.AbstractEventLoop, driver_executable: Path) -> None:
+        super().__init__(loop)
         self._stopped = False
         self._driver_executable = driver_executable
         self._loop: asyncio.AbstractEventLoop
@@ -96,14 +106,27 @@ class PipeTransport(Transport):
         await super().run()
         self._stopped_future: asyncio.Future = asyncio.Future()
 
-        self._proc = proc = await asyncio.create_subprocess_exec(
-            str(self._driver_executable),
-            "run-driver",
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=_get_stderr_fileno(),
-            limit=32768,
-        )
+        try:
+            self._proc = proc = await asyncio.create_subprocess_exec(
+                str(self._driver_executable),
+                "run-driver",
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=_get_stderr_fileno(),
+                limit=32768,
+            )
+        except FileNotFoundError:
+            self._wait_until_started_set_exception(
+                Error(
+                    "playwright's driver is not found, You can read the contributing guide "
+                    "for some guidance on how to get everything setup for working on the code "
+                    "https://github.com/microsoft/playwright-python/blob/master/CONTRIBUTING.md"
+                )
+            )
+            return
+
+        self._wait_until_started_set_success()
+
         assert proc.stdout
         assert proc.stdin
         self._output = proc.stdin
@@ -138,10 +161,10 @@ class PipeTransport(Transport):
 
 class WebSocketTransport(AsyncIOEventEmitter, Transport):
     def __init__(
-        self, ws_endpoint: str, timeout: float = None, headers: Dict[str, str] = None
+        self, loop: asyncio.AbstractEventLoop, ws_endpoint: str, timeout: float = None, headers: Dict[str, str] = None
     ) -> None:
         super().__init__()
-        Transport.__init__(self)
+        Transport.__init__(self, loop)
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
@@ -168,7 +191,15 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
             options["ping_timeout"] = self.timeout / 1000
         if self.headers is not None:
             options["extra_headers"] = self.headers
-        self._connection = await websockets.connect(self.ws_endpoint, **options)
+        try:
+            self._connection = await websockets.connect(self.ws_endpoint, **options)
+        except Exception as err:
+            self._wait_until_started_set_exception(
+                Error(f"playwright's websocket endpoint connection error: {err}")
+            )
+            return
+
+        self._wait_until_started_set_success()
 
         while not self._stopped:
             try:
