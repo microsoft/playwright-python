@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Union, cast
 
@@ -179,11 +180,24 @@ class BrowserType(ChannelOwner):
             self._connection._object_factory,
             transport,
         )
+        await connection._transport.start()
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
+        obj = asyncio.create_task(
+            connection.wait_for_object_with_known_name("Playwright")
+        )
+        done, pending = await asyncio.wait(
+            {
+                obj,
+                connection._transport.on_error_future,  # type: ignore
+            },
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if not obj.done():
+            obj.cancel()
+        playwright = next(iter(done)).result()
         self._connection._child_ws_connections.append(connection)
-        playwright = await connection.wait_for_object_with_known_name("Playwright")
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
