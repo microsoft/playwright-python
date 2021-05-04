@@ -969,7 +969,7 @@ def expect_ssl_error(error_message: str, browser_name: str) -> None:
         if sys.platform == "darwin":
             assert "The certificate for this server is invalid" in error_message
         elif sys.platform == "win32":
-            assert "SSL connect error" in error_message
+            assert "SSL peer certificate or SSH remote key was not OK" in error_message
         else:
             assert "Unacceptable TLS certificate" in error_message
     else:
