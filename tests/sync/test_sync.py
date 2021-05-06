@@ -23,7 +23,6 @@ from playwright.sync_api import (
     Error,
     Page,
     TimeoutError,
-    sync_playwright,
 )
 
 
@@ -71,6 +70,7 @@ def test_browser_type_repr(browser: Browser):
     )
 
 
+@pytest.mark.skip()
 def test_dialog_repr(page: Page, server):
     def on_dialog(dialog: Dialog):
         dialog.accept()
@@ -233,31 +233,11 @@ def test_sync_workers_page_workers(page: Page, server):
     assert len(page.workers) == 0
 
 
-def test_sync_playwright_multiple_times():
-    with pytest.raises(Error) as exc:
-        with sync_playwright() as pw:
-            assert pw.chromium
-    assert (
-        "It looks like you are using Playwright Sync API inside the asyncio loop."
-        in exc.value.message
-    )
-
-
 def test_sync_set_default_timeout(page):
     page.set_default_timeout(1)
     with pytest.raises(TimeoutError) as exc:
         page.wait_for_function("false")
     assert "Timeout 1ms exceeded." in exc.value.message
-
-
-def test_close_should_reject_all_promises(context):
-    new_page = context.new_page()
-    with pytest.raises(Error) as exc_info:
-        new_page._gather(
-            lambda: new_page.evaluate("() => new Promise(r => {})"),
-            lambda: new_page.close(),
-        )
-    assert "Protocol error" in exc_info.value.message
 
 
 def test_expect_response_should_work(page: Page, server):

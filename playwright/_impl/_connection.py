@@ -13,12 +13,10 @@
 # limitations under the License.
 
 import asyncio
-import sys
 import traceback
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
 from playwright._impl._helper import ParsedMessagePayload, parse_error
@@ -81,7 +79,6 @@ class ChannelOwner(AsyncIOEventEmitter):
     ) -> None:
         super().__init__(loop=parent._loop)
         self._loop: asyncio.AbstractEventLoop = parent._loop
-        self._dispatcher_fiber: Any = parent._dispatcher_fiber
         self._type = type
         self._guid = guid
         self._connection: Connection = (
@@ -150,11 +147,9 @@ class RootChannelOwner(ChannelOwner):
 class Connection:
     def __init__(
         self,
-        dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], Any],
         transport: Transport,
     ) -> None:
-        self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self._dispatch(msg)
         self._waiting_for_object: Dict[str, Any] = {}
@@ -162,23 +157,13 @@ class Connection:
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._object_factory = object_factory
-        self._is_sync = False
         self._api_name = ""
         self._child_ws_connections: List["Connection"] = []
-
-    async def run_as_sync(self) -> None:
-        self._is_sync = True
-        await self.run()
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
         await self._transport.run()
-
-    def stop_sync(self) -> None:
-        self._transport.request_stop()
-        self._dispatcher_fiber.switch()
-        self.cleanup()
 
     async def stop_async(self) -> None:
         self._transport.request_stop()
@@ -264,18 +249,7 @@ class Connection:
             return
 
         object = self._objects[guid]
-        try:
-            if self._is_sync:
-                for listener in object._channel.listeners(method):
-                    g = greenlet(listener)
-                    g.switch(self._replace_guids_with_channels(params))
-            else:
-                object._channel.emit(method, self._replace_guids_with_channels(params))
-        except Exception:
-            print(
-                "Error dispatching the event",
-                "".join(traceback.format_exception(*sys.exc_info())),
-            )
+        object._channel.emit(method, self._replace_guids_with_channels(params))
 
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict

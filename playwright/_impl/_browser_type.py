@@ -129,7 +129,7 @@ class BrowserType(ChannelOwner):
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
-        normalize_context_params(self._connection._is_sync, params)
+        normalize_context_params(False, params)
         normalize_launch_params(params)
         try:
             context = from_channel(
@@ -150,9 +150,7 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
-        params["sdkLanguage"] = (
-            "python" if self._connection._is_sync else "python-async"
-        )
+        params["sdkLanguage"] = "python"
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
         browser._is_remote = True
@@ -176,12 +174,10 @@ class BrowserType(ChannelOwner):
         transport = WebSocketTransport(ws_endpoint, timeout, headers)
 
         connection = Connection(
-            self._connection._dispatcher_fiber,
             self._connection._object_factory,
             transport,
         )
         await connection._transport.start()
-        connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
         obj = asyncio.create_task(

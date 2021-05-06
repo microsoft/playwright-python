@@ -100,7 +100,7 @@ class Browser(ChannelOwner):
         storageState: Union[StorageState, str, Path] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        normalize_context_params(self._connection._is_sync, params)
+        normalize_context_params(False, params)
 
         channel = await self._channel.send("newContext", params)
         context = from_channel(channel)

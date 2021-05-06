@@ -25,7 +25,6 @@ if TYPE_CHECKING:  # pragma: no cover
 class Video:
     def __init__(self, page: "Page") -> None:
         self._loop = page._loop
-        self._dispatcher_fiber = page._dispatcher_fiber
         self._page = page
         self._artifact_future = page._loop.create_future()
         if page._browser_context and page._browser_context._browser:

@@ -31,5 +31,5 @@ def test_running_in_thread(browser_name, launch_arguments):
 
     test_thread = TestThread()
     test_thread.start()
-    test_thread.join()
+    test_thread.join(30)
     assert "Success" in result

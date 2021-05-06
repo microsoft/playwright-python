@@ -16,6 +16,8 @@ import json
 
 import pytest
 
+pytestmark = pytest.mark.skip()
+
 
 def test_should_capture_local_storage(context, is_webkit, is_win):
     if is_webkit and is_win:

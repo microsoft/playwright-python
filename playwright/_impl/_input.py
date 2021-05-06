@@ -20,7 +20,6 @@ class Keyboard:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
         self._loop = channel._connection._loop
-        self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def down(self, key: str) -> None:
         await self._channel.send("keyboardDown", locals_to_params(locals()))
@@ -42,7 +41,6 @@ class Mouse:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
         self._loop = channel._connection._loop
-        self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def move(self, x: float, y: float, steps: int = None) -> None:
         await self._channel.send("mouseMove", locals_to_params(locals()))
@@ -85,7 +83,6 @@ class Touchscreen:
     def __init__(self, channel: Channel) -> None:
         self._channel = channel
         self._loop = channel._connection._loop
-        self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def tap(self, x: float, y: float) -> None:
         await self._channel.send("touchscreenTap", locals_to_params(locals()))
