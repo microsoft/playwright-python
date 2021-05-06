@@ -1647,12 +1647,16 @@ class ElementHandle(JSHandle):
     ) -> typing.List[str]:
         """ElementHandle.select_option
 
+        This method waits for [actionability](./actionability.md) checks, waits until all specified options are present in the
+        `<select>` element and selects these options.
+
+        If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
+
         Returns the array of option values that have been successfully selected.
 
-        Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
-        element, the method throws an error.
-
-        Will wait until all specified options are present in the `<select>` element.
+        Triggers a `change` and `input` event once all the provided options have been selected.
 
         ```py
         # single selection matching the value
@@ -1782,10 +1786,14 @@ class ElementHandle(JSHandle):
         """ElementHandle.fill
 
         This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
-        event after filling. If the element is inside the `<label>` element that has associated
-        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be filled
-        instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method
-        throws an error. Note that you can pass an empty string to clear the input field.
+        event after filling. Note that you can pass an empty string to clear the input field.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+        instead.
+
+        To send fine-grained keyboard events, use `element_handle.type()`.
 
         Parameters
         ----------
@@ -3759,10 +3767,13 @@ class Frame(SyncBase):
         """Frame.fill
 
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-        element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
-        associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
-        filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
-        method throws an error. Note that you can pass an empty string to clear the input field.
+        element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
+        field.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+        instead.
 
         To send fine-grained keyboard events, use `frame.type()`.
 
@@ -4001,12 +4012,16 @@ class Frame(SyncBase):
     ) -> typing.List[str]:
         """Frame.select_option
 
+        This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
+        all specified options are present in the `<select>` element and selects these options.
+
+        If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
+
         Returns the array of option values that have been successfully selected.
 
-        Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
-        matching `selector`, the method throws an error.
-
-        Will wait until all specified options are present in the `<select>` element.
+        Triggers a `change` and `input` event once all the provided options have been selected.
 
         ```py
         # single selection matching the value
@@ -4605,6 +4620,8 @@ class ConsoleMessage(SyncBase):
     def text(self) -> str:
         """ConsoleMessage.text
 
+        The text of the console message.
+
         Returns
         -------
         str
@@ -4614,6 +4631,8 @@ class ConsoleMessage(SyncBase):
     @property
     def args(self) -> typing.List["JSHandle"]:
         """ConsoleMessage.args
+
+        List of arguments passed to a `console` function call. See also `page.on('console')`.
 
         Returns
         -------
@@ -6759,14 +6778,17 @@ class Page(SyncBase):
         """Page.fill
 
         This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-        element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
-        associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
-        filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
-        method throws an error. Note that you can pass an empty string to clear the input field.
+        element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
+        field.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+        instead.
 
         To send fine-grained keyboard events, use `page.type()`.
 
-        Shortcut for main frame's `frame.fill()`
+        Shortcut for main frame's `frame.fill()`.
 
         Parameters
         ----------
@@ -7007,12 +7029,16 @@ class Page(SyncBase):
     ) -> typing.List[str]:
         """Page.select_option
 
+        This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
+        all specified options are present in the `<select>` element and selects these options.
+
+        If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
+
         Returns the array of option values that have been successfully selected.
 
-        Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
-        matching `selector`, the method throws an error.
-
-        Will wait until all specified options are present in the `<select>` element.
+        Triggers a `change` and `input` event once all the provided options have been selected.
 
         ```py
         # single selection matching the value
@@ -7023,7 +7049,7 @@ class Page(SyncBase):
         page.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
         ```
 
-        Shortcut for main frame's `frame.select_option()`
+        Shortcut for main frame's `frame.select_option()`.
 
         Parameters
         ----------
