@@ -92,7 +92,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             if platform == "mac":
                 wheel = "macosx_10_13_x86_64.whl"
             if platform == "linux":
-                wheel = "manylinux1_x86_64.whl"
+                wheel = "manylinux_2_27_x86_64.whl"
             if platform == "win32":
                 wheel = "win32.whl"
             if platform == "win32_x64":
