@@ -31,21 +31,20 @@ class PlaywrightContextManager:
         self._playwright: SyncPlaywright
 
     def __enter__(self) -> SyncPlaywright:
-        def greenlet_main() -> None:
-            loop = None
-            own_loop = None
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                own_loop = loop
-
-            if loop.is_running():
-                raise Error(
-                    """It looks like you are using Playwright Sync API inside the asyncio loop.
+        loop: asyncio.AbstractEventLoop
+        own_loop = None
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            own_loop = loop
+        if loop.is_running():
+            raise Error(
+                """It looks like you are using Playwright Sync API inside the asyncio loop.
 Please use the Async API instead."""
-                )
+            )
 
+        def greenlet_main() -> None:
             loop.run_until_complete(self._connection.run_as_sync())
 
             if own_loop:
@@ -56,7 +55,7 @@ Please use the Async API instead."""
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
-            PipeTransport(compute_driver_executable()),
+            PipeTransport(loop, compute_driver_executable()),
         )
 
         g_self = greenlet.getcurrent()

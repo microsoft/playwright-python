@@ -91,3 +91,11 @@ class WaitHelper:
 
     def result(self) -> asyncio.Future:
         return self._result
+
+
+def throw_on_timeout(timeout: float, exception: Exception) -> asyncio.Task:
+    async def throw() -> None:
+        await asyncio.sleep(timeout / 1000)
+        raise exception
+
+    return asyncio.create_task(throw())

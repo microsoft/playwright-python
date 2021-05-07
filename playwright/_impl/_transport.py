@@ -41,8 +41,10 @@ def _get_stderr_fileno() -> Optional[int]:
 
 
 class Transport(ABC):
-    def __init__(self) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+        self._loop = loop
         self.on_message = lambda _: None
+        self.on_error_future: asyncio.Future = loop.create_future()
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -55,9 +57,9 @@ class Transport(ABC):
     async def wait_until_stopped(self) -> None:
         pass
 
+    @abstractmethod
     async def run(self) -> None:
-        self._loop = asyncio.get_running_loop()
-        self.on_error_future: asyncio.Future = asyncio.Future()
+        pass
 
     @abstractmethod
     def send(self, message: Dict) -> None:
@@ -78,11 +80,12 @@ class Transport(ABC):
 
 
 class PipeTransport(Transport):
-    def __init__(self, driver_executable: Path) -> None:
-        super().__init__()
+    def __init__(
+        self, loop: asyncio.AbstractEventLoop, driver_executable: Path
+    ) -> None:
+        super().__init__(loop)
         self._stopped = False
         self._driver_executable = driver_executable
-        self._loop: asyncio.AbstractEventLoop
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -93,17 +96,21 @@ class PipeTransport(Transport):
         await self._proc.wait()
 
     async def run(self) -> None:
-        await super().run()
         self._stopped_future: asyncio.Future = asyncio.Future()
 
-        self._proc = proc = await asyncio.create_subprocess_exec(
-            str(self._driver_executable),
-            "run-driver",
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=_get_stderr_fileno(),
-            limit=32768,
-        )
+        try:
+            self._proc = proc = await asyncio.create_subprocess_exec(
+                str(self._driver_executable),
+                "run-driver",
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=_get_stderr_fileno(),
+                limit=32768,
+            )
+        except Exception as exc:
+            self.on_error_future.set_exception(exc)
+            return
+
         assert proc.stdout
         assert proc.stdin
         self._output = proc.stdin
@@ -138,16 +145,17 @@ class PipeTransport(Transport):
 
 class WebSocketTransport(AsyncIOEventEmitter, Transport):
     def __init__(
-        self, ws_endpoint: str, timeout: float = None, headers: Dict[str, str] = None
+        self,
+        loop: asyncio.AbstractEventLoop,
+        ws_endpoint: str,
+        headers: Dict[str, str] = None,
     ) -> None:
-        super().__init__()
-        Transport.__init__(self)
+        super().__init__(loop)
+        Transport.__init__(self, loop)
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
-        self.timeout = timeout
         self.headers = headers
-        self._loop: asyncio.AbstractEventLoop
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -160,15 +168,13 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         await self._connection.wait_closed()
 
     async def run(self) -> None:
-        await super().run()
-
-        options: Dict[str, Any] = {}
-        if self.timeout is not None:
-            options["close_timeout"] = self.timeout / 1000
-            options["ping_timeout"] = self.timeout / 1000
-        if self.headers is not None:
-            options["extra_headers"] = self.headers
-        self._connection = await websockets.connect(self.ws_endpoint, **options)
+        try:
+            self._connection = await websockets.connect(
+                self.ws_endpoint, extra_headers=self.headers
+            )
+        except Exception as exc:
+            self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
+            return
 
         while not self._stopped:
             try:
@@ -188,8 +194,8 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
                 )
                 break
             except Exception as exc:
-                print(f"Received unhandled exception: {exc}")
                 self.on_error_future.set_exception(exc)
+                break
 
     def send(self, message: Dict) -> None:
         if self._stopped or self._connection.closed:

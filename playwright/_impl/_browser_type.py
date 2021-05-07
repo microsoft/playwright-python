@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Union, cast
 
@@ -21,6 +22,7 @@ from playwright._impl._api_structures import (
     ProxySettings,
     ViewportSize,
 )
+from playwright._impl._api_types import Error
 from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import (
@@ -37,6 +39,7 @@ from playwright._impl._helper import (
     not_installed_error,
 )
 from playwright._impl._transport import WebSocketTransport
+from playwright._impl._wait_helper import throw_on_timeout
 
 
 class BrowserType(ChannelOwner):
@@ -172,8 +175,10 @@ class BrowserType(ChannelOwner):
         slow_mo: float = None,
         headers: Dict[str, str] = None,
     ) -> Browser:
-        transport = WebSocketTransport(ws_endpoint, timeout, headers)
+        if timeout is None:
+            timeout = 30000
 
+        transport = WebSocketTransport(self._connection._loop, ws_endpoint, headers)
         connection = Connection(
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
@@ -182,8 +187,20 @@ class BrowserType(ChannelOwner):
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
+        future = connection._loop.create_task(
+            connection.wait_for_object_with_known_name("Playwright")
+        )
+        timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
+        done, pending = await asyncio.wait(
+            {transport.on_error_future, future, timeout_future},
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if not future.done():
+            future.cancel()
+        if not timeout_future.done():
+            timeout_future.cancel()
+        playwright = next(iter(done)).result()
         self._connection._child_ws_connections.append(connection)
-        playwright = await connection.wait_for_object_with_known_name("Playwright")
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
