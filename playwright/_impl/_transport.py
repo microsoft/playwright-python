@@ -160,7 +160,6 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         self,
         loop: asyncio.AbstractEventLoop,
         ws_endpoint: str,
-        timeout: float = None,
         headers: Dict[str, str] = None,
     ) -> None:
         super().__init__(loop)
@@ -168,7 +167,6 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
-        self.timeout = timeout or 30000
         self.headers = headers
 
     def request_stop(self) -> None:
@@ -184,18 +182,13 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     async def run(self) -> None:
         await super().run()
 
-        options: Dict[str, Any] = {}
-        if self.timeout is not None:
-            options["close_timeout"] = self.timeout / 1000
-            options["ping_timeout"] = self.timeout / 1000
-
-        if self.headers:
-            options["extra_headers"] = self.headers
         try:
-            self._connection = await websockets.connect(self.ws_endpoint, **options)
+            self._connection = await websockets.connect(
+                self.ws_endpoint, extra_headers=self.headers
+            )
         except Exception as err:
             self._wait_until_initialized_set_exception(
-                Error(f"playwright's websocket endpoint connection error: {err}")
+                Error(f"websockets.connect: {err}")
             )
             return
 
@@ -221,6 +214,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
             except Exception as exc:
                 print(f"Received unhandled exception: {exc}")
                 self.on_error_future.set_exception(exc)
+                break
 
     def send(self, message: Dict) -> None:
         if self._stopped or self._connection.closed:
