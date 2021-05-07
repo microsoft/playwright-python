@@ -10,7 +10,7 @@ repos:
       - id: check-toml
       - id: requirements-txt-fixer
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 21.5b0
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy

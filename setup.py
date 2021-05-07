@@ -120,7 +120,6 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 with InWheel(
                     in_wheel=whlfile,
                     out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
-                    ret_self=True,
                 ):
                     print("Updating RECORD file of %s" % whlfile)
             shutil.rmtree(self.dist_dir)
