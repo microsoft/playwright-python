@@ -199,8 +199,7 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
 # WebKit rich text accessibility is iffy
 @pytest.mark.skip_browser("webkit")
 def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_fields_with_role_should_have_children(
-    page,
-    is_firefox,
+    page, is_firefox, browser_channel
 ):
     page.set_content(
         """
@@ -216,15 +215,29 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
             "children": [{"role": "text", "name": "my fake image"}],
         }
     else:
-        golden = {
-            "role": "textbox",
-            "name": "",
-            "value": "Edit this image: ",
-            "children": [
-                {"role": "text", "name": "Edit this image:"},
-                {"role": "img", "name": "my fake image"},
-            ],
-        }
+        if browser_channel:
+            golden = {
+                "role": "textbox",
+                "name": "",
+                "value": "Edit this image: ",
+                "children": [
+                    {"role": "text", "name": "Edit this image:"},
+                    {"role": "img", "name": "my fake image"},
+                ],
+                "value": "Edit this image: ",
+            }
+        else:
+            golden = {
+                "role": "textbox",
+                "name": "",
+                "multiline": True,
+                "value": "Edit this image: ",
+                "children": [
+                    {"role": "text", "name": "Edit this image:"},
+                    {"role": "img", "name": "my fake image"},
+                ],
+                "value": "Edit this image: ",
+            }
     snapshot = page.accessibility.snapshot()
     assert snapshot["children"][0] == golden
 
@@ -232,41 +245,65 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
 # Firefox does not support contenteditable="plaintext-only".
 # WebKit rich text accessibility is iffy
 @pytest.mark.only_browser("chromium")
-def test_accessibility_plain_text_field_with_role_should_not_have_children(page):
+def test_accessibility_plain_text_field_with_role_should_not_have_children(
+    page, browser_channel
+):
     page.set_content(
         """
     <div contenteditable="plaintext-only" role='textbox'>Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
     )
     snapshot = page.accessibility.snapshot()
-    assert snapshot["children"][0] == {
-        "role": "textbox",
-        "name": "",
-        "value": "Edit this image:",
-    }
+    if browser_channel:
+        assert snapshot["children"][0] == {
+            "name": "",
+            "role": "textbox",
+            "value": "Edit this image:",
+        }
+    else:
+        assert snapshot["children"][0] == {
+            "multiline": True,
+            "name": "",
+            "role": "textbox",
+            "value": "Edit this image:",
+        }
 
 
 @pytest.mark.only_browser("chromium")
 def test_accessibility_plain_text_field_without_role_should_not_have_content(
-    page,
+    page, browser_channel
 ):
     page.set_content(
         """
     <div contenteditable="plaintext-only">Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
     )
     snapshot = page.accessibility.snapshot()
-    assert snapshot["children"][0] == {"role": "generic", "name": ""}
+    if browser_channel:
+        assert snapshot["children"][0] == {"name": "", "role": "generic"}
+    else:
+        assert snapshot["children"][0] == {
+            "name": "",
+            "role": "generic",
+            "value": "Edit this image:",
+        }
 
 
 @pytest.mark.only_browser("chromium")
 def test_accessibility_plain_text_field_with_tabindex_and_without_role_should_not_have_content(
-    page,
+    page, browser_channel
 ):
     page.set_content(
         """
     <div contenteditable="plaintext-only" tabIndex=0>Edit this image:<img src="fakeimage.png" alt="my fake image"></div>"""
     )
     snapshot = page.accessibility.snapshot()
-    assert snapshot["children"][0] == {"role": "generic", "name": ""}
+    if browser_channel:
+        assert snapshot["children"][0] == {"name": "", "role": "generic"}
+    else:
+        assert snapshot["children"][0] == {
+            "name": "",
+            "role": "generic",
+            "value": "Edit this image:",
+        }
 
 
 def test_accessibility_non_editable_textbox_with_role_and_tabIndex_and_label_should_not_have_children(

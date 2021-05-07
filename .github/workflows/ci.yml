@@ -145,19 +145,19 @@ jobs:
     - name: Install ffmpeg
       run: python -m playwright install ffmpeg
     - name: Common Tests
-      run: pytest -vv tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest -vv tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest -vv tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Async API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest -vv tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest -vv tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - uses: actions/upload-artifact@v2
       if: failure()
       with:
