@@ -46,12 +46,12 @@ class Transport(ABC):
         self.on_error_future: asyncio.Future
         self.on_message = lambda _: None
 
-        self.wait_until_started: asyncio.Future = loop.create_future()
-        self._wait_until_started_set_success = (
-            lambda: self.wait_until_started.set_result(True)
+        self.wait_until_initialized: asyncio.Future = loop.create_future()
+        self._wait_until_initialized_set_success = (
+            lambda: self.wait_until_initialized.set_result(True)
         )
-        self._wait_until_started_set_exception = (
-            lambda exc: self.wait_until_started.set_exception(exc)
+        self._wait_until_initialized_set_exception = (
+            lambda exc: self.wait_until_initialized.set_exception(exc)
         )
 
     @abstractmethod
@@ -88,7 +88,9 @@ class Transport(ABC):
 
 
 class PipeTransport(Transport):
-    def __init__(self, loop: asyncio.AbstractEventLoop, driver_executable: Path) -> None:
+    def __init__(
+        self, loop: asyncio.AbstractEventLoop, driver_executable: Path
+    ) -> None:
         super().__init__(loop)
         self._stopped = False
         self._driver_executable = driver_executable
@@ -115,17 +117,11 @@ class PipeTransport(Transport):
                 stderr=_get_stderr_fileno(),
                 limit=32768,
             )
-        except FileNotFoundError:
-            self._wait_until_started_set_exception(
-                Error(
-                    "playwright's driver is not found, You can read the contributing guide "
-                    "for some guidance on how to get everything setup for working on the code "
-                    "https://github.com/microsoft/playwright-python/blob/master/CONTRIBUTING.md"
-                )
-            )
+        except Exception as exc:
+            self._wait_until_initialized_set_exception(exc)
             return
 
-        self._wait_until_started_set_success()
+        self._wait_until_initialized_set_success()
 
         assert proc.stdout
         assert proc.stdin
@@ -161,16 +157,19 @@ class PipeTransport(Transport):
 
 class WebSocketTransport(AsyncIOEventEmitter, Transport):
     def __init__(
-        self, loop: asyncio.AbstractEventLoop, ws_endpoint: str, timeout: float = None, headers: Dict[str, str] = None
+        self,
+        loop: asyncio.AbstractEventLoop,
+        ws_endpoint: str,
+        timeout: float = None,
+        headers: Dict[str, str] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(loop)
         Transport.__init__(self, loop)
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
-        self.timeout = timeout
+        self.timeout = timeout or 30000
         self.headers = headers
-        self._loop: asyncio.AbstractEventLoop
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -189,17 +188,18 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         if self.timeout is not None:
             options["close_timeout"] = self.timeout / 1000
             options["ping_timeout"] = self.timeout / 1000
-        if self.headers is not None:
+
+        if self.headers:
             options["extra_headers"] = self.headers
         try:
             self._connection = await websockets.connect(self.ws_endpoint, **options)
         except Exception as err:
-            self._wait_until_started_set_exception(
+            self._wait_until_initialized_set_exception(
                 Error(f"playwright's websocket endpoint connection error: {err}")
             )
             return
 
-        self._wait_until_started_set_success()
+        self._wait_until_initialized_set_success()
 
         while not self._stopped:
             try:
