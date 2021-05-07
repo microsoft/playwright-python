@@ -182,13 +182,3 @@ async def test_prevent_getting_video_path(
         == "Path is not available when using browserType.connect(). Use save_as() to save a local copy."
     )
     remote_server.kill()
-
-
-async def test_connect_to_closed_server_without_hangs(
-    browser_type: BrowserType, launch_server
-):
-    remote_server = launch_server()
-    remote_server.kill()
-    with pytest.raises(Error) as exc:
-        await browser_type.connect(remote_server.ws_endpoint)
-    assert "playwright's websocket endpoint connection error" in exc.value.message

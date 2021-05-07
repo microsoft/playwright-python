@@ -145,13 +145,3 @@ def test_browser_type_connect_should_forward_close_events_to_pages(
     assert events == ["page::close", "context::close", "browser::disconnected"]
     remote.kill()
     assert events == ["page::close", "context::close", "browser::disconnected"]
-
-
-def test_connect_to_closed_server_without_hangs(
-    browser_type: BrowserType, launch_server
-):
-    remote_server = launch_server()
-    remote_server.kill()
-    with pytest.raises(Error) as exc:
-        browser_type.connect(remote_server.ws_endpoint)
-    assert "playwright's websocket endpoint connection error" in exc.value.message

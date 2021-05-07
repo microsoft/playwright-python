@@ -42,7 +42,6 @@ def _get_stderr_fileno() -> Optional[int]:
 
 class Transport(ABC):
     def __init__(self) -> None:
-        self.on_error_future: asyncio.Future
         self.on_message = lambda _: None
 
     @abstractmethod
@@ -56,14 +55,9 @@ class Transport(ABC):
     async def wait_until_stopped(self) -> None:
         pass
 
-    async def start(self) -> None:
-        if not hasattr(self, "on_error_future"):
-            self.on_error_future = asyncio.Future()
-        self._loop = asyncio.get_running_loop()
-
-    @abstractmethod
     async def run(self) -> None:
-        pass
+        self._loop = asyncio.get_running_loop()
+        self.on_error_future: asyncio.Future = asyncio.Future()
 
     @abstractmethod
     def send(self, message: Dict) -> None:
@@ -99,28 +93,17 @@ class PipeTransport(Transport):
         await self._proc.wait()
 
     async def run(self) -> None:
-        await self.start()
+        await super().run()
         self._stopped_future: asyncio.Future = asyncio.Future()
 
-        try:
-            self._proc = proc = await asyncio.create_subprocess_exec(
-                str(self._driver_executable),
-                "run-driver",
-                stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=_get_stderr_fileno(),
-                limit=32768,
-            )
-        except FileNotFoundError:
-            self.on_error_future.set_exception(
-                Error(
-                    "playwright's driver is not found, You can read the contributing guide "
-                    "for some guidance on how to get everything setup for working on the code "
-                    "https://github.com/microsoft/playwright-python/blob/master/CONTRIBUTING.md"
-                )
-            )
-            return
-
+        self._proc = proc = await asyncio.create_subprocess_exec(
+            str(self._driver_executable),
+            "run-driver",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=_get_stderr_fileno(),
+            limit=32768,
+        )
         assert proc.stdout
         assert proc.stdin
         self._output = proc.stdin
@@ -177,22 +160,15 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         await self._connection.wait_closed()
 
     async def run(self) -> None:
-        await self.start()
+        await super().run()
 
         options: Dict[str, Any] = {}
         if self.timeout is not None:
             options["close_timeout"] = self.timeout / 1000
             options["ping_timeout"] = self.timeout / 1000
-
         if self.headers is not None:
             options["extra_headers"] = self.headers
-        try:
-            self._connection = await websockets.connect(self.ws_endpoint, **options)
-        except Exception as err:
-            self.on_error_future.set_exception(
-                Error(f"playwright's websocket endpoint connection error: {err}")
-            )
-            return
+        self._connection = await websockets.connect(self.ws_endpoint, **options)
 
         while not self._stopped:
             try:
