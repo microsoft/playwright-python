@@ -178,7 +178,9 @@ class BrowserType(ChannelOwner):
         if timeout is None:
             timeout = 30000
 
-        transport = WebSocketTransport(self._connection._loop, ws_endpoint, headers)
+        transport = WebSocketTransport(
+            self._connection._loop, ws_endpoint, headers, slow_mo
+        )
         connection = Connection(
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
