@@ -1,4 +1,4 @@
-# 🎭 [Playwright](https://playwright.dev) for Python [![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack)
+# 🎭 [Playwright](https://playwright.dev) for Python [![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![Anaconda version](https://img.shields.io/conda/v/microsoft/playwright)](https://anaconda.org/Microsoft/playwright) [![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack)
 
 #### [Docs](https://playwright.dev/python/docs/intro) | [API](https://playwright.dev/python/docs/api/class-playwright)
 
@@ -24,7 +24,9 @@ Headless execution is supported for all browsers on all platforms.
   - [Intercept network requests](#intercept-network-requests)
 - [Documentation](#documentation)
 
-## Usage
+## Usage - pip
+
+[![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/)
 
 ```sh
 pip install playwright
@@ -32,6 +34,19 @@ playwright install
 ```
 
 This installs Playwright and browser binaries for Chromium, Firefox and WebKit. Playwright requires Python 3.7+.
+
+## Usage - conda
+
+[![Anaconda version](https://img.shields.io/conda/v/microsoft/playwright)](https://anaconda.org/Microsoft/playwright)
+
+```sh
+conda config --add channels conda-forge
+conda config --add channels microsoft
+conda install playwright
+playwright install
+```
+
+This installs Playwright and browser binaries for Chromium, Firefox and WebKit with the conda package manager. Playwright requires a conda environment with Python 3.7+.
 
 #### Record and generate code
 
