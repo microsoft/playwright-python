@@ -67,7 +67,7 @@ If your app is based on the modern asyncio loop and you are used to async/await 
 Playwright exposes Async API for you. You should use this API inside a Python REPL supporting `asyncio` like with `python -m asyncio`
 
 ```console
-$ python -m asyncio
+python -m asyncio
 ```
 
 ```py
@@ -119,7 +119,7 @@ Blocking REPL, as in CLI:
 Async REPL such as `asyncio` REPL:
 
 ```console
-$ python -m asyncio
+python -m asyncio
 ```
 
 ```py
