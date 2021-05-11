@@ -141,7 +141,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "websockets>=8.1",
-        "greenlet>=0.4",
+        "greenlet>=1.0.0",
         "pyee>=8.0.1",
         "typing-extensions;python_version<='3.8'",
     ],
