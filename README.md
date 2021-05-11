@@ -26,7 +26,7 @@ Headless execution is supported for all browsers on all platforms.
 
 ## Usage - pip
 
-![](https://img.shields.io/pypi/v/playwright)
+[![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/)
 
 ```sh
 pip install playwright
@@ -37,7 +37,7 @@ This installs Playwright and browser binaries for Chromium, Firefox and WebKit. 
 
 ## Usage - conda
 
-![](https://img.shields.io/conda/v/microsoft/playwright)
+[![Anaconda version](https://img.shields.io/conda/v/microsoft/playwright)](https://anaconda.org/Microsoft/playwright)
 
 ```sh
 conda config --add channels conda-forge
@@ -46,7 +46,7 @@ conda install playwright
 playwright install
 ```
 
-This installs Playwright and browser binaries for Chromium, Firefox and WebKit with the conda package manager. Playwright requires conda environment with Python 3.7+.
+This installs Playwright and browser binaries for Chromium, Firefox and WebKit with the conda package manager. Playwright requires a conda environment with Python 3.7+.
 
 #### Record and generate code
 
