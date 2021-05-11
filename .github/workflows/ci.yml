@@ -163,3 +163,23 @@ jobs:
       with:
         name: ${{ matrix.browser-channel }}-${{ matrix.os }}
         path: pw-log.txt
+  build-conda:
+    name: Conda Build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-10.15, windows-2019]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Get conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.9
+          channels: conda-forge
+      - name: Prepare
+        run: conda install conda-build conda-verify
+      - name: Build
+        run: conda build .

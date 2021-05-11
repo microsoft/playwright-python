@@ -1,0 +1,53 @@
+package:
+  name: playwright
+  version: "{{ environ.get('GIT_DESCRIBE_TAG') }}"
+
+source:
+  path: .
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+  skip: true # [py<37]
+  binary_relocation: False
+  missing_dso_whitelist: "*"
+  entry_points:
+    - playwright = playwright.__main__:main
+
+requirements:
+  host:
+    - python
+    - wheel
+    - pip
+    - curl
+    - setuptools_scm
+  run:
+    - python
+    - greenlet >=0.4
+    - pyee >=8.0.1
+    - websockets >=8.1
+    - typing_extensions # [py<39]
+test:
+  requires:
+    - pip
+  imports:
+    - playwright
+    - playwright.sync_api
+    - playwright.async_api
+  commands:
+    - pip check
+    - playwright --help
+
+about:
+  home: https://github.com/microsoft/playwright-python
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Python version of the Playwright testing and automation library.
+  description: |
+    Playwright is a Python library to automate Chromium,
+    Firefox and WebKit browsers with a single API. Playwright
+    delivers automation that is ever-green, capable, reliable
+    and fast.
+  doc_url: https://playwright.dev/python/docs/intro/
+  dev_url: https://github.com/microsoft/playwright-python
