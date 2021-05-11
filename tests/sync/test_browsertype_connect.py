@@ -12,10 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 import pytest
 
 from playwright.sync_api import BrowserType, Error
 from tests.server import Server
+
+
+def test_browser_type_connect_slow_mo(
+    server: Server, browser_type: BrowserType, launch_server
+):
+    remote_server = launch_server()
+    browser = browser_type.connect(remote_server.ws_endpoint, slow_mo=100)
+    browser_context = browser.new_context()
+    page = browser_context.new_page()
+    t1 = time.monotonic()
+    assert page.evaluate("11 * 11") == 121
+    assert (time.monotonic() - t1) >= 0.100
+    page.goto(server.EMPTY_PAGE)
+    browser.close()
 
 
 def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(

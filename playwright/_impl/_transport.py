@@ -149,6 +149,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         loop: asyncio.AbstractEventLoop,
         ws_endpoint: str,
         headers: Dict[str, str] = None,
+        slow_mo: float = None,
     ) -> None:
         super().__init__(loop)
         Transport.__init__(self, loop)
@@ -156,6 +157,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.headers = headers
+        self.slow_mo = slow_mo
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -179,6 +181,8 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         while not self._stopped:
             try:
                 message = await self._connection.recv()
+                if self.slow_mo is not None:
+                    await asyncio.sleep(self.slow_mo / 1000)
                 if self._stopped:
                     self.on_error_future.set_exception(
                         Error("Playwright connection closed")
