@@ -8,7 +8,7 @@ source:
 build:
   number: 0
   script: "{{ PYTHON }} -m pip install . --no-deps -vv"
-  skip: true  # [py<37]
+  skip: true # [py<37]
   binary_relocation: False
   missing_dso_whitelist: "*"
   entry_points:
@@ -26,7 +26,7 @@ requirements:
     - greenlet >=0.4
     - pyee >=8.0.1
     - websockets >=8.1
-    - typing_extensions  # [py<39]
+    - typing_extensions # [py<39]
 test:
   requires:
     - pip
@@ -48,11 +48,6 @@ about:
     Playwright is a Python library to automate Chromium,
     Firefox and WebKit browsers with a single API. Playwright
     delivers automation that is ever-green, capable, reliable
-    and fast. See how Playwright is better.
+    and fast.
   doc_url: https://playwright.dev/python/docs/intro/
   dev_url: https://github.com/microsoft/playwright-python
-
-extra:
-  recipe-maintainers:
-    - kumaraditya303
-    - mxschmitt
