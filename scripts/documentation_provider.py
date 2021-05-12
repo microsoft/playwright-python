@@ -245,9 +245,11 @@ class DocumentationProvider:
     def make_optional(self, text: str) -> str:
         if text.startswith("Union["):
             if text.endswith("NoneType]"):
-                return text
-            return text[:-1] + ", NoneType]"
-        return f"Union[{text}, NoneType]"
+                return text.replace("Union", "Optional").replace(", NoneType", "")
+            return text.replace("Union", "Optional")
+        if text.startswith("Optional"):
+            return text
+        return f"Optional[{text}]"
 
     def compare_types(
         self, value: Any, doc_value: Any, fqname: str, direction: str
@@ -311,6 +313,15 @@ class DocumentationProvider:
                 return self.make_optional(self.serialize_python_type(args[0]))
             ll = list(map(lambda a: self.serialize_python_type(a), args))
             ll.sort(key=lambda item: "}" if item == "NoneType" else item)
+            if "NoneType" in ll:
+                try:
+                    ll.remove("NoneType")
+                    ll.remove("Optional")
+                except ValueError:
+                    pass
+                if len(ll) > 1:
+                    return f"Optional[Union[{', '.join(ll)}]]"
+                return f"Optional[{', '.join(ll)}]"
             return f"Union[{', '.join(ll)}]"
         if str(origin) == "<class 'dict'>":
             args = get_args(value)
@@ -345,6 +356,11 @@ class DocumentationProvider:
             for i in range(len(ll)):
                 if ll[i].startswith("Union["):
                     ll[i] = ll[i][6:-1]
+            if "NoneType" in ll and "Optional" not in ll:
+                ll.remove("NoneType")
+                if len(ll) > 1:
+                    return f"Optional[Union[{', '.join(ll)}]]"
+                return f"Optional[{', '.join(ll)}]"
             return f"Union[{', '.join(ll)}]"
 
         type_name = type["name"]

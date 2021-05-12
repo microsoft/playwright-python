@@ -115,7 +115,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data)
 
@@ -130,7 +130,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[Any, NoneType]
+        Optional[Any]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data_json)
 
@@ -142,7 +142,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[bytes, NoneType]
+        Optional[bytes]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data_buffer)
 
@@ -196,7 +196,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[Request, NoneType]
+        Optional[Request]
         """
         return mapping.from_impl_nullable(self._impl_obj.redirected_from)
 
@@ -214,7 +214,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[Request, NoneType]
+        Optional[Request]
         """
         return mapping.from_impl_nullable(self._impl_obj.redirected_to)
 
@@ -232,7 +232,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
@@ -264,7 +264,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        Union[Response, NoneType]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -382,7 +382,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -460,7 +460,7 @@ class Route(SyncBase):
 
         Parameters
         ----------
-        error_code : Union[str, NoneType]
+        error_code : Optional[str]
             Optional error code. Defaults to `failed`, could be one of the following:
             - `'aborted'` - An operation was aborted (due to user action)
             - `'accessdenied'` - Permission to access a resource, other than the network, was denied
@@ -514,16 +514,16 @@ class Route(SyncBase):
 
         Parameters
         ----------
-        status : Union[int, NoneType]
+        status : Optional[int]
             Response status code, defaults to `200`.
-        headers : Union[Dict[str, str], NoneType]
+        headers : Optional[Dict[str, str]]
             Response headers. Header values will be converted to a string.
-        body : Union[bytes, str, NoneType]
+        body : Optional[Union[bytes, str]]
             Response body.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             File path to respond with. The content type will be inferred from file extension. If `path` is a relative path, then it
             is resolved relative to the current working directory.
-        content_type : Union[str, NoneType]
+        content_type : Optional[str]
             If set, equals to setting `Content-Type` response header.
         """
 
@@ -567,13 +567,13 @@ class Route(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, NoneType]
+        url : Optional[str]
             If set changes the request URL. New URL must have same protocol as original one.
-        method : Union[str, NoneType]
+        method : Optional[str]
             If set changes the request method (e.g. GET or POST)
-        headers : Union[Dict[str, str], NoneType]
+        headers : Optional[Dict[str, str]]
             If set changes the request HTTP headers. Header values will be converted to a string.
-        post_data : Union[bytes, str, NoneType]
+        post_data : Optional[Union[bytes, str]]
             If set changes the post data of request
         """
 
@@ -621,9 +621,9 @@ class WebSocket(SyncBase):
         ----------
         event : str
             Event name, same one would pass into `webSocket.on(event)`.
-        predicate : Union[Callable, NoneType]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -653,9 +653,9 @@ class WebSocket(SyncBase):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, NoneType]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -788,7 +788,7 @@ class Keyboard(SyncBase):
         ----------
         text : str
             A text to type into a focused element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
         """
 
@@ -834,7 +834,7 @@ class Keyboard(SyncBase):
         ----------
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         """
 
@@ -859,7 +859,7 @@ class Mouse(SyncBase):
         ----------
         x : float
         y : float
-        steps : Union[int, NoneType]
+        steps : Optional[int]
             defaults to 1. Sends intermediate `mousemove` events.
         """
 
@@ -879,9 +879,9 @@ class Mouse(SyncBase):
 
         Parameters
         ----------
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        click_count : Union[int, NoneType]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
         """
 
@@ -903,9 +903,9 @@ class Mouse(SyncBase):
 
         Parameters
         ----------
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        click_count : Union[int, NoneType]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
         """
 
@@ -932,11 +932,11 @@ class Mouse(SyncBase):
         ----------
         x : float
         y : float
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        click_count : Union[int, NoneType]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
         """
 
@@ -966,9 +966,9 @@ class Mouse(SyncBase):
         ----------
         x : float
         y : float
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
         """
 
@@ -1031,7 +1031,7 @@ class JSHandle(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -1068,7 +1068,7 @@ class JSHandle(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -1136,7 +1136,7 @@ class JSHandle(SyncBase):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(self._impl_obj.as_element())
@@ -1183,7 +1183,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(self._impl_obj.as_element())
@@ -1195,7 +1195,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[Frame, NoneType]
+        Optional[Frame]
         """
 
         return mapping.from_impl_nullable(
@@ -1209,7 +1209,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[Frame, NoneType]
+        Optional[Frame]
         """
 
         return mapping.from_impl_nullable(
@@ -1228,7 +1228,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -1244,7 +1244,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -1398,7 +1398,7 @@ class ElementHandle(JSHandle):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, NoneType]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
         """
 
@@ -1423,7 +1423,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -1461,18 +1461,18 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -1520,28 +1520,28 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        click_count : Union[int, NoneType]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -1595,26 +1595,26 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -1680,20 +1680,20 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        value : Union[List[str], str, NoneType]
+        value : Optional[Union[List[str], str]]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, NoneType]
+        index : Optional[Union[List[int], int]]
             Options to select by index. Optional.
-        label : Union[List[str], str, NoneType]
+        label : Optional[Union[List[str], str]]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], NoneType]
+        element : Optional[Union[ElementHandle, List[ElementHandle]]]
             Option elements to select. Optional.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -1746,22 +1746,22 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -1799,10 +1799,10 @@ class ElementHandle(JSHandle):
         ----------
         value : str
             Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -1825,7 +1825,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -1861,10 +1861,10 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -1920,12 +1920,12 @@ class ElementHandle(JSHandle):
         ----------
         text : str
             A text to type into a focused element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -1973,12 +1973,12 @@ class ElementHandle(JSHandle):
         ----------
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -2020,19 +2020,19 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2077,19 +2077,19 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2130,7 +2130,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[{x: float, y: float, width: float, height: float}, NoneType]
+        Optional[{x: float, y: float, width: float, height: float}]
         """
 
         return mapping.from_impl_nullable(
@@ -2155,18 +2155,18 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        type : Union["jpeg", "png", NoneType]
+        type : Optional["jpeg", "png"]
             Specify screenshot type, defaults to `png`.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative
             path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to
             the disk.
-        quality : Union[int, NoneType]
+        quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omit_background : Union[bool, NoneType]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
 
@@ -2201,7 +2201,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -2263,7 +2263,7 @@ class ElementHandle(JSHandle):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -2314,7 +2314,7 @@ class ElementHandle(JSHandle):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -2360,7 +2360,7 @@ class ElementHandle(JSHandle):
         ----------
         state : Union["disabled", "editable", "enabled", "hidden", "stable", "visible"]
             A state to wait for, see below for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -2402,7 +2402,7 @@ class ElementHandle(JSHandle):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
-        state : Union["attached", "detached", "hidden", "visible", NoneType]
+        state : Optional["attached", "detached", "hidden", "visible"]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
             - `'detached'` - wait for element to not be present in DOM.
@@ -2410,13 +2410,13 @@ class ElementHandle(JSHandle):
               any content or with `display:none` has an empty bounding box and is not considered visible.
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
               This is opposite to the `'visible'` option.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -2473,14 +2473,14 @@ class Accessibility(SyncBase):
 
         Parameters
         ----------
-        interesting_only : Union[bool, NoneType]
+        interesting_only : Optional[bool]
             Prune uninteresting nodes from the tree. Defaults to `true`.
-        root : Union[ElementHandle, NoneType]
+        root : Optional[ElementHandle]
             The root DOM element for the snapshot. Defaults to the whole page.
 
         Returns
         -------
-        Union[Dict, NoneType]
+        Optional[Dict]
         """
 
         return mapping.from_maybe_impl(
@@ -2557,10 +2557,10 @@ class FileChooser(SyncBase):
         Parameters
         ----------
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -2631,7 +2631,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        Union[Frame, NoneType]
+        Optional[Frame]
         """
         return mapping.from_impl_nullable(self._impl_obj.parent_frame)
 
@@ -2678,23 +2678,23 @@ class Frame(SyncBase):
         ----------
         url : str
             URL to navigate frame to. The url should include scheme, e.g. `https://`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        referer : Union[str, NoneType]
+        referer : Optional[str]
             Referer header value. If provided it will take preference over the referer header value set by
             `page.set_extra_http_headers()`.
 
         Returns
         -------
-        Union[Response, NoneType]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -2733,14 +2733,14 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+        url : Optional[Union[Callable[[str], bool], Pattern, str]]
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -2777,12 +2777,12 @@ class Frame(SyncBase):
         ----------
         url : Union[Callable[[str], bool], Pattern, str]
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -2818,13 +2818,13 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        state : Union["domcontentloaded", "load", "networkidle", NoneType]
+        state : Optional["domcontentloaded", "load", "networkidle"]
             Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
             document, the method resolves immediately. Can be one of:
             - `'load'` - wait for the `load` event to be fired.
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
             - `'networkidle'` - wait until there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -2901,7 +2901,7 @@ class Frame(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -2954,7 +2954,7 @@ class Frame(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -2986,7 +2986,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -3059,10 +3059,10 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        state : Union["attached", "detached", "hidden", "visible", NoneType]
+        state : Optional["attached", "detached", "hidden", "visible"]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
             - `'detached'` - wait for element to not be present in DOM.
@@ -3073,7 +3073,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -3095,7 +3095,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3121,7 +3121,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3147,7 +3147,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3173,7 +3173,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3200,7 +3200,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3227,7 +3227,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3288,9 +3288,9 @@ class Frame(SyncBase):
             [working with selectors](./selectors.md) for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, NoneType]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -3336,7 +3336,7 @@ class Frame(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -3379,7 +3379,7 @@ class Frame(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -3423,12 +3423,12 @@ class Frame(SyncBase):
         ----------
         html : str
             HTML markup to assign to the page.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -3472,14 +3472,14 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, NoneType]
+        url : Optional[str]
             URL of a script to be added.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
             current working directory.
-        content : Union[str, NoneType]
+        content : Optional[str]
             Raw JavaScript content to be injected into frame.
-        type : Union[str, NoneType]
+        type : Optional[str]
             Script type. Use 'module' in order to load a Javascript ES6 module. See
             [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
@@ -3513,12 +3513,12 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, NoneType]
+        url : Optional[str]
             URL of the `<link>` tag.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
             current working directory.
-        content : Union[str, NoneType]
+        content : Optional[str]
             Raw CSS content to be injected into frame.
 
         Returns
@@ -3567,28 +3567,28 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        click_count : Union[int, NoneType]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -3647,26 +3647,26 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -3721,22 +3721,22 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -3784,10 +3784,10 @@ class Frame(SyncBase):
             [working with selectors](./selectors.md) for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -3816,7 +3816,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -3839,13 +3839,13 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -3865,7 +3865,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3891,7 +3891,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3921,13 +3921,13 @@ class Frame(SyncBase):
             [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -3969,18 +3969,18 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -4036,20 +4036,20 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
-        value : Union[List[str], str, NoneType]
+        value : Optional[Union[List[str], str]]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, NoneType]
+        index : Optional[Union[List[int], int]]
             Options to select by index. Optional.
-        label : Union[List[str], str, NoneType]
+        label : Optional[Union[List[str], str]]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], NoneType]
+        element : Optional[Union[ElementHandle, List[ElementHandle]]]
             Option elements to select. Optional.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -4102,10 +4102,10 @@ class Frame(SyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -4151,12 +4151,12 @@ class Frame(SyncBase):
             [working with selectors](./selectors.md) for more details.
         text : str
             A text to type into a focused element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -4210,12 +4210,12 @@ class Frame(SyncBase):
             [working with selectors](./selectors.md) for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -4265,19 +4265,19 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -4327,19 +4327,19 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -4420,12 +4420,12 @@ class Frame(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
-        polling : Union["raf", float, NoneType]
+        polling : Optional[Union["raf", float]]
             If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a
             number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
@@ -4495,7 +4495,7 @@ class Worker(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -4528,7 +4528,7 @@ class Worker(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -4574,12 +4574,12 @@ class Selectors(SyncBase):
         name : str
             Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only
             contain `[a-zA-Z0-9_]` characters.
-        script : Union[str, NoneType]
+        script : Optional[str]
             Raw script content.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory.
-        content_script : Union[bool, NoneType]
+        content_script : Optional[bool]
             Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same DOM, but
             not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content script is not
             guaranteed when this engine is used together with other registered engines.
@@ -4701,7 +4701,7 @@ class Dialog(SyncBase):
 
         Parameters
         ----------
-        prompt_text : Union[str, NoneType]
+        prompt_text : Optional[str]
             A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
 
@@ -4771,7 +4771,7 @@ class Download(SyncBase):
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -4786,7 +4786,7 @@ class Download(SyncBase):
 
         Returns
         -------
-        Union[pathlib.Path, NoneType]
+        Optional[pathlib.Path]
         """
 
         return mapping.from_maybe_impl(
@@ -4957,7 +4957,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[{width: int, height: int}, NoneType]
+        Optional[{width: int, height: int}]
         """
         return mapping.from_impl_nullable(self._impl_obj.viewport_size)
 
@@ -4984,7 +4984,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[Video, NoneType]
+        Optional[Video]
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
 
@@ -4995,7 +4995,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[Page, NoneType]
+        Optional[Page]
         """
 
         return mapping.from_impl_nullable(
@@ -5022,14 +5022,14 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        name : Union[str, NoneType]
+        name : Optional[str]
             Frame name specified in the `iframe`'s `name` attribute. Optional.
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+        url : Optional[Union[Callable[[str], bool], Pattern, str]]
             A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
 
         Returns
         -------
-        Union[Frame, NoneType]
+        Optional[Frame]
         """
 
         return mapping.from_impl_nullable(
@@ -5093,7 +5093,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -5166,10 +5166,10 @@ class Page(SyncBase):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        state : Union["attached", "detached", "hidden", "visible", NoneType]
+        state : Optional["attached", "detached", "hidden", "visible"]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
             - `'detached'` - wait for element to not be present in DOM.
@@ -5180,7 +5180,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -5202,7 +5202,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5228,7 +5228,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5254,7 +5254,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5280,7 +5280,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5307,7 +5307,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5334,7 +5334,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5395,9 +5395,9 @@ class Page(SyncBase):
             [working with selectors](./selectors.md) for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, NoneType]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -5456,7 +5456,7 @@ class Page(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -5509,7 +5509,7 @@ class Page(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -5554,7 +5554,7 @@ class Page(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -5595,7 +5595,7 @@ class Page(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -5629,14 +5629,14 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, NoneType]
+        url : Optional[str]
             URL of a script to be added.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
             current working directory.
-        content : Union[str, NoneType]
+        content : Optional[str]
             Raw JavaScript content to be injected into frame.
-        type : Union[str, NoneType]
+        type : Optional[str]
             Script type. Use 'module' in order to load a Javascript ES6 module. See
             [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
@@ -5670,12 +5670,12 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[str, NoneType]
+        url : Optional[str]
             URL of the `<link>` tag.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
             current working directory.
-        content : Union[str, NoneType]
+        content : Optional[str]
             Raw CSS content to be injected into frame.
 
         Returns
@@ -5814,7 +5814,7 @@ class Page(SyncBase):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, NoneType]
+        handle : Optional[bool]
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
         """
@@ -5875,12 +5875,12 @@ class Page(SyncBase):
         ----------
         html : str
             HTML markup to assign to the page.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -5931,23 +5931,23 @@ class Page(SyncBase):
         ----------
         url : str
             URL to navigate page to. The url should include scheme, e.g. `https://`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        referer : Union[str, NoneType]
+        referer : Optional[str]
             Referer header value. If provided it will take preference over the referer header value set by
             `page.set_extra_http_headers()`.
 
         Returns
         -------
-        Union[Response, NoneType]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -5972,12 +5972,12 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -5985,7 +5985,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[Response, NoneType]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -6026,13 +6026,13 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        state : Union["domcontentloaded", "load", "networkidle", NoneType]
+        state : Optional["domcontentloaded", "load", "networkidle"]
             Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
             document, the method resolves immediately. Can be one of:
             - `'load'` - wait for the `load` event to be fired.
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
             - `'networkidle'` - wait until there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -6068,12 +6068,12 @@ class Page(SyncBase):
         ----------
         url : Union[Callable[[str], bool], Pattern, str]
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -6104,9 +6104,9 @@ class Page(SyncBase):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, NoneType]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -6141,12 +6141,12 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -6154,7 +6154,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[Response, NoneType]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -6179,12 +6179,12 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
@@ -6192,7 +6192,7 @@ class Page(SyncBase):
 
         Returns
         -------
-        Union[Response, NoneType]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -6243,10 +6243,10 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        media : Union["print", "screen", NoneType]
+        media : Optional["print", "screen"]
             Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null`
             disables CSS media emulation.
-        color_scheme : Union["dark", "light", "no-preference", NoneType]
+        color_scheme : Optional["dark", "light", "no-preference"]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
             `null` disables color scheme emulation.
         """
@@ -6320,9 +6320,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        script : Union[str, NoneType]
+        script : Optional[str]
             Script to be evaluated in all pages in the browser context. Optional.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
         """
@@ -6420,7 +6420,7 @@ class Page(SyncBase):
         ----------
         url : Union[Callable[[str], bool], Pattern, str]
             A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
-        handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any], NoneType]
+        handler : Optional[Union[Callable[[Route, Request], Any], Callable[[Route], Any]]]
             Optional handler function to route the request.
         """
 
@@ -6450,24 +6450,24 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        type : Union["jpeg", "png", NoneType]
+        type : Optional["jpeg", "png"]
             Specify screenshot type, defaults to `png`.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative
             path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to
             the disk.
-        quality : Union[int, NoneType]
+        quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omit_background : Union[bool, NoneType]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
-        full_page : Union[bool, NoneType]
+        full_page : Optional[bool]
             When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to
             `false`.
-        clip : Union[{x: float, y: float, width: float, height: float}, NoneType]
+        clip : Optional[{x: float, y: float, width: float, height: float}]
             An object which specifies clipping of the resulting image. Should have the following fields:
 
         Returns
@@ -6515,7 +6515,7 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        run_before_unload : Union[bool, NoneType]
+        run_before_unload : Optional[bool]
             Defaults to `false`. Whether to run the
             [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload) page handlers.
         """
@@ -6574,28 +6574,28 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        click_count : Union[int, NoneType]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -6656,26 +6656,26 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
-        button : Union["left", "middle", "right", NoneType]
+        button : Optional["left", "middle", "right"]
             Defaults to `left`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -6732,22 +6732,22 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -6797,10 +6797,10 @@ class Page(SyncBase):
             [working with selectors](./selectors.md) for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -6831,7 +6831,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -6854,13 +6854,13 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -6880,7 +6880,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -6906,7 +6906,7 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -6936,13 +6936,13 @@ class Page(SyncBase):
             [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, NoneType]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -6986,18 +6986,18 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+        modifiers : Optional[List[Union["Alt", "Control", "Meta", "Shift"]]]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
             modifiers back. If not specified, currently pressed modifiers are used.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -7056,20 +7056,20 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        value : Union[List[str], str, NoneType]
+        value : Optional[Union[List[str], str]]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, NoneType]
+        index : Optional[Union[List[int], int]]
             Options to select by index. Optional.
-        label : Union[List[str], str, NoneType]
+        label : Optional[Union[List[str], str]]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
             only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], NoneType]
+        element : Optional[Union[ElementHandle, List[ElementHandle]]]
             Option elements to select. Optional.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -7122,10 +7122,10 @@ class Page(SyncBase):
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -7173,12 +7173,12 @@ class Page(SyncBase):
             [working with selectors](./selectors.md) for more details.
         text : str
             A text to type into a focused element.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -7246,12 +7246,12 @@ class Page(SyncBase):
             [working with selectors](./selectors.md) for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, NoneType]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
@@ -7303,19 +7303,19 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -7367,19 +7367,19 @@ class Page(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        position : Union[{x: float, y: float}, NoneType]
+        position : Optional[{x: float, y: float}]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
             element.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, NoneType]
+        force : Optional[bool]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, NoneType]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        trial : Union[bool, NoneType]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -7469,12 +7469,12 @@ class Page(SyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
             as a function. Otherwise, evaluated as an expression.
-        arg : Union[Any, NoneType]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
-        polling : Union["raf", float, NoneType]
+        polling : Optional[Union["raf", float]]
             If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a
             number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 
@@ -7577,11 +7577,11 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        scale : Union[float, NoneType]
+        scale : Optional[float]
             Scale of the webpage rendering. Defaults to `1`. Scale amount must be between 0.1 and 2.
-        display_header_footer : Union[bool, NoneType]
+        display_header_footer : Optional[bool]
             Display header and footer. Defaults to `false`.
-        header_template : Union[str, NoneType]
+        header_template : Optional[str]
             HTML template for the print header. Should be valid HTML markup with following classes used to inject printing values
             into them:
             - `'date'` formatted print date
@@ -7589,26 +7589,26 @@ class Page(SyncBase):
             - `'url'` document location
             - `'pageNumber'` current page number
             - `'totalPages'` total pages in the document
-        footer_template : Union[str, NoneType]
+        footer_template : Optional[str]
             HTML template for the print footer. Should use the same format as the `headerTemplate`.
-        print_background : Union[bool, NoneType]
+        print_background : Optional[bool]
             Print background graphics. Defaults to `false`.
-        landscape : Union[bool, NoneType]
+        landscape : Optional[bool]
             Paper orientation. Defaults to `false`.
-        page_ranges : Union[str, NoneType]
+        page_ranges : Optional[str]
             Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
-        format : Union[str, NoneType]
+        format : Optional[str]
             Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
-        width : Union[float, str, NoneType]
+        width : Optional[Union[float, str]]
             Paper width, accepts values labeled with units.
-        height : Union[float, str, NoneType]
+        height : Optional[Union[float, str]]
             Paper height, accepts values labeled with units.
-        prefer_css_page_size : Union[bool, NoneType]
+        prefer_css_page_size : Optional[bool]
             Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format`
             options. Defaults to `false`, which will scale the content to fit the paper size.
-        margin : Union[{top: Union[float, str, NoneType], right: Union[float, str, NoneType], bottom: Union[float, str, NoneType], left: Union[float, str, NoneType]}, NoneType]
+        margin : Optional[{top: Optional[Union[float, str]], right: Optional[Union[float, str]], bottom: Optional[Union[float, str]], left: Optional[Union[float, str]]}]
             Paper margins, defaults to none.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to the current working
             directory. If no path is provided, the PDF won't be saved to the disk.
 
@@ -7656,9 +7656,9 @@ class Page(SyncBase):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, NoneType]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -7687,9 +7687,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        predicate : Union[Callable[[ConsoleMessage], bool], NoneType]
+        predicate : Optional[Callable[[ConsoleMessage], bool]]
             Receives the `ConsoleMessage` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -7718,9 +7718,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        predicate : Union[Callable[[Download], bool], NoneType]
+        predicate : Optional[Callable[[Download], bool]]
             Receives the `Download` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -7749,9 +7749,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        predicate : Union[Callable[[FileChooser], bool], NoneType]
+        predicate : Optional[Callable[[FileChooser], bool]]
             Receives the `FileChooser` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -7796,14 +7796,14 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+        url : Optional[Union[Callable[[str], bool], Pattern, str]]
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Optional["domcontentloaded", "load", "networkidle"]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -7834,9 +7834,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        predicate : Union[Callable[[Page], bool], NoneType]
+        predicate : Optional[Callable[[Page], bool]]
             Receives the `Page` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -7879,7 +7879,7 @@ class Page(SyncBase):
         ----------
         url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
             Request URL string, regex or predicate receiving `Request` object.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
             changed by using the `page.set_default_timeout()` method.
 
@@ -7923,7 +7923,7 @@ class Page(SyncBase):
         ----------
         url_or_predicate : Union[Callable[[Response], bool], Pattern, str]
             Request URL string, regex or predicate receiving `Response` object.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
             changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -7952,9 +7952,9 @@ class Page(SyncBase):
 
         Parameters
         ----------
-        predicate : Union[Callable[[Worker], bool], NoneType]
+        predicate : Optional[Callable[[Worker], bool]]
             Receives the `Worker` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -7997,7 +7997,7 @@ class BrowserContext(SyncBase):
 
         Returns
         -------
-        Union[Browser, NoneType]
+        Optional[Browser]
         """
         return mapping.from_impl_nullable(self._impl_obj.browser)
 
@@ -8095,12 +8095,12 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        urls : Union[List[str], str, NoneType]
+        urls : Optional[Union[List[str], str]]
             Optional list of URLs.
 
         Returns
         -------
-        List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
+        List[{name: str, value: str, url: Optional[str], domain: Optional[str], path: Optional[str], expires: Optional[float], httpOnly: Optional[bool], secure: Optional[bool], sameSite: Optional["Lax", "None", "Strict"]}]
         """
 
         return mapping.from_impl_list(
@@ -8119,7 +8119,7 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        cookies : List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
+        cookies : List[{name: str, value: str, url: Optional[str], domain: Optional[str], path: Optional[str], expires: Optional[float], httpOnly: Optional[bool], secure: Optional[bool], sameSite: Optional["Lax", "None", "Strict"]}]
         """
 
         return mapping.from_maybe_impl(
@@ -8167,7 +8167,7 @@ class BrowserContext(SyncBase):
             - `'clipboard-read'`
             - `'clipboard-write'`
             - `'payment-handler'`
-        origin : Union[str, NoneType]
+        origin : Optional[str]
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
 
@@ -8213,7 +8213,7 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
+        geolocation : Optional[{latitude: float, longitude: float, accuracy: Optional[float]}]
         """
 
         return mapping.from_maybe_impl(
@@ -8286,9 +8286,9 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        script : Union[str, NoneType]
+        script : Optional[str]
             Script to be evaluated in all pages in the browser context. Optional.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
         """
@@ -8362,7 +8362,7 @@ class BrowserContext(SyncBase):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, NoneType]
+        handle : Optional[bool]
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
         """
@@ -8525,7 +8525,7 @@ class BrowserContext(SyncBase):
         url : Union[Callable[[str], bool], Pattern, str]
             A glob pattern, regex pattern or predicate receiving [URL] used to register a routing with
             `browser_context.route()`.
-        handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any], NoneType]
+        handler : Optional[Union[Callable[[Route, Request], Any], Callable[[Route], Any]]]
             Optional handler function used to register a routing with `browser_context.route()`.
         """
 
@@ -8556,9 +8556,9 @@ class BrowserContext(SyncBase):
         ----------
         event : str
             Event name, same one would pass into `browserContext.on(event)`.
-        predicate : Union[Callable, NoneType]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -8594,13 +8594,13 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
             working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 
         Returns
         -------
-        {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}
+        {cookies: Optional[List[{name: str, value: str, url: Optional[str], domain: Optional[str], path: Optional[str], expires: Optional[float], httpOnly: Optional[bool], secure: Optional[bool], sameSite: Optional["Lax", "None", "Strict"]}]], origins: Optional[List[{origin: str, localStorage: List[{name: str, value: str}]}]]}
         """
 
         return mapping.from_impl(
@@ -8624,9 +8624,9 @@ class BrowserContext(SyncBase):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, NoneType]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -8660,9 +8660,9 @@ class BrowserContext(SyncBase):
 
         Parameters
         ----------
-        predicate : Union[Callable[[Page], bool], NoneType]
+        predicate : Optional[Callable[[Page], bool]]
             Receives the `Page` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
             value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -8716,7 +8716,7 @@ class CDPSession(SyncBase):
         ----------
         method : str
             protocol method name
-        params : Union[Dict, NoneType]
+        params : Optional[Dict]
             Optional method parameters
 
         Returns
@@ -8838,70 +8838,70 @@ class Browser(SyncBase):
 
         Parameters
         ----------
-        viewport : Union[{width: int, height: int}, NoneType]
+        viewport : Optional[{width: int, height: int}]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
-        screen : Union[{width: int, height: int}, NoneType]
+        screen : Optional[{width: int, height: int}]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport`
             is set.
-        no_viewport : Union[bool, NoneType]
+        no_viewport : Optional[bool]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
-        ignore_https_errors : Union[bool, NoneType]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-        java_script_enabled : Union[bool, NoneType]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
-        bypass_csp : Union[bool, NoneType]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
-        user_agent : Union[str, NoneType]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        locale : Union[str, NoneType]
+        locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language`
             request header value as well as number and date formatting rules.
-        timezone_id : Union[str, NoneType]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
-        permissions : Union[List[str], NoneType]
+        geolocation : Optional[{latitude: float, longitude: float, accuracy: Optional[float]}]
+        permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
-        extra_http_headers : Union[Dict[str, str], NoneType]
+        extra_http_headers : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
-        offline : Union[bool, NoneType]
+        offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[{username: str, password: str}, NoneType]
+        http_credentials : Optional[{username: str, password: str}]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-        device_scale_factor : Union[float, NoneType]
+        device_scale_factor : Optional[float]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-        is_mobile : Union[bool, NoneType]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported
             in Firefox.
-        has_touch : Union[bool, NoneType]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        color_scheme : Union["dark", "light", "no-preference", NoneType]
+        color_scheme : Optional["dark", "light", "no-preference"]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
-        accept_downloads : Union[bool, NoneType]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-        proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
+        proxy : Optional[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}]
             Network proxy settings to use with this context.
 
             > NOTE: For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If all
             contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: {
             server: 'http://per-context' } })`.
-        record_har_path : Union[pathlib.Path, str, NoneType]
+        record_har_path : Optional[Union[pathlib.Path, str]]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
             filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
             be saved.
-        record_har_omit_content : Union[bool, NoneType]
+        record_har_omit_content : Optional[bool]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
-        record_video_dir : Union[pathlib.Path, str, NoneType]
+        record_video_dir : Optional[Union[pathlib.Path, str]]
             Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
             to call `browser_context.close()` for videos to be saved.
-        record_video_size : Union[{width: int, height: int}, NoneType]
+        record_video_size : Optional[{width: int, height: int}]
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
             be scaled down if necessary to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
+        storage_state : Optional[Union[pathlib.Path, str, {cookies: Optional[List[{name: str, value: str, url: Optional[str], domain: Optional[str], path: Optional[str], expires: Optional[float], httpOnly: Optional[bool], secure: Optional[bool], sameSite: Optional["Lax", "None", "Strict"]}]], origins: Optional[List[{origin: str, localStorage: List[{name: str, value: str}]}]]}]]
             Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
@@ -8985,70 +8985,70 @@ class Browser(SyncBase):
 
         Parameters
         ----------
-        viewport : Union[{width: int, height: int}, NoneType]
+        viewport : Optional[{width: int, height: int}]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
-        screen : Union[{width: int, height: int}, NoneType]
+        screen : Optional[{width: int, height: int}]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport`
             is set.
-        no_viewport : Union[bool, NoneType]
+        no_viewport : Optional[bool]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
-        ignore_https_errors : Union[bool, NoneType]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-        java_script_enabled : Union[bool, NoneType]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
-        bypass_csp : Union[bool, NoneType]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
-        user_agent : Union[str, NoneType]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        locale : Union[str, NoneType]
+        locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language`
             request header value as well as number and date formatting rules.
-        timezone_id : Union[str, NoneType]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
-        permissions : Union[List[str], NoneType]
+        geolocation : Optional[{latitude: float, longitude: float, accuracy: Optional[float]}]
+        permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
-        extra_http_headers : Union[Dict[str, str], NoneType]
+        extra_http_headers : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
-        offline : Union[bool, NoneType]
+        offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[{username: str, password: str}, NoneType]
+        http_credentials : Optional[{username: str, password: str}]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-        device_scale_factor : Union[float, NoneType]
+        device_scale_factor : Optional[float]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-        is_mobile : Union[bool, NoneType]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported
             in Firefox.
-        has_touch : Union[bool, NoneType]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        color_scheme : Union["dark", "light", "no-preference", NoneType]
+        color_scheme : Optional["dark", "light", "no-preference"]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
-        accept_downloads : Union[bool, NoneType]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-        proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
+        proxy : Optional[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}]
             Network proxy settings to use with this context.
 
             > NOTE: For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If all
             contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: {
             server: 'http://per-context' } })`.
-        record_har_path : Union[pathlib.Path, str, NoneType]
+        record_har_path : Optional[Union[pathlib.Path, str]]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
             filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
             be saved.
-        record_har_omit_content : Union[bool, NoneType]
+        record_har_omit_content : Optional[bool]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
-        record_video_dir : Union[pathlib.Path, str, NoneType]
+        record_video_dir : Optional[Union[pathlib.Path, str]]
             Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
             to call `browser_context.close()` for videos to be saved.
-        record_video_size : Union[{width: int, height: int}, NoneType]
+        record_video_size : Optional[{width: int, height: int}]
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
             be scaled down if necessary to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: Union[List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}], NoneType], origins: Union[List[{origin: str, localStorage: List[{name: str, value: str}]}], NoneType]}, NoneType]
+        storage_state : Optional[Union[pathlib.Path, str, {cookies: Optional[List[{name: str, value: str, url: Optional[str], domain: Optional[str], path: Optional[str], expires: Optional[float], httpOnly: Optional[bool], secure: Optional[bool], sameSite: Optional["Lax", "None", "Strict"]}]], origins: Optional[List[{origin: str, localStorage: List[{name: str, value: str}]}]]}]]
             Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
@@ -9150,13 +9150,13 @@ class Browser(SyncBase):
 
         Parameters
         ----------
-        page : Union[Page, NoneType]
+        page : Optional[Page]
             Optional, if specified, tracing includes screenshots of the given page.
-        path : Union[pathlib.Path, str, NoneType]
+        path : Optional[Union[pathlib.Path, str]]
             A path to write the trace file to.
-        screenshots : Union[bool, NoneType]
+        screenshots : Optional[bool]
             captures screenshots in the trace.
-        categories : Union[List[str], NoneType]
+        categories : Optional[List[str]]
             specify custom categories to use instead of default.
         """
 
@@ -9281,48 +9281,48 @@ class BrowserType(SyncBase):
 
         Parameters
         ----------
-        executable_path : Union[pathlib.Path, str, NoneType]
+        executable_path : Optional[Union[pathlib.Path, str]]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Optional["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev"]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
-        args : Union[List[str], NoneType]
+        args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
-        ignore_default_args : Union[List[str], bool, NoneType]
+        ignore_default_args : Optional[Union[List[str], bool]]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handle_sigint : Union[bool, NoneType]
+        handle_sigint : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
-        handle_sigterm : Union[bool, NoneType]
+        handle_sigterm : Optional[bool]
             Close the browser process on SIGTERM. Defaults to `true`.
-        handle_sighup : Union[bool, NoneType]
+        handle_sighup : Optional[bool]
             Close the browser process on SIGHUP. Defaults to `true`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to
             disable timeout.
-        env : Union[Dict[str, Union[bool, float, str]], NoneType]
+        env : Optional[Dict[str, Union[bool, float, str]]]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-        headless : Union[bool, NoneType]
+        headless : Optional[bool]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the
             `devtools` option is `true`.
-        devtools : Union[bool, NoneType]
+        devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless`
             option will be set `false`.
-        proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
+        proxy : Optional[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}]
             Network proxy settings.
-        downloads_path : Union[pathlib.Path, str, NoneType]
+        downloads_path : Optional[Union[pathlib.Path, str]]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is
             deleted when browser is closed.
-        slow_mo : Union[float, NoneType]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
-        chromium_sandbox : Union[bool, NoneType]
+        chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `false`.
-        firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], NoneType]
+        firefox_user_prefs : Optional[Dict[str, Union[bool, float, str]]]
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
 
@@ -9422,102 +9422,102 @@ class BrowserType(SyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Optional["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev"]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
-        executable_path : Union[pathlib.Path, str, NoneType]
+        executable_path : Optional[Union[pathlib.Path, str]]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
             Chromium, Firefox or WebKit, use at your own risk.
-        args : Union[List[str], NoneType]
+        args : Optional[List[str]]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
-        ignore_default_args : Union[List[str], bool, NoneType]
+        ignore_default_args : Optional[Union[List[str], bool]]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handle_sigint : Union[bool, NoneType]
+        handle_sigint : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
-        handle_sigterm : Union[bool, NoneType]
+        handle_sigterm : Optional[bool]
             Close the browser process on SIGTERM. Defaults to `true`.
-        handle_sighup : Union[bool, NoneType]
+        handle_sighup : Optional[bool]
             Close the browser process on SIGHUP. Defaults to `true`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to
             disable timeout.
-        env : Union[Dict[str, Union[bool, float, str]], NoneType]
+        env : Optional[Dict[str, Union[bool, float, str]]]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-        headless : Union[bool, NoneType]
+        headless : Optional[bool]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the
             `devtools` option is `true`.
-        devtools : Union[bool, NoneType]
+        devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless`
             option will be set `false`.
-        proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
+        proxy : Optional[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}]
             Network proxy settings.
-        downloads_path : Union[pathlib.Path, str, NoneType]
+        downloads_path : Optional[Union[pathlib.Path, str]]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is
             deleted when browser is closed.
-        slow_mo : Union[float, NoneType]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
             Defaults to 0.
-        viewport : Union[{width: int, height: int}, NoneType]
+        viewport : Optional[{width: int, height: int}]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
-        screen : Union[{width: int, height: int}, NoneType]
+        screen : Optional[{width: int, height: int}]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport`
             is set.
-        no_viewport : Union[bool, NoneType]
+        no_viewport : Optional[bool]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
-        ignore_https_errors : Union[bool, NoneType]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors during navigation. Defaults to `false`.
-        java_script_enabled : Union[bool, NoneType]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
-        bypass_csp : Union[bool, NoneType]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy.
-        user_agent : Union[str, NoneType]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        locale : Union[str, NoneType]
+        locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language`
             request header value as well as number and date formatting rules.
-        timezone_id : Union[str, NoneType]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, NoneType]}, NoneType]
-        permissions : Union[List[str], NoneType]
+        geolocation : Optional[{latitude: float, longitude: float, accuracy: Optional[float]}]
+        permissions : Optional[List[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
-        extra_http_headers : Union[Dict[str, str], NoneType]
+        extra_http_headers : Optional[Dict[str, str]]
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
-        offline : Union[bool, NoneType]
+        offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[{username: str, password: str}, NoneType]
+        http_credentials : Optional[{username: str, password: str}]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-        device_scale_factor : Union[float, NoneType]
+        device_scale_factor : Optional[float]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
-        is_mobile : Union[bool, NoneType]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported
             in Firefox.
-        has_touch : Union[bool, NoneType]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false.
-        color_scheme : Union["dark", "light", "no-preference", NoneType]
+        color_scheme : Optional["dark", "light", "no-preference"]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
-        accept_downloads : Union[bool, NoneType]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-        chromium_sandbox : Union[bool, NoneType]
+        chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `true`.
-        record_har_path : Union[pathlib.Path, str, NoneType]
+        record_har_path : Optional[Union[pathlib.Path, str]]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
             filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
             be saved.
-        record_har_omit_content : Union[bool, NoneType]
+        record_har_omit_content : Optional[bool]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
-        record_video_dir : Union[pathlib.Path, str, NoneType]
+        record_video_dir : Optional[Union[pathlib.Path, str]]
             Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
             to call `browser_context.close()` for videos to be saved.
-        record_video_size : Union[{width: int, height: int}, NoneType]
+        record_video_size : Optional[{width: int, height: int}]
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
             be scaled down if necessary to fit the specified size.
@@ -9595,13 +9595,13 @@ class BrowserType(SyncBase):
         endpoint_url : str
             A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
             `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to
             disable timeout.
-        slow_mo : Union[float, NoneType]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
             Defaults to 0.
-        headers : Union[Dict[str, str], NoneType]
+        headers : Optional[Dict[str, str]]
             Additional HTTP headers to be sent with connect request. Optional.
 
         Returns
@@ -9637,13 +9637,13 @@ class BrowserType(SyncBase):
         ----------
         ws_endpoint : str
             A browser websocket endpoint to connect to.
-        timeout : Union[float, NoneType]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to
             disable timeout.
-        slow_mo : Union[float, NoneType]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
             Defaults to 0.
-        headers : Union[Dict[str, str], NoneType]
+        headers : Optional[Dict[str, str]]
             Additional HTTP headers to be sent with web socket connect request. Optional.
 
         Returns
