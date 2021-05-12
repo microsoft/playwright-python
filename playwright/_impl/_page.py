@@ -111,7 +111,7 @@ class Page(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._browser_context: BrowserContext = None  # type: ignore
+        self._browser_context: BrowserContext = parent
         self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)
@@ -126,7 +126,9 @@ class Page(ChannelOwner):
         self._bindings: Dict[str, Any] = {}
         self._routes: List[RouteHandlerEntry] = []
         self._owned_context: Optional["BrowserContext"] = None
-        self._timeout_settings: TimeoutSettings = TimeoutSettings(None)
+        self._timeout_settings: TimeoutSettings = TimeoutSettings(
+            self._browser_context._timeout_settings
+        )
         self._video: Optional[Video] = None
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
 
@@ -217,10 +219,6 @@ class Page(ChannelOwner):
     def __repr__(self) -> str:
         return f"<Page url={self.url!r}>"
 
-    def _set_browser_context(self, context: "BrowserContext") -> None:
-        self._browser_context = context
-        self._timeout_settings = TimeoutSettings(context._timeout_settings)
-
     def _on_request_failed(
         self,
         request: Request,
@@ -271,7 +269,10 @@ class Page(ChannelOwner):
 
     def _on_close(self) -> None:
         self._is_closed = True
-        self._browser_context._pages.remove(self)
+        if self in self._browser_context._pages:
+            self._browser_context._pages.remove(self)
+        if self in self._browser_context._background_pages:
+            self._browser_context._background_pages.remove(self)
         self.emit(Page.Events.Close)
 
     def _on_crash(self) -> None:
