@@ -26,6 +26,7 @@ class Download:
     def __init__(
         self, page: "Page", url: str, suggested_filename: str, artifact: Artifact
     ) -> None:
+        self._page = page
         self._loop = page._loop
         self._dispatcher_fiber = page._dispatcher_fiber
         self._url = url

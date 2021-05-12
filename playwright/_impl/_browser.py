@@ -148,6 +148,12 @@ class Browser(ChannelOwner):
     async def close(self) -> None:
         if self._is_closed_or_closing:
             return
+        if self._is_remote:
+            for context in self.contexts:
+                for page in context.pages:
+                    page._on_close()
+                context._on_close()
+            self._on_close()
         self._is_closed_or_closing = True
         try:
             await self._channel.send("close")

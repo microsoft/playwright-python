@@ -153,7 +153,6 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     ) -> None:
         super().__init__(loop)
         Transport.__init__(self, loop)
-
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.headers = headers
@@ -190,7 +189,10 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
                     break
                 obj = self.deserialize_message(message)
                 self.on_message(obj)
-            except websockets.exceptions.ConnectionClosed:
+            except (
+                websockets.exceptions.ConnectionClosed,
+                websockets.exceptions.ConnectionClosedError,
+            ):
                 if not self._stopped:
                     self.emit("close")
                 self.on_error_future.set_exception(

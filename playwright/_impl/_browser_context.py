@@ -35,6 +35,7 @@ from playwright._impl._helper import (
 )
 from playwright._impl._network import Request, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._tracing import Tracing
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -64,7 +65,7 @@ class BrowserContext(ChannelOwner):
         self._options: Dict[str, Any] = {}
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
-
+        self._tracing = Tracing(self)
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -79,7 +80,6 @@ class BrowserContext(ChannelOwner):
                 from_channel(params.get("route")), from_channel(params.get("request"))
             ),
         )
-
         self._channel.on(
             "backgroundPage",
             lambda params: self._on_background_page(from_channel(params["page"])),
@@ -239,7 +239,7 @@ class BrowserContext(ChannelOwner):
 
     def _on_close(self) -> None:
         self._is_closed_or_closing = True
-        if self._browser:
+        if self._browser and self in self._browser.contexts:
             self._browser._contexts.remove(self)
 
         self.emit(BrowserContext.Events.Close)
@@ -299,3 +299,7 @@ class BrowserContext(ChannelOwner):
         return from_channel(
             await self._channel.send("newCDPSession", {"page": page._channel})
         )
+
+    @property
+    def tracing(self) -> Tracing:
+        return self._tracing

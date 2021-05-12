@@ -43,6 +43,7 @@ from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import Page, Worker
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
+from playwright._impl._tracing import Tracing
 from playwright._impl._video import Video
 
 
@@ -233,6 +234,7 @@ from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
+from playwright._impl._tracing import Tracing as TracingImpl
 
 """
 
@@ -262,6 +264,7 @@ all_types = [
     Browser,
     BrowserType,
     Playwright,
+    Tracing,
 ]
 
 api_globals = globals()
