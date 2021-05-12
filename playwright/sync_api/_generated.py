@@ -4796,12 +4796,13 @@ class Download(SyncBase):
     def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
         """Download.save_as
 
-        Saves the download to a user-specified path. It is safe to call this method while the download is still in progress.
+        Copy the download to a user-specified path. It is safe to call this method while the download is still in progress. Will
+        wait for the download to finish if necessary.
 
         Parameters
         ----------
         path : Union[pathlib.Path, str]
-            Path where the download should be saved.
+            Path where the download should be copied.
         """
 
         return mapping.from_maybe_impl(
@@ -5082,7 +5083,7 @@ class Page(SyncBase):
         """Page.query_selector
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
-        return value resolves to `null`.
+        return value resolves to `null`. To wait for an element on the page, use `page.wait_for_selector()`.
 
         Shortcut for main frame's `frame.query_selector()`.
 
