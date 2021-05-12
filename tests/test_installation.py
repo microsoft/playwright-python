@@ -28,10 +28,9 @@ def test_install(tmp_path: Path):
     if sys.platform == "win32":
         wheelpath = list((root / "dist").glob("playwright*win_amd64*.whl"))[0]
     elif sys.platform == "linux":
-        wheelpath = list((root / "dist").glob("playwright*manylinux_2_27_*.whl"))[0]
+        wheelpath = list((root / "dist").glob("playwright*manylinux1*.whl"))[0]
     elif sys.platform == "darwin":
         wheelpath = list((root / "dist").glob("playwright*macosx_10_*.whl"))[0]
-    subprocess.check_output([context.env_exe, "-m", "pip", "install", "pip", "-U"])
     subprocess.check_output(
         [
             context.env_exe,
