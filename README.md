@@ -190,7 +190,7 @@ async def main():
             geolocation={"longitude": 12.492507, "latitude": 41.889938},
             permissions=["geolocation"]
         )
-        page = await context.newPage()
+        page = await context.new_page()
         await page.goto("https://maps.google.com")
         await page.click("text="Your location"")
         await page.screenshot(path="colosseum-iphone.png")
