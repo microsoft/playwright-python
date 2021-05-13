@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from playwright.async_api import Browser, Page
+from playwright.async_api import Browser, BrowserType, Page
 
 
 @pytest.mark.only_browser("chromium")
@@ -103,3 +103,18 @@ async def test_should_support_a_buffer_without_a_path(
     await page.goto(server.PREFIX + "/grid.html")
     trace = await browser.stop_tracing()
     assert "screenshot" in trace.decode()
+
+
+@pytest.mark.only_browser("chromium")
+async def test_browser_context_output_trace(
+    browser_type: BrowserType, server, tmp_path: Path
+):
+    browser = await browser_type.launch(trace_dir=tmp_path / "traces")
+    context = await browser.new_context()
+    await context.tracing.start(name="trace", screenshots=True, snapshots=True)
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/grid.html")
+    await context.tracing.stop()
+    await context.tracing.export(Path(tmp_path / "traces" / "trace.zip").resolve())
+    assert Path(tmp_path / "traces" / "trace.trace.zip").exists()
+    assert Path(tmp_path / "traces" / "resources").exists()
