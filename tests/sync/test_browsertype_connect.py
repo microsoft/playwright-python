@@ -19,6 +19,8 @@ import pytest
 from playwright.sync_api import BrowserType, Error
 from tests.server import Server
 
+pytestmark = pytest.mark.skip()
+
 
 def test_browser_type_connect_slow_mo(
     server: Server, browser_type: BrowserType, launch_server
