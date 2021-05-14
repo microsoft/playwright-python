@@ -153,7 +153,6 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     ) -> None:
         super().__init__(loop)
         Transport.__init__(self, loop)
-
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.headers = headers

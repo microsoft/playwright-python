@@ -239,7 +239,7 @@ class BrowserContext(ChannelOwner):
 
     def _on_close(self) -> None:
         self._is_closed_or_closing = True
-        if self._browser:
+        if self._browser and self in self._browser.contexts:
             self._browser._contexts.remove(self)
 
         self.emit(BrowserContext.Events.Close)
