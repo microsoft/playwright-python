@@ -142,7 +142,7 @@ async def test_evaluate_return_complex_objects(page):
 
 async def test_evaluate_accept_none_as_one_of_multiple_parameters(page):
     result = await page.evaluate(
-        '({ a, b }) => Object.is(a, undefined) && Object.is(b, "foo")',
+        '({ a, b }) => Object.is(a, null) && Object.is(b, "foo")',
         {"a": None, "b": "foo"},
     )
     assert result
