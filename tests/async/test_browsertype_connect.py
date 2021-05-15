@@ -90,6 +90,23 @@ async def test_browser_type_connect_disconnected_event_should_be_emitted_when_br
     assert len(disconnected2) == 1
 
 
+async def test_browser_type_connect_disconnected_event_should_be_emitted_when_remote_killed_connection(
+    browser_type: BrowserType, launch_server
+):
+    # Launch another server to not affect other tests.
+    remote = launch_server()
+
+    browser = await browser_type.connect(remote.ws_endpoint)
+
+    disconnected = []
+    browser.on("disconnected", lambda: disconnected.append(True))
+    page = await browser.new_page()
+    remote.kill()
+    with pytest.raises(Error):
+        await page.title()
+    assert len(disconnected) == 1
+
+
 async def test_browser_type_disconnected_event_should_have_browser_as_argument(
     browser_type: BrowserType, launch_server
 ):

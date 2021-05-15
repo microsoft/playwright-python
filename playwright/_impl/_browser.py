@@ -60,6 +60,11 @@ class Browser(ChannelOwner):
 
     def _on_close(self) -> None:
         self._is_connected = False
+        if self._is_remote:
+            for context in self.contexts:
+                for page in context.pages:
+                    page._on_close()
+                context._on_close()
         self.emit(Browser.Events.Disconnected, self)
         self._is_closed_or_closing = True
 
