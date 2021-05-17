@@ -1,3 +1,7 @@
 # text files must be lf for golden file tests to work
 *.txt eol=lf
 *.json eol=lf
+*.py eol=lf
+*.yml eol=lf
+*.yaml eol=lf
+*.md eol=lf
