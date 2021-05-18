@@ -22,9 +22,9 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import websockets
-from pyee import AsyncIOEventEmitter
 
 from playwright._impl._api_types import Error
+from playwright._impl._event_emitter import EventEmitter
 
 
 # Sourced from: https://github.com/pytest-dev/pytest/blob/da01ee0a4bb0af780167ecd228ab3ad249511302/src/_pytest/faulthandler.py#L69-L77
@@ -143,7 +143,7 @@ class PipeTransport(Transport):
         )
 
 
-class WebSocketTransport(AsyncIOEventEmitter, Transport):
+class WebSocketTransport(EventEmitter, Transport):
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,

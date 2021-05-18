@@ -18,7 +18,17 @@ import inspect
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Union,
+    cast,
+)
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
@@ -111,7 +121,7 @@ class Page(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._browser_context: BrowserContext = parent
+        self._browser_context = cast("BrowserContext", parent)
         self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)
@@ -255,14 +265,18 @@ class Page(ChannelOwner):
         artifact = from_channel(params["artifact"])
         cast(Video, self.video)._artifact_ready(artifact)
 
-    def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
+    def _add_event_handler(
+        self, event: str, f: Callable[..., Optional[Coroutine]]
+    ) -> None:
         if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
             self._channel.send_no_reply(
                 "setFileChooserInterceptedNoReply", {"intercepted": True}
             )
-        super()._add_event_handler(event, k, v)
+        return super()._add_event_handler(event, f)
 
-    def remove_listener(self, event: str, f: Any) -> None:
+    def remove_listener(
+        self, event: str, f: Callable[..., Optional[Coroutine]]
+    ) -> None:
         super().remove_listener(event, f)
         if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
             self._channel.send_no_reply(

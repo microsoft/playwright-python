@@ -17,8 +17,6 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
-from pyee import EventEmitter
-
 from playwright._impl._api_structures import FilePayload, Position
 from playwright._impl._api_types import Error
 from playwright._impl._connection import (
@@ -28,6 +26,7 @@ from playwright._impl._connection import (
 )
 from playwright._impl._element_handle import ElementHandle, convert_select_option_values
 from playwright._impl._event_context_manager import EventContextManagerImpl
+from playwright._impl._event_emitter import EventEmitter
 from playwright._impl._file_chooser import normalize_file_payloads
 from playwright._impl._helper import (
     DocumentLoadState,
@@ -244,12 +243,12 @@ class Frame(ChannelOwner):
         )
 
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
-        return list(
-            map(
-                cast(ElementHandle, from_channel),
-                await self._channel.send("querySelectorAll", dict(selector=selector)),
+        return [
+            cast(ElementHandle, from_channel(handle))
+            for handle in await self._channel.send(
+                "querySelectorAll", dict(selector=selector)
             )
-        )
+        ]
 
     async def wait_for_selector(
         self,

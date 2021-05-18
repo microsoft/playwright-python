@@ -14,7 +14,7 @@
 
 import math
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner, from_channel
@@ -93,7 +93,7 @@ class JSHandle(ChannelOwner):
 def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     if isinstance(value, JSHandle):
         h = len(handles)
-        handles.append(value._channel)
+        handles.append(cast(JSHandle, value._channel))
         return dict(h=h)
     if depth > 100:
         raise Error("Maximum argument depth exceeded")

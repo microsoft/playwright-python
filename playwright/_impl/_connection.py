@@ -19,13 +19,13 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
-from pyee import AsyncIOEventEmitter
 
+from playwright._impl._event_emitter import EventEmitter
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
 
-class Channel(AsyncIOEventEmitter):
+class Channel(EventEmitter):
     def __init__(self, connection: "Connection", guid: str) -> None:
         super().__init__()
         self._connection: Connection = connection
@@ -71,7 +71,7 @@ class Channel(AsyncIOEventEmitter):
         self._connection._send_message_to_server(self._guid, method, params)
 
 
-class ChannelOwner(AsyncIOEventEmitter):
+class ChannelOwner(EventEmitter):
     def __init__(
         self,
         parent: Union["ChannelOwner", "Connection"],
@@ -80,7 +80,6 @@ class ChannelOwner(AsyncIOEventEmitter):
         initializer: Dict,
     ) -> None:
         super().__init__(loop=parent._loop)
-        self._loop: asyncio.AbstractEventLoop = parent._loop
         self._dispatcher_fiber: Any = parent._dispatcher_fiber
         self._type = type
         self._guid = guid
@@ -251,7 +250,7 @@ class Connection:
             return
 
         guid = msg["guid"]
-        method = msg.get("method")
+        method = msg["method"]
         params = msg["params"]
         if method == "__create__":
             parent = self._objects[guid]

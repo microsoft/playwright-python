@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import base64
 import json
 import mimetypes
@@ -28,6 +27,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
+from playwright._impl._event_emitter import EventEmitter
 from playwright._impl._helper import ContinueParameters, Header, locals_to_params
 from playwright._impl._wait_helper import WaitHelper
 
@@ -326,7 +326,9 @@ class WebSocket(ChannelOwner):
             wait_helper.reject_on_event(
                 self, WebSocket.Events.Error, Error("Socket error")
             )
-        wait_helper.reject_on_event(self._parent, "close", Error("Page closed"))
+        wait_helper.reject_on_event(
+            cast(EventEmitter, self._parent), "close", Error("Page closed")
+        )
         wait_helper.wait_for_event(self, event, predicate)
         return EventContextManagerImpl(wait_helper.result())
 

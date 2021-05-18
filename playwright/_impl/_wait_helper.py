@@ -17,10 +17,9 @@ import uuid
 from asyncio.tasks import Task
 from typing import Any, Callable, List, Tuple
 
-from pyee import EventEmitter
-
 from playwright._impl._api_types import Error, TimeoutError
 from playwright._impl._connection import ChannelOwner
+from playwright._impl._event_emitter import EventEmitter
 
 
 class WaitHelper:
