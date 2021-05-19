@@ -212,7 +212,14 @@ class BrowserType(ChannelOwner):
         browser._is_remote = True
         browser._is_connected_over_websocket = True
 
-        transport.once("close", browser.close)
+        def handle_transport_close() -> None:
+            for context in browser.contexts:
+                for page in context.pages:
+                    page._on_close()
+                context._on_close()
+            browser._on_close()
+
+        transport.once("close", handle_transport_close)
 
         return browser
 

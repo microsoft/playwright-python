@@ -4754,6 +4754,18 @@ class Download(AsyncBase):
         super().__init__(obj)
 
     @property
+    def page(self) -> "Page":
+        """Download.page
+
+        Get the page that the download belongs to.
+
+        Returns
+        -------
+        Page
+        """
+        return mapping.from_impl(self._impl_obj.page)
+
+    @property
     def url(self) -> str:
         """Download.url
 
@@ -9295,7 +9307,6 @@ class BrowserType(AsyncBase):
             "chrome-beta",
             "chrome-canary",
             "chrome-dev",
-            "firefox-stable",
             "msedge",
             "msedge-beta",
             "msedge-canary",
@@ -9352,7 +9363,7 @@ class BrowserType(AsyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         args : Union[List[str], NoneType]
@@ -9434,7 +9445,6 @@ class BrowserType(AsyncBase):
             "chrome-beta",
             "chrome-canary",
             "chrome-dev",
-            "firefox-stable",
             "msedge",
             "msedge-beta",
             "msedge-canary",
@@ -9493,7 +9503,7 @@ class BrowserType(AsyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, NoneType]

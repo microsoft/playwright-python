@@ -37,6 +37,10 @@ class Download:
         return f"<Download url={self.url!r} suggested_filename={self.suggested_filename!r}>"
 
     @property
+    def page(self) -> "Page":
+        return self._page
+
+    @property
     def url(self) -> str:
         return self._url
 

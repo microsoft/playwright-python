@@ -153,6 +153,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     ) -> None:
         super().__init__(loop)
         Transport.__init__(self, loop)
+
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.headers = headers
@@ -160,6 +161,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
 
     def request_stop(self) -> None:
         self._stopped = True
+        self.emit("close")
         self._loop.create_task(self._connection.close())
 
     def dispose(self) -> None:
