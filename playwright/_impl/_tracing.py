@@ -24,11 +24,10 @@ if TYPE_CHECKING:
 
 
 class Tracing:
-    def __init__(self, channel: "BrowserContext") -> None:
-        self._context = channel
-        self._channel = channel._channel  # type: ignore
-        self._loop = channel._loop
-        self._dispatcher_fiber = channel._dispatcher_fiber
+    def __init__(self, context: "BrowserContext") -> None:
+        self._context = context
+        self._channel = context._channel
+        self._loop = context._loop
 
     async def start(
         self, name: str = None, snapshots: bool = None, screenshots: bool = None
