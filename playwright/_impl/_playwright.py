@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
+from typing import Dict, cast
 
+from playwright._impl._api_structures import DeviceDescriptor, Devices
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._selectors import Selectors
 
 
 class Playwright(ChannelOwner):
-    devices: Dict
+    devices: Devices
     selectors: Selectors
     chromium: BrowserType
     firefox: BrowserType
@@ -34,20 +35,22 @@ class Playwright(ChannelOwner):
         self.firefox = from_channel(initializer["firefox"])
         self.webkit = from_channel(initializer["webkit"])
         self.selectors = from_channel(initializer["selectors"])
-        self.devices = {}
-        self.devices = {
-            device["name"]: parse_device_descriptor(device["descriptor"])
-            for device in initializer["deviceDescriptors"]
-        }
+        self.devices = cast(
+            Devices,
+            {
+                device["name"]: parse_device_descriptor(device["descriptor"])
+                for device in initializer["deviceDescriptors"]
+            },
+        )
 
     def stop(self) -> None:
         pass
 
 
-def parse_device_descriptor(dict: Dict) -> Dict:
+def parse_device_descriptor(dict: Dict) -> DeviceDescriptor:
     return {
-        "user_agent": dict["userAgent"],
         "viewport": dict["viewport"],
+        "user_agent": dict["userAgent"],
         "device_scale_factor": dict["deviceScaleFactor"],
         "is_mobile": dict["isMobile"],
         "has_touch": dict["hasTouch"],
