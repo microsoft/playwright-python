@@ -1,7 +1,8 @@
 #!/bin/bash
 
 python scripts/update_versions.py
-
+python scripts/generate_devices.py
+pre-commit run --files playwright/_impl/_devices_generated.py
 function update_api {
     echo "Generating $1"
     file_name="$1"
