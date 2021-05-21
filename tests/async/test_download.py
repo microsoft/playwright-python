@@ -53,6 +53,7 @@ async def test_should_report_downloads_with_accept_downloads_false(page: Page, s
     async with page.expect_download() as download_info:
         await page.click("a")
     download = await download_info.value
+    assert download.page is page
     assert download.url == f"{server.PREFIX}/downloadWithFilename"
     assert download.suggested_filename == "file.txt"
     assert (

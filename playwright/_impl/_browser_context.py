@@ -22,7 +22,11 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Unio
 from playwright._impl._api_structures import Cookie, Geolocation, StorageState
 from playwright._impl._api_types import Error
 from playwright._impl._cdp_session import CDPSession
-from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._connection import (
+    ChannelOwner,
+    from_channel,
+    from_nullable_channel,
+)
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import (
     RouteHandler,
@@ -33,8 +37,9 @@ from playwright._impl._helper import (
     is_safe_close_error,
     locals_to_params,
 )
-from playwright._impl._network import Request, Route, serialize_headers
+from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._tracing import Tracing
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -48,6 +53,10 @@ class BrowserContext(ChannelOwner):
         Close="close",
         Page="page",
         ServiceWorker="serviceworker",
+        Request="request",
+        Response="response",
+        RequestFailed="requestfailed",
+        RequestFinished="requestfinished",
     )
 
     def __init__(
@@ -64,7 +73,7 @@ class BrowserContext(ChannelOwner):
         self._options: Dict[str, Any] = {}
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
-
+        self._tracing = Tracing(self)
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -88,6 +97,37 @@ class BrowserContext(ChannelOwner):
         self._channel.on(
             "serviceWorker",
             lambda params: self._on_service_worker(from_channel(params["worker"])),
+        )
+        self._channel.on(
+            "request",
+            lambda params: self._on_request(
+                from_channel(params["request"]),
+                from_nullable_channel(params.get("page")),
+            ),
+        )
+        self._channel.on(
+            "response",
+            lambda params: self._on_response(
+                from_channel(params["response"]),
+                from_nullable_channel(params.get("page")),
+            ),
+        )
+        self._channel.on(
+            "requestFailed",
+            lambda params: self._on_request_failed(
+                from_channel(params["request"]),
+                params["responseEndTiming"],
+                params["failureText"],
+                from_nullable_channel(params.get("page")),
+            ),
+        )
+        self._channel.on(
+            "requestFinished",
+            lambda params: self._on_request_finished(
+                from_channel(params["request"]),
+                params["responseEndTiming"],
+                from_nullable_channel(params.get("page")),
+            ),
         )
 
     def __repr__(self) -> str:
@@ -287,6 +327,39 @@ class BrowserContext(ChannelOwner):
         self._service_workers.add(worker)
         self.emit(BrowserContext.Events.ServiceWorker, worker)
 
+    def _on_request_failed(
+        self,
+        request: Request,
+        response_end_timing: float,
+        failure_text: Optional[str],
+        page: Optional[Page],
+    ) -> None:
+        request._failure_text = failure_text
+        if request._timing:
+            request._timing["responseEnd"] = response_end_timing
+        self.emit(BrowserContext.Events.RequestFailed, request)
+        if page:
+            page.emit(Page.Events.RequestFailed, request)
+
+    def _on_request_finished(
+        self, request: Request, response_end_timing: float, page: Optional[Page]
+    ) -> None:
+        if request._timing:
+            request._timing["responseEnd"] = response_end_timing
+        self.emit(BrowserContext.Events.RequestFinished, request)
+        if page:
+            page.emit(Page.Events.RequestFinished, request)
+
+    def _on_request(self, request: Request, page: Optional[Page]) -> None:
+        self.emit(BrowserContext.Events.Request, request)
+        if page:
+            page.emit(Page.Events.Request, request)
+
+    def _on_response(self, response: Response, page: Optional[Page]) -> None:
+        self.emit(BrowserContext.Events.Response, response)
+        if page:
+            page.emit(Page.Events.Response, response)
+
     @property
     def background_pages(self) -> List[Page]:
         return list(self._background_pages)
@@ -299,3 +372,7 @@ class BrowserContext(ChannelOwner):
         return from_channel(
             await self._channel.send("newCDPSession", {"page": page._channel})
         )
+
+    @property
+    def tracing(self) -> Tracing:
+        return self._tracing

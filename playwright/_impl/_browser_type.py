@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import pathlib
 from pathlib import Path
 from typing import Dict, List, Optional, Union, cast
 
@@ -75,6 +76,7 @@ class BrowserType(ChannelOwner):
         proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: float = None,
+        traceDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
     ) -> Browser:
@@ -123,6 +125,7 @@ class BrowserType(ChannelOwner):
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         acceptDownloads: bool = None,
+        traceDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,
@@ -209,7 +212,14 @@ class BrowserType(ChannelOwner):
         browser._is_remote = True
         browser._is_connected_over_websocket = True
 
-        transport.once("close", browser._on_close)
+        def handle_transport_close() -> None:
+            for context in browser.contexts:
+                for page in context.pages:
+                    page._on_close()
+                context._on_close()
+            browser._on_close()
+
+        transport.once("close", handle_transport_close)
 
         return browser
 

@@ -60,6 +60,7 @@ from playwright._impl._page import Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._sync_base import EventContextManager, SyncBase, mapping
+from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._video import Video as VideoImpl
 
 NoneType = type(None)
@@ -4728,6 +4729,18 @@ class Download(SyncBase):
         super().__init__(obj)
 
     @property
+    def page(self) -> "Page":
+        """Download.page
+
+        Get the page that the download belongs to.
+
+        Returns
+        -------
+        Page
+        """
+        return mapping.from_impl(self._impl_obj.page)
+
+    @property
     def url(self) -> str:
         """Download.url
 
@@ -4796,12 +4809,13 @@ class Download(SyncBase):
     def save_as(self, path: typing.Union[str, pathlib.Path]) -> NoneType:
         """Download.save_as
 
-        Saves the download to a user-specified path. It is safe to call this method while the download is still in progress.
+        Copy the download to a user-specified path. It is safe to call this method while the download is still in progress. Will
+        wait for the download to finish if necessary.
 
         Parameters
         ----------
         path : Union[pathlib.Path, str]
-            Path where the download should be saved.
+            Path where the download should be copied.
         """
 
         return mapping.from_maybe_impl(
@@ -5082,7 +5096,7 @@ class Page(SyncBase):
         """Page.query_selector
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
-        return value resolves to `null`.
+        return value resolves to `null`. To wait for an element on the page, use `page.wait_for_selector()`.
 
         Shortcut for main frame's `frame.query_selector()`.
 
@@ -8029,6 +8043,16 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_impl_list(self._impl_obj.service_workers)
 
+    @property
+    def tracing(self) -> "Tracing":
+        """BrowserContext.tracing
+
+        Returns
+        -------
+        Tracing
+        """
+        return mapping.from_impl(self._impl_obj.tracing)
+
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
         """BrowserContext.set_default_navigation_timeout
 
@@ -9229,7 +9253,6 @@ class BrowserType(SyncBase):
             "chrome-beta",
             "chrome-canary",
             "chrome-dev",
-            "firefox-stable",
             "msedge",
             "msedge-beta",
             "msedge-canary",
@@ -9247,6 +9270,7 @@ class BrowserType(SyncBase):
         proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
+        trace_dir: typing.Union[str, pathlib.Path] = None,
         chromium_sandbox: bool = None,
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
@@ -9285,7 +9309,7 @@ class BrowserType(SyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         args : Union[List[str], NoneType]
@@ -9320,8 +9344,10 @@ class BrowserType(SyncBase):
             deleted when browser is closed.
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
+        trace_dir : Union[pathlib.Path, str, NoneType]
+            If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
-            Enable Chromium sandboxing. Defaults to `false`.
+            Enable Chromium sandboxing. Defaults to `true`.
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], NoneType]
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
@@ -9349,6 +9375,7 @@ class BrowserType(SyncBase):
                     proxy=proxy,
                     downloadsPath=downloads_path,
                     slowMo=slow_mo,
+                    traceDir=trace_dir,
                     chromiumSandbox=chromium_sandbox,
                     firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
                 ),
@@ -9364,7 +9391,6 @@ class BrowserType(SyncBase):
             "chrome-beta",
             "chrome-canary",
             "chrome-dev",
-            "firefox-stable",
             "msedge",
             "msedge-beta",
             "msedge-canary",
@@ -9402,6 +9428,7 @@ class BrowserType(SyncBase):
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         accept_downloads: bool = None,
+        trace_dir: typing.Union[str, pathlib.Path] = None,
         chromium_sandbox: bool = None,
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
@@ -9422,13 +9449,13 @@ class BrowserType(SyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "firefox-stable", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
+        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
             Browser distribution channel. Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
-            resolved relative to the current working directory. **BEWARE**: Playwright is only guaranteed to work with the bundled
-            Chromium, Firefox or WebKit, use at your own risk.
+            resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
+            or WebKit, use at your own risk.
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -9461,7 +9488,6 @@ class BrowserType(SyncBase):
             deleted when browser is closed.
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
-            Defaults to 0.
         viewport : Union[{width: int, height: int}, NoneType]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
         screen : Union[{width: int, height: int}, NoneType]
@@ -9506,6 +9532,8 @@ class BrowserType(SyncBase):
             `page.emulate_media()` for more details. Defaults to `'light'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+        trace_dir : Union[pathlib.Path, str, NoneType]
+            If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
             Enable Chromium sandboxing. Defaults to `true`.
         record_har_path : Union[pathlib.Path, str, NoneType]
@@ -9565,6 +9593,7 @@ class BrowserType(SyncBase):
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
                     acceptDownloads=accept_downloads,
+                    traceDir=trace_dir,
                     chromiumSandbox=chromium_sandbox,
                     recordHarPath=record_har_path,
                     recordHarOmitContent=record_har_omit_content,
@@ -9774,3 +9803,70 @@ class Playwright(SyncBase):
 
 
 mapping.register(PlaywrightImpl, Playwright)
+
+
+class Tracing(SyncBase):
+    def __init__(self, obj: TracingImpl):
+        super().__init__(obj)
+
+    def start(
+        self, *, name: str = None, snapshots: bool = None, screenshots: bool = None
+    ) -> NoneType:
+        """Tracing.start
+
+        Start tracing.
+
+        ```py
+        context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        page.goto(\"https://playwright.dev\")
+        context.tracing.stop()
+        context.tracing.export(\"trace.zip\")
+        ```
+
+        Parameters
+        ----------
+        name : Union[str, NoneType]
+            If specified, the trace is going to be saved into the file with the given name inside the `traceDir` folder specified in
+            `browser_type.launch()`.
+        snapshots : Union[bool, NoneType]
+            Whether to capture DOM snapshot on every action.
+        screenshots : Union[bool, NoneType]
+            Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "tracing.start",
+                self._impl_obj.start(
+                    name=name, snapshots=snapshots, screenshots=screenshots
+                ),
+            )
+        )
+
+    def stop(self) -> NoneType:
+        """Tracing.stop
+
+        Stop tracing.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("tracing.stop", self._impl_obj.stop())
+        )
+
+    def export(self, path: typing.Union[pathlib.Path, str]) -> NoneType:
+        """Tracing.export
+
+        Export trace into the file with the given name. Should be called after the tracing has stopped.
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str]
+            File to save the trace into.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("tracing.export", self._impl_obj.export(path=path))
+        )
+
+
+mapping.register(TracingImpl, Tracing)

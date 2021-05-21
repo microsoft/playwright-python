@@ -174,32 +174,6 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on(
-            "request",
-            lambda params: self.emit(
-                Page.Events.Request, from_channel(params["request"])
-            ),
-        )
-        self._channel.on(
-            "requestFailed",
-            lambda params: self._on_request_failed(
-                from_channel(params["request"]),
-                params["responseEndTiming"],
-                params["failureText"],
-            ),
-        )
-        self._channel.on(
-            "requestFinished",
-            lambda params: self._on_request_finished(
-                from_channel(params["request"]), params["responseEndTiming"]
-            ),
-        )
-        self._channel.on(
-            "response",
-            lambda params: self.emit(
-                Page.Events.Response, from_channel(params["response"])
-            ),
-        )
-        self._channel.on(
             "route",
             lambda params: self._on_route(
                 from_channel(params["route"]), from_channel(params["request"])
@@ -218,24 +192,6 @@ class Page(ChannelOwner):
 
     def __repr__(self) -> str:
         return f"<Page url={self.url!r}>"
-
-    def _on_request_failed(
-        self,
-        request: Request,
-        response_end_timing: float,
-        failure_text: str = None,
-    ) -> None:
-        request._failure_text = failure_text
-        if request._timing:
-            request._timing["responseEnd"] = response_end_timing
-        self.emit(Page.Events.RequestFailed, request)
-
-    def _on_request_finished(
-        self, request: Request, response_end_timing: float
-    ) -> None:
-        if request._timing:
-            request._timing["responseEnd"] = response_end_timing
-        self.emit(Page.Events.RequestFinished, request)
 
     def _on_frame_attached(self, frame: Frame) -> None:
         frame._page = self

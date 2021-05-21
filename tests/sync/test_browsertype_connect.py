@@ -163,6 +163,26 @@ def test_browser_type_connect_should_forward_close_events_to_pages(
     assert events == ["page::close", "context::close", "browser::disconnected"]
 
 
+def test_browser_type_connect_should_forward_close_events_on_remote_kill(
+    browser_type: BrowserType, launch_server
+):
+    # Launch another server to not affect other tests.
+    remote = launch_server()
+
+    browser = browser_type.connect(remote.ws_endpoint)
+    context = browser.new_context()
+    page = context.new_page()
+
+    events = []
+    browser.on("disconnected", lambda: events.append("browser::disconnected"))
+    context.on("close", lambda: events.append("context::close"))
+    page.on("close", lambda: events.append("page::close"))
+    remote.kill()
+    with pytest.raises(Error):
+        page.title()
+    assert events == ["page::close", "context::close", "browser::disconnected"]
+
+
 def test_connect_to_closed_server_without_hangs(
     browser_type: BrowserType, launch_server
 ):
