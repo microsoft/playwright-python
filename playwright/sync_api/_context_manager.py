@@ -37,6 +37,7 @@ class PlaywrightContextManager:
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             own_loop = loop
         if loop.is_running():
             raise Error(

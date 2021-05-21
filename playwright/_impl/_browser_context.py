@@ -128,8 +128,8 @@ class BrowserContext(ChannelOwner):
                 from_nullable_channel(params.get("page")),
             ),
         )
-        self._closed_future: asyncio.Future = asyncio.Future()
-        self.once(self.Events.Close, lambda: self._closed_future.set_result(True))
+        self._closed = asyncio.Event()
+        self.once(self.Events.Close, lambda: self._closed.set())
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
@@ -287,7 +287,7 @@ class BrowserContext(ChannelOwner):
     async def close(self) -> None:
         try:
             await self._channel.send("close")
-            await self._closed_future
+            await self._closed.wait()
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
