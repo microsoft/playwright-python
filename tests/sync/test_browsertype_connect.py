@@ -26,10 +26,10 @@ def test_browser_type_connect_slow_mo(
     remote_server = launch_server()
     browser = browser_type.connect(remote_server.ws_endpoint, slow_mo=100)
     browser_context = browser.new_context()
-    page = browser_context.new_page()
     t1 = time.monotonic()
+    page = browser_context.new_page()
     assert page.evaluate("11 * 11") == 121
-    assert (time.monotonic() - t1) >= 0.100
+    assert (time.monotonic() - t1) >= 0.2
     page.goto(server.EMPTY_PAGE)
     browser.close()
 
