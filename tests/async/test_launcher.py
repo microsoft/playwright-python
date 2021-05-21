@@ -47,7 +47,7 @@ async def test_browser_type_launch_should_reject_if_launched_browser_fails_immed
     with pytest.raises(Error):
         await browser_type.launch(
             **launch_arguments,
-            executable_path=assetdir / "dummy_bad_browser_executable.js"
+            executable_path=assetdir / "dummy_bad_browser_executable.js",
         )
 
 
@@ -109,3 +109,40 @@ async def test_browser_launch_non_existing_executable_path_shows_install_msg(
     with pytest.raises(Error) as exc_info:
         await browser_type.launch(executable_path=tmpdir.join("executable"))
     assert "python -m playwright install" in exc_info.value.message
+
+
+@pytest.mark.only_browser("chromium")
+async def test_browser_launch_should_return_background_pages(
+    browser_type: BrowserType,
+    tmpdir,
+    browser_channel,
+    assetdir,
+    launch_arguments,
+):
+    if browser_channel:
+        pytest.skip()
+
+    extension_path = str(assetdir / "simple-extension")
+    context = await browser_type.launch_persistent_context(
+        str(tmpdir),
+        **{
+            **launch_arguments,
+            "headless": False,
+            "args": [
+                f"--disable-extensions-except={extension_path}",
+                f"--load-extension={extension_path}",
+            ],
+        },  # type: ignore
+    )
+    background_page = None
+    if len(context.background_pages):
+        background_page = context.background_pages[0]
+    else:
+        background_page = await context.wait_for_event("backgroundpage")
+    assert background_page
+    assert background_page in context.background_pages
+    assert background_page not in context.pages
+    assert await background_page.evaluate("window.MAGIC") == 42
+    await context.close()
+    assert len(context.background_pages) == 0
+    assert len(context.pages) == 0

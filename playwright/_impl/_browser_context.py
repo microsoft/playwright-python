@@ -69,7 +69,6 @@ class BrowserContext(ChannelOwner):
         self._timeout_settings = TimeoutSettings(None)
         self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
-        self._is_closed_or_closing = False
         self._options: Dict[str, Any] = {}
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
@@ -129,6 +128,8 @@ class BrowserContext(ChannelOwner):
                 from_nullable_channel(params.get("page")),
             ),
         )
+        self._closed_future: asyncio.Future = asyncio.Future()
+        self.once(self.Events.Close, lambda: self._closed_future.set_result(True))
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
@@ -278,18 +279,15 @@ class BrowserContext(ChannelOwner):
         return EventContextManagerImpl(wait_helper.result())
 
     def _on_close(self) -> None:
-        self._is_closed_or_closing = True
         if self._browser:
             self._browser._contexts.remove(self)
 
         self.emit(BrowserContext.Events.Close)
 
     async def close(self) -> None:
-        if self._is_closed_or_closing:
-            return
-        self._is_closed_or_closing = True
         try:
             await self._channel.send("close")
+            await self._closed_future
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
