@@ -14,12 +14,9 @@
 
 from pathlib import Path
 
-import pytest
-
 from playwright.async_api import BrowserType
 
 
-@pytest.mark.only_browser("chromium")
 async def test_browser_context_output_trace(
     browser_type: BrowserType, server, tmp_path: Path, launch_arguments
 ):
