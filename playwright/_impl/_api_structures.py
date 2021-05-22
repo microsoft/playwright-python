@@ -20,13 +20,15 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal, TypedDict
 
+# Required to import it directly from this module
+from playwright._impl._devices_generated import DeviceDescriptor, Devices  # NOQA
+
 # These are the structures that we like keeping in a JSON form for their potential
 # reuse between SDKs / services. They are public and are a part of the
 # stable API.
 
 # Explicitly mark optional params as such for the documentation
 # If there is at least one optional param, set total=False for better mypy handling.
-from playwright._impl._devices_generated import DeviceDescriptor, Devices
 
 
 class Cookie(TypedDict, total=False):
@@ -120,23 +122,3 @@ class FilePayload(TypedDict):
     name: str
     mimeType: str
     buffer: bytes
-
-
-__all__ = [
-    "Cookie",
-    "FloatRect",
-    "Geolocation",
-    "HttpCredentials",
-    "LocalStorageEntry",
-    "OriginState",
-    "PdfMargins",
-    "Position",
-    "ProxySettings",
-    "StorageState",
-    "ResourceTiming",
-    "ViewportSize",
-    "SourceLocation",
-    "FilePayload",
-    "DeviceDescriptor",
-    "Devices",
-]

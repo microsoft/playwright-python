@@ -20,5 +20,5 @@ Parameter type mismatch in BrowserContext.cookies(return=): documented as List[{
 Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
-# Temporary
+# Devices are properly typed
 Parameter type mismatch in Playwright.devices(return=): documented as Dict, code has Devices
