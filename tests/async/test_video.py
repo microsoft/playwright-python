@@ -28,6 +28,7 @@ async def test_short_video_should_throw(browser, tmpdir, server):
     await page.goto(server.PREFIX + "/grid.html")
     path = await page.video.path()
     assert str(tmpdir) in str(path)
+    await page.wait_for_timeout(1000)
     await page.context.close()
     assert os.path.exists(path)
 
@@ -43,6 +44,7 @@ async def test_short_video_should_throw_persistent_context(
     )
     page = context.pages[0]
     await page.goto(server.PREFIX + "/grid.html")
+    await page.wait_for_timeout(1000)
     await context.close()
 
     path = await page.video.path()

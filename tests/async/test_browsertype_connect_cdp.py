@@ -18,7 +18,7 @@ import pytest
 import requests
 
 from playwright.async_api import BrowserType
-from tests.server import Server, find_free_port, wait_for_port
+from tests.server import Server, find_free_port
 
 pytestmark = pytest.mark.only_browser("chromium")
 
@@ -30,7 +30,6 @@ async def test_connect_to_an_existing_cdp_session(
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    wait_for_port(port)
     cdp_browser = await browser_type.connect_over_cdp(f"http://localhost:{port}")
     assert len(cdp_browser.contexts) == 1
     await cdp_browser.close()
@@ -44,7 +43,6 @@ async def test_connect_to_an_existing_cdp_session_twice(
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    wait_for_port(port)
     endpoint_url = f"http://localhost:{port}"
     cdp_browser1 = await browser_type.connect_over_cdp(endpoint_url)
     cdp_browser2 = await browser_type.connect_over_cdp(endpoint_url)
@@ -78,7 +76,6 @@ async def test_conect_over_a_ws_endpoint(
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    wait_for_port(port)
     ws_endpoint = _ws_endpoint_from_url(f"http://localhost:{port}/json/version/")
 
     cdp_browser1 = await browser_type.connect_over_cdp(ws_endpoint)

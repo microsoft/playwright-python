@@ -26,6 +26,7 @@ async def test_page_event_should_create_new_context(browser):
     assert context in browser.contexts
     await context.close()
     assert len(browser.contexts) == 0
+    assert context.browser == browser
 
 
 async def test_window_open_should_use_parent_tab_context(browser, server):

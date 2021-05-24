@@ -14,7 +14,6 @@
 
 
 import pytest
-from flaky import flaky
 
 
 async def test_should_have_default_url_when_launching_browser(
@@ -26,34 +25,6 @@ async def test_should_have_default_url_when_launching_browser(
     urls = [page.url for page in browser_context.pages]
     assert urls == ["about:blank"]
     await browser_context.close()
-
-
-async def test_headless_should_be_able_to_read_cookies_written_by_headful(
-    browser_type, launch_arguments, server, tmpdir, is_chromium, is_win
-):
-    if is_chromium and is_win:
-        pytest.skip("see https://github.com/microsoft/playwright/issues/717")
-        return
-    # Write a cookie in headful chrome
-    headful_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": False}
-    )
-    headful_page = await headful_context.new_page()
-    await headful_page.goto(server.EMPTY_PAGE)
-    await headful_page.evaluate(
-        """() => document.cookie = 'foo=true; expires=Fri, 31 Dec 9999 23:59:59 GMT'"""
-    )
-    await headful_context.close()
-    # Read the cookie from headless chrome
-    headless_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": True}
-    )
-    headless_page = await headless_context.new_page()
-    await headless_page.goto(server.EMPTY_PAGE)
-    cookie = await headless_page.evaluate("() => document.cookie")
-    await headless_context.close()
-    # This might throw. See https://github.com/GoogleChrome/puppeteer/issues/2778
-    assert cookie == "foo=true"
 
 
 async def test_should_close_browser_with_beforeunload_page(
@@ -177,7 +148,6 @@ async def test_should_not_override_viewport_size_when_passed_null(
     await browser.close()
 
 
-@flaky
 async def test_page_bring_to_front_should_work(browser_type, launch_arguments):
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page1 = await browser.new_page()

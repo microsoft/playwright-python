@@ -128,9 +128,6 @@ async def test_async_stacks_should_work(page, server):
     assert __file__ in exc_info.value.stack
 
 
-# TODO: bring in page.crash events
-
-
 async def test_opener_should_provide_access_to_the_opener_page(page):
     async with page.expect_popup() as popup_info:
         await page.evaluate("window.open('about:blank')"),
@@ -766,7 +763,6 @@ async def test_select_option_should_select_only_first_option(page, server):
     assert await page.evaluate("result.onChange") == ["blue"]
 
 
-@pytest.mark.skip_browser("webkit")  # TODO: investigate
 async def test_select_option_should_not_throw_when_select_causes_navigation(
     page, server
 ):
