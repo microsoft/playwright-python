@@ -171,6 +171,7 @@ async def test_request_headers_should_work(
         assert "WebKit" in response.request.headers["user-agent"]
 
 
+# TODO: update once fixed https://github.com/microsoft/playwright/issues/6690
 @pytest.mark.xfail
 async def test_request_headers_should_get_the_same_headers_as_the_server(
     page: Page, server, is_webkit, is_win

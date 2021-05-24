@@ -28,6 +28,7 @@ async def test_browser_context_output_trace(
     page = await context.new_page()
     await page.goto(server.PREFIX + "/grid.html")
     await context.tracing.stop()
+    await page.wait_for_timeout(1000)
     await context.tracing.export(Path(tmp_path / "traces" / "trace.zip").resolve())
     assert Path(tmp_path / "traces" / "trace.zip").exists()
     assert Path(tmp_path / "traces" / "resources").exists()

@@ -20,6 +20,7 @@ from playwright.async_api import Error
 async def test_evaluate_handle(page, server):
     await page.goto(server.EMPTY_PAGE)
     main_frame = page.main_frame
+    assert main_frame.page == page
     window_handle = await main_frame.evaluate_handle("window")
     assert window_handle
 

@@ -338,7 +338,3 @@ def serialize_call_stack(stack_trace: traceback.StackSummary) -> List[Dict]:
         )
     stack.reverse()
     return stack
-
-
-def capture_call_stack() -> List[Dict]:
-    return serialize_call_stack(traceback.extract_stack())

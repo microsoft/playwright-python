@@ -17,7 +17,7 @@ from typing import Dict
 import pytest
 
 from playwright.sync_api import BrowserType
-from tests.server import find_free_port, wait_for_port
+from tests.server import find_free_port
 
 pytestmark = pytest.mark.only_browser("chromium")
 
@@ -29,7 +29,6 @@ def test_connect_to_an_existing_cdp_session(
     browser_server = browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    wait_for_port(port)
     cdp_browser = browser_type.connect_over_cdp(f"http://localhost:{port}")
     assert len(cdp_browser.contexts) == 1
     cdp_browser.close()

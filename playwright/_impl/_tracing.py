@@ -19,7 +19,7 @@ from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_channel
 from playwright._impl._helper import locals_to_params
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
 
 
