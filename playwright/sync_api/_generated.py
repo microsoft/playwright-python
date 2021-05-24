@@ -6111,7 +6111,7 @@ class Page(SyncBase):
         > NOTE: In most cases, you should use `page.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
-        waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
+        waits for `predicate(event)` to return a truthy value. Will throw an error if the page is closed before the `event` is
         fired.
 
         Parameters
@@ -8641,8 +8641,8 @@ class BrowserContext(SyncBase):
         > NOTE: In most cases, you should use `browser_context.expect_event()`.
 
         Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function and
-        waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the `event` is
-        fired.
+        waits for `predicate(event)` to return a truthy value. Will throw an error if the browser context is closed before the
+        `event` is fired.
 
         Parameters
         ----------
@@ -9347,7 +9347,7 @@ class BrowserType(SyncBase):
         trace_dir : Union[pathlib.Path, str, NoneType]
             If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
-            Enable Chromium sandboxing. Defaults to `true`.
+            Enable Chromium sandboxing. Defaults to `false`.
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], NoneType]
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
@@ -9535,7 +9535,7 @@ class BrowserType(SyncBase):
         trace_dir : Union[pathlib.Path, str, NoneType]
             If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
-            Enable Chromium sandboxing. Defaults to `true`.
+            Enable Chromium sandboxing. Defaults to `false`.
         record_har_path : Union[pathlib.Path, str, NoneType]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file on the
             filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()` for the HAR to
