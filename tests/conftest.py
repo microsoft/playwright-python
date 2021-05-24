@@ -238,14 +238,7 @@ class RemoteServer:
         # Send the signal to all the process groups
         if self.process.poll() is not None:
             return
-        if sys.platform == "win32":
-            subprocess.check_call(
-                ["taskkill", "/F", "/PID", str(self.process.pid)],
-                stderr=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-            )
-        else:
-            self.process.kill()
+        self.process.kill()
         self.process.wait()
 
 
