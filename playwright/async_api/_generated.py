@@ -6258,7 +6258,8 @@ class Page(AsyncBase):
         self,
         *,
         media: Literal["print", "screen"] = None,
-        color_scheme: Literal["dark", "light", "no-preference"] = None
+        color_scheme: Literal["dark", "light", "no-preference"] = None,
+        reduced_motion: Literal["no-preference", "reduce"] = None
     ) -> NoneType:
         """Page.emulate_media
 
@@ -6302,12 +6303,17 @@ class Page(AsyncBase):
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
             `null` disables color scheme emulation.
+        reduced_motion : Union["no-preference", "reduce", NoneType]
+            Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null`
+            disables reduced motion emulation.
         """
 
         return mapping.from_maybe_impl(
             await self._async(
                 "page.emulate_media",
-                self._impl_obj.emulate_media(media=media, colorScheme=color_scheme),
+                self._impl_obj.emulate_media(
+                    media=media, colorScheme=color_scheme, reducedMotion=reduced_motion
+                ),
             )
         )
 
@@ -8892,6 +8898,7 @@ class Browser(AsyncBase):
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
+        reduced_motion: Literal["no-preference", "reduce"] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: ProxySettings = None,
@@ -8958,6 +8965,9 @@ class Browser(AsyncBase):
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
+        reduced_motion : Union["no-preference", "reduce", NoneType]
+            Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
+            `page.emulate_media()` for more details. Defaults to `'no-preference'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
@@ -9011,6 +9021,7 @@ class Browser(AsyncBase):
                     isMobile=is_mobile,
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
+                    reducedMotion=reduced_motion,
                     acceptDownloads=accept_downloads,
                     defaultBrowserType=default_browser_type,
                     proxy=proxy,
@@ -9044,6 +9055,7 @@ class Browser(AsyncBase):
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
+        reduced_motion: Literal["no-preference", "reduce"] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: ProxySettings = None,
@@ -9105,6 +9117,9 @@ class Browser(AsyncBase):
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
+        reduced_motion : Union["no-preference", "reduce", NoneType]
+            Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
+            `page.emulate_media()` for more details. Defaults to `'no-preference'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
@@ -9158,6 +9173,7 @@ class Browser(AsyncBase):
                     isMobile=is_mobile,
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
+                    reducedMotion=reduced_motion,
                     acceptDownloads=accept_downloads,
                     defaultBrowserType=default_browser_type,
                     proxy=proxy,
@@ -9481,6 +9497,7 @@ class BrowserType(AsyncBase):
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
+        reduced_motion: Literal["no-preference", "reduce"] = None,
         accept_downloads: bool = None,
         trace_dir: typing.Union[str, pathlib.Path] = None,
         chromium_sandbox: bool = None,
@@ -9584,6 +9601,9 @@ class BrowserType(AsyncBase):
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
+        reduced_motion : Union["no-preference", "reduce", NoneType]
+            Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
+            `page.emulate_media()` for more details. Defaults to `'no-preference'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         trace_dir : Union[pathlib.Path, str, NoneType]
@@ -9646,6 +9666,7 @@ class BrowserType(AsyncBase):
                     isMobile=is_mobile,
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
+                    reducedMotion=reduced_motion,
                     acceptDownloads=accept_downloads,
                     traceDir=trace_dir,
                     chromiumSandbox=chromium_sandbox,

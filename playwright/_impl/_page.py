@@ -46,6 +46,7 @@ from playwright._impl._helper import (
     DocumentLoadState,
     KeyboardModifier,
     MouseButton,
+    ReducedMotion,
     RouteHandler,
     RouteHandlerEntry,
     TimeoutSettings,
@@ -477,6 +478,7 @@ class Page(ChannelOwner):
         self,
         media: Literal["print", "screen"] = None,
         colorScheme: ColorScheme = None,
+        reducedMotion: ReducedMotion = None,
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 
