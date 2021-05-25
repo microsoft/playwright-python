@@ -175,7 +175,7 @@ class Browser(ChannelOwner):
         if page:
             params["page"] = page._channel
         if path:
-            params["path"] = str(path)
+            params["path"] = str(Path(path).resolve())
         await self._channel.send("startTracing", params)
 
     async def stop_tracing(self) -> bytes:

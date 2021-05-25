@@ -132,7 +132,7 @@ class BrowserType(ChannelOwner):
         recordVideoDir: Union[Path, str] = None,
         recordVideoSize: ViewportSize = None,
     ) -> BrowserContext:
-        userDataDir = str(Path(userDataDir))
+        userDataDir = str(Path(userDataDir).resolve())
         params = locals_to_params(locals())
         normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
@@ -235,6 +235,6 @@ def normalize_launch_params(params: Dict) -> None:
             params["ignoreAllDefaultArgs"] = True
             del params["ignoreDefaultArgs"]
     if "executablePath" in params:
-        params["executablePath"] = str(Path(params["executablePath"]))
+        params["executablePath"] = str(Path(params["executablePath"]).resolve())
     if "downloadsPath" in params:
-        params["downloadsPath"] = str(Path(params["downloadsPath"]))
+        params["downloadsPath"] = str(Path(params["downloadsPath"]).resolve())
