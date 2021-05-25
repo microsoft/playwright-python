@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import base64
-import mimetypes
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
@@ -69,8 +68,6 @@ def normalize_file_payloads(
                 file_payloads.append(
                     {
                         "name": os.path.basename(item),
-                        "mimeType": mimetypes.guess_type(str(Path(item)))[0]
-                        or "application/octet-stream",
                         "buffer": base64.b64encode(fd.read()).decode(),
                     }
                 )
