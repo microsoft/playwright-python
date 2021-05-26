@@ -28,7 +28,12 @@ from playwright._impl._api_structures import (
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._helper import ColorScheme, is_safe_close_error, locals_to_params
+from playwright._impl._helper import (
+    ColorScheme,
+    ReducedMotion,
+    is_safe_close_error,
+    locals_to_params,
+)
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
 
@@ -90,6 +95,7 @@ class Browser(ChannelOwner):
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
+        reducedMotion: ReducedMotion = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
         proxy: ProxySettings = None,
@@ -129,6 +135,7 @@ class Browser(ChannelOwner):
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
+        reducedMotion: ReducedMotion = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
         proxy: ProxySettings = None,

@@ -1219,3 +1219,21 @@ async def test_frame_press_should_work(page, server):
     frame = page.frame("inner")
     await frame.press("textarea", "a")
     assert await frame.evaluate("document.querySelector('textarea').value") == "a"
+
+
+async def test_should_emulate_reduced_motion(page, server):
+    assert await page.evaluate(
+        "matchMedia('(prefers-reduced-motion: no-preference)').matches"
+    )
+    await page.emulate_media(reduced_motion="reduce")
+    assert await page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
+    assert not await page.evaluate(
+        "matchMedia('(prefers-reduced-motion: no-preference)').matches"
+    )
+    await page.emulate_media(reduced_motion="no-preference")
+    assert not await page.evaluate(
+        "matchMedia('(prefers-reduced-motion: reduce)').matches"
+    )
+    assert await page.evaluate(
+        "matchMedia('(prefers-reduced-motion: no-preference)').matches"
+    )

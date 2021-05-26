@@ -376,3 +376,8 @@ async def test_should_fire_close_event_for_a_persistent_context(launch_persisten
     context.on("close", lambda: fired_event.set_result(True))
     await context.close()
     await fired_event
+
+
+async def test_should_support_reduced_motion(launch_persistent):
+    (page, context) = await launch_persistent(reduced_motion="reduce")
+    assert await page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")

@@ -50,6 +50,7 @@ URLMatchResponse = Union[str, Pattern, Callable[["Response"], bool]]
 RouteHandler = Union[Callable[["Route"], Any], Callable[["Route", "Request"], Any]]
 
 ColorScheme = Literal["dark", "light", "no-preference"]
+ReducedMotion = Literal["no-preference", "reduce"]
 DocumentLoadState = Literal["domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
