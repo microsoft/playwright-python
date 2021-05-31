@@ -98,11 +98,9 @@ class PipeTransport(Transport):
 
     async def run(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
-        platform = sys.platform
-        if platform == "win32" and sys.stdout is None:
+        creationflags = 0
+        if sys.platform == "win32" and sys.stdout is None:
             creationflags = subprocess.CREATE_NO_WINDOW
-        else:
-            creationflags = 0
 
         try:
             self._proc = proc = await asyncio.create_subprocess_exec(
