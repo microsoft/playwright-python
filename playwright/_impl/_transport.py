@@ -98,6 +98,7 @@ class PipeTransport(Transport):
 
     async def run(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
+        # Hide the command-line popup on Windows when using Pythonw.exe
         creationflags = 0
         if sys.platform == "win32" and sys.stdout is None:
             creationflags = subprocess.CREATE_NO_WINDOW
