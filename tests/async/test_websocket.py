@@ -34,7 +34,7 @@ async def test_should_work(page, ws_server):
 
 
 async def test_should_emit_close_events(page, ws_server):
-    async with page.expect_event("websocket") as ws_info:
+    async with page.expect_websocket() as ws_info:
         await page.evaluate(
             """port => {
             let cb;

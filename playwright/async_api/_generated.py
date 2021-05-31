@@ -7749,7 +7749,7 @@ class Page(AsyncBase):
 
         Performs action and waits for a `ConsoleMessage` to be logged by in the page. If predicate is provided, it passes
         `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to return a truthy value. Will
-        throw an error if the page is closed before the console event is fired.
+        throw an error if the page is closed before the `page.on('console')` event is fired.
 
         Parameters
         ----------
@@ -7960,6 +7960,37 @@ class Page(AsyncBase):
             ).future
         )
 
+    def expect_request_finished(
+        self,
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: float = None
+    ) -> AsyncEventContextManager["Request"]:
+        """Page.expect_request_finished
+
+        Performs action and waits for a `Request` to finish loading. If predicate is provided, it passes `Request` value into
+        the `predicate` function and waits for `predicate(request)` to return a truthy value. Will throw an error if the page is
+        closed before the `page.on('request_finished')` event is fired.
+
+        Parameters
+        ----------
+        predicate : Union[Callable[[Request], bool], NoneType]
+            Receives the `Request` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[Request]
+        """
+
+        return AsyncEventContextManager(
+            self._impl_obj.expect_request_finished(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future
+        )
+
     def expect_response(
         self,
         url_or_predicate: typing.Union[
@@ -8001,6 +8032,37 @@ class Page(AsyncBase):
         return AsyncEventContextManager(
             self._impl_obj.expect_response(
                 url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+            ).future
+        )
+
+    def expect_websocket(
+        self,
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: float = None
+    ) -> AsyncEventContextManager["WebSocket"]:
+        """Page.expect_websocket
+
+        Performs action and waits for a new `WebSocket`. If predicate is provided, it passes `WebSocket` value into the
+        `predicate` function and waits for `predicate(webSocket)` to return a truthy value. Will throw an error if the page is
+        closed before the WebSocket event is fired.
+
+        Parameters
+        ----------
+        predicate : Union[Callable[[WebSocket], bool], NoneType]
+            Receives the `WebSocket` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, NoneType]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default
+            value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[WebSocket]
+        """
+
+        return AsyncEventContextManager(
+            self._impl_obj.expect_websocket(
+                predicate=self._wrap_handler(predicate), timeout=timeout
             ).future
         )
 
@@ -9318,16 +9380,7 @@ class BrowserType(AsyncBase):
         self,
         *,
         executable_path: typing.Union[str, pathlib.Path] = None,
-        channel: Literal[
-            "chrome",
-            "chrome-beta",
-            "chrome-canary",
-            "chrome-dev",
-            "msedge",
-            "msedge-beta",
-            "msedge-canary",
-            "msedge-dev",
-        ] = None,
+        channel: str = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
         handle_sigint: bool = None,
@@ -9379,8 +9432,9 @@ class BrowserType(AsyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox
             or WebKit, use at your own risk.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
-            Browser distribution channel. Read more about using
+        channel : Union[str, NoneType]
+            Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge",
+            "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         args : Union[List[str], NoneType]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
@@ -9456,16 +9510,7 @@ class BrowserType(AsyncBase):
         self,
         user_data_dir: typing.Union[str, pathlib.Path],
         *,
-        channel: Literal[
-            "chrome",
-            "chrome-beta",
-            "chrome-canary",
-            "chrome-dev",
-            "msedge",
-            "msedge-beta",
-            "msedge-canary",
-            "msedge-dev",
-        ] = None,
+        channel: str = None,
         executable_path: typing.Union[str, pathlib.Path] = None,
         args: typing.List[str] = None,
         ignore_default_args: typing.Union[bool, typing.List[str]] = None,
@@ -9520,8 +9565,9 @@ class BrowserType(AsyncBase):
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
             data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
-        channel : Union["chrome", "chrome-beta", "chrome-canary", "chrome-dev", "msedge", "msedge-beta", "msedge-canary", "msedge-dev", NoneType]
-            Browser distribution channel. Read more about using
+        channel : Union[str, NoneType]
+            Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge",
+            "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, NoneType]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is

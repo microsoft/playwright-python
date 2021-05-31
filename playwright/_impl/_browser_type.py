@@ -33,7 +33,6 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._helper import (
-    BrowserChannel,
     ColorScheme,
     Env,
     ReducedMotion,
@@ -64,7 +63,7 @@ class BrowserType(ChannelOwner):
     async def launch(
         self,
         executablePath: Union[str, Path] = None,
-        channel: BrowserChannel = None,
+        channel: str = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
         handleSIGINT: bool = None,
@@ -93,7 +92,7 @@ class BrowserType(ChannelOwner):
     async def launch_persistent_context(
         self,
         userDataDir: Union[str, Path],
-        channel: BrowserChannel = None,
+        channel: str = None,
         executablePath: Union[str, Path] = None,
         args: List[str] = None,
         ignoreDefaultArgs: Union[bool, List[str]] = None,
