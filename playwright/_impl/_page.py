@@ -78,6 +78,7 @@ else:  # pragma: no cover
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
+    from playwright._impl._network import WebSocket
 
 
 class Page(ChannelOwner):
@@ -826,6 +827,15 @@ class Page(ChannelOwner):
             Page.Events.Request, predicate=my_predicate, timeout=timeout
         )
 
+    def expect_request_finished(
+        self,
+        predicate: Callable[["Request"], bool] = None,
+        timeout: float = None,
+    ) -> EventContextManagerImpl[Request]:
+        return self.expect_event(
+            Page.Events.RequestFinished, predicate=predicate, timeout=timeout
+        )
+
     def expect_response(
         self,
         url_or_predicate: URLMatchResponse,
@@ -844,6 +854,13 @@ class Page(ChannelOwner):
         return self.expect_event(
             Page.Events.Response, predicate=my_predicate, timeout=timeout
         )
+
+    def expect_websocket(
+        self,
+        predicate: Callable[["WebSocket"], bool] = None,
+        timeout: float = None,
+    ) -> EventContextManagerImpl["WebSocket"]:
+        return self.expect_event("websocket", predicate, timeout)
 
     def expect_worker(
         self,
