@@ -76,7 +76,7 @@ class BrowserType(ChannelOwner):
         proxy: ProxySettings = None,
         downloadsPath: Union[str, Path] = None,
         slowMo: float = None,
-        traceDir: Union[pathlib.Path, str] = None,
+        tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
     ) -> Browser:
@@ -126,7 +126,7 @@ class BrowserType(ChannelOwner):
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
         acceptDownloads: bool = None,
-        traceDir: Union[pathlib.Path, str] = None,
+        tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,

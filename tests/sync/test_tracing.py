@@ -15,10 +15,10 @@
 from pathlib import Path
 
 
-async def test_browser_context_output_trace(browser, server, tmp_path):
-    context = await browser.new_context()
-    await context.tracing.start(screenshots=True, snapshots=True)
-    page = await context.new_page()
-    await page.goto(server.PREFIX + "/grid.html")
-    await context.tracing.stop(path=tmp_path / "trace.zip")
+def test_browser_context_output_trace(browser, server, tmp_path):
+    context = browser.new_context()
+    context.tracing.start(screenshots=True, snapshots=True)
+    page = context.new_page()
+    page.goto(server.PREFIX + "/grid.html")
+    context.tracing.stop(path=tmp_path / "trace.zip")
     assert Path(tmp_path / "trace.zip").exists()

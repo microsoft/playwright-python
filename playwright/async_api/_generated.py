@@ -5748,15 +5748,15 @@ class Page(AsyncBase):
 
         > NOTE: Functions installed via `page.expose_function()` survive navigations.
 
-        An example of adding an `sha1` function to the page:
+        An example of adding a `sha256` function to the page:
 
         ```py
         import asyncio
         import hashlib
         from playwright.async_api import async_playwright
 
-        async def sha1(text):
-            m = hashlib.sha1()
+        def sha256(text):
+            m = hashlib.sha256()
             m.update(bytes(text, \"utf8\"))
             return m.hexdigest()
 
@@ -5764,11 +5764,11 @@ class Page(AsyncBase):
             webkit = playwright.webkit
             browser = await webkit.launch(headless=False)
             page = await browser.new_page()
-            await page.expose_function(\"sha1\", sha1)
+            await page.expose_function(\"sha256\", sha256)
             await page.set_content(\"\"\"
                 <script>
                   async function onClick() {
-                    document.querySelector('div').textContent = await window.sha1('PLAYWRIGHT');
+                    document.querySelector('div').textContent = await window.sha256('PLAYWRIGHT');
                   }
                 </script>
                 <button onclick=\"onClick()\">Click me</button>
@@ -8531,15 +8531,15 @@ class BrowserContext(AsyncBase):
 
         See `page.expose_function()` for page-only version.
 
-        An example of adding an `md5` function to all pages in the context:
+        An example of adding a `sha256` function to all pages in the context:
 
         ```py
         import asyncio
         import hashlib
         from playwright.async_api import async_playwright
 
-        async def sha1(text):
-            m = hashlib.sha1()
+        def sha256(text):
+            m = hashlib.sha256()
             m.update(bytes(text, \"utf8\"))
             return m.hexdigest()
 
@@ -8547,12 +8547,12 @@ class BrowserContext(AsyncBase):
             webkit = playwright.webkit
             browser = await webkit.launch(headless=False)
             context = await browser.new_context()
-            await context.expose_function(\"sha1\", sha1)
+            await context.expose_function(\"sha256\", sha256)
             page = await context.new_page()
             await page.set_content(\"\"\"
                 <script>
                   async function onClick() {
-                    document.querySelector('div').textContent = await window.sha1('PLAYWRIGHT');
+                    document.querySelector('div').textContent = await window.sha256('PLAYWRIGHT');
                   }
                 </script>
                 <button onclick=\"onClick()\">Click me</button>
@@ -9393,7 +9393,7 @@ class BrowserType(AsyncBase):
         proxy: ProxySettings = None,
         downloads_path: typing.Union[str, pathlib.Path] = None,
         slow_mo: float = None,
-        trace_dir: typing.Union[str, pathlib.Path] = None,
+        traces_dir: typing.Union[str, pathlib.Path] = None,
         chromium_sandbox: bool = None,
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
@@ -9468,7 +9468,7 @@ class BrowserType(AsyncBase):
             deleted when browser is closed.
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
-        trace_dir : Union[pathlib.Path, str, NoneType]
+        traces_dir : Union[pathlib.Path, str, NoneType]
             If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
             Enable Chromium sandboxing. Defaults to `false`.
@@ -9499,7 +9499,7 @@ class BrowserType(AsyncBase):
                     proxy=proxy,
                     downloadsPath=downloads_path,
                     slowMo=slow_mo,
-                    traceDir=trace_dir,
+                    tracesDir=traces_dir,
                     chromiumSandbox=chromium_sandbox,
                     firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
                 ),
@@ -9544,7 +9544,7 @@ class BrowserType(AsyncBase):
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         reduced_motion: Literal["no-preference", "reduce"] = None,
         accept_downloads: bool = None,
-        trace_dir: typing.Union[str, pathlib.Path] = None,
+        traces_dir: typing.Union[str, pathlib.Path] = None,
         chromium_sandbox: bool = None,
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
@@ -9652,7 +9652,7 @@ class BrowserType(AsyncBase):
             `page.emulate_media()` for more details. Defaults to `'no-preference'`.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
-        trace_dir : Union[pathlib.Path, str, NoneType]
+        traces_dir : Union[pathlib.Path, str, NoneType]
             If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
             Enable Chromium sandboxing. Defaults to `false`.
@@ -9714,7 +9714,7 @@ class BrowserType(AsyncBase):
                     colorScheme=color_scheme,
                     reducedMotion=reduced_motion,
                     acceptDownloads=accept_downloads,
-                    traceDir=trace_dir,
+                    tracesDir=traces_dir,
                     chromiumSandbox=chromium_sandbox,
                     recordHarPath=record_har_path,
                     recordHarOmitContent=record_har_omit_content,
@@ -9944,14 +9944,14 @@ class Tracing(AsyncBase):
         await context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
         await page.goto(\"https://playwright.dev\")
         await context.tracing.stop()
-        await context.tracing.export(\"trace.zip\")
+        await context.tracing.stop(path = \"trace.zip\")
         ```
 
         Parameters
         ----------
         name : Union[str, NoneType]
-            If specified, the trace is going to be saved into the file with the given name inside the `traceDir` folder specified in
-            `browser_type.launch()`.
+            If specified, the trace is going to be saved into the file with the given name inside the `tracesDir` folder specified
+            in `browser_type.launch()`.
         snapshots : Union[bool, NoneType]
             Whether to capture DOM snapshot on every action.
         screenshots : Union[bool, NoneType]
@@ -9967,29 +9967,19 @@ class Tracing(AsyncBase):
             )
         )
 
-    async def stop(self) -> NoneType:
+    async def stop(self, *, path: typing.Union[str, pathlib.Path] = None) -> NoneType:
         """Tracing.stop
 
         Stop tracing.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._async("tracing.stop", self._impl_obj.stop())
-        )
-
-    async def export(self, path: typing.Union[pathlib.Path, str]) -> NoneType:
-        """Tracing.export
-
-        Export trace into the file with the given name. Should be called after the tracing has stopped.
 
         Parameters
         ----------
-        path : Union[pathlib.Path, str]
-            File to save the trace into.
+        path : Union[pathlib.Path, str, NoneType]
+            Export trace into the file with the given name.
         """
 
         return mapping.from_maybe_impl(
-            await self._async("tracing.export", self._impl_obj.export(path=path))
+            await self._async("tracing.stop", self._impl_obj.stop(path=path))
         )
 
 

@@ -28,6 +28,7 @@ class Tracing:
         self._context = context
         self._channel = context._channel
         self._loop = context._loop
+        self._dispatcher_fiber = context._channel._connection._dispatcher_fiber
 
     async def start(
         self, name: str = None, snapshots: bool = None, screenshots: bool = None
@@ -35,14 +36,13 @@ class Tracing:
         params = locals_to_params(locals())
         await self._channel.send("tracingStart", params)
 
-    async def stop(self) -> None:
+    async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._channel.send("tracingStop")
-
-    async def export(self, path: Union[pathlib.Path, str]) -> None:
-        artifact = cast(
-            Artifact, from_channel(await self._channel.send("tracingExport"))
-        )
-        if self._context._browser:
-            artifact._is_remote = self._context._browser._is_remote
-        await artifact.save_as(path)
-        await artifact.delete()
+        if path:
+            artifact = cast(
+                Artifact, from_channel(await self._channel.send("tracingExport"))
+            )
+            if self._context._browser:
+                artifact._is_remote = self._context._browser._is_remote
+            await artifact.save_as(path)
+            await artifact.delete()
