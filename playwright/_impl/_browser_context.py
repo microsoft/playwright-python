@@ -15,9 +15,21 @@
 import asyncio
 import inspect
 import json
+import typing
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Type,
+    Union,
+    cast,
+)
 
 from playwright._impl._api_structures import Cookie, Geolocation, StorageState
 from playwright._impl._api_types import Error
@@ -374,3 +386,14 @@ class BrowserContext(ChannelOwner):
     @property
     def tracing(self) -> Tracing:
         return self._tracing
+
+    async def __aenter__(self) -> "BrowserContext":
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        traceback: typing.Any,
+    ) -> None:
+        await self.close()

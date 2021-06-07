@@ -18,7 +18,7 @@ import inspect
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union, cast
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
@@ -868,6 +868,17 @@ class Page(ChannelOwner):
         timeout: float = None,
     ) -> EventContextManagerImpl["Worker"]:
         return self.expect_event("worker", predicate, timeout)
+
+    async def __aenter__(self) -> "Page":
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        traceback: Any,
+    ) -> None:
+        await self.close()
 
 
 class Worker(ChannelOwner):

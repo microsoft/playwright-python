@@ -5002,6 +5002,28 @@ class Page(SyncBase):
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
 
+    def __enter__(self) -> "Page":
+        return mapping.from_impl(
+            self._sync("page.__enter__", self._impl_obj.__aenter__())
+        )
+
+    def __exit__(
+        self,
+        exc_type: typing.Type[BaseException],
+        exc_val: BaseException,
+        traceback: typing.Any,
+    ) -> NoneType:
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.__exit__",
+                self._impl_obj.__aexit__(
+                    exc_type=exc_type,
+                    exc_val=exc_val,
+                    traceback=mapping.to_impl(traceback),
+                ),
+            )
+        )
+
     def opener(self) -> typing.Optional["Page"]:
         """Page.opener
 
@@ -8121,6 +8143,28 @@ class BrowserContext(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.tracing)
 
+    def __enter__(self) -> "BrowserContext":
+        return mapping.from_impl(
+            self._sync("browser_context.__enter__", self._impl_obj.__aenter__())
+        )
+
+    def __exit__(
+        self,
+        exc_type: typing.Type[BaseException],
+        exc_val: BaseException,
+        traceback: typing.Any,
+    ) -> NoneType:
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser_context.__exit__",
+                self._impl_obj.__aexit__(
+                    exc_type=exc_type,
+                    exc_val=exc_val,
+                    traceback=mapping.to_impl(traceback),
+                ),
+            )
+        )
+
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
         """BrowserContext.set_default_navigation_timeout
 
@@ -8871,6 +8915,28 @@ class Browser(SyncBase):
         str
         """
         return mapping.from_maybe_impl(self._impl_obj.version)
+
+    def __enter__(self) -> "Browser":
+        return mapping.from_impl(
+            self._sync("browser.__enter__", self._impl_obj.__aenter__())
+        )
+
+    def __exit__(
+        self,
+        exc_type: typing.Type[BaseException],
+        exc_val: BaseException,
+        traceback: typing.Any,
+    ) -> NoneType:
+        return mapping.from_maybe_impl(
+            self._sync(
+                "browser.__exit__",
+                self._impl_obj.__aexit__(
+                    exc_type=exc_type,
+                    exc_val=exc_val,
+                    traceback=mapping.to_impl(traceback),
+                ),
+            )
+        )
 
     def is_connected(self) -> bool:
         """Browser.is_connected

@@ -11,12 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import base64
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, Union
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -188,6 +187,17 @@ class Browser(ChannelOwner):
     async def stop_tracing(self) -> bytes:
         encoded_binary = await self._channel.send("stopTracing")
         return base64.b64decode(encoded_binary)
+
+    async def __aenter__(self) -> "Browser":
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        traceback: Any,
+    ) -> None:
+        await self.close()
 
 
 def normalize_context_params(is_sync: bool, params: Dict) -> None:

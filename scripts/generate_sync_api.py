@@ -59,7 +59,22 @@ def generate(t: Any) -> None:
         print(f"{prefix}{suffix}")
     for [name, value] in t.__dict__.items():
         if name.startswith("_"):
-            continue
+            if name in ["__aenter__", "__aexit__"]:
+                sync_name = name.replace("a", "")
+                print(
+                    f"    def {sync_name}({signature(value, len(name) + 9)}) -> {return_type(value)}:"
+                )
+                [prefix, suffix] = return_value(
+                    get_type_hints(value, api_globals)["return"]
+                )
+                prefix = (
+                    "        return "
+                    + prefix
+                    + f'self._sync("{to_snake_case(class_name)}.{sync_name}", self._impl_obj.{name}'
+                )
+                print(f"{prefix}({arguments(value, len(prefix))}{suffix}))")
+            else:
+                continue
         if not name.startswith("_") and str(value).startswith("<property"):
             value = value.fget
             print("")
