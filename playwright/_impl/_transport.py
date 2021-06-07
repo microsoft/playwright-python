@@ -20,12 +20,13 @@ import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Callable, Dict, Optional
 
 import websockets
 from pyee import AsyncIOEventEmitter
 
 from playwright._impl._api_types import Error
+from playwright._impl._helper import ParsedMessagePayload
 
 
 # Sourced from: https://github.com/pytest-dev/pytest/blob/da01ee0a4bb0af780167ecd228ab3ad249511302/src/_pytest/faulthandler.py#L69-L77
@@ -44,7 +45,7 @@ def _get_stderr_fileno() -> Optional[int]:
 class Transport(ABC):
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self._loop = loop
-        self.on_message = lambda _: None
+        self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
         self.on_error_future: asyncio.Future = loop.create_future()
 
     @abstractmethod
@@ -72,7 +73,7 @@ class Transport(ABC):
             print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
         return msg.encode()
 
-    def deserialize_message(self, data: bytes) -> Any:
+    def deserialize_message(self, data: bytes) -> ParsedMessagePayload:
         obj = json.loads(data)
 
         if "DEBUGP" in os.environ:  # pragma: no cover

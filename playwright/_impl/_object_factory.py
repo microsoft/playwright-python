@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, cast
+from typing import Dict, cast
 
 from playwright._impl._artifact import Artifact
 from playwright._impl._browser import Browser
@@ -41,7 +41,7 @@ class DummyObject(ChannelOwner):
 
 def create_remote_object(
     parent: ChannelOwner, type: str, guid: str, initializer: Dict
-) -> Any:
+) -> ChannelOwner:
     if type == "Artifact":
         return Artifact(parent, type, guid, initializer)
     if type == "BindingCall":

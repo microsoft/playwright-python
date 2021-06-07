@@ -151,13 +151,13 @@ class Connection:
     def __init__(
         self,
         dispatcher_fiber: Any,
-        object_factory: Callable[[ChannelOwner, str, str, Dict], Any],
+        object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self._dispatch(msg)
-        self._waiting_for_object: Dict[str, Any] = {}
+        self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
@@ -189,19 +189,19 @@ class Connection:
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
 
-    async def wait_for_object_with_known_name(self, guid: str) -> Any:
+    async def wait_for_object_with_known_name(self, guid: str) -> ChannelOwner:
         if guid in self._objects:
             return self._objects[guid]
-        callback = self._loop.create_future()
+        callback: asyncio.Future[ChannelOwner] = self._loop.create_future()
 
-        def callback_wrapper(result: Any) -> None:
+        def callback_wrapper(result: ChannelOwner) -> None:
             callback.set_result(result)
 
         self._waiting_for_object[guid] = callback_wrapper
         return await callback
 
     def call_on_object_with_known_name(
-        self, guid: str, callback: Callable[[Any], None]
+        self, guid: str, callback: Callable[[ChannelOwner], None]
     ) -> None:
         self._waiting_for_object[guid] = callback
 
@@ -279,8 +279,7 @@ class Connection:
 
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
-    ) -> Any:
-        result: ChannelOwner
+    ) -> ChannelOwner:
         initializer = self._replace_guids_with_channels(initializer)
         result = self._object_factory(parent, type, guid, initializer)
         if guid in self._waiting_for_object:
