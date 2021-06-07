@@ -27,15 +27,15 @@ class PlaywrightContextManager:
         self._connection: Connection
 
     async def __aenter__(self) -> AsyncPlaywright:
+        loop = asyncio.get_running_loop()
         self._connection = Connection(
             None,
             create_remote_object,
-            PipeTransport(asyncio.get_event_loop(), compute_driver_executable()),
+            PipeTransport(loop, compute_driver_executable()),
         )
-        loop = asyncio.get_running_loop()
         self._connection._loop = loop
         loop.create_task(self._connection.run())
-        playwright_future = asyncio.create_task(
+        playwright_future = loop.create_task(
             self._connection.wait_for_object_with_known_name("Playwright")
         )
         done, pending = await asyncio.wait(

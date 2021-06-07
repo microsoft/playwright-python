@@ -81,7 +81,7 @@ class EventContextManager(Generic[T]):
 class SyncBase(ImplWrapper):
     def __init__(self, impl_obj: Any) -> None:
         super().__init__(impl_obj)
-        self._loop: asyncio.BaseEventLoop = impl_obj._loop
+        self._loop: asyncio.AbstractEventLoop = impl_obj._loop
         self._dispatcher_fiber = impl_obj._dispatcher_fiber
 
     def __str__(self) -> str:
