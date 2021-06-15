@@ -295,7 +295,8 @@ class WebSocket(ChannelOwner):
             lambda params: self._on_frame_received(params["opcode"], params["data"]),
         )
         self._channel.on(
-            "error", lambda params: self.emit(WebSocket.Events.Error, params["error"])
+            "socketError",
+            lambda params: self.emit(WebSocket.Events.Error, params["error"]),
         )
         self._channel.on("close", lambda params: self._on_close())
 
