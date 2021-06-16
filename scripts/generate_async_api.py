@@ -16,7 +16,7 @@
 import inspect
 import re
 from types import FunctionType
-from typing import Any, get_type_hints  # type: ignore
+from typing import Any, get_type_hints
 
 from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
