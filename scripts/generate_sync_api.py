@@ -60,7 +60,7 @@ def generate(t: Any) -> None:
     for [name, value] in t.__dict__.items():
         if name.startswith("_"):
             continue
-        if not name.startswith("_") and str(value).startswith("<property"):
+        if str(value).startswith("<property"):
             value = value.fget
             print("")
             print("    @property")
