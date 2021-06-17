@@ -10,10 +10,11 @@ Playwright is a Python library to automate [Chromium](https://www.chromium.org/H
 
 ## Documentation
 
-[https://playwright.dev/dotnet/docs/intro](https://playwright.dev/dotnet/docs/intro) 
+[https://playwright.dev/python/docs/intro](https://playwright.dev/python/docs/intro)
 
 ## API Reference
-[https://playwright.dev/dotnet/docs/api/class-playwright](https://playwright.dev/dotnet/docs/api/class-playwright)
+
+[https://playwright.dev/python/docs/api/class-playwright](https://playwright.dev/python/docs/api/class-playwright)
 
 ## Example
 
@@ -48,6 +49,6 @@ asyncio.run(main())
 ## Other languages
 
 More comfortable in another programming language? [Playwright](https://playwright.dev) is also available in
-- [TypeScript](https://playwright.dev/docs/intro)
+- [Node.js (JavaScript / TypeScript)](https://playwright.dev/docs/intro)
 - [.NET](https://playwright.dev/dotnet/docs/intro)
 - [Java](https://playwright.dev/java/docs/intro)
