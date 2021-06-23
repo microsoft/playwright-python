@@ -16,7 +16,7 @@
 import inspect
 import re
 from types import FunctionType
-from typing import Any, get_type_hints  # type: ignore
+from typing import Any, get_type_hints
 
 from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
@@ -59,7 +59,7 @@ def generate(t: Any) -> None:
     for [name, value] in t.__dict__.items():
         if name.startswith("_"):
             continue
-        if not name.startswith("_") and str(value).startswith("<property"):
+        if str(value).startswith("<property"):
             value = value.fget
             print("")
             print("    @property")
