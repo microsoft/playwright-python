@@ -15,7 +15,6 @@
 import asyncio
 
 import pytest
-from flaky import flaky
 
 from playwright.async_api import Error
 
@@ -112,7 +111,6 @@ async def test_should_emit_binary_frame_events(page, ws_server):
     assert received == ["incoming", b"\x04\x02"]
 
 
-@flaky
 async def test_should_reject_wait_for_event_on_close_and_error(page, ws_server):
     async with page.expect_event("websocket") as ws_info:
         await page.evaluate(
