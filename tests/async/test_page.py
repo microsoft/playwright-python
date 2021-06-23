@@ -17,7 +17,6 @@ import os
 import re
 
 import pytest
-from flaky import flaky
 
 from playwright.async_api import Error, TimeoutError
 
@@ -764,7 +763,6 @@ async def test_select_option_should_select_only_first_option(page, server):
     assert await page.evaluate("result.onChange") == ["blue"]
 
 
-@flaky  # TODO: https://github.com/microsoft/playwright/issues/6725
 async def test_select_option_should_not_throw_when_select_causes_navigation(
     page, server
 ):
