@@ -233,6 +233,7 @@ class RemoteServer:
         )
         assert self.process.stdout
         self.ws_endpoint = self.process.stdout.readline().decode().strip()
+        self.process.stdout.close()
 
     def kill(self):
         # Send the signal to all the process groups
