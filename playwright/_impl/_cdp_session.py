@@ -16,7 +16,6 @@ from typing import Any, Dict
 
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._helper import locals_to_params
-from playwright._impl._js_handle import parse_result
 
 
 class CDPSession(ChannelOwner):
@@ -27,11 +26,10 @@ class CDPSession(ChannelOwner):
         self._channel.on("event", lambda params: self._on_event(params))
 
     def _on_event(self, params: Any) -> None:
-        self.emit(params["method"], parse_result(params["params"]))
+        self.emit(params["method"], params["params"])
 
     async def send(self, method: str, params: Dict = None) -> Dict:
-        result = await self._channel.send("send", locals_to_params(locals()))
-        return parse_result(result)
+        return await self._channel.send("send", locals_to_params(locals()))
 
     async def detach(self) -> None:
         await self._channel.send("detach")

@@ -14,67 +14,65 @@
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.sync_api import Error
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_work(page):
-    client = await page.context.new_cdp_session(page)
+def test_should_work(page):
+    client = page.context.new_cdp_session(page)
     events = []
     client.on("Runtime.consoleAPICalled", lambda params: events.append(params))
-    await client.send("Runtime.enable")
-    result = await client.send(
+    client.send("Runtime.enable")
+    result = client.send(
         "Runtime.evaluate",
         {"expression": "window.foo = 'bar'; console.log('log'); 'result'"},
     )
     assert result == {"result": {"type": "string", "value": "result"}}
-    foo = await page.evaluate("() => window.foo")
+    foo = page.evaluate("() => window.foo")
     assert foo == "bar"
     assert events[0]["args"][0]["value"] == "log"
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_receive_events(page, server):
-    client = await page.context.new_cdp_session(page)
-    await client.send("Network.enable")
+def test_should_receive_events(page, server):
+    client = page.context.new_cdp_session(page)
+    client.send("Network.enable")
     events = []
     client.on("Network.requestWillBeSent", lambda event: events.append(event))
-    await page.goto(server.EMPTY_PAGE)
+    page.goto(server.EMPTY_PAGE)
     assert len(events) == 1
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_be_able_to_detach_session(page):
-    client = await page.context.new_cdp_session(page)
-    await client.send("Runtime.enable")
-    eval_response = await client.send(
+def test_should_be_able_to_detach_session(page):
+    client = page.context.new_cdp_session(page)
+    client.send("Runtime.enable")
+    eval_response = client.send(
         "Runtime.evaluate", {"expression": "1 + 2", "returnByValue": True}
     )
     assert eval_response["result"]["value"] == 3
-    await client.detach()
+    client.detach()
     with pytest.raises(Error) as exc_info:
-        await client.send(
-            "Runtime.evaluate", {"expression": "3 + 1", "returnByValue": True}
-        )
+        client.send("Runtime.evaluate", {"expression": "3 + 1", "returnByValue": True})
     assert "Target page, context or browser has been closed" in exc_info.value.message
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_not_break_page_close(browser):
-    context = await browser.new_context()
-    page = await context.new_page()
-    session = await page.context.new_cdp_session(page)
-    await session.detach()
-    await page.close()
-    await context.close()
+def test_should_not_break_page_close(browser):
+    context = browser.new_context()
+    page = context.new_page()
+    session = page.context.new_cdp_session(page)
+    session.detach()
+    page.close()
+    context.close()
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_detach_when_page_closes(browser):
-    context = await browser.new_context()
-    page = await context.new_page()
-    session = await context.new_cdp_session(page)
-    await page.close()
+def test_should_detach_when_page_closes(browser):
+    context = browser.new_context()
+    page = context.new_page()
+    session = context.new_cdp_session(page)
+    page.close()
     with pytest.raises(Error):
-        await session.detach()
-    await context.close()
+        session.detach()
+    context.close()
