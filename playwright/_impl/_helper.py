@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import asyncio
 import fnmatch
 import math
 import os
@@ -31,6 +31,7 @@ from typing import (
     Pattern,
     Union,
     cast,
+    overload,
 )
 
 from playwright._impl._api_types import Error, TimeoutError
@@ -231,3 +232,33 @@ def make_dirs_for_file(path: Union[Path, str]) -> None:
     if not os.path.isabs(path):
         path = Path.cwd() / path
     os.makedirs(os.path.dirname(path), exist_ok=True)
+
+
+async def async_writefile(
+    file: Union[str, Path], mode: str, data: Union[str, bytes]
+) -> None:
+    def inner() -> None:
+        with open(file, mode) as fh:
+            fh.write(data)
+
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, inner)
+
+
+@overload
+async def async_readfile(file: Union[str, Path], mode: Literal["r"]) -> str:
+    ...
+
+
+@overload
+async def async_readfile(file: Union[str, Path], mode: Literal["rb"]) -> bytes:
+    ...
+
+
+async def async_readfile(file: Union[str, Path], mode: str) -> Union[str, bytes]:
+    def inner() -> str:
+        with open(file, mode) as fh:
+            return fh.read()
+
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, inner)

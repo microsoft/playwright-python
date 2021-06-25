@@ -135,7 +135,7 @@ class BrowserType(ChannelOwner):
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
-        normalize_context_params(self._connection._is_sync, params)
+        await normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
         try:
             context = from_channel(
