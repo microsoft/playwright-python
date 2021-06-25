@@ -26,9 +26,12 @@ class Stream(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
 
     async def save_as(self, path: Union[str, Path]) -> None:
-        with open(path, mode="wb") as file:
-            while True:
-                binary = await self._channel.send("read")
-                if not binary:
-                    break
-                file.write(base64.b64decode(binary))
+        file = await self._loop.run_in_executor(None, lambda: open(path, "wb"))
+        while True:
+            binary = await self._channel.send("read")
+            if not binary:
+                break
+            await self._loop.run_in_executor(
+                None, lambda: file.write(base64.b64decode(binary))
+            )
+        await self._loop.run_in_executor(None, lambda: file.close())
