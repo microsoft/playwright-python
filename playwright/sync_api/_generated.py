@@ -9872,6 +9872,15 @@ class Playwright(SyncBase):
 
         return mapping.from_maybe_impl(self._impl_obj.stop())
 
+    def __getitem__(self, value: str) -> "BrowserType":
+        if value == "chromium":
+            return self.chromium
+        elif value == "firefox":
+            return self.firefox
+        elif value == "webkit":
+            return self.webkit
+        raise ValueError("Invalid browser " + value)
+
 
 mapping.register(PlaywrightImpl, Playwright)
 
