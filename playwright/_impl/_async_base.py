@@ -14,7 +14,8 @@
 
 import asyncio
 import traceback
-from typing import Any, Awaitable, Callable, Generic, TypeVar
+from types import TracebackType
+from typing import Any, Awaitable, Callable, Generic, Type, TypeVar
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -22,6 +23,7 @@ mapping = ImplToApiMapping()
 
 
 T = TypeVar("T")
+Self = TypeVar("Self", bound="AsyncBase")
 
 
 class AsyncEventInfo(Generic[T]):
@@ -79,3 +81,16 @@ class AsyncBase(ImplWrapper):
     def remove_listener(self, event: str, f: Any) -> None:
         """Removes the function ``f`` from ``event``."""
         self._impl_obj.remove_listener(event, self._wrap_handler(f))
+
+
+class AsyncContextManager(AsyncBase):
+    async def __aenter__(self: Self) -> Self:
+        return self
+
+    async def __aexit__(
+        self: Self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        traceback: TracebackType,
+    ) -> None:
+        await self.close()  # type: ignore

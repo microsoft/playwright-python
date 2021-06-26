@@ -14,6 +14,7 @@
 
 import asyncio
 import traceback
+from types import TracebackType
 from typing import (
     Any,
     Awaitable,
@@ -22,6 +23,7 @@ from typing import (
     Generic,
     List,
     Optional,
+    Type,
     TypeVar,
     cast,
 )
@@ -34,6 +36,7 @@ mapping = ImplToApiMapping()
 
 
 T = TypeVar("T")
+Self = TypeVar("Self")
 
 
 class EventInfo(Generic[T]):
@@ -152,3 +155,16 @@ class SyncBase(ImplWrapper):
             raise exceptions[0]
 
         return list(map(lambda action: results[action], actions))
+
+
+class SyncContextManager(SyncBase):
+    def __enter__(self: Self) -> Self:
+        return self
+
+    def __exit__(
+        self: Self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        traceback: TracebackType,
+    ) -> None:
+        self.close()  # type: ignore

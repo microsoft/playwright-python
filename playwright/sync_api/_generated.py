@@ -59,7 +59,12 @@ from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
-from playwright._impl._sync_base import EventContextManager, SyncBase, mapping
+from playwright._impl._sync_base import (
+    EventContextManager,
+    SyncBase,
+    SyncContextManager,
+    mapping,
+)
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._video import Video as VideoImpl
 
@@ -4873,7 +4878,7 @@ class Video(SyncBase):
 mapping.register(VideoImpl, Video)
 
 
-class Page(SyncBase):
+class Page(SyncContextManager):
     def __init__(self, obj: PageImpl):
         super().__init__(obj)
 
@@ -8055,7 +8060,7 @@ class Page(SyncBase):
 mapping.register(PageImpl, Page)
 
 
-class BrowserContext(SyncBase):
+class BrowserContext(SyncContextManager):
     def __init__(self, obj: BrowserContextImpl):
         super().__init__(obj)
 
@@ -8837,7 +8842,7 @@ class CDPSession(SyncBase):
 mapping.register(CDPSessionImpl, CDPSession)
 
 
-class Browser(SyncBase):
+class Browser(SyncContextManager):
     def __init__(self, obj: BrowserImpl):
         super().__init__(obj)
 

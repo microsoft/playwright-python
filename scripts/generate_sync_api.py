@@ -40,11 +40,12 @@ def generate(t: Any) -> None:
     print("")
     class_name = short_name(t)
     base_class = t.__bases__[0].__name__
-    base_sync_class = (
-        "SyncBase"
-        if base_class == "ChannelOwner" or base_class == "object"
-        else base_class
-    )
+    if class_name in ["Page", "BrowserContext", "Browser"]:
+        base_sync_class = "SyncContextManager"
+    elif base_class in ["ChannelOwner", "object"]:
+        base_sync_class = "SyncBase"
+    else:
+        base_sync_class = base_class
     print(f"class {class_name}({base_sync_class}):")
     print("")
     print(f"    def __init__(self, obj: {class_name}Impl):")
@@ -123,7 +124,7 @@ def main() -> None:
 
     print(header)
     print(
-        "from playwright._impl._sync_base import EventContextManager, SyncBase, mapping"
+        "from playwright._impl._sync_base import EventContextManager, SyncBase, SyncContextManager, mapping"
     )
     print("NoneType = type(None)")
 
