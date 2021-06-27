@@ -37,7 +37,12 @@ from playwright._impl._api_structures import (
     StorageState,
     ViewportSize,
 )
-from playwright._impl._async_base import AsyncBase, AsyncEventContextManager, mapping
+from playwright._impl._async_base import (
+    AsyncBase,
+    AsyncContextManager,
+    AsyncEventContextManager,
+    mapping,
+)
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -4900,7 +4905,7 @@ class Video(AsyncBase):
 mapping.register(VideoImpl, Video)
 
 
-class Page(AsyncBase):
+class Page(AsyncContextManager):
     def __init__(self, obj: PageImpl):
         super().__init__(obj)
 
@@ -8101,7 +8106,7 @@ class Page(AsyncBase):
 mapping.register(PageImpl, Page)
 
 
-class BrowserContext(AsyncBase):
+class BrowserContext(AsyncContextManager):
     def __init__(self, obj: BrowserContextImpl):
         super().__init__(obj)
 
@@ -8892,7 +8897,7 @@ class CDPSession(AsyncBase):
 mapping.register(CDPSessionImpl, CDPSession)
 
 
-class Browser(AsyncBase):
+class Browser(AsyncContextManager):
     def __init__(self, obj: BrowserImpl):
         super().__init__(obj)
 
