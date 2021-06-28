@@ -55,30 +55,32 @@ async def test_should_emit_close_events(page, ws_server):
 
 
 async def test_should_emit_frame_events(page, ws_server):
-    sent = []
-    received = []
+    log = []
+    socke_close_future = asyncio.Future()
 
     def on_web_socket(ws):
-        ws.on("framesent", lambda payload: sent.append(payload))
-        ws.on("framereceived", lambda payload: received.append(payload))
+        log.append("open")
+        ws.on("framesent", lambda payload: log.append(f"sent<{payload}>"))
+        ws.on("framereceived", lambda payload: log.append(f"received<{payload}>"))
+        ws.on(
+            "close", lambda: (log.append("close"), socke_close_future.set_result(None))
+        )
 
     page.on("websocket", on_web_socket)
-    async with page.expect_event("websocket") as ws_info:
+    async with page.expect_event("websocket"):
         await page.evaluate(
             """port => {
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
-            ws.addEventListener('open', () => {
-                ws.send('echo-text');
-            });
+            ws.addEventListener('open', () => ws.send('outgoing'));
+            ws.addEventListener('message', () => ws.close())
         }""",
             ws_server.PORT,
         )
-    ws = await ws_info.value
-    if not ws.is_closed():
-        await ws.wait_for_event("close")
-
-    assert sent == ["echo-text"]
-    assert received == ["incoming", "text"]
+    await socke_close_future
+    assert log[0] == "open"
+    assert log[3] == "close"
+    log.sort()
+    assert log == ["close", "open", "received<incoming>", "sent<outgoing>"]
 
 
 async def test_should_emit_binary_frame_events(page, ws_server):

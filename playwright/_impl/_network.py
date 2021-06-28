@@ -341,13 +341,13 @@ class WebSocket(ChannelOwner):
     def _on_frame_sent(self, opcode: int, data: str) -> None:
         if opcode == 2:
             self.emit(WebSocket.Events.FrameSent, base64.b64decode(data))
-        else:
+        elif opcode == 1:
             self.emit(WebSocket.Events.FrameSent, data)
 
     def _on_frame_received(self, opcode: int, data: str) -> None:
         if opcode == 2:
             self.emit(WebSocket.Events.FrameReceived, base64.b64decode(data))
-        else:
+        elif opcode == 1:
             self.emit(WebSocket.Events.FrameReceived, data)
 
     def is_closed(self) -> bool:
