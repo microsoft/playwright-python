@@ -115,7 +115,19 @@ def generate(t: Any) -> None:
                     f"""
         return {prefix}{arguments(value, len(prefix))}{suffix}"""
                 )
-
+    if class_name == "Playwright":
+        print(
+            """
+    def __getitem__(self, value: str) -> "BrowserType":
+        if value == "chromium":
+            return self.chromium
+        elif value == "firefox":
+            return self.firefox
+        elif value == "webkit":
+            return self.webkit
+        raise ValueError("Invalid browser "+value)
+            """
+        )
     print("")
     print(f"mapping.register({class_name}Impl, {class_name})")
 
