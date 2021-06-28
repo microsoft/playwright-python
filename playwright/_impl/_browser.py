@@ -31,7 +31,7 @@ from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
     ColorScheme,
     ReducedMotion,
-    async_read_text,
+    async_readfile,
     is_safe_close_error,
     locals_to_params,
 )
@@ -215,4 +215,6 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
     if "storageState" in params:
         storageState = params["storageState"]
         if not isinstance(storageState, dict):
-            params["storageState"] = json.loads(await async_read_text(storageState))
+            params["storageState"] = json.loads(
+                (await async_readfile(storageState)).decode()
+            )

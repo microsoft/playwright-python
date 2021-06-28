@@ -242,7 +242,7 @@ class ElementHandle(JSHandle):
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
-            await async_writefile(path, "wb", decoded_binary)
+            await async_writefile(path, decoded_binary)
         return decoded_binary
 
     async def query_selector(self, selector: str) -> Optional["ElementHandle"]:

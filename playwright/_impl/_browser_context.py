@@ -34,7 +34,7 @@ from playwright._impl._helper import (
     TimeoutSettings,
     URLMatch,
     URLMatcher,
-    async_read_text,
+    async_readfile,
     async_writefile,
     is_safe_close_error,
     locals_to_params,
@@ -216,7 +216,7 @@ class BrowserContext(ChannelOwner):
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
-            script = await async_read_text(path)
+            script = (await async_readfile(path)).decode()
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
@@ -299,7 +299,7 @@ class BrowserContext(ChannelOwner):
     async def storage_state(self, path: Union[str, Path] = None) -> StorageState:
         result = await self._channel.send_return_as_dict("storageState")
         if path:
-            await async_writefile(path, "w", json.dumps(result))
+            await async_writefile(path, json.dumps(result))
         return result
 
     async def wait_for_event(

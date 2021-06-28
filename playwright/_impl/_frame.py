@@ -36,7 +36,7 @@ from playwright._impl._helper import (
     MouseButton,
     URLMatch,
     URLMatcher,
-    async_read_text,
+    async_readfile,
     locals_to_params,
     monotonic_time,
 )
@@ -362,7 +362,9 @@ class Frame(ChannelOwner):
         params = locals_to_params(locals())
         if path:
             params["content"] = (
-                (await async_read_text(path)) + "\n//# sourceURL=" + str(Path(path))
+                (await async_readfile(path)).decode()
+                + "\n//# sourceURL="
+                + str(Path(path))
             )
             del params["path"]
         return from_channel(await self._channel.send("addScriptTag", params))
@@ -373,7 +375,7 @@ class Frame(ChannelOwner):
         params = locals_to_params(locals())
         if path:
             params["content"] = (
-                (await async_read_text(path))
+                (await async_readfile(path)).decode()
                 + "\n/*# sourceURL="
                 + str(Path(path))
                 + "*/"

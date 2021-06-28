@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
 
 from playwright._impl._api_structures import FilePayload
-from playwright._impl._helper import async_read_binary
+from playwright._impl._helper import async_readfile
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
@@ -68,7 +68,7 @@ async def normalize_file_payloads(
             file_payloads.append(
                 {
                     "name": os.path.basename(item),
-                    "buffer": base64.b64encode(await async_read_binary(item)).decode(),
+                    "buffer": base64.b64encode(await async_readfile(item)).decode(),
                 }
             )
         else:
