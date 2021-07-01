@@ -16,7 +16,8 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.async_api import Error, Page
+from tests.server import Server
 
 
 async def test_bounding_box(page, server):
@@ -660,3 +661,13 @@ async def test_is_checked_should_work(page):
     with pytest.raises(Error) as exc_info:
         await page.is_checked("div")
     assert "Not a checkbox or radio button" in exc_info.value.message
+
+
+async def test_input_value(page: Page, server: Server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    element = await page.query_selector("input")
+    await element.fill("my-text-content")
+    assert await element.input_value() == "my-text-content"
+
+    await element.fill("")
+    assert await element.input_value() == ""

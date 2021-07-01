@@ -119,3 +119,16 @@ class FilePayload(TypedDict):
     name: str
     mimeType: str
     buffer: bytes
+
+
+class RemoteAddr(TypedDict):
+    ipAddress: str
+    port: int
+
+
+class SecurityDetails(TypedDict):
+    issuer: Optional[str]
+    protocol: Optional[str]
+    subjectName: Optional[str]
+    validFrom: Optional[int]
+    validTo: Optional[int]

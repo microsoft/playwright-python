@@ -19,7 +19,8 @@ from typing import Dict, List, cast
 
 import pytest
 
-from playwright.async_api import Error, Page, Request, Response, Route
+from playwright.async_api import Browser, Error, Page, Request, Response, Route
+from tests.server import Server
 
 
 async def test_request_fulfill(page, server):
@@ -656,3 +657,51 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
     except Error as exc:
         error = exc
     assert error.message == "headers[0].value: expected string, got number"
+
+
+async def test_response_server_addr(page: Page, server: Server):
+    response = await page.goto(server.EMPTY_PAGE)
+    server_addr = await response.server_addr()
+    assert server_addr
+    assert server_addr["port"] == server.PORT
+    assert server_addr["ipAddress"] in ["127.0.0.1", "::1"]
+
+
+async def test_response_security_details(
+    browser: Browser, https_server: Server, browser_name, is_win, is_linux
+):
+    if browser_name == "webkit" and is_linux:
+        pytest.skip("https://github.com/microsoft/playwright/issues/6759")
+    page = await browser.new_page(ignore_https_errors=True)
+    response = await page.goto(https_server.EMPTY_PAGE)
+    await response.finished()
+    security_details = await response.security_details()
+    assert security_details
+    if browser_name == "webkit" and is_win:
+        assert security_details == {
+            "subjectName": "puppeteer-tests",
+            "validFrom": 1550084863,
+            "validTo": -1,
+        }
+    elif browser_name == "webkit":
+        assert security_details == {
+            "protocol": "TLS 1.3",
+            "subjectName": "puppeteer-tests",
+            "validFrom": 1550084863,
+            "validTo": 33086084863,
+        }
+    else:
+        assert security_details == {
+            "issuer": "puppeteer-tests",
+            "protocol": "TLS 1.3",
+            "subjectName": "puppeteer-tests",
+            "validFrom": 1550084863,
+            "validTo": 33086084863,
+        }
+    await page.close()
+
+
+async def test_response_security_details_none_without_https(page: Page, server: Server):
+    response = await page.goto(server.EMPTY_PAGE)
+    security_details = await response.security_details()
+    assert security_details is None
