@@ -603,7 +603,12 @@ class Page(ChannelOwner):
         return await self._main_frame.tap(**locals_to_params(locals()))
 
     async def fill(
-        self, selector: str, value: str, timeout: float = None, noWaitAfter: bool = None
+        self,
+        selector: str,
+        value: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
     ) -> None:
         return await self._main_frame.fill(**locals_to_params(locals()))
 
@@ -644,9 +649,14 @@ class Page(ChannelOwner):
         element: Union["ElementHandle", List["ElementHandle"]] = None,
         timeout: float = None,
         noWaitAfter: bool = None,
+        force: bool = None,
     ) -> List[str]:
         params = locals_to_params(locals())
         return await self._main_frame.select_option(**params)
+
+    async def input_value(self, selector: str, timeout: float = None) -> str:
+        params = locals_to_params(locals())
+        return await self._main_frame.input_value(**params)
 
     async def set_input_files(
         self,

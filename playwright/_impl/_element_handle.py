@@ -142,6 +142,7 @@ class ElementHandle(JSHandle):
         label: Union[str, List[str]] = None,
         element: Union["ElementHandle", List["ElementHandle"]] = None,
         timeout: float = None,
+        force: bool = None,
         noWaitAfter: bool = None,
     ) -> List[str]:
         params = locals_to_params(
@@ -165,12 +166,19 @@ class ElementHandle(JSHandle):
         await self._channel.send("tap", locals_to_params(locals()))
 
     async def fill(
-        self, value: str, timeout: float = None, noWaitAfter: bool = None
+        self,
+        value: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
-    async def select_text(self, timeout: float = None) -> None:
+    async def select_text(self, force: bool = None, timeout: float = None) -> None:
         await self._channel.send("selectText", locals_to_params(locals()))
+
+    async def input_value(self, timeout: float = None) -> str:
+        return await self._channel.send("inputValue", locals_to_params(locals()))
 
     async def set_input_files(
         self,

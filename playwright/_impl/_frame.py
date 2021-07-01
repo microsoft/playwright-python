@@ -419,7 +419,12 @@ class Frame(ChannelOwner):
         await self._channel.send("tap", locals_to_params(locals()))
 
     async def fill(
-        self, selector: str, value: str, timeout: float = None, noWaitAfter: bool = None
+        self,
+        selector: str,
+        value: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
@@ -460,6 +465,7 @@ class Frame(ChannelOwner):
         element: Union["ElementHandle", List["ElementHandle"]] = None,
         timeout: float = None,
         noWaitAfter: bool = None,
+        force: bool = None,
     ) -> List[str]:
         params = locals_to_params(
             dict(
@@ -470,6 +476,13 @@ class Frame(ChannelOwner):
             )
         )
         return await self._channel.send("selectOption", params)
+
+    async def input_value(
+        self,
+        selector: str,
+        timeout: float = None,
+    ) -> str:
+        return await self._channel.send("inputValue", locals_to_params(locals()))
 
     async def set_input_files(
         self,

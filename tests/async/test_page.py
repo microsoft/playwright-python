@@ -18,7 +18,8 @@ import re
 
 import pytest
 
-from playwright.async_api import Error, TimeoutError
+from playwright.async_api import Error, Page, TimeoutError
+from tests.server import Server
 
 
 async def test_close_should_reject_all_promises(context):
@@ -1235,3 +1236,13 @@ async def test_should_emulate_reduced_motion(page, server):
     assert await page.evaluate(
         "matchMedia('(prefers-reduced-motion: no-preference)').matches"
     )
+
+
+async def test_input_value(page: Page, server: Server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+
+    await page.fill("input", "my-text-content")
+    assert await page.input_value("input") == "my-text-content"
+
+    await page.fill("input", "")
+    assert await page.input_value("input") == ""

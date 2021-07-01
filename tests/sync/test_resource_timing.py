@@ -22,7 +22,7 @@ def test_should_work(page, server, is_webkit, is_mac):
         page.goto(server.EMPTY_PAGE)
     request = request_info.value
     timing = request.timing
-    assert timing["domainLookupStart"] >= 0
+    assert timing["domainLookupStart"] >= -1
     assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
     assert timing["connectStart"] >= timing["domainLookupEnd"]
     assert timing["secureConnectionStart"] == -1
@@ -43,7 +43,6 @@ def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
     timing = requests[1].timing
     if is_webkit and is_win:
         # Curl does not reuse connections.
-        assert timing["domainLookupStart"] >= 0
         assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
         assert timing["connectStart"] >= timing["domainLookupEnd"]
         assert timing["secureConnectionStart"] == -1
@@ -55,6 +54,7 @@ def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
         assert timing["connectEnd"] == 0 or timing["connectEnd"] == -1
         assert timing["secureConnectionStart"] == -1
 
+    assert timing["domainLookupStart"] >= -1
     assert timing["requestStart"] >= 0
     assert timing["responseStart"] > timing["requestStart"]
     assert timing["responseEnd"] >= timing["responseStart"]
@@ -70,7 +70,7 @@ def test_should_work_for_ssl(browser, https_server, is_mac, is_webkit):
     request = request_info.value
     timing = request.timing
     if not (is_webkit and is_mac):
-        assert timing["domainLookupStart"] >= 0
+        assert timing["domainLookupStart"] >= -1
         assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
         assert timing["connectStart"] >= timing["domainLookupEnd"]
         assert timing["secureConnectionStart"] > timing["connectStart"]
@@ -97,7 +97,7 @@ def test_should_work_for_redirect(page, server):
     assert responses[1].url == server.PREFIX + "/empty.html"
 
     timing1 = responses[0].request.timing
-    assert timing1["domainLookupStart"] >= 0
+    assert timing1["domainLookupStart"] >= -1
     assert timing1["domainLookupEnd"] >= timing1["domainLookupStart"]
     assert timing1["connectStart"] >= timing1["domainLookupEnd"]
     assert timing1["secureConnectionStart"] == -1

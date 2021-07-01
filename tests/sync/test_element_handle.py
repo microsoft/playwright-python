@@ -14,7 +14,8 @@
 
 import pytest
 
-from playwright.sync_api import Error
+from playwright.sync_api import Error, Page
+from tests.server import Server
 
 
 def test_bounding_box(page, server):
@@ -554,3 +555,13 @@ def test_is_checked_should_work(page):
     with pytest.raises(Error) as exc_info:
         page.is_checked("div")
     assert "Not a checkbox or radio button" in exc_info.value.message
+
+
+def test_input_value(page: Page, server: Server):
+    page.goto(server.PREFIX + "/input/textarea.html")
+    element = page.query_selector("input")
+    element.fill("my-text-content")
+    assert element.input_value() == "my-text-content"
+
+    element.fill("")
+    assert element.input_value() == ""

@@ -32,7 +32,9 @@ from playwright._impl._api_structures import (
     PdfMargins,
     Position,
     ProxySettings,
+    RemoteAddr,
     ResourceTiming,
+    SecurityDetails,
     SourceLocation,
     StorageState,
     ViewportSize,
@@ -380,6 +382,36 @@ class Response(AsyncBase):
         Frame
         """
         return mapping.from_impl(self._impl_obj.frame)
+
+    async def server_addr(self) -> typing.Optional[RemoteAddr]:
+        """Response.server_addr
+
+        Returns the IP address and port of the server.
+
+        Returns
+        -------
+        Union[{ipAddress: str, port: int}, NoneType]
+        """
+
+        return mapping.from_impl_nullable(
+            await self._async("response.server_addr", self._impl_obj.server_addr())
+        )
+
+    async def security_details(self) -> typing.Optional[SecurityDetails]:
+        """Response.security_details
+
+        Returns SSL and other security information.
+
+        Returns
+        -------
+        Union[{issuer: Union[str, NoneType], protocol: Union[str, NoneType], subjectName: Union[str, NoneType], validFrom: Union[int, NoneType], validTo: Union[int, NoneType]}, NoneType]
+        """
+
+        return mapping.from_impl_nullable(
+            await self._async(
+                "response.security_details", self._impl_obj.security_details()
+            )
+        )
 
     async def finished(self) -> typing.Optional[str]:
         """Response.finished
@@ -1671,6 +1703,7 @@ class ElementHandle(JSHandle):
         label: typing.Union[str, typing.List[str]] = None,
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
+        force: bool = None,
         no_wait_after: bool = None
     ) -> typing.List[str]:
         """ElementHandle.select_option
@@ -1710,6 +1743,8 @@ class ElementHandle(JSHandle):
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, NoneType]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
@@ -1729,6 +1764,7 @@ class ElementHandle(JSHandle):
                     label=label,
                     element=mapping.to_impl(element),
                     timeout=timeout,
+                    force=force,
                     noWaitAfter=no_wait_after,
                 ),
             )
@@ -1798,7 +1834,12 @@ class ElementHandle(JSHandle):
         )
 
     async def fill(
-        self, value: str, *, timeout: float = None, no_wait_after: bool = None
+        self,
+        value: str,
+        *,
+        timeout: float = None,
+        no_wait_after: bool = None,
+        force: bool = None
     ) -> NoneType:
         """ElementHandle.fill
 
@@ -1823,18 +1864,22 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
 
         return mapping.from_maybe_impl(
             await self._async(
                 "element_handle.fill",
                 self._impl_obj.fill(
-                    value=value, timeout=timeout, noWaitAfter=no_wait_after
+                    value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
                 ),
             )
         )
 
-    async def select_text(self, *, timeout: float = None) -> NoneType:
+    async def select_text(
+        self, *, force: bool = None, timeout: float = None
+    ) -> NoneType:
         """ElementHandle.select_text
 
         This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
@@ -1842,6 +1887,8 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -1850,7 +1897,30 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             await self._async(
                 "element_handle.select_text",
-                self._impl_obj.select_text(timeout=timeout),
+                self._impl_obj.select_text(force=force, timeout=timeout),
+            )
+        )
+
+    async def input_value(self, *, timeout: float = None) -> str:
+        """ElementHandle.input_value
+
+        Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "element_handle.input_value",
+                self._impl_obj.input_value(timeout=timeout),
             )
         )
 
@@ -3786,7 +3856,8 @@ class Frame(AsyncBase):
         value: str,
         *,
         timeout: float = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        force: bool = None
     ) -> NoneType:
         """Frame.fill
 
@@ -3815,6 +3886,8 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
 
         return mapping.from_maybe_impl(
@@ -3825,6 +3898,7 @@ class Frame(AsyncBase):
                     value=value,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    force=force,
                 ),
             )
         )
@@ -4032,7 +4106,8 @@ class Frame(AsyncBase):
         label: typing.Union[str, typing.List[str]] = None,
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        force: bool = None
     ) -> typing.List[str]:
         """Frame.select_option
 
@@ -4077,6 +4152,8 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
 
         Returns
         -------
@@ -4094,7 +4171,34 @@ class Frame(AsyncBase):
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    force=force,
                 ),
+            )
+        )
+
+    async def input_value(self, selector: str, *, timeout: float = None) -> str:
+        """Frame.input_value
+
+        Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "frame.input_value",
+                self._impl_obj.input_value(selector=selector, timeout=timeout),
             )
         )
 
@@ -6839,7 +6943,8 @@ class Page(AsyncContextManager):
         value: str,
         *,
         timeout: float = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        force: bool = None
     ) -> NoneType:
         """Page.fill
 
@@ -6870,6 +6975,8 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
 
         return mapping.from_maybe_impl(
@@ -6880,6 +6987,7 @@ class Page(AsyncContextManager):
                     value=value,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    force=force,
                 ),
             )
         )
@@ -7091,7 +7199,8 @@ class Page(AsyncContextManager):
         label: typing.Union[str, typing.List[str]] = None,
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        force: bool = None
     ) -> typing.List[str]:
         """Page.select_option
 
@@ -7139,6 +7248,8 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
 
         Returns
         -------
@@ -7156,7 +7267,34 @@ class Page(AsyncContextManager):
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    force=force,
                 ),
+            )
+        )
+
+    async def input_value(self, selector: str, *, timeout: float = None) -> str:
+        """Page.input_value
+
+        Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "page.input_value",
+                self._impl_obj.input_value(selector=selector, timeout=timeout),
             )
         )
 
