@@ -23,6 +23,7 @@ from playwright._impl._file_chooser import normalize_file_payloads
 from playwright._impl._helper import (
     KeyboardModifier,
     MouseButton,
+    async_writefile,
     locals_to_params,
     make_dirs_for_file,
 )
@@ -187,7 +188,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
     ) -> None:
         params = locals_to_params(locals())
-        params["files"] = normalize_file_payloads(files)
+        params["files"] = await normalize_file_payloads(files)
         await self._channel.send("setInputFiles", params)
 
     async def focus(self) -> None:
@@ -249,8 +250,7 @@ class ElementHandle(JSHandle):
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
-            with open(path, "wb") as fd:
-                fd.write(decoded_binary)
+            await async_writefile(path, decoded_binary)
         return decoded_binary
 
     async def query_selector(self, selector: str) -> Optional["ElementHandle"]:

@@ -36,6 +36,7 @@ from playwright._impl._helper import (
     MouseButton,
     URLMatch,
     URLMatcher,
+    async_readfile,
     locals_to_params,
     monotonic_time,
 )
@@ -360,9 +361,12 @@ class Frame(ChannelOwner):
     ) -> ElementHandle:
         params = locals_to_params(locals())
         if path:
-            with open(path, "r") as file:
-                params["content"] = file.read() + "\n//# sourceURL=" + str(Path(path))
-                del params["path"]
+            params["content"] = (
+                (await async_readfile(path)).decode()
+                + "\n//# sourceURL="
+                + str(Path(path))
+            )
+            del params["path"]
         return from_channel(await self._channel.send("addScriptTag", params))
 
     async def add_style_tag(
@@ -370,11 +374,13 @@ class Frame(ChannelOwner):
     ) -> ElementHandle:
         params = locals_to_params(locals())
         if path:
-            with open(path, "r") as file:
-                params["content"] = (
-                    file.read() + "\n/*# sourceURL=" + str(Path(path)) + "*/"
-                )
-                del params["path"]
+            params["content"] = (
+                (await async_readfile(path)).decode()
+                + "\n/*# sourceURL="
+                + str(Path(path))
+                + "*/"
+            )
+            del params["path"]
         return from_channel(await self._channel.send("addStyleTag", params))
 
     async def click(
@@ -492,7 +498,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
     ) -> None:
         params = locals_to_params(locals())
-        params["files"] = normalize_file_payloads(files)
+        params["files"] = await normalize_file_payloads(files)
         await self._channel.send("setInputFiles", params)
 
     async def type(

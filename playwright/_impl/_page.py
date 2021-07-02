@@ -54,6 +54,8 @@ from playwright._impl._helper import (
     URLMatcher,
     URLMatchRequest,
     URLMatchResponse,
+    async_readfile,
+    async_writefile,
     is_safe_close_error,
     locals_to_params,
     make_dirs_for_file,
@@ -498,8 +500,7 @@ class Page(ChannelOwner):
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
-            with open(path, "r") as file:
-                script = file.read()
+            script = (await async_readfile(path)).decode()
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
@@ -542,8 +543,7 @@ class Page(ChannelOwner):
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
-            with open(path, "wb") as fd:
-                fd.write(decoded_binary)
+            await async_writefile(path, decoded_binary)
         return decoded_binary
 
     async def title(self) -> str:
@@ -751,8 +751,7 @@ class Page(ChannelOwner):
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
-            with open(path, "wb") as fd:
-                fd.write(decoded_binary)
+            await async_writefile(path, decoded_binary)
         return decoded_binary
 
     @property
