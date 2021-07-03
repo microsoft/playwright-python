@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pathlib
-from typing import TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Union
 
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_channel
@@ -39,9 +39,7 @@ class Tracing:
     async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._channel.send("tracingStop")
         if path:
-            artifact = cast(
-                Artifact, from_channel(await self._channel.send("tracingExport"))
-            )
+            artifact: Artifact = from_channel(await self._channel.send("tracingExport"))
             if self._context._browser:
                 artifact._is_remote = self._context._browser._is_remote
             await artifact.save_as(path)

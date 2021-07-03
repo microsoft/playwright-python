@@ -134,7 +134,9 @@ class Page(ChannelOwner):
             self._browser_context._timeout_settings
         )
         self._video: Optional[Video] = None
-        self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
+        self._opener: Optional["Page"] = from_nullable_channel(
+            initializer.get("opener")
+        )
 
         self._channel.on(
             "bindingCall",
@@ -248,7 +250,7 @@ class Page(ChannelOwner):
     def _on_download(self, params: Any) -> None:
         url = params["url"]
         suggested_filename = params["suggestedFilename"]
-        artifact = cast(Artifact, from_channel(params["artifact"]))
+        artifact: Artifact = from_channel(params["artifact"])
         if self._browser_context._browser:
             artifact._is_remote = self._browser_context._browser._is_remote
         self.emit(

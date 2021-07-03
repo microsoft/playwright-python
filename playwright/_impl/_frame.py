@@ -15,7 +15,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 
 from pyee import EventEmitter
 
@@ -112,11 +112,8 @@ class Frame(ChannelOwner):
         waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
-        return cast(
-            Optional[Response],
-            from_nullable_channel(
-                await self._channel.send("goto", locals_to_params(locals()))
-            ),
+        return from_nullable_channel(
+            await self._channel.send("goto", locals_to_params(locals()))
         )
 
     def _setup_navigation_wait_helper(
@@ -247,7 +244,7 @@ class Frame(ChannelOwner):
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
         return list(
             map(
-                cast(ElementHandle, from_channel),
+                from_channel,
                 await self._channel.send("querySelectorAll", dict(selector=selector)),
             )
         )

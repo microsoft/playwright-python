@@ -319,11 +319,12 @@ class Connection:
         return payload
 
 
-def from_channel(channel: Channel) -> Any:
+def from_channel(channel: Channel) -> ChannelOwner:
+    assert channel._object
     return channel._object
 
 
-def from_nullable_channel(channel: Optional[Channel]) -> Optional[Any]:
+def from_nullable_channel(channel: Optional[Channel]) -> Optional[ChannelOwner]:
     return channel._object if channel else None
 
 

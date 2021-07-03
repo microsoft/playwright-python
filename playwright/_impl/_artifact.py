@@ -14,7 +14,7 @@
 
 import pathlib
 from pathlib import Path
-from typing import Dict, Optional, Union, cast
+from typing import Dict, Optional, Union
 
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import Error, make_dirs_for_file, patch_error_message
@@ -37,7 +37,7 @@ class Artifact(ChannelOwner):
         return pathlib.Path(await self._channel.send("pathAfterFinished"))
 
     async def save_as(self, path: Union[str, Path]) -> None:
-        stream = cast(Stream, from_channel(await self._channel.send("saveAsStream")))
+        stream: Stream = from_channel(await self._channel.send("saveAsStream"))
         make_dirs_for_file(path)
         await stream.save_as(path)
 

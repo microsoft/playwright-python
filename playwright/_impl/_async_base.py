@@ -15,7 +15,7 @@
 import asyncio
 import traceback
 from types import TracebackType
-from typing import Any, Awaitable, Callable, Generic, Type, TypeVar
+from typing import Any, Awaitable, Callable, Generic, Type, TypeVar, Union
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -23,11 +23,11 @@ mapping = ImplToApiMapping()
 
 
 T = TypeVar("T")
-Self = TypeVar("Self", bound="AsyncBase")
+Self = TypeVar("Self", bound="AsyncContextManager")
 
 
 class AsyncEventInfo(Generic[T]):
-    def __init__(self, future: asyncio.Future) -> None:
+    def __init__(self, future: "asyncio.Future[T]") -> None:
         self._future = future
 
     @property
@@ -39,13 +39,18 @@ class AsyncEventInfo(Generic[T]):
 
 
 class AsyncEventContextManager(Generic[T]):
-    def __init__(self, future: asyncio.Future) -> None:
-        self._event: AsyncEventInfo = AsyncEventInfo(future)
+    def __init__(self, future: "asyncio.Future[T]") -> None:
+        self._event = AsyncEventInfo[T](future)
 
     async def __aenter__(self) -> AsyncEventInfo[T]:
         return self._event
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> None:
         await self._event.value
 
 
@@ -68,17 +73,19 @@ class AsyncBase(ImplWrapper):
             return mapping.wrap_handler(handler)
         return handler
 
-    def on(self, event: str, f: Any) -> None:
+    def on(self, event: str, f: Callable[..., Union[Awaitable[None], None]]) -> None:
         """Registers the function ``f`` to the event name ``event``."""
         self._impl_obj.on(event, self._wrap_handler(f))
 
-    def once(self, event: str, f: Any) -> None:
+    def once(self, event: str, f: Callable[..., Union[Awaitable[None], None]]) -> None:
         """The same as ``self.on``, except that the listener is automatically
         removed after being called.
         """
         self._impl_obj.once(event, self._wrap_handler(f))
 
-    def remove_listener(self, event: str, f: Any) -> None:
+    def remove_listener(
+        self, event: str, f: Callable[..., Union[Awaitable[None], None]]
+    ) -> None:
         """Removes the function ``f`` from ``event``."""
         self._impl_obj.remove_listener(event, self._wrap_handler(f))
 
@@ -93,4 +100,7 @@ class AsyncContextManager(AsyncBase):
         exc_val: BaseException,
         traceback: TracebackType,
     ) -> None:
-        await self.close()  # type: ignore
+        await self.close()
+
+    async def close(self: Self) -> None:
+        ...

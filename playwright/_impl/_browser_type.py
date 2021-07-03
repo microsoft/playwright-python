@@ -15,7 +15,7 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -138,7 +138,7 @@ class BrowserType(ChannelOwner):
         await normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
         try:
-            context = from_channel(
+            context: BrowserContext = from_channel(
                 await self._channel.send("launchPersistentContext", params)
             )
             context._options = params
@@ -160,12 +160,11 @@ class BrowserType(ChannelOwner):
             "python" if self._connection._is_sync else "python-async"
         )
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
-        browser = cast(Browser, from_channel(response["browser"]))
+        browser: Browser = from_channel(response["browser"])
         browser._is_remote = True
 
-        default_context = cast(
-            Optional[BrowserContext],
-            from_nullable_channel(response.get("defaultContext")),
+        default_context: Optional[BrowserContext] = from_nullable_channel(
+            response.get("defaultContext")
         )
         if default_context:
             browser._contexts.append(default_context)
@@ -209,7 +208,7 @@ class BrowserType(ChannelOwner):
         self._connection._child_ws_connections.append(connection)
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
-        browser = cast(Browser, from_channel(pre_launched_browser))
+        browser: Browser = from_channel(pre_launched_browser)
         browser._is_remote = True
         browser._is_connected_over_websocket = True
 

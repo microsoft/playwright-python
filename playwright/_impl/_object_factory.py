@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, cast
+from typing import Dict
 
 from playwright._impl._artifact import Artifact
 from playwright._impl._browser import Browser
@@ -47,7 +47,7 @@ def create_remote_object(
     if type == "BindingCall":
         return BindingCall(parent, type, guid, initializer)
     if type == "Browser":
-        return Browser(cast(BrowserType, parent), type, guid, initializer)
+        return Browser(parent, type, guid, initializer)
     if type == "BrowserType":
         return BrowserType(parent, type, guid, initializer)
     if type == "BrowserContext":

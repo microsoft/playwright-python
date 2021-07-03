@@ -204,7 +204,7 @@ class Route(ChannelOwner):
             overrides["postData"] = base64.b64encode(postData.encode()).decode()
         elif isinstance(postData, bytes):
             overrides["postData"] = base64.b64encode(postData).decode()
-        await self._channel.send("continue", cast(Any, overrides))
+        await self._channel.send("continue", cast(Dict, overrides))
 
 
 class Response(ChannelOwner):
