@@ -36,18 +36,18 @@ mapping = ImplToApiMapping()
 
 
 T = TypeVar("T")
-Self = TypeVar("Self")
+Self = TypeVar("Self", bound="SyncContextManager")
 
 
 class EventInfo(Generic[T]):
-    def __init__(self, sync_base: "SyncBase", future: asyncio.Future) -> None:
+    def __init__(self, sync_base: "SyncBase", future: "asyncio.Future[T]") -> None:
         self._sync_base = sync_base
         self._value: Optional[T] = None
-        self._exception = None
+        self._exception: Optional[Exception] = None
         self._future = future
         g_self = greenlet.getcurrent()
 
-        def done_callback(task: Any) -> None:
+        def done_callback(task: "asyncio.Future[T]") -> None:
             try:
                 self._value = mapping.from_maybe_impl(self._future.result())
             except Exception as e:
@@ -71,13 +71,18 @@ class EventInfo(Generic[T]):
 
 
 class EventContextManager(Generic[T]):
-    def __init__(self, sync_base: "SyncBase", future: asyncio.Future) -> None:
-        self._event: EventInfo = EventInfo(sync_base, future)
+    def __init__(self, sync_base: "SyncBase", future: "asyncio.Future[T]") -> None:
+        self._event = EventInfo[T](sync_base, future)
 
     def __enter__(self) -> EventInfo[T]:
         return self._event
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> None:
         self._event.value
 
 
@@ -110,17 +115,17 @@ class SyncBase(ImplWrapper):
             return mapping.wrap_handler(handler)
         return handler
 
-    def on(self, event: str, f: Any) -> None:
+    def on(self, event: str, f: Callable[..., None]) -> None:
         """Registers the function ``f`` to the event name ``event``."""
         self._impl_obj.on(event, self._wrap_handler(f))
 
-    def once(self, event: str, f: Any) -> None:
+    def once(self, event: str, f: Callable[..., None]) -> None:
         """The same as ``self.on``, except that the listener is automatically
         removed after being called.
         """
         self._impl_obj.once(event, self._wrap_handler(f))
 
-    def remove_listener(self, event: str, f: Any) -> None:
+    def remove_listener(self, event: str, f: Callable[..., None]) -> None:
         """Removes the function ``f`` from ``event``."""
         self._impl_obj.remove_listener(event, self._wrap_handler(f))
 
@@ -167,4 +172,7 @@ class SyncContextManager(SyncBase):
         exc_val: BaseException,
         traceback: TracebackType,
     ) -> None:
-        self.close()  # type: ignore
+        self.close()
+
+    def close(self: Self) -> None:
+        ...
