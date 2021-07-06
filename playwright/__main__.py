@@ -13,24 +13,17 @@
 # limitations under the License.
 
 import os
-import platform
 import subprocess
 import sys
 
 from playwright._impl._driver import compute_driver_executable
-from playwright._repo_version import version
 
 
 def main() -> None:
-    if "envinfo" in sys.argv:
-        print(f"- Playwright Version: {version}")
-        print(f"- Operating System: {platform.platform()}")
-        print(f"- Python Version: {sys.version}")
-    else:
-        driver_executable = compute_driver_executable()
-        env = os.environ.copy()
-        env["PW_CLI_TARGET_LANG"] = "python"
-        subprocess.run([str(driver_executable), *sys.argv[1:]], env=env)
+    driver_executable = compute_driver_executable()
+    env = os.environ.copy()
+    env["PW_CLI_TARGET_LANG"] = "python"
+    subprocess.run([str(driver_executable), *sys.argv[1:]], env=env)
 
 
 if __name__ == "__main__":
