@@ -102,6 +102,8 @@ jobs:
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90
+    - name: Code Coverage
+      run: coverage report
     - uses: actions/upload-artifact@v2
       if: failure()
       with:
