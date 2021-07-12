@@ -23,7 +23,8 @@ def main() -> None:
     driver_executable = compute_driver_executable()
     env = os.environ.copy()
     env["PW_CLI_TARGET_LANG"] = "python"
-    subprocess.run([str(driver_executable), *sys.argv[1:]], env=env)
+    completed_process = subprocess.run([str(driver_executable), *sys.argv[1:]], env=env)
+    sys.exit(completed_process.returncode)
 
 
 if __name__ == "__main__":
