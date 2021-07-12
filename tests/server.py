@@ -119,7 +119,7 @@ class Server:
                     else:
                         request.write(file_content)
                     self.setResponseCode(HTTPStatus.OK)
-                except (FileNotFoundError, IsADirectoryError):
+                except (FileNotFoundError, IsADirectoryError, PermissionError):
                     request.setResponseCode(HTTPStatus.NOT_FOUND)
                 self.finish()
 

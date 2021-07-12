@@ -287,7 +287,11 @@ class Page(ChannelOwner):
         return self._main_frame
 
     def frame(self, name: str = None, url: URLMatch = None) -> Optional[Frame]:
-        matcher = URLMatcher(url) if url else None
+        matcher = (
+            URLMatcher(self._browser_context._options.get("baseURL"), url)
+            if url
+            else None
+        )
         for frame in self._frames:
             if name and frame.name == name:
                 return frame
@@ -335,10 +339,10 @@ class Page(ChannelOwner):
     async def is_enabled(self, selector: str, timeout: float = None) -> bool:
         return await self._main_frame.is_enabled(**locals_to_params(locals()))
 
-    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+    async def is_hidden(self, selector: str) -> bool:
         return await self._main_frame.is_hidden(**locals_to_params(locals()))
 
-    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+    async def is_visible(self, selector: str) -> bool:
         return await self._main_frame.is_visible(**locals_to_params(locals()))
 
     async def dispatch_event(
@@ -506,7 +510,11 @@ class Page(ChannelOwner):
         await self._channel.send("addInitScript", dict(source=script))
 
     async def route(self, url: URLMatch, handler: RouteHandler) -> None:
-        self._routes.append(RouteHandlerEntry(URLMatcher(url), handler))
+        self._routes.append(
+            RouteHandlerEntry(
+                URLMatcher(self._browser_context._options.get("baseURL"), url), handler
+            )
+        )
         if len(self._routes) == 1:
             await self._channel.send(
                 "setNetworkInterceptionEnabled", dict(enabled=True)
@@ -822,7 +830,13 @@ class Page(ChannelOwner):
         url_or_predicate: URLMatchRequest,
         timeout: float = None,
     ) -> EventContextManagerImpl[Request]:
-        matcher = None if callable(url_or_predicate) else URLMatcher(url_or_predicate)
+        matcher = (
+            None
+            if callable(url_or_predicate)
+            else URLMatcher(
+                self._browser_context._options.get("baseURL"), url_or_predicate
+            )
+        )
         predicate = url_or_predicate if callable(url_or_predicate) else None
 
         def my_predicate(request: Request) -> bool:
@@ -850,7 +864,13 @@ class Page(ChannelOwner):
         url_or_predicate: URLMatchResponse,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
-        matcher = None if callable(url_or_predicate) else URLMatcher(url_or_predicate)
+        matcher = (
+            None
+            if callable(url_or_predicate)
+            else URLMatcher(
+                self._browser_context._options.get("baseURL"), url_or_predicate
+            )
+        )
         predicate = url_or_predicate if callable(url_or_predicate) else None
 
         def my_predicate(response: Response) -> bool:

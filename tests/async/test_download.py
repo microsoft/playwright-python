@@ -349,3 +349,22 @@ async def test_should_delete_downloads_on_browser_gone(browser_factory, server):
     assert os.path.exists(path1) is False
     assert os.path.exists(path2) is False
     assert os.path.exists(os.path.join(path1, "..")) is False
+
+
+async def test_download_cancel_should_work(browser, server):
+    def handle_download(request):
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment")
+        # Chromium requires a large enough payload to trigger the download event soon enough
+        request.write(b"a" * 4096)
+        request.write(b"foo")
+
+    server.set_route("/downloadWithDelay", handle_download)
+    page = await browser.new_page(accept_downloads=True)
+    await page.set_content(f'<a href="{server.PREFIX}/downloadWithDelay">download</a>')
+    async with page.expect_download() as download_info:
+        await page.click("a")
+    download = await download_info.value
+    await download.cancel()
+    assert await download.failure() == "canceled"
+    await page.close()

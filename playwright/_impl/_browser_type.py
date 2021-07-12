@@ -132,6 +132,7 @@ class BrowserType(ChannelOwner):
         recordHarOmitContent: bool = None,
         recordVideoDir: Union[Path, str] = None,
         recordVideoSize: ViewportSize = None,
+        baseURL: str = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())

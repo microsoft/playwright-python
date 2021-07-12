@@ -3283,7 +3283,7 @@ class Frame(AsyncBase):
             )
         )
 
-    async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_hidden(self, selector: str) -> bool:
         """Frame.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
@@ -3294,9 +3294,6 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -3305,12 +3302,11 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._async(
-                "frame.is_hidden",
-                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+                "frame.is_hidden", self._impl_obj.is_hidden(selector=selector)
             )
         )
 
-    async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_visible(self, selector: str) -> bool:
         """Frame.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
@@ -3321,9 +3317,6 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -3332,8 +3325,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._async(
-                "frame.is_visible",
-                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+                "frame.is_visible", self._impl_obj.is_visible(selector=selector)
             )
         )
 
@@ -4931,6 +4923,9 @@ class Download(AsyncBase):
         Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
         necessary. The method throws when connected remotely.
 
+        Note that the download's file name is a random GUID, use `download.suggested_filename()` to get suggested file
+        name.
+
         Returns
         -------
         Union[pathlib.Path, NoneType]
@@ -4954,6 +4949,17 @@ class Download(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._async("download.save_as", self._impl_obj.save_as(path=path))
+        )
+
+    async def cancel(self) -> NoneType:
+        """Download.cancel
+
+        Cancels a download. Will not fail if the download is already finished or canceled. Upon successful cancellations,
+        `download.failure()` would resolve to `'canceled'`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async("download.cancel", self._impl_obj.cancel())
         )
 
 
@@ -5449,7 +5455,7 @@ class Page(AsyncContextManager):
             )
         )
 
-    async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_hidden(self, selector: str) -> bool:
         """Page.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
@@ -5460,9 +5466,6 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5471,12 +5474,11 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._async(
-                "page.is_hidden",
-                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+                "page.is_hidden", self._impl_obj.is_hidden(selector=selector)
             )
         )
 
-    async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_visible(self, selector: str) -> bool:
         """Page.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
@@ -5487,9 +5489,6 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5498,8 +5497,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._async(
-                "page.is_visible",
-                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+                "page.is_visible", self._impl_obj.is_visible(selector=selector)
             )
         )
 
@@ -6091,7 +6089,9 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         url : str
-            URL to navigate page to. The url should include scheme, e.g. `https://`.
+            URL to navigate page to. The url should include scheme, e.g. `https://`. When a `baseURL` via the context options was
+            provided and the passed URL is a path, it gets merged via the
+            [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         timeout : Union[float, NoneType]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
@@ -6558,7 +6558,9 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+            A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a `baseURL` via the context
+            options was provided and the passed URL is a path, it gets merged via the
+            [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
         """
@@ -8070,7 +8072,7 @@ class Page(AsyncContextManager):
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request
 
-        Waits for the matching request and returns it.  See [waiting for event](./events.md#waiting-for-event) for more details
+        Waits for the matching request and returns it. See [waiting for event](./events.md#waiting-for-event) for more details
         about events.
 
         ```py
@@ -8087,7 +8089,9 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
-            Request URL string, regex or predicate receiving `Request` object.
+            Request URL string, regex or predicate receiving `Request` object. When a `baseURL` via the context options was provided
+            and the passed URL is a path, it gets merged via the
+            [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         timeout : Union[float, NoneType]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
             changed by using the `page.set_default_timeout()` method.
@@ -8162,7 +8166,9 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Response], bool], Pattern, str]
-            Request URL string, regex or predicate receiving `Response` object.
+            Request URL string, regex or predicate receiving `Response` object. When a `baseURL` via the context options was
+            provided and the passed URL is a path, it gets merged via the
+            [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         timeout : Union[float, NoneType]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be
             changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -8782,7 +8788,9 @@ class BrowserContext(AsyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+            A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a `baseURL` via the context
+            options was provided and the passed URL is a path, it gets merged via the
+            [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
         """
@@ -9111,7 +9119,8 @@ class Browser(AsyncContextManager):
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
-        storage_state: typing.Union[StorageState, str, pathlib.Path] = None
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
+        base_url: str = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -9198,6 +9207,13 @@ class Browser(AsyncContextManager):
             Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
+        base_url : Union[str, NoneType]
+            When using `page.goto()`, `page.route()`, `page.wait_for_url()`, `page.expect_request()`,
+            or `page.expect_response()` it takes the base URL in consideration by using the
+            [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL.
+            Examples:
+            - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
+            - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
 
         Returns
         -------
@@ -9235,6 +9251,7 @@ class Browser(AsyncContextManager):
                     recordVideoDir=record_video_dir,
                     recordVideoSize=record_video_size,
                     storageState=storage_state,
+                    baseURL=base_url,
                 ),
             )
         )
@@ -9268,7 +9285,8 @@ class Browser(AsyncContextManager):
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
-        storage_state: typing.Union[StorageState, str, pathlib.Path] = None
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
+        base_url: str = None
     ) -> "Page":
         """Browser.new_page
 
@@ -9350,6 +9368,13 @@ class Browser(AsyncContextManager):
             Populates context with given storage state. This option can be used to initialize context with logged-in information
             obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or an object with
             the following fields:
+        base_url : Union[str, NoneType]
+            When using `page.goto()`, `page.route()`, `page.wait_for_url()`, `page.expect_request()`,
+            or `page.expect_response()` it takes the base URL in consideration by using the
+            [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL.
+            Examples:
+            - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
+            - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
 
         Returns
         -------
@@ -9387,6 +9412,7 @@ class Browser(AsyncContextManager):
                     recordVideoDir=record_video_dir,
                     recordVideoSize=record_video_size,
                     storageState=storage_state,
+                    baseURL=base_url,
                 ),
             )
         )
@@ -9692,7 +9718,8 @@ class BrowserType(AsyncBase):
         record_har_path: typing.Union[str, pathlib.Path] = None,
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
-        record_video_size: ViewportSize = None
+        record_video_size: ViewportSize = None,
+        base_url: str = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -9812,6 +9839,13 @@ class BrowserType(AsyncBase):
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page will
             be scaled down if necessary to fit the specified size.
+        base_url : Union[str, NoneType]
+            When using `page.goto()`, `page.route()`, `page.wait_for_url()`, `page.expect_request()`,
+            or `page.expect_response()` it takes the base URL in consideration by using the
+            [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL.
+            Examples:
+            - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
+            - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
 
         Returns
         -------
@@ -9863,6 +9897,7 @@ class BrowserType(AsyncBase):
                     recordHarOmitContent=record_har_omit_content,
                     recordVideoDir=record_video_dir,
                     recordVideoSize=record_video_size,
+                    baseURL=base_url,
                 ),
             )
         )

@@ -392,17 +392,41 @@ async def test_expose_bindinghandle_should_work(page, server):
     assert result == 17
 
 
-async def test_page_error_should_fire(page, server, is_webkit):
+async def test_page_error_should_fire(page, server, browser_name):
+    url = server.PREFIX + "/error.html"
     async with page.expect_event("pageerror") as error_info:
-        await page.goto(server.PREFIX + "/error.html")
+        await page.goto(url)
     error = await error_info.value
     assert error.name == "Error"
     assert error.message == "Fancy error!"
-    stack = await page.evaluate("window.e.stack")
     # Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
-    if is_webkit:
-        stack = stack.replace("14:25", "15:19")
-    assert error.stack == stack
+    if browser_name == "chromium":
+        assert (
+            error.stack
+            == """Error: Fancy error!
+    at c (myscript.js:14:11)
+    at b (myscript.js:10:5)
+    at a (myscript.js:6:5)
+    at myscript.js:3:1"""
+        )
+    if browser_name == "firefox":
+        assert (
+            error.stack
+            == """Error: Fancy error!
+    at c (myscript.js:14:11)
+    at b (myscript.js:10:5)
+    at a (myscript.js:6:5)
+    at  (myscript.js:3:1)"""
+        )
+    if browser_name == "webkit":
+        assert (
+            error.stack
+            == f"""Error: Fancy error!
+    at c ({url}:14:36)
+    at b ({url}:10:6)
+    at a ({url}:6:6)
+    at global code ({url}:3:2)"""
+        )
 
 
 async def test_page_error_should_handle_odd_values(page):
