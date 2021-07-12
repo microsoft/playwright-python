@@ -46,3 +46,6 @@ class Artifact(ChannelOwner):
 
     async def delete(self) -> None:
         await self._channel.send("delete")
+
+    async def cancel(self) -> None:
+        await self._channel.send("cancel")

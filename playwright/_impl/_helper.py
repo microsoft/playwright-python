@@ -32,6 +32,7 @@ from typing import (
     Union,
     cast,
 )
+from urllib.parse import urljoin
 
 from playwright._impl._api_types import Error, TimeoutError
 
@@ -105,10 +106,12 @@ Env = Dict[str, Union[str, float, bool]]
 
 
 class URLMatcher:
-    def __init__(self, match: URLMatch) -> None:
+    def __init__(self, base_url: Union[str, None], match: URLMatch) -> None:
         self._callback: Optional[Callable[[str], bool]] = None
         self._regex_obj: Optional[Pattern] = None
         if isinstance(match, str):
+            if base_url and not match.startswith("*"):
+                match = urljoin(base_url, match)
             regex = fnmatch.translate(match)
             self._regex_obj = re.compile(regex)
         elif isinstance(match, Pattern):

@@ -153,7 +153,11 @@ class Frame(ChannelOwner):
             timeout = self._page._timeout_settings.navigation_timeout()
         deadline = monotonic_time() + timeout
         wait_helper = self._setup_navigation_wait_helper("expect_navigation", timeout)
-        matcher = URLMatcher(url) if url else None
+        matcher = (
+            URLMatcher(self._page._browser_context._options.get("baseURL"), url)
+            if url
+            else None
+        )
 
         def predicate(event: Any) -> bool:
             # Any failed navigation results in a rejection.
@@ -188,7 +192,7 @@ class Frame(ChannelOwner):
         wait_until: DocumentLoadState = None,
         timeout: float = None,
     ) -> None:
-        matcher = URLMatcher(url)
+        matcher = URLMatcher(self._page._browser_context._options.get("baseURL"), url)
         if matcher.matches(self.url):
             await self.wait_for_load_state(state=wait_until, timeout=timeout)
             return
@@ -274,10 +278,10 @@ class Frame(ChannelOwner):
     async def is_enabled(self, selector: str, timeout: float = None) -> bool:
         return await self._channel.send("isEnabled", locals_to_params(locals()))
 
-    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
+    async def is_hidden(self, selector: str) -> bool:
         return await self._channel.send("isHidden", locals_to_params(locals()))
 
-    async def is_visible(self, selector: str, timeout: float = None) -> bool:
+    async def is_visible(self, selector: str) -> bool:
         return await self._channel.send("isVisible", locals_to_params(locals()))
 
     async def dispatch_event(

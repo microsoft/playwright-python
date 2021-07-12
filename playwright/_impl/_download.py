@@ -59,3 +59,6 @@ class Download:
 
     async def save_as(self, path: Union[str, Path]) -> None:
         await self._artifact.save_as(path)
+
+    async def cancel(self) -> None:
+        return await self._artifact.cancel()
