@@ -130,5 +130,5 @@ class SecurityDetails(TypedDict):
     issuer: Optional[str]
     protocol: Optional[str]
     subjectName: Optional[str]
-    validFrom: Optional[int]
-    validTo: Optional[int]
+    validFrom: Optional[float]
+    validTo: Optional[float]

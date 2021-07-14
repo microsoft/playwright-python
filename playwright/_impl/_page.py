@@ -339,10 +339,10 @@ class Page(ChannelOwner):
     async def is_enabled(self, selector: str, timeout: float = None) -> bool:
         return await self._main_frame.is_enabled(**locals_to_params(locals()))
 
-    async def is_hidden(self, selector: str) -> bool:
+    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
         return await self._main_frame.is_hidden(**locals_to_params(locals()))
 
-    async def is_visible(self, selector: str) -> bool:
+    async def is_visible(self, selector: str, timeout: float = None) -> bool:
         return await self._main_frame.is_visible(**locals_to_params(locals()))
 
     async def dispatch_event(
