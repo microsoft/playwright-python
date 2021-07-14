@@ -404,7 +404,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        Union[{issuer: Union[str, NoneType], protocol: Union[str, NoneType], subjectName: Union[str, NoneType], validFrom: Union[int, NoneType], validTo: Union[int, NoneType]}, NoneType]
+        Union[{issuer: Union[str, NoneType], protocol: Union[str, NoneType], subjectName: Union[str, NoneType], validFrom: Union[float, NoneType], validTo: Union[float, NoneType]}, NoneType]
         """
 
         return mapping.from_impl_nullable(
@@ -3261,7 +3261,7 @@ class Frame(SyncBase):
             )
         )
 
-    def is_hidden(self, selector: str) -> bool:
+    def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
@@ -3272,6 +3272,9 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -3279,10 +3282,13 @@ class Frame(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync("frame.is_hidden", self._impl_obj.is_hidden(selector=selector))
+            self._sync(
+                "frame.is_hidden",
+                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+            )
         )
 
-    def is_visible(self, selector: str) -> bool:
+    def is_visible(self, selector: str, *, timeout: float = None) -> bool:
         """Frame.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
@@ -3293,6 +3299,9 @@ class Frame(SyncBase):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -3300,7 +3309,10 @@ class Frame(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync("frame.is_visible", self._impl_obj.is_visible(selector=selector))
+            self._sync(
+                "frame.is_visible",
+                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+            )
         )
 
     def dispatch_event(
@@ -5417,7 +5429,7 @@ class Page(SyncContextManager):
             )
         )
 
-    def is_hidden(self, selector: str) -> bool:
+    def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
@@ -5428,6 +5440,9 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5435,10 +5450,13 @@ class Page(SyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            self._sync("page.is_hidden", self._impl_obj.is_hidden(selector=selector))
+            self._sync(
+                "page.is_hidden",
+                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+            )
         )
 
-    def is_visible(self, selector: str) -> bool:
+    def is_visible(self, selector: str, *, timeout: float = None) -> bool:
         """Page.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
@@ -5449,6 +5467,9 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5456,7 +5477,10 @@ class Page(SyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            self._sync("page.is_visible", self._impl_obj.is_visible(selector=selector))
+            self._sync(
+                "page.is_visible",
+                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+            )
         )
 
     def dispatch_event(

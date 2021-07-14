@@ -278,10 +278,10 @@ class Frame(ChannelOwner):
     async def is_enabled(self, selector: str, timeout: float = None) -> bool:
         return await self._channel.send("isEnabled", locals_to_params(locals()))
 
-    async def is_hidden(self, selector: str) -> bool:
+    async def is_hidden(self, selector: str, timeout: float = None) -> bool:
         return await self._channel.send("isHidden", locals_to_params(locals()))
 
-    async def is_visible(self, selector: str) -> bool:
+    async def is_visible(self, selector: str, timeout: float = None) -> bool:
         return await self._channel.send("isVisible", locals_to_params(locals()))
 
     async def dispatch_event(
