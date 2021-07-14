@@ -46,47 +46,48 @@ async def test_page_route_should_intercept(page, server):
 async def test_page_route_should_unroute(page: Page, server):
     intercepted = []
 
-    def handler1(route):
-        intercepted.append(1)
-        asyncio.create_task(route.continue_())
-
-    await page.route("**/empty.html", handler1)
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(2),  # type: ignore
-            asyncio.create_task(route.continue_()),
-        ),
-    )
-
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(3),  # type: ignore
-            asyncio.create_task(route.continue_()),
-        ),
-    )
-
     await page.route(
         "**/*",
         lambda route: (
-            intercepted.append(4),  # type: ignore
+            intercepted.append(1),
             asyncio.create_task(route.continue_()),
         ),
     )
 
+    await page.route(
+        "**/empty.html",
+        lambda route: (
+            intercepted.append(2),
+            asyncio.create_task(route.continue_()),
+        ),
+    )
+
+    await page.route(
+        "**/empty.html",
+        lambda route: (
+            intercepted.append(3),
+            asyncio.create_task(route.continue_()),
+        ),
+    )
+
+    def handler4(route):
+        intercepted.append(4)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/empty.html", handler4)
+
     await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [1]
+    assert intercepted == [4]
 
     intercepted = []
-    await page.unroute("**/empty.html", handler1)
+    await page.unroute("**/empty.html", handler4)
     await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [2]
+    assert intercepted == [3]
 
     intercepted = []
     await page.unroute("**/empty.html")
     await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [4]
+    assert intercepted == [1]
 
 
 async def test_page_route_should_work_when_POST_is_redirected_with_302(page, server):

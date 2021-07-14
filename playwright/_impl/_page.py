@@ -510,10 +510,11 @@ class Page(ChannelOwner):
         await self._channel.send("addInitScript", dict(source=script))
 
     async def route(self, url: URLMatch, handler: RouteHandler) -> None:
-        self._routes.append(
+        self._routes.insert(
+            0,
             RouteHandlerEntry(
                 URLMatcher(self._browser_context._options.get("baseURL"), url), handler
-            )
+            ),
         )
         if len(self._routes) == 1:
             await self._channel.send(
