@@ -464,30 +464,31 @@ async def test_route_should_unroute(context, server):
         intercepted.append(ordinal)
         asyncio.create_task(route.continue_())
 
-    def handler1(route, request):
-        handler(route, request, 1)
-
-    await context.route("**/empty.html", handler1)
+    await context.route("**/*", lambda route, request: handler(route, request, 1))
     await context.route(
         "**/empty.html", lambda route, request: handler(route, request, 2)
     )
     await context.route(
         "**/empty.html", lambda route, request: handler(route, request, 3)
     )
-    await context.route("**/*", lambda route, request: handler(route, request, 4))
+
+    def handler4(route, request):
+        handler(route, request, 4)
+
+    await context.route("**/empty.html", handler4)
 
     await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [1]
+    assert intercepted == [4]
 
     intercepted = []
-    await context.unroute("**/empty.html", handler1)
+    await context.unroute("**/empty.html", handler4)
     await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [2]
+    assert intercepted == [3]
 
     intercepted = []
     await context.unroute("**/empty.html")
     await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [4]
+    assert intercepted == [1]
 
 
 async def test_route_should_yield_to_page_route(context, server):

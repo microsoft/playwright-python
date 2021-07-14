@@ -240,8 +240,8 @@ class BrowserContext(ChannelOwner):
         await self.expose_binding(name, lambda source, *args: callback(*args))
 
     async def route(self, url: URLMatch, handler: RouteHandler) -> None:
-        self._routes.append(
-            RouteHandlerEntry(URLMatcher(self._options.get("baseURL"), url), handler)
+        self._routes.insert(
+            0, RouteHandlerEntry(URLMatcher(self._options.get("baseURL"), url), handler)
         )
         if len(self._routes) == 1:
             await self._channel.send(
