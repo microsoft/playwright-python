@@ -168,5 +168,6 @@ setup(
         "console_scripts": [
             "playwright=playwright.__main__:main",
         ],
+        "pyinstaller40": ["hook-dirs=playwright._impl.__pyinstaller:get_hook_dirs"],
     },
 )
