@@ -1270,3 +1270,14 @@ async def test_input_value(page: Page, server: Server):
 
     await page.fill("input", "")
     assert await page.input_value("input") == ""
+
+
+async def test_drag_and_drop_helper_method(page: Page, server: Server):
+    await page.goto(server.PREFIX + "/drag-n-drop.html")
+    await page.drag_and_drop("#source", "#target")
+    assert (
+        await page.eval_on_selector(
+            "#target", "target => target.contains(document.querySelector('#source'))"
+        )
+        is True
+    )

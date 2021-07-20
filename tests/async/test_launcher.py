@@ -58,7 +58,7 @@ async def test_browser_type_launch_should_reject_if_executable_path_is_invalid(
         await browser_type.launch(
             **launch_arguments, executable_path="random-invalid-path"
         )
-    assert "browser was not found" in exc.value.message
+    assert "executable doesn't exist" in exc.value.message
 
 
 async def test_browser_type_executable_path_should_work(browser_type, browser_channel):
@@ -100,15 +100,6 @@ async def test_browser_close_should_be_callable_twice(browser_type, launch_argum
         browser.close(),
     )
     await browser.close()
-
-
-async def test_browser_launch_non_existing_executable_path_shows_install_msg(
-    browser_type,
-    tmpdir,
-):
-    with pytest.raises(Error) as exc_info:
-        await browser_type.launch(executable_path=tmpdir.join("executable"))
-    assert "python -m playwright install" in exc_info.value.message
 
 
 @pytest.mark.only_browser("chromium")

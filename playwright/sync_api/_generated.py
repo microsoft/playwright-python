@@ -3165,7 +3165,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3191,7 +3191,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3217,7 +3217,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3243,7 +3243,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3270,7 +3270,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3297,7 +3297,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3356,7 +3356,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
@@ -3637,7 +3637,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -3717,7 +3717,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -3791,7 +3791,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -3853,7 +3853,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
@@ -3890,7 +3890,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3913,7 +3913,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3939,7 +3939,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3965,7 +3965,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3993,7 +3993,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
@@ -4043,7 +4043,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -4070,6 +4070,50 @@ class Frame(SyncBase):
                     position=position,
                     timeout=timeout,
                     force=force,
+                    trial=trial,
+                ),
+            )
+        )
+
+    def drag_and_drop(
+        self,
+        source: str,
+        target: str,
+        *,
+        force: bool = None,
+        no_wait_after: bool = None,
+        timeout: float = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Frame.drag_and_drop
+
+        Parameters
+        ----------
+        source : str
+        target : str
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.drag_and_drop",
+                self._impl_obj.drag_and_drop(
+                    source=source,
+                    target=target,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    timeout=timeout,
                     trial=trial,
                 ),
             )
@@ -4162,7 +4206,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4205,7 +4249,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
@@ -4253,7 +4297,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         text : str
             A text to type into a focused element.
@@ -4312,7 +4356,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
@@ -4369,7 +4413,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
@@ -4431,7 +4475,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
@@ -5333,7 +5377,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5359,7 +5403,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5385,7 +5429,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5411,7 +5455,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5438,7 +5482,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5465,7 +5509,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5524,7 +5568,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
@@ -6715,7 +6759,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -6797,7 +6841,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -6873,7 +6917,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -6937,7 +6981,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
@@ -6976,7 +7020,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -6999,7 +7043,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -7025,7 +7069,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -7051,7 +7095,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -7079,7 +7123,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
@@ -7131,7 +7175,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
@@ -7158,6 +7202,50 @@ class Page(SyncContextManager):
                     position=position,
                     timeout=timeout,
                     force=force,
+                    trial=trial,
+                ),
+            )
+        )
+
+    def drag_and_drop(
+        self,
+        source: str,
+        target: str,
+        *,
+        force: bool = None,
+        no_wait_after: bool = None,
+        timeout: float = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Page.drag_and_drop
+
+        Parameters
+        ----------
+        source : str
+        target : str
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.drag_and_drop",
+                self._impl_obj.drag_and_drop(
+                    source=source,
+                    target=target,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    timeout=timeout,
                     trial=trial,
                 ),
             )
@@ -7202,7 +7290,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         value : Union[List[str], str, NoneType]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
@@ -7253,7 +7341,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -7296,7 +7384,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, NoneType]
@@ -7346,7 +7434,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         text : str
             A text to type into a focused element.
@@ -7419,7 +7507,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
@@ -7478,7 +7566,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
@@ -7542,7 +7630,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to search for element. If there are multiple elements satisfying the selector, the first will be used. See
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         position : Union[{x: float, y: float}, NoneType]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
@@ -9419,7 +9507,9 @@ class Browser(SyncContextManager):
     ) -> NoneType:
         """Browser.start_tracing
 
-        > NOTE: Tracing is only supported on Chromium-based browsers.
+        > NOTE: This API controls [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool)
+        which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be
+        found [here](./class-tracing).
 
         You can use `browser.start_tracing()` and `browser.stop_tracing()` to create a trace file that can be
         opened in Chrome DevTools performance panel.
@@ -9457,7 +9547,9 @@ class Browser(SyncContextManager):
     def stop_tracing(self) -> bytes:
         """Browser.stop_tracing
 
-        > NOTE: Tracing is only supported on Chromium-based browsers.
+        > NOTE: This API controls [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool)
+        which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be
+        found [here](./class-tracing).
 
         Returns the buffer with trace data.
 
