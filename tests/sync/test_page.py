@@ -24,3 +24,14 @@ def test_input_value(page: Page, server: Server):
 
     page.fill("input", "")
     assert page.input_value("input") == ""
+
+
+def test_drag_and_drop_helper_method(page: Page, server: Server):
+    page.goto(server.PREFIX + "/drag-n-drop.html")
+    page.drag_and_drop("#source", "#target")
+    assert (
+        page.eval_on_selector(
+            "#target", "target => target.contains(document.querySelector('#source'))"
+        )
+        is True
+    )

@@ -649,6 +649,17 @@ class Page(ChannelOwner):
     ) -> None:
         return await self._main_frame.hover(**locals_to_params(locals()))
 
+    async def drag_and_drop(
+        self,
+        source: str,
+        target: str,
+        force: bool = None,
+        noWaitAfter: bool = None,
+        timeout: float = None,
+        trial: bool = None,
+    ) -> None:
+        return await self._main_frame.drag_and_drop(**locals_to_params(locals()))
+
     async def select_option(
         self,
         selector: str,

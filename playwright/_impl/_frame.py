@@ -466,6 +466,17 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("hover", locals_to_params(locals()))
 
+    async def drag_and_drop(
+        self,
+        source: str,
+        target: str,
+        force: bool = None,
+        noWaitAfter: bool = None,
+        timeout: float = None,
+        trial: bool = None,
+    ) -> None:
+        await self._channel.send("dragAndDrop", locals_to_params(locals()))
+
     async def select_option(
         self,
         selector: str,
