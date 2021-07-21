@@ -105,6 +105,11 @@ class PipeTransport(Transport):
             creationflags = subprocess.CREATE_NO_WINDOW
 
         try:
+            # For pyinstaller
+            env = os.environ.copy()
+            if getattr(sys, "frozen", False):
+                env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
+
             self._proc = proc = await asyncio.create_subprocess_exec(
                 str(self._driver_executable),
                 "run-driver",
@@ -113,6 +118,7 @@ class PipeTransport(Transport):
                 stderr=_get_stderr_fileno(),
                 limit=32768,
                 creationflags=creationflags,
+                env=env,
             )
         except Exception as exc:
             self.on_error_future.set_exception(exc)
