@@ -105,6 +105,7 @@ class PipeTransport(Transport):
             creationflags = subprocess.CREATE_NO_WINDOW
 
         try:
+            # For pyinstaller
             env = os.environ.copy()
             if getattr(sys, "frozen", False):
                 env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
