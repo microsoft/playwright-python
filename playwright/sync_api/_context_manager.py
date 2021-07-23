@@ -45,8 +45,11 @@ Please use the Async API instead."""
             )
 
         def greenlet_main() -> None:
-            loop.run_until_complete(self._connection.run_as_sync())
-
+            try:
+                loop.run_until_complete(self._connection.run_as_sync())
+            except KeyboardInterrupt:
+                loop.run_until_complete(self._connection.stop_async())
+                raise
             if own_loop:
                 loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
