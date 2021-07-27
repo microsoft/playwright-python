@@ -99,31 +99,6 @@ class ChannelOwner(AsyncIOEventEmitter):
         if self._parent:
             self._parent._objects[guid] = self
 
-    def _wait_for_event_info_before(self, wait_id: str, api_name: str) -> None:
-        self._connection._send_message_to_server(
-            self._guid,
-            "waitForEventInfo",
-            {
-                "info": {
-                    "apiName": api_name,
-                    "waitId": wait_id,
-                    "phase": "before",
-                }
-            },
-        )
-
-    def _wait_for_event_info_after(
-        self, wait_id: str, exception: Exception = None
-    ) -> None:
-        info = {"waitId": wait_id, "phase": "after"}
-        if exception:
-            info["error"] = str(exception)
-        self._connection._send_message_to_server(
-            self._guid,
-            "waitForEventInfo",
-            {"info": info},
-        )
-
     def _dispose(self) -> None:
         # Clean up from parent and connection.
         if self._parent:
