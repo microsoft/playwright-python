@@ -19,7 +19,8 @@ from typing import Any
 
 import pytest
 
-from playwright.async_api import Error, Request, TimeoutError
+from playwright.async_api import Error, Page, Request, TimeoutError
+from tests.server import Server
 
 
 async def test_goto_should_work(page, server):
@@ -674,6 +675,14 @@ async def test_wait_for_load_state_should_resolve_immediately_if_load_state_matc
 
     await page.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded")
     await page.wait_for_load_state("domcontentloaded")
+
+
+async def test_wait_for_load_state_networkidle(page: Page, server: Server):
+    wait_for_network_idle_future = asyncio.create_task(
+        page.wait_for_load_state("networkidle")
+    )
+    await page.goto(server.PREFIX + "/networkidle.html")
+    await wait_for_network_idle_future
 
 
 async def test_wait_for_load_state_should_work_with_pages_that_have_loaded_before_being_connected_to(

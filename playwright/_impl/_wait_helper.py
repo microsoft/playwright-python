@@ -24,14 +24,41 @@ from playwright._impl._connection import ChannelOwner
 
 
 class WaitHelper:
-    def __init__(self, channel_owner: ChannelOwner, api_name: str) -> None:
+    def __init__(self, channel_owner: ChannelOwner, event: str) -> None:
         self._result: asyncio.Future = asyncio.Future()
         self._wait_id = uuid.uuid4().hex
         self._loop = channel_owner._loop
         self._pending_tasks: List[Task] = []
-        self._channel_owner = channel_owner
+        self._channel = channel_owner._channel
         self._registered_listeners: List[Tuple[EventEmitter, str, Callable]] = []
-        channel_owner._wait_for_event_info_before(self._wait_id, api_name)
+        self._wait_for_event_info_before(self._wait_id, event)
+
+    def _wait_for_event_info_before(self, wait_id: str, event: str) -> None:
+        self._channel.send_no_reply(
+            "waitForEventInfo",
+            {
+                "info": {
+                    "waitId": wait_id,
+                    "phase": "before",
+                    "event": event,
+                }
+            },
+        )
+
+    def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
+        try:
+            self._channel.send_no_reply(
+                "waitForEventInfo",
+                {
+                    "info": {
+                        "waitId": wait_id,
+                        "phase": "after",
+                        "error": str(error) if error else None,
+                    }
+                },
+            )
+        except Exception:
+            pass
 
     def reject_on_event(
         self,
@@ -68,13 +95,13 @@ class WaitHelper:
         self._cleanup()
         if not self._result.done():
             self._result.set_result(result)
-        self._channel_owner._wait_for_event_info_after(self._wait_id)
+        self._wait_for_event_info_after(self._wait_id)
 
     def _reject(self, exception: Exception) -> None:
         self._cleanup()
         if not self._result.done():
             self._result.set_exception(exception)
-        self._channel_owner._wait_for_event_info_after(self._wait_id, exception)
+        self._wait_for_event_info_after(self._wait_id, exception)
 
     def wait_for_event(
         self,
