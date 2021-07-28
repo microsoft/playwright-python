@@ -30,7 +30,7 @@ jobs:
     - name: Install browsers
       run: python -m playwright install
     - name: Lint
-      uses: pre-commit/action@v2.0.0
+      uses: pre-commit/action@v2.0.3
     - name: Generate APIs
       run: bash scripts/update_api.sh
     - name: Verify generated API is up to date
@@ -126,10 +126,6 @@ jobs:
           browser-channel: msedge
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Install Media Pack
-      if: matrix.os == 'windows-latest'
-      shell: powershell
-      run: Install-WindowsFeature Server-Media-Foundation
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -142,8 +138,8 @@ jobs:
         pip install -e .
         python setup.py bdist_wheel
         python -m playwright install-deps
-    - name: Install ffmpeg
-      run: python -m playwright install ffmpeg
+    - name: Install browsers
+      run: python -m playwright install ${{ matrix.browser-channel }}
     - name: Common Tests
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
