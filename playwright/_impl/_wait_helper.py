@@ -45,11 +45,9 @@ class WaitHelper:
             },
         )
 
-    async def _wait_for_event_info_after(
-        self, wait_id: str, error: Exception = None
-    ) -> None:
+    def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
         try:
-            await self._channel.send(
+            self._channel.send_no_reply(
                 "waitForEventInfo",
                 {
                     "info": {
@@ -97,15 +95,13 @@ class WaitHelper:
         self._cleanup()
         if not self._result.done():
             self._result.set_result(result)
-        self._loop.create_task(self._wait_for_event_info_after(self._wait_id))
+        self._wait_for_event_info_after(self._wait_id)
 
     def _reject(self, exception: Exception) -> None:
         self._cleanup()
         if not self._result.done():
             self._result.set_exception(exception)
-        self._loop.create_task(
-            self._wait_for_event_info_after(self._wait_id, exception)
-        )
+        self._wait_for_event_info_after(self._wait_id, exception)
 
     def wait_for_event(
         self,
