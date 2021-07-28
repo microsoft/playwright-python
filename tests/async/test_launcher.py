@@ -133,7 +133,6 @@ async def test_browser_launch_should_return_background_pages(
     assert background_page
     assert background_page in context.background_pages
     assert background_page not in context.pages
-    assert await background_page.evaluate("window.MAGIC") == 42
     await context.close()
     assert len(context.background_pages) == 0
     assert len(context.pages) == 0
