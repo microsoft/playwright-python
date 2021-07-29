@@ -24,6 +24,7 @@ from typing import Callable, Dict, Optional
 
 import websockets
 from pyee import AsyncIOEventEmitter
+from websockets.client import connect as websocket_connect
 
 from playwright._impl._api_types import Error
 from playwright._impl._helper import ParsedMessagePayload
@@ -185,7 +186,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
 
     async def run(self) -> None:
         try:
-            self._connection = await websockets.connect(
+            self._connection = await websocket_connect(
                 self.ws_endpoint, extra_headers=self.headers
             )
         except Exception as exc:
