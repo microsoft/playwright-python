@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import math
 import uuid
 from asyncio.tasks import Task
 from typing import Any, Callable, List, Tuple
@@ -31,6 +32,7 @@ class WaitHelper:
         self._pending_tasks: List[Task] = []
         self._channel = channel_owner._channel
         self._registered_listeners: List[Tuple[EventEmitter, str, Callable]] = []
+        self._logs: List[str] = []
         self._wait_for_event_info_before(self._wait_id, event)
 
     def _wait_for_event_info_before(self, wait_id: str, event: str) -> None:
@@ -101,6 +103,9 @@ class WaitHelper:
 
     def _reject(self, exception: Exception) -> None:
         self._cleanup()
+        if exception:
+            base_class = TimeoutError if isinstance(exception, TimeoutError) else Error
+            exception = base_class(str(exception) + format_log_recording(self._logs))
         if not self._result.done():
             self._result.set_exception(exception)
         self._wait_for_event_info_after(self._wait_id, exception)
@@ -121,6 +126,22 @@ class WaitHelper:
     def result(self) -> asyncio.Future:
         return self._result
 
+    def log(self, message: str) -> None:
+        self._logs.append(message)
+        try:
+            self._channel.send_no_reply(
+                "waitForEventInfo",
+                {
+                    "info": {
+                        "waitId": self._wait_id,
+                        "phase": "log",
+                        "message": message,
+                    },
+                },
+            )
+        except Exception:
+            pass
+
 
 def throw_on_timeout(timeout: float, exception: Exception) -> asyncio.Task:
     async def throw() -> None:
@@ -128,3 +149,14 @@ def throw_on_timeout(timeout: float, exception: Exception) -> asyncio.Task:
         raise exception
 
     return asyncio.create_task(throw())
+
+
+def format_log_recording(log: List[str]) -> str:
+    if not log:
+        return ""
+    header = " logs "
+    header_length = 60
+    left_length = math.floor((header_length - len(header)) / 2)
+    right_length = header_length - len(header) - left_length
+    new_line = "\n"
+    return f"{new_line}{'=' * left_length}{header}{'=' * right_length}{new_line}{new_line.join(log)}{new_line}{'=' * header_length}"
