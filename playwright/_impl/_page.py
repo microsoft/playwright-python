@@ -15,6 +15,7 @@
 import asyncio
 import base64
 import inspect
+import re
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -788,12 +789,25 @@ class Page(ChannelOwner):
         predicate: Callable = None,
         timeout: float = None,
     ) -> EventContextManagerImpl:
+        return self._expect_event(
+            event, predicate, timeout, f'waiting for event "{event}"'
+        )
+
+    def _expect_event(
+        self,
+        event: str,
+        predicate: Callable = None,
+        timeout: float = None,
+        log_line: str = None,
+    ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
         wait_helper = WaitHelper(self, f"page.expect_event({event})")
         wait_helper.reject_on_timeout(
             timeout, f'Timeout while waiting for event "{event}"'
         )
+        if log_line:
+            wait_helper.log(log_line)
         if event != Page.Events.Crash:
             wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
         if event != Page.Events.Close:
@@ -858,8 +872,13 @@ class Page(ChannelOwner):
                 return predicate(request)
             return True
 
-        return self.expect_event(
-            Page.Events.Request, predicate=my_predicate, timeout=timeout
+        trimmed_url = trim_url(url_or_predicate)
+        log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
+        return self._expect_event(
+            Page.Events.Request,
+            predicate=my_predicate,
+            timeout=timeout,
+            log_line=log_line,
         )
 
     def expect_request_finished(
@@ -892,8 +911,13 @@ class Page(ChannelOwner):
                 return predicate(response)
             return True
 
-        return self.expect_event(
-            Page.Events.Response, predicate=my_predicate, timeout=timeout
+        trimmed_url = trim_url(url_or_predicate)
+        log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
+        return self._expect_event(
+            Page.Events.Response,
+            predicate=my_predicate,
+            timeout=timeout,
+            log_line=log_line,
         )
 
     def expect_websocket(
@@ -986,3 +1010,17 @@ class BindingCall(ChannelOwner):
                     "reject", dict(error=dict(error=serialize_error(e, tb)))
                 )
             )
+
+
+def trim_url(param: URLMatchRequest) -> Optional[str]:
+    if isinstance(param, re.Pattern):
+        return trim_end(param.pattern)
+    if isinstance(param, str):
+        return trim_end(param)
+    return None
+
+
+def trim_end(s: str) -> str:
+    if len(s) > 50:
+        return s[:50] + "\u2026"
+    return s

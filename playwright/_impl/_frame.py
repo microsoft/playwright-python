@@ -153,6 +153,9 @@ class Frame(ChannelOwner):
             timeout = self._page._timeout_settings.navigation_timeout()
         deadline = monotonic_time() + timeout
         wait_helper = self._setup_navigation_wait_helper("expect_navigation", timeout)
+
+        to_url = f' to "{url}"' if url else ""
+        wait_helper.log(f"waiting for navigation{to_url} until '{wait_until}'")
         matcher = (
             URLMatcher(self._page._browser_context._options.get("baseURL"), url)
             if url
@@ -163,6 +166,7 @@ class Frame(ChannelOwner):
             # Any failed navigation results in a rejection.
             if event.get("error"):
                 return True
+            wait_helper.log(f'  navigated to "{event["url"]}"')
             return not matcher or matcher.matches(event["url"])
 
         wait_helper.wait_for_event(
@@ -211,8 +215,15 @@ class Frame(ChannelOwner):
         if state in self._load_states:
             return
         wait_helper = self._setup_navigation_wait_helper("wait_for_load_state", timeout)
+
+        def handle_load_state_event(actual_state: str) -> bool:
+            wait_helper.log(f'"{actual_state}" event fired')
+            return actual_state == state
+
         wait_helper.wait_for_event(
-            self._event_emitter, "loadstate", lambda s: s == state
+            self._event_emitter,
+            "loadstate",
+            handle_load_state_event,
         )
         await wait_helper.result()
 
