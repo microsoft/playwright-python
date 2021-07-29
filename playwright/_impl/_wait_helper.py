@@ -47,14 +47,16 @@ class WaitHelper:
 
     def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
         try:
+            info = {
+                "waitId": wait_id,
+                "phase": "after",
+            }
+            if error:
+                info["error"] = str(error)
             self._channel.send_no_reply(
                 "waitForEventInfo",
                 {
-                    "info": {
-                        "waitId": wait_id,
-                        "phase": "after",
-                        "error": str(error) if error else None,
-                    }
+                    "info": info,
                 },
             )
         except Exception:
