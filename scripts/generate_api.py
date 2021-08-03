@@ -39,6 +39,7 @@ from playwright._impl._frame import Frame
 from playwright._impl._helper import to_snake_case
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import JSHandle, Serializable
+from playwright._impl._locator import Locator
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import Page, Worker
 from playwright._impl._playwright import Playwright
@@ -235,6 +236,7 @@ from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._tracing import Tracing as TracingImpl
+from playwright._impl._locator import Locator as LocatorImpl
 
 """
 
@@ -265,6 +267,7 @@ all_types = [
     BrowserType,
     Playwright,
     Tracing,
+    Locator,
 ]
 
 api_globals = globals()

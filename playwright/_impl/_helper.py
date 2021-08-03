@@ -137,7 +137,9 @@ class TimeoutSettings:
     def set_timeout(self, timeout: float) -> None:
         self._timeout = timeout
 
-    def timeout(self) -> float:
+    def timeout(self, timeout: float = None) -> float:
+        if timeout is not None:
+            return timeout
         if self._timeout is not None:
             return self._timeout
         if self._parent:
