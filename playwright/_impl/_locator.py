@@ -58,7 +58,7 @@ class Locator:
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
 
     def __repr__(self) -> str:
-        return f"<Locator frame='{self._frame._url}' selector='{self._selector}'>"
+        return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
 
     async def _with_element(
         self,

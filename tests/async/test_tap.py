@@ -192,7 +192,7 @@ async def test_should_wait_until_an_element_is_visible_to_tap_it(page):
 
 async def test_locators_tap(page: Page):
     await page.set_content(
-        """"
+        """
         <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
         <div id="b" style="background: pink; width: 50px; height: 50px">b</div>
     """

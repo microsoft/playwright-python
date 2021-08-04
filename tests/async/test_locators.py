@@ -62,7 +62,7 @@ async def test_locators_should_have_repr(page: Page, server: Server):
     await button.click()
     assert (
         str(button)
-        == f"<Locator frame='{server.PREFIX}/input/button.html' selector='button'>"
+        == f"<Locator frame=<Frame name= url='{server.PREFIX}/input/button.html'> selector='button'>"
     )
 
 
@@ -201,15 +201,18 @@ async def test_locators_evaluate_handle_should_work(page: Page, server: Server):
     check = inner.locator("#check")
     text = await inner.evaluate_handle("e => e.firstChild")
     await page.evaluate("1 + 1")
-    assert str(outer) == f"<Locator frame='{server.PREFIX}/dom.html' selector='#outer'>"
+    assert (
+        str(outer)
+        == f"<Locator frame=<Frame name= url='{server.PREFIX}/dom.html'> selector='#outer'>"
+    )
     assert (
         str(inner)
-        == f"<Locator frame='{server.PREFIX}/dom.html' selector='#outer >> #inner'>"
+        == f"<Locator frame=<Frame name= url='{server.PREFIX}/dom.html'> selector='#outer >> #inner'>"
     )
     assert str(text) == "JSHandle@#text=Text,↵more text"
     assert (
         str(check)
-        == f"<Locator frame='{server.PREFIX}/dom.html' selector='#outer >> #inner >> #check'>"
+        == f"<Locator frame=<Frame name= url='{server.PREFIX}/dom.html'> selector='#outer >> #inner >> #check'>"
     )
 
 
@@ -398,7 +401,7 @@ async def test_locators_should_return_bounding_box(page: Page, server: Server):
 
 async def test_locators_should_respect_first_and_last(page: Page):
     await page.set_content(
-        """"
+        """
         <section>
             <div><p>A</p></div>
             <div><p>A</p><p>A</p></div>
@@ -413,7 +416,7 @@ async def test_locators_should_respect_first_and_last(page: Page):
 
 async def test_locators_should_respect_nth(page: Page):
     await page.set_content(
-        """"
+        """
     <section>
         <div><p>A</p></div>
         <div><p>A</p><p>A</p></div>
@@ -427,7 +430,7 @@ async def test_locators_should_respect_nth(page: Page):
 
 async def test_locators_should_throw_on_capture_without_nth(page: Page):
     await page.set_content(
-        """"
+        """
         <section><div><p>A</p></div></section>
     """
     )
@@ -437,7 +440,7 @@ async def test_locators_should_throw_on_capture_without_nth(page: Page):
 
 async def test_locators_should_throw_due_to_strictness(page: Page):
     await page.set_content(
-        """"
+        """
         <div>A</div><div>B</div>
     """
     )
@@ -447,7 +450,7 @@ async def test_locators_should_throw_due_to_strictness(page: Page):
 
 async def test_locators_should_throw_due_to_strictness_2(page: Page):
     await page.set_content(
-        """"
+        """
         <select><option>One</option><option>Two</option></select>
     """
     )
