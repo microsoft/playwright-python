@@ -62,35 +62,26 @@ class Locator:
 
     async def _with_element(
         self,
-        task: Callable[[ElementHandle, Any], Awaitable[T]],
+        task: Callable[[ElementHandle, float], Awaitable[T]],
         timeout: float = None,
-        **kwargs: Any,
     ) -> T:
         timeout = self._frame.page._timeout_settings.timeout(timeout)
         deadline = (monotonic_time() + timeout) if timeout else 0
         handle = await self.element_handle(timeout=timeout)
         if not handle:
             raise Error(f"Could not resolve {self._selector} to DOM Element")
-        options = {
-            **kwargs,
-            "timeout": (deadline - monotonic_time()) if deadline else 0,
-        }
-        if "strict" in options:
-            options.pop("strict")
         try:
             return await task(
                 handle,
-                options,
+                (deadline - monotonic_time()) if deadline else 0,
             )
         finally:
             await handle.dispose()
 
     async def bounding_box(self, timeout: float = None) -> Optional[FloatRect]:
-        params = locals_to_params(locals())
         return await self._with_element(
-            lambda e, o: e.bounding_box(),
-            strict=True,
-            **params,
+            lambda h, _: h.bounding_box(),
+            timeout,
         )
 
     async def check(
@@ -145,11 +136,9 @@ class Locator:
     async def evaluate(
         self, expression: str, arg: Serializable = None, timeout: float = None
     ) -> Any:
-        params = locals_to_params(locals())
         return await self._with_element(
-            lambda h, o: h.evaluate(expression, arg),
-            strict=True,
-            **params,
+            lambda h, _: h.evaluate(expression, arg),
+            timeout,
         )
 
     async def evaluate_all(self, expression: str, arg: Serializable = None) -> None:
@@ -159,11 +148,8 @@ class Locator:
     async def evaluate_handle(
         self, expression: str, arg: Serializable = None, timeout: float = None
     ) -> "JSHandle":
-        params = locals_to_params(locals())
         return await self._with_element(
-            lambda h, o: h.evaluate_handle(expression, arg),
-            strict=True,
-            **params,
+            lambda h, o: h.evaluate_handle(expression, arg), timeout
         )
 
     async def fill(
@@ -332,18 +318,16 @@ class Locator:
     ) -> bytes:
         params = locals_to_params(locals())
         return await self._with_element(
-            lambda h, o: h.screenshot(), strict=True, **params
+            lambda h, timeout: h.screenshot(timeout=timeout, **params)
         )
 
     async def scroll_into_view_if_needed(
         self,
         timeout: float = None,
     ) -> None:
-        params = locals_to_params(locals())
         return await self._with_element(
-            lambda h, o: h.scroll_into_view_if_needed(**o),
-            strict=True,
-            **params,
+            lambda h, timeout: h.scroll_into_view_if_needed(timeout=timeout),
+            timeout,
         )
 
     async def select_option(
@@ -365,7 +349,9 @@ class Locator:
 
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
         params = locals_to_params(locals())
-        return await self._with_element(lambda h, o: h.select_text(**o), **params)
+        return await self._with_element(
+            lambda h, timeout: h.select_text(timeout=timeout, **params), timeout
+        )
 
     async def set_input_files(
         self,
