@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import ElementHandle, JSHandle
+from playwright.async_api import ElementHandle, JSHandle, Page
 
 
 @pytest.fixture
@@ -188,6 +188,34 @@ async def test_should_wait_until_an_element_is_visible_to_tap_it(page):
     await div.evaluate("""div => div.style.display = 'block'""")
     await tap_promise
     assert await div.text_content() == "clicked"
+
+
+async def test_locators_tap(page: Page):
+    await page.set_content(
+        """
+        <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
+        <div id="b" style="background: pink; width: 50px; height: 50px">b</div>
+    """
+    )
+    await page.locator("#a").tap()
+    element_handle = await track_events(await page.query_selector("#b"))
+    await page.locator("#b").tap()
+    assert await element_handle.json_value() == [
+        "pointerover",
+        "pointerenter",
+        "pointerdown",
+        "touchstart",
+        "pointerup",
+        "pointerout",
+        "pointerleave",
+        "touchend",
+        "mouseover",
+        "mouseenter",
+        "mousemove",
+        "mousedown",
+        "mouseup",
+        "click",
+    ]
 
 
 async def track_events(target: ElementHandle) -> JSHandle:

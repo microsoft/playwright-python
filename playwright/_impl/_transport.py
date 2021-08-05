@@ -20,7 +20,7 @@ import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Optional, Union
 
 import websockets
 from pyee import AsyncIOEventEmitter
@@ -74,7 +74,7 @@ class Transport(ABC):
             print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
         return msg.encode()
 
-    def deserialize_message(self, data: bytes) -> ParsedMessagePayload:
+    def deserialize_message(self, data: Union[str, bytes]) -> ParsedMessagePayload:
         obj = json.loads(data)
 
         if "DEBUGP" in os.environ:  # pragma: no cover

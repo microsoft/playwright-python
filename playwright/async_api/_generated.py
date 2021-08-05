@@ -59,6 +59,7 @@ from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
 from playwright._impl._input import Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
+from playwright._impl._locator import Locator as LocatorImpl
 from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
 from playwright._impl._network import Route as RouteImpl
@@ -3062,7 +3063,9 @@ class Frame(AsyncBase):
             )
         )
 
-    async def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
+    async def query_selector(
+        self, selector: str, *, strict: bool = None
+    ) -> typing.Optional["ElementHandle"]:
         """Frame.query_selector
 
         Returns the ElementHandle pointing to the frame element.
@@ -3074,6 +3077,9 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -3082,7 +3088,8 @@ class Frame(AsyncBase):
 
         return mapping.from_impl_nullable(
             await self._async(
-                "frame.query_selector", self._impl_obj.query_selector(selector=selector)
+                "frame.query_selector",
+                self._impl_obj.query_selector(selector=selector, strict=strict),
             )
         )
 
@@ -3115,6 +3122,7 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
+        strict: bool = None,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
     ) -> typing.Optional["ElementHandle"]:
@@ -3153,6 +3161,9 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3174,12 +3185,14 @@ class Frame(AsyncBase):
             await self._async(
                 "frame.wait_for_selector",
                 self._impl_obj.wait_for_selector(
-                    selector=selector, timeout=timeout, state=state
+                    selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
         )
 
-    async def is_checked(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_checked(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Frame.is_checked
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
@@ -3189,6 +3202,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3201,11 +3217,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.is_checked",
-                self._impl_obj.is_checked(selector=selector, timeout=timeout),
+                self._impl_obj.is_checked(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_disabled(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Frame.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
@@ -3215,6 +3235,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3227,11 +3250,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.is_disabled",
-                self._impl_obj.is_disabled(selector=selector, timeout=timeout),
+                self._impl_obj.is_disabled(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_editable(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Frame.is_editable
 
         Returns whether the element is [editable](./actionability.md#editable).
@@ -3241,6 +3268,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3253,11 +3283,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.is_editable",
-                self._impl_obj.is_editable(selector=selector, timeout=timeout),
+                self._impl_obj.is_editable(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_enabled(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Frame.is_enabled
 
         Returns whether the element is [enabled](./actionability.md#enabled).
@@ -3267,6 +3301,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3279,11 +3316,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.is_enabled",
-                self._impl_obj.is_enabled(selector=selector, timeout=timeout),
+                self._impl_obj.is_enabled(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_hidden(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Frame.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
@@ -3294,6 +3335,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3306,11 +3350,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.is_hidden",
-                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+                self._impl_obj.is_hidden(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_visible(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Frame.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
@@ -3321,6 +3369,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3333,7 +3384,9 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.is_visible",
-                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+                self._impl_obj.is_visible(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
@@ -3343,6 +3396,7 @@ class Frame(AsyncBase):
         type: str,
         event_init: typing.Dict = None,
         *,
+        strict: bool = None,
         timeout: float = None
     ) -> NoneType:
         """Frame.dispatch_event
@@ -3384,6 +3438,9 @@ class Frame(AsyncBase):
             DOM event type: `"click"`, `"dragstart"`, etc.
         event_init : Union[Dict, NoneType]
             Optional event-specific initialization properties.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3396,13 +3453,19 @@ class Frame(AsyncBase):
                     selector=selector,
                     type=type,
                     eventInit=mapping.to_impl(event_init),
+                    strict=strict,
                     timeout=timeout,
                 ),
             )
         )
 
     async def eval_on_selector(
-        self, selector: str, expression: str, arg: typing.Any = None
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        *,
+        strict: bool = None
     ) -> typing.Any:
         """Frame.eval_on_selector
 
@@ -3432,6 +3495,9 @@ class Frame(AsyncBase):
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `expression`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -3442,7 +3508,10 @@ class Frame(AsyncBase):
             await self._async(
                 "frame.eval_on_selector",
                 self._impl_obj.eval_on_selector(
-                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                    selector=selector,
+                    expression=expression,
+                    arg=mapping.to_impl(arg),
+                    strict=strict,
                 ),
             )
         )
@@ -3641,6 +3710,7 @@ class Frame(AsyncBase):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Frame.click
@@ -3682,6 +3752,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -3700,6 +3773,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -3718,6 +3792,7 @@ class Frame(AsyncBase):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Frame.dblclick
@@ -3760,6 +3835,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -3777,6 +3855,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -3793,6 +3872,7 @@ class Frame(AsyncBase):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Frame.tap
@@ -3830,6 +3910,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -3845,6 +3928,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -3857,6 +3941,7 @@ class Frame(AsyncBase):
         *,
         timeout: float = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         force: bool = None
     ) -> NoneType:
         """Frame.fill
@@ -3886,6 +3971,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
@@ -3898,12 +3986,36 @@ class Frame(AsyncBase):
                     value=value,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     force=force,
                 ),
             )
         )
 
-    async def focus(self, selector: str, *, timeout: float = None) -> NoneType:
+    def locator(self, selector: str) -> "Locator":
+        """Frame.locator
+
+        The method returns an element locator that can be used to perform actions in the frame. Locator is resolved to the
+        element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
+        different DOM elements. That would happen if the DOM structure between those actions has changed.
+
+        Note that locator always implies visibility, so it will always be locating visible elements.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+
+    async def focus(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> NoneType:
         """Frame.focus
 
         This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
@@ -3914,6 +4026,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3921,12 +4036,13 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._async(
-                "frame.focus", self._impl_obj.focus(selector=selector, timeout=timeout)
+                "frame.focus",
+                self._impl_obj.focus(selector=selector, strict=strict, timeout=timeout),
             )
         )
 
     async def text_content(
-        self, selector: str, *, timeout: float = None
+        self, selector: str, *, strict: bool = None, timeout: float = None
     ) -> typing.Optional[str]:
         """Frame.text_content
 
@@ -3937,6 +4053,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3949,11 +4068,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.text_content",
-                self._impl_obj.text_content(selector=selector, timeout=timeout),
+                self._impl_obj.text_content(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def inner_text(self, selector: str, *, timeout: float = None) -> str:
+    async def inner_text(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> str:
         """Frame.inner_text
 
         Returns `element.innerText`.
@@ -3963,6 +4086,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3975,11 +4101,15 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.inner_text",
-                self._impl_obj.inner_text(selector=selector, timeout=timeout),
+                self._impl_obj.inner_text(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def inner_html(self, selector: str, *, timeout: float = None) -> str:
+    async def inner_html(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> str:
         """Frame.inner_html
 
         Returns `element.innerHTML`.
@@ -3989,6 +4119,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4001,12 +4134,14 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.inner_html",
-                self._impl_obj.inner_html(selector=selector, timeout=timeout),
+                self._impl_obj.inner_html(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
     async def get_attribute(
-        self, selector: str, name: str, *, timeout: float = None
+        self, selector: str, name: str, *, strict: bool = None, timeout: float = None
     ) -> typing.Optional[str]:
         """Frame.get_attribute
 
@@ -4019,6 +4154,9 @@ class Frame(AsyncBase):
             [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4032,7 +4170,7 @@ class Frame(AsyncBase):
             await self._async(
                 "frame.get_attribute",
                 self._impl_obj.get_attribute(
-                    selector=selector, name=name, timeout=timeout
+                    selector=selector, name=name, strict=strict, timeout=timeout
                 ),
             )
         )
@@ -4047,6 +4185,7 @@ class Frame(AsyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Frame.hover
@@ -4078,6 +4217,9 @@ class Frame(AsyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -4092,6 +4234,7 @@ class Frame(AsyncBase):
                     position=position,
                     timeout=timeout,
                     force=force,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -4104,6 +4247,7 @@ class Frame(AsyncBase):
         *,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         timeout: float = None,
         trial: bool = None
     ) -> NoneType:
@@ -4119,6 +4263,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4135,6 +4282,7 @@ class Frame(AsyncBase):
                     target=target,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     timeout=timeout,
                     trial=trial,
                 ),
@@ -4151,6 +4299,7 @@ class Frame(AsyncBase):
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         force: bool = None
     ) -> typing.List[str]:
         """Frame.select_option
@@ -4196,6 +4345,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
 
@@ -4215,12 +4367,15 @@ class Frame(AsyncBase):
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     force=force,
                 ),
             )
         )
 
-    async def input_value(self, selector: str, *, timeout: float = None) -> str:
+    async def input_value(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> str:
         """Frame.input_value
 
         Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
@@ -4230,6 +4385,9 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4242,7 +4400,9 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "frame.input_value",
-                self._impl_obj.input_value(selector=selector, timeout=timeout),
+                self._impl_obj.input_value(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
@@ -4257,6 +4417,7 @@ class Frame(AsyncBase):
             typing.List[FilePayload],
         ],
         *,
+        strict: bool = None,
         timeout: float = None,
         no_wait_after: bool = None
     ) -> NoneType:
@@ -4274,6 +4435,9 @@ class Frame(AsyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4289,6 +4453,7 @@ class Frame(AsyncBase):
                 self._impl_obj.set_input_files(
                     selector=selector,
                     files=files,
+                    strict=strict,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                 ),
@@ -4301,6 +4466,7 @@ class Frame(AsyncBase):
         text: str,
         *,
         delay: float = None,
+        strict: bool = None,
         timeout: float = None,
         no_wait_after: bool = None
     ) -> NoneType:
@@ -4325,6 +4491,9 @@ class Frame(AsyncBase):
             A text to type into a focused element.
         delay : Union[float, NoneType]
             Time to wait between key presses in milliseconds. Defaults to 0.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4341,6 +4510,7 @@ class Frame(AsyncBase):
                     selector=selector,
                     text=text,
                     delay=delay,
+                    strict=strict,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                 ),
@@ -4353,6 +4523,7 @@ class Frame(AsyncBase):
         key: str,
         *,
         delay: float = None,
+        strict: bool = None,
         timeout: float = None,
         no_wait_after: bool = None
     ) -> NoneType:
@@ -4384,6 +4555,9 @@ class Frame(AsyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Union[float, NoneType]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -4400,6 +4574,7 @@ class Frame(AsyncBase):
                     selector=selector,
                     key=key,
                     delay=delay,
+                    strict=strict,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                 ),
@@ -4414,6 +4589,7 @@ class Frame(AsyncBase):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Frame.check
@@ -4449,6 +4625,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -4463,6 +4642,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -4476,6 +4656,7 @@ class Frame(AsyncBase):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Frame.uncheck
@@ -4511,6 +4692,9 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -4525,6 +4709,7 @@ class Frame(AsyncBase):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -5286,7 +5471,9 @@ class Page(AsyncContextManager):
             self._impl_obj.set_default_timeout(timeout=timeout)
         )
 
-    async def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
+    async def query_selector(
+        self, selector: str, *, strict: bool = None
+    ) -> typing.Optional["ElementHandle"]:
         """Page.query_selector
 
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
@@ -5298,6 +5485,9 @@ class Page(AsyncContextManager):
         ----------
         selector : str
             A selector to query for. See [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -5306,7 +5496,8 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl_nullable(
             await self._async(
-                "page.query_selector", self._impl_obj.query_selector(selector=selector)
+                "page.query_selector",
+                self._impl_obj.query_selector(selector=selector, strict=strict),
             )
         )
 
@@ -5340,7 +5531,8 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         timeout: float = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        strict: bool = None
     ) -> typing.Optional["ElementHandle"]:
         """Page.wait_for_selector
 
@@ -5388,6 +5580,9 @@ class Page(AsyncContextManager):
               any content or with `display:none` has an empty bounding box and is not considered visible.
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
               This is opposite to the `'visible'` option.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -5398,12 +5593,14 @@ class Page(AsyncContextManager):
             await self._async(
                 "page.wait_for_selector",
                 self._impl_obj.wait_for_selector(
-                    selector=selector, timeout=timeout, state=state
+                    selector=selector, timeout=timeout, state=state, strict=strict
                 ),
             )
         )
 
-    async def is_checked(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_checked(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Page.is_checked
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
@@ -5413,6 +5610,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5425,11 +5625,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.is_checked",
-                self._impl_obj.is_checked(selector=selector, timeout=timeout),
+                self._impl_obj.is_checked(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_disabled(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_disabled(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Page.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
@@ -5439,6 +5643,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5451,11 +5658,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.is_disabled",
-                self._impl_obj.is_disabled(selector=selector, timeout=timeout),
+                self._impl_obj.is_disabled(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_editable(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_editable(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Page.is_editable
 
         Returns whether the element is [editable](./actionability.md#editable).
@@ -5465,6 +5676,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5477,11 +5691,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.is_editable",
-                self._impl_obj.is_editable(selector=selector, timeout=timeout),
+                self._impl_obj.is_editable(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_enabled(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_enabled(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Page.is_enabled
 
         Returns whether the element is [enabled](./actionability.md#enabled).
@@ -5491,6 +5709,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5503,11 +5724,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.is_enabled",
-                self._impl_obj.is_enabled(selector=selector, timeout=timeout),
+                self._impl_obj.is_enabled(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_hidden(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_hidden(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Page.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
@@ -5518,6 +5743,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5530,11 +5758,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.is_hidden",
-                self._impl_obj.is_hidden(selector=selector, timeout=timeout),
+                self._impl_obj.is_hidden(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def is_visible(self, selector: str, *, timeout: float = None) -> bool:
+    async def is_visible(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> bool:
         """Page.is_visible
 
         Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
@@ -5545,6 +5777,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -5557,7 +5792,9 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.is_visible",
-                self._impl_obj.is_visible(selector=selector, timeout=timeout),
+                self._impl_obj.is_visible(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
@@ -5567,7 +5804,8 @@ class Page(AsyncContextManager):
         type: str,
         event_init: typing.Dict = None,
         *,
-        timeout: float = None
+        timeout: float = None,
+        strict: bool = None
     ) -> NoneType:
         """Page.dispatch_event
 
@@ -5611,6 +5849,9 @@ class Page(AsyncContextManager):
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         """
 
         return mapping.from_maybe_impl(
@@ -5621,6 +5862,7 @@ class Page(AsyncContextManager):
                     type=type,
                     eventInit=mapping.to_impl(event_init),
                     timeout=timeout,
+                    strict=strict,
                 ),
             )
         )
@@ -5740,7 +5982,12 @@ class Page(AsyncContextManager):
         )
 
     async def eval_on_selector(
-        self, selector: str, expression: str, arg: typing.Any = None
+        self,
+        selector: str,
+        expression: str,
+        arg: typing.Any = None,
+        *,
+        strict: bool = None
     ) -> typing.Any:
         """Page.eval_on_selector
 
@@ -5769,6 +6016,9 @@ class Page(AsyncContextManager):
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `expression`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -5779,7 +6029,10 @@ class Page(AsyncContextManager):
             await self._async(
                 "page.eval_on_selector",
                 self._impl_obj.eval_on_selector(
-                    selector=selector, expression=expression, arg=mapping.to_impl(arg)
+                    selector=selector,
+                    expression=expression,
+                    arg=mapping.to_impl(arg),
+                    strict=strict,
                 ),
             )
         )
@@ -6784,7 +7037,8 @@ class Page(AsyncContextManager):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
-        trial: bool = None
+        trial: bool = None,
+        strict: bool = None
     ) -> NoneType:
         """Page.click
 
@@ -6830,6 +7084,9 @@ class Page(AsyncContextManager):
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         """
 
         return mapping.from_maybe_impl(
@@ -6846,6 +7103,7 @@ class Page(AsyncContextManager):
                     force=force,
                     noWaitAfter=no_wait_after,
                     trial=trial,
+                    strict=strict,
                 ),
             )
         )
@@ -6863,6 +7121,7 @@ class Page(AsyncContextManager):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Page.dblclick
@@ -6907,6 +7166,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -6924,6 +7186,7 @@ class Page(AsyncContextManager):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -6940,6 +7203,7 @@ class Page(AsyncContextManager):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Page.tap
@@ -6979,6 +7243,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -6994,6 +7261,7 @@ class Page(AsyncContextManager):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -7006,6 +7274,7 @@ class Page(AsyncContextManager):
         *,
         timeout: float = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         force: bool = None
     ) -> NoneType:
         """Page.fill
@@ -7037,6 +7306,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         """
@@ -7049,12 +7321,38 @@ class Page(AsyncContextManager):
                     value=value,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     force=force,
                 ),
             )
         )
 
-    async def focus(self, selector: str, *, timeout: float = None) -> NoneType:
+    def locator(self, selector: str) -> "Locator":
+        """Page.locator
+
+        The method returns an element locator that can be used to perform actions on the page. Locator is resolved to the
+        element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
+        different DOM elements. That would happen if the DOM structure between those actions has changed.
+
+        Note that locator always implies visibility, so it will always be locating visible elements.
+
+        Shortcut for main frame's `frame.locator()`.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+
+    async def focus(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> NoneType:
         """Page.focus
 
         This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
@@ -7067,6 +7365,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7074,12 +7375,13 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._async(
-                "page.focus", self._impl_obj.focus(selector=selector, timeout=timeout)
+                "page.focus",
+                self._impl_obj.focus(selector=selector, strict=strict, timeout=timeout),
             )
         )
 
     async def text_content(
-        self, selector: str, *, timeout: float = None
+        self, selector: str, *, strict: bool = None, timeout: float = None
     ) -> typing.Optional[str]:
         """Page.text_content
 
@@ -7090,6 +7392,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7102,11 +7407,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.text_content",
-                self._impl_obj.text_content(selector=selector, timeout=timeout),
+                self._impl_obj.text_content(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def inner_text(self, selector: str, *, timeout: float = None) -> str:
+    async def inner_text(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> str:
         """Page.inner_text
 
         Returns `element.innerText`.
@@ -7116,6 +7425,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7128,11 +7440,15 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.inner_text",
-                self._impl_obj.inner_text(selector=selector, timeout=timeout),
+                self._impl_obj.inner_text(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
-    async def inner_html(self, selector: str, *, timeout: float = None) -> str:
+    async def inner_html(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> str:
         """Page.inner_html
 
         Returns `element.innerHTML`.
@@ -7142,6 +7458,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7154,12 +7473,14 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.inner_html",
-                self._impl_obj.inner_html(selector=selector, timeout=timeout),
+                self._impl_obj.inner_html(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
     async def get_attribute(
-        self, selector: str, name: str, *, timeout: float = None
+        self, selector: str, name: str, *, strict: bool = None, timeout: float = None
     ) -> typing.Optional[str]:
         """Page.get_attribute
 
@@ -7172,6 +7493,9 @@ class Page(AsyncContextManager):
             [working with selectors](./selectors.md) for more details.
         name : str
             Attribute name to get the value for.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7185,7 +7509,7 @@ class Page(AsyncContextManager):
             await self._async(
                 "page.get_attribute",
                 self._impl_obj.get_attribute(
-                    selector=selector, name=name, timeout=timeout
+                    selector=selector, name=name, strict=strict, timeout=timeout
                 ),
             )
         )
@@ -7200,6 +7524,7 @@ class Page(AsyncContextManager):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Page.hover
@@ -7233,6 +7558,9 @@ class Page(AsyncContextManager):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -7247,6 +7575,7 @@ class Page(AsyncContextManager):
                     position=position,
                     timeout=timeout,
                     force=force,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -7260,6 +7589,7 @@ class Page(AsyncContextManager):
         force: bool = None,
         no_wait_after: bool = None,
         timeout: float = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Page.drag_and_drop
@@ -7277,6 +7607,9 @@ class Page(AsyncContextManager):
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -7291,6 +7624,7 @@ class Page(AsyncContextManager):
                     force=force,
                     noWaitAfter=no_wait_after,
                     timeout=timeout,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -7306,7 +7640,8 @@ class Page(AsyncContextManager):
         element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
         timeout: float = None,
         no_wait_after: bool = None,
-        force: bool = None
+        force: bool = None,
+        strict: bool = None
     ) -> typing.List[str]:
         """Page.select_option
 
@@ -7356,6 +7691,9 @@ class Page(AsyncContextManager):
             inaccessible pages. Defaults to `false`.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -7374,11 +7712,14 @@ class Page(AsyncContextManager):
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
                     force=force,
+                    strict=strict,
                 ),
             )
         )
 
-    async def input_value(self, selector: str, *, timeout: float = None) -> str:
+    async def input_value(
+        self, selector: str, *, strict: bool = None, timeout: float = None
+    ) -> str:
         """Page.input_value
 
         Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
@@ -7388,6 +7729,9 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7400,7 +7744,9 @@ class Page(AsyncContextManager):
         return mapping.from_maybe_impl(
             await self._async(
                 "page.input_value",
-                self._impl_obj.input_value(selector=selector, timeout=timeout),
+                self._impl_obj.input_value(
+                    selector=selector, strict=strict, timeout=timeout
+                ),
             )
         )
 
@@ -7416,6 +7762,7 @@ class Page(AsyncContextManager):
         ],
         *,
         timeout: float = None,
+        strict: bool = None,
         no_wait_after: bool = None
     ) -> NoneType:
         """Page.set_input_files
@@ -7435,6 +7782,9 @@ class Page(AsyncContextManager):
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         no_wait_after : Union[bool, NoneType]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
@@ -7448,6 +7798,7 @@ class Page(AsyncContextManager):
                     selector=selector,
                     files=files,
                     timeout=timeout,
+                    strict=strict,
                     noWaitAfter=no_wait_after,
                 ),
             )
@@ -7460,7 +7811,8 @@ class Page(AsyncContextManager):
         *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        strict: bool = None
     ) -> NoneType:
         """Page.type
 
@@ -7492,6 +7844,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         """
 
         return mapping.from_maybe_impl(
@@ -7503,6 +7858,7 @@ class Page(AsyncContextManager):
                     delay=delay,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                 ),
             )
         )
@@ -7514,7 +7870,8 @@ class Page(AsyncContextManager):
         *,
         delay: float = None,
         timeout: float = None,
-        no_wait_after: bool = None
+        no_wait_after: bool = None,
+        strict: bool = None
     ) -> NoneType:
         """Page.press
 
@@ -7565,6 +7922,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         """
 
         return mapping.from_maybe_impl(
@@ -7576,6 +7936,7 @@ class Page(AsyncContextManager):
                     delay=delay,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                 ),
             )
         )
@@ -7588,6 +7949,7 @@ class Page(AsyncContextManager):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Page.check
@@ -7625,6 +7987,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -7639,6 +8004,7 @@ class Page(AsyncContextManager):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -7652,6 +8018,7 @@ class Page(AsyncContextManager):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
+        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """Page.uncheck
@@ -7689,6 +8056,9 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -7703,6 +8073,7 @@ class Page(AsyncContextManager):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
+                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -10279,3 +10650,1367 @@ class Tracing(AsyncBase):
 
 
 mapping.register(TracingImpl, Tracing)
+
+
+class Locator(AsyncBase):
+    def __init__(self, obj: LocatorImpl):
+        super().__init__(obj)
+
+    @property
+    def first(self) -> "Locator":
+        """Locator.first
+
+        Returns locator to the first matching element.
+
+        Returns
+        -------
+        Locator
+        """
+        return mapping.from_impl(self._impl_obj.first)
+
+    @property
+    def last(self) -> "Locator":
+        """Locator.last
+
+        Returns locator to the last matching element.
+
+        Returns
+        -------
+        Locator
+        """
+        return mapping.from_impl(self._impl_obj.last)
+
+    async def bounding_box(
+        self, *, timeout: float = None
+    ) -> typing.Optional[FloatRect]:
+        """Locator.bounding_box
+
+        This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
+        calculated relative to the main frame viewport - which is usually the same as the browser window.
+
+        Scrolling affects the returned bonding box, similarly to
+        [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect). That
+        means `x` and/or `y` may be negative.
+
+        Elements from child frames return the bounding box relative to the main frame, unlike the
+        [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
+
+        Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
+        snippet should click the center of the element.
+
+        ```py
+        box = await element.bounding_box()
+        await page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
+        ```
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        Union[{x: float, y: float, width: float, height: float}, NoneType]
+        """
+
+        return mapping.from_impl_nullable(
+            await self._async(
+                "locator.bounding_box", self._impl_obj.bounding_box(timeout=timeout)
+            )
+        )
+
+    async def check(
+        self,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.check
+
+        This method checks the element by performing the following steps:
+        1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
+           this method returns immediately.
+        1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Ensure that the element is now checked. If not, this method throws.
+
+        If the element is detached from the DOM at any moment during the action, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.check",
+                self._impl_obj.check(
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    trial=trial,
+                ),
+            )
+        )
+
+    async def click(
+        self,
+        *,
+        modifiers: typing.Optional[
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+        ] = None,
+        position: Position = None,
+        delay: float = None,
+        button: Literal["left", "middle", "right"] = None,
+        click_count: int = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.click
+
+        This method clicks the element by performing the following steps:
+        1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element, or the specified `position`.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
+            modifiers back. If not specified, currently pressed modifiers are used.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        delay : Union[float, NoneType]
+            Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        button : Union["left", "middle", "right", NoneType]
+            Defaults to `left`.
+        click_count : Union[int, NoneType]
+            defaults to 1. See [UIEvent.detail].
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.click",
+                self._impl_obj.click(
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    clickCount=click_count,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    trial=trial,
+                ),
+            )
+        )
+
+    async def dblclick(
+        self,
+        *,
+        modifiers: typing.Optional[
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+        ] = None,
+        position: Position = None,
+        delay: float = None,
+        button: Literal["left", "middle", "right"] = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.dblclick
+
+        This method double clicks the element by performing the following steps:
+        1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
+           first click of the `dblclick()` triggers a navigation event, this method will throw.
+
+        If the element is detached from the DOM at any moment during the action, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        > NOTE: `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
+
+        Parameters
+        ----------
+        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
+            modifiers back. If not specified, currently pressed modifiers are used.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        delay : Union[float, NoneType]
+            Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
+        button : Union["left", "middle", "right", NoneType]
+            Defaults to `left`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.dblclick",
+                self._impl_obj.dblclick(
+                    modifiers=modifiers,
+                    position=position,
+                    delay=delay,
+                    button=button,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    trial=trial,
+                ),
+            )
+        )
+
+    async def dispatch_event(
+        self, type: str, event_init: typing.Dict = None, *, timeout: float = None
+    ) -> NoneType:
+        """Locator.dispatch_event
+
+        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+        `click` is dispatched. This is equivalent to calling
+        [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+
+        ```py
+        await element.dispatch_event(\"click\")
+        ```
+
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
+        and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
+
+        Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
+        - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
+        - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
+        - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
+        - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
+        - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
+        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
+
+        You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = await page.evaluate_handle(\"new DataTransfer()\")
+        await element.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
+        ```
+
+        Parameters
+        ----------
+        type : str
+            DOM event type: `"click"`, `"dragstart"`, etc.
+        event_init : Union[Dict, NoneType]
+            Optional event-specific initialization properties.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.dispatch_event",
+                self._impl_obj.dispatch_event(
+                    type=type, eventInit=mapping.to_impl(event_init), timeout=timeout
+                ),
+            )
+        )
+
+    async def evaluate(
+        self, expression: str, arg: typing.Any = None, *, timeout: float = None
+    ) -> typing.Any:
+        """Locator.evaluate
+
+        Returns the return value of `expression`.
+
+        This method passes this handle as the first argument to `expression`.
+
+        If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its value.
+
+        Examples:
+
+        ```py
+        tweets = await page.locator(\".tweet .retweets\")
+        assert await tweets.evaluate(\"node => node.innerText\") == \"10 retweets\"
+        ```
+
+        Parameters
+        ----------
+        expression : str
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
+        arg : Union[Any, NoneType]
+            Optional argument to pass to `expression`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        Any
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.evaluate",
+                self._impl_obj.evaluate(
+                    expression=expression, arg=mapping.to_impl(arg), timeout=timeout
+                ),
+            )
+        )
+
+    async def evaluate_all(self, expression: str, arg: typing.Any = None) -> NoneType:
+        """Locator.evaluate_all
+
+        The method finds all elements matching the specified locator and passes an array of matched elements as a first argument
+        to `expression`. Returns the result of `expression` invocation.
+
+        If `expression` returns a [Promise], then [`Locator.evaluateAll`] would wait for the promise to resolve and return its
+        value.
+
+        Examples:
+
+        ```py
+        elements = page.locator(\"div\")
+        div_counts = await elements(\"(divs, min) => divs.length >= min\", 10)
+        ```
+
+        Parameters
+        ----------
+        expression : str
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
+        arg : Union[Any, NoneType]
+            Optional argument to pass to `expression`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.evaluate_all",
+                self._impl_obj.evaluate_all(
+                    expression=expression, arg=mapping.to_impl(arg)
+                ),
+            )
+        )
+
+    async def evaluate_handle(
+        self, expression: str, arg: typing.Any = None, *, timeout: float = None
+    ) -> "JSHandle":
+        """Locator.evaluate_handle
+
+        Returns the return value of `expression` as a `JSHandle`.
+
+        This method passes this handle as the first argument to `expression`.
+
+        The only difference between `locator.evaluate()` and `locator.evaluate_handle()` is that
+        `locator.evaluate_handle()` returns `JSHandle`.
+
+        If the function passed to the `locator.evaluate_handle()` returns a [Promise], then
+        `locator.evaluate_handle()` would wait for the promise to resolve and return its value.
+
+        See `page.evaluate_handle()` for more details.
+
+        Parameters
+        ----------
+        expression : str
+            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
+            as a function. Otherwise, evaluated as an expression.
+        arg : Union[Any, NoneType]
+            Optional argument to pass to `expression`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        JSHandle
+        """
+
+        return mapping.from_impl(
+            await self._async(
+                "locator.evaluate_handle",
+                self._impl_obj.evaluate_handle(
+                    expression=expression, arg=mapping.to_impl(arg), timeout=timeout
+                ),
+            )
+        )
+
+    async def fill(
+        self,
+        value: str,
+        *,
+        timeout: float = None,
+        no_wait_after: bool = None,
+        force: bool = None
+    ) -> NoneType:
+        """Locator.fill
+
+        This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
+        event after filling. Note that you can pass an empty string to clear the input field.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+        instead.
+
+        To send fine-grained keyboard events, use `locator.type()`.
+
+        Parameters
+        ----------
+        value : str
+            Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.fill",
+                self._impl_obj.fill(
+                    value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+                ),
+            )
+        )
+
+    def locator(self, selector: str) -> "Locator":
+        """Locator.locator
+
+        The method finds an element matching the specified selector in the `Locator`'s subtree. See
+        [Working with selectors](./selectors.md) for more details.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+
+    async def element_handle(self, *, timeout: float = None) -> "ElementHandle":
+        """Locator.element_handle
+
+        Resolves given locator to the first matching DOM element. If no elements matching the query are visible, waits for them
+        up to a given timeout. If multiple elements match the selector, throws.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        ElementHandle
+        """
+
+        return mapping.from_impl(
+            await self._async(
+                "locator.element_handle", self._impl_obj.element_handle(timeout=timeout)
+            )
+        )
+
+    async def element_handles(self) -> typing.List["ElementHandle"]:
+        """Locator.element_handles
+
+        Resolves given locator to all matching DOM elements.
+
+        Returns
+        -------
+        List[ElementHandle]
+        """
+
+        return mapping.from_impl_list(
+            await self._async(
+                "locator.element_handles", self._impl_obj.element_handles()
+            )
+        )
+
+    def nth(self, index: int) -> "Locator":
+        """Locator.nth
+
+        Returns locator to the n-th matching element.
+
+        Parameters
+        ----------
+        index : int
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.nth(index=index))
+
+    async def focus(self, *, timeout: float = None) -> NoneType:
+        """Locator.focus
+
+        Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async("locator.focus", self._impl_obj.focus(timeout=timeout))
+        )
+
+    async def count(self) -> int:
+        """Locator.count
+
+        Returns the number of elements matching given selector.
+
+        Returns
+        -------
+        int
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async("locator.count", self._impl_obj.count())
+        )
+
+    async def get_attribute(
+        self, name: str, *, timeout: float = None
+    ) -> typing.Optional[str]:
+        """Locator.get_attribute
+
+        Returns element attribute value.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name to get the value for.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        Union[str, NoneType]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.get_attribute",
+                self._impl_obj.get_attribute(name=name, timeout=timeout),
+            )
+        )
+
+    async def hover(
+        self,
+        *,
+        modifiers: typing.Optional[
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+        ] = None,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.hover
+
+        This method hovers over the element by performing the following steps:
+        1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
+            modifiers back. If not specified, currently pressed modifiers are used.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.hover",
+                self._impl_obj.hover(
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    trial=trial,
+                ),
+            )
+        )
+
+    async def inner_html(self, *, timeout: float = None) -> str:
+        """Locator.inner_html
+
+        Returns the `element.innerHTML`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.inner_html", self._impl_obj.inner_html(timeout=timeout)
+            )
+        )
+
+    async def inner_text(self, *, timeout: float = None) -> str:
+        """Locator.inner_text
+
+        Returns the `element.innerText`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.inner_text", self._impl_obj.inner_text(timeout=timeout)
+            )
+        )
+
+    async def input_value(self, *, timeout: float = None) -> str:
+        """Locator.input_value
+
+        Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.input_value", self._impl_obj.input_value(timeout=timeout)
+            )
+        )
+
+    async def is_checked(self, *, timeout: float = None) -> bool:
+        """Locator.is_checked
+
+        Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.is_checked", self._impl_obj.is_checked(timeout=timeout)
+            )
+        )
+
+    async def is_disabled(self, *, timeout: float = None) -> bool:
+        """Locator.is_disabled
+
+        Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.is_disabled", self._impl_obj.is_disabled(timeout=timeout)
+            )
+        )
+
+    async def is_editable(self, *, timeout: float = None) -> bool:
+        """Locator.is_editable
+
+        Returns whether the element is [editable](./actionability.md#editable).
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.is_editable", self._impl_obj.is_editable(timeout=timeout)
+            )
+        )
+
+    async def is_enabled(self, *, timeout: float = None) -> bool:
+        """Locator.is_enabled
+
+        Returns whether the element is [enabled](./actionability.md#enabled).
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.is_enabled", self._impl_obj.is_enabled(timeout=timeout)
+            )
+        )
+
+    async def is_hidden(self, *, timeout: float = None) -> bool:
+        """Locator.is_hidden
+
+        Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.is_hidden", self._impl_obj.is_hidden(timeout=timeout)
+            )
+        )
+
+    async def is_visible(self, *, timeout: float = None) -> bool:
+        """Locator.is_visible
+
+        Returns whether the element is [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.is_visible", self._impl_obj.is_visible(timeout=timeout)
+            )
+        )
+
+    async def press(
+        self,
+        key: str,
+        *,
+        delay: float = None,
+        timeout: float = None,
+        no_wait_after: bool = None
+    ) -> NoneType:
+        """Locator.press
+
+        Focuses the element, and then uses `keyboard.down()` and `keyboard.up()`.
+
+        `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
+        value or a single character to generate the text for. A superset of the `key` values can be found
+        [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
+
+        `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+        `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`, etc.
+
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+
+        Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
+
+        If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+        texts.
+
+        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
+        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+
+        Parameters
+        ----------
+        key : str
+            Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
+        delay : Union[float, NoneType]
+            Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.press",
+                self._impl_obj.press(
+                    key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
+            )
+        )
+
+    async def screenshot(
+        self,
+        *,
+        timeout: float = None,
+        type: Literal["jpeg", "png"] = None,
+        path: typing.Union[str, pathlib.Path] = None,
+        quality: int = None,
+        omit_background: bool = None
+    ) -> bytes:
+        """Locator.screenshot
+
+        Returns the buffer with the captured screenshot.
+
+        This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a
+        screenshot. If the element is detached from DOM, the method throws an error.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        type : Union["jpeg", "png", NoneType]
+            Specify screenshot type, defaults to `png`.
+        path : Union[pathlib.Path, str, NoneType]
+            The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative
+            path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to
+            the disk.
+        quality : Union[int, NoneType]
+            The quality of the image, between 0-100. Not applicable to `png` images.
+        omit_background : Union[bool, NoneType]
+            Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
+            Defaults to `false`.
+
+        Returns
+        -------
+        bytes
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.screenshot",
+                self._impl_obj.screenshot(
+                    timeout=timeout,
+                    type=type,
+                    path=path,
+                    quality=quality,
+                    omitBackground=omit_background,
+                ),
+            )
+        )
+
+    async def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
+        """Locator.scroll_into_view_if_needed
+
+        This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is
+        completely visible as defined by
+        [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.scroll_into_view_if_needed",
+                self._impl_obj.scroll_into_view_if_needed(timeout=timeout),
+            )
+        )
+
+    async def select_option(
+        self,
+        value: typing.Union[str, typing.List[str]] = None,
+        *,
+        index: typing.Union[int, typing.List[int]] = None,
+        label: typing.Union[str, typing.List[str]] = None,
+        element: typing.Union["ElementHandle", typing.List["ElementHandle"]] = None,
+        timeout: float = None,
+        no_wait_after: bool = None,
+        force: bool = None
+    ) -> typing.List[str]:
+        """Locator.select_option
+
+        This method waits for [actionability](./actionability.md) checks, waits until all specified options are present in the
+        `<select>` element and selects these options.
+
+        If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
+
+        Returns the array of option values that have been successfully selected.
+
+        Triggers a `change` and `input` event once all the provided options have been selected.
+
+        ```py
+        # single selection matching the value
+        await element.select_option(\"blue\")
+        # single selection matching the label
+        await element.select_option(label=\"blue\")
+        # multiple selection
+        await element.select_option(value=[\"red\", \"green\", \"blue\"])
+        ```
+
+        Parameters
+        ----------
+        value : Union[List[str], str, NoneType]
+            Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        index : Union[List[int], int, NoneType]
+            Options to select by index. Optional.
+        label : Union[List[str], str, NoneType]
+            Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected, otherwise
+            only the first option matching one of the passed options is selected. Optional.
+        element : Union[ElementHandle, List[ElementHandle], NoneType]
+            Option elements to select. Optional.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+
+        Returns
+        -------
+        List[str]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.select_option",
+                self._impl_obj.select_option(
+                    value=value,
+                    index=index,
+                    label=label,
+                    element=mapping.to_impl(element),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
+                    force=force,
+                ),
+            )
+        )
+
+    async def select_text(
+        self, *, force: bool = None, timeout: float = None
+    ) -> NoneType:
+        """Locator.select_text
+
+        This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
+        content.
+
+        Parameters
+        ----------
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.select_text",
+                self._impl_obj.select_text(force=force, timeout=timeout),
+            )
+        )
+
+    async def set_input_files(
+        self,
+        files: typing.Union[
+            str,
+            pathlib.Path,
+            FilePayload,
+            typing.List[typing.Union[str, pathlib.Path]],
+            typing.List[FilePayload],
+        ],
+        *,
+        timeout: float = None,
+        no_wait_after: bool = None
+    ) -> NoneType:
+        """Locator.set_input_files
+
+        This method expects `element` to point to an
+        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
+
+        Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
+        are resolved relative to the the current working directory. For empty array, clears the selected files.
+
+        Parameters
+        ----------
+        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.set_input_files",
+                self._impl_obj.set_input_files(
+                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                ),
+            )
+        )
+
+    async def tap(
+        self,
+        *,
+        modifiers: typing.Optional[
+            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+        ] = None,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.tap
+
+        This method taps the element by performing the following steps:
+        1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+        1. Scroll the element into view if needed.
+        1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+
+        If the element is detached from the DOM at any moment during the action, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        > NOTE: `element.tap()` requires that the `hasTouch` option of the browser context be set to true.
+
+        Parameters
+        ----------
+        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], NoneType]
+            Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores current
+            modifiers back. If not specified, currently pressed modifiers are used.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.tap",
+                self._impl_obj.tap(
+                    modifiers=modifiers,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    trial=trial,
+                ),
+            )
+        )
+
+    async def text_content(self, *, timeout: float = None) -> typing.Optional[str]:
+        """Locator.text_content
+
+        Returns the `node.textContent`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        Union[str, NoneType]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.text_content", self._impl_obj.text_content(timeout=timeout)
+            )
+        )
+
+    async def type(
+        self,
+        text: str,
+        *,
+        delay: float = None,
+        timeout: float = None,
+        no_wait_after: bool = None
+    ) -> NoneType:
+        """Locator.type
+
+        Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
+
+        To press a special key, like `Control` or `ArrowDown`, use `locator.press()`.
+
+        ```py
+        await element.type(\"hello\") # types instantly
+        await element.type(\"world\", delay=100) # types slower, like a user
+        ```
+
+        An example of typing into a text field and then submitting the form:
+
+        ```py
+        element = page.locator(\"input\")
+        await element.type(\"some text\")
+        await element.press(\"Enter\")
+        ```
+
+        Parameters
+        ----------
+        text : str
+            A text to type into a focused element.
+        delay : Union[float, NoneType]
+            Time to wait between key presses in milliseconds. Defaults to 0.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.type",
+                self._impl_obj.type(
+                    text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
+            )
+        )
+
+    async def uncheck(
+        self,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.uncheck
+
+        This method checks the element by performing the following steps:
+        1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
+           unchecked, this method returns immediately.
+        1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Ensure that the element is now unchecked. If not, this method throws.
+
+        If the element is detached from the DOM at any moment during the action, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.uncheck",
+                self._impl_obj.uncheck(
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    trial=trial,
+                ),
+            )
+        )
+
+    async def all_inner_texts(self) -> typing.List[str]:
+        """Locator.all_inner_texts
+
+        Returns an array of `node.innerText` values for all matching nodes.
+
+        Returns
+        -------
+        List[str]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.all_inner_texts", self._impl_obj.all_inner_texts()
+            )
+        )
+
+    async def all_text_contents(self) -> typing.List[str]:
+        """Locator.all_text_contents
+
+        Returns an array of `node.textContent` values for all matching nodes.
+
+        Returns
+        -------
+        List[str]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.all_text_contents", self._impl_obj.all_text_contents()
+            )
+        )
+
+
+mapping.register(LocatorImpl, Locator)
