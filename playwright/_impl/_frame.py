@@ -522,6 +522,8 @@ class Frame(ChannelOwner):
         self,
         source: str,
         target: str,
+        source_position: Position = None,
+        target_position: Position = None,
         force: bool = None,
         noWaitAfter: bool = None,
         strict: bool = None,

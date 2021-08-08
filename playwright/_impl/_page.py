@@ -699,6 +699,8 @@ class Page(ChannelOwner):
         self,
         source: str,
         target: str,
+        source_position: Position = None,
+        target_position: Position = None,
         force: bool = None,
         noWaitAfter: bool = None,
         timeout: float = None,

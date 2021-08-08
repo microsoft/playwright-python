@@ -182,14 +182,18 @@ def test_sync_network_events(page, server):
     ]
 
 
-def test_console_should_work(page):
+def test_console_should_work(page, browser_name):
     messages = []
     page.once("console", lambda m: messages.append(m))
     page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
     assert len(messages) == 1
     message = messages[0]
-    assert message.text == "hello 5 JSHandle@object"
-    assert str(message) == "hello 5 JSHandle@object"
+    if browser_name != "firefox":
+        assert message.text == "hello 5 {foo: bar}"
+        assert str(message) == "hello 5 {foo: bar}"
+    else:
+        assert message.text == "hello 5 JSHandle@object"
+        assert str(message) == "hello 5 JSHandle@object"
     assert message.type == "log"
     assert message.args[0].json_value() == "hello"
     assert message.args[1].json_value() == 5

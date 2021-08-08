@@ -1905,7 +1905,7 @@ class ElementHandle(JSHandle):
     async def input_value(self, *, timeout: float = None) -> str:
         """ElementHandle.input_value
 
-        Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
@@ -4245,6 +4245,8 @@ class Frame(AsyncBase):
         source: str,
         target: str,
         *,
+        source_position: Position = None,
+        target_position: Position = None,
         force: bool = None,
         no_wait_after: bool = None,
         strict: bool = None,
@@ -4257,6 +4259,12 @@ class Frame(AsyncBase):
         ----------
         source : str
         target : str
+        source_position : Union[{x: float, y: float}, NoneType]
+            Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
+        target_position : Union[{x: float, y: float}, NoneType]
+            Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, NoneType]
@@ -4280,6 +4288,8 @@ class Frame(AsyncBase):
                 self._impl_obj.drag_and_drop(
                     source=source,
                     target=target,
+                    source_position=source_position,
+                    target_position=target_position,
                     force=force,
                     noWaitAfter=no_wait_after,
                     strict=strict,
@@ -4378,7 +4388,7 @@ class Frame(AsyncBase):
     ) -> str:
         """Frame.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
@@ -7586,6 +7596,8 @@ class Page(AsyncContextManager):
         source: str,
         target: str,
         *,
+        source_position: Position = None,
+        target_position: Position = None,
         force: bool = None,
         no_wait_after: bool = None,
         timeout: float = None,
@@ -7598,6 +7610,12 @@ class Page(AsyncContextManager):
         ----------
         source : str
         target : str
+        source_position : Union[{x: float, y: float}, NoneType]
+            Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
+        target_position : Union[{x: float, y: float}, NoneType]
+            Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, NoneType]
@@ -7621,6 +7639,8 @@ class Page(AsyncContextManager):
                 self._impl_obj.drag_and_drop(
                     source=source,
                     target=target,
+                    source_position=source_position,
+                    target_position=target_position,
                     force=force,
                     noWaitAfter=no_wait_after,
                     timeout=timeout,
@@ -7722,7 +7742,7 @@ class Page(AsyncContextManager):
     ) -> str:
         """Page.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
@@ -11370,7 +11390,7 @@ class Locator(AsyncBase):
     async def input_value(self, *, timeout: float = None) -> str:
         """Locator.input_value
 
-        Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------

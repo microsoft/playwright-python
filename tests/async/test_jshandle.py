@@ -202,17 +202,20 @@ async def test_jshandle_as_element_return_none_for_non_elements(page):
 
 async def test_jshandle_to_string_work_for_primitives(page):
     number_handle = await page.evaluate_handle("2")
-    assert str(number_handle) == "JSHandle@2"
+    assert str(number_handle) == "2"
     string_handle = await page.evaluate_handle('"a"')
-    assert str(string_handle) == "JSHandle@a"
+    assert str(string_handle) == "a"
 
 
-async def test_jshandle_to_string_work_for_complicated_objects(page):
+async def test_jshandle_to_string_work_for_complicated_objects(page, browser_name):
     handle = await page.evaluate_handle("window")
-    assert str(handle) == "JSHandle@object"
+    if browser_name != "firefox":
+        assert str(handle) == "Window"
+    else:
+        assert str(handle) == "JSHandle@object"
 
 
 async def test_jshandle_to_string_work_for_promises(page):
     handle = await page.evaluate_handle("({b: Promise.resolve(123)})")
     b_handle = await handle.get_property("b")
-    assert str(b_handle) == "JSHandle@promise"
+    assert str(b_handle) == "Promise"

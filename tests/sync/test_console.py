@@ -17,15 +17,19 @@ from typing import List
 from playwright.sync_api import ConsoleMessage, Page
 
 
-def test_console_should_work(page: Page, server):
+def test_console_should_work(page: Page, browser_name):
     messages: List[ConsoleMessage] = []
     page.once("console", lambda m: messages.append(m))
     with page.expect_console_message():
         page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
     assert len(messages) == 1
     message = messages[0]
-    assert message.text == "hello 5 JSHandle@object"
-    assert str(message) == "hello 5 JSHandle@object"
+    if browser_name != "firefox":
+        assert message.text == "hello 5 {foo: bar}"
+        assert str(message) == "hello 5 {foo: bar}"
+    else:
+        assert message.text == "hello 5 JSHandle@object"
+        assert str(message) == "hello 5 JSHandle@object"
     assert message.type == "log"
     assert message.args[0].json_value() == "hello"
     assert message.args[1].json_value() == 5
@@ -78,17 +82,20 @@ def test_console_should_work_for_different_console_api_calls(page, server):
         "calling console.dir",
         "calling console.warn",
         "calling console.error",
-        "JSHandle@promise",
+        "Promise",
     ]
 
 
-def test_console_should_not_fail_for_window_object(page: Page, server):
+def test_console_should_not_fail_for_window_object(page: Page, browser_name):
     messages = []
     page.once("console", lambda m: messages.append(m))
     with page.expect_console_message():
         page.evaluate("() => console.error(window)")
     assert len(messages) == 1
-    assert messages[0].text == "JSHandle@object"
+    if browser_name != "firefox":
+        assert messages[0].text == "Window"
+    else:
+        assert messages[0].text == "JSHandle@object"
 
 
 def test_console_should_trigger_correct_Log(page, server):

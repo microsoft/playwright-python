@@ -37,7 +37,6 @@ class Tracing:
         await self._channel.send("tracingStart", params)
 
     async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
-        await self._channel.send("tracingStop")
         if path:
             artifact = cast(
                 Artifact, from_channel(await self._channel.send("tracingExport"))
@@ -46,3 +45,4 @@ class Tracing:
                 artifact._is_remote = self._context._browser._is_remote
             await artifact.save_as(path)
             await artifact.delete()
+        await self._channel.send("tracingStop")
