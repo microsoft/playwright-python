@@ -14,12 +14,8 @@
 
 import json
 
-import pytest
-
 
 def test_should_capture_local_storage(context, is_webkit, is_win):
-    if is_webkit and is_win:
-        pytest.skip()
     page1 = context.new_page()
     page1.route("**/*", lambda route: route.fulfill(body="<html></html>"))
     page1.goto("https://www.example.com")
@@ -41,8 +37,6 @@ def test_should_capture_local_storage(context, is_webkit, is_win):
 
 
 def test_should_set_local_storage(browser, is_webkit, is_win):
-    if is_webkit and is_win:
-        pytest.skip()
     context = browser.new_context(
         storage_state={
             "origins": [

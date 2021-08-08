@@ -15,12 +15,8 @@
 import asyncio
 import json
 
-import pytest
-
 
 async def test_should_capture_local_storage(context, is_webkit, is_win):
-    if is_webkit and is_win:
-        pytest.skip()
     page1 = await context.new_page()
     await page1.route(
         "**/*", lambda route: asyncio.create_task(route.fulfill(body="<html></html>"))
@@ -44,8 +40,6 @@ async def test_should_capture_local_storage(context, is_webkit, is_win):
 
 
 async def test_should_set_local_storage(browser, is_webkit, is_win):
-    if is_webkit and is_win:
-        pytest.skip()
     context = await browser.new_context(
         storage_state={
             "origins": [

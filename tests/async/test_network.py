@@ -198,6 +198,8 @@ async def test_request_headers_should_get_the_same_headers_as_the_server(
     assert cast(Response, response).request.headers == server_headers
 
 
+# TODO: update once fixed https://github.com/microsoft/playwright/issues/6690
+@pytest.mark.xfail
 async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
     page: Page, server, is_webkit, is_win
 ):
@@ -562,11 +564,10 @@ async def test_network_events_should_support_redirects(page, server):
 
 
 async def test_request_is_navigation_request_should_work(page, server):
-    pytest.skip(msg="test")
     requests = {}
 
     def handle_request(request):
-        requests[request.url().split("/").pop()] = request
+        requests[request.url.split("/").pop()] = request
 
     page.on("request", handle_request)
     server.set_redirect("/rrredirect", "/frames/one-frame.html")
