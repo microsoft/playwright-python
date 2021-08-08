@@ -63,14 +63,17 @@ async def test_workers_should_report_console_logs(page):
     assert message.text == "1"
 
 
-async def test_workers_should_have_JSHandles_for_console_logs(page):
+async def test_workers_should_have_JSHandles_for_console_logs(page, browser_name):
     log_promise = asyncio.Future()
     page.on("console", lambda m: log_promise.set_result(m))
     await page.evaluate(
         "() => new Worker(URL.createObjectURL(new Blob(['console.log(1,2,3,this)'], {type: 'application/javascript'})))"
     )
     log = await log_promise
-    assert log.text == "1 2 3 JSHandle@object"
+    if browser_name != "firefox":
+        assert log.text == "1 2 3 DedicatedWorkerGlobalScope"
+    else:
+        assert log.text == "1 2 3 JSHandle@object"
     assert len(log.args) == 4
     assert await (await log.args[3].get_property("origin")).json_value() == "null"
 

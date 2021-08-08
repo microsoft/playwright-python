@@ -1890,7 +1890,7 @@ class ElementHandle(JSHandle):
     def input_value(self, *, timeout: float = None) -> str:
         """ElementHandle.input_value
 
-        Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
@@ -4223,6 +4223,8 @@ class Frame(SyncBase):
         source: str,
         target: str,
         *,
+        source_position: Position = None,
+        target_position: Position = None,
         force: bool = None,
         no_wait_after: bool = None,
         strict: bool = None,
@@ -4235,6 +4237,12 @@ class Frame(SyncBase):
         ----------
         source : str
         target : str
+        source_position : Union[{x: float, y: float}, NoneType]
+            Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
+        target_position : Union[{x: float, y: float}, NoneType]
+            Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, NoneType]
@@ -4258,6 +4266,8 @@ class Frame(SyncBase):
                 self._impl_obj.drag_and_drop(
                     source=source,
                     target=target,
+                    source_position=source_position,
+                    target_position=target_position,
                     force=force,
                     noWaitAfter=no_wait_after,
                     strict=strict,
@@ -4356,7 +4366,7 @@ class Frame(SyncBase):
     ) -> str:
         """Frame.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
@@ -7541,6 +7551,8 @@ class Page(SyncContextManager):
         source: str,
         target: str,
         *,
+        source_position: Position = None,
+        target_position: Position = None,
         force: bool = None,
         no_wait_after: bool = None,
         timeout: float = None,
@@ -7553,6 +7565,12 @@ class Page(SyncContextManager):
         ----------
         source : str
         target : str
+        source_position : Union[{x: float, y: float}, NoneType]
+            Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
+        target_position : Union[{x: float, y: float}, NoneType]
+            Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, NoneType]
@@ -7576,6 +7594,8 @@ class Page(SyncContextManager):
                 self._impl_obj.drag_and_drop(
                     source=source,
                     target=target,
+                    source_position=source_position,
+                    target_position=target_position,
                     force=force,
                     noWaitAfter=no_wait_after,
                     timeout=timeout,
@@ -7677,7 +7697,7 @@ class Page(SyncContextManager):
     ) -> str:
         """Page.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
@@ -11300,7 +11320,7 @@ class Locator(SyncBase):
     def input_value(self, *, timeout: float = None) -> str:
         """Locator.input_value
 
-        Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+        Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 
         Parameters
         ----------
