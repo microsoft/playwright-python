@@ -37,7 +37,7 @@ async def launch_persistent(tmpdir, launch_arguments, browser_type):
     await context.close()
 
 
-async def test_context_cookies_should_work(server, launch_persistent, is_firefox):
+async def test_context_cookies_should_work(server, launch_persistent, is_chromium):
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
@@ -57,12 +57,12 @@ async def test_context_cookies_should_work(server, launch_persistent, is_firefox
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_chromium else "None",
         }
     ]
 
 
-async def test_context_add_cookies_should_work(server, launch_persistent):
+async def test_context_add_cookies_should_work(server, launch_persistent, is_chromium):
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     await page.context.add_cookies(
@@ -78,7 +78,7 @@ async def test_context_add_cookies_should_work(server, launch_persistent):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_chromium else "None",
         }
     ]
 
@@ -124,7 +124,7 @@ async def test_should_not_block_third_party_cookies(
     )
 
     await page.wait_for_timeout(2000)
-    allows_third_party = is_chromium or is_firefox
+    allows_third_party = is_firefox
     assert document_cookie == ("username=John Doe" if allows_third_party else "")
     cookies = await context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
     if allows_third_party:

@@ -185,14 +185,14 @@ class Locator:
 
     @property
     def first(self) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >>  _nth=first")
+        return Locator(self._frame, f"{self._selector} >>  nth=0")
 
     @property
     def last(self) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >>  _nth=last")
+        return Locator(self._frame, f"{self._selector} >>  nth=-1")
 
     def nth(self, index: int) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >>  _nth={index}")
+        return Locator(self._frame, f"{self._selector} >>  nth={index}")
 
     async def focus(self, timeout: float = None) -> None:
         params = locals_to_params(locals())
