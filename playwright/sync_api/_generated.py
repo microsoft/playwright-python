@@ -10980,8 +10980,8 @@ class Locator(SyncBase):
         The method finds all elements matching the specified locator and passes an array of matched elements as a first argument
         to `expression`. Returns the result of `expression` invocation.
 
-        If `expression` returns a [Promise], then [`Locator.evaluateAll`] would wait for the promise to resolve and return its
-        value.
+        If `expression` returns a [Promise], then `locator.evaluate_all()` would wait for the promise to resolve and
+        return its value.
 
         Examples:
 

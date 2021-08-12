@@ -210,7 +210,7 @@ async def test_should_have_expires_set_to_neg_1_for_session_cookies(context, ser
     assert cookies[0]["expires"] == -1
 
 
-async def test_should_set_cookie_with_reasonable_defaults(context, server):
+async def test_should_set_cookie_with_reasonable_defaults(context, server, is_chromium):
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "defaults", "value": "123456"}]
     )
@@ -225,12 +225,12 @@ async def test_should_set_cookie_with_reasonable_defaults(context, server):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_chromium else "None",
         }
     ]
 
 
-async def test_should_set_a_cookie_with_a_path(context, page, server):
+async def test_should_set_a_cookie_with_a_path(context, page, server, is_chromium):
     await page.goto(server.PREFIX + "/grid.html")
     await context.add_cookies(
         [
@@ -251,7 +251,7 @@ async def test_should_set_a_cookie_with_a_path(context, page, server):
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_chromium else "None",
         }
     ]
     assert await page.evaluate("document.cookie") == "gridcookie=GRID"
@@ -311,7 +311,9 @@ async def test_should_be_able_to_set_unsecure_cookie_for_http_website(
     assert not cookie["secure"]
 
 
-async def test_should_set_a_cookie_on_a_different_domain(context, page, server):
+async def test_should_set_a_cookie_on_a_different_domain(
+    context, page, server, is_chromium
+):
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
         [{"url": "https://www.example.com", "name": "example-cookie", "value": "best"}]
@@ -326,7 +328,7 @@ async def test_should_set_a_cookie_on_a_different_domain(context, page, server):
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": "None",
+            "sameSite": "Lax" if is_chromium else "None",
         }
     ]
 
@@ -370,7 +372,7 @@ async def test_should_not_block_third_party_cookies(
     )
     await page.frames[1].evaluate("document.cookie = 'username=John Doe'")
     await page.wait_for_timeout(2000)
-    allows_third_party = is_chromium or is_firefox
+    allows_third_party = is_firefox
     cookies = await context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
 
     if allows_third_party:
@@ -381,7 +383,7 @@ async def test_should_not_block_third_party_cookies(
                 "httpOnly": False,
                 "name": "username",
                 "path": "/",
-                "sameSite": "None",
+                "sameSite": "Lax" if is_chromium else "None",
                 "secure": False,
                 "value": "John Doe",
             }

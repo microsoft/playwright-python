@@ -101,7 +101,7 @@ async def test_should_not_block_third_party_cookies(
     )
 
     await page.wait_for_timeout(2000)
-    allows_third_party = is_chromium or is_firefox
+    allows_third_party = is_firefox
     assert document_cookie == ("username=John Doe" if allows_third_party else "")
     cookies = await page.context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
     if allows_third_party:
@@ -112,7 +112,7 @@ async def test_should_not_block_third_party_cookies(
                 "httpOnly": False,
                 "name": "username",
                 "path": "/",
-                "sameSite": "None",
+                "sameSite": "Lax" if is_chromium else "None",
                 "secure": False,
                 "value": "John Doe",
             }

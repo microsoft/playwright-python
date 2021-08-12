@@ -435,7 +435,7 @@ async def test_locators_should_throw_on_capture_without_nth(page: Page):
     """
     )
     with pytest.raises(Error, match="Can't query n-th element"):
-        await page.locator("*css=div >> p").nth(0).click()
+        await page.locator("*css=div >> p").nth(1).click()
 
 
 async def test_locators_should_throw_due_to_strictness(page: Page):
