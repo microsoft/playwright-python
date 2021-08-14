@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import gc
+from collections import defaultdict
 
 import objgraph
-import pandas as pd
 import pytest
 
 from playwright.async_api import async_playwright
@@ -42,11 +42,13 @@ async def test_memory_objects() -> None:
 
     gc.collect()
 
-    df_dicts = pd.DataFrame()
-    df_dicts["dicts"] = objgraph.by_type("dict")
-    df_dicts["pw_types"] = df_dicts["dicts"].apply(lambda x: x.get("_type"))
+    pw_objects = defaultdict(int)
+    for o in objgraph.by_type("dict"):
+        name = o.get("_type")
+        if not name:
+            continue
+        pw_objects[name] += 1
 
-    head = df_dicts["pw_types"].value_counts().head(20)
-    assert "Dialog" not in head.items()
-    assert "Request" not in head.items()
-    assert "Route" not in head.items()
+    assert "Dialog" not in pw_objects
+    assert "Request" not in pw_objects
+    assert "Route" not in pw_objects

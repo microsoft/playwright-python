@@ -5,7 +5,6 @@ flake8==3.9.2
 flaky==3.7.0
 mypy==0.902
 objgraph==3.5.0
-pandas==1.2.4
 Pillow==8.2.0
 pixelmatch==0.2.3
 pre-commit==2.13.0
