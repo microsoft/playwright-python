@@ -43,10 +43,47 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-11.0]
-        python-version: [3.7, 3.8, 3.9, '3.10-dev']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.7, 3.8]
         browser: [chromium, firefox, webkit]
-
+        include:
+        - os: ubuntu-latest
+          python-version: 3.9
+          browser: chromium
+        - os: windows-latest
+          python-version: 3.9
+          browser: chromium
+        - os: macos-latest
+          python-version: 3.9
+          browser: chromium
+        - os: macos-11.0
+          python-version: 3.9
+          browser: chromium
+        - os: macos-11.0
+          python-version: 3.9
+          browser: firefox
+        - os: macos-11.0
+          python-version: 3.9
+          browser: webkit
+        - os: ubuntu-latest
+          python-version: '3.10-dev'
+          browser: chromium
+        # TODO: Enable windows once https://github.com/python-pillow/Pillow/issues/5569 is fixed
+        # - os: windows-latest
+        #   python-version: '3.10-dev'
+        #   browser: chromium
+        - os: macos-latest
+          python-version: '3.10-dev'
+          browser: chromium
+        - os: macos-11.0
+          python-version: '3.10-dev'
+          browser: chromium
+        - os: macos-11.0
+          python-version: '3.10-dev'
+          browser: firefox
+        - os: macos-11.0
+          python-version: '3.10-dev'
+          browser: webkit
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
