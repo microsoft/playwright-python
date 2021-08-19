@@ -28,6 +28,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
+from playwright._impl._frame import Frame
 from playwright._impl._helper import (
     RouteHandler,
     RouteHandlerEntry,
@@ -38,6 +39,7 @@ from playwright._impl._helper import (
     async_writefile,
     is_safe_close_error,
     locals_to_params,
+    to_impl,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
@@ -368,10 +370,16 @@ class BrowserContext(ChannelOwner):
     def service_workers(self) -> List[Worker]:
         return list(self._service_workers)
 
-    async def new_cdp_session(self, page: Page) -> CDPSession:
-        return from_channel(
-            await self._channel.send("newCDPSession", {"page": page._channel})
-        )
+    async def new_cdp_session(self, page: Union[Page, Frame]) -> CDPSession:
+        page = to_impl(page)
+        params = {}
+        if isinstance(page, Page):
+            params["page"] = page._channel
+        elif isinstance(page, Frame):
+            params["frame"] = page._channel
+        else:
+            raise Error("page: expected Page or Frame")
+        return from_channel(await self._channel.send("newCDPSession", params))
 
     @property
     def tracing(self) -> Tracing:

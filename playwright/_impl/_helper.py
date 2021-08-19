@@ -29,6 +29,7 @@ from typing import (
     List,
     Optional,
     Pattern,
+    TypeVar,
     Union,
     cast,
 )
@@ -254,3 +255,12 @@ async def async_readfile(file: Union[str, Path]) -> bytes:
 
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, inner)
+
+
+T = TypeVar("T")
+
+
+def to_impl(obj: T) -> T:
+    if hasattr(obj, "_impl_obj"):
+        return cast(Any, obj)._impl_obj
+    return obj

@@ -16,7 +16,8 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.async_api import Browser, Error
+from tests.server import Server
 
 
 async def test_page_event_should_create_new_context(browser):
@@ -725,3 +726,18 @@ async def test_page_event_should_work_with_ctrl_clicking(context, server, is_mac
         await page.click("a", modifiers=["Meta" if is_mac else "Control"])
     popup = await popup_info.value
     assert await popup.opener() is None
+
+
+async def test_strict_selectors_on_context(browser: Browser, server: Server):
+    context = await browser.new_context(strict_selectors=True)
+    page = await context.new_page()
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content(
+        """
+        <button>Hello</button>
+        <button>Hello</button>
+    """
+    )
+    with pytest.raises(Error):
+        await page.text_content("button")
+    await context.close()
