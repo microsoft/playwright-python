@@ -16,13 +16,16 @@ import asyncio
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
+
+if TYPE_CHECKING:
+    from playwright._impl._playwright import Playwright
 
 
 class Channel(AsyncIOEventEmitter):
@@ -119,7 +122,7 @@ class ProtocolCallback:
 
 class RootChannelOwner(ChannelOwner):
     def __init__(self, connection: "Connection") -> None:
-        super().__init__(connection, "", "", {})
+        super().__init__(connection, "Root", "", {})
 
 
 class Connection:
@@ -164,16 +167,15 @@ class Connection:
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
 
-    async def wait_for_object_with_known_name(self, guid: str) -> ChannelOwner:
-        if guid in self._objects:
-            return self._objects[guid]
-        callback: asyncio.Future[ChannelOwner] = self._loop.create_future()
-
-        def callback_wrapper(result: ChannelOwner) -> None:
-            callback.set_result(result)
-
-        self._waiting_for_object[guid] = callback_wrapper
-        return await callback
+    async def initialize_playwright(self) -> "Playwright":
+        result = await self._send_message_to_server(
+            "",
+            "initialize",
+            {
+                "language": "python",
+            },
+        ).future
+        return from_channel(result["playwright"])
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]

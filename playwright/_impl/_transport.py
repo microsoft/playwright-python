@@ -44,10 +44,11 @@ def _get_stderr_fileno() -> Optional[int]:
 
 
 class Transport(ABC):
-    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop, on_ready: Callable) -> None:
         self._loop = loop
         self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
         self.on_error_future: asyncio.Future = loop.create_future()
+        self._on_ready = on_ready
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -84,9 +85,12 @@ class Transport(ABC):
 
 class PipeTransport(Transport):
     def __init__(
-        self, loop: asyncio.AbstractEventLoop, driver_executable: Path
+        self,
+        loop: asyncio.AbstractEventLoop,
+        driver_executable: Path,
+        on_ready: Callable,
     ) -> None:
-        super().__init__(loop)
+        super().__init__(loop, on_ready)
         self._stopped = False
         self._driver_executable = driver_executable
 
@@ -128,6 +132,7 @@ class PipeTransport(Transport):
         assert proc.stdout
         assert proc.stdin
         self._output = proc.stdin
+        self._on_ready()
 
         while not self._stopped:
             try:
@@ -162,16 +167,18 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         self,
         loop: asyncio.AbstractEventLoop,
         ws_endpoint: str,
-        headers: Dict[str, str] = None,
-        slow_mo: float = None,
+        headers: Optional[Dict[str, str]],
+        slow_mo: Optional[float],
+        on_ready: Callable,
     ) -> None:
-        super().__init__(loop)
-        Transport.__init__(self, loop)
+        AsyncIOEventEmitter.__init__(self)
+        Transport.__init__(self, loop, on_ready)
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.headers = headers
         self.slow_mo = slow_mo
+        self._on_ready = on_ready
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -192,7 +199,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         except Exception as exc:
             self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
             return
-
+        self._on_ready()
         while not self._stopped:
             try:
                 message = await self._connection.recv()

@@ -52,10 +52,14 @@ Please use the Async API instead."""
                 loop.close()
 
         dispatcher_fiber = greenlet(greenlet_main)
+
+        def on_ready() -> None:
+            asyncio.ensure_future(self._connection.initialize_playwright())
+
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
-            PipeTransport(loop, compute_driver_executable()),
+            PipeTransport(loop, compute_driver_executable(), on_ready),
         )
 
         g_self = greenlet.getcurrent()

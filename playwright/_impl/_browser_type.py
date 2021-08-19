@@ -15,7 +15,7 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -41,6 +41,9 @@ from playwright._impl._helper import (
 )
 from playwright._impl._transport import WebSocketTransport
 from playwright._impl._wait_helper import throw_on_timeout
+
+if TYPE_CHECKING:
+    from playwright._impl._playwright import Playwright
 
 
 class BrowserType(ChannelOwner):
@@ -184,8 +187,13 @@ class BrowserType(ChannelOwner):
         if timeout is None:
             timeout = 30000
 
+        on_ready = asyncio.Event()
         transport = WebSocketTransport(
-            self._connection._loop, ws_endpoint, headers, slow_mo
+            self._connection._loop,
+            ws_endpoint,
+            headers,
+            slow_mo,
+            lambda: on_ready.set(),
         )
         connection = Connection(
             self._connection._dispatcher_fiber,
@@ -195,9 +203,12 @@ class BrowserType(ChannelOwner):
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
-        future = connection._loop.create_task(
-            connection.wait_for_object_with_known_name("Playwright")
-        )
+
+        async def initialize() -> "Playwright":
+            await on_ready.wait()
+            return await connection.initialize_playwright()
+
+        future = asyncio.create_task(initialize())
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
             {transport.on_error_future, future, timeout_future},
@@ -207,7 +218,7 @@ class BrowserType(ChannelOwner):
             future.cancel()
         if not timeout_future.done():
             timeout_future.cancel()
-        playwright = next(iter(done)).result()
+        playwright: "Playwright" = next(iter(done)).result()
         self._connection._child_ws_connections.append(connection)
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
