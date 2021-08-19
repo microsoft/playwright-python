@@ -20,7 +20,7 @@ import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import websockets
 from pyee import AsyncIOEventEmitter
@@ -44,11 +44,10 @@ def _get_stderr_fileno() -> Optional[int]:
 
 
 class Transport(ABC):
-    def __init__(self, loop: asyncio.AbstractEventLoop, on_ready: Callable) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self._loop = loop
         self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
         self.on_error_future: asyncio.Future = loop.create_future()
-        self._on_ready = on_ready
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -62,7 +61,7 @@ class Transport(ABC):
         pass
 
     @abstractmethod
-    async def run(self) -> None:
+    async def run(self, on_ready: Callable[[], Any]) -> None:
         pass
 
     @abstractmethod
@@ -88,9 +87,8 @@ class PipeTransport(Transport):
         self,
         loop: asyncio.AbstractEventLoop,
         driver_executable: Path,
-        on_ready: Callable,
     ) -> None:
-        super().__init__(loop, on_ready)
+        super().__init__(loop)
         self._stopped = False
         self._driver_executable = driver_executable
 
@@ -102,7 +100,7 @@ class PipeTransport(Transport):
         await self._stopped_future
         await self._proc.wait()
 
-    async def run(self) -> None:
+    async def run(self, on_ready: Callable[[], Any]) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
         # Hide the command-line window on Windows when using Pythonw.exe
         creationflags = 0
@@ -132,7 +130,7 @@ class PipeTransport(Transport):
         assert proc.stdout
         assert proc.stdin
         self._output = proc.stdin
-        self._on_ready()
+        on_ready()
 
         while not self._stopped:
             try:
@@ -169,16 +167,14 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         ws_endpoint: str,
         headers: Optional[Dict[str, str]],
         slow_mo: Optional[float],
-        on_ready: Callable,
     ) -> None:
         AsyncIOEventEmitter.__init__(self)
-        Transport.__init__(self, loop, on_ready)
+        Transport.__init__(self, loop)
 
         self._stopped = False
         self.ws_endpoint = ws_endpoint
         self.headers = headers
         self.slow_mo = slow_mo
-        self._on_ready = on_ready
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -191,7 +187,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     async def wait_until_stopped(self) -> None:
         await self._connection.wait_closed()
 
-    async def run(self) -> None:
+    async def run(self, on_ready: Callable[[], Any]) -> None:
         try:
             self._connection = await websocket_connect(
                 self.ws_endpoint, extra_headers=self.headers
@@ -199,7 +195,8 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         except Exception as exc:
             self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
             return
-        self._on_ready()
+        on_ready()
+
         while not self._stopped:
             try:
                 message = await self._connection.recv()

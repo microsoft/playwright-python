@@ -187,35 +187,31 @@ class BrowserType(ChannelOwner):
         if timeout is None:
             timeout = 30000
 
-        on_ready = asyncio.Event()
         transport = WebSocketTransport(
-            self._connection._loop,
-            ws_endpoint,
-            headers,
-            slow_mo,
-            lambda: on_ready.set(),
+            self._connection._loop, ws_endpoint, headers, slow_mo
         )
+        playwright_future: asyncio.Future = asyncio.Future()
+
+        async def handle_ready() -> None:
+            playwright_future.set_result(await connection.initialize_playwright())
+
         connection = Connection(
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
             transport,
+            handle_ready,
         )
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
 
-        async def initialize() -> "Playwright":
-            await on_ready.wait()
-            return await connection.initialize_playwright()
-
-        future = asyncio.create_task(initialize())
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
-            {transport.on_error_future, future, timeout_future},
+            {transport.on_error_future, playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
         )
-        if not future.done():
-            future.cancel()
+        if not playwright_future.done():
+            playwright_future.cancel()
         if not timeout_future.done():
             timeout_future.cancel()
         playwright: "Playwright" = next(iter(done)).result()

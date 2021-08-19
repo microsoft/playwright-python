@@ -28,23 +28,23 @@ class PlaywrightContextManager:
 
     async def __aenter__(self) -> AsyncPlaywright:
         loop = asyncio.get_running_loop()
-        on_ready = asyncio.Event()
+        playwright_future: asyncio.Future = asyncio.Future()
+
+        async def handle_ready() -> None:
+            playwright_future.set_result(await self._connection.initialize_playwright())
+
         self._connection = Connection(
             None,
             create_remote_object,
             PipeTransport(
                 loop,
                 compute_driver_executable(),
-                lambda: on_ready.set(),
             ),
+            handle_ready,
         )
         self._connection._loop = loop
         loop.create_task(self._connection.run())
-        await on_ready.wait()
 
-        playwright_future = asyncio.create_task(
-            self._connection.initialize_playwright()
-        )
         done, pending = await asyncio.wait(
             {self._connection._transport.on_error_future, playwright_future},
             return_when=asyncio.FIRST_COMPLETED,

@@ -16,7 +16,7 @@ import asyncio
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Dict, List, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
@@ -131,10 +131,12 @@ class Connection:
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
+        on_ready: Callable[[], Coroutine],
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self._dispatch(msg)
+        self._on_ready = on_ready
         self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
@@ -151,7 +153,7 @@ class Connection:
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
-        await self._transport.run()
+        await self._transport.run(lambda: asyncio.create_task(self._on_ready()))
 
     def stop_sync(self) -> None:
         self._transport.request_stop()
