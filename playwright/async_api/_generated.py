@@ -9615,7 +9615,8 @@ class Browser(AsyncContextManager):
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
-        base_url: str = None
+        base_url: str = None,
+        strict_selectors: bool = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -9709,6 +9710,10 @@ class Browser(AsyncContextManager):
             Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
+        strict_selectors : Union[bool, NoneType]
+            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
+            more about the strict mode.
 
         Returns
         -------
@@ -9747,6 +9752,7 @@ class Browser(AsyncContextManager):
                     recordVideoSize=record_video_size,
                     storageState=storage_state,
                     baseURL=base_url,
+                    strictSelectors=strict_selectors,
                 ),
             )
         )
@@ -9781,7 +9787,8 @@ class Browser(AsyncContextManager):
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
-        base_url: str = None
+        base_url: str = None,
+        strict_selectors: bool = None
     ) -> "Page":
         """Browser.new_page
 
@@ -9870,6 +9877,10 @@ class Browser(AsyncContextManager):
             Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
+        strict_selectors : Union[bool, NoneType]
+            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
+            more about the strict mode.
 
         Returns
         -------
@@ -9908,6 +9919,7 @@ class Browser(AsyncContextManager):
                     recordVideoSize=record_video_size,
                     storageState=storage_state,
                     baseURL=base_url,
+                    strictSelectors=strict_selectors,
                 ),
             )
         )
@@ -10218,7 +10230,8 @@ class BrowserType(AsyncBase):
         record_har_omit_content: bool = None,
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
-        base_url: str = None
+        base_url: str = None,
+        strict_selectors: bool = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -10345,6 +10358,10 @@ class BrowserType(AsyncBase):
             Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
+        strict_selectors : Union[bool, NoneType]
+            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
+            more about the strict mode.
 
         Returns
         -------
@@ -10397,6 +10414,7 @@ class BrowserType(AsyncBase):
                     recordVideoDir=record_video_dir,
                     recordVideoSize=record_video_size,
                     baseURL=base_url,
+                    strictSelectors=strict_selectors,
                 ),
             )
         )

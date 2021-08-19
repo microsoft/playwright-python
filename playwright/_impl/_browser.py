@@ -106,6 +106,7 @@ class Browser(ChannelOwner):
         recordVideoSize: ViewportSize = None,
         storageState: Union[StorageState, str, Path] = None,
         baseURL: str = None,
+        strictSelectors: bool = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
@@ -147,6 +148,7 @@ class Browser(ChannelOwner):
         recordVideoSize: ViewportSize = None,
         storageState: Union[StorageState, str, Path] = None,
         baseURL: str = None,
+        strictSelectors: bool = None,
     ) -> Page:
         params = locals_to_params(locals())
         context = await self.new_context(**params)
