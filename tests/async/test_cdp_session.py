@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.async_api import Browser, Error
 
 
 @pytest.mark.only_browser("chromium")
@@ -78,3 +78,16 @@ async def test_should_detach_when_page_closes(browser):
     with pytest.raises(Error):
         await session.detach()
     await context.close()
+
+
+@pytest.mark.only_browser("chromium")
+async def test_should_work_with_main_frame(browser: Browser):
+    context = await browser.new_context()
+    page = await context.new_page()
+    client = await context.new_cdp_session(page.main_frame)
+    await client.send("Runtime.enable")
+    await client.send(
+        "Runtime.evaluate",
+        {"expression": "window.foo = 'bar'"},
+    )
+    assert await page.evaluate("() => window.foo") == "bar"
