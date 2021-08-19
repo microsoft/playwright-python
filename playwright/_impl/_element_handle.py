@@ -15,7 +15,17 @@
 import base64
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+    cast,
+    overload,
+)
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
@@ -308,6 +318,24 @@ class ElementHandle(JSHandle):
         timeout: float = None,
     ) -> None:
         await self._channel.send("waitForElementState", locals_to_params(locals()))
+
+    @overload
+    async def wait_for_selector(
+        self,
+        selector: str,
+        state: Literal["attached", "visible"] = None,
+        timeout: float = None,
+    ) -> "ElementHandle":
+        ...
+
+    @overload
+    async def wait_for_selector(
+        self,
+        selector: str,
+        state: Literal["detached", "hidden"],
+        timeout: float = None,
+    ) -> None:
+        ...
 
     async def wait_for_selector(
         self,

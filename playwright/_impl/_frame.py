@@ -15,7 +15,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast, overload
 
 from pyee import EventEmitter
 
@@ -269,6 +269,36 @@ class Frame(ChannelOwner):
                 await self._channel.send("querySelectorAll", dict(selector=selector)),
             )
         )
+
+    @overload
+    async def wait_for_selector(
+        self,
+        selector: str,
+        strict: bool = None,
+        timeout: float = None,
+        state: Literal["attached", "visible"] = None,
+    ) -> ElementHandle:
+        ...
+
+    @overload
+    async def wait_for_selector(
+            self,
+            selector: str,
+            strict: bool = None,
+            timeout: float = None,
+            *,
+            state: Literal["detached", "hidden"],
+    ) -> None:
+        ...
+    @overload
+    async def wait_for_selector(
+            self,
+            selector: str,
+            strict: Optional[bool],
+            timeout: Optional[float],
+            state: Literal["detached", "hidden"],
+    ) -> None:
+        ...
 
     async def wait_for_selector(
         self,
