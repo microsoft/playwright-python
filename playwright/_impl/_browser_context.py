@@ -39,6 +39,7 @@ from playwright._impl._helper import (
     async_writefile,
     is_safe_close_error,
     locals_to_params,
+    to_impl,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
@@ -370,6 +371,7 @@ class BrowserContext(ChannelOwner):
         return list(self._service_workers)
 
     async def new_cdp_session(self, page: Union[Page, Frame]) -> CDPSession:
+        page = to_impl(page)
         params = {}
         if isinstance(page, Page):
             params["page"] = page._channel
