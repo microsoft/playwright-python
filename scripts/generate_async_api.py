@@ -40,15 +40,16 @@ def generate(t: Any) -> None:
     class_name = short_name(t)
     base_class = t.__bases__[0].__name__
     if class_name in ["Page", "BrowserContext", "Browser"]:
-        base_sync_class = "AsyncContextManager"
+        base_async_class = "AsyncContextManager"
     elif base_class in ["ChannelOwner", "object"]:
-        base_sync_class = "AsyncBase"
+        base_async_class = "AsyncBase"
     else:
-        base_sync_class = base_class
-    print(f"class {class_name}({base_sync_class}):")
+        base_async_class = base_class
+    print("@final")
+    print(
+        f"class {class_name}({base_async_class}): {'# type: ignore' if base_async_class== 'JSHandle' else ''}"
+    )
     print("")
-    print(f"    def __init__(self, obj: {class_name}Impl):")
-    print("        super().__init__(obj)")
     for [name, type] in get_type_hints(t, api_globals).items():
         print("")
         print("    @property")

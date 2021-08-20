@@ -18,9 +18,9 @@ import sys
 import typing
 
 if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
+    from typing import Literal, final
 else:  # pragma: no cover
-    from typing_extensions import Literal
+    from typing_extensions import Literal, final
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
@@ -74,10 +74,8 @@ from playwright._impl._video import Video as VideoImpl
 NoneType = type(None)
 
 
+@final
 class Request(AsyncBase):
-    def __init__(self, obj: RequestImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Request.url
@@ -296,10 +294,8 @@ class Request(AsyncBase):
 mapping.register(RequestImpl, Request)
 
 
+@final
 class Response(AsyncBase):
-    def __init__(self, obj: ResponseImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Response.url
@@ -476,10 +472,8 @@ class Response(AsyncBase):
 mapping.register(ResponseImpl, Response)
 
 
+@final
 class Route(AsyncBase):
-    def __init__(self, obj: RouteImpl):
-        super().__init__(obj)
-
     @property
     def request(self) -> "Request":
         """Route.request
@@ -632,10 +626,8 @@ class Route(AsyncBase):
 mapping.register(RouteImpl, Route)
 
 
+@final
 class WebSocket(AsyncBase):
-    def __init__(self, obj: WebSocketImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """WebSocket.url
@@ -730,10 +722,8 @@ class WebSocket(AsyncBase):
 mapping.register(WebSocketImpl, WebSocket)
 
 
+@final
 class Keyboard(AsyncBase):
-    def __init__(self, obj: KeyboardImpl):
-        super().__init__(obj)
-
     async def down(self, key: str) -> NoneType:
         """Keyboard.down
 
@@ -891,10 +881,8 @@ class Keyboard(AsyncBase):
 mapping.register(KeyboardImpl, Keyboard)
 
 
+@final
 class Mouse(AsyncBase):
-    def __init__(self, obj: MouseImpl):
-        super().__init__(obj)
-
     async def move(self, x: float, y: float, *, steps: int = None) -> NoneType:
         """Mouse.move
 
@@ -1028,10 +1016,8 @@ class Mouse(AsyncBase):
 mapping.register(MouseImpl, Mouse)
 
 
+@final
 class Touchscreen(AsyncBase):
-    def __init__(self, obj: TouchscreenImpl):
-        super().__init__(obj)
-
     async def tap(self, x: float, y: float) -> NoneType:
         """Touchscreen.tap
 
@@ -1051,10 +1037,8 @@ class Touchscreen(AsyncBase):
 mapping.register(TouchscreenImpl, Touchscreen)
 
 
+@final
 class JSHandle(AsyncBase):
-    def __init__(self, obj: JSHandleImpl):
-        super().__init__(obj)
-
     async def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """JSHandle.evaluate
 
@@ -1221,10 +1205,8 @@ class JSHandle(AsyncBase):
 mapping.register(JSHandleImpl, JSHandle)
 
 
-class ElementHandle(JSHandle):
-    def __init__(self, obj: ElementHandleImpl):
-        super().__init__(obj)
-
+@final
+class ElementHandle(JSHandle):  # type: ignore
     def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
 
@@ -2526,10 +2508,8 @@ class ElementHandle(JSHandle):
 mapping.register(ElementHandleImpl, ElementHandle)
 
 
+@final
 class Accessibility(AsyncBase):
-    def __init__(self, obj: AccessibilityImpl):
-        super().__init__(obj)
-
     async def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
     ) -> typing.Optional[typing.Dict]:
@@ -2590,10 +2570,8 @@ class Accessibility(AsyncBase):
 mapping.register(AccessibilityImpl, Accessibility)
 
 
+@final
 class FileChooser(AsyncBase):
-    def __init__(self, obj: FileChooserImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """FileChooser.page
@@ -2673,10 +2651,8 @@ class FileChooser(AsyncBase):
 mapping.register(FileChooserImpl, FileChooser)
 
 
+@final
 class Frame(AsyncBase):
-    def __init__(self, obj: FrameImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """Frame.page
@@ -4836,10 +4812,8 @@ class Frame(AsyncBase):
 mapping.register(FrameImpl, Frame)
 
 
+@final
 class Worker(AsyncBase):
-    def __init__(self, obj: WorkerImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Worker.url
@@ -4923,10 +4897,8 @@ class Worker(AsyncBase):
 mapping.register(WorkerImpl, Worker)
 
 
+@final
 class Selectors(AsyncBase):
-    def __init__(self, obj: SelectorsImpl):
-        super().__init__(obj)
-
     async def register(
         self,
         name: str,
@@ -5007,10 +4979,8 @@ class Selectors(AsyncBase):
 mapping.register(SelectorsImpl, Selectors)
 
 
+@final
 class ConsoleMessage(AsyncBase):
-    def __init__(self, obj: ConsoleMessageImpl):
-        super().__init__(obj)
-
     @property
     def type(self) -> str:
         """ConsoleMessage.type
@@ -5063,10 +5033,8 @@ class ConsoleMessage(AsyncBase):
 mapping.register(ConsoleMessageImpl, ConsoleMessage)
 
 
+@final
 class Dialog(AsyncBase):
-    def __init__(self, obj: DialogImpl):
-        super().__init__(obj)
-
     @property
     def type(self) -> str:
         """Dialog.type
@@ -5134,10 +5102,8 @@ class Dialog(AsyncBase):
 mapping.register(DialogImpl, Dialog)
 
 
+@final
 class Download(AsyncBase):
-    def __init__(self, obj: DownloadImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """Download.page
@@ -5250,10 +5216,8 @@ class Download(AsyncBase):
 mapping.register(DownloadImpl, Download)
 
 
+@final
 class Video(AsyncBase):
-    def __init__(self, obj: VideoImpl):
-        super().__init__(obj)
-
     async def path(self) -> pathlib.Path:
         """Video.path
 
@@ -5299,10 +5263,8 @@ class Video(AsyncBase):
 mapping.register(VideoImpl, Video)
 
 
+@final
 class Page(AsyncContextManager):
-    def __init__(self, obj: PageImpl):
-        super().__init__(obj)
-
     @property
     def accessibility(self) -> "Accessibility":
         """Page.accessibility
@@ -8789,10 +8751,8 @@ class Page(AsyncContextManager):
 mapping.register(PageImpl, Page)
 
 
+@final
 class BrowserContext(AsyncContextManager):
-    def __init__(self, obj: BrowserContextImpl):
-        super().__init__(obj)
-
     @property
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
@@ -9554,10 +9514,8 @@ class BrowserContext(AsyncContextManager):
 mapping.register(BrowserContextImpl, BrowserContext)
 
 
+@final
 class CDPSession(AsyncBase):
-    def __init__(self, obj: CDPSessionImpl):
-        super().__init__(obj)
-
     async def send(self, method: str, params: typing.Dict = None) -> typing.Dict:
         """CDPSession.send
 
@@ -9595,10 +9553,8 @@ class CDPSession(AsyncBase):
 mapping.register(CDPSessionImpl, CDPSession)
 
 
+@final
 class Browser(AsyncContextManager):
-    def __init__(self, obj: BrowserImpl):
-        super().__init__(obj)
-
     @property
     def contexts(self) -> typing.List["BrowserContext"]:
         """Browser.contexts
@@ -10085,10 +10041,8 @@ class Browser(AsyncContextManager):
 mapping.register(BrowserImpl, Browser)
 
 
+@final
 class BrowserType(AsyncBase):
-    def __init__(self, obj: BrowserTypeImpl):
-        super().__init__(obj)
-
     @property
     def name(self) -> str:
         """BrowserType.name
@@ -10571,10 +10525,8 @@ class BrowserType(AsyncBase):
 mapping.register(BrowserTypeImpl, BrowserType)
 
 
+@final
 class Playwright(AsyncBase):
-    def __init__(self, obj: PlaywrightImpl):
-        super().__init__(obj)
-
     @property
     def devices(self) -> typing.Dict:
         """Playwright.devices
@@ -10692,10 +10644,8 @@ class Playwright(AsyncBase):
 mapping.register(PlaywrightImpl, Playwright)
 
 
+@final
 class Tracing(AsyncBase):
-    def __init__(self, obj: TracingImpl):
-        super().__init__(obj)
-
     async def start(
         self, *, name: str = None, snapshots: bool = None, screenshots: bool = None
     ) -> NoneType:
@@ -10749,10 +10699,8 @@ class Tracing(AsyncBase):
 mapping.register(TracingImpl, Tracing)
 
 
+@final
 class Locator(AsyncBase):
-    def __init__(self, obj: LocatorImpl):
-        super().__init__(obj)
-
     @property
     def first(self) -> "Locator":
         """Locator.first
