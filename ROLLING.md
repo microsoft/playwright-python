@@ -7,6 +7,7 @@
 * install all deps:
      - `python -m pip install --upgrade pip`
      - `pip install -r local-requirements.txt`
+     - `pre-commit install`
      - `pip install -e .`
 * checkout `release-1.14` branch
 * change driver version in `setup.py`
