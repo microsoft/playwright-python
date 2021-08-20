@@ -11,7 +11,7 @@
      - `pip install -e .`
 * checkout `release-1.14` branch
 * change driver version in `setup.py`
-* download new driver: `rm -rf build/ dist/ driver/ && python setup.py bdist_wheel`
+* download new driver: `python setup.py bdist_wheel`
 * update API wrt new driver: `./scripts/update_api.sh`
 * run commit hooks (twice!): `pre-commit run --all-files`
 * commit changes & send PR
