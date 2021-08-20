@@ -13,7 +13,6 @@
 * change driver version in `setup.py`
 * download new driver: `python setup.py bdist_wheel`
 * generate API: `./scripts/update_api.sh`
-* run commit hooks (twice!): `pre-commit run --all-files`
 * commit changes & send PR
 * wait for bots to pass & merge the PR
 
