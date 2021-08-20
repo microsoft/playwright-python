@@ -15,4 +15,3 @@
 * generate API: `./scripts/update_api.sh`
 * commit changes & send PR
 * wait for bots to pass & merge the PR
-
