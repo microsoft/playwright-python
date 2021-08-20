@@ -16,7 +16,7 @@ import asyncio
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
@@ -131,7 +131,7 @@ class Connection:
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
-        on_ready: Callable[[], Coroutine],
+        on_ready: Callable[[], Awaitable],
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
@@ -174,7 +174,7 @@ class Connection:
             "",
             "initialize",
             {
-                "language": "python",
+                "sdkLanguage": "python",
             },
         ).future
         return from_channel(result["playwright"])
