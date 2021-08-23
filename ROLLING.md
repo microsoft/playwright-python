@@ -9,7 +9,6 @@
      - `pip install -r local-requirements.txt`
      - `pre-commit install`
      - `pip install -e .`
-* checkout `release-1.14` branch
 * change driver version in `setup.py`
 * download new driver: `python setup.py bdist_wheel`
 * generate API: `./scripts/update_api.sh`
