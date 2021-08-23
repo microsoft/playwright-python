@@ -31,7 +31,7 @@ python setup.py bdist_wheel --all
 Run tests:
 
 ```sh
-pytest
+pytest --browser chromium
 ```
 
 Checking for typing errors
