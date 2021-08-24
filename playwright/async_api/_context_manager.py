@@ -28,7 +28,7 @@ class PlaywrightContextManager:
 
     async def __aenter__(self) -> AsyncPlaywright:
         loop = asyncio.get_running_loop()
-        playwright_future: asyncio.Future = asyncio.Future()
+        playwright_future = loop.create_future()
 
         async def handle_ready() -> None:
             playwright_future.set_result(await self._connection.initialize_playwright())

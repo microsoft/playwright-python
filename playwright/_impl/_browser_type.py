@@ -190,7 +190,7 @@ class BrowserType(ChannelOwner):
         transport = WebSocketTransport(
             self._connection._loop, ws_endpoint, headers, slow_mo
         )
-        playwright_future: asyncio.Future = asyncio.Future()
+        playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
 
         async def handle_ready() -> None:
             playwright_future.set_result(await connection.initialize_playwright())
