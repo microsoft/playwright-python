@@ -55,8 +55,8 @@ Please use the Async API instead."""
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
+            loop.create_future(),
             PipeTransport(loop, compute_driver_executable()),
-            lambda: self._connection.initialize_playwright(),
         )
         g_self = greenlet.getcurrent()
 
