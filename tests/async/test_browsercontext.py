@@ -740,4 +740,6 @@ async def test_strict_selectors_on_context(browser: Browser, server: Server):
     )
     with pytest.raises(Error):
         await page.text_content("button")
+    with pytest.raises(Error):
+        await page.query_selector("button")
     await context.close()

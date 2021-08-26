@@ -14,7 +14,10 @@
 
 import asyncio
 
-from playwright.async_api import Error
+import pytest
+
+from playwright.async_api import Error, Page
+from tests.server import Server
 
 
 async def test_evaluate_handle(page, server):
@@ -253,3 +256,17 @@ async def test_should_report_different_frame_instance_when_frame_re_attaches(
     frame2 = await frame2_info.value
     assert frame2.is_detached() is False
     assert frame1 != frame2
+
+
+async def test_strict_mode(page: Page, server: Server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content(
+        """
+        <button>Hello</button>
+        <button>Hello</button>
+    """
+    )
+    with pytest.raises(Error):
+        await page.text_content("button", strict=True)
+    with pytest.raises(Error):
+        await page.query_selector("button", strict=True)

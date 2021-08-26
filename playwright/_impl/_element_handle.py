@@ -150,6 +150,7 @@ class ElementHandle(JSHandle):
             dict(
                 timeout=timeout,
                 noWaitAfter=noWaitAfter,
+                force=force,
                 **convert_select_option_values(value, index, label, element)
             )
         )
