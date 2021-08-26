@@ -16,13 +16,16 @@ import asyncio
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
+
+if TYPE_CHECKING:
+    from playwright._impl._playwright import Playwright
 
 
 class Channel(AsyncIOEventEmitter):
@@ -119,7 +122,17 @@ class ProtocolCallback:
 
 class RootChannelOwner(ChannelOwner):
     def __init__(self, connection: "Connection") -> None:
-        super().__init__(connection, "", "", {})
+        super().__init__(connection, "Root", "", {})
+
+    async def initialize(self) -> "Playwright":
+        return from_channel(
+            await self._channel.send(
+                "initialize",
+                {
+                    "sdkLanguage": "python",
+                },
+            )
+        )
 
 
 class Connection:
@@ -128,6 +141,7 @@ class Connection:
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
+        loop: asyncio.AbstractEventLoop,
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
@@ -140,6 +154,8 @@ class Connection:
         self._is_sync = False
         self._api_name = ""
         self._child_ws_connections: List["Connection"] = []
+        self._loop = loop
+        self._playwright_future: asyncio.Future["Playwright"] = loop.create_future()
 
     async def run_as_sync(self) -> None:
         self._is_sync = True
@@ -148,7 +164,16 @@ class Connection:
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
+
+        async def init() -> None:
+            self._playwright_future.set_result(await self._root_object.initialize())
+
+        await self._transport.connect()
+        self._loop.create_task(init())
         await self._transport.run()
+
+    def get_playwright_future(self) -> asyncio.Future:
+        return self._playwright_future
 
     def stop_sync(self) -> None:
         self._transport.request_stop()
@@ -163,17 +188,6 @@ class Connection:
     def cleanup(self) -> None:
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
-
-    async def wait_for_object_with_known_name(self, guid: str) -> ChannelOwner:
-        if guid in self._objects:
-            return self._objects[guid]
-        callback: asyncio.Future[ChannelOwner] = self._loop.create_future()
-
-        def callback_wrapper(result: ChannelOwner) -> None:
-            callback.set_result(result)
-
-        self._waiting_for_object[guid] = callback_wrapper
-        return await callback
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]

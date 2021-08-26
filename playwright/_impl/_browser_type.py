@@ -15,7 +15,7 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -41,6 +41,9 @@ from playwright._impl._helper import (
 )
 from playwright._impl._transport import WebSocketTransport
 from playwright._impl._wait_helper import throw_on_timeout
+
+if TYPE_CHECKING:
+    from playwright._impl._playwright import Playwright
 
 
 class BrowserType(ChannelOwner):
@@ -191,23 +194,22 @@ class BrowserType(ChannelOwner):
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
             transport,
+            self._connection._loop,
         )
         connection._is_sync = self._connection._is_sync
-        connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
-        future = connection._loop.create_task(
-            connection.wait_for_object_with_known_name("Playwright")
-        )
+        playwright_future = connection.get_playwright_future()
+
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
-            {transport.on_error_future, future, timeout_future},
+            {transport.on_error_future, playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
         )
-        if not future.done():
-            future.cancel()
+        if not playwright_future.done():
+            playwright_future.cancel()
         if not timeout_future.done():
             timeout_future.cancel()
-        playwright = next(iter(done)).result()
+        playwright: "Playwright" = next(iter(done)).result()
         self._connection._child_ws_connections.append(connection)
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser

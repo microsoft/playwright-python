@@ -61,6 +61,10 @@ class Transport(ABC):
         pass
 
     @abstractmethod
+    async def connect(self) -> None:
+        pass
+
+    @abstractmethod
     async def run(self) -> None:
         pass
 
@@ -91,6 +95,7 @@ class PipeTransport(Transport):
         self._driver_executable = driver_executable
 
     def request_stop(self) -> None:
+        assert self._output
         self._stopped = True
         self._output.close()
 
@@ -98,7 +103,7 @@ class PipeTransport(Transport):
         await self._stopped_future
         await self._proc.wait()
 
-    async def run(self) -> None:
+    async def connect(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
         # Hide the command-line window on Windows when using Pythonw.exe
         creationflags = 0
@@ -111,7 +116,7 @@ class PipeTransport(Transport):
             if getattr(sys, "frozen", False):
                 env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
 
-            self._proc = proc = await asyncio.create_subprocess_exec(
+            self._proc = await asyncio.create_subprocess_exec(
                 str(self._driver_executable),
                 "run-driver",
                 stdin=asyncio.subprocess.PIPE,
@@ -123,20 +128,21 @@ class PipeTransport(Transport):
             )
         except Exception as exc:
             self.on_error_future.set_exception(exc)
-            return
+            raise exc
 
-        assert proc.stdout
-        assert proc.stdin
-        self._output = proc.stdin
+        self._output = self._proc.stdin
 
+    async def run(self) -> None:
+        assert self._proc.stdout
+        assert self._proc.stdin
         while not self._stopped:
             try:
-                buffer = await proc.stdout.readexactly(4)
+                buffer = await self._proc.stdout.readexactly(4)
                 length = int.from_bytes(buffer, byteorder="little", signed=False)
                 buffer = bytes(0)
                 while length:
                     to_read = min(length, 32768)
-                    data = await proc.stdout.readexactly(to_read)
+                    data = await self._proc.stdout.readexactly(to_read)
                     length -= to_read
                     if len(buffer):
                         buffer = buffer + data
@@ -151,6 +157,7 @@ class PipeTransport(Transport):
         self._stopped_future.set_result(None)
 
     def send(self, message: Dict) -> None:
+        assert self._output
         data = self.serialize_message(message)
         self._output.write(
             len(data).to_bytes(4, byteorder="little", signed=False) + data
@@ -184,15 +191,16 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     async def wait_until_stopped(self) -> None:
         await self._connection.wait_closed()
 
-    async def run(self) -> None:
+    async def connect(self) -> None:
         try:
             self._connection = await websocket_connect(
                 self.ws_endpoint, extra_headers=self.headers
             )
         except Exception as exc:
             self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
-            return
+            raise exc
 
+    async def run(self) -> None:
         while not self._stopped:
             try:
                 message = await self._connection.recv()
@@ -220,7 +228,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
                 break
 
     def send(self, message: Dict) -> None:
-        if self._stopped or self._connection.closed:
+        if self._stopped or (hasattr(self, "_connection") and self._connection.closed):
             raise Error("Playwright connection closed")
         data = self.serialize_message(message)
         self._loop.create_task(self._connection.send(data))

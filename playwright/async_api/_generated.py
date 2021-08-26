@@ -2748,18 +2748,18 @@ class Frame(AsyncBase):
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
         last redirect.
 
-        `frame.goto` will throw an error if:
+        The method will throw an error if:
         - there's an SSL error (e.g. in case of self-signed certificates).
         - target URL is invalid.
         - the `timeout` is exceeded during navigation.
         - the remote server does not respond or is unreachable.
         - the main resource failed to load.
 
-        `frame.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404
-        \"Not Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
+        The method will not throw an error when any valid HTTP status code is returned by the remote server, including 404 \"Not
+        Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
         `response.status()`.
 
-        > NOTE: `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        > NOTE: The method either throws an error or returns a main resource response. The only exceptions are navigation to
         `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
         > NOTE: Headless mode doesn't support navigation to a PDF document. See the
         [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
@@ -4936,7 +4936,42 @@ class Selectors(AsyncBase):
         An example of registering selector engine that queries elements based on a tag name:
 
         ```py
-        # FIXME: add snippet
+        import asyncio
+        from playwright.async_api import async_playwright
+
+        async def run(playwright):
+            tag_selector = \"\"\"
+              {
+                  // Returns the first element matching given selector in the root's subtree.
+                  query(root, selector) {
+                      return root.querySelector(selector);
+                  },
+                  // Returns all elements matching given selector in the root's subtree.
+                  queryAll(root, selector) {
+                      return Array.from(root.querySelectorAll(selector));
+                  }
+              }\"\"\"
+
+            # Register the engine. Selectors will be prefixed with \"tag=\".
+            await playwright.selectors.register(\"tag\", tag_selector)
+            browser = await playwright.chromium.launch()
+            page = await browser.new_page()
+            await page.set_content('<div><button>Click me</button></div>')
+
+            # Use the selector prefixed with its name.
+            button = await page.query_selector('tag=button')
+            # Combine it with other selector engines.
+            await page.click('tag=div >> text=\"Click me\"')
+            # Can use it in any methods supporting selectors.
+            button_count = await page.eval_on_selector_all('tag=button', 'buttons => buttons.length')
+            print(button_count)
+            await browser.close()
+
+        async def main():
+            async with async_playwright() as playwright:
+                await run(playwright)
+
+        asyncio.run(main())
         ```
 
         Parameters
@@ -6389,18 +6424,18 @@ class Page(AsyncContextManager):
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
         last redirect.
 
-        `page.goto` will throw an error if:
+        The method will throw an error if:
         - there's an SSL error (e.g. in case of self-signed certificates).
         - target URL is invalid.
         - the `timeout` is exceeded during navigation.
         - the remote server does not respond or is unreachable.
         - the main resource failed to load.
 
-        `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 \"Not
+        The method will not throw an error when any valid HTTP status code is returned by the remote server, including 404 \"Not
         Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
         `response.status()`.
 
-        > NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+        > NOTE: The method either throws an error or returns a main resource response. The only exceptions are navigation to
         `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
         > NOTE: Headless mode doesn't support navigation to a PDF document. See the
         [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
@@ -10144,7 +10179,8 @@ class BrowserType(AsyncBase):
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, NoneType]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is
-            deleted when browser is closed.
+            deleted when browser is closed. In either case, the downloads are deleted when the browser context they were created in
+            is closed.
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         traces_dir : Union[pathlib.Path, str, NoneType]
@@ -10283,7 +10319,8 @@ class BrowserType(AsyncBase):
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, NoneType]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is
-            deleted when browser is closed.
+            deleted when browser is closed. In either case, the downloads are deleted when the browser context they were created in
+            is closed.
         slow_mo : Union[float, NoneType]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
         viewport : Union[{width: int, height: int}, NoneType]

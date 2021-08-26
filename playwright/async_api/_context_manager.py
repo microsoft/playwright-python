@@ -32,12 +32,11 @@ class PlaywrightContextManager:
             None,
             create_remote_object,
             PipeTransport(loop, compute_driver_executable()),
+            loop,
         )
-        self._connection._loop = loop
         loop.create_task(self._connection.run())
-        playwright_future = loop.create_task(
-            self._connection.wait_for_object_with_known_name("Playwright")
-        )
+        playwright_future = self._connection.get_playwright_future()
+
         done, pending = await asyncio.wait(
             {self._connection._transport.on_error_future, playwright_future},
             return_when=asyncio.FIRST_COMPLETED,

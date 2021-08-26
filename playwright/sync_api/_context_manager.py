@@ -56,6 +56,7 @@ Please use the Async API instead."""
             dispatcher_fiber,
             create_remote_object,
             PipeTransport(loop, compute_driver_executable()),
+            loop,
         )
 
         g_self = greenlet.getcurrent()
