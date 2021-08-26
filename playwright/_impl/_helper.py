@@ -25,6 +25,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Coroutine,
     Dict,
     List,
     Optional,
@@ -49,7 +50,9 @@ if TYPE_CHECKING:  # pragma: no cover
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
 URLMatchRequest = Union[str, Pattern, Callable[["Request"], bool]]
 URLMatchResponse = Union[str, Pattern, Callable[["Response"], bool]]
-RouteHandler = Union[Callable[["Route"], Any], Callable[["Route", "Request"], Any]]
+RouteHandlerCallback = Union[
+    Callable[["Route"], Any], Callable[["Route", "Request"], Any]
+]
 
 ColorScheme = Literal["dark", "light", "no-preference"]
 ReducedMotion = Literal["no-preference", "reduce"]
@@ -199,10 +202,28 @@ def monotonic_time() -> int:
     return math.floor(time.monotonic() * 1000)
 
 
-class RouteHandlerEntry:
-    def __init__(self, matcher: URLMatcher, handler: RouteHandler):
+class RouteHandler:
+    def __init__(
+        self,
+        matcher: URLMatcher,
+        handler: RouteHandlerCallback,
+        times: Optional[int],
+    ):
         self.matcher = matcher
         self.handler = handler
+        self._times = times
+        self._handled_count = 0
+
+    def matches(self, request_url: str) -> bool:
+        if self._times and self._handled_count >= self._times:
+            return False
+        return self.matcher.matches(request_url)
+
+    def handle(self, route: "Route", request: "Request") -> Union[Coroutine, Any]:
+        self._handled_count += 1
+        return cast(
+            Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
+        )(route, request)
 
 
 def is_safe_close_error(error: Exception) -> bool:

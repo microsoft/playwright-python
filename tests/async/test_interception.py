@@ -17,7 +17,8 @@ import json
 
 import pytest
 
-from playwright.async_api import Browser, Error, Page, Route
+from playwright.async_api import Browser, BrowserContext, Error, Page, Route
+from tests.server import Server
 
 
 async def test_page_route_should_intercept(page, server):
@@ -907,3 +908,35 @@ async def test_ignore_http_errors_service_worker_should_intercept_after_a_servic
     # Page route is not applied to service worker initiated fetch.
     non_intercepted_response = await page.evaluate('() => fetchDummy("passthrough")')
     assert non_intercepted_response == "FAILURE: Not Found"
+
+
+async def test_page_route_should_support_times_parameter(page: Page, server: Server):
+    intercepted = []
+
+    async def handle_request(route):
+        await route.continue_()
+        intercepted.append(True)
+
+    await page.route("**/empty.html", handle_request, times=1)
+
+    await page.goto(server.EMPTY_PAGE)
+    await page.goto(server.EMPTY_PAGE)
+    await page.goto(server.EMPTY_PAGE)
+    assert len(intercepted) == 1
+
+
+async def test_context_route_should_support_times_parameter(
+    context: BrowserContext, page: Page, server: Server
+):
+    intercepted = []
+
+    async def handle_request(route):
+        await route.continue_()
+        intercepted.append(True)
+
+    await context.route("**/empty.html", handle_request, times=1)
+
+    await page.goto(server.EMPTY_PAGE)
+    await page.goto(server.EMPTY_PAGE)
+    await page.goto(server.EMPTY_PAGE)
+    assert len(intercepted) == 1

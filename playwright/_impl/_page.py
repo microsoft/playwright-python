@@ -49,7 +49,7 @@ from playwright._impl._helper import (
     MouseButton,
     ReducedMotion,
     RouteHandler,
-    RouteHandlerEntry,
+    RouteHandlerCallback,
     TimeoutSettings,
     URLMatch,
     URLMatcher,
@@ -130,7 +130,7 @@ class Page(ChannelOwner):
         self._is_closed = False
         self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
-        self._routes: List[RouteHandlerEntry] = []
+        self._routes: List[RouteHandler] = []
         self._owned_context: Optional["BrowserContext"] = None
         self._timeout_settings: TimeoutSettings = TimeoutSettings(
             self._browser_context._timeout_settings
@@ -211,8 +211,8 @@ class Page(ChannelOwner):
 
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
-            if handler_entry.matcher.matches(request.url):
-                result = cast(Any, handler_entry.handler)(route, request)
+            if handler_entry.matches(request.url):
+                result = handler_entry.handle(route, request)
                 if inspect.iscoroutine(result):
                     asyncio.create_task(result)
                 return
@@ -536,11 +536,15 @@ class Page(ChannelOwner):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
 
-    async def route(self, url: URLMatch, handler: RouteHandler) -> None:
+    async def route(
+        self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
+    ) -> None:
         self._routes.insert(
             0,
-            RouteHandlerEntry(
-                URLMatcher(self._browser_context._options.get("baseURL"), url), handler
+            RouteHandler(
+                URLMatcher(self._browser_context._options.get("baseURL"), url),
+                handler,
+                times,
             ),
         )
         if len(self._routes) == 1:
@@ -549,7 +553,7 @@ class Page(ChannelOwner):
             )
 
     async def unroute(
-        self, url: URLMatch, handler: Optional[RouteHandler] = None
+        self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
     ) -> None:
         self._routes = list(
             filter(

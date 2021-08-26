@@ -2467,7 +2467,8 @@ class ElementHandle(JSHandle):
         selector: str,
         *,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
-        timeout: float = None
+        timeout: float = None,
+        strict: bool = None
     ) -> typing.Optional["ElementHandle"]:
         """ElementHandle.wait_for_selector
 
@@ -2503,6 +2504,9 @@ class ElementHandle(JSHandle):
         timeout : Union[float, NoneType]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
 
         Returns
         -------
@@ -2513,7 +2517,7 @@ class ElementHandle(JSHandle):
             await self._async(
                 "element_handle.wait_for_selector",
                 self._impl_obj.wait_for_selector(
-                    selector=selector, state=state, timeout=timeout
+                    selector=selector, state=state, timeout=timeout, strict=strict
                 ),
             )
         )
@@ -3339,8 +3343,8 @@ class Frame(AsyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
             element, the call throws an exception.
         timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            **DEPRECATED** This option is ignored. `frame.is_hidden()` does not wait for the element to become hidden and
+            returns immediately.
 
         Returns
         -------
@@ -3373,8 +3377,8 @@ class Frame(AsyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
             element, the call throws an exception.
         timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            **DEPRECATED** This option is ignored. `frame.is_visible()` does not wait for the element to become visible and
+            returns immediately.
 
         Returns
         -------
@@ -5790,8 +5794,8 @@ class Page(AsyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
             element, the call throws an exception.
         timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            **DEPRECATED** This option is ignored. `page.is_hidden()` does not wait for the element to become hidden and
+            returns immediately.
 
         Returns
         -------
@@ -5824,8 +5828,8 @@ class Page(AsyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
             element, the call throws an exception.
         timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            **DEPRECATED** This option is ignored. `page.is_visible()` does not wait for the element to become visible and
+            returns immediately.
 
         Returns
         -------
@@ -6865,6 +6869,8 @@ class Page(AsyncContextManager):
             typing.Callable[["Route"], typing.Any],
             typing.Callable[["Route", "Request"], typing.Any],
         ],
+        *,
+        times: int = None
     ) -> NoneType:
         """Page.route
 
@@ -6873,6 +6879,9 @@ class Page(AsyncContextManager):
         Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 
         > NOTE: The handler will only be called for the first url if the response is a redirect.
+        > NOTE: `page.route()` will not intercept requests intercepted by Service Worker. See
+        [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
+        request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
 
         An example of a naive handler that aborts all image requests:
 
@@ -6919,13 +6928,17 @@ class Page(AsyncContextManager):
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
+        times : Union[int, NoneType]
+            How often a route should be used. By default it will be used every time.
         """
 
         return mapping.from_maybe_impl(
             await self._async(
                 "page.route",
                 self._impl_obj.route(
-                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                    url=self._wrap_handler(url),
+                    handler=self._wrap_handler(handler),
+                    times=times,
                 ),
             )
         )
@@ -9265,11 +9278,17 @@ class BrowserContext(AsyncContextManager):
             typing.Callable[["Route"], typing.Any],
             typing.Callable[["Route", "Request"], typing.Any],
         ],
+        *,
+        times: int = None
     ) -> NoneType:
         """BrowserContext.route
 
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
         is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
+
+        > NOTE: `page.route()` will not intercept requests intercepted by Service Worker. See
+        [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
+        request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
 
         An example of a naive handler that aborts all image requests:
 
@@ -9319,13 +9338,17 @@ class BrowserContext(AsyncContextManager):
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
+        times : Union[int, NoneType]
+            How often a route should be used. By default it will be used every time.
         """
 
         return mapping.from_maybe_impl(
             await self._async(
                 "browser_context.route",
                 self._impl_obj.route(
-                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                    url=self._wrap_handler(url),
+                    handler=self._wrap_handler(handler),
+                    times=times,
                 ),
             )
         )
@@ -9512,7 +9535,7 @@ class BrowserContext(AsyncContextManager):
         Parameters
         ----------
         page : Union[Frame, Page]
-            Target to create new session for. For backwards-compatability, this parameter is named `page`, but it can be a `Page` or
+            Target to create new session for. For backwards-compatibility, this parameter is named `page`, but it can be a `Page` or
             `Frame` type.
 
         Returns
@@ -11559,8 +11582,8 @@ class Locator(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            **DEPRECATED** This option is ignored. `locator.is_hidden()` does not wait for the element to become hidden and
+            returns immediately.
 
         Returns
         -------
@@ -11581,8 +11604,8 @@ class Locator(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            **DEPRECATED** This option is ignored. `locator.is_visible()` does not wait for the element to become visible and
+            returns immediately.
 
         Returns
         -------
