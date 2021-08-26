@@ -259,7 +259,7 @@ class Frame(ChannelOwner):
         self, selector: str, strict: bool = None
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
-            await self._channel.send("querySelector", dict(selector=selector))
+            await self._channel.send("querySelector", locals_to_params(locals()))
         )
 
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
@@ -321,7 +321,15 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send(
             "dispatchEvent",
-            dict(selector=selector, type=type, eventInit=serialize_argument(eventInit)),
+            locals_to_params(
+                dict(
+                    selector=selector,
+                    type=type,
+                    eventInit=serialize_argument(eventInit),
+                    strict=strict,
+                    timeout=timeout,
+                ),
+            ),
         )
 
     async def eval_on_selector(
@@ -334,10 +342,13 @@ class Frame(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evalOnSelector",
-                dict(
-                    selector=selector,
-                    expression=expression,
-                    arg=serialize_argument(arg),
+                locals_to_params(
+                    dict(
+                        selector=selector,
+                        expression=expression,
+                        arg=serialize_argument(arg),
+                        strict=strict,
+                    )
                 ),
             )
         )
@@ -549,6 +560,8 @@ class Frame(ChannelOwner):
                 selector=selector,
                 timeout=timeout,
                 noWaitAfter=noWaitAfter,
+                strict=strict,
+                force=force,
                 **convert_select_option_values(value, index, label, element),
             )
         )
