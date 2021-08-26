@@ -194,9 +194,9 @@ class BrowserType(ChannelOwner):
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
             transport,
+            self._connection._loop,
         )
         connection._is_sync = self._connection._is_sync
-        connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
         playwright_future = connection.get_playwright_future()
 

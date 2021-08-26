@@ -141,6 +141,7 @@ class Connection:
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
+        loop: asyncio.AbstractEventLoop,
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
@@ -153,7 +154,8 @@ class Connection:
         self._is_sync = False
         self._api_name = ""
         self._child_ws_connections: List["Connection"] = []
-        self._playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
+        self._loop = loop
+        self._playwright_future: asyncio.Future["Playwright"] = loop.create_future()
 
     async def run_as_sync(self) -> None:
         self._is_sync = True
@@ -171,9 +173,9 @@ class Connection:
             self._loop.create_task(init())
             await self._transport.run()
         except Exception:
-            pass
+            await self.stop_async()
 
-    def get_playwright_future(self) -> asyncio.Future["Playwright"]:
+    def get_playwright_future(self) -> asyncio.Future:
         return self._playwright_future
 
     def stop_sync(self) -> None:

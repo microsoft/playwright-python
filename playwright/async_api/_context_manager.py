@@ -32,8 +32,8 @@ class PlaywrightContextManager:
             None,
             create_remote_object,
             PipeTransport(loop, compute_driver_executable()),
+            loop,
         )
-        self._connection._loop = loop
         loop.create_task(self._connection.run())
         playwright_future = self._connection.get_playwright_future()
 
