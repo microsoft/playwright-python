@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import inspect
 import re
 from types import FunctionType
 from typing import (  # type: ignore
     Any,
+    Callable,
     List,
     Match,
+    Optional,
     Union,
     cast,
     get_args,
@@ -91,6 +93,34 @@ positional_exceptions = [
 ]
 
 
+class Overload:
+    def __init__(self, clazz: object, name: str):
+        matches = re.match(r"_overload(\d+)_([a-zA-Z\d_]+)", name)
+        if matches is None:
+            raise ValueError(f"failed to get function name for overload: {name}")
+        self.number = int(matches[1])
+        self.name = matches[2]
+        self.clazz = clazz
+
+    def assert_has_implementation(self) -> None:
+        if self.implementation() is None:
+            raise Exception(f"implementation for overload '{self.name}' not found")
+
+    def implementation(self) -> Optional[Callable]:
+        for name, method in self.clazz.__dict__.items():
+            if name == self.name:
+                return method
+        return None
+
+
+def is_overload(name: str) -> bool:
+    try:
+        Overload(None, name)
+        return True
+    except TypeError:
+        return False
+
+
 def is_positional_exception(key: str) -> bool:
     for pattern in positional_exceptions:
         if re.match(pattern, key):
@@ -98,12 +128,19 @@ def is_positional_exception(key: str) -> bool:
     return False
 
 
-def signature(func: FunctionType, indent: int) -> str:
+def signature(func: FunctionType, indent: int, overload: bool = False) -> str:
+    tokens = []
     hints = get_type_hints(func, globals())
-    tokens = ["self"]
-    split = ",\n" + " " * indent
+    inspected_signature = inspect.signature(func).parameters
 
+    tokens.append("self")
+    split = ",\n" + " " * indent
     saw_optional = False
+
+    # when preserving position and keyword separators (if overload)
+    render_pos_only_separator = False
+    render_kw_only_separator = True
+
     for [name, value] in hints.items():
         if name == "return":
             continue
@@ -113,18 +150,54 @@ def signature(func: FunctionType, indent: int) -> str:
                 "Positional exception is not first in the list "
                 + f"{func.__name__}.{name}"
             )
-        if (
-            not positional_exception
-            and not saw_optional
-            and (
-                str(value).endswith("NoneType]")
-                or str(value).startswith("typing.Optional")
-            )
-        ):
-            saw_optional = True
-            tokens.append("*")
-        processed = process_type(value, True)
+        # preserve any keyword/positional separators otherwise it could make the overload invalid
+        if overload:
+            # the types in Signature are different to the types in get_type_hints
+            # use them instead so it's consistent with the other signatures
+            param = inspected_signature[name]
+
+            kind = param.kind
+
+            # taken from Signature.__str__
+            if kind == inspect.Parameter.POSITIONAL_ONLY:
+                render_pos_only_separator = True
+            elif render_pos_only_separator:
+                # It's not a positional-only parameter, and the flag
+                # is set to 'True' (there were pos-only params before.)
+                tokens.append("/")
+                render_pos_only_separator = False
+
+            if kind == inspect.Parameter.VAR_POSITIONAL:
+                # OK, we have an '*args'-like parameter, so we won't need
+                # a '*' to separate keyword-only arguments
+                render_kw_only_separator = False
+            elif kind == inspect.Parameter.KEYWORD_ONLY and render_kw_only_separator:
+                # We have a keyword-only parameter to render and we haven't
+                # rendered an '*args'-like parameter before, so add a '*'
+                # separator to the parameters list ("foo(arg1, *, arg2)" case)
+                tokens.append("*")
+                # This condition should be only triggered once, so
+                # reset the flag
+                render_kw_only_separator = False
+
+            processed = process_type(value, False)
+        else:
+            if (
+                not positional_exception
+                and not saw_optional
+                and (
+                    str(value).endswith("NoneType]")
+                    or str(value).startswith("typing.Optional")
+                )
+            ):
+                saw_optional = True
+                tokens.append("*")
+            processed = process_type(value, True)
         tokens.append(f"{to_snake_case(name)}: {processed}")
+    if overload and render_pos_only_separator:
+        # There were only positional-only parameters, hence the
+        # flag was not reset to 'False'
+        tokens.append("/")
     return split.join(tokens)
 
 
