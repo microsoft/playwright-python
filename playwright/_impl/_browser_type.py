@@ -190,16 +190,15 @@ class BrowserType(ChannelOwner):
         transport = WebSocketTransport(
             self._connection._loop, ws_endpoint, headers, slow_mo
         )
-        playwright_future = self._connection._loop.create_future()
         connection = Connection(
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
-            playwright_future,
             transport,
         )
         connection._is_sync = self._connection._is_sync
         connection._loop = self._connection._loop
         connection._loop.create_task(connection.run())
+        playwright_future = connection.get_playwright_future()
 
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(

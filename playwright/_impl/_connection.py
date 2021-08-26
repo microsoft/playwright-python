@@ -140,7 +140,6 @@ class Connection:
         self,
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
-        playwright_future: asyncio.Future,
         transport: Transport,
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
@@ -154,7 +153,7 @@ class Connection:
         self._is_sync = False
         self._api_name = ""
         self._child_ws_connections: List["Connection"] = []
-        self._playwright_future = playwright_future
+        self._playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
 
     async def run_as_sync(self) -> None:
         self._is_sync = True
@@ -163,13 +162,19 @@ class Connection:
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
-        await self._transport.connect()
 
         async def init() -> None:
             self._playwright_future.set_result(await self._root_object.initialize())
 
-        self._loop.create_task(init())
-        await self._transport.run()
+        try:
+            await self._transport.connect()
+            self._loop.create_task(init())
+            await self._transport.run()
+        except Exception:
+            pass
+
+    def get_playwright_future(self) -> asyncio.Future["Playwright"]:
+        return self._playwright_future
 
     def stop_sync(self) -> None:
         self._transport.request_stop()

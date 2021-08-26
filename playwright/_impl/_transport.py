@@ -88,9 +88,7 @@ class Transport(ABC):
 
 class PipeTransport(Transport):
     def __init__(
-        self,
-        loop: asyncio.AbstractEventLoop,
-        driver_executable: Path,
+        self, loop: asyncio.AbstractEventLoop, driver_executable: Path
     ) -> None:
         super().__init__(loop)
         self._stopped = False
@@ -130,7 +128,7 @@ class PipeTransport(Transport):
             )
         except Exception as exc:
             self.on_error_future.set_exception(exc)
-            return
+            raise exc
 
         self._output = self._proc.stdin
 
@@ -171,10 +169,10 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
         self,
         loop: asyncio.AbstractEventLoop,
         ws_endpoint: str,
-        headers: Optional[Dict[str, str]],
-        slow_mo: Optional[float],
+        headers: Dict[str, str] = None,
+        slow_mo: float = None,
     ) -> None:
-        AsyncIOEventEmitter.__init__(self)
+        super().__init__(loop)
         Transport.__init__(self, loop)
 
         self._stopped = False
@@ -200,7 +198,7 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
             )
         except Exception as exc:
             self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
-            return
+            raise exc
 
     async def run(self) -> None:
         while not self._stopped:
