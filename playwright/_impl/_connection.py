@@ -168,12 +168,9 @@ class Connection:
         async def init() -> None:
             self._playwright_future.set_result(await self._root_object.initialize())
 
-        try:
-            await self._transport.connect()
-            self._loop.create_task(init())
-            await self._transport.run()
-        except Exception:
-            await self.stop_async()
+        await self._transport.connect()
+        self._loop.create_task(init())
+        await self._transport.run()
 
     def get_playwright_future(self) -> asyncio.Future:
         return self._playwright_future
