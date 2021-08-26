@@ -173,9 +173,12 @@ class Locator:
         timeout: float = None,
     ) -> ElementHandle:
         params = locals_to_params(locals())
-        return await self._frame.wait_for_selector(
+        return cast(
+            ElementHandle,
+            await self._frame.wait_for_selector(
                 self._selector, strict=True, state="attached", **params
-            )
+            ),
+        )
 
     async def element_handles(self) -> List[ElementHandle]:
         return await self._frame.query_selector_all(self._selector)

@@ -2445,6 +2445,26 @@ class ElementHandle(JSHandle):
             )
         )
 
+    @typing.overload
+    def wait_for_selector(
+        self,
+        selector: str,
+        *,
+        state: typing.Optional[Literal["attached", "visible"]],
+        timeout: typing.Optional[float]
+    ) -> "ElementHandle":
+        pass
+
+    @typing.overload
+    def wait_for_selector(
+        self,
+        selector: str,
+        *,
+        state: Literal["detached", "hidden"],
+        timeout: typing.Optional[float]
+    ) -> NoneType:
+        pass
+
     def wait_for_selector(
         self,
         selector: str,
@@ -3098,6 +3118,28 @@ class Frame(SyncBase):
                 self._impl_obj.query_selector_all(selector=selector),
             )
         )
+
+    @typing.overload
+    def wait_for_selector(
+        self,
+        selector: str,
+        *,
+        strict: typing.Optional[bool],
+        timeout: typing.Optional[float],
+        state: typing.Optional[Literal["attached", "visible"]]
+    ) -> "ElementHandle":
+        pass
+
+    @typing.overload
+    def wait_for_selector(
+        self,
+        selector: str,
+        *,
+        strict: typing.Optional[bool],
+        timeout: typing.Optional[float],
+        state: Literal["detached", "hidden"]
+    ) -> NoneType:
+        pass
 
     def wait_for_selector(
         self,
@@ -5504,6 +5546,28 @@ class Page(SyncContextManager):
                 self._impl_obj.query_selector_all(selector=selector),
             )
         )
+
+    @typing.overload
+    def wait_for_selector(
+        self,
+        selector: str,
+        *,
+        timeout: typing.Optional[float],
+        state: typing.Optional[Literal["attached", "visible"]],
+        strict: typing.Optional[bool]
+    ) -> "ElementHandle":
+        pass
+
+    @typing.overload
+    def wait_for_selector(
+        self,
+        selector: str,
+        *,
+        timeout: typing.Optional[float],
+        state: Literal["detached", "hidden"],
+        strict: typing.Optional[bool]
+    ) -> NoneType:
+        pass
 
     def wait_for_selector(
         self,

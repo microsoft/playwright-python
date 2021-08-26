@@ -19,17 +19,7 @@ import re
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
@@ -335,40 +325,30 @@ class Page(ChannelOwner):
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
         return await self._main_frame.query_selector_all(selector)
 
-    @overload
-    async def wait_for_selector(
+    async def _overload1_wait_for_selector(
         self,
         selector: str,
+        *,
         timeout: float = None,
         state: Literal["attached", "visible"] = None,
         strict: bool = None,
     ) -> ElementHandle:
         ...
 
-    @overload
-    async def wait_for_selector(
-            self,
-            selector: str,
-            timeout: float= None,
-            *,
-            state: Literal["detached", "hidden"],
-            strict: bool = None,
-    ) -> None:
-        ...
-
-    @overload
-    async def wait_for_selector(
-            self,
-            selector: str,
-            timeout: Optional[float],
-            state: Literal["detached", "hidden"],
-            strict: bool = None,
+    async def _overload2_wait_for_selector(
+        self,
+        selector: str,
+        *,
+        timeout: float = None,
+        state: Literal["detached", "hidden"],
+        strict: bool = None,
     ) -> None:
         ...
 
     async def wait_for_selector(
         self,
         selector: str,
+        *,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         strict: bool = None,
