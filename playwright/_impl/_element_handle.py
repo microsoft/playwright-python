@@ -315,6 +315,7 @@ class ElementHandle(JSHandle):
         selector: str,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         timeout: float = None,
+        strict: bool = None,
     ) -> Optional["ElementHandle"]:
         return from_nullable_channel(
             await self._channel.send("waitForSelector", locals_to_params(locals()))

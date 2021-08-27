@@ -261,7 +261,7 @@ def test_close_should_reject_all_promises(context):
             lambda: new_page.evaluate("() => new Promise(r => {})"),
             lambda: new_page.close(),
         )
-    assert "Protocol error" in exc_info.value.message
+    assert "Target closed" in exc_info.value.message
 
 
 def test_expect_response_should_work(page: Page, server):

@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Unio
 
 from playwright._impl._api_structures import Cookie, Geolocation, StorageState
 from playwright._impl._api_types import Error
+from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import (
     ChannelOwner,
@@ -31,7 +32,7 @@ from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._frame import Frame
 from playwright._impl._helper import (
     RouteHandler,
-    RouteHandlerEntry,
+    RouteHandlerCallback,
     TimeoutSettings,
     URLMatch,
     URLMatcher,
@@ -68,7 +69,7 @@ class BrowserContext(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._pages: List[Page] = []
-        self._routes: List[RouteHandlerEntry] = []
+        self._routes: List[RouteHandler] = []
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
         self._browser: Optional["Browser"] = None
@@ -146,8 +147,8 @@ class BrowserContext(ChannelOwner):
 
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
-            if handler_entry.matcher.matches(request.url):
-                result = cast(Any, handler_entry.handler)(route, request)
+            if handler_entry.matches(request.url):
+                result = handler_entry.handle(route, request)
                 if inspect.iscoroutine(result):
                     asyncio.create_task(result)
                 return
@@ -241,9 +242,12 @@ class BrowserContext(ChannelOwner):
     async def expose_function(self, name: str, callback: Callable) -> None:
         await self.expose_binding(name, lambda source, *args: callback(*args))
 
-    async def route(self, url: URLMatch, handler: RouteHandler) -> None:
+    async def route(
+        self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
+    ) -> None:
         self._routes.insert(
-            0, RouteHandlerEntry(URLMatcher(self._options.get("baseURL"), url), handler)
+            0,
+            RouteHandler(URLMatcher(self._options.get("baseURL"), url), handler, times),
         )
         if len(self._routes) == 1:
             await self._channel.send(
@@ -251,7 +255,7 @@ class BrowserContext(ChannelOwner):
             )
 
     async def unroute(
-        self, url: URLMatch, handler: Optional[RouteHandler] = None
+        self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
     ) -> None:
         self._routes = list(
             filter(
@@ -291,6 +295,16 @@ class BrowserContext(ChannelOwner):
 
     async def close(self) -> None:
         try:
+            if self._options.get("recordHar"):
+                har = cast(
+                    Artifact, from_channel(await self._channel.send("harExport"))
+                )
+                if self.browser and self.browser._is_remote:
+                    har._is_remote = True
+                await har.save_as(
+                    cast(Dict[str, str], self._options["recordHar"])["path"]
+                )
+                await har.delete()
             await self._channel.send("close")
             await self._closed_future
         except Exception as e:
