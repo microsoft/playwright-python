@@ -14,6 +14,8 @@
 
 from typing import List
 
+import pytest
+
 from playwright.async_api import ConsoleMessage, Page
 
 
@@ -95,6 +97,8 @@ async def test_console_should_not_fail_for_window_object(page, browser_name):
         assert message.text == "JSHandle@object"
 
 
+# Upstream issue https://bugs.webkit.org/show_bug.cgi?id=229515
+@pytest.mark.skip_browser("webkit")
 async def test_console_should_trigger_correct_log(page, server):
     await page.goto("about:blank")
     async with page.expect_console_message() as message_info:

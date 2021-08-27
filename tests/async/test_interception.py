@@ -541,7 +541,7 @@ async def test_page_route_should_create_a_redirect(page, server):
     assert text == ""
 
 
-async def test_page_route_should_support_cors_with_GET(page, server):
+async def test_page_route_should_support_cors_with_GET(page, server, browser_name):
     await page.goto(server.EMPTY_PAGE)
 
     async def handle_route(route, request):
@@ -579,7 +579,12 @@ async def test_page_route_should_support_cors_with_GET(page, server):
             return response.json();
         }"""
         )
-    assert "failed" in exc.value.message
+    if browser_name == "chromium":
+        assert "Failed" in exc.value.message
+    elif browser_name == "webkit":
+        assert "TypeError" in exc.value.message
+    elif browser_name == "firefox":
+        assert "NetworkError" in exc.value.message
 
 
 async def test_page_route_should_support_cors_with_POST(page, server):

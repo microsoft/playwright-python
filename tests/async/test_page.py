@@ -28,7 +28,7 @@ async def test_close_should_reject_all_promises(context):
         await asyncio.gather(
             new_page.evaluate("() => new Promise(r => {})"), new_page.close()
         )
-    assert "Protocol error" in exc_info.value.message
+    assert "Target closed" in exc_info.value.message
 
 
 async def test_closed_should_not_visible_in_context_pages(context):

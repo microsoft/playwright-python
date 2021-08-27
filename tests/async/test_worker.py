@@ -51,7 +51,7 @@ async def test_workers_should_emit_created_and_destroyed_events(page: Page):
     assert await worker_destroyed_promise == worker
     with pytest.raises(Error) as exc:
         await worker_this_obj.get_property("self")
-    assert "Most likely the worker has been closed." in exc.value.message
+    assert "Target closed" in exc.value.message
 
 
 async def test_workers_should_report_console_logs(page):

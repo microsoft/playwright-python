@@ -20,4 +20,3 @@ Parameter type mismatch in BrowserContext.cookies(return=): documented as List[{
 Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
-Parameter not implemented: Route.fulfill(_response=)

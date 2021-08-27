@@ -29,7 +29,7 @@ async def test_browser_type_launch_should_reject_all_promises_when_browser_is_cl
     await page.close()
     with pytest.raises(Error) as exc:
         await never_resolves
-    assert "Protocol error" in exc.value.message
+    assert "Target closed" in exc.value.message
 
 
 @pytest.mark.skip_browser("firefox")
