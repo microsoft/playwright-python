@@ -213,6 +213,33 @@ class ElementHandle(JSHandle):
     ) -> None:
         await self._channel.send("press", locals_to_params(locals()))
 
+    async def set_checked(
+        self,
+        checked: bool,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+        strict: bool = None,
+        trial: bool = None,
+    ) -> None:
+        if checked:
+            await self.check(
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+                trial=trial,
+            )
+        else:
+            await self.uncheck(
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+                trial=trial,
+            )
+
     async def check(
         self,
         position: Position = None,

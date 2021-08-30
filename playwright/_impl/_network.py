@@ -20,7 +20,12 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 
-from playwright._impl._api_structures import RemoteAddr, ResourceTiming, SecurityDetails
+from playwright._impl._api_structures import (
+    RemoteAddr,
+    RequestSizes,
+    ResourceTiming,
+    SecurityDetails,
+)
 from playwright._impl._api_types import Error
 from playwright._impl._connection import (
     ChannelOwner,
@@ -58,6 +63,13 @@ class Request(ChannelOwner):
             "responseStart": -1,
             "responseEnd": -1,
         }
+        self._sizes: RequestSizes = {
+            "requestBodySize": 0,
+            "requestHeadersSize": 0,
+            "responseBodySize": 0,
+            "responseHeadersSize": 0,
+            "responseTransferSize": 0,
+        }
         self._headers: Dict[str, str] = parse_headers(self._initializer["headers"])
 
     def __repr__(self) -> str:
@@ -74,6 +86,10 @@ class Request(ChannelOwner):
     @property
     def method(self) -> str:
         return self._initializer["method"]
+
+    @property
+    def sizes(self) -> RequestSizes:
+        return self._sizes
 
     @property
     def post_data(self) -> Optional[str]:

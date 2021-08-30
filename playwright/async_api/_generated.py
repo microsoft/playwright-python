@@ -33,6 +33,7 @@ from playwright._impl._api_structures import (
     Position,
     ProxySettings,
     RemoteAddr,
+    RequestSizes,
     ResourceTiming,
     SecurityDetails,
     SourceLocation,
@@ -115,6 +116,19 @@ class Request(AsyncBase):
         str
         """
         return mapping.from_maybe_impl(self._impl_obj.method)
+
+    @property
+    def sizes(self) -> RequestSizes:
+        """Request.sizes
+
+        Returns resource size information for given request. Requires the response to be finished via
+        `response.finished()` to ensure the info is available.
+
+        Returns
+        -------
+        {requestBodySize: int, requestHeadersSize: int, responseBodySize: int, responseHeadersSize: int, responseTransferSize: int}
+        """
+        return mapping.from_impl(self._impl_obj.sizes)
 
     @property
     def post_data(self) -> typing.Optional[str]:
@@ -2077,6 +2091,71 @@ class ElementHandle(JSHandle):
                 "element_handle.press",
                 self._impl_obj.press(
                     key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                ),
+            )
+        )
+
+    async def set_checked(
+        self,
+        checked: bool,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        strict: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """ElementHandle.set_checked
+
+        This method checks or unchecks an element by performing the following steps:
+        1. Ensure that element is a checkbox or a radio input. If not, this method throws.
+        1. If the element already has the right checked state, this method returns immediately.
+        1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+           element is detached during the checks, the whole action is retried.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Ensure that the element is now checked or unchecked. If not, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        checked : bool
+            Whether to check or uncheck the checkbox.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "element_handle.set_checked",
+                self._impl_obj.set_checked(
+                    checked=checked,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    strict=strict,
+                    trial=trial,
                 ),
             )
         )
@@ -4830,6 +4909,77 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._async("frame.title", self._impl_obj.title())
+        )
+
+    async def set_checked(
+        self,
+        selector: str,
+        checked: bool,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        strict: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Frame.set_checked
+
+        This method checks or unchecks an element matching `selector` by performing the following steps:
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
+        1. If the element already has the right checked state, this method returns immediately.
+        1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+           element is detached during the checks, the whole action is retried.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Ensure that the element is now checked or unchecked. If not, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md) for more details.
+        checked : bool
+            Whether to check or uncheck the checkbox.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "frame.set_checked",
+                self._impl_obj.set_checked(
+                    selector=selector,
+                    checked=checked,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    strict=strict,
+                    trial=trial,
+                ),
+            )
         )
 
 
@@ -8785,6 +8935,79 @@ class Page(AsyncContextManager):
             ).future
         )
 
+    async def set_checked(
+        self,
+        selector: str,
+        checked: bool,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        no_wait_after: bool = None,
+        strict: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Page.set_checked
+
+        This method checks or unchecks an element matching `selector` by performing the following steps:
+        1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
+        1. If the element already has the right checked state, this method returns immediately.
+        1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+           element is detached during the checks, the whole action is retried.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Ensure that the element is now checked or unchecked. If not, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Shortcut for main frame's `frame.set_checked()`.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](./selectors.md) for more details.
+        checked : bool
+            Whether to check or uncheck the checkbox.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "page.set_checked",
+                self._impl_obj.set_checked(
+                    selector=selector,
+                    checked=checked,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    strict=strict,
+                    trial=trial,
+                ),
+            )
+        )
+
 
 mapping.register(PageImpl, Page)
 
@@ -12106,6 +12329,71 @@ class Locator(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "locator.all_text_contents", self._impl_obj.all_text_contents()
+            )
+        )
+
+    async def set_checked(
+        self,
+        checked: bool,
+        *,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        strict: bool = None,
+        no_wait_after: bool = None,
+        trial: bool = None
+    ) -> NoneType:
+        """Locator.set_checked
+
+        This method checks or unchecks an element by performing the following steps:
+        1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
+        1. If the element already has the right checked state, this method returns immediately.
+        1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+           element is detached during the checks, the whole action is retried.
+        1. Scroll the element into view if needed.
+        1. Use `page.mouse` to click in the center of the element.
+        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Ensure that the element is now checked or unchecked. If not, this method throws.
+
+        When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+        zero timeout disables this.
+
+        Parameters
+        ----------
+        checked : bool
+            Whether to check or uncheck the checkbox.
+        position : Union[{x: float, y: float}, NoneType]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the
+            element.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.set_checked",
+                self._impl_obj.set_checked(
+                    checked=checked,
+                    position=position,
+                    timeout=timeout,
+                    force=force,
+                    strict=strict,
+                    noWaitAfter=no_wait_after,
+                    trial=trial,
+                ),
             )
         )
 

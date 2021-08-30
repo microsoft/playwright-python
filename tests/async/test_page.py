@@ -1281,3 +1281,33 @@ async def test_drag_and_drop_helper_method(page: Page, server: Server):
         )
         is True
     )
+
+
+async def test_should_check_box_using_set_checked(page: Page):
+    await page.set_content("`<input id='checkbox' type='checkbox'></input>`")
+    await page.set_checked("input", True)
+    assert await page.evaluate("checkbox.checked") is True
+    await page.set_checked("input", False)
+    assert await page.evaluate("checkbox.checked") is False
+
+
+async def test_should_set_bodysize_and_headersize(page: Page, server: Server):
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_event("request") as req_info:
+        await page.evaluate(
+            "() => fetch('./get', { method: 'POST', body: '12345'}).then(r => r.text())"
+        )
+    req = await req_info.value
+    await (await req.response()).finished()
+    assert req.sizes["requestBodySize"] == 5
+    assert req.sizes["requestHeadersSize"] >= 300
+
+
+async def test_should_set_bodysize_to_0(page: Page, server: Server):
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_event("request") as req_info:
+        await page.evaluate("() => fetch('./get').then(r => r.text())")
+    req = await req_info.value
+    await (await req.response()).finished()
+    assert req.sizes["requestBodySize"] == 0
+    assert req.sizes["requestHeadersSize"] >= 250

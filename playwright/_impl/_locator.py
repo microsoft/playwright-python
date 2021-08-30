@@ -438,3 +438,30 @@ class Locator:
         return await self._frame.eval_on_selector_all(
             self._selector, "ee => ee.map(e => e.textContent || '')"
         )
+
+    async def set_checked(
+        self,
+        checked: bool,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        strict: bool = None,
+        noWaitAfter: bool = None,
+        trial: bool = None,
+    ) -> None:
+        if checked:
+            await self.check(
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+                trial=trial,
+            )
+        else:
+            await self.uncheck(
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+                trial=trial,
+            )

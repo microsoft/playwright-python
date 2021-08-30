@@ -671,3 +671,12 @@ async def test_input_value(page: Page, server: Server):
 
     await element.fill("")
     assert await element.input_value() == ""
+
+
+async def test_set_checked(page: Page):
+    await page.set_content("`<input id='checkbox' type='checkbox'></input>`")
+    input = await page.query_selector("input")
+    await input.set_checked(True)
+    assert await page.evaluate("checkbox.checked")
+    await input.set_checked(False)
+    assert await page.evaluate("checkbox.checked") is False
