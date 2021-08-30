@@ -14,9 +14,11 @@
 
 import asyncio
 import pathlib
+import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
+import playwright
 from playwright._impl._api_structures import (
     Geolocation,
     HttpCredentials,
@@ -187,6 +189,9 @@ class BrowserType(ChannelOwner):
         if timeout is None:
             timeout = 30000
 
+        if headers is None:
+            headers = {"User-Agent": getUserAgent()}
+
         transport = WebSocketTransport(
             self._connection._loop, ws_endpoint, headers, slow_mo
         )
@@ -243,3 +248,7 @@ def normalize_launch_params(params: Dict) -> None:
         params["executablePath"] = str(Path(params["executablePath"]))
     if "downloadsPath" in params:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
+
+
+def getUserAgent() -> str:
+    return "Playwright/{} ({})".format(playwright.__version__, platform.platform())
