@@ -150,8 +150,6 @@ def signature(func: FunctionType, indent: int, overload: bool = False) -> str:
                 # This condition should be only triggered once, so
                 # reset the flag
                 render_kw_only_separator = False
-
-            processed = process_type(value, False)
         else:
             if (
                 not positional_exception
@@ -163,7 +161,7 @@ def signature(func: FunctionType, indent: int, overload: bool = False) -> str:
             ):
                 saw_optional = True
                 tokens.append("*")
-            processed = process_type(value, True)
+        processed = process_type(value, True)
         tokens.append(f"{to_snake_case(name)}: {processed}")
     if overload and render_pos_only_separator:
         # There were only positional-only parameters, hence the

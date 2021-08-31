@@ -2450,8 +2450,8 @@ class ElementHandle(JSHandle):
         self,
         selector: str,
         *,
-        state: typing.Optional[Literal["attached", "visible"]],
-        timeout: typing.Optional[float]
+        state: Literal["attached", "visible"] = None,
+        timeout: float = None
     ) -> "ElementHandle":
         pass
 
@@ -2461,7 +2461,7 @@ class ElementHandle(JSHandle):
         selector: str,
         *,
         state: Literal["detached", "hidden"],
-        timeout: typing.Optional[float]
+        timeout: float = None
     ) -> NoneType:
         pass
 
@@ -3124,9 +3124,9 @@ class Frame(SyncBase):
         self,
         selector: str,
         *,
-        strict: typing.Optional[bool],
-        timeout: typing.Optional[float],
-        state: typing.Optional[Literal["attached", "visible"]]
+        strict: bool = None,
+        timeout: float = None,
+        state: Literal["attached", "visible"] = None
     ) -> "ElementHandle":
         pass
 
@@ -3135,8 +3135,8 @@ class Frame(SyncBase):
         self,
         selector: str,
         *,
-        strict: typing.Optional[bool],
-        timeout: typing.Optional[float],
+        strict: bool = None,
+        timeout: float = None,
         state: Literal["detached", "hidden"]
     ) -> NoneType:
         pass
@@ -5552,9 +5552,9 @@ class Page(SyncContextManager):
         self,
         selector: str,
         *,
-        timeout: typing.Optional[float],
-        state: typing.Optional[Literal["attached", "visible"]],
-        strict: typing.Optional[bool]
+        timeout: float = None,
+        state: Literal["attached", "visible"] = None,
+        strict: bool = None
     ) -> "ElementHandle":
         pass
 
@@ -5563,9 +5563,9 @@ class Page(SyncContextManager):
         self,
         selector: str,
         *,
-        timeout: typing.Optional[float],
+        timeout: float = None,
         state: Literal["detached", "hidden"],
-        strict: typing.Optional[bool]
+        strict: bool = None
     ) -> NoneType:
         pass
 
