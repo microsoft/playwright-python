@@ -19,7 +19,6 @@ from typing import (  # type: ignore
     Callable,
     List,
     Match,
-    Optional,
     Union,
     cast,
     get_args,
@@ -91,34 +90,6 @@ positional_exceptions = [
     r"wait_for_load_state\.state",
     r"unroute\.handler",
 ]
-
-
-class Overload:
-    def __init__(self, clazz: object, name: str):
-        matches = re.match(r"_overload(\d+)_([a-zA-Z\d_]+)", name)
-        if matches is None:
-            raise ValueError(f"failed to get function name for overload: {name}")
-        self.number = int(matches[1])
-        self.name = matches[2]
-        self.clazz = clazz
-
-    def assert_has_implementation(self) -> None:
-        if self.implementation() is None:
-            raise Exception(f"implementation for overload '{self.name}' not found")
-
-    def implementation(self) -> Optional[Callable]:
-        for name, method in self.clazz.__dict__.items():
-            if name == self.name:
-                return method
-        return None
-
-
-def is_overload(name: str) -> bool:
-    try:
-        Overload(None, name)
-        return True
-    except TypeError:
-        return False
 
 
 def is_positional_exception(key: str) -> bool:
@@ -234,9 +205,13 @@ def arguments(func: FunctionType, indent: int) -> str:
     return split.join(tokens)
 
 
-def return_type(func: FunctionType) -> str:
+def return_type(func: Callable) -> str:
     value = get_type_hints(func, globals())["return"]
     return process_type(value)
+
+
+def return_type_value(func: Callable) -> str:
+    return re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type(func))
 
 
 def short_name(t: Any) -> str:

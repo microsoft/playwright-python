@@ -71,6 +71,7 @@ from playwright._impl._js_handle import (
     serialize_argument,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
+from playwright._impl._overload import api_overload
 from playwright._impl._video import Video
 from playwright._impl._wait_helper import WaitHelper
 
@@ -325,7 +326,8 @@ class Page(ChannelOwner):
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
         return await self._main_frame.query_selector_all(selector)
 
-    async def _overload1_wait_for_selector(
+    @api_overload
+    async def wait_for_selector(
         self,
         selector: str,
         *,
@@ -335,7 +337,8 @@ class Page(ChannelOwner):
     ) -> ElementHandle:
         ...
 
-    async def _overload2_wait_for_selector(
+    @api_overload  # type: ignore[no-redef]
+    async def wait_for_selector(
         self,
         selector: str,
         *,
@@ -345,7 +348,7 @@ class Page(ChannelOwner):
     ) -> None:
         ...
 
-    async def wait_for_selector(
+    async def wait_for_selector(  # type: ignore[no-redef]
         self,
         selector: str,
         *,

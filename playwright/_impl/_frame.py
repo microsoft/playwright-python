@@ -48,6 +48,7 @@ from playwright._impl._js_handle import (
 )
 from playwright._impl._locator import Locator
 from playwright._impl._network import Response
+from playwright._impl._overload import api_overload
 from playwright._impl._wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -270,7 +271,8 @@ class Frame(ChannelOwner):
             )
         )
 
-    async def _overload1_wait_for_selector(
+    @api_overload
+    async def wait_for_selector(
         self,
         selector: str,
         *,
@@ -280,7 +282,8 @@ class Frame(ChannelOwner):
     ) -> ElementHandle:
         ...
 
-    async def _overload2_wait_for_selector(
+    @api_overload  # type: ignore[no-redef]
+    async def wait_for_selector(
         self,
         selector: str,
         *,
@@ -290,7 +293,7 @@ class Frame(ChannelOwner):
     ) -> None:
         ...
 
-    async def wait_for_selector(
+    async def wait_for_selector(  # type: ignore[no-redef]
         self,
         selector: str,
         *,

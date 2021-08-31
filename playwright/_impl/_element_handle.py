@@ -33,6 +33,7 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
+from playwright._impl._overload import api_overload
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -309,7 +310,8 @@ class ElementHandle(JSHandle):
     ) -> None:
         await self._channel.send("waitForElementState", locals_to_params(locals()))
 
-    async def _overload1_wait_for_selector(
+    @api_overload
+    async def wait_for_selector(
         self,
         selector: str,
         *,
@@ -318,7 +320,8 @@ class ElementHandle(JSHandle):
     ) -> "ElementHandle":
         ...
 
-    async def _overload2_wait_for_selector(
+    @api_overload  # type: ignore[no-redef]
+    async def wait_for_selector(
         self,
         selector: str,
         *,
@@ -327,7 +330,7 @@ class ElementHandle(JSHandle):
     ) -> None:
         ...
 
-    async def wait_for_selector(
+    async def wait_for_selector(  # type: ignore[no-redef]
         self,
         selector: str,
         *,

@@ -14,27 +14,31 @@
 # limitations under the License.
 
 import inspect
-import re
 from types import FunctionType
-from typing import Any, Optional, get_type_hints
+from typing import Any, Callable, Dict, List, get_type_hints
 
 from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
-    Overload,
     all_types,
     api_globals,
     arguments,
     header,
-    is_overload,
     process_type,
     return_type,
+    return_type_value,
     return_value,
     short_name,
     signature,
 )
 
 documentation_provider = DocumentationProvider(True)
+
+
+def async_return_type_value(func: Callable) -> str:
+    return return_type_value(func).replace(
+        "EventContextManager", "AsyncEventContextManager"
+    )
 
 
 def generate(t: Any) -> None:
@@ -59,6 +63,9 @@ def generate(t: Any) -> None:
         [prefix, suffix] = return_value(type)
         prefix = "        return " + prefix + f"self._impl_obj.{name}"
         print(f"{prefix}{suffix}")
+    all_overloads: Dict[str, List[Callable]] = (
+        inspect.getmodule(t).__dict__.get("__overloads__") or {}
+    )
     for [name, value] in t.__dict__.items():
         if name.startswith("_"):
             continue
@@ -78,55 +85,48 @@ def generate(t: Any) -> None:
             prefix = "        return " + prefix + f"self._impl_obj.{name}"
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
     for [name, value] in t.__dict__.items():
-        overload: Optional[Overload] = None
-        if is_overload(name):
-            overload = Overload(t, name)
-            overload.assert_has_implementation()
-            name = overload.name
+        overloads = all_overloads.get(name) or []
         if (
             not name.startswith("_")
             and isinstance(value, FunctionType)
             and "remove_listener" != name
         ):
             is_async = inspect.iscoroutinefunction(value)
-            return_type_value = return_type(value)
-            return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
-            return_type_value = return_type_value.replace(
-                "EventContextManager", "AsyncEventContextManager"
-            )
-            print("")
             async_prefix = "async " if is_async else ""
-            if overload is not None:
+            indent = len(name) + 9
+            for overload in overloads:
                 print("    @typing.overload")
-            print(
-                f"    {async_prefix}def {name}({signature(value, len(name) + 9, overload is not None)}) -> {return_type_value}:"
-            )
-            if overload is None:
-                documentation_provider.print_entry(
-                    class_name, name, get_type_hints(value, api_globals)
+                print(
+                    f"    {async_prefix}def {name}({signature(overload, indent, True)}) -> {async_return_type_value(overload)}:"
                 )
-                if "expect_" in name:
-                    print("")
-                    print(
-                        f"        return AsyncEventContextManager(self._impl_obj.{name}({arguments(value, 12)}).future)"
-                    )
-                else:
-                    [prefix, suffix] = return_value(
-                        get_type_hints(value, api_globals)["return"]
-                    )
-                    if is_async:
-                        prefix += (
-                            f'await self._async("{to_snake_case(class_name)}.{name}", '
-                        )
-                        suffix += ")"
-                    prefix = prefix + f"self._impl_obj.{name}("
-                    suffix = ")" + suffix
-                    print(
-                        f"""
-        return {prefix}{arguments(value, len(prefix))}{suffix}"""
-                    )
-            else:
                 print("        pass")
+            print("")
+            print(
+                f"    {async_prefix}def {name}({signature(value, indent)}) -> {async_return_type_value(value)}:"
+            )
+            documentation_provider.print_entry(
+                class_name, name, get_type_hints(value, api_globals)
+            )
+            if "expect_" in name:
+                print("")
+                print(
+                    f"        return AsyncEventContextManager(self._impl_obj.{name}({arguments(value, 12)}).future)"
+                )
+            else:
+                [prefix, suffix] = return_value(
+                    get_type_hints(value, api_globals)["return"]
+                )
+                if is_async:
+                    prefix += (
+                        f'await self._async("{to_snake_case(class_name)}.{name}", '
+                    )
+                    suffix += ")"
+                prefix = prefix + f"self._impl_obj.{name}("
+                suffix = ")" + suffix
+                print(
+                    f"""
+        return {prefix}{arguments(value, len(prefix))}{suffix}"""
+                )
     if class_name == "Playwright":
         print(
             """
