@@ -49,12 +49,62 @@ pre-commit run --all-files
 
 For more details look at the [CI configuration](./blob/master/.github/workflows/ci.yml).
 
-### Regenerating APIs
+### APIs
+
+#### Regenerating
 
 ```bash
 ./scripts/update_api.sh
 pre-commit run --all-files
 ```
+
+#### Differences between `_impl` and exposed API method signatures
+
+- optional arguments are automatically converted to keyword arguments, unless the method has overloads. for example:
+  ```py
+  def wait_for_selector(self, selector: str, timeout: float = None, state: str = None): ...
+  ```
+  becomes
+  ```py
+  def wait_for_selector(self, selector: str, *, timeout: float = None, state: str = None): ...
+  ```
+
+- overloads must be defined using `@api_overload` in order for the generate scripts to be able to see them at runtime.
+  ```py
+  from playwright._impl._overload import api_overload
+  
+  @api_overload
+  async def wait_for_selector(
+      self,
+      selector: str,
+      *,
+      timeout: float = None,
+      state: Literal["attached", "visible"] = None,
+      strict: bool = None,
+  ) -> ElementHandle:
+      pass
+
+  @api_overload  # type: ignore[no-redef]
+  async def wait_for_selector(
+      self,
+      selector: str,
+      *,
+      timeout: float = None,
+      state: Literal["detached", "hidden"],
+      strict: bool = None,
+  ) -> None:
+      pass
+
+  async def wait_for_selector(  # type: ignore[no-redef]
+      self,
+      selector: str,
+      *,
+      timeout: float = None,
+      state: Literal["attached", "detached", "hidden", "visible"] = None,
+      strict: bool = None,
+  ) -> Optional[ElementHandle]:
+      ...
+  ```
 
 ## Contributor License Agreement
 
