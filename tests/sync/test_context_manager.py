@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 from playwright.sync_api import BrowserType
 
 
-def test_context_managers(browser_type: BrowserType, launch_arguments):
+def test_context_managers(browser_type: BrowserType, launch_arguments: Dict) -> None:
     with browser_type.launch(**launch_arguments) as browser:
         with browser.new_context() as context:
             with context.new_page():

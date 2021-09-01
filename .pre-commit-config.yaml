@@ -17,6 +17,7 @@ repos:
     rev: v0.910
     hooks:
       - id: mypy
+        additional_dependencies: [types-pyOpenSSL==20.0.6]
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:

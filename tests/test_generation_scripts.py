@@ -25,7 +25,7 @@ pytestmark = pytest.mark.skipif(
 
 @patch("sys.stderr", new_callable=StringIO)
 @patch("sys.stdout", new_callable=StringIO)
-def test_generate_sync_api(stdout, stderr):
+def test_generate_sync_api(stdout: StringIO, stderr: StringIO) -> None:
     from scripts.generate_sync_api import main as generate_sync_api
 
     generate_sync_api()
@@ -33,7 +33,7 @@ def test_generate_sync_api(stdout, stderr):
 
 @patch("sys.stderr", new_callable=StringIO)
 @patch("sys.stdout", new_callable=StringIO)
-def test_generate_async_api(stdout, stderr):
+def test_generate_async_api(stdout: StringIO, stderr: StringIO) -> None:
     from scripts.generate_async_api import main as generate_async_api
 
     generate_async_api()

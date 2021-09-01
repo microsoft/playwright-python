@@ -24,7 +24,7 @@ pytestmark = pytest.mark.only_browser("chromium")
 
 def test_connect_to_an_existing_cdp_session(
     launch_arguments: Dict, browser_type: BrowserType
-):
+) -> None:
     port = find_free_port()
     browser_server = browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]

@@ -14,11 +14,12 @@
 
 import pytest
 
-from playwright.sync_api import Error
+from playwright.sync_api import Browser, Error, Page
+from tests.server import Server
 
 
 @pytest.mark.only_browser("chromium")
-def test_should_work(page):
+def test_should_work(page: Page) -> None:
     client = page.context.new_cdp_session(page)
     events = []
     client.on("Runtime.consoleAPICalled", lambda params: events.append(params))
@@ -34,7 +35,7 @@ def test_should_work(page):
 
 
 @pytest.mark.only_browser("chromium")
-def test_should_receive_events(page, server):
+def test_should_receive_events(page: Page, server: Server) -> None:
     client = page.context.new_cdp_session(page)
     client.send("Network.enable")
     events = []
@@ -44,7 +45,7 @@ def test_should_receive_events(page, server):
 
 
 @pytest.mark.only_browser("chromium")
-def test_should_be_able_to_detach_session(page):
+def test_should_be_able_to_detach_session(page: Page) -> None:
     client = page.context.new_cdp_session(page)
     client.send("Runtime.enable")
     eval_response = client.send(
@@ -58,7 +59,7 @@ def test_should_be_able_to_detach_session(page):
 
 
 @pytest.mark.only_browser("chromium")
-def test_should_not_break_page_close(browser):
+def test_should_not_break_page_close(browser: Browser) -> None:
     context = browser.new_context()
     page = context.new_page()
     session = page.context.new_cdp_session(page)
@@ -68,7 +69,7 @@ def test_should_not_break_page_close(browser):
 
 
 @pytest.mark.only_browser("chromium")
-def test_should_detach_when_page_closes(browser):
+def test_should_detach_when_page_closes(browser: Browser) -> None:
     context = browser.new_context()
     page = context.new_page()
     session = context.new_cdp_session(page)

@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import json
+from pathlib import Path
+
+from playwright.sync_api import Browser, BrowserContext
 
 
-def test_should_capture_local_storage(context, is_webkit, is_win):
+def test_should_capture_local_storage(context: BrowserContext) -> None:
     page1 = context.new_page()
     page1.route("**/*", lambda route: route.fulfill(body="<html></html>"))
     page1.goto("https://www.example.com")
@@ -25,6 +28,7 @@ def test_should_capture_local_storage(context, is_webkit, is_win):
 
     state = context.storage_state()
     origins = state["origins"]
+    assert origins
     assert len(origins) == 2
     assert origins[0] == {
         "origin": "https://www.example.com",
@@ -36,7 +40,7 @@ def test_should_capture_local_storage(context, is_webkit, is_win):
     }
 
 
-def test_should_set_local_storage(browser, is_webkit, is_win):
+def test_should_set_local_storage(browser: Browser) -> None:
     context = browser.new_context(
         storage_state={
             "origins": [
@@ -56,7 +60,9 @@ def test_should_set_local_storage(browser, is_webkit, is_win):
     context.close()
 
 
-def test_should_round_trip_through_the_file(browser, context, tmpdir):
+def test_should_round_trip_through_the_file(
+    browser: Browser, context: BrowserContext, tmpdir: Path
+) -> None:
     page1 = context.new_page()
     page1.route(
         "**/*",

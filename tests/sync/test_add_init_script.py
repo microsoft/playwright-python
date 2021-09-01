@@ -12,37 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Error, Page
+from pathlib import Path
+
+import pytest
+
+from playwright.sync_api import BrowserContext, Error, Page
 
 
-def test_add_init_script_evaluate_before_anything_else_on_the_page(page):
+def test_add_init_script_evaluate_before_anything_else_on_the_page(page: Page) -> None:
     page.add_init_script("window.injected = 123")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
-def test_add_init_script_work_with_a_path(page, assetdir):
+def test_add_init_script_work_with_a_path(page: Page, assetdir: Path) -> None:
     page.add_init_script(path=assetdir / "injectedfile.js")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
-def test_add_init_script_work_with_content(page: Page):
+def test_add_init_script_work_with_content(page: Page) -> None:
     page.add_init_script("window.injected = 123")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
-def test_add_init_script_throw_without_path_and_content(page):
-    error = None
-    try:
-        page.add_init_script({"foo": "bar"})
-    except Error as e:
-        error = e
-    assert error.message == "Either path or script parameter must be specified"
+def test_add_init_script_throw_without_path_and_content(page: Page) -> None:
+    with pytest.raises(
+        Error, match="Either path or script parameter must be specified"
+    ):
+        page.add_init_script({"foo": "bar"})  # type: ignore
 
 
-def test_add_init_script_work_with_browser_context_scripts(page, context):
+def test_add_init_script_work_with_browser_context_scripts(
+    page: Page, context: BrowserContext
+) -> None:
     context.add_init_script("window.temp = 123")
     page = context.new_page()
     page.add_init_script("window.injected = window.temp")
@@ -51,8 +55,8 @@ def test_add_init_script_work_with_browser_context_scripts(page, context):
 
 
 def test_add_init_script_work_with_browser_context_scripts_with_a_path(
-    page, context, assetdir
-):
+    page: Page, context: BrowserContext, assetdir: Path
+) -> None:
     context.add_init_script(path=assetdir / "injectedfile.js")
     page = context.new_page()
     page.goto("data:text/html,<script>window.result = window.injected</script>")
@@ -60,15 +64,15 @@ def test_add_init_script_work_with_browser_context_scripts_with_a_path(
 
 
 def test_add_init_script_work_with_browser_context_scripts_for_already_created_pages(
-    page, context
-):
+    page: Page, context: BrowserContext
+) -> None:
     context.add_init_script("window.temp = 123")
     page.add_init_script("window.injected = window.temp")
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.result") == 123
 
 
-def test_add_init_script_support_multiple_scripts(page):
+def test_add_init_script_support_multiple_scripts(page: Page) -> None:
     page.add_init_script("window.script1 = 1")
     page.add_init_script("window.script2 = 2")
     page.goto("data:text/html,<script>window.result = window.injected</script>")

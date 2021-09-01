@@ -70,9 +70,10 @@ async def test_bounding_box_with_SVG_nodes(page, server):
     assert pw_bounding_box == web_bounding_box
 
 
+@pytest.mark.skip_browser("firefox")
 async def test_bounding_box_with_page_scale(browser, server):
     context = await browser.new_context(
-        viewport={"width": 400, "height": 400, "is_mobile": True}
+        viewport={"width": 400, "height": 400}, is_mobile=True
     )
     page = await context.new_page()
     await page.goto(server.PREFIX + "/input/button.html")

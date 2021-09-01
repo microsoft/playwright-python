@@ -20,7 +20,7 @@ from pathlib import Path
 from venv import EnvBuilder
 
 
-def test_install(tmp_path: Path):
+def test_install(tmp_path: Path) -> None:
     env = EnvBuilder(with_pip=True)
     env.create(env_dir=tmp_path)
     context = env.ensure_directories(tmp_path)

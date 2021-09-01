@@ -18,8 +18,9 @@ from playwright.sync_api import Browser, Page
 from tests.server import Server
 
 
-def test_response_server_addr(page: Page, server: Server):
+def test_response_server_addr(page: Page, server: Server) -> None:
     response = page.goto(server.EMPTY_PAGE)
+    assert response
     server_addr = response.server_addr()
     assert server_addr
     assert server_addr["port"] == server.PORT
@@ -27,12 +28,17 @@ def test_response_server_addr(page: Page, server: Server):
 
 
 def test_response_security_details(
-    browser: Browser, https_server: Server, browser_name, is_win, is_linux
-):
+    browser: Browser,
+    https_server: Server,
+    browser_name: str,
+    is_win: bool,
+    is_linux: bool,
+) -> None:
     if browser_name == "webkit" and is_linux:
         pytest.skip("https://github.com/microsoft/playwright/issues/6759")
     page = browser.new_page(ignore_https_errors=True)
     response = page.goto(https_server.EMPTY_PAGE)
+    assert response
     response.finished()
     security_details = response.security_details()
     assert security_details
@@ -60,7 +66,10 @@ def test_response_security_details(
     page.close()
 
 
-def test_response_security_details_none_without_https(page: Page, server: Server):
+def test_response_security_details_none_without_https(
+    page: Page, server: Server
+) -> None:
     response = page.goto(server.EMPTY_PAGE)
+    assert response
     security_details = response.security_details()
     assert security_details is None

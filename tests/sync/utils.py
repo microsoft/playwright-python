@@ -13,20 +13,13 @@
 # limitations under the License.
 
 import re
-from typing import List, cast
+from typing import Any, List, cast
 
-from playwright.sync_api import (
-    ElementHandle,
-    Error,
-    Frame,
-    Page,
-    Selectors,
-    ViewportSize,
-)
+from playwright.sync_api import Error, Frame, Page, Selectors, ViewportSize
 
 
 class Utils:
-    def attach_frame(self, page: Page, frame_id: str, url: str):
+    def attach_frame(self, page: Page, frame_id: str, url: str) -> Frame:
         handle = page.evaluate_handle(
             """async ({ frame_id, url }) => {
                 const frame = document.createElement('iframe');
@@ -38,9 +31,13 @@ class Utils:
             }""",
             {"frame_id": frame_id, "url": url},
         )
-        return cast(ElementHandle, handle.as_element()).content_frame()
+        element_handle = handle.as_element()
+        assert element_handle
+        frame = element_handle.content_frame()
+        assert frame
+        return frame
 
-    def detach_frame(self, page: Page, frame_id: str):
+    def detach_frame(self, page: Page, frame_id: str) -> None:
         page.evaluate(
             "frame_id => document.getElementById(frame_id).remove()", frame_id
         )
@@ -58,13 +55,15 @@ class Utils:
             result = result + utils.dump_frames(child, "    " + indentation)
         return result
 
-    def verify_viewport(self, page: Page, width: int, height: int):
+    def verify_viewport(self, page: Page, width: int, height: int) -> None:
         assert cast(ViewportSize, page.viewport_size)["width"] == width
         assert cast(ViewportSize, page.viewport_size)["height"] == height
         assert page.evaluate("window.innerWidth") == width
         assert page.evaluate("window.innerHeight") == height
 
-    def register_selector_engine(self, selectors: Selectors, *args, **kwargs) -> None:
+    def register_selector_engine(
+        self, selectors: Selectors, *args: Any, **kwargs: Any
+    ) -> None:
         try:
             selectors.register(*args, **kwargs)
         except Error as exc:

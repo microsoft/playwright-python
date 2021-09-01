@@ -15,9 +15,13 @@
 import base64
 import json
 import os
+from pathlib import Path
+
+from playwright.sync_api import Browser
+from tests.server import Server
 
 
-def test_should_work(browser, server, tmpdir):
+def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = browser.new_context(record_har_path=path)
     page = context.new_page()
@@ -28,7 +32,7 @@ def test_should_work(browser, server, tmpdir):
         assert "log" in data
 
 
-def test_should_omit_content(browser, server, tmpdir):
+def test_should_omit_content(browser: Browser, server: Server, tmpdir: Path) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = browser.new_context(record_har_path=path, record_har_omit_content=True)
     page = context.new_page()
@@ -43,7 +47,7 @@ def test_should_omit_content(browser, server, tmpdir):
         assert "text" not in content1
 
 
-def test_should_include_content(browser, server, tmpdir):
+def test_should_include_content(browser: Browser, server: Server, tmpdir: Path) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = browser.new_context(record_har_path=path)
     page = context.new_page()

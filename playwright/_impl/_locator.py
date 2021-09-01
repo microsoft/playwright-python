@@ -141,7 +141,7 @@ class Locator:
             timeout,
         )
 
-    async def evaluate_all(self, expression: str, arg: Serializable = None) -> None:
+    async def evaluate_all(self, expression: str, arg: Serializable = None) -> Any:
         params = locals_to_params(locals())
         return await self._frame.eval_on_selector_all(self._selector, **params)
 

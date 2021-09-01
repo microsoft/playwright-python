@@ -14,8 +14,13 @@
 
 from pathlib import Path
 
+from playwright.sync_api import Browser
+from tests.server import Server
 
-def test_browser_context_output_trace(browser, server, tmp_path):
+
+def test_browser_context_output_trace(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
     context = browser.new_context()
     context.tracing.start(screenshots=True, snapshots=True)
     page = context.new_page()
