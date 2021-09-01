@@ -1310,4 +1310,4 @@ async def test_should_set_bodysize_to_0(page: Page, server: Server):
     req = await req_info.value
     await (await req.response()).finished()
     assert req.sizes["requestBodySize"] == 0
-    assert req.sizes["requestHeadersSize"] >= 250
+    assert req.sizes["requestHeadersSize"] >= 200
