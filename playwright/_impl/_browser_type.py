@@ -85,7 +85,7 @@ class BrowserType(ChannelOwner):
         try:
             return from_channel(await self._channel.send("launch", params))
         except Exception as e:
-            if "npx playwright install" in str(e):
+            if "npx playwright install " in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
 
@@ -146,7 +146,7 @@ class BrowserType(ChannelOwner):
             context._options = params
             return context
         except Exception as e:
-            if "npx playwright install" in str(e):
+            if "npx playwright install " in str(e):
                 raise not_installed_error(f'"{self.name}" browser was not found.')
             raise e
 
