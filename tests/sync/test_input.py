@@ -13,7 +13,10 @@
 # limitations under the License.
 
 
-def test_expect_file_chooser(page, server):
+from playwright.sync_api import Page
+
+
+def test_expect_file_chooser(page: Page) -> None:
     page.set_content("<input type=file></input>")
     with page.expect_file_chooser() as fc_info:
         page.click('input[type="file"]')

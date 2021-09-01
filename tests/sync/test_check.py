@@ -12,32 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from playwright.sync_api import Page
 
-def test_check_the_box(page):
+
+def test_check_the_box(page: Page) -> None:
     page.set_content('<input id="checkbox" type="checkbox"></input>')
     page.check("input")
     assert page.evaluate("checkbox.checked")
 
 
-def test_not_check_the_checked_box(page):
+def test_not_check_the_checked_box(page: Page) -> None:
     page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     page.check("input")
     assert page.evaluate("checkbox.checked")
 
 
-def test_uncheck_the_box(page):
+def test_uncheck_the_box(page: Page) -> None:
     page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     page.uncheck("input")
     assert page.evaluate("checkbox.checked") is False
 
 
-def test_not_uncheck_the_unchecked_box(page):
+def test_not_uncheck_the_unchecked_box(page: Page) -> None:
     page.set_content('<input id="checkbox" type="checkbox"></input>')
     page.uncheck("input")
     assert page.evaluate("checkbox.checked") is False
 
 
-def test_check_the_box_by_label(page):
+def test_check_the_box_by_label(page: Page) -> None:
     page.set_content(
         '<label for="checkbox"><input id="checkbox" type="checkbox"></input></label>'
     )
@@ -45,7 +47,7 @@ def test_check_the_box_by_label(page):
     assert page.evaluate("checkbox.checked")
 
 
-def test_check_the_box_outside_label(page):
+def test_check_the_box_outside_label(page: Page) -> None:
     page.set_content(
         '<label for="checkbox">Text</label><div><input id="checkbox" type="checkbox"></input></div>'
     )
@@ -53,7 +55,7 @@ def test_check_the_box_outside_label(page):
     assert page.evaluate("checkbox.checked")
 
 
-def test_check_the_box_inside_label_without_id(page):
+def test_check_the_box_inside_label_without_id(page: Page) -> None:
     page.set_content(
         '<label>Text<span><input id="checkbox" type="checkbox"></input></span></label>'
     )
@@ -61,7 +63,7 @@ def test_check_the_box_inside_label_without_id(page):
     assert page.evaluate("checkbox.checked")
 
 
-def test_check_radio(page):
+def test_check_radio(page: Page) -> None:
     page.set_content(
         """
       <input type='radio'>one</input>
@@ -72,7 +74,7 @@ def test_check_radio(page):
     assert page.evaluate("two.checked")
 
 
-def test_check_the_box_by_aria_role(page):
+def test_check_the_box_by_aria_role(page: Page) -> None:
     page.set_content(
         """<div role='checkbox' id='checkbox'>CHECKBOX</div>
       <script>

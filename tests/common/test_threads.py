@@ -13,15 +13,16 @@
 # limitations under the License.
 
 import threading
+from typing import Dict
 
 from playwright.sync_api import sync_playwright
 
 
-def test_running_in_thread(browser_name, launch_arguments):
+def test_running_in_thread(browser_name: str, launch_arguments: Dict) -> None:
     result = []
 
     class TestThread(threading.Thread):
-        def run(self):
+        def run(self) -> None:
             with sync_playwright() as playwright:
                 browser = getattr(playwright, browser_name).launch(**launch_arguments)
                 # This should not throw ^^.

@@ -25,26 +25,28 @@ from playwright.sync_api import (
     TimeoutError,
     sync_playwright,
 )
+from tests.server import Server
 
 
-def test_sync_query_selector(page):
+def test_sync_query_selector(page: Page) -> None:
     page.set_content(
         """
     <h1 id="foo">Bar</h1>
     """
     )
-    assert (
-        page.query_selector("#foo").inner_text()
-        == page.query_selector("h1").inner_text()
-    )
+    e1 = page.query_selector("#foo")
+    assert e1
+    e2 = page.query_selector("h1")
+    assert e2
+    assert e1.inner_text() == e2.inner_text()
 
 
-def test_page_repr(page):
+def test_page_repr(page: Page) -> None:
     page.goto("https://example.com")
     assert repr(page) == f"<Page url={page.url!r}>"
 
 
-def test_frame_repr(page: Page):
+def test_frame_repr(page: Page) -> None:
     page.goto("https://example.com")
     assert (
         repr(page.main_frame)
@@ -52,18 +54,18 @@ def test_frame_repr(page: Page):
     )
 
 
-def test_browser_context_repr(context: BrowserContext):
+def test_browser_context_repr(context: BrowserContext) -> None:
     assert repr(context) == f"<BrowserContext browser={context.browser}>"
 
 
-def test_browser_repr(browser: Browser):
+def test_browser_repr(browser: Browser) -> None:
     assert (
         repr(browser)
         == f"<Browser type={browser._impl_obj._browser_type} version={browser.version}>"
     )
 
 
-def test_browser_type_repr(browser: Browser):
+def test_browser_type_repr(browser: Browser) -> None:
     browser_type = browser._impl_obj._browser_type
     assert (
         repr(browser_type)
@@ -71,8 +73,8 @@ def test_browser_type_repr(browser: Browser):
     )
 
 
-def test_dialog_repr(page: Page, server):
-    def on_dialog(dialog: Dialog):
+def test_dialog_repr(page: Page) -> None:
+    def on_dialog(dialog: Dialog) -> None:
         dialog.accept()
         assert (
             repr(dialog)
@@ -83,7 +85,7 @@ def test_dialog_repr(page: Page, server):
     page.evaluate("alert('yo')")
 
 
-def test_console_repr(page: Page, server):
+def test_console_repr(page: Page) -> None:
     messages = []
     page.on("console", lambda m: messages.append(m))
     page.evaluate('() => console.log("Hello world")')
@@ -91,7 +93,7 @@ def test_console_repr(page: Page, server):
     assert repr(message) == f"<ConsoleMessage type={message.type} text={message.text}>"
 
 
-def test_sync_click(page):
+def test_sync_click(page: Page) -> None:
     page.set_content(
         """
     <button onclick="window.clicked=true">Bar</button>
@@ -101,7 +103,7 @@ def test_sync_click(page):
     assert page.evaluate("()=>window.clicked")
 
 
-def test_sync_nested_query_selector(page):
+def test_sync_nested_query_selector(page: Page) -> None:
     page.set_content(
         """
     <div id="one">
@@ -114,12 +116,15 @@ def test_sync_nested_query_selector(page):
     """
     )
     e1 = page.query_selector("#one")
+    assert e1
     e2 = e1.query_selector(".two")
+    assert e2
     e3 = e2.query_selector("label")
+    assert e3
     assert e3.inner_text() == "MyValue"
 
 
-def test_sync_handle_multiple_pages(context):
+def test_sync_handle_multiple_pages(context: BrowserContext) -> None:
     page1 = context.new_page()
     page2 = context.new_page()
     assert len(context.pages) == 2
@@ -136,27 +141,27 @@ def test_sync_handle_multiple_pages(context):
             page.content()
 
 
-def test_sync_wait_for_event(page: Page, server):
+def test_sync_wait_for_event(page: Page, server: Server) -> None:
     with page.expect_event("popup", timeout=10000) as popup:
         page.evaluate("(url) => window.open(url)", server.EMPTY_PAGE)
     assert popup.value
 
 
-def test_sync_wait_for_event_raise(page):
+def test_sync_wait_for_event_raise(page: Page) -> None:
     with pytest.raises(Error):
         with page.expect_event("popup", timeout=500) as popup:
             assert False
         assert popup.value is None
 
 
-def test_sync_make_existing_page_sync(page):
+def test_sync_make_existing_page_sync(page: Page) -> None:
     page = page
     assert page.evaluate("() => ({'playwright': true})") == {"playwright": True}
     page.set_content("<h1>myElement</h1>")
     page.wait_for_selector("text=myElement")
 
 
-def test_sync_network_events(page, server):
+def test_sync_network_events(page: Page, server: Server) -> None:
     server.set_route(
         "/hello-world",
         lambda request: (
@@ -182,7 +187,7 @@ def test_sync_network_events(page, server):
     ]
 
 
-def test_console_should_work(page, browser_name):
+def test_console_should_work(page: Page, browser_name: str) -> None:
     messages = []
     page.once("console", lambda m: messages.append(m))
     page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
@@ -200,7 +205,7 @@ def test_console_should_work(page, browser_name):
     assert message.args[2].json_value() == {"foo": "bar"}
 
 
-def test_sync_download(browser: Browser, server):
+def test_sync_download(browser: Browser, server: Server) -> None:
     server.set_route(
         "/downloadWithFilename",
         lambda request: (
@@ -224,7 +229,7 @@ def test_sync_download(browser: Browser, server):
     page.close()
 
 
-def test_sync_workers_page_workers(page: Page, server):
+def test_sync_workers_page_workers(page: Page, server: Server) -> None:
     with page.expect_event("worker") as event_worker:
         page.goto(server.PREFIX + "/worker/worker.html")
     assert event_worker.value
@@ -237,7 +242,7 @@ def test_sync_workers_page_workers(page: Page, server):
     assert len(page.workers) == 0
 
 
-def test_sync_playwright_multiple_times():
+def test_sync_playwright_multiple_times() -> None:
     with pytest.raises(Error) as exc:
         with sync_playwright() as pw:
             assert pw.chromium
@@ -247,14 +252,14 @@ def test_sync_playwright_multiple_times():
     )
 
 
-def test_sync_set_default_timeout(page):
+def test_sync_set_default_timeout(page: Page) -> None:
     page.set_default_timeout(1)
     with pytest.raises(TimeoutError) as exc:
         page.wait_for_function("false")
     assert "Timeout 1ms exceeded." in exc.value.message
 
 
-def test_close_should_reject_all_promises(context):
+def test_close_should_reject_all_promises(context: BrowserContext) -> None:
     new_page = context.new_page()
     with pytest.raises(Error) as exc_info:
         new_page._gather(
@@ -264,7 +269,7 @@ def test_close_should_reject_all_promises(context):
     assert "Target closed" in exc_info.value.message
 
 
-def test_expect_response_should_work(page: Page, server):
+def test_expect_response_should_work(page: Page, server: Server) -> None:
     with page.expect_response("**/*") as resp:
         page.goto(server.EMPTY_PAGE)
     assert resp.value

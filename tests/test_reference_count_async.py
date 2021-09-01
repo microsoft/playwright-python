@@ -42,7 +42,7 @@ async def test_memory_objects() -> None:
 
     gc.collect()
 
-    pw_objects = defaultdict(int)
+    pw_objects: defaultdict = defaultdict(int)
     for o in objgraph.by_type("dict"):
         name = o.get("_type")
         if not name:

@@ -16,7 +16,7 @@ from playwright.sync_api import Page
 from tests.server import Server
 
 
-def test_input_value(page: Page, server: Server):
+def test_input_value(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/textarea.html")
 
     page.fill("input", "my-text-content")
@@ -26,7 +26,7 @@ def test_input_value(page: Page, server: Server):
     assert page.input_value("input") == ""
 
 
-def test_drag_and_drop_helper_method(page: Page, server: Server):
+def test_drag_and_drop_helper_method(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/drag-n-drop.html")
     page.drag_and_drop("#source", "#target")
     assert (
@@ -37,7 +37,7 @@ def test_drag_and_drop_helper_method(page: Page, server: Server):
     )
 
 
-def test_should_check_box_using_set_checked(page: Page):
+def test_should_check_box_using_set_checked(page: Page) -> None:
     page.set_content("`<input id='checkbox' type='checkbox'></input>`")
     page.set_checked("input", True)
     assert page.evaluate("checkbox.checked") is True
@@ -45,7 +45,7 @@ def test_should_check_box_using_set_checked(page: Page):
     assert page.evaluate("checkbox.checked") is False
 
 
-def test_should_set_bodysize_and_headersize(page: Page, server: Server):
+def test_should_set_bodysize_and_headersize(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     with page.expect_event("request") as req_info:
         page.evaluate(
@@ -57,7 +57,7 @@ def test_should_set_bodysize_and_headersize(page: Page, server: Server):
     assert req.sizes["requestHeadersSize"] >= 300
 
 
-def test_should_set_bodysize_to_0(page: Page, server: Server):
+def test_should_set_bodysize_to_0(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     with page.expect_event("request") as req_info:
         page.evaluate("() => fetch('./get').then(r => r.text())")

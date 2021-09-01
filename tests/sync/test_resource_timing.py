@@ -15,8 +15,11 @@
 import pytest
 from flaky import flaky
 
+from playwright.sync_api import Browser, Page
+from tests.server import Server
 
-def test_should_work(page, server, is_webkit, is_mac):
+
+def test_should_work(page: Page, server: Server, is_webkit: bool, is_mac: bool) -> None:
     if is_webkit and is_mac:
         pytest.skip()
     with page.expect_event("requestfinished") as request_info:
@@ -35,7 +38,9 @@ def test_should_work(page, server, is_webkit, is_mac):
 
 
 @flaky
-def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
+def test_should_work_for_subresource(
+    page: Page, server: Server, is_win: bool, is_mac: bool, is_webkit: bool
+) -> None:
     if is_webkit and is_mac:
         pytest.skip()
     requests = []
@@ -63,7 +68,9 @@ def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
     assert timing["responseEnd"] < 10000
 
 
-def test_should_work_for_ssl(browser, https_server, is_mac, is_webkit):
+def test_should_work_for_ssl(
+    browser: Browser, https_server: Server, is_mac: bool, is_webkit: bool
+) -> None:
     if is_webkit and is_mac:
         pytest.skip()
     page = browser.new_page(ignore_https_errors=True)
@@ -86,7 +93,7 @@ def test_should_work_for_ssl(browser, https_server, is_mac, is_webkit):
 
 
 @pytest.mark.skip_browser("webkit")  # In WebKit, redirects don"t carry the timing info
-def test_should_work_for_redirect(page, server):
+def test_should_work_for_redirect(page: Page, server: Server) -> None:
     server.set_redirect("/foo.html", "/empty.html")
     responses = []
     page.on("response", lambda response: responses.append(response))

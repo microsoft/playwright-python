@@ -17,9 +17,10 @@ from typing import List
 import pytest
 
 from playwright.sync_api import ConsoleMessage, Page
+from tests.server import Server
 
 
-def test_console_should_work(page: Page, browser_name):
+def test_console_should_work(page: Page, browser_name: str) -> None:
     messages: List[ConsoleMessage] = []
     page.once("console", lambda m: messages.append(m))
     with page.expect_console_message():
@@ -38,14 +39,14 @@ def test_console_should_work(page: Page, browser_name):
     assert message.args[2].json_value() == {"foo": "bar"}
 
 
-def test_console_should_emit_same_log_twice(page, server):
+def test_console_should_emit_same_log_twice(page: Page) -> None:
     messages = []
     page.on("console", lambda m: messages.append(m.text))
     page.evaluate('() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } ')
     assert messages == ["hello", "hello"]
 
 
-def test_console_should_use_text_for__str__(page):
+def test_console_should_use_text_for__str__(page: Page) -> None:
     messages = []
     page.on("console", lambda m: messages.append(m))
     page.evaluate('() => console.log("Hello world")')
@@ -53,7 +54,7 @@ def test_console_should_use_text_for__str__(page):
     assert str(messages[0]) == "Hello world"
 
 
-def test_console_should_work_for_different_console_api_calls(page, server):
+def test_console_should_work_for_different_console_api_calls(page: Page) -> None:
     messages = []
     page.on("console", lambda m: messages.append(m))
     # All console events will be reported before 'page.evaluate' is finished.
@@ -88,7 +89,9 @@ def test_console_should_work_for_different_console_api_calls(page, server):
     ]
 
 
-def test_console_should_not_fail_for_window_object(page: Page, browser_name):
+def test_console_should_not_fail_for_window_object(
+    page: Page, browser_name: str
+) -> None:
     messages = []
     page.once("console", lambda m: messages.append(m))
     with page.expect_console_message():
@@ -102,7 +105,7 @@ def test_console_should_not_fail_for_window_object(page: Page, browser_name):
 
 # Upstream issue https://bugs.webkit.org/show_bug.cgi?id=229515
 @pytest.mark.skip_browser("webkit")
-def test_console_should_trigger_correct_Log(page, server):
+def test_console_should_trigger_correct_Log(page: Page, server: Server) -> None:
     page.goto("about:blank")
     with page.expect_console_message() as message:
         page.evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE),
@@ -110,11 +113,13 @@ def test_console_should_trigger_correct_Log(page, server):
     assert message.value.type == "error"
 
 
-def test_console_should_have_location_for_console_api_calls(page, server):
+def test_console_should_have_location_for_console_api_calls(
+    page: Page, server: Server
+) -> None:
     page.goto(server.EMPTY_PAGE)
-    with page.expect_console_message() as message:
+    with page.expect_console_message() as message_info:
         page.goto(server.PREFIX + "/consolelog.html")
-    message = message.value
+    message = message_info.value
     assert message.text == "yellow"
     assert message.type == "log"
     location = message.location
@@ -124,8 +129,8 @@ def test_console_should_have_location_for_console_api_calls(page, server):
 
 
 def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(
-    page: Page, server
-):
+    page: Page, server: Server
+) -> None:
     page.goto(server.EMPTY_PAGE)
     with page.expect_popup() as popup:
         page.evaluate(

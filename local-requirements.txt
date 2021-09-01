@@ -21,4 +21,5 @@ service_identity==21.1.0
 setuptools==57.4.0
 twine==3.4.2
 twisted==21.7.0
+types-pyOpenSSL==20.0.6
 wheel==0.37.0

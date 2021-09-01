@@ -20,11 +20,13 @@ import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
+from typing import Any, Callable, Dict, Set, Tuple
 from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
 from twisted.internet import reactor, ssl
+from twisted.internet.protocol import ClientFactory
 from twisted.web import http
 
 from playwright._impl._path_utils import get_file_dirname
@@ -32,7 +34,7 @@ from playwright._impl._path_utils import get_file_dirname
 _dirname = get_file_dirname()
 
 
-def find_free_port():
+def find_free_port() -> int:
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -42,7 +44,7 @@ def find_free_port():
 class Server:
     protocol = "http"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.PORT = find_free_port()
         self.EMPTY_PAGE = f"{self.protocol}://localhost:{self.PORT}/empty.html"
         self.PREFIX = f"{self.protocol}://localhost:{self.PORT}"
@@ -58,15 +60,15 @@ class Server:
         return self.PREFIX
 
     @abc.abstractmethod
-    def listen(self, factory):
+    def listen(self, factory: ClientFactory) -> None:
         pass
 
-    def start(self):
-        request_subscribers = {}
-        auth = {}
-        csp = {}
-        routes = {}
-        gzip_routes = set()
+    def start(self) -> None:
+        request_subscribers: Dict[str, asyncio.Future] = {}
+        auth: Dict[str, Tuple[str, str]] = {}
+        csp: Dict[str, str] = {}
+        routes: Dict[str, Callable[[http.Request], Any]] = {}
+        gzip_routes: Set[str] = set()
         self.request_subscribers = request_subscribers
         self.auth = auth
         self.csp = csp
@@ -75,10 +77,13 @@ class Server:
         static_path = _dirname / "assets"
 
         class TestServerHTTPHandler(http.Request):
-            def process(self):
+            def process(self) -> None:
                 request = self
-                self.post_body = request.content.read()
-                request.content.seek(0, 0)
+                if request.content:
+                    self.post_body = request.content.read()
+                    request.content.seek(0, 0)
+                else:
+                    self.post_body = None
                 uri = urlparse(request.uri.decode())
                 path = uri.path
 
@@ -131,34 +136,34 @@ class Server:
 
         self.listen(MyHttpFactory())
 
-    async def wait_for_request(self, path):
+    async def wait_for_request(self, path: str) -> http.Request:
         if path in self.request_subscribers:
             return await self.request_subscribers[path]
-        future = asyncio.Future()
+        future: asyncio.Future["http.Request"] = asyncio.Future()
         self.request_subscribers[path] = future
         return await future
 
-    def set_auth(self, path: str, username: str, password: str):
+    def set_auth(self, path: str, username: str, password: str) -> None:
         self.auth[path] = (username, password)
 
-    def set_csp(self, path: str, value: str):
+    def set_csp(self, path: str, value: str) -> None:
         self.csp[path] = value
 
-    def reset(self):
+    def reset(self) -> None:
         self.request_subscribers.clear()
         self.auth.clear()
         self.csp.clear()
         self.gzip_routes.clear()
         self.routes.clear()
 
-    def set_route(self, path, callback):
+    def set_route(self, path: str, callback: Callable[[http.Request], Any]) -> None:
         self.routes[path] = callback
 
-    def enable_gzip(self, path):
+    def enable_gzip(self, path: str) -> None:
         self.gzip_routes.add(path)
 
-    def set_redirect(self, from_, to):
-        def handle_redirect(request):
+    def set_redirect(self, from_: str, to: str) -> None:
+        def handle_redirect(request: http.Request) -> None:
             request.setResponseCode(HTTPStatus.FOUND)
             request.setHeader("location", to)
             request.finish()
@@ -167,14 +172,14 @@ class Server:
 
 
 class HTTPServer(Server):
-    def listen(self, factory):
+    def listen(self, factory: ClientFactory) -> None:
         reactor.listenTCP(self.PORT, factory)
 
 
 class HTTPSServer(Server):
     protocol = "https"
 
-    def listen(self, factory):
+    def listen(self, factory: ClientFactory) -> None:
         cert = ssl.PrivateCertificate.fromCertificateAndKeyPair(
             ssl.Certificate.loadPEM(
                 (_dirname / "testserver" / "cert.pem").read_bytes()
@@ -192,20 +197,20 @@ class WebSocketServerServer(WebSocketServerProtocol):
         super().__init__()
         self.PORT = find_free_port()
 
-    def start(self):
+    def start(self) -> None:
         ws = WebSocketServerFactory("ws://127.0.0.1:" + str(self.PORT))
         ws.protocol = WebSocketProtocol
         reactor.listenTCP(self.PORT, ws)
 
 
 class WebSocketProtocol(WebSocketServerProtocol):
-    def onConnect(self, request):
+    def onConnect(self, request: Any) -> None:
         pass
 
-    def onOpen(self):
+    def onOpen(self) -> None:
         self.sendMessage(b"incoming")
 
-    def onMessage(self, payload, isBinary):
+    def onMessage(self, payload: bytes, isBinary: bool) -> None:
         if payload == b"echo-bin":
             self.sendMessage(b"\x04\x02", True)
             self.sendClose()
@@ -215,7 +220,7 @@ class WebSocketProtocol(WebSocketServerProtocol):
         if payload == b"close":
             self.sendClose()
 
-    def onClose(self, wasClean, code, reason):
+    def onClose(self, wasClean: Any, code: Any, reason: Any) -> None:
         pass
 
 

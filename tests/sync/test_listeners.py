@@ -13,10 +13,14 @@
 # limitations under the License.
 
 
-def test_listeners(page, server):
+from playwright.sync_api import Page, Response
+from tests.server import Server
+
+
+def test_listeners(page: Page, server: Server) -> None:
     log = []
 
-    def print_response(response):
+    def print_response(response: Response) -> None:
         log.append(response)
 
     page.on("response", print_response)

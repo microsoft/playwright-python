@@ -12,19 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Generator, Optional
+
 import pytest
 
-from playwright.sync_api import ElementHandle, JSHandle
+from playwright.sync_api import Browser, BrowserContext, ElementHandle, JSHandle, Page
 
 
 @pytest.fixture
-def context(browser):
+def context(browser: Browser) -> Generator[BrowserContext, None, None]:
     context = browser.new_context(has_touch=True)
     yield context
     context.close()
 
 
-def test_should_send_all_of_the_correct_events(page):
+def test_should_send_all_of_the_correct_events(page: Page) -> None:
     page.set_content(
         """
             <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
@@ -52,7 +54,7 @@ def test_should_send_all_of_the_correct_events(page):
     ]
 
 
-def test_should_not_send_mouse_events_touchstart_is_canceled(page):
+def test_should_not_send_mouse_events_touchstart_is_canceled(page: Page) -> None:
     page.set_content("hello world")
     page.evaluate(
         """() => {
@@ -74,7 +76,7 @@ def test_should_not_send_mouse_events_touchstart_is_canceled(page):
     ]
 
 
-def test_should_not_send_mouse_events_touchend_is_canceled(page):
+def test_should_not_send_mouse_events_touchend_is_canceled(page: Page) -> None:
     page.set_content("hello world")
     page.evaluate(
         """() => {
@@ -96,7 +98,8 @@ def test_should_not_send_mouse_events_touchend_is_canceled(page):
     ]
 
 
-def track_events(target: ElementHandle) -> JSHandle:
+def track_events(target: Optional[ElementHandle]) -> JSHandle:
+    assert target
     return target.evaluate_handle(
         """target => {
             const events = [];

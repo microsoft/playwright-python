@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from typing import Callable
 
 import pytest
 
@@ -24,14 +25,16 @@ _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
 
 
-def test_locators_click_should_work(page: Page, server: Server):
+def test_locators_click_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     button.click()
     assert page.evaluate("window['result']") == "Clicked"
 
 
-def test_locators_click_should_work_with_node_removed(page: Page, server: Server):
+def test_locators_click_should_work_with_node_removed(
+    page: Page, server: Server
+) -> None:
     page.goto(server.PREFIX + "/input/button.html")
     page.evaluate("delete window['Node']")
     button = page.locator("button")
@@ -39,7 +42,7 @@ def test_locators_click_should_work_with_node_removed(page: Page, server: Server
     assert page.evaluate("window['result']") == "Clicked"
 
 
-def test_locators_click_should_work_for_text_nodes(page: Page, server: Server):
+def test_locators_click_should_work_for_text_nodes(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/button.html")
     page.evaluate(
         """() => {
@@ -56,7 +59,7 @@ def test_locators_click_should_work_for_text_nodes(page: Page, server: Server):
     assert page.evaluate("result") == "Clicked"
 
 
-def test_locators_should_have_repr(page: Page, server: Server):
+def test_locators_should_have_repr(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     button.click()
@@ -66,39 +69,39 @@ def test_locators_should_have_repr(page: Page, server: Server):
     )
 
 
-def test_locators_get_attribute_should_work(page: Page, server: Server):
+def test_locators_get_attribute_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/dom.html")
     button = page.locator("#outer")
     assert button.get_attribute("name") == "value"
     assert button.get_attribute("foo") is None
 
 
-def test_locators_input_value_should_work(page: Page, server: Server):
+def test_locators_input_value_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/dom.html")
     page.fill("#textarea", "input value")
     text_area = page.locator("#textarea")
     assert text_area.input_value() == "input value"
 
 
-def test_locators_inner_html_should_work(page: Page, server: Server):
+def test_locators_inner_html_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/dom.html")
     locator = page.locator("#outer")
     assert locator.inner_html() == '<div id="inner">Text,\nmore text</div>'
 
 
-def test_locators_inner_text_should_work(page: Page, server: Server):
+def test_locators_inner_text_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/dom.html")
     locator = page.locator("#inner")
     assert locator.inner_text() == "Text, more text"
 
 
-def test_locators_text_content_should_work(page: Page, server: Server):
+def test_locators_text_content_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/dom.html")
     locator = page.locator("#inner")
     assert locator.text_content() == "Text,\nmore text"
 
 
-def test_locators_is_hidden_and_is_visible_should_work(page: Page):
+def test_locators_is_hidden_and_is_visible_should_work(page: Page) -> None:
     page.set_content("<div>Hi</div><span></span>")
 
     div = page.locator("div")
@@ -110,7 +113,7 @@ def test_locators_is_hidden_and_is_visible_should_work(page: Page):
     assert span.is_hidden() is True
 
 
-def test_locators_is_enabled_and_is_disabled_should_work(page: Page):
+def test_locators_is_enabled_and_is_disabled_should_work(page: Page) -> None:
     page.set_content(
         """
         <button disabled>button1</button>
@@ -132,7 +135,7 @@ def test_locators_is_enabled_and_is_disabled_should_work(page: Page):
     assert button1.is_disabled() is False
 
 
-def test_locators_is_editable_should_work(page: Page):
+def test_locators_is_editable_should_work(page: Page) -> None:
     page.set_content(
         """
         <input id=input1 disabled><textarea></textarea><input id=input2>
@@ -146,7 +149,7 @@ def test_locators_is_editable_should_work(page: Page):
     assert input2.is_editable() is True
 
 
-def test_locators_is_checked_should_work(page: Page):
+def test_locators_is_checked_should_work(page: Page) -> None:
     page.set_content(
         """
         <input type='checkbox' checked><div>Not a checkbox</div>
@@ -159,7 +162,7 @@ def test_locators_is_checked_should_work(page: Page):
     assert element.is_checked() is False
 
 
-def test_locators_all_text_contents_should_work(page: Page):
+def test_locators_all_text_contents_should_work(page: Page) -> None:
     page.set_content(
         """
         <div>A</div><div>B</div><div>C</div>
@@ -170,7 +173,7 @@ def test_locators_all_text_contents_should_work(page: Page):
     assert element.all_text_contents() == ["A", "B", "C"]
 
 
-def test_locators_all_inner_texts(page: Page):
+def test_locators_all_inner_texts(page: Page) -> None:
     page.set_content(
         """
         <div>A</div><div>B</div><div>C</div>
@@ -181,7 +184,7 @@ def test_locators_all_inner_texts(page: Page):
     assert element.all_inner_texts() == ["A", "B", "C"]
 
 
-def test_locators_should_query_existing_element(page: Page, server: Server):
+def test_locators_should_query_existing_element(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/playground.html")
     page.set_content(
         """<html><body><div class="second"><div class="inner">A</div></div></body></html>"""
@@ -192,7 +195,7 @@ def test_locators_should_query_existing_element(page: Page, server: Server):
     assert page.evaluate("e => e.textContent", inner.element_handle()) == "A"
 
 
-def test_locators_evaluate_handle_should_work(page: Page, server: Server):
+def test_locators_evaluate_handle_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/dom.html")
     outer = page.locator("#outer")
     inner = outer.locator("#inner")
@@ -214,7 +217,7 @@ def test_locators_evaluate_handle_should_work(page: Page, server: Server):
     )
 
 
-def test_locators_should_query_existing_elements(page: Page):
+def test_locators_should_query_existing_elements(page: Page) -> None:
     page.set_content("""<html><body><div>A</div><br/><div>B</div></body></html>""")
     html = page.locator("html")
     elements = html.locator("div").element_handles()
@@ -225,7 +228,7 @@ def test_locators_should_query_existing_elements(page: Page):
     assert result == ["A", "B"]
 
 
-def test_locators_return_empty_array_for_non_existing_elements(page: Page):
+def test_locators_return_empty_array_for_non_existing_elements(page: Page) -> None:
     page.set_content("""<html><body><div>A</div><br/><div>B</div></body></html>""")
     html = page.locator("html")
     elements = html.locator("abc").element_handles()
@@ -233,7 +236,7 @@ def test_locators_return_empty_array_for_non_existing_elements(page: Page):
     assert elements == []
 
 
-def test_locators_evaluate_all_should_work(page: Page):
+def test_locators_evaluate_all_should_work(page: Page) -> None:
     page.set_content(
         """<html><body><div class="tweet"><div class="like">100</div><div class="like">10</div></div></body></html>"""
     )
@@ -242,42 +245,42 @@ def test_locators_evaluate_all_should_work(page: Page):
     assert content == ["100", "10"]
 
 
-def test_locators_evaluate_all_should_work_with_missing_selector(page: Page):
+def test_locators_evaluate_all_should_work_with_missing_selector(page: Page) -> None:
     page.set_content("""<div class="a">not-a-child-div</div><div id="myId"></div""")
     tweet = page.locator("#myId .a")
     nodes_length = tweet.evaluate_all("nodes => nodes.length")
     assert nodes_length == 0
 
 
-def test_locators_hover_should_work(page: Page, server: Server):
+def test_locators_hover_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/scrollable.html")
     button = page.locator("#button-6")
     button.hover()
     assert page.evaluate("document.querySelector('button:hover').id") == "button-6"
 
 
-def test_locators_fill_should_work(page: Page, server: Server):
+def test_locators_fill_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/textarea.html")
     button = page.locator("input")
     button.fill("some value")
     assert page.evaluate("result") == "some value"
 
 
-def test_locators_check_should_work(page: Page):
+def test_locators_check_should_work(page: Page) -> None:
     page.set_content("<input id='checkbox' type='checkbox'></input>")
     button = page.locator("input")
     button.check()
     assert page.evaluate("checkbox.checked") is True
 
 
-def test_locators_uncheck_should_work(page: Page):
+def test_locators_uncheck_should_work(page: Page) -> None:
     page.set_content("<input id='checkbox' type='checkbox' checked></input>")
     button = page.locator("input")
     button.uncheck()
     assert page.evaluate("checkbox.checked") is False
 
 
-def test_locators_select_option_should_work(page: Page, server: Server):
+def test_locators_select_option_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/select.html")
     select = page.locator("select")
     select.select_option("blue")
@@ -285,7 +288,7 @@ def test_locators_select_option_should_work(page: Page, server: Server):
     assert page.evaluate("result.onChange") == ["blue"]
 
 
-def test_locators_focus_should_work(page: Page, server: Server):
+def test_locators_focus_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     assert button.evaluate("button => document.activeElement === button") is False
@@ -293,14 +296,14 @@ def test_locators_focus_should_work(page: Page, server: Server):
     assert button.evaluate("button => document.activeElement === button") is True
 
 
-def test_locators_dispatch_event_should_work(page: Page, server: Server):
+def test_locators_dispatch_event_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     button.dispatch_event("click")
     assert page.evaluate("result") == "Clicked"
 
 
-def test_locators_should_upload_a_file(page: Page, server: Server):
+def test_locators_should_upload_a_file(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/fileupload.html")
     input = page.locator("input[type=file]")
 
@@ -312,13 +315,13 @@ def test_locators_should_upload_a_file(page: Page, server: Server):
     )
 
 
-def test_locators_should_press(page: Page):
+def test_locators_should_press(page: Page) -> None:
     page.set_content("<input type='text' />")
     page.locator("input").press("h")
     page.eval_on_selector("input", "input => input.value") == "h"
 
 
-def test_locators_should_scroll_into_view(page: Page, server: Server):
+def test_locators_should_scroll_into_view(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/offscreenbuttons.html")
     for i in range(11):
         button = page.locator(f"#btn{i}")
@@ -334,7 +337,9 @@ def test_locators_should_scroll_into_view(page: Page, server: Server):
         page.evaluate("window.scrollTo(0, 0)")
 
 
-def test_locators_should_select_textarea(page: Page, server: Server, browser_name: str):
+def test_locators_should_select_textarea(
+    page: Page, server: Server, browser_name: str
+) -> None:
     page.goto(server.PREFIX + "/input/textarea.html")
     textarea = page.locator("textarea")
     textarea.evaluate("textarea => textarea.value = 'some value'")
@@ -346,13 +351,15 @@ def test_locators_should_select_textarea(page: Page, server: Server, browser_nam
         assert page.evaluate("window.getSelection().toString()") == "some value"
 
 
-def test_locators_should_type(page: Page):
+def test_locators_should_type(page: Page) -> None:
     page.set_content("<input type='text' />")
     page.locator("input").type("hello")
     page.eval_on_selector("input", "input => input.value") == "hello"
 
 
-def test_locators_should_screenshot(page: Page, server: Server, assert_to_be_golden):
+def test_locators_should_screenshot(
+    page: Page, server: Server, assert_to_be_golden: Callable[[bytes, str], None]
+) -> None:
     page.set_viewport_size(
         {
             "width": 500,
@@ -365,7 +372,7 @@ def test_locators_should_screenshot(page: Page, server: Server, assert_to_be_gol
     assert_to_be_golden(element.screenshot(), "screenshot-element-bounding-box.png")
 
 
-def test_locators_should_return_bounding_box(page: Page, server: Server):
+def test_locators_should_return_bounding_box(page: Page, server: Server) -> None:
     page.set_viewport_size(
         {
             "width": 500,
@@ -383,7 +390,7 @@ def test_locators_should_return_bounding_box(page: Page, server: Server):
     }
 
 
-def test_locators_should_respect_first_and_last(page: Page):
+def test_locators_should_respect_first_and_last(page: Page) -> None:
     page.set_content(
         """
         <section>
@@ -398,7 +405,7 @@ def test_locators_should_respect_first_and_last(page: Page):
     assert page.locator("div").last.locator("p").count() == 3
 
 
-def test_locators_should_respect_nth(page: Page):
+def test_locators_should_respect_nth(page: Page) -> None:
     page.set_content(
         """
     <section>
@@ -412,7 +419,7 @@ def test_locators_should_respect_nth(page: Page):
     assert page.locator("div").nth(2).locator("p").count() == 3
 
 
-def test_locators_should_throw_on_capture_without_nth(page: Page):
+def test_locators_should_throw_on_capture_without_nth(page: Page) -> None:
     page.set_content(
         """
         <section><div><p>A</p></div></section>
@@ -422,7 +429,7 @@ def test_locators_should_throw_on_capture_without_nth(page: Page):
         page.locator("*css=div >> p").nth(1).click()
 
 
-def test_locators_should_throw_due_to_strictness(page: Page):
+def test_locators_should_throw_due_to_strictness(page: Page) -> None:
     page.set_content(
         """
         <div>A</div><div>B</div>
@@ -432,7 +439,7 @@ def test_locators_should_throw_due_to_strictness(page: Page):
         page.locator("div").is_visible()
 
 
-def test_locators_should_throw_due_to_strictness_2(page: Page):
+def test_locators_should_throw_due_to_strictness_2(page: Page) -> None:
     page.set_content(
         """
         <select><option>One</option><option>Two</option></select>
@@ -442,7 +449,7 @@ def test_locators_should_throw_due_to_strictness_2(page: Page):
         page.locator("option").evaluate("e => {}")
 
 
-def test_locators_set_checked(page: Page):
+def test_locators_set_checked(page: Page) -> None:
     page.set_content("`<input id='checkbox' type='checkbox'></input>`")
     locator = page.locator("input")
     locator.set_checked(True)

@@ -11268,7 +11268,7 @@ class Locator(SyncBase):
             )
         )
 
-    def evaluate_all(self, expression: str, arg: typing.Any = None) -> NoneType:
+    def evaluate_all(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """Locator.evaluate_all
 
         The method finds all elements matching the specified locator and passes an array of matched elements as a first argument
@@ -11291,6 +11291,10 @@ class Locator(SyncBase):
             as a function. Otherwise, evaluated as an expression.
         arg : Union[Any, NoneType]
             Optional argument to pass to `expression`.
+
+        Returns
+        -------
+        Any
         """
 
         return mapping.from_maybe_impl(
