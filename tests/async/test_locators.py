@@ -456,3 +456,12 @@ async def test_locators_should_throw_due_to_strictness_2(page: Page):
     )
     with pytest.raises(Error, match="strict mode violation"):
         await page.locator("option").evaluate("e => {}")
+
+
+async def test_locators_set_checked(page: Page):
+    await page.set_content("`<input id='checkbox' type='checkbox'></input>`")
+    locator = page.locator("input")
+    await locator.set_checked(True)
+    assert await page.evaluate("checkbox.checked")
+    await locator.set_checked(False)
+    assert await page.evaluate("checkbox.checked") is False

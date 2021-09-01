@@ -104,6 +104,14 @@ class ResourceTiming(TypedDict):
     responseEnd: float
 
 
+class RequestSizes(TypedDict):
+    requestBodySize: int
+    requestHeadersSize: int
+    responseBodySize: int
+    responseHeadersSize: int
+    responseTransferSize: int
+
+
 class ViewportSize(TypedDict):
     width: int
     height: int

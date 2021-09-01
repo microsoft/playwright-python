@@ -241,8 +241,9 @@ class Connection:
 
         guid = msg["guid"]
         method = msg.get("method")
-        params = msg["params"]
+        params = msg.get("params")
         if method == "__create__":
+            assert params
             parent = self._objects[guid]
             self._create_remote_object(
                 parent, params["type"], params["guid"], params["initializer"]
@@ -251,7 +252,6 @@ class Connection:
         if method == "__dispose__":
             self._objects[guid]._dispose()
             return
-
         object = self._objects[guid]
         try:
             if self._is_sync:

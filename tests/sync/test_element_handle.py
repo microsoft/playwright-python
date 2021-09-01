@@ -565,3 +565,12 @@ def test_input_value(page: Page, server: Server):
 
     element.fill("")
     assert element.input_value() == ""
+
+
+def test_set_checked(page: Page):
+    page.set_content("`<input id='checkbox' type='checkbox'></input>`")
+    input = page.query_selector("input")
+    input.set_checked(True)
+    assert page.evaluate("checkbox.checked")
+    input.set_checked(False)
+    assert page.evaluate("checkbox.checked") is False

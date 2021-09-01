@@ -649,3 +649,35 @@ class Frame(ChannelOwner):
 
     async def title(self) -> str:
         return await self._channel.send("title")
+
+    async def set_checked(
+        self,
+        selector: str,
+        checked: bool,
+        position: Position = None,
+        timeout: float = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+        strict: bool = None,
+        trial: bool = None,
+    ) -> None:
+        if checked:
+            await self.check(
+                selector=selector,
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+                strict=strict,
+                trial=trial,
+            )
+        else:
+            await self.uncheck(
+                selector=selector,
+                position=position,
+                timeout=timeout,
+                force=force,
+                noWaitAfter=noWaitAfter,
+                strict=strict,
+                trial=trial,
+            )
