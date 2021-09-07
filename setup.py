@@ -63,10 +63,10 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         platform_map = {
             "darwin": "mac",
             "linux": "linux",
-            "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
+            "win32": "win",
         }
         if self.all:
-            platforms = ["mac", "linux", "win32", "win32_x64"]
+            platforms = ["mac", "linux", "win"]
         else:
             platforms = [platform_map[sys.platform]]
         for platform in platforms:
@@ -93,9 +93,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 wheel = "macosx_10_13_x86_64.whl"
             if platform == "linux":
                 wheel = "manylinux1_x86_64.whl"
-            if platform == "win32":
-                wheel = "win32.whl"
-            if platform == "win32_x64":
+            if platform == "win":
                 wheel = "win_amd64.whl"
             wheel_location = without_platform + wheel
             shutil.copy(base_wheel_location, wheel_location)
