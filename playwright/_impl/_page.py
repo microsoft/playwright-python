@@ -331,8 +331,19 @@ class Page(ChannelOwner):
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         strict: bool = None,
-    ) -> Optional[ElementHandle]:
+    ) -> ElementHandle:
         return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+
+    async def wait_for_selector_hidden(
+        self,
+        selector: str,
+        strict: bool = None,
+        timeout: float = None,
+        state: Literal["detached", "hidden"] = None,
+    ) -> None:
+        await self.wait_for_selector(
+            selector, strict=strict, timeout=timeout, state=state
+        )
 
     async def is_checked(
         self, selector: str, strict: bool = None, timeout: float = None
