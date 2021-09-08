@@ -277,8 +277,11 @@ class Frame(ChannelOwner):
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> ElementHandle:
-        return from_nullable_channel(
-            await self._channel.send("waitForSelector", locals_to_params(locals()))
+        return cast(
+            ElementHandle,
+            from_nullable_channel(
+                await self._channel.send("waitForSelector", locals_to_params(locals()))
+            ),
         )
 
     async def wait_for_selector_hidden(

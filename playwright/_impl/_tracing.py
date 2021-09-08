@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import pathlib
-from typing import TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 from playwright._impl._artifact import Artifact
-from playwright._impl._connection import from_channel
+from playwright._impl._connection import from_nullable_channel
 from playwright._impl._helper import locals_to_params
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -35,14 +35,34 @@ class Tracing:
     ) -> None:
         params = locals_to_params(locals())
         await self._channel.send("tracingStart", params)
+        await self._channel.send("tracingStartChunk")
+
+    async def start_chunk(self) -> None:
+        await self._channel.send("tracingStartChunk")
+
+    async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
+        await self._do_stop_chunk(path)
 
     async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
-        if path:
-            artifact = cast(
-                Artifact, from_channel(await self._channel.send("tracingExport"))
-            )
-            if self._context._browser:
-                artifact._is_remote = self._context._browser._is_remote
-            await artifact.save_as(path)
-            await artifact.delete()
+        await self._do_stop_chunk(path)
         await self._channel.send("tracingStop")
+
+    async def _do_stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
+        artifact = cast(
+            Optional[Artifact],
+            from_nullable_channel(
+                await self._channel.send(
+                    "tracingStopChunk",
+                    {
+                        "save": bool(path),
+                    },
+                )
+            ),
+        )
+        if not artifact:
+            return
+        if self._context._browser:
+            artifact._is_remote = self._context._browser._is_remote
+        if path:
+            await artifact.save_as(path)
+        await artifact.delete()

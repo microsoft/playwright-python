@@ -118,7 +118,7 @@ def test_accessibility_should_work_with_regular_text(
 
 
 def test_accessibility_roledescription(page: Page) -> None:
-    page.set_content('<div tabIndex=-1 aria-roledescription="foo">Hi</div>')
+    page.set_content('<p tabIndex=-1 aria-roledescription="foo">Hi</p>')
     snapshot = page.accessibility.snapshot()
     assert snapshot
     assert snapshot["children"][0]["roledescription"] == "foo"

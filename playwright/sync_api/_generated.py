@@ -118,19 +118,6 @@ class Request(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.method)
 
     @property
-    def sizes(self) -> RequestSizes:
-        """Request.sizes
-
-        Returns resource size information for given request. Requires the response to be finished via
-        `response.finished()` to ensure the info is available.
-
-        Returns
-        -------
-        {requestBodySize: int, requestHeadersSize: int, responseBodySize: int, responseHeadersSize: int, responseTransferSize: int}
-        """
-        return mapping.from_impl(self._impl_obj.sizes)
-
-    @property
     def post_data(self) -> typing.Optional[str]:
         """Request.post_data
 
@@ -173,7 +160,7 @@ class Request(SyncBase):
     def headers(self) -> typing.Dict[str, str]:
         """Request.headers
 
-        An object with HTTP headers associated with the request. All header names are lower-case.
+        **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use `request.all_headers()` instead.
 
         Returns
         -------
@@ -280,6 +267,19 @@ class Request(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.timing)
 
+    def sizes(self) -> RequestSizes:
+        """Request.sizes
+
+        Returns resource size information for given request. Requires the response to be finished via
+        `response.finished()` to ensure the info is available.
+
+        Returns
+        -------
+        {requestBodySize: int, requestHeadersSize: int, responseBodySize: int, responseHeadersSize: int}
+        """
+
+        return mapping.from_impl(self._sync("request.sizes", self._impl_obj.sizes()))
+
     def response(self) -> typing.Optional["Response"]:
         """Request.response
 
@@ -305,6 +305,35 @@ class Request(SyncBase):
         """
 
         return mapping.from_maybe_impl(self._impl_obj.is_navigation_request())
+
+    def all_headers(self) -> typing.Dict[str, str]:
+        """Request.all_headers
+
+        An object with all the request HTTP headers associated with this request. The header names are lower-cased.
+
+        Returns
+        -------
+        Dict[str, str]
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("request.all_headers", self._impl_obj.all_headers())
+        )
+
+    def headers_array(self) -> typing.List[typing.List[str]]:
+        """Request.headers_array
+
+        An array with all the request HTTP headers associated with this request. Unlike `request.all_headers()`, header
+        names are not lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+
+        Returns
+        -------
+        List[List[str]]
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("request.headers_array", self._impl_obj.headers_array())
+        )
 
 
 mapping.register(RequestImpl, Request)
@@ -366,7 +395,7 @@ class Response(SyncBase):
     def headers(self) -> typing.Dict[str, str]:
         """Response.headers
 
-        Returns the object with HTTP headers associated with the response. All header names are lower-case.
+        **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use `response.all_headers()` instead.
 
         Returns
         -------
@@ -398,6 +427,35 @@ class Response(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.frame)
 
+    def all_headers(self) -> typing.Dict[str, str]:
+        """Response.all_headers
+
+        An object with all the response HTTP headers associated with this response.
+
+        Returns
+        -------
+        Dict[str, str]
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("response.all_headers", self._impl_obj.all_headers())
+        )
+
+    def headers_array(self) -> typing.List[typing.List[str]]:
+        """Response.headers_array
+
+        An array with all the request HTTP headers associated with this response. Unlike `response.all_headers()`, header
+        names are not lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+
+        Returns
+        -------
+        List[List[str]]
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("response.headers_array", self._impl_obj.headers_array())
+        )
+
     def server_addr(self) -> typing.Optional[RemoteAddr]:
         """Response.server_addr
 
@@ -426,14 +484,10 @@ class Response(SyncBase):
             self._sync("response.security_details", self._impl_obj.security_details())
         )
 
-    def finished(self) -> typing.Optional[str]:
+    def finished(self) -> NoneType:
         """Response.finished
 
         Waits for this response to finish, returns failure error if request failed.
-
-        Returns
-        -------
-        Union[str, NoneType]
         """
 
         return mapping.from_maybe_impl(
@@ -2088,7 +2142,6 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         force: bool = None,
         no_wait_after: bool = None,
-        strict: bool = None,
         trial: bool = None
     ) -> NoneType:
         """ElementHandle.set_checked
@@ -2122,9 +2175,6 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
-        strict : Union[bool, NoneType]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
-            element, the call throws an exception.
         trial : Union[bool, NoneType]
             When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
@@ -2139,7 +2189,6 @@ class ElementHandle(JSHandle):
                     timeout=timeout,
                     force=force,
                     noWaitAfter=no_wait_after,
-                    strict=strict,
                     trial=trial,
                 ),
             )
@@ -2531,7 +2580,7 @@ class ElementHandle(JSHandle):
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         timeout: float = None,
         strict: bool = None
-    ) -> typing.Optional["ElementHandle"]:
+    ) -> "ElementHandle":
         """ElementHandle.wait_for_selector
 
         Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -2572,14 +2621,53 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        ElementHandle
         """
 
-        return mapping.from_impl_nullable(
+        return mapping.from_impl(
             self._sync(
                 "element_handle.wait_for_selector",
                 self._impl_obj.wait_for_selector(
                     selector=selector, state=state, timeout=timeout, strict=strict
+                ),
+            )
+        )
+
+    def wait_for_selector_hidden(
+        self,
+        selector: str,
+        *,
+        strict: bool = None,
+        timeout: float = None,
+        state: Literal["detached", "hidden"] = None
+    ) -> NoneType:
+        """ElementHandle.wait_for_selector_hidden
+
+        Returns when element specified by selector satisfies `state` option. See `element_handle.wait_for_selector()` for
+        more information.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        state : Union["detached", "hidden", NoneType]
+            Defaults to `'hidden'`. Can be either:
+            - `'detached'` - wait for element to not be present in DOM.
+            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
+              This is opposite to the `'visible'` option.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "element_handle.wait_for_selector_hidden",
+                self._impl_obj.wait_for_selector_hidden(
+                    selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
         )
@@ -3189,7 +3277,7 @@ class Frame(SyncBase):
         strict: bool = None,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
-    ) -> typing.Optional["ElementHandle"]:
+    ) -> "ElementHandle":
         """Frame.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -3239,13 +3327,52 @@ class Frame(SyncBase):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        ElementHandle
         """
 
-        return mapping.from_impl_nullable(
+        return mapping.from_impl(
             self._sync(
                 "frame.wait_for_selector",
                 self._impl_obj.wait_for_selector(
+                    selector=selector, strict=strict, timeout=timeout, state=state
+                ),
+            )
+        )
+
+    def wait_for_selector_hidden(
+        self,
+        selector: str,
+        *,
+        strict: bool = None,
+        timeout: float = None,
+        state: Literal["detached", "hidden"] = None
+    ) -> NoneType:
+        """Frame.wait_for_selector_hidden
+
+        Returns when element specified by selector satisfies `state` option. See `frame.wait_for_selector()` for more
+        information.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        state : Union["detached", "hidden", NoneType]
+            Defaults to `'hidden'`. Can be either:
+            - `'detached'` - wait for element to not be present in DOM.
+            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
+              This is opposite to the `'visible'` option.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "frame.wait_for_selector_hidden",
+                self._impl_obj.wait_for_selector_hidden(
                     selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
@@ -5695,7 +5822,7 @@ class Page(SyncContextManager):
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         strict: bool = None
-    ) -> typing.Optional["ElementHandle"]:
+    ) -> "ElementHandle":
         """Page.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -5745,14 +5872,53 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        Union[ElementHandle, NoneType]
+        ElementHandle
         """
 
-        return mapping.from_impl_nullable(
+        return mapping.from_impl(
             self._sync(
                 "page.wait_for_selector",
                 self._impl_obj.wait_for_selector(
                     selector=selector, timeout=timeout, state=state, strict=strict
+                ),
+            )
+        )
+
+    def wait_for_selector_hidden(
+        self,
+        selector: str,
+        *,
+        strict: bool = None,
+        timeout: float = None,
+        state: Literal["detached", "hidden"] = None
+    ) -> NoneType:
+        """Page.wait_for_selector_hidden
+
+        Returns when element specified by selector satisfies `state` option. See `page.wait_for_selector()` for more
+        information.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to query for. See [working with selectors](./selectors.md) for more details.
+        strict : Union[bool, NoneType]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            element, the call throws an exception.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        state : Union["detached", "hidden", NoneType]
+            Defaults to `'hidden'`. Can be either:
+            - `'detached'` - wait for element to not be present in DOM.
+            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
+              This is opposite to the `'visible'` option.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page.wait_for_selector_hidden",
+                self._impl_obj.wait_for_selector_hidden(
+                    selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
         )
@@ -6832,7 +6998,8 @@ class Page(SyncContextManager):
         *,
         media: Literal["print", "screen"] = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
-        reduced_motion: Literal["no-preference", "reduce"] = None
+        reduced_motion: Literal["no-preference", "reduce"] = None,
+        forced_colors: Literal["active", "none"] = None
     ) -> NoneType:
         """Page.emulate_media
 
@@ -6878,13 +7045,21 @@ class Page(SyncContextManager):
         reduced_motion : Union["no-preference", "reduce", NoneType]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null`
             disables reduced motion emulation.
+        forced_colors : Union["active", "none", NoneType]
+            Emulates `'forced-colors'` media feature, supported values are `'active'` and `'none'`. Passing `null` disables forced
+            colors emulation.
+
+            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         """
 
         return mapping.from_maybe_impl(
             self._sync(
                 "page.emulate_media",
                 self._impl_obj.emulate_media(
-                    media=media, colorScheme=color_scheme, reducedMotion=reduced_motion
+                    media=media,
+                    colorScheme=color_scheme,
+                    reducedMotion=reduced_motion,
+                    forcedColors=forced_colors,
                 ),
             )
         )
@@ -9822,6 +9997,7 @@ class Browser(SyncContextManager):
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         reduced_motion: Literal["no-preference", "reduce"] = None,
+        forced_colors: Literal["active", "none"] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
         proxy: ProxySettings = None,
@@ -9893,6 +10069,11 @@ class Browser(SyncContextManager):
         reduced_motion : Union["no-preference", "reduce", NoneType]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'no-preference'`.
+        forced_colors : Union["active", "none", NoneType]
+            Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
+            for more details. Defaults to `'none'`.
+
+            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
@@ -9958,6 +10139,7 @@ class Browser(SyncContextManager):
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
                     reducedMotion=reduced_motion,
+                    forcedColors=forced_colors,
                     acceptDownloads=accept_downloads,
                     defaultBrowserType=default_browser_type,
                     proxy=proxy,
@@ -9993,6 +10175,7 @@ class Browser(SyncContextManager):
         is_mobile: bool = None,
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
+        forced_colors: Literal["active", "none"] = None,
         reduced_motion: Literal["no-preference", "reduce"] = None,
         accept_downloads: bool = None,
         default_browser_type: str = None,
@@ -10057,6 +10240,11 @@ class Browser(SyncContextManager):
         color_scheme : Union["dark", "light", "no-preference", NoneType]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'light'`.
+        forced_colors : Union["active", "none", NoneType]
+            Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
+            for more details. Defaults to `'none'`.
+
+            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         reduced_motion : Union["no-preference", "reduce", NoneType]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'no-preference'`.
@@ -10124,6 +10312,7 @@ class Browser(SyncContextManager):
                     isMobile=is_mobile,
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
+                    forcedColors=forced_colors,
                     reducedMotion=reduced_motion,
                     acceptDownloads=accept_downloads,
                     defaultBrowserType=default_browser_type,
@@ -10439,6 +10628,7 @@ class BrowserType(SyncBase):
         has_touch: bool = None,
         color_scheme: Literal["dark", "light", "no-preference"] = None,
         reduced_motion: Literal["no-preference", "reduce"] = None,
+        forced_colors: Literal["active", "none"] = None,
         accept_downloads: bool = None,
         traces_dir: typing.Union[str, pathlib.Path] = None,
         chromium_sandbox: bool = None,
@@ -10549,6 +10739,11 @@ class BrowserType(SyncBase):
         reduced_motion : Union["no-preference", "reduce", NoneType]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'no-preference'`.
+        forced_colors : Union["active", "none", NoneType]
+            Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
+            for more details. Defaults to `'none'`.
+
+            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         accept_downloads : Union[bool, NoneType]
             Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
         traces_dir : Union[pathlib.Path, str, NoneType]
@@ -10623,6 +10818,7 @@ class BrowserType(SyncBase):
                     hasTouch=has_touch,
                     colorScheme=color_scheme,
                     reducedMotion=reduced_motion,
+                    forcedColors=forced_colors,
                     acceptDownloads=accept_downloads,
                     tracesDir=traces_dir,
                     chromiumSandbox=chromium_sandbox,
@@ -10860,8 +11056,8 @@ class Tracing(SyncBase):
 
         ```py
         context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        page = context.new_page()
         page.goto(\"https://playwright.dev\")
-        context.tracing.stop()
         context.tracing.stop(path = \"trace.zip\")
         ```
 
@@ -10885,6 +11081,49 @@ class Tracing(SyncBase):
             )
         )
 
+    def start_chunk(self) -> NoneType:
+        """Tracing.start_chunk
+
+        Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
+        `tracing.start()` once, and then create multiple trace chunks with `tracing.start_chunk()` and
+        `tracing.stop_chunk()`.
+
+        ```py
+        context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        page = context.new_page()
+        page.goto(\"https://playwright.dev\")
+
+        context.tracing.start_chunk()
+        page.click(\"text=Get Started\")
+        # Everything between start_chunk and stop_chunk will be recorded in the trace.
+        context.tracing.stop_chunk(path = \"trace1.zip\")
+
+        context.tracing.start_chunk()
+        page.goto(\"http://example.com\")
+        # Save a second trace file with different actions.
+        context.tracing.stop_chunk(path = \"trace2.zip\")
+        ```
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("tracing.start_chunk", self._impl_obj.start_chunk())
+        )
+
+    def stop_chunk(self, *, path: typing.Union[str, pathlib.Path] = None) -> NoneType:
+        """Tracing.stop_chunk
+
+        Stop the trace chunk. See `tracing.start_chunk()` for more details about multiple trace chunks.
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str, NoneType]
+            Export trace collected since the last `tracing.start_chunk()` call into the file with the given path.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("tracing.stop_chunk", self._impl_obj.stop_chunk(path=path))
+        )
+
     def stop(self, *, path: typing.Union[str, pathlib.Path] = None) -> NoneType:
         """Tracing.stop
 
@@ -10893,7 +11132,7 @@ class Tracing(SyncBase):
         Parameters
         ----------
         path : Union[pathlib.Path, str, NoneType]
-            Export trace into the file with the given name.
+            Export trace into the file with the given path.
         """
 
         return mapping.from_maybe_impl(
@@ -12264,7 +12503,6 @@ class Locator(SyncBase):
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        strict: bool = None,
         no_wait_after: bool = None,
         trial: bool = None
     ) -> NoneType:
@@ -12295,9 +12533,6 @@ class Locator(SyncBase):
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, NoneType]
             Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
-        strict : Union[bool, NoneType]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
-            element, the call throws an exception.
         no_wait_after : Union[bool, NoneType]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
@@ -12315,7 +12550,6 @@ class Locator(SyncBase):
                     position=position,
                     timeout=timeout,
                     force=force,
-                    strict=strict,
                     noWaitAfter=no_wait_after,
                     trial=trial,
                 ),

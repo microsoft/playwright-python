@@ -220,7 +220,6 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
-        strict: bool = None,
         trial: bool = None,
     ) -> None:
         if checked:
@@ -344,8 +343,11 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         strict: bool = None,
     ) -> "ElementHandle":
-        return from_nullable_channel(
-            await self._channel.send("waitForSelector", locals_to_params(locals()))
+        return cast(
+            ElementHandle,
+            from_nullable_channel(
+                await self._channel.send("waitForSelector", locals_to_params(locals()))
+            ),
         )
 
     async def wait_for_selector_hidden(

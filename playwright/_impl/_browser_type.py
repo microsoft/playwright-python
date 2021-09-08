@@ -35,6 +35,7 @@ from playwright._impl._connection import (
 from playwright._impl._helper import (
     ColorScheme,
     Env,
+    ForcedColors,
     ReducedMotion,
     locals_to_params,
     not_installed_error,
@@ -128,6 +129,7 @@ class BrowserType(ChannelOwner):
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
+        forcedColors: ForcedColors = None,
         acceptDownloads: bool = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,

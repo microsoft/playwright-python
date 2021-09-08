@@ -30,6 +30,7 @@ from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
     ColorScheme,
+    ForcedColors,
     ReducedMotion,
     async_readfile,
     is_safe_close_error,
@@ -97,6 +98,7 @@ class Browser(ChannelOwner):
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
+        forcedColors: ForcedColors = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
         proxy: ProxySettings = None,
@@ -138,6 +140,7 @@ class Browser(ChannelOwner):
         isMobile: bool = None,
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
+        forcedColors: ForcedColors = None,
         reducedMotion: ReducedMotion = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,

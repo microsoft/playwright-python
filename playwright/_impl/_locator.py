@@ -173,11 +173,8 @@ class Locator:
         timeout: float = None,
     ) -> ElementHandle:
         params = locals_to_params(locals())
-        return cast(
-            ElementHandle,
-            await self._frame.wait_for_selector(
-                self._selector, strict=True, state="attached", **params
-            ),
+        return await self._frame.wait_for_selector(
+            self._selector, strict=True, state="attached", **params
         )
 
     async def element_handles(self) -> List[ElementHandle]:
@@ -445,7 +442,6 @@ class Locator:
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        strict: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:

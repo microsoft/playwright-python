@@ -1293,21 +1293,32 @@ async def test_should_check_box_using_set_checked(page: Page):
 
 async def test_should_set_bodysize_and_headersize(page: Page, server: Server):
     await page.goto(server.EMPTY_PAGE)
-    async with page.expect_event("request") as req_info:
+    async with page.expect_request("*/**") as request_info:
         await page.evaluate(
             "() => fetch('./get', { method: 'POST', body: '12345'}).then(r => r.text())"
         )
-    req = await req_info.value
-    await (await req.response()).finished()
-    assert req.sizes["requestBodySize"] == 5
-    assert req.sizes["requestHeadersSize"] >= 300
+    request = await request_info.value
+    sizes = await request.sizes()
+    assert sizes["requestBodySize"] == 5
+    assert sizes["requestHeadersSize"] >= 300
 
 
 async def test_should_set_bodysize_to_0(page: Page, server: Server):
     await page.goto(server.EMPTY_PAGE)
-    async with page.expect_event("request") as req_info:
+    async with page.expect_request("*/**") as request_info:
         await page.evaluate("() => fetch('./get').then(r => r.text())")
-    req = await req_info.value
-    await (await req.response()).finished()
-    assert req.sizes["requestBodySize"] == 0
-    assert req.sizes["requestHeadersSize"] >= 200
+    request = await request_info.value
+    sizes = await request.sizes()
+    assert sizes["requestBodySize"] == 0
+    assert sizes["requestHeadersSize"] >= 200
+
+
+@pytest.mark.skip_browser("webkit")  # https://bugs.webkit.org/show_bug.cgi?id=225281
+async def test_should_emulate_forced_colors(page):
+    assert await page.evaluate("matchMedia('(forced-colors: none)').matches")
+    await page.emulate_media(forced_colors="none")
+    assert await page.evaluate("matchMedia('(forced-colors: none)').matches")
+    assert not await page.evaluate("matchMedia('(forced-colors: active)').matches")
+    await page.emulate_media(forced_colors="active")
+    assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
+    assert not await page.evaluate("matchMedia('(forced-colors: none)').matches")

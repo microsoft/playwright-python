@@ -109,7 +109,6 @@ class RequestSizes(TypedDict):
     requestHeadersSize: int
     responseBodySize: int
     responseHeadersSize: int
-    responseTransferSize: int
 
 
 class ViewportSize(TypedDict):
