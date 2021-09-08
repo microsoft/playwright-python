@@ -23,9 +23,3 @@ twine==3.4.2
 twisted==21.7.0
 types-pyOpenSSL==20.0.6
 wheel==0.37.0
-setuptools==57.0.0
-twine==3.4.1
-twisted==21.2.0
-# Python 3.10
-websockets @ https://github.com/aaugustin/websockets/archive/6edb363af07365867b4c372405b6ab3177a57830.tar.gz; python_version >= '3.10'
-wheel==0.36.2
