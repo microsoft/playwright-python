@@ -66,13 +66,3 @@ def test_should_set_bodysize_to_0(page: Page, server: Server) -> None:
     sizes = request.sizes()
     assert sizes["requestBodySize"] == 0
     assert sizes["requestHeadersSize"] >= 200
-
-
-def test_wait_for_selector(page: Page, server: Server) -> None:
-    page.goto(server.EMPTY_PAGE)
-    page.set_content("""<button onclick="window.clicked=true">foo</button>""")
-    button = page.wait_for_selector("button")
-    button.click()
-    assert page.evaluate("window.clicked") is True
-    no_button = page.wait_for_selector_hidden("button.not-there", timeout=100)  # type: ignore
-    assert no_button is None

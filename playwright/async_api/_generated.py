@@ -270,8 +270,7 @@ class Request(AsyncBase):
     async def sizes(self) -> RequestSizes:
         """Request.sizes
 
-        Returns resource size information for given request. Requires the response to be finished via
-        `response.finished()` to ensure the info is available.
+        Returns resource size information for given request.
 
         Returns
         -------
@@ -2599,7 +2598,7 @@ class ElementHandle(JSHandle):
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         timeout: float = None,
         strict: bool = None
-    ) -> "ElementHandle":
+    ) -> typing.Optional["ElementHandle"]:
         """ElementHandle.wait_for_selector
 
         Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -2640,53 +2639,14 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        ElementHandle
+        Union[ElementHandle, NoneType]
         """
 
-        return mapping.from_impl(
+        return mapping.from_impl_nullable(
             await self._async(
                 "element_handle.wait_for_selector",
                 self._impl_obj.wait_for_selector(
                     selector=selector, state=state, timeout=timeout, strict=strict
-                ),
-            )
-        )
-
-    async def wait_for_selector_hidden(
-        self,
-        selector: str,
-        *,
-        strict: bool = None,
-        timeout: float = None,
-        state: Literal["detached", "hidden"] = None
-    ) -> NoneType:
-        """ElementHandle.wait_for_selector_hidden
-
-        Returns when element specified by selector satisfies `state` option. See `element_handle.wait_for_selector()` for
-        more information.
-
-        Parameters
-        ----------
-        selector : str
-            A selector to query for. See [working with selectors](./selectors.md) for more details.
-        strict : Union[bool, NoneType]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
-            element, the call throws an exception.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        state : Union["detached", "hidden", NoneType]
-            Defaults to `'hidden'`. Can be either:
-            - `'detached'` - wait for element to not be present in DOM.
-            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
-              This is opposite to the `'visible'` option.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._async(
-                "element_handle.wait_for_selector_hidden",
-                self._impl_obj.wait_for_selector_hidden(
-                    selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
         )
@@ -3298,7 +3258,7 @@ class Frame(AsyncBase):
         strict: bool = None,
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None
-    ) -> "ElementHandle":
+    ) -> typing.Optional["ElementHandle"]:
         """Frame.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -3351,52 +3311,13 @@ class Frame(AsyncBase):
 
         Returns
         -------
-        ElementHandle
+        Union[ElementHandle, NoneType]
         """
 
-        return mapping.from_impl(
+        return mapping.from_impl_nullable(
             await self._async(
                 "frame.wait_for_selector",
                 self._impl_obj.wait_for_selector(
-                    selector=selector, strict=strict, timeout=timeout, state=state
-                ),
-            )
-        )
-
-    async def wait_for_selector_hidden(
-        self,
-        selector: str,
-        *,
-        strict: bool = None,
-        timeout: float = None,
-        state: Literal["detached", "hidden"] = None
-    ) -> NoneType:
-        """Frame.wait_for_selector_hidden
-
-        Returns when element specified by selector satisfies `state` option. See `frame.wait_for_selector()` for more
-        information.
-
-        Parameters
-        ----------
-        selector : str
-            A selector to query for. See [working with selectors](./selectors.md) for more details.
-        strict : Union[bool, NoneType]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
-            element, the call throws an exception.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        state : Union["detached", "hidden", NoneType]
-            Defaults to `'hidden'`. Can be either:
-            - `'detached'` - wait for element to not be present in DOM.
-            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
-              This is opposite to the `'visible'` option.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._async(
-                "frame.wait_for_selector_hidden",
-                self._impl_obj.wait_for_selector_hidden(
                     selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
@@ -5859,7 +5780,7 @@ class Page(AsyncContextManager):
         timeout: float = None,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         strict: bool = None
-    ) -> "ElementHandle":
+    ) -> typing.Optional["ElementHandle"]:
         """Page.wait_for_selector
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -5912,53 +5833,14 @@ class Page(AsyncContextManager):
 
         Returns
         -------
-        ElementHandle
+        Union[ElementHandle, NoneType]
         """
 
-        return mapping.from_impl(
+        return mapping.from_impl_nullable(
             await self._async(
                 "page.wait_for_selector",
                 self._impl_obj.wait_for_selector(
                     selector=selector, timeout=timeout, state=state, strict=strict
-                ),
-            )
-        )
-
-    async def wait_for_selector_hidden(
-        self,
-        selector: str,
-        *,
-        strict: bool = None,
-        timeout: float = None,
-        state: Literal["detached", "hidden"] = None
-    ) -> NoneType:
-        """Page.wait_for_selector_hidden
-
-        Returns when element specified by selector satisfies `state` option. See `page.wait_for_selector()` for more
-        information.
-
-        Parameters
-        ----------
-        selector : str
-            A selector to query for. See [working with selectors](./selectors.md) for more details.
-        strict : Union[bool, NoneType]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
-            element, the call throws an exception.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        state : Union["detached", "hidden", NoneType]
-            Defaults to `'hidden'`. Can be either:
-            - `'detached'` - wait for element to not be present in DOM.
-            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
-              This is opposite to the `'visible'` option.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._async(
-                "page.wait_for_selector_hidden",
-                self._impl_obj.wait_for_selector_hidden(
-                    selector=selector, strict=strict, timeout=timeout, state=state
                 ),
             )
         )
