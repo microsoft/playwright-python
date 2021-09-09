@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
+import os
+import sys
 
 from playwright.sync_api import Playwright, sync_playwright
 
@@ -21,9 +22,8 @@ def main(playwright: Playwright) -> None:
     for browser_type in [playwright.chromium, playwright.firefox, playwright.webkit]:
         browser = browser_type.launch()
         page = browser.new_page()
-        page.goto("https://example.com")
-        here = Path(__file__).parent.resolve()
-        page.screenshot(path=here / f"{browser_type.name}.png")
+        page.set_content("<h1>Hello World</h1>")
+        page.screenshot(path=os.path.join(sys.argv[1], f"{browser_type.name}.png"))
         page.close()
         browser.close()
 

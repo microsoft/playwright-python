@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
 
-datas = collect_data_files("playwright")
+binaries = collect_dynamic_libs("playwright")
+datas = collect_data_files("playwright") + collect_dynamic_libs("playwright")
