@@ -227,13 +227,21 @@ async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
     assert await request.all_headers() == server_headers
 
 
-async def test_should_report_request_headers_array(page: Page, server: Server) -> None:
+async def test_should_report_request_headers_array(
+    page: Page, server: Server, browser_name: str, is_win: bool
+) -> None:
     expected_headers = []
 
-    def handle(request):
+    def handle(request: http.Request):
         for key, values in request.requestHeaders.getAllRawHeaders():
+            if (
+                browser_name == "webkit"
+                and is_win
+                and key.lower() in ["accept-encoding", "accept-language"]
+            ):
+                continue
             for value in values:
-                expected_headers.append([key.decode(), value.decode()])
+                expected_headers.append([key.decode().lower(), value.decode()])
         request.finish()
 
     server.set_route("/headers", handle)
@@ -251,7 +259,11 @@ async def test_should_report_request_headers_array(page: Page, server: Server) -
         """
         )
     request = await request_info.value
-    assert (await request.headers_array()).sort() == expected_headers.sort()
+    assert sorted(
+        list(
+            map(lambda item: [item[0].lower(), item[1]], await request.headers_array())
+        )
+    ) == sorted(expected_headers)
 
 
 async def test_should_report_response_headers_array(
