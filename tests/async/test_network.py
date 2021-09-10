@@ -176,6 +176,8 @@ async def test_request_headers_should_work(
 async def test_request_headers_should_get_the_same_headers_as_the_server(
     page: Page, server, is_webkit, is_win
 ):
+    if is_webkit and is_win:
+        pytest.xfail("Curl does not show accept-encoding and accept-language")
     server_request_headers_future: Future[Dict[str, str]] = asyncio.Future()
 
     def handle(request):
@@ -195,8 +197,10 @@ async def test_request_headers_should_get_the_same_headers_as_the_server(
 
 
 async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
-    page: Page, server
+    page: Page, server, is_webkit, is_win
 ):
+    if is_webkit and is_win:
+        pytest.xfail("Curl does not show accept-encoding and accept-language")
     await page.goto(server.PREFIX + "/empty.html")
     server_request_headers_future: Future[Dict[str, str]] = asyncio.Future()
 
@@ -228,18 +232,14 @@ async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
 
 
 async def test_should_report_request_headers_array(
-    page: Page, server: Server, browser_name: str, is_win: bool
+    page: Page, server: Server, is_win: bool, browser_name: str
 ) -> None:
+    if is_win and browser_name == "webkit":
+        pytest.skip("libcurl does not support non-set-cookie multivalue headers")
     expected_headers = []
 
     def handle(request: http.Request):
         for key, values in request.requestHeaders.getAllRawHeaders():
-            if (
-                browser_name == "webkit"
-                and is_win
-                and key.lower() in ["accept-encoding", "accept-language"]
-            ):
-                continue
             for value in values:
                 expected_headers.append([key.decode().lower(), value.decode()])
         request.finish()
