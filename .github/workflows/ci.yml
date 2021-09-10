@@ -20,21 +20,20 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - name: Install dependencies
+    - name: Install dependencies & browsers
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip wheel
         pip install -r local-requirements.txt
         pip install -e .
         python setup.py bdist_wheel
-        python -m playwright install-deps
-    - name: Install browsers
-      run: python -m playwright install
+        python -m playwright install --with-deps
     - name: Lint
       uses: pre-commit/action@v2.0.3
     - name: Generate APIs
       run: bash scripts/update_api.sh
     - name: Verify generated API is up to date
       run: git diff --exit-code
+
   build:
     name: Build
     timeout-minutes: 30
@@ -66,6 +65,18 @@ jobs:
         - os: macos-11.0
           python-version: 3.9
           browser: webkit
+        - os: ubuntu-latest
+          python-version: '3.10-dev'
+          browser: chromium
+        - os: windows-latest
+          python-version: '3.10-dev'
+          browser: chromium
+        - os: macos-latest
+          python-version: '3.10-dev'
+          browser: chromium
+        - os: macos-11.0
+          python-version: '3.10-dev'
+          browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -73,15 +84,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install dependencies & browsers
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip wheel
         pip install -r local-requirements.txt
         pip install -e .
         python setup.py bdist_wheel
-        python -m playwright install-deps
-    - name: Install browsers
-      run: python -m playwright install
+        python -m playwright install --with-deps
     - name: Common Tests
       run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
     - name: Test Reference count
@@ -130,16 +139,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
-    - name: Install dependencies
+        python-version: 3.9
+    - name: Install dependencies & browsers
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip wheel
         pip install -r local-requirements.txt
         pip install -e .
         python setup.py bdist_wheel
-        python -m playwright install-deps
-    - name: Install browsers
-      run: python -m playwright install ${{ matrix.browser-channel }}
+        python -m playwright install ${{ matrix.browser-channel }} --with-deps
     - name: Common Tests
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
@@ -159,6 +166,7 @@ jobs:
       with:
         name: ${{ matrix.browser-channel }}-${{ matrix.os }}
         path: pw-log.txt
+
   build-conda:
     name: Conda Build
     strategy:
