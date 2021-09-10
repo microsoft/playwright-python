@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import base64
 import json
 import mimetypes
@@ -63,14 +64,8 @@ class Request(ChannelOwner):
             "responseStart": -1,
             "responseEnd": -1,
         }
-        self._sizes: RequestSizes = {
-            "requestBodySize": 0,
-            "requestHeadersSize": 0,
-            "responseBodySize": 0,
-            "responseHeadersSize": 0,
-            "responseTransferSize": 0,
-        }
-        self._headers: Dict[str, str] = parse_headers(self._initializer["headers"])
+        self._headers: List[Header] = self._initializer["headers"]
+        self._all_headers_future: Optional[asyncio.Future[List[Header]]] = None
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
@@ -87,9 +82,11 @@ class Request(ChannelOwner):
     def method(self) -> str:
         return self._initializer["method"]
 
-    @property
-    def sizes(self) -> RequestSizes:
-        return self._sizes
+    async def sizes(self) -> RequestSizes:
+        response = await self.response()
+        if not response:
+            raise Error("Unable to fetch sizes for failed request")
+        return await response._channel.send("sizes")
 
     @property
     def post_data(self) -> Optional[str]:
@@ -120,7 +117,7 @@ class Request(ChannelOwner):
 
     @property
     def headers(self) -> Dict[str, str]:
-        return self._headers
+        return headers_array_to_object(self._headers, True)
 
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
@@ -147,6 +144,27 @@ class Request(ChannelOwner):
     @property
     def timing(self) -> ResourceTiming:
         return self._timing
+
+    async def all_headers(self) -> Dict[str, str]:
+        return headers_array_to_object(await self._get_headers_if_needed(), True)
+
+    async def headers_array(self) -> List[List[str]]:
+        return list(
+            map(
+                lambda header: [header["name"], header["value"]],
+                await self._get_headers_if_needed(),
+            )
+        )
+
+    async def _get_headers_if_needed(self) -> List[Header]:
+        if not self._all_headers_future:
+            self._all_headers_future = asyncio.Future()
+            response = await self.response()
+            if not response:
+                return self._headers
+            headers = await response._channel.send("rawRequestHeaders")
+            self._all_headers_future.set_result(headers)
+        return await self._all_headers_future
 
 
 class Route(ChannelOwner):
@@ -238,7 +256,11 @@ class Response(ChannelOwner):
         self._request._timing["connectEnd"] = timing["connectEnd"]
         self._request._timing["requestStart"] = timing["requestStart"]
         self._request._timing["responseStart"] = timing["responseStart"]
-        self._request._headers = parse_headers(self._initializer["requestHeaders"])
+        self._headers = headers_array_to_object(
+            cast(List[Header], self._initializer["headers"]), True
+        )
+        self._raw_headers_future: Optional[asyncio.Future[List[Header]]] = None
+        self._finished_future: asyncio.Future[bool] = asyncio.Future()
 
     def __repr__(self) -> str:
         return f"<Response url={self.url!r} request={self.request}>"
@@ -263,7 +285,25 @@ class Response(ChannelOwner):
 
     @property
     def headers(self) -> Dict[str, str]:
-        return parse_headers(self._initializer["headers"])
+        return self._headers.copy()
+
+    async def all_headers(self) -> Dict[str, str]:
+        return headers_array_to_object(await self._get_headers_if_needed(), True)
+
+    async def headers_array(self) -> List[List[str]]:
+        return list(
+            map(
+                lambda header: [header["name"], header["value"]],
+                await self._get_headers_if_needed(),
+            )
+        )
+
+    async def _get_headers_if_needed(self) -> List[Header]:
+        if not self._raw_headers_future:
+            self._raw_headers_future = asyncio.Future()
+            headers = cast(List[Header], await self._channel.send("rawResponseHeaders"))
+            self._raw_headers_future.set_result(headers)
+        return await self._raw_headers_future
 
     async def server_addr(self) -> Optional[RemoteAddr]:
         return await self._channel.send("serverAddr")
@@ -271,8 +311,8 @@ class Response(ChannelOwner):
     async def security_details(self) -> Optional[SecurityDetails]:
         return await self._channel.send("securityDetails")
 
-    async def finished(self) -> Optional[str]:
-        return await self._channel.send("finished")
+    async def finished(self) -> None:
+        await self._finished_future
 
     async def body(self) -> bytes:
         binary = await self._channel.send("body")
@@ -384,5 +424,8 @@ def serialize_headers(headers: Dict[str, str]) -> List[Header]:
     return [{"name": name, "value": value} for name, value in headers.items()]
 
 
-def parse_headers(headers: List[Header]) -> Dict[str, str]:
-    return {header["name"].lower(): header["value"] for header in headers}
+def headers_array_to_object(headers: List[Header], lower_case: bool) -> Dict[str, str]:
+    return {
+        (header["name"].lower() if lower_case else header["name"]): header["value"]
+        for header in headers
+    }

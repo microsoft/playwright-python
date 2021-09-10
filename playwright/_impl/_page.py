@@ -45,6 +45,7 @@ from playwright._impl._frame import Frame
 from playwright._impl._helper import (
     ColorScheme,
     DocumentLoadState,
+    ForcedColors,
     KeyboardModifier,
     MouseButton,
     ReducedMotion,
@@ -513,6 +514,7 @@ class Page(ChannelOwner):
         media: Literal["print", "screen"] = None,
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
+        forcedColors: ForcedColors = None,
     ) -> None:
         await self._channel.send("emulateMedia", locals_to_params(locals()))
 

@@ -743,3 +743,11 @@ async def test_strict_selectors_on_context(browser: Browser, server: Server):
     with pytest.raises(Error):
         await page.query_selector("button")
     await context.close()
+
+
+@pytest.mark.skip_browser("webkit")  # https://bugs.webkit.org/show_bug.cgi?id=225281
+async def test_should_support_forced_colors(browser: Browser):
+    context = await browser.new_context(forced_colors="active")
+    page = await context.new_page()
+    assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
+    assert not await page.evaluate("matchMedia('(forced-colors: none)').matches")

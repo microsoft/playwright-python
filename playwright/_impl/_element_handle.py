@@ -220,7 +220,6 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
-        strict: bool = None,
         trial: bool = None,
     ) -> None:
         if checked:

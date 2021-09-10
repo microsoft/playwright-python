@@ -19,12 +19,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union, cast
 
-from playwright._impl._api_structures import (
-    Cookie,
-    Geolocation,
-    RequestSizes,
-    StorageState,
-)
+from playwright._impl._api_structures import Cookie, Geolocation, StorageState
 from playwright._impl._api_types import Error
 from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
@@ -134,9 +129,9 @@ class BrowserContext(ChannelOwner):
             "requestFinished",
             lambda params: self._on_request_finished(
                 from_channel(params["request"]),
+                from_nullable_channel(params["response"]),
                 params["responseEndTiming"],
                 from_nullable_channel(params.get("page")),
-                params["requestSizes"],
             ),
         )
         self._closed_future: asyncio.Future = asyncio.Future()
@@ -366,16 +361,17 @@ class BrowserContext(ChannelOwner):
     def _on_request_finished(
         self,
         request: Request,
+        response: Optional[Response],
         response_end_timing: float,
         page: Optional[Page],
-        request_sizes: RequestSizes,
     ) -> None:
         if request._timing:
             request._timing["responseEnd"] = response_end_timing
-        request._sizes = request_sizes
         self.emit(BrowserContext.Events.RequestFinished, request)
         if page:
             page.emit(Page.Events.RequestFinished, request)
+        if response:
+            response._finished_future.set_result(True)
 
     def _on_request(self, request: Request, page: Optional[Page]) -> None:
         self.emit(BrowserContext.Events.Request, request)

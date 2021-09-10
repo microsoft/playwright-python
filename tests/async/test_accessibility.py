@@ -111,7 +111,7 @@ async def test_accessibility_should_work_with_regular_text(page, is_firefox):
 
 
 async def test_accessibility_roledescription(page):
-    await page.set_content('<div tabIndex=-1 aria-roledescription="foo">Hi</div>')
+    await page.set_content('<p tabIndex=-1 aria-roledescription="foo">Hi</p>')
     snapshot = await page.accessibility.snapshot()
     assert snapshot["children"][0]["roledescription"] == "foo"
 

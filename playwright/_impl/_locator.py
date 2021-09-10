@@ -445,7 +445,6 @@ class Locator:
         position: Position = None,
         timeout: float = None,
         force: bool = None,
-        strict: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:

@@ -15,11 +15,12 @@
 import asyncio
 import json
 from asyncio import Future
-from typing import Dict, List, cast
+from typing import Dict, List
 
 import pytest
+from twisted.web import http
 
-from playwright.async_api import Browser, Error, Page, Request, Response, Route
+from playwright.async_api import Browser, Error, Page, Request, Route
 from tests.server import Server
 
 
@@ -172,11 +173,11 @@ async def test_request_headers_should_work(
         assert "WebKit" in response.request.headers["user-agent"]
 
 
-# TODO: update once fixed https://github.com/microsoft/playwright/issues/6690
-@pytest.mark.xfail
 async def test_request_headers_should_get_the_same_headers_as_the_server(
     page: Page, server, is_webkit, is_win
 ):
+    if is_webkit and is_win:
+        pytest.xfail("Curl does not show accept-encoding and accept-language")
     server_request_headers_future: Future[Dict[str, str]] = asyncio.Future()
 
     def handle(request):
@@ -190,19 +191,16 @@ async def test_request_headers_should_get_the_same_headers_as_the_server(
 
     server.set_route("/empty.html", handle)
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     server_headers = await server_request_headers_future
-    if is_webkit and is_win:
-        # Curl does not show accept-encoding and accept-language
-        server_headers.pop("accept-encoding")
-        server_headers.pop("accept-language")
-    assert cast(Response, response).request.headers == server_headers
+    assert await response.request.all_headers() == server_headers
 
 
-# TODO: update once fixed https://github.com/microsoft/playwright/issues/6690
-@pytest.mark.xfail
 async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
     page: Page, server, is_webkit, is_win
 ):
+    if is_webkit and is_win:
+        pytest.xfail("Curl does not show accept-encoding and accept-language")
     await page.goto(server.PREFIX + "/empty.html")
     server_request_headers_future: Future[Dict[str, str]] = asyncio.Future()
 
@@ -230,18 +228,89 @@ async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
     request = await request_info.value
     assert text == "done"
     server_headers = await server_request_headers_future
-    if is_webkit and is_win:
-        # Curl does not show accept-encoding and accept-language
-        server_headers.pop("accept-encoding")
-        server_headers.pop("accept-language")
-    assert request.headers == server_headers
+    assert await request.all_headers() == server_headers
 
 
-async def test_response_headers_should_work(page, server):
+async def test_should_report_request_headers_array(
+    page: Page, server: Server, is_win: bool, browser_name: str
+) -> None:
+    if is_win and browser_name == "webkit":
+        pytest.skip("libcurl does not support non-set-cookie multivalue headers")
+    expected_headers = []
+
+    def handle(request: http.Request):
+        for key, values in request.requestHeaders.getAllRawHeaders():
+            for value in values:
+                expected_headers.append([key.decode().lower(), value.decode()])
+        request.finish()
+
+    server.set_route("/headers", handle)
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_request("*/**") as request_info:
+        await page.evaluate(
+            """() => fetch('/headers', {
+            headers: [
+                ['header-a', 'value-a'],
+                ['header-b', 'value-b'],
+                ['header-a', 'value-a-1'],
+                ['header-a', 'value-a-2'],
+            ]
+            })
+        """
+        )
+    request = await request_info.value
+    assert sorted(
+        list(
+            map(lambda item: [item[0].lower(), item[1]], await request.headers_array())
+        )
+    ) == sorted(expected_headers)
+
+
+async def test_should_report_response_headers_array(
+    page: Page, server: Server, is_win, browser_name
+) -> None:
+    if is_win and browser_name == "webkit":
+        pytest.skip("libcurl does not support non-set-cookie multivalue headers")
+    expected_headers = {
+        "Header-A": ["value-a", "value-a-1", "value-a-2"],
+        "Header-B": ["value-b"],
+    }
+
+    def handle(request: http.Request):
+        for key in expected_headers:
+            for value in expected_headers[key]:
+                request.responseHeaders.addRawHeader(key, value)
+        request.finish()
+
+    server.set_route("/headers", handle)
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_response("*/**") as response_info:
+        await page.evaluate(
+            """() => fetch('/headers')
+        """
+        )
+    response = await response_info.value
+    headers = await response.headers_array()
+    actual_headers = {}
+    for name, value in headers:
+        if not actual_headers.get(name):
+            actual_headers[name] = []
+        actual_headers[name].append(value)
+
+    for key in ["Keep-Alive", "Connection", "Date", "Transfer-Encoding"]:
+        if key in actual_headers:
+            actual_headers.pop(key)
+        if key.lower() in actual_headers:
+            actual_headers.pop(key.lower())
+    assert actual_headers == expected_headers
+
+
+async def test_response_headers_should_work(page: Page, server):
     server.set_route("/empty.html", lambda r: (r.setHeader("foo", "bar"), r.finish()))
 
     response = await page.goto(server.EMPTY_PAGE)
     assert response.headers["foo"] == "bar"
+    assert (await response.all_headers())["foo"] == "bar"
 
 
 async def test_request_post_data_should_work(page, server):
@@ -538,25 +607,21 @@ async def test_network_events_should_fire_events_in_proper_order(page, server):
 
 
 async def test_network_events_should_support_redirects(page, server):
-    events = []
-    page.on("request", lambda request: events.append(f"{request.method} {request.url}"))
-    page.on(
-        "response", lambda response: events.append(f"{response.status} {response.url}")
-    )
-    page.on("requestfinished", lambda request: events.append(f"DONE {request.url}"))
-    page.on("requestfailed", lambda request: events.append(f"FAIL {request.url}"))
-    server.set_redirect("/foo.html", "/empty.html")
     FOO_URL = server.PREFIX + "/foo.html"
+    events = {}
+    events[FOO_URL] = []
+    events[server.EMPTY_PAGE] = []
+    page.on("request", lambda request: events[request.url].append(request.method))
+    page.on("response", lambda response: events[response.url].append(response.status))
+    page.on("requestfinished", lambda request: events[request.url].append("DONE"))
+    page.on("requestfailed", lambda request: events[request.url].append("FAIL"))
+    server.set_redirect("/foo.html", "/empty.html")
     response = await page.goto(FOO_URL)
     await response.finished()
-    assert events == [
-        f"GET {FOO_URL}",
-        f"302 {FOO_URL}",
-        f"DONE {FOO_URL}",
-        f"GET {server.EMPTY_PAGE}",
-        f"200 {server.EMPTY_PAGE}",
-        f"DONE {server.EMPTY_PAGE}",
-    ]
+    expected = {}
+    expected[FOO_URL] = ["GET", 302, "DONE"]
+    expected[server.EMPTY_PAGE] = ["GET", 200, "DONE"]
+    assert events == expected
     redirected_from = response.request.redirected_from
     assert "/foo.html" in redirected_from.url
     assert redirected_from.redirected_from is None

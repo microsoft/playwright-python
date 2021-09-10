@@ -47,21 +47,22 @@ def test_should_check_box_using_set_checked(page: Page) -> None:
 
 def test_should_set_bodysize_and_headersize(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    with page.expect_event("request") as req_info:
+    with page.expect_request("*/**") as request_info:
         page.evaluate(
             "() => fetch('./get', { method: 'POST', body: '12345'}).then(r => r.text())"
         )
-    req = req_info.value
-    req.response().finished()
-    assert req.sizes["requestBodySize"] == 5
-    assert req.sizes["requestHeadersSize"] >= 300
+    request = request_info.value
+    sizes = request.sizes()
+    assert sizes["requestBodySize"] == 5
+    assert sizes["requestHeadersSize"] >= 300
 
 
 def test_should_set_bodysize_to_0(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    with page.expect_event("request") as req_info:
+    with page.expect_request("*/**") as request_info:
         page.evaluate("() => fetch('./get').then(r => r.text())")
-    req = req_info.value
-    req.response().finished()
-    assert req.sizes["requestBodySize"] == 0
-    assert req.sizes["requestHeadersSize"] >= 200
+
+    request = request_info.value
+    sizes = request.sizes()
+    assert sizes["requestBodySize"] == 0
+    assert sizes["requestHeadersSize"] >= 200
