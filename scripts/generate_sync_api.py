@@ -48,8 +48,6 @@ def generate(t: Any) -> None:
         base_sync_class = base_class
     print(f"class {class_name}({base_sync_class}):")
     print("")
-    print(f"    def __init__(self, obj: {class_name}Impl):")
-    print("        super().__init__(obj)")
     for [name, type] in get_type_hints(t, api_globals).items():
         print("")
         print("    @property")
