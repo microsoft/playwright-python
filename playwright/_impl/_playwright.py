@@ -40,6 +40,15 @@ class Playwright(ChannelOwner):
             for device in initializer["deviceDescriptors"]
         }
 
+    def __getitem__(self, value: str) -> "BrowserType":
+        if value == "chromium":
+            return self.chromium
+        elif value == "firefox":
+            return self.firefox
+        elif value == "webkit":
+            return self.webkit
+        raise ValueError("Invalid browser " + value)
+
     def stop(self) -> None:
         pass
 

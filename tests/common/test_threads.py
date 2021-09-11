@@ -24,7 +24,7 @@ def test_running_in_thread(browser_name: str, launch_arguments: Dict) -> None:
     class TestThread(threading.Thread):
         def run(self) -> None:
             with sync_playwright() as playwright:
-                browser = getattr(playwright, browser_name).launch(**launch_arguments)
+                browser = playwright[browser_name].launch(**launch_arguments)
                 # This should not throw ^^.
                 browser.new_page()
                 browser.close()

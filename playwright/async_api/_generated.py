@@ -10959,6 +10959,10 @@ class Playwright(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.webkit)
 
+    def __getitem__(self, value: str) -> "BrowserType":
+
+        return mapping.from_impl(self._impl_obj.__getitem__(value=value))
+
     def stop(self) -> NoneType:
         """Playwright.stop
 
@@ -10981,15 +10985,6 @@ class Playwright(AsyncBase):
         """
 
         return mapping.from_maybe_impl(self._impl_obj.stop())
-
-    def __getitem__(self, value: str) -> "BrowserType":
-        if value == "chromium":
-            return self.chromium
-        elif value == "firefox":
-            return self.firefox
-        elif value == "webkit":
-            return self.webkit
-        raise ValueError("Invalid browser " + value)
 
 
 mapping.register(PlaywrightImpl, Playwright)
