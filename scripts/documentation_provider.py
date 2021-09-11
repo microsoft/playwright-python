@@ -55,6 +55,7 @@ class DocumentationProvider:
                 continue
             members = {}
             self.classes[clazz["name"]] = clazz
+            events = []
             for member in clazz["members"]:
                 if not works_for_python(member):
                     continue
@@ -63,11 +64,11 @@ class DocumentationProvider:
                 self._add_link(member["kind"], clazz["name"], member_name, new_name)
 
                 if member["kind"] == "event":
-                    continue
-
-                new_name = to_snake_case(new_name)
-                member["name"] = new_name
-                members[new_name] = member
+                    events.append(member)
+                else:
+                    new_name = to_snake_case(new_name)
+                    member["name"] = new_name
+                    members[new_name] = member
                 apply_type_or_override(member)
 
                 if "args" in member:
@@ -93,6 +94,7 @@ class DocumentationProvider:
                     member["args"] = args
 
             clazz["members"] = members
+            clazz["events"] = events
 
     def _add_link(self, kind: str, clazz: str, member: str, alias: str) -> None:
         match = re.match(r"(JS|CDP|[A-Z])([^.]+)", clazz)
@@ -199,6 +201,39 @@ class DocumentationProvider:
             self.errors.add(
                 f"Parameter not implemented: {class_name}.{method_name}({name}=)"
             )
+
+    def print_events(self, class_name: str) -> None:
+        clazz = self.classes[class_name]
+        if events := clazz["events"]:
+            doc = []
+            for event_type in ["on", "once"]:
+                for event in events:
+                    return_type = (
+                        "typing.Union[typing.Awaitable[None], None]"
+                        if self.is_async
+                        else "None"
+                    )
+                    func_arg = self.serialize_doc_type(event["type"], "")
+                    if func_arg.startswith("{"):
+                        func_arg = "typing.Dict"
+                    if len(events) > 1:
+                        doc.append("    @typing.overload")
+                    impl = ""
+                    if len(events) == 1:
+                        impl = f"        return super().{event_type}(event=event,f=f)"
+                    doc.append(
+                        f"    def {event_type}(self, event: Literal['{event['name'].lower()}'], f: typing.Callable[['{func_arg}'], '{return_type}']) -> None:"
+                    )
+                    doc.append(
+                        f'        """{self.beautify_method_comment(event["comment"]," " * 8)}"""'
+                    )
+                    doc.append(impl)
+                if len(events) > 1:
+                    doc.append(
+                        f"    def {event_type}(self, event: str, f: typing.Callable[...,{return_type}]) -> None:"
+                    )
+                    doc.append(f"        return super().{event_type}(event=event,f=f)")
+            print("\n".join(doc))
 
     def indent_paragraph(self, p: str, indent: str) -> str:
         lines = p.split("\n")
@@ -386,10 +421,9 @@ class DocumentationProvider:
                     )
                 )
             return f"{{{', '.join(items)}}}"
-
         if type_name == "boolean":
             return "bool"
-        if type_name == "string":
+        if type_name.lower() == "string":
             return "str"
         if type_name == "any" or type_name == "Serializable":
             return "Any"

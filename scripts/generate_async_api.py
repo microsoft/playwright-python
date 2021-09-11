@@ -47,6 +47,7 @@ def generate(t: Any) -> None:
         base_sync_class = base_class
     print(f"class {class_name}({base_sync_class}):")
     print("")
+    documentation_provider.print_events(class_name)
     for [name, type] in get_type_hints(t, api_globals).items():
         print("")
         print("    @property")

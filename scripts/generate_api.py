@@ -237,7 +237,7 @@ from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._locator import Locator as LocatorImpl
-
+from playwright._impl._api_types import Error
 """
 
 
