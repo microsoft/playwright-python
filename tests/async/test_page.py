@@ -75,6 +75,16 @@ async def test_close_should_not_run_beforeunload_by_default(context, server):
     await page.close()
 
 
+async def test_should_be_able_to_navigate_away_from_page_with_before_unload(
+    server: Server, page: Page
+):
+    await page.goto(server.PREFIX + "/beforeunload.html")
+    # We have to interact with a page so that 'beforeunload' handlers
+    # fire.
+    await page.click("body")
+    await page.goto(server.EMPTY_PAGE)
+
+
 async def test_close_should_set_the_page_close_state(context):
     page = await context.new_page()
     assert page.is_closed() is False
