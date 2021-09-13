@@ -37,6 +37,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._dialog import Dialog
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._event_context_manager import EventContextManagerImpl
@@ -242,11 +243,14 @@ class Page(ChannelOwner):
         self.emit(Page.Events.Crash)
 
     def _on_dialog(self, params: Any) -> None:
-        dialog = from_channel(params["dialog"])
+        dialog = cast(Dialog, from_channel(params["dialog"]))
         if self.listeners(Page.Events.Dialog):
             self.emit(Page.Events.Dialog, dialog)
         else:
-            asyncio.create_task(dialog.dismiss())
+            if dialog.type == "beforeunload":
+                asyncio.create_task(dialog.accept())
+            else:
+                asyncio.create_task(dialog.dismiss())
 
     def _on_download(self, params: Any) -> None:
         url = params["url"]
