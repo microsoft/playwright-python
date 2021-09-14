@@ -47,8 +47,6 @@ def generate(t: Any) -> None:
         base_sync_class = base_class
     print(f"class {class_name}({base_sync_class}):")
     print("")
-    print(f"    def __init__(self, obj: {class_name}Impl):")
-    print("        super().__init__(obj)")
     for [name, type] in get_type_hints(t, api_globals).items():
         print("")
         print("    @property")
@@ -76,11 +74,13 @@ def generate(t: Any) -> None:
             prefix = "        return " + prefix + f"self._impl_obj.{name}"
             print(f"{prefix}{arguments(value, len(prefix))}{suffix}")
     for [name, value] in t.__dict__.items():
-        if (
-            not name.startswith("_")
-            and isinstance(value, FunctionType)
-            and "remove_listener" != name
-        ):
+        if isinstance(value, FunctionType) and "remove_listener" != name:
+            # List of dunder methods to allow without docs
+            allow_without_docs_methods = [
+                "__getitem__",
+            ]
+            if name.startswith("_") and name not in allow_without_docs_methods:
+                continue
             is_async = inspect.iscoroutinefunction(value)
             return_type_value = return_type(value)
             return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
@@ -92,9 +92,11 @@ def generate(t: Any) -> None:
             print(
                 f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
-            documentation_provider.print_entry(
-                class_name, name, get_type_hints(value, api_globals)
-            )
+            # Allow dunder methods without docs
+            if name not in allow_without_docs_methods:
+                documentation_provider.print_entry(
+                    class_name, name, get_type_hints(value, api_globals)
+                )
             if "expect_" in name:
                 print("")
                 print(
@@ -115,19 +117,6 @@ def generate(t: Any) -> None:
                     f"""
         return {prefix}{arguments(value, len(prefix))}{suffix}"""
                 )
-    if class_name == "Playwright":
-        print(
-            """
-    def __getitem__(self, value: str) -> "BrowserType":
-        if value == "chromium":
-            return self.chromium
-        elif value == "firefox":
-            return self.firefox
-        elif value == "webkit":
-            return self.webkit
-        raise ValueError("Invalid browser "+value)
-            """
-        )
     print("")
     print(f"mapping.register({class_name}Impl, {class_name})")
 

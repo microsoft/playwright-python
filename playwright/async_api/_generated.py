@@ -76,9 +76,6 @@ NoneType = type(None)
 
 
 class Request(AsyncBase):
-    def __init__(self, obj: RequestImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Request.url
@@ -341,9 +338,6 @@ mapping.register(RequestImpl, Request)
 
 
 class Response(AsyncBase):
-    def __init__(self, obj: ResponseImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Response.url
@@ -546,9 +540,6 @@ mapping.register(ResponseImpl, Response)
 
 
 class Route(AsyncBase):
-    def __init__(self, obj: RouteImpl):
-        super().__init__(obj)
-
     @property
     def request(self) -> "Request":
         """Route.request
@@ -702,9 +693,6 @@ mapping.register(RouteImpl, Route)
 
 
 class WebSocket(AsyncBase):
-    def __init__(self, obj: WebSocketImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """WebSocket.url
@@ -800,9 +788,6 @@ mapping.register(WebSocketImpl, WebSocket)
 
 
 class Keyboard(AsyncBase):
-    def __init__(self, obj: KeyboardImpl):
-        super().__init__(obj)
-
     async def down(self, key: str) -> NoneType:
         """Keyboard.down
 
@@ -961,9 +946,6 @@ mapping.register(KeyboardImpl, Keyboard)
 
 
 class Mouse(AsyncBase):
-    def __init__(self, obj: MouseImpl):
-        super().__init__(obj)
-
     async def move(self, x: float, y: float, *, steps: int = None) -> NoneType:
         """Mouse.move
 
@@ -1098,9 +1080,6 @@ mapping.register(MouseImpl, Mouse)
 
 
 class Touchscreen(AsyncBase):
-    def __init__(self, obj: TouchscreenImpl):
-        super().__init__(obj)
-
     async def tap(self, x: float, y: float) -> NoneType:
         """Touchscreen.tap
 
@@ -1121,9 +1100,6 @@ mapping.register(TouchscreenImpl, Touchscreen)
 
 
 class JSHandle(AsyncBase):
-    def __init__(self, obj: JSHandleImpl):
-        super().__init__(obj)
-
     async def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """JSHandle.evaluate
 
@@ -1291,9 +1267,6 @@ mapping.register(JSHandleImpl, JSHandle)
 
 
 class ElementHandle(JSHandle):
-    def __init__(self, obj: ElementHandleImpl):
-        super().__init__(obj)
-
     def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
 
@@ -2656,9 +2629,6 @@ mapping.register(ElementHandleImpl, ElementHandle)
 
 
 class Accessibility(AsyncBase):
-    def __init__(self, obj: AccessibilityImpl):
-        super().__init__(obj)
-
     async def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
     ) -> typing.Optional[typing.Dict]:
@@ -2720,9 +2690,6 @@ mapping.register(AccessibilityImpl, Accessibility)
 
 
 class FileChooser(AsyncBase):
-    def __init__(self, obj: FileChooserImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """FileChooser.page
@@ -2803,9 +2770,6 @@ mapping.register(FileChooserImpl, FileChooser)
 
 
 class Frame(AsyncBase):
-    def __init__(self, obj: FrameImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """Frame.page
@@ -5037,9 +5001,6 @@ mapping.register(FrameImpl, Frame)
 
 
 class Worker(AsyncBase):
-    def __init__(self, obj: WorkerImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Worker.url
@@ -5124,9 +5085,6 @@ mapping.register(WorkerImpl, Worker)
 
 
 class Selectors(AsyncBase):
-    def __init__(self, obj: SelectorsImpl):
-        super().__init__(obj)
-
     async def register(
         self,
         name: str,
@@ -5208,9 +5166,6 @@ mapping.register(SelectorsImpl, Selectors)
 
 
 class ConsoleMessage(AsyncBase):
-    def __init__(self, obj: ConsoleMessageImpl):
-        super().__init__(obj)
-
     @property
     def type(self) -> str:
         """ConsoleMessage.type
@@ -5264,9 +5219,6 @@ mapping.register(ConsoleMessageImpl, ConsoleMessage)
 
 
 class Dialog(AsyncBase):
-    def __init__(self, obj: DialogImpl):
-        super().__init__(obj)
-
     @property
     def type(self) -> str:
         """Dialog.type
@@ -5335,9 +5287,6 @@ mapping.register(DialogImpl, Dialog)
 
 
 class Download(AsyncBase):
-    def __init__(self, obj: DownloadImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """Download.page
@@ -5451,9 +5400,6 @@ mapping.register(DownloadImpl, Download)
 
 
 class Video(AsyncBase):
-    def __init__(self, obj: VideoImpl):
-        super().__init__(obj)
-
     async def path(self) -> pathlib.Path:
         """Video.path
 
@@ -5500,9 +5446,6 @@ mapping.register(VideoImpl, Video)
 
 
 class Page(AsyncContextManager):
-    def __init__(self, obj: PageImpl):
-        super().__init__(obj)
-
     @property
     def accessibility(self) -> "Accessibility":
         """Page.accessibility
@@ -9072,9 +9015,6 @@ mapping.register(PageImpl, Page)
 
 
 class BrowserContext(AsyncContextManager):
-    def __init__(self, obj: BrowserContextImpl):
-        super().__init__(obj)
-
     @property
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
@@ -9837,9 +9777,6 @@ mapping.register(BrowserContextImpl, BrowserContext)
 
 
 class CDPSession(AsyncBase):
-    def __init__(self, obj: CDPSessionImpl):
-        super().__init__(obj)
-
     async def send(self, method: str, params: typing.Dict = None) -> typing.Dict:
         """CDPSession.send
 
@@ -9878,9 +9815,6 @@ mapping.register(CDPSessionImpl, CDPSession)
 
 
 class Browser(AsyncContextManager):
-    def __init__(self, obj: BrowserImpl):
-        super().__init__(obj)
-
     @property
     def contexts(self) -> typing.List["BrowserContext"]:
         """Browser.contexts
@@ -10382,9 +10316,6 @@ mapping.register(BrowserImpl, Browser)
 
 
 class BrowserType(AsyncBase):
-    def __init__(self, obj: BrowserTypeImpl):
-        super().__init__(obj)
-
     @property
     def name(self) -> str:
         """BrowserType.name
@@ -10875,9 +10806,6 @@ mapping.register(BrowserTypeImpl, BrowserType)
 
 
 class Playwright(AsyncBase):
-    def __init__(self, obj: PlaywrightImpl):
-        super().__init__(obj)
-
     @property
     def devices(self) -> typing.Dict:
         """Playwright.devices
@@ -10959,6 +10887,10 @@ class Playwright(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.webkit)
 
+    def __getitem__(self, value: str) -> "BrowserType":
+
+        return mapping.from_impl(self._impl_obj.__getitem__(value=value))
+
     def stop(self) -> NoneType:
         """Playwright.stop
 
@@ -10982,23 +10914,11 @@ class Playwright(AsyncBase):
 
         return mapping.from_maybe_impl(self._impl_obj.stop())
 
-    def __getitem__(self, value: str) -> "BrowserType":
-        if value == "chromium":
-            return self.chromium
-        elif value == "firefox":
-            return self.firefox
-        elif value == "webkit":
-            return self.webkit
-        raise ValueError("Invalid browser " + value)
-
 
 mapping.register(PlaywrightImpl, Playwright)
 
 
 class Tracing(AsyncBase):
-    def __init__(self, obj: TracingImpl):
-        super().__init__(obj)
-
     async def start(
         self, *, name: str = None, snapshots: bool = None, screenshots: bool = None
     ) -> NoneType:
@@ -11100,9 +11020,6 @@ mapping.register(TracingImpl, Tracing)
 
 
 class Locator(AsyncBase):
-    def __init__(self, obj: LocatorImpl):
-        super().__init__(obj)
-
     @property
     def first(self) -> "Locator":
         """Locator.first

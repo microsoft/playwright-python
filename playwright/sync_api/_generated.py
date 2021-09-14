@@ -76,9 +76,6 @@ NoneType = type(None)
 
 
 class Request(SyncBase):
-    def __init__(self, obj: RequestImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Request.url
@@ -339,9 +336,6 @@ mapping.register(RequestImpl, Request)
 
 
 class Response(SyncBase):
-    def __init__(self, obj: ResponseImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Response.url
@@ -542,9 +536,6 @@ mapping.register(ResponseImpl, Response)
 
 
 class Route(SyncBase):
-    def __init__(self, obj: RouteImpl):
-        super().__init__(obj)
-
     @property
     def request(self) -> "Request":
         """Route.request
@@ -698,9 +689,6 @@ mapping.register(RouteImpl, Route)
 
 
 class WebSocket(SyncBase):
-    def __init__(self, obj: WebSocketImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """WebSocket.url
@@ -796,9 +784,6 @@ mapping.register(WebSocketImpl, WebSocket)
 
 
 class Keyboard(SyncBase):
-    def __init__(self, obj: KeyboardImpl):
-        super().__init__(obj)
-
     def down(self, key: str) -> NoneType:
         """Keyboard.down
 
@@ -951,9 +936,6 @@ mapping.register(KeyboardImpl, Keyboard)
 
 
 class Mouse(SyncBase):
-    def __init__(self, obj: MouseImpl):
-        super().__init__(obj)
-
     def move(self, x: float, y: float, *, steps: int = None) -> NoneType:
         """Mouse.move
 
@@ -1088,9 +1070,6 @@ mapping.register(MouseImpl, Mouse)
 
 
 class Touchscreen(SyncBase):
-    def __init__(self, obj: TouchscreenImpl):
-        super().__init__(obj)
-
     def tap(self, x: float, y: float) -> NoneType:
         """Touchscreen.tap
 
@@ -1111,9 +1090,6 @@ mapping.register(TouchscreenImpl, Touchscreen)
 
 
 class JSHandle(SyncBase):
-    def __init__(self, obj: JSHandleImpl):
-        super().__init__(obj)
-
     def evaluate(self, expression: str, arg: typing.Any = None) -> typing.Any:
         """JSHandle.evaluate
 
@@ -1277,9 +1253,6 @@ mapping.register(JSHandleImpl, JSHandle)
 
 
 class ElementHandle(JSHandle):
-    def __init__(self, obj: ElementHandleImpl):
-        super().__init__(obj)
-
     def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
 
@@ -2637,9 +2610,6 @@ mapping.register(ElementHandleImpl, ElementHandle)
 
 
 class Accessibility(SyncBase):
-    def __init__(self, obj: AccessibilityImpl):
-        super().__init__(obj)
-
     def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
     ) -> typing.Optional[typing.Dict]:
@@ -2701,9 +2671,6 @@ mapping.register(AccessibilityImpl, Accessibility)
 
 
 class FileChooser(SyncBase):
-    def __init__(self, obj: FileChooserImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """FileChooser.page
@@ -2784,9 +2751,6 @@ mapping.register(FileChooserImpl, FileChooser)
 
 
 class Frame(SyncBase):
-    def __init__(self, obj: FrameImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """Frame.page
@@ -5010,9 +4974,6 @@ mapping.register(FrameImpl, Frame)
 
 
 class Worker(SyncBase):
-    def __init__(self, obj: WorkerImpl):
-        super().__init__(obj)
-
     @property
     def url(self) -> str:
         """Worker.url
@@ -5095,9 +5056,6 @@ mapping.register(WorkerImpl, Worker)
 
 
 class Selectors(SyncBase):
-    def __init__(self, obj: SelectorsImpl):
-        super().__init__(obj)
-
     def register(
         self,
         name: str,
@@ -5175,9 +5133,6 @@ mapping.register(SelectorsImpl, Selectors)
 
 
 class ConsoleMessage(SyncBase):
-    def __init__(self, obj: ConsoleMessageImpl):
-        super().__init__(obj)
-
     @property
     def type(self) -> str:
         """ConsoleMessage.type
@@ -5231,9 +5186,6 @@ mapping.register(ConsoleMessageImpl, ConsoleMessage)
 
 
 class Dialog(SyncBase):
-    def __init__(self, obj: DialogImpl):
-        super().__init__(obj)
-
     @property
     def type(self) -> str:
         """Dialog.type
@@ -5300,9 +5252,6 @@ mapping.register(DialogImpl, Dialog)
 
 
 class Download(SyncBase):
-    def __init__(self, obj: DownloadImpl):
-        super().__init__(obj)
-
     @property
     def page(self) -> "Page":
         """Download.page
@@ -5416,9 +5365,6 @@ mapping.register(DownloadImpl, Download)
 
 
 class Video(SyncBase):
-    def __init__(self, obj: VideoImpl):
-        super().__init__(obj)
-
     def path(self) -> pathlib.Path:
         """Video.path
 
@@ -5463,9 +5409,6 @@ mapping.register(VideoImpl, Video)
 
 
 class Page(SyncContextManager):
-    def __init__(self, obj: PageImpl):
-        super().__init__(obj)
-
     @property
     def accessibility(self) -> "Accessibility":
         """Page.accessibility
@@ -9016,9 +8959,6 @@ mapping.register(PageImpl, Page)
 
 
 class BrowserContext(SyncContextManager):
-    def __init__(self, obj: BrowserContextImpl):
-        super().__init__(obj)
-
     @property
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
@@ -9770,9 +9710,6 @@ mapping.register(BrowserContextImpl, BrowserContext)
 
 
 class CDPSession(SyncBase):
-    def __init__(self, obj: CDPSessionImpl):
-        super().__init__(obj)
-
     def send(self, method: str, params: typing.Dict = None) -> typing.Dict:
         """CDPSession.send
 
@@ -9811,9 +9748,6 @@ mapping.register(CDPSessionImpl, CDPSession)
 
 
 class Browser(SyncContextManager):
-    def __init__(self, obj: BrowserImpl):
-        super().__init__(obj)
-
     @property
     def contexts(self) -> typing.List["BrowserContext"]:
         """Browser.contexts
@@ -10315,9 +10249,6 @@ mapping.register(BrowserImpl, Browser)
 
 
 class BrowserType(SyncBase):
-    def __init__(self, obj: BrowserTypeImpl):
-        super().__init__(obj)
-
     @property
     def name(self) -> str:
         """BrowserType.name
@@ -10808,9 +10739,6 @@ mapping.register(BrowserTypeImpl, BrowserType)
 
 
 class Playwright(SyncBase):
-    def __init__(self, obj: PlaywrightImpl):
-        super().__init__(obj)
-
     @property
     def devices(self) -> typing.Dict:
         """Playwright.devices
@@ -10889,6 +10817,10 @@ class Playwright(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.webkit)
 
+    def __getitem__(self, value: str) -> "BrowserType":
+
+        return mapping.from_impl(self._impl_obj.__getitem__(value=value))
+
     def stop(self) -> NoneType:
         """Playwright.stop
 
@@ -10912,23 +10844,11 @@ class Playwright(SyncBase):
 
         return mapping.from_maybe_impl(self._impl_obj.stop())
 
-    def __getitem__(self, value: str) -> "BrowserType":
-        if value == "chromium":
-            return self.chromium
-        elif value == "firefox":
-            return self.firefox
-        elif value == "webkit":
-            return self.webkit
-        raise ValueError("Invalid browser " + value)
-
 
 mapping.register(PlaywrightImpl, Playwright)
 
 
 class Tracing(SyncBase):
-    def __init__(self, obj: TracingImpl):
-        super().__init__(obj)
-
     def start(
         self, *, name: str = None, snapshots: bool = None, screenshots: bool = None
     ) -> NoneType:
@@ -11026,9 +10946,6 @@ mapping.register(TracingImpl, Tracing)
 
 
 class Locator(SyncBase):
-    def __init__(self, obj: LocatorImpl):
-        super().__init__(obj)
-
     @property
     def first(self) -> "Locator":
         """Locator.first
