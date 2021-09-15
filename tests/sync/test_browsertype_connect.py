@@ -90,8 +90,8 @@ def test_browser_type_connect_disconnected_event_should_be_emitted_when_browser_
 
     disconnected1 = []
     disconnected2 = []
-    browser1.on("disconnected", lambda: disconnected1.append(True))
-    browser2.on("disconnected", lambda: disconnected2.append(True))
+    browser1.on("disconnected", lambda browser: disconnected1.append(True))
+    browser2.on("disconnected", lambda browser: disconnected2.append(True))
 
     page2 = browser2.new_page()
 
@@ -155,9 +155,9 @@ def test_browser_type_connect_should_forward_close_events_to_pages(
     page = context.new_page()
 
     events = []
-    browser.on("disconnected", lambda: events.append("browser::disconnected"))
-    context.on("close", lambda: events.append("context::close"))
-    page.on("close", lambda: events.append("page::close"))
+    browser.on("disconnected", lambda browser: events.append("browser::disconnected"))
+    context.on("close", lambda context: events.append("context::close"))
+    page.on("close", lambda page: events.append("page::close"))
 
     browser.close()
     assert events == ["page::close", "context::close", "browser::disconnected"]
@@ -176,9 +176,9 @@ def test_browser_type_connect_should_forward_close_events_on_remote_kill(
     page = context.new_page()
 
     events = []
-    browser.on("disconnected", lambda: events.append("browser::disconnected"))
-    context.on("close", lambda: events.append("context::close"))
-    page.on("close", lambda: events.append("page::close"))
+    browser.on("disconnected", lambda context: events.append("browser::disconnected"))
+    context.on("close", lambda context: events.append("context::close"))
+    page.on("close", lambda page: events.append("page::close"))
     remote.kill()
     with pytest.raises(Error):
         page.title()

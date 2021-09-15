@@ -154,7 +154,7 @@ class Page(ChannelOwner):
         self._channel.on("crash", lambda _: self._on_crash())
         self._channel.on("dialog", lambda params: self._on_dialog(params))
         self._channel.on(
-            "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded)
+            "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded, self)
         )
         self._channel.on("download", lambda params: self._on_download(params))
         self._channel.on(
@@ -174,7 +174,7 @@ class Page(ChannelOwner):
             "frameDetached",
             lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
-        self._channel.on("load", lambda _: self.emit(Page.Events.Load))
+        self._channel.on("load", lambda _: self.emit(Page.Events.Load, self))
         self._channel.on(
             "pageError",
             lambda params: self.emit(
@@ -237,10 +237,10 @@ class Page(ChannelOwner):
             self._browser_context._pages.remove(self)
         if self in self._browser_context._background_pages:
             self._browser_context._background_pages.remove(self)
-        self.emit(Page.Events.Close)
+        self.emit(Page.Events.Close, self)
 
     def _on_crash(self) -> None:
-        self.emit(Page.Events.Crash)
+        self.emit(Page.Events.Crash, self)
 
     def _on_dialog(self, params: Any) -> None:
         dialog = cast(Dialog, from_channel(params["dialog"]))
