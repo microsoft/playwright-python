@@ -15,6 +15,7 @@
 import base64
 
 import pytest
+from flaky import flaky
 
 
 @pytest.fixture(scope="session")
@@ -71,6 +72,7 @@ async def test_should_work_with_ip_port_notion(context_factory, server):
     assert await page.title() == "Served by the proxy"
 
 
+@flaky  # Upstream flaky
 async def test_should_authenticate(context_factory, server):
     def handler(req):
         auth = req.getHeader("proxy-authorization")
@@ -99,6 +101,7 @@ async def test_should_authenticate(context_factory, server):
     )
 
 
+@flaky  # Upstream flaky
 async def test_should_authenticate_with_empty_password(context_factory, server):
     def handler(req):
         auth = req.getHeader("proxy-authorization")
