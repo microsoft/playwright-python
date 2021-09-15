@@ -15,7 +15,7 @@
 import asyncio
 import traceback
 from types import TracebackType
-from typing import Any, Awaitable, Callable, Generic, Type, TypeVar, Union
+from typing import Any, Awaitable, Callable, Generic, Type, TypeVar
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -73,19 +73,17 @@ class AsyncBase(ImplWrapper):
             return mapping.wrap_handler(handler)
         return handler
 
-    def on(self, event: str, f: Callable[..., Union[Awaitable[None], None]]) -> None:
+    def on(self, event: Any, f: Any) -> None:
         """Registers the function ``f`` to the event name ``event``."""
         self._impl_obj.on(event, self._wrap_handler(f))
 
-    def once(self, event: str, f: Callable[..., Union[Awaitable[None], None]]) -> None:
+    def once(self, event: Any, f: Any) -> None:
         """The same as ``self.on``, except that the listener is automatically
         removed after being called.
         """
         self._impl_obj.once(event, self._wrap_handler(f))
 
-    def remove_listener(
-        self, event: str, f: Callable[..., Union[Awaitable[None], None]]
-    ) -> None:
+    def remove_listener(self, event: Any, f: Any) -> None:
         """Removes the function ``f`` from ``event``."""
         self._impl_obj.remove_listener(event, self._wrap_handler(f))
 

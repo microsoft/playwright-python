@@ -40,6 +40,7 @@ from playwright._impl._api_structures import (
     StorageState,
     ViewportSize,
 )
+from playwright._impl._api_types import Error
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -689,6 +690,72 @@ mapping.register(RouteImpl, Route)
 
 
 class WebSocket(SyncBase):
+    @typing.overload
+    def on(
+        self, event: Literal["close"], f: typing.Callable[["WebSocket"], "None"]
+    ) -> None:
+        """
+        Fired when the websocket closes."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["framereceived"],
+        f: typing.Callable[["typing.Dict"], "None"],
+    ) -> None:
+        """
+        Fired when the websocket receives a frame."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["framesent"], f: typing.Callable[["typing.Dict"], "None"]
+    ) -> None:
+        """
+        Fired when the websocket sends a frame."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["socketerror"], f: typing.Callable[["str"], "None"]
+    ) -> None:
+        """
+        Fired when the websocket has an error."""
+
+    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+        return super().on(event=event, f=f)
+
+    @typing.overload
+    def once(
+        self, event: Literal["close"], f: typing.Callable[["WebSocket"], "None"]
+    ) -> None:
+        """
+        Fired when the websocket closes."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["framereceived"],
+        f: typing.Callable[["typing.Dict"], "None"],
+    ) -> None:
+        """
+        Fired when the websocket receives a frame."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["framesent"], f: typing.Callable[["typing.Dict"], "None"]
+    ) -> None:
+        """
+        Fired when the websocket sends a frame."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["socketerror"], f: typing.Callable[["str"], "None"]
+    ) -> None:
+        """
+        Fired when the websocket has an error."""
+
+    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+        return super().once(event=event, f=f)
+
     @property
     def url(self) -> str:
         """WebSocket.url
@@ -4974,6 +5041,20 @@ mapping.register(FrameImpl, Frame)
 
 
 class Worker(SyncBase):
+    def on(
+        self, event: Literal["close"], f: typing.Callable[["Worker"], "None"]
+    ) -> None:
+        """
+        Emitted when this dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is terminated."""
+        return super().on(event=event, f=f)
+
+    def once(
+        self, event: Literal["close"], f: typing.Callable[["Worker"], "None"]
+    ) -> None:
+        """
+        Emitted when this dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is terminated."""
+        return super().once(event=event, f=f)
+
     @property
     def url(self) -> str:
         """Worker.url
@@ -5409,6 +5490,404 @@ mapping.register(VideoImpl, Video)
 
 
 class Page(SyncContextManager):
+    @typing.overload
+    def on(self, event: Literal["close"], f: typing.Callable[["Page"], "None"]) -> None:
+        """
+        Emitted when the page closes."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
+    ) -> None:
+        """
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
+        emitted if the page throws an error or a warning.
+
+        The arguments passed into `console.log` appear as arguments on the event handler.
+
+        An example of handling `console` event:
+
+        ```py
+        def print_args(msg):
+            for arg in msg.args:
+                print(arg.json_value())
+
+        page.on(\"console\", print_args)
+        page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        ```"""
+
+    @typing.overload
+    def on(self, event: Literal["crash"], f: typing.Callable[["Page"], "None"]) -> None:
+        """
+        Emitted when the page crashes. Browser pages might crash if they try to allocate too much memory. When the page crashes,
+        ongoing and subsequent operations will throw.
+
+        The most common way to deal with crashes is to catch an exception:
+
+        ```py
+        try:
+            # crash might happen during a click.
+            page.click(\"button\")
+            # or while waiting for an event.
+            page.wait_for_event(\"popup\")
+        except Error as e:
+            # when the page crashes, exception message contains \"crash\".
+        ```"""
+
+    @typing.overload
+    def on(
+        self, event: Literal["dialog"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
+        either `dialog.accept()` or `dialog.dismiss()` the dialog - otherwise the page will
+        [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog, and
+        actions like click will never finish.
+
+        > NOTE: When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["domcontentloaded"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        Emitted when the JavaScript [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded)
+        event is dispatched."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["download"], f: typing.Callable[["Download"], "None"]
+    ) -> None:
+        """
+        Emitted when attachment download started. User can access basic file operations on downloaded content via the passed
+        `Download` instance.
+
+        > NOTE: Browser context **must** be created with the `acceptDownloads` set to `true` when user needs access to the
+        downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
+        performed and user has no access to the downloaded files."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["filechooser"], f: typing.Callable[["FileChooser"], "None"]
+    ) -> None:
+        """
+        Emitted when a file chooser is supposed to appear, such as after clicking the  `<input type=file>`. Playwright can
+        respond to it via setting the input files using `file_chooser.set_files()` that can be uploaded after that.
+
+        ```py
+        page.on(\"filechooser\", lambda file_chooser: file_chooser.set_files(\"/tmp/myfile.pdf\"))
+        ```"""
+
+    @typing.overload
+    def on(
+        self, event: Literal["frameattached"], f: typing.Callable[["Frame"], "None"]
+    ) -> None:
+        """
+        Emitted when a frame is attached."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["framedetached"], f: typing.Callable[["Frame"], "None"]
+    ) -> None:
+        """
+        Emitted when a frame is detached."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["framenavigated"], f: typing.Callable[["Frame"], "None"]
+    ) -> None:
+        """
+        Emitted when a frame is navigated to a new url."""
+
+    @typing.overload
+    def on(self, event: Literal["load"], f: typing.Callable[["Page"], "None"]) -> None:
+        """
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["pageerror"], f: typing.Callable[["Error"], "None"]
+    ) -> None:
+        """
+        Emitted when an uncaught exception happens within the page."""
+
+    @typing.overload
+    def on(self, event: Literal["popup"], f: typing.Callable[["Page"], "None"]) -> None:
+        """
+        Emitted when the page opens a new tab or window. This event is emitted in addition to the
+        `browser_context.on('page')`, but only for popups relevant to this page.
+
+        The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
+        popup with `window.open('http://example.com')`, this event will fire when the network request to \"http://example.com\" is
+        done and its response has started loading in the popup.
+
+        ```py
+        with page.expect_event(\"popup\") as page_info:
+            page.evaluate(\"window.open('https://example.com')\")
+        popup = page_info.value
+        print(popup.evaluate(\"location.href\"))
+        ```
+
+        > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
+        in most cases)."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["request"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a page issues a request. The [request] object is read-only. In order to intercept and mutate requests, see
+        `page.route()` or `browser_context.route()`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["requestfailed"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request fails, for example by timing out.
+
+        > NOTE: HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request will
+        complete with `page.on('request_finished')` event and not with `page.on('request_failed')`. A request will only be
+        considered failed when the client cannot get an HTTP response from the server, e.g. due to network error
+        net::ERR_FAILED."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["requestfinished"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request finishes successfully after downloading the response body. For a successful response, the
+        sequence of events is `request`, `response` and `requestfinished`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["response"], f: typing.Callable[["Response"], "None"]
+    ) -> None:
+        """
+        Emitted when [response] status and headers are received for a request. For a successful response, the sequence of events
+        is `request`, `response` and `requestfinished`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["websocket"], f: typing.Callable[["WebSocket"], "None"]
+    ) -> None:
+        """
+        Emitted when `WebSocket` request is sent."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["worker"], f: typing.Callable[["Worker"], "None"]
+    ) -> None:
+        """
+        Emitted when a dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is spawned by the
+        page."""
+
+    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+        return super().on(event=event, f=f)
+
+    @typing.overload
+    def once(
+        self, event: Literal["close"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        Emitted when the page closes."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
+    ) -> None:
+        """
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
+        emitted if the page throws an error or a warning.
+
+        The arguments passed into `console.log` appear as arguments on the event handler.
+
+        An example of handling `console` event:
+
+        ```py
+        def print_args(msg):
+            for arg in msg.args:
+                print(arg.json_value())
+
+        page.on(\"console\", print_args)
+        page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        ```"""
+
+    @typing.overload
+    def once(
+        self, event: Literal["crash"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        Emitted when the page crashes. Browser pages might crash if they try to allocate too much memory. When the page crashes,
+        ongoing and subsequent operations will throw.
+
+        The most common way to deal with crashes is to catch an exception:
+
+        ```py
+        try:
+            # crash might happen during a click.
+            page.click(\"button\")
+            # or while waiting for an event.
+            page.wait_for_event(\"popup\")
+        except Error as e:
+            # when the page crashes, exception message contains \"crash\".
+        ```"""
+
+    @typing.overload
+    def once(
+        self, event: Literal["dialog"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
+        either `dialog.accept()` or `dialog.dismiss()` the dialog - otherwise the page will
+        [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog, and
+        actions like click will never finish.
+
+        > NOTE: When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["domcontentloaded"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        Emitted when the JavaScript [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded)
+        event is dispatched."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["download"], f: typing.Callable[["Download"], "None"]
+    ) -> None:
+        """
+        Emitted when attachment download started. User can access basic file operations on downloaded content via the passed
+        `Download` instance.
+
+        > NOTE: Browser context **must** be created with the `acceptDownloads` set to `true` when user needs access to the
+        downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
+        performed and user has no access to the downloaded files."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["filechooser"], f: typing.Callable[["FileChooser"], "None"]
+    ) -> None:
+        """
+        Emitted when a file chooser is supposed to appear, such as after clicking the  `<input type=file>`. Playwright can
+        respond to it via setting the input files using `file_chooser.set_files()` that can be uploaded after that.
+
+        ```py
+        page.on(\"filechooser\", lambda file_chooser: file_chooser.set_files(\"/tmp/myfile.pdf\"))
+        ```"""
+
+    @typing.overload
+    def once(
+        self, event: Literal["frameattached"], f: typing.Callable[["Frame"], "None"]
+    ) -> None:
+        """
+        Emitted when a frame is attached."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["framedetached"], f: typing.Callable[["Frame"], "None"]
+    ) -> None:
+        """
+        Emitted when a frame is detached."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["framenavigated"], f: typing.Callable[["Frame"], "None"]
+    ) -> None:
+        """
+        Emitted when a frame is navigated to a new url."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["load"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["pageerror"], f: typing.Callable[["Error"], "None"]
+    ) -> None:
+        """
+        Emitted when an uncaught exception happens within the page."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["popup"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        Emitted when the page opens a new tab or window. This event is emitted in addition to the
+        `browser_context.on('page')`, but only for popups relevant to this page.
+
+        The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
+        popup with `window.open('http://example.com')`, this event will fire when the network request to \"http://example.com\" is
+        done and its response has started loading in the popup.
+
+        ```py
+        with page.expect_event(\"popup\") as page_info:
+            page.evaluate(\"window.open('https://example.com')\")
+        popup = page_info.value
+        print(popup.evaluate(\"location.href\"))
+        ```
+
+        > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
+        in most cases)."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["request"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a page issues a request. The [request] object is read-only. In order to intercept and mutate requests, see
+        `page.route()` or `browser_context.route()`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["requestfailed"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request fails, for example by timing out.
+
+        > NOTE: HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request will
+        complete with `page.on('request_finished')` event and not with `page.on('request_failed')`. A request will only be
+        considered failed when the client cannot get an HTTP response from the server, e.g. due to network error
+        net::ERR_FAILED."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["requestfinished"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request finishes successfully after downloading the response body. For a successful response, the
+        sequence of events is `request`, `response` and `requestfinished`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["response"], f: typing.Callable[["Response"], "None"]
+    ) -> None:
+        """
+        Emitted when [response] status and headers are received for a request. For a successful response, the sequence of events
+        is `request`, `response` and `requestfinished`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["websocket"], f: typing.Callable[["WebSocket"], "None"]
+    ) -> None:
+        """
+        Emitted when `WebSocket` request is sent."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["worker"], f: typing.Callable[["Worker"], "None"]
+    ) -> None:
+        """
+        Emitted when a dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is spawned by the
+        page."""
+
+    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+        return super().once(event=event, f=f)
+
     @property
     def accessibility(self) -> "Accessibility":
         """Page.accessibility
@@ -8959,6 +9438,196 @@ mapping.register(PageImpl, Page)
 
 
 class BrowserContext(SyncContextManager):
+    @typing.overload
+    def on(
+        self, event: Literal["backgroundpage"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        > NOTE: Only works with Chromium browser's persistent context.
+
+        Emitted when new background page is created in the context.
+
+        ```py
+        background_page = context.wait_for_event(\"backgroundpage\")
+        ```"""
+
+    @typing.overload
+    def on(
+        self, event: Literal["close"], f: typing.Callable[["BrowserContext"], "None"]
+    ) -> None:
+        """
+        Emitted when Browser context gets closed. This might happen because of one of the following:
+        - Browser context is closed.
+        - Browser application is closed or crashed.
+        - The `browser.close()` method was called."""
+
+    @typing.overload
+    def on(self, event: Literal["page"], f: typing.Callable[["Page"], "None"]) -> None:
+        """
+        The event is emitted when a new Page is created in the BrowserContext. The page may still be loading. The event will
+        also fire for popup pages. See also `page.on('popup')` to receive events about popups relevant to a specific page.
+
+        The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
+        popup with `window.open('http://example.com')`, this event will fire when the network request to \"http://example.com\" is
+        done and its response has started loading in the popup.
+
+        ```py
+        with context.expect_page() as page_info:
+            page.click(\"a[target=_blank]\"),
+        page = page_info.value
+        print(page.evaluate(\"location.href\"))
+        ```
+
+        > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
+        in most cases)."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["request"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To only
+        listen for requests from a particular page, use `page.on('request')`.
+
+        In order to intercept and mutate requests, see `browser_context.route()` or `page.route()`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["requestfailed"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request fails, for example by timing out. To only listen for failed requests from a particular page, use
+        `page.on('request_failed')`.
+
+        > NOTE: HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request will
+        complete with `browser_context.on('request_finished')` event and not with `browser_context.on('request_failed')`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["requestfinished"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request finishes successfully after downloading the response body. For a successful response, the
+        sequence of events is `request`, `response` and `requestfinished`. To listen for successful requests from a particular
+        page, use `page.on('request_finished')`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["response"], f: typing.Callable[["Response"], "None"]
+    ) -> None:
+        """
+        Emitted when [response] status and headers are received for a request. For a successful response, the sequence of events
+        is `request`, `response` and `requestfinished`. To listen for response events from a particular page, use
+        `page.on('response')`."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["serviceworker"], f: typing.Callable[["Worker"], "None"]
+    ) -> None:
+        """
+        > NOTE: Service workers are only supported on Chromium-based browsers.
+
+        Emitted when new service worker is created in the context."""
+
+    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+        return super().on(event=event, f=f)
+
+    @typing.overload
+    def once(
+        self, event: Literal["backgroundpage"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        > NOTE: Only works with Chromium browser's persistent context.
+
+        Emitted when new background page is created in the context.
+
+        ```py
+        background_page = context.wait_for_event(\"backgroundpage\")
+        ```"""
+
+    @typing.overload
+    def once(
+        self, event: Literal["close"], f: typing.Callable[["BrowserContext"], "None"]
+    ) -> None:
+        """
+        Emitted when Browser context gets closed. This might happen because of one of the following:
+        - Browser context is closed.
+        - Browser application is closed or crashed.
+        - The `browser.close()` method was called."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["page"], f: typing.Callable[["Page"], "None"]
+    ) -> None:
+        """
+        The event is emitted when a new Page is created in the BrowserContext. The page may still be loading. The event will
+        also fire for popup pages. See also `page.on('popup')` to receive events about popups relevant to a specific page.
+
+        The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
+        popup with `window.open('http://example.com')`, this event will fire when the network request to \"http://example.com\" is
+        done and its response has started loading in the popup.
+
+        ```py
+        with context.expect_page() as page_info:
+            page.click(\"a[target=_blank]\"),
+        page = page_info.value
+        print(page.evaluate(\"location.href\"))
+        ```
+
+        > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
+        in most cases)."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["request"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To only
+        listen for requests from a particular page, use `page.on('request')`.
+
+        In order to intercept and mutate requests, see `browser_context.route()` or `page.route()`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["requestfailed"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request fails, for example by timing out. To only listen for failed requests from a particular page, use
+        `page.on('request_failed')`.
+
+        > NOTE: HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request will
+        complete with `browser_context.on('request_finished')` event and not with `browser_context.on('request_failed')`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["requestfinished"], f: typing.Callable[["Request"], "None"]
+    ) -> None:
+        """
+        Emitted when a request finishes successfully after downloading the response body. For a successful response, the
+        sequence of events is `request`, `response` and `requestfinished`. To listen for successful requests from a particular
+        page, use `page.on('request_finished')`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["response"], f: typing.Callable[["Response"], "None"]
+    ) -> None:
+        """
+        Emitted when [response] status and headers are received for a request. For a successful response, the sequence of events
+        is `request`, `response` and `requestfinished`. To listen for response events from a particular page, use
+        `page.on('response')`."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["serviceworker"], f: typing.Callable[["Worker"], "None"]
+    ) -> None:
+        """
+        > NOTE: Service workers are only supported on Chromium-based browsers.
+
+        Emitted when new service worker is created in the context."""
+
+    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+        return super().once(event=event, f=f)
+
     @property
     def pages(self) -> typing.List["Page"]:
         """BrowserContext.pages
@@ -9748,6 +10417,24 @@ mapping.register(CDPSessionImpl, CDPSession)
 
 
 class Browser(SyncContextManager):
+    def on(
+        self, event: Literal["disconnected"], f: typing.Callable[["Browser"], "None"]
+    ) -> None:
+        """
+        Emitted when Browser gets disconnected from the browser application. This might happen because of one of the following:
+        - Browser application is closed or crashed.
+        - The `browser.close()` method was called."""
+        return super().on(event=event, f=f)
+
+    def once(
+        self, event: Literal["disconnected"], f: typing.Callable[["Browser"], "None"]
+    ) -> None:
+        """
+        Emitted when Browser gets disconnected from the browser application. This might happen because of one of the following:
+        - Browser application is closed or crashed.
+        - The `browser.close()` method was called."""
+        return super().once(event=event, f=f)
+
     @property
     def contexts(self) -> typing.List["BrowserContext"]:
         """Browser.contexts
