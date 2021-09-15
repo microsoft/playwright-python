@@ -429,9 +429,9 @@ def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
 class RawHeaders:
     def __init__(self, headers: HeadersArray) -> None:
         self._headers_array = headers
-        self._headers_map = defaultdict(list)
+        self._headers_map: Dict[str, Dict[str, bool]] = defaultdict(dict)
         for header in headers:
-            self._headers_map[header["name"].lower()].append(header["value"])
+            self._headers_map[header["name"].lower()][header["value"]] = True
 
     def get(self, name: str) -> Optional[str]:
         values = self.get_all(name)
@@ -441,7 +441,7 @@ class RawHeaders:
         return separator.join(values)
 
     def get_all(self, name: str) -> List[str]:
-        return self._headers_map[name.lower()].copy()
+        return list(self._headers_map[name.lower()].keys())
 
     def headers(self) -> Dict[str, str]:
         result = {}

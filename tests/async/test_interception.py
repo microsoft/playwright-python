@@ -204,7 +204,7 @@ async def test_page_route_should_work_with_redirect_inside_sync_XHR(page, server
 
 
 async def test_page_route_should_work_with_custom_referer_headers(page, server):
-    await page.set_extra_http_headers({"Referer": server.EMPTY_PAGE})
+    await page.set_extra_http_headers({"referer": server.EMPTY_PAGE})
 
     def assert_headers(route):
         assert route.request.headers["referer"] == server.EMPTY_PAGE
