@@ -38,7 +38,6 @@ from playwright._impl._helper import (
     ForcedColors,
     ReducedMotion,
     locals_to_params,
-    not_installed_error,
 )
 from playwright._impl._transport import WebSocketTransport
 from playwright._impl._wait_helper import throw_on_timeout
@@ -86,12 +85,7 @@ class BrowserType(ChannelOwner):
     ) -> Browser:
         params = locals_to_params(locals())
         normalize_launch_params(params)
-        try:
-            return from_channel(await self._channel.send("launch", params))
-        except Exception as e:
-            if "npx playwright install" in str(e):
-                raise not_installed_error(f'"{self.name}" browser was not found.')
-            raise e
+        return from_channel(await self._channel.send("launch", params))
 
     async def launch_persistent_context(
         self,
@@ -144,16 +138,11 @@ class BrowserType(ChannelOwner):
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
-        try:
-            context = from_channel(
-                await self._channel.send("launchPersistentContext", params)
-            )
-            context._options = params
-            return context
-        except Exception as e:
-            if "npx playwright install" in str(e):
-                raise not_installed_error(f'"{self.name}" browser was not found.')
-            raise e
+        context = from_channel(
+            await self._channel.send("launchPersistentContext", params)
+        )
+        context._options = params
+        return context
 
     async def connect_over_cdp(
         self,

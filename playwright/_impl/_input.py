@@ -80,6 +80,9 @@ class Mouse:
     ) -> None:
         await self.click(x, y, delay=delay, button=button, clickCount=2)
 
+    async def wheel(self, deltaX: float, deltaY: float) -> None:
+        await self._channel.send("mouseWheel", locals_to_params(locals()))
+
 
 class Touchscreen:
     def __init__(self, channel: Channel) -> None:

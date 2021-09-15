@@ -238,3 +238,49 @@ async def test_should_work_for_webkitdirectory(page):
         await page.click("input")
     file_chooser = await fc_info.value
     assert file_chooser.is_multiple()
+
+
+async def test_wheel_should_work(page: Page, server):
+    await page.set_content(
+        """
+        <div style="width: 5000px; height: 5000px;"></div>
+    """
+    )
+    await page.mouse.move(50, 60)
+    await _listen_for_wheel_events(page, "div")
+    await page.mouse.wheel(0, 100)
+    assert await page.evaluate("window.lastEvent") == {
+        "deltaX": 0,
+        "deltaY": 100,
+        "clientX": 50,
+        "clientY": 60,
+        "deltaMode": 0,
+        "ctrlKey": False,
+        "shiftKey": False,
+        "altKey": False,
+        "metaKey": False,
+    }
+    await page.wait_for_function("window.scrollY === 100")
+
+
+async def _listen_for_wheel_events(page: Page, selector: str) -> None:
+    await page.evaluate(
+        """
+        selector => {
+            document.querySelector(selector).addEventListener('wheel', (e) => {
+            window['lastEvent'] = {
+                deltaX: e.deltaX,
+                deltaY: e.deltaY,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                deltaMode: e.deltaMode,
+                ctrlKey: e.ctrlKey,
+                shiftKey: e.shiftKey,
+                altKey: e.altKey,
+                metaKey: e.metaKey,
+            };
+            }, { passive: false });
+        }
+    """,
+        selector,
+    )

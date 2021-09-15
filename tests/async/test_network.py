@@ -239,9 +239,11 @@ async def test_should_report_request_headers_array(
     expected_headers = []
 
     def handle(request: http.Request):
-        for key, values in request.requestHeaders.getAllRawHeaders():
+        for name, values in request.requestHeaders.getAllRawHeaders():
             for value in values:
-                expected_headers.append([key.decode().lower(), value.decode()])
+                expected_headers.append(
+                    {"name": name.decode().lower(), "value": value.decode()}
+                )
         request.finish()
 
     server.set_route("/headers", handle)
@@ -259,11 +261,24 @@ async def test_should_report_request_headers_array(
         """
         )
     request = await request_info.value
-    assert sorted(
+    sorted_pw_request_headers = sorted(
         list(
-            map(lambda item: [item[0].lower(), item[1]], await request.headers_array())
-        )
-    ) == sorted(expected_headers)
+            map(
+                lambda header: {
+                    "name": header["name"].lower(),
+                    "value": header["value"],
+                },
+                await request.headers_array(),
+            )
+        ),
+        key=lambda header: header["name"],
+    )
+    sorted_expected_headers = sorted(
+        expected_headers, key=lambda header: header["name"]
+    )
+    assert sorted_pw_request_headers == sorted_expected_headers
+    assert await request.header_value("Header-A") == "value-a, value-a-1, value-a-2"
+    assert await request.header_value("not-there") is None
 
 
 async def test_should_report_response_headers_array(
@@ -272,8 +287,9 @@ async def test_should_report_response_headers_array(
     if is_win and browser_name == "webkit":
         pytest.skip("libcurl does not support non-set-cookie multivalue headers")
     expected_headers = {
-        "Header-A": ["value-a", "value-a-1", "value-a-2"],
-        "Header-B": ["value-b"],
+        "header-a": ["value-a", "value-a-1", "value-a-2"],
+        "header-b": ["value-b"],
+        "set-cookie": ["a=b", "c=d"],
     }
 
     def handle(request: http.Request):
@@ -290,9 +306,10 @@ async def test_should_report_response_headers_array(
         """
         )
     response = await response_info.value
-    headers = await response.headers_array()
     actual_headers = {}
-    for name, value in headers:
+    for header in await response.headers_array():
+        name = header["name"].lower()
+        value = header["value"]
         if not actual_headers.get(name):
             actual_headers[name] = []
         actual_headers[name].append(value)
@@ -303,6 +320,10 @@ async def test_should_report_response_headers_array(
         if key.lower() in actual_headers:
             actual_headers.pop(key.lower())
     assert actual_headers == expected_headers
+    assert await response.header_value("not-there") is None
+    assert await response.header_value("set-cookie") == "a=b\nc=d"
+    assert await response.header_value("header-a") == "value-a, value-a-1, value-a-2"
+    assert await response.header_values("set-cookie") == ["a=b", "c=d"]
 
 
 async def test_response_headers_should_work(page: Page, server):
