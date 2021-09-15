@@ -417,7 +417,7 @@ class WebSocket(ChannelOwner):
 
     def _on_close(self) -> None:
         self._is_closed = True
-        self.emit(WebSocket.Events.Close)
+        self.emit(WebSocket.Events.Close, self)
 
 
 def serialize_headers(headers: Dict[str, str]) -> List[Header]:

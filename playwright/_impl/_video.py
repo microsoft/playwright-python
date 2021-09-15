@@ -35,7 +35,7 @@ class Video:
         if page.is_closed():
             self._page_closed()
         else:
-            page.on("close", lambda: self._page_closed())
+            page.on("close", lambda page: self._page_closed())
 
     def __repr__(self) -> str:
         return f"<Video page={self._page}>"

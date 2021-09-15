@@ -135,7 +135,9 @@ class BrowserContext(ChannelOwner):
             ),
         )
         self._closed_future: asyncio.Future = asyncio.Future()
-        self.once(self.Events.Close, lambda: self._closed_future.set_result(True))
+        self.once(
+            self.Events.Close, lambda context: self._closed_future.set_result(True)
+        )
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
@@ -292,7 +294,7 @@ class BrowserContext(ChannelOwner):
         if self._browser:
             self._browser._contexts.remove(self)
 
-        self.emit(BrowserContext.Events.Close)
+        self.emit(BrowserContext.Events.Close, self)
 
     async def close(self) -> None:
         try:
