@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import sys
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -139,3 +139,12 @@ class SecurityDetails(TypedDict):
     subjectName: Optional[str]
     validFrom: Optional[float]
     validTo: Optional[float]
+
+
+class NameValue(TypedDict):
+    name: str
+    value: str
+
+
+HeadersArray = List[NameValue]
+Headers = Dict[str, str]

@@ -16,12 +16,15 @@ import asyncio
 import base64
 import json
 import mimetypes
+from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 
 from playwright._impl._api_structures import (
+    Headers,
+    HeadersArray,
     RemoteAddr,
     RequestSizes,
     ResourceTiming,
@@ -34,7 +37,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._helper import ContinueParameters, Header, locals_to_params
+from playwright._impl._helper import ContinueParameters, locals_to_params
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -64,8 +67,8 @@ class Request(ChannelOwner):
             "responseStart": -1,
             "responseEnd": -1,
         }
-        self._headers: List[Header] = self._initializer["headers"]
-        self._all_headers_future: Optional[asyncio.Future[List[Header]]] = None
+        self._provisional_headers = RawHeaders(self._initializer["headers"])
+        self._all_headers_future: Optional[asyncio.Future[RawHeaders]] = None
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
@@ -115,10 +118,6 @@ class Request(ChannelOwner):
             return None
         return base64.b64decode(b64_content)
 
-    @property
-    def headers(self) -> Dict[str, str]:
-        return headers_array_to_object(self._headers, True)
-
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
 
@@ -145,25 +144,27 @@ class Request(ChannelOwner):
     def timing(self) -> ResourceTiming:
         return self._timing
 
-    async def all_headers(self) -> Dict[str, str]:
-        return headers_array_to_object(await self._get_headers_if_needed(), True)
+    @property
+    def headers(self) -> Headers:
+        return self._provisional_headers.headers()
 
-    async def headers_array(self) -> List[List[str]]:
-        return list(
-            map(
-                lambda header: [header["name"], header["value"]],
-                await self._get_headers_if_needed(),
-            )
-        )
+    async def all_headers(self) -> Headers:
+        return (await self._actual_headers()).headers()
 
-    async def _get_headers_if_needed(self) -> List[Header]:
+    async def headers_array(self) -> HeadersArray:
+        return (await self._actual_headers()).headers_array()
+
+    async def header_value(self, name: str) -> Optional[str]:
+        return (await self._actual_headers()).get(name)
+
+    async def _actual_headers(self) -> "RawHeaders":
         if not self._all_headers_future:
             self._all_headers_future = asyncio.Future()
             response = await self.response()
             if not response:
-                return self._headers
+                return self._provisional_headers
             headers = await response._channel.send("rawRequestHeaders")
-            self._all_headers_future.set_result(headers)
+            self._all_headers_future.set_result(RawHeaders(headers))
         return await self._all_headers_future
 
 
@@ -256,10 +257,10 @@ class Response(ChannelOwner):
         self._request._timing["connectEnd"] = timing["connectEnd"]
         self._request._timing["requestStart"] = timing["requestStart"]
         self._request._timing["responseStart"] = timing["responseStart"]
-        self._headers = headers_array_to_object(
-            cast(List[Header], self._initializer["headers"]), True
+        self._provisional_headers = RawHeaders(
+            cast(HeadersArray, self._initializer["headers"])
         )
-        self._raw_headers_future: Optional[asyncio.Future[List[Header]]] = None
+        self._raw_headers_future: Optional[asyncio.Future[RawHeaders]] = None
         self._finished_future: asyncio.Future[bool] = asyncio.Future()
 
     def __repr__(self) -> str:
@@ -284,25 +285,26 @@ class Response(ChannelOwner):
         return self._initializer["statusText"]
 
     @property
-    def headers(self) -> Dict[str, str]:
-        return self._headers.copy()
+    def headers(self) -> Headers:
+        return self._provisional_headers.headers()
 
-    async def all_headers(self) -> Dict[str, str]:
-        return headers_array_to_object(await self._get_headers_if_needed(), True)
+    async def all_headers(self) -> Headers:
+        return (await self._actual_headers()).headers()
 
-    async def headers_array(self) -> List[List[str]]:
-        return list(
-            map(
-                lambda header: [header["name"], header["value"]],
-                await self._get_headers_if_needed(),
-            )
-        )
+    async def headers_array(self) -> HeadersArray:
+        return (await self._actual_headers()).headers_array()
 
-    async def _get_headers_if_needed(self) -> List[Header]:
+    async def header_value(self, name: str) -> Optional[str]:
+        return (await self._actual_headers()).get(name)
+
+    async def header_values(self, name: str) -> List[str]:
+        return (await self._actual_headers()).get_all(name)
+
+    async def _actual_headers(self) -> "RawHeaders":
         if not self._raw_headers_future:
             self._raw_headers_future = asyncio.Future()
-            headers = cast(List[Header], await self._channel.send("rawResponseHeaders"))
-            self._raw_headers_future.set_result(headers)
+            headers = cast(HeadersArray, await self._channel.send("rawResponseHeaders"))
+            self._raw_headers_future.set_result(RawHeaders(headers))
         return await self._raw_headers_future
 
     async def server_addr(self) -> Optional[RemoteAddr]:
@@ -420,12 +422,32 @@ class WebSocket(ChannelOwner):
         self.emit(WebSocket.Events.Close, self)
 
 
-def serialize_headers(headers: Dict[str, str]) -> List[Header]:
+def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
     return [{"name": name, "value": value} for name, value in headers.items()]
 
 
-def headers_array_to_object(headers: List[Header], lower_case: bool) -> Dict[str, str]:
-    return {
-        (header["name"].lower() if lower_case else header["name"]): header["value"]
-        for header in headers
-    }
+class RawHeaders:
+    def __init__(self, headers: HeadersArray) -> None:
+        self._headers_array = headers
+        self._headers_map: Dict[str, Dict[str, bool]] = defaultdict(dict)
+        for header in headers:
+            self._headers_map[header["name"].lower()][header["value"]] = True
+
+    def get(self, name: str) -> Optional[str]:
+        values = self.get_all(name)
+        if not values:
+            return None
+        separator = "\n" if name.lower() == "set-cookie" else ", "
+        return separator.join(values)
+
+    def get_all(self, name: str) -> List[str]:
+        return list(self._headers_map[name.lower()].keys())
+
+    def headers(self) -> Dict[str, str]:
+        result = {}
+        for name in self._headers_map.keys():
+            result[name] = cast(str, self.get(name))
+        return result
+
+    def headers_array(self) -> HeadersArray:
+        return self._headers_array

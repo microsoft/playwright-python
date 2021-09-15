@@ -29,6 +29,7 @@ from playwright._impl._api_structures import (
     FloatRect,
     Geolocation,
     HttpCredentials,
+    NameValue,
     PdfMargins,
     Position,
     ProxySettings,
@@ -155,18 +156,6 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.post_data_buffer)
 
     @property
-    def headers(self) -> typing.Dict[str, str]:
-        """Request.headers
-
-        **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use `request.all_headers()` instead.
-
-        Returns
-        -------
-        Dict[str, str]
-        """
-        return mapping.from_maybe_impl(self._impl_obj.headers)
-
-    @property
     def frame(self) -> "Frame":
         """Request.frame
 
@@ -265,6 +254,18 @@ class Request(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.timing)
 
+    @property
+    def headers(self) -> typing.Dict[str, str]:
+        """Request.headers
+
+        **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use `request.all_headers()` instead.
+
+        Returns
+        -------
+        Dict[str, str]
+        """
+        return mapping.from_maybe_impl(self._impl_obj.headers)
+
     async def sizes(self) -> RequestSizes:
         """Request.sizes
 
@@ -319,19 +320,40 @@ class Request(AsyncBase):
             await self._async("request.all_headers", self._impl_obj.all_headers())
         )
 
-    async def headers_array(self) -> typing.List[typing.List[str]]:
+    async def headers_array(self) -> typing.List[NameValue]:
         """Request.headers_array
 
         An array with all the request HTTP headers associated with this request. Unlike `request.all_headers()`, header
-        names are not lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+        names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 
         Returns
         -------
-        List[List[str]]
+        List[{name: str, value: str}]
+        """
+
+        return mapping.from_impl_list(
+            await self._async("request.headers_array", self._impl_obj.headers_array())
+        )
+
+    async def header_value(self, name: str) -> typing.Optional[str]:
+        """Request.header_value
+
+        Returns the value of the header matching the name. The name is case insensitive.
+
+        Parameters
+        ----------
+        name : str
+            Name of the header.
+
+        Returns
+        -------
+        Union[str, NoneType]
         """
 
         return mapping.from_maybe_impl(
-            await self._async("request.headers_array", self._impl_obj.headers_array())
+            await self._async(
+                "request.header_value", self._impl_obj.header_value(name=name)
+            )
         )
 
 
@@ -437,19 +459,63 @@ class Response(AsyncBase):
             await self._async("response.all_headers", self._impl_obj.all_headers())
         )
 
-    async def headers_array(self) -> typing.List[typing.List[str]]:
+    async def headers_array(self) -> typing.List[NameValue]:
         """Response.headers_array
 
         An array with all the request HTTP headers associated with this response. Unlike `response.all_headers()`, header
-        names are not lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+        names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 
         Returns
         -------
-        List[List[str]]
+        List[{name: str, value: str}]
+        """
+
+        return mapping.from_impl_list(
+            await self._async("response.headers_array", self._impl_obj.headers_array())
+        )
+
+    async def header_value(self, name: str) -> typing.Optional[str]:
+        """Response.header_value
+
+        Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same name
+        (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\\n` separator is used. If
+        no headers are found, `null` is returned.
+
+        Parameters
+        ----------
+        name : str
+            Name of the header.
+
+        Returns
+        -------
+        Union[str, NoneType]
         """
 
         return mapping.from_maybe_impl(
-            await self._async("response.headers_array", self._impl_obj.headers_array())
+            await self._async(
+                "response.header_value", self._impl_obj.header_value(name=name)
+            )
+        )
+
+    async def header_values(self, name: str) -> typing.List[str]:
+        """Response.header_values
+
+        Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
+
+        Parameters
+        ----------
+        name : str
+            Name of the header.
+
+        Returns
+        -------
+        List[str]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "response.header_values", self._impl_obj.header_values(name=name)
+            )
         )
 
     async def server_addr(self) -> typing.Optional[RemoteAddr]:
@@ -485,7 +551,7 @@ class Response(AsyncBase):
     async def finished(self) -> NoneType:
         """Response.finished
 
-        Waits for this response to finish, returns failure error if request failed.
+        Waits for this response to finish, returns always `null`.
         """
 
         return mapping.from_maybe_impl(
@@ -1167,6 +1233,28 @@ class Mouse(AsyncBase):
             await self._async(
                 "mouse.dblclick",
                 self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button),
+            )
+        )
+
+    async def wheel(self, delta_x: float, delta_y: float) -> NoneType:
+        """Mouse.wheel
+
+        Dispatches a `wheel` event.
+
+        > NOTE: Wheel events may cause scrolling if they are not handled, and this method does not wait for the scrolling to
+        finish before returning.
+
+        Parameters
+        ----------
+        delta_x : float
+            Pixels to scroll horizontally.
+        delta_y : float
+            Pixels to scroll vertically.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "mouse.wheel", self._impl_obj.wheel(deltaX=delta_x, deltaY=delta_y)
             )
         )
 

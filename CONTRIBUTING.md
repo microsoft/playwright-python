@@ -49,6 +49,13 @@ pre-commit run --all-files
 
 For more details look at the [CI configuration](./blob/master/.github/workflows/ci.yml).
 
+Collect coverage
+
+```sh
+pytest --browser chromium --cov-report html --cov=playwright
+open htmlcov/index.html
+```
+
 ### Regenerating APIs
 
 ```bash

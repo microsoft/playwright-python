@@ -36,6 +36,7 @@ from typing import (
 )
 from urllib.parse import urljoin
 
+from playwright._impl._api_structures import NameValue
 from playwright._impl._api_types import Error, TimeoutError
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -69,15 +70,10 @@ class ErrorPayload(TypedDict, total=False):
     value: Any
 
 
-class Header(TypedDict):
-    name: str
-    value: str
-
-
 class ContinueParameters(TypedDict, total=False):
     url: Optional[str]
     method: Optional[str]
-    headers: Optional[List[Header]]
+    headers: Optional[List[NameValue]]
     postData: Optional[str]
 
 
@@ -231,20 +227,6 @@ def is_safe_close_error(error: Exception) -> bool:
     message = str(error)
     return message.endswith("Browser has been closed") or message.endswith(
         "Target page, context or browser has been closed"
-    )
-
-
-def not_installed_error(message: str) -> Exception:
-    return Error(
-        f"""
-================================================================================
-{message}
-Please complete Playwright installation via running
-
-    "python -m playwright install"
-
-================================================================================
-"""
     )
 
 
