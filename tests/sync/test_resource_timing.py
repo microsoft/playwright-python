@@ -68,6 +68,7 @@ def test_should_work_for_subresource(
     assert timing["responseEnd"] < 10000
 
 
+@flaky  # Upstream flaky
 def test_should_work_for_ssl(
     browser: Browser, https_server: Server, is_mac: bool, is_webkit: bool
 ) -> None:
