@@ -60,7 +60,7 @@ async def test_request_continue(page, server):
         intercepted.append(True)
         await route.continue_()
 
-    intercepted = list()
+    intercepted = []
     await page.route(
         "**/*",
         lambda route, request: asyncio.create_task(

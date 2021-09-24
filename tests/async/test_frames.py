@@ -127,7 +127,7 @@ async def test_should_send_events_when_frames_are_manipulated_dynamically(
     assert navigated_frames[0].url == server.EMPTY_PAGE
 
     # validate framedetached events
-    detached_frames = list()
+    detached_frames = []
     page.on("framedetached", lambda frame: detached_frames.append(frame))
     await utils.detach_frame(page, "frame1")
     assert len(detached_frames) == 1
@@ -149,7 +149,7 @@ async def test_persist_main_frame_on_cross_process_navigation(page, server):
 
 
 async def test_should_not_send_attach_detach_events_for_main_frame(page, server):
-    has_events = list()
+    has_events = []
     page.on("frameattached", lambda frame: has_events.append(True))
     page.on("framedetached", lambda frame: has_events.append(True))
     await page.goto(server.EMPTY_PAGE)

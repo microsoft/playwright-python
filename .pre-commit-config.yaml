@@ -9,8 +9,12 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: requirements-txt-fixer
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
   - repo: https://github.com/psf/black
-    rev: 21.8b0
+    rev: 21.9b0
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -18,7 +22,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-pyOpenSSL==20.0.6]
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://github.com/pycqa/flake8
     rev: 3.9.2
     hooks:
       - id: flake8
