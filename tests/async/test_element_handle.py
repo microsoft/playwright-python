@@ -381,7 +381,7 @@ async def test_scroll_should_throw_for_detached_element(page, server):
 
 async def waiting_helper(page, after):
     div = await page.query_selector("div")
-    done = list()
+    done = []
 
     async def scroll():
         done.append(False)
@@ -496,7 +496,7 @@ async def test_select_text_wait_for_visible(page, server):
     textarea = await page.query_selector("textarea")
     await textarea.evaluate('textarea => textarea.value = "some value"')
     await textarea.evaluate('e => e.style.display = "none"')
-    done = list()
+    done = []
 
     async def select_text():
         done.append(False)

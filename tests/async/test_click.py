@@ -181,7 +181,7 @@ async def test_wait_with_force(page, server):
 
 
 async def test_wait_for_display_none_to_be_gone(page, server):
-    done = list()
+    done = []
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.display = 'none'")
 
@@ -200,7 +200,7 @@ async def test_wait_for_display_none_to_be_gone(page, server):
 
 
 async def test_wait_for_visibility_hidden_to_be_gone(page, server):
-    done = list()
+    done = []
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.visibility = 'hidden'")
 
@@ -243,7 +243,7 @@ async def test_timeout_waiting_for_visbility_hidden_to_be_gone(page, server):
 
 
 async def test_waitFor_visible_when_parent_is_hidden(page, server):
-    done = list()
+    done = []
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.parentElement.style.display = 'none'")
 
@@ -626,7 +626,7 @@ async def test_wait_for_button_to_be_enabled(page, server):
     await page.set_content(
         '<button onclick="javascript:window.__CLICKED=true;" disabled><span>Click target</span></button>'
     )
-    done = list()
+    done = []
 
     async def click():
         await page.click("text=Click target")
