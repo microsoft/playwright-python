@@ -91,6 +91,8 @@ jobs:
         pip install -e .
         python setup.py bdist_wheel
         python -m playwright install --with-deps
+    - name: Test PyInstaller
+      run: pytest tests/test_pyinstaller.py --browser=${{ matrix.browser }}
     - name: Common Tests
       run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
     - name: Test Reference count
@@ -99,8 +101,6 @@ jobs:
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Generation Scripts
       run: pytest tests/test_generation_scripts.py --browser=${{ matrix.browser }}
-    - name: Test PyInstaller
-      run: pytest tests/test_pyinstaller.py --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
       run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90

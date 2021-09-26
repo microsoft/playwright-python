@@ -20,6 +20,7 @@ from playwright.sync_api import Playwright, sync_playwright
 
 def main(playwright: Playwright) -> None:
     for browser_type in [playwright.chromium, playwright.firefox, playwright.webkit]:
+        raise RuntimeError(str(os.environ))
         browser = browser_type.launch()
         page = browser.new_page()
         page.set_content("<h1>Hello World</h1>")
