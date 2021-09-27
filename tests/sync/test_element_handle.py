@@ -511,13 +511,13 @@ def test_inner_text_should_throw(page: Page) -> None:
     page.set_content("<svg>text</svg>")
     with pytest.raises(Error) as exc_info1:
         page.inner_text("svg")
-    assert "Not an HTMLElement" in exc_info1.value.message
+    assert " Node is not an HTMLElement" in exc_info1.value.message
 
     handle = page.query_selector("svg")
     assert handle
     with pytest.raises(Error) as exc_info2:
         handle.inner_text()
-    assert "Not an HTMLElement" in exc_info2.value.message
+    assert " Node is not an HTMLElement" in exc_info2.value.message
 
 
 def test_text_content(page: Page, server: Server) -> None:
