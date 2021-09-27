@@ -551,12 +551,12 @@ async def test_inner_text_should_throw(page, server):
     await page.set_content("<svg>text</svg>")
     with pytest.raises(Error) as exc_info1:
         await page.inner_text("svg")
-    assert "Not an HTMLElement" in exc_info1.value.message
+    assert " Node is not an HTMLElement" in exc_info1.value.message
 
     handle = await page.query_selector("svg")
     with pytest.raises(Error) as exc_info2:
         await handle.inner_text()
-    assert "Not an HTMLElement" in exc_info2.value.message
+    assert " Node is not an HTMLElement" in exc_info2.value.message
 
 
 async def test_text_content(page, server):

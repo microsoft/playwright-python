@@ -634,7 +634,7 @@ class Frame(ChannelOwner):
         await self._channel.send("uncheck", locals_to_params(locals()))
 
     async def wait_for_timeout(self, timeout: float) -> None:
-        await self._connection._loop.create_task(asyncio.sleep(timeout / 1000))
+        await self._channel.send("waitForTimeout", locals_to_params(locals()))
 
     async def wait_for_function(
         self,

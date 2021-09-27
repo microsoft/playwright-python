@@ -845,7 +845,7 @@ async def test_select_option_should_throw_when_element_is_not_a__select_(page, s
     await page.goto(server.PREFIX + "/input/select.html")
     with pytest.raises(Error) as exc_info:
         await page.select_option("body", "")
-    assert "Element is not a <select> element." in exc_info.value.message
+    assert "Element is not a <select> element" in exc_info.value.message
 
 
 async def test_select_option_should_return_on_no_matched_values(page, server):
