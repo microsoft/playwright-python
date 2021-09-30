@@ -1,5 +1,5 @@
 auditwheel==5.0.0
-autobahn==21.3.1
+autobahn==21.2.1
 black==21.9b0
 flake8==3.9.2
 flaky==3.7.0
@@ -20,6 +20,6 @@ requests==2.26.0
 service_identity==21.1.0
 setuptools==58.1.0
 twine==3.4.2
-twisted==21.7.0
+twisted
 types-pyOpenSSL==20.0.6
 wheel==0.37.0
