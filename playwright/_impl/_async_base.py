@@ -93,12 +93,12 @@ class AsyncContextManager(AsyncBase):
         return self
 
     async def __aexit__(
-        self: Self,
+        self,
         exc_type: Type[BaseException],
         exc_val: BaseException,
         traceback: TracebackType,
     ) -> None:
         await self.close()
 
-    async def close(self: Self) -> None:
+    async def close(self) -> None:
         ...

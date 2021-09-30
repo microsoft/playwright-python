@@ -76,7 +76,6 @@ def async_playwright() -> PlaywrightContextManager:
 __all__ = [
     "async_playwright",
     "Accessibility",
-    "BindingCall",
     "Browser",
     "BrowserContext",
     "BrowserType",
@@ -110,7 +109,6 @@ __all__ = [
     "Selectors",
     "SourceLocation",
     "StorageState",
-    "sync_playwright",
     "TimeoutError",
     "Touchscreen",
     "Video",

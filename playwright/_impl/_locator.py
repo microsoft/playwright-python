@@ -24,7 +24,6 @@ from typing import (
     Optional,
     TypeVar,
     Union,
-    cast,
 )
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
@@ -173,12 +172,11 @@ class Locator:
         timeout: float = None,
     ) -> ElementHandle:
         params = locals_to_params(locals())
-        return cast(
-            ElementHandle,
-            await self._frame.wait_for_selector(
-                self._selector, strict=True, state="attached", **params
-            ),
+        handle = await self._frame.wait_for_selector(
+            self._selector, strict=True, state="attached", **params
         )
+        assert handle
+        return handle
 
     async def element_handles(self) -> List[ElementHandle]:
         return await self._frame.query_selector_all(self._selector)
@@ -201,7 +199,7 @@ class Locator:
     async def count(
         self,
     ) -> int:
-        return cast(int, await self.evaluate_all("ee => ee.length"))
+        return int(await self.evaluate_all("ee => ee.length"))
 
     async def get_attribute(self, name: str, timeout: float = None) -> Optional[str]:
         params = locals_to_params(locals())
@@ -437,6 +435,15 @@ class Locator:
     ) -> List[str]:
         return await self._frame.eval_on_selector_all(
             self._selector, "ee => ee.map(e => e.textContent || '')"
+        )
+
+    async def wait_for(
+        self,
+        timeout: float = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None,
+    ) -> None:
+        await self._frame.wait_for_selector(
+            self._selector, strict=True, timeout=timeout, state=state
         )
 
     async def set_checked(

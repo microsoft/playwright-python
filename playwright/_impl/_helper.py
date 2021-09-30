@@ -67,7 +67,7 @@ class ErrorPayload(TypedDict, total=False):
     message: str
     name: str
     stack: str
-    value: Any
+    value: Optional[Any]
 
 
 class ContinueParameters(TypedDict, total=False):
@@ -159,7 +159,9 @@ class TimeoutSettings:
 
 
 def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
-    return dict(message=str(ex), name="Error", stack="".join(traceback.format_tb(tb)))
+    return ErrorPayload(
+        message=str(ex), name="Error", stack="".join(traceback.format_tb(tb))
+    )
 
 
 def parse_error(error: ErrorPayload) -> Error:

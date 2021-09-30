@@ -167,12 +167,12 @@ class SyncContextManager(SyncBase):
         return self
 
     def __exit__(
-        self: Self,
+        self,
         exc_type: Type[BaseException],
         exc_val: BaseException,
         traceback: TracebackType,
     ) -> None:
         self.close()
 
-    def close(self: Self) -> None:
+    def close(self) -> None:
         ...
