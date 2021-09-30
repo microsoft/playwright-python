@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Callable, Dict, Optional, Union
 
 import websockets
+import websockets.exceptions
 from pyee import AsyncIOEventEmitter
 from websockets.client import connect as websocket_connect
 

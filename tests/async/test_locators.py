@@ -465,3 +465,12 @@ async def test_locators_set_checked(page: Page):
     assert await page.evaluate("checkbox.checked")
     await locator.set_checked(False)
     assert await page.evaluate("checkbox.checked") is False
+
+
+async def test_locators_wait_for(page: Page) -> None:
+    await page.set_content("<div></div>")
+    locator = page.locator("div")
+    task = locator.wait_for()
+    await page.eval_on_selector("div", "div => div.innerHTML = '<span>target</span>'")
+    await task
+    assert await locator.text_content() == "target"

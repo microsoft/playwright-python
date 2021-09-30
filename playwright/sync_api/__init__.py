@@ -74,9 +74,7 @@ def sync_playwright() -> PlaywrightContextManager:
 
 
 __all__ = [
-    "async_playwright",
     "Accessibility",
-    "BindingCall",
     "Browser",
     "BrowserContext",
     "BrowserType",

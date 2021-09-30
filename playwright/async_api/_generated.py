@@ -11497,7 +11497,8 @@ class BrowserType(AsyncBase):
             Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's user
-            data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`.
+            data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`. Pass an empty string to use
+            a temporary directory instead.
         channel : Union[str, NoneType]
             Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge",
             "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
@@ -13342,6 +13343,46 @@ class Locator(AsyncBase):
         return mapping.from_maybe_impl(
             await self._async(
                 "locator.all_text_contents", self._impl_obj.all_text_contents()
+            )
+        )
+
+    async def wait_for(
+        self,
+        *,
+        timeout: float = None,
+        state: Literal["attached", "detached", "hidden", "visible"] = None
+    ) -> NoneType:
+        """Locator.wait_for
+
+        Returns when element specified by locator satisfies the `state` option.
+
+        If target element already satisfies the condition, the method returns immediately. Otherwise, waits for up to `timeout`
+        milliseconds until the condition is met.
+
+        ```py
+        order_sent = page.locator(\"#order-sent\")
+        await order_sent.wait_for()
+        ```
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        state : Union["attached", "detached", "hidden", "visible", NoneType]
+            Defaults to `'visible'`. Can be either:
+            - `'attached'` - wait for element to be present in DOM.
+            - `'detached'` - wait for element to not be present in DOM.
+            - `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without
+              any content or with `display:none` has an empty bounding box and is not considered visible.
+            - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
+              This is opposite to the `'visible'` option.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.wait_for",
+                self._impl_obj.wait_for(timeout=timeout, state=state),
             )
         )
 
