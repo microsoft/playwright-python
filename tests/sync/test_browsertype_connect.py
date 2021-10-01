@@ -140,7 +140,7 @@ def test_browser_type_connect_should_throw_when_used_after_is_connected_returns_
 
     with pytest.raises(Error) as exc_info:
         page.evaluate("1 + 1")
-    assert "Playwright connection closed" == exc_info.value.message
+    assert "Target page, context or browser has been closed" == exc_info.value.message
     assert browser.is_connected() is False
 
 
@@ -192,4 +192,4 @@ def test_connect_to_closed_server_without_hangs(
     remote_server.kill()
     with pytest.raises(Error) as exc:
         browser_type.connect(remote_server.ws_endpoint)
-    assert "websocket.connect: " in exc.value.message
+    assert "connect ECONNREFUSED" in exc.value.message

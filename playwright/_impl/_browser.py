@@ -168,8 +168,8 @@ class Browser(ChannelOwner):
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
-        if self._should_close_connection_on_close:
-            await self._connection.stop_async()
+        if self._is_connected_over_websocket:
+            await self._connection.stop()
 
     @property
     def version(self) -> str:

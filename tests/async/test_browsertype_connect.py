@@ -139,7 +139,7 @@ async def test_browser_type_connect_should_throw_when_used_after_is_connected_re
 
     with pytest.raises(Error) as exc_info:
         await page.evaluate("1 + 1")
-    assert "Playwright connection closed" == exc_info.value.message
+    assert "Target page, context or browser has been closed" == exc_info.value.message
     assert browser.is_connected() is False
 
 
@@ -153,7 +153,7 @@ async def test_browser_type_connect_should_reject_navigation_when_browser_closes
 
     with pytest.raises(Error) as exc_info:
         await page.goto(server.PREFIX + "/one-style.html")
-    assert "Playwright connection closed" in exc_info.value.message
+    assert "Target page, context or browser has been closed" in exc_info.value.message
 
 
 async def test_should_not_allow_getting_the_path(
@@ -208,4 +208,4 @@ async def test_connect_to_closed_server_without_hangs(
     remote_server.kill()
     with pytest.raises(Error) as exc:
         await browser_type.connect(remote_server.ws_endpoint)
-    assert "websocket.connect: " in exc.value.message
+    assert "connect ECONNREFUSED" in exc.value.message

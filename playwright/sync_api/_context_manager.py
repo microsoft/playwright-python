@@ -20,7 +20,6 @@ from greenlet import greenlet
 from playwright._impl._api_types import Error
 from playwright._impl._connection import Connection
 from playwright._impl._driver import compute_driver_executable
-from playwright._impl._object_factory import create_remote_object
 from playwright._impl._playwright import Playwright
 from playwright._impl._transport import PipeTransport
 from playwright.sync_api._generated import Playwright as SyncPlaywright
@@ -32,6 +31,8 @@ dispatcher_fiber: Any = None
 class PlaywrightContextManager:
     def __init__(self) -> None:
         self._playwright: SyncPlaywright
+        self._connection: Connection
+        self._transport: PipeTransport
 
     def __enter__(self) -> SyncPlaywright:
         loop: asyncio.AbstractEventLoop
@@ -46,22 +47,23 @@ class PlaywrightContextManager:
                 """It looks like you are using Playwright Sync API inside the asyncio loop.
 Please use the Async API instead."""
             )
+        asyncio.set_event_loop(loop)
 
         def greenlet_main() -> None:
-            loop.run_until_complete(self._connection.run_as_sync())
+            loop.run_until_complete(self._transport.run())
 
             if own_loop:
                 loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
 
         global dispatcher_fiber
-        dispatcher_fiber = greenlet(greenlet_main)
-        self._connection = Connection(
-            dispatcher_fiber,
-            create_remote_object,
-            PipeTransport(loop, compute_driver_executable()),
-            loop,
-        )
+        self._dispatcher_fiber = dispatcher_fiber = greenlet(greenlet_main)
+        self._connection = connection = Connection(dispatcher_fiber, loop)
+        self._transport = transport = PipeTransport(loop, compute_driver_executable())
+        connection.on_message = transport.send
+        transport.on_message = connection.dispatch
+        loop.run_until_complete(self._transport.connect())
+        loop.run_until_complete(self._connection.run_as_sync())
 
         g_self = greenlet.getcurrent()
 
@@ -80,4 +82,5 @@ Please use the Async API instead."""
         return self.__enter__()
 
     def __exit__(self, *args: Any) -> None:
-        self._connection.stop_sync()
+        self._transport.request_stop()
+        self._dispatcher_fiber.switch()
