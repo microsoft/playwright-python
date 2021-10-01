@@ -111,7 +111,9 @@ def test_accessibility_should_work_with_regular_text(
     page.set_content("<div>Hello World</div>")
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == {
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == {
         "role": "text leaf" if is_firefox else "text",
         "name": "Hello World",
     }
@@ -121,35 +123,45 @@ def test_accessibility_roledescription(page: Page) -> None:
     page.set_content('<p tabIndex=-1 aria-roledescription="foo">Hi</p>')
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0]["roledescription"] == "foo"
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0]["roledescription"] == "foo"
 
 
 def test_accessibility_orientation(page: Page) -> None:
     page.set_content('<a href="" role="slider" aria-orientation="vertical">11</a>')
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0]["orientation"] == "vertical"
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0]["orientation"] == "vertical"
 
 
 def test_accessibility_autocomplete(page: Page) -> None:
     page.set_content('<div role="textbox" aria-autocomplete="list">hi</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0]["autocomplete"] == "list"
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0]["autocomplete"] == "list"
 
 
 def test_accessibility_multiselectable(page: Page) -> None:
     page.set_content('<div role="grid" tabIndex=-1 aria-multiselectable=true>hey</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0]["multiselectable"]
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0]["multiselectable"]
 
 
 def test_accessibility_keyshortcuts(page: Page) -> None:
     page.set_content('<div role="grid" tabIndex=-1 aria-keyshortcuts="foo">hey</div>')
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0]["keyshortcuts"] == "foo"
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0]["keyshortcuts"] == "foo"
 
 
 def test_accessibility_filtering_children_of_leaf_nodes_should_not_report_text_nodes_inside_controls(
@@ -206,7 +218,9 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
     )
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == golden
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == golden
 
 
 # WebKit rich text accessibility is iffy
@@ -241,7 +255,9 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
         }
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == golden
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == golden
 
 
 # Firefox does not support contenteditable="plaintext-only".
@@ -256,7 +272,9 @@ def test_accessibility_plain_text_field_with_role_should_not_have_children(
     )
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == {
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == {
         "multiline": True,
         "name": "",
         "role": "textbox",
@@ -274,7 +292,9 @@ def test_accessibility_plain_text_field_without_role_should_not_have_content(
     )
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == {
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == {
         "name": "",
         "role": "generic",
         "value": "Edit this image:",
@@ -291,7 +311,9 @@ def test_accessibility_plain_text_field_with_tabindex_and_without_role_should_no
     )
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == {
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == {
         "name": "",
         "role": "generic",
         "value": "Edit this image:",
@@ -328,7 +350,9 @@ def test_accessibility_non_editable_textbox_with_role_and_tabIndex_and_label_sho
         }
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == golden
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == golden
 
 
 def test_accessibility_checkbox_with_and_tabIndex_and_label_should_not_have_children(
@@ -344,7 +368,9 @@ def test_accessibility_checkbox_with_and_tabIndex_and_label_should_not_have_chil
     golden = {"role": "checkbox", "name": "my favorite checkbox", "checked": True}
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == golden
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == golden
 
 
 def test_accessibility_checkbox_without_label_should_not_have_children(
@@ -364,7 +390,9 @@ def test_accessibility_checkbox_without_label_should_not_have_children(
     }
     snapshot = page.accessibility.snapshot()
     assert snapshot
-    assert snapshot["children"][0] == golden
+    childrens = snapshot["children"]
+    assert childrens
+    assert childrens[0] == golden
 
 
 def test_accessibility_should_work_a_button(page: Page) -> None:
@@ -442,6 +470,7 @@ def test_accessibility_should_show_uninteresting_nodes(page: Page) -> None:
     snapshot = page.accessibility.snapshot(root=root, interesting_only=False)
     assert snapshot
     assert snapshot["role"] == "textbox"
+    assert isinstance(snapshot["value"], str)
     assert "hello" in snapshot["value"]
     assert "world" in snapshot["value"]
     assert snapshot["children"]

@@ -24,6 +24,7 @@ else:  # pragma: no cover
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
+    AXNode,
     Cookie,
     FilePayload,
     FloatRect,
@@ -2815,7 +2816,7 @@ mapping.register(ElementHandleImpl, ElementHandle)
 class Accessibility(AsyncBase):
     async def snapshot(
         self, *, interesting_only: bool = None, root: "ElementHandle" = None
-    ) -> typing.Optional[typing.Dict]:
+    ) -> typing.Optional[AXNode]:
         """Accessibility.snapshot
 
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
@@ -2857,10 +2858,10 @@ class Accessibility(AsyncBase):
 
         Returns
         -------
-        Union[Dict, NoneType]
+        Union[{role: str, name: str, value: Union[float, str, NoneType], description: Union[str, NoneType], keyshortcuts: Union[str, NoneType], roledescription: Union[str, NoneType], valuetext: Union[str, NoneType], disabled: Union[bool, NoneType], expanded: Union[bool, NoneType], focused: Union[bool, NoneType], modal: Union[bool, NoneType], multiline: Union[bool, NoneType], multiselectable: Union[bool, NoneType], readonly: Union[bool, NoneType], required: Union[bool, NoneType], selected: Union[bool, NoneType], checked: Union["mixed", bool, NoneType], pressed: Union["mixed", bool, NoneType], level: Union[int, NoneType], valuemin: Union[float, NoneType], valuemax: Union[float, NoneType], autocomplete: Union[str, NoneType], haspopup: Union[str, NoneType], invalid: Union[str, NoneType], orientation: Union[str, NoneType], children: Union[List[Dict], NoneType]}, NoneType]
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl_nullable(
             await self._async(
                 "accessibility.snapshot",
                 self._impl_obj.snapshot(

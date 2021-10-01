@@ -157,5 +157,34 @@ class NameValue(TypedDict):
     value: str
 
 
+class AXNode(TypedDict, total=False):
+    role: str
+    name: str
+    value: Optional[Union[float, str]]
+    description: Optional[str]
+    keyshortcuts: Optional[str]
+    roledescription: Optional[str]
+    valuetext: Optional[str]
+    disabled: Optional[bool]
+    expanded: Optional[bool]
+    focused: Optional[bool]
+    modal: Optional[bool]
+    multiline: Optional[bool]
+    multiselectable: Optional[bool]
+    readonly: Optional[bool]
+    required: Optional[bool]
+    selected: Optional[bool]
+    checked: Optional[Union[bool, Literal["mixed"]]]
+    pressed: Optional[Union[bool, Literal["mixed"]]]
+    level: Optional[int]
+    valuemin: Optional[float]
+    valuemax: Optional[float]
+    autocomplete: Optional[str]
+    haspopup: Optional[str]
+    invalid: Optional[str]
+    orientation: Optional[str]
+    children: Optional[List[Dict]]
+
+
 HeadersArray = List[NameValue]
 Headers = Dict[str, str]
