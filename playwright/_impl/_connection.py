@@ -47,9 +47,15 @@ class Channel(AsyncIOEventEmitter):
         if params is None:
             params = {}
         callback = self._connection._send_message_to_server(self._guid, method, params)
-
-        done, pending = await asyncio.wait(
-            {self._connection._transport.on_error_future, callback.future},
+        if self._connection._error:
+            error = self._connection._error
+            self._connection._error = None
+            raise error
+        done, _ = await asyncio.wait(
+            {
+                self._connection._transport.on_error_future,
+                callback.future,
+            },
             return_when=asyncio.FIRST_COMPLETED,
         )
         if not callback.future.done():
@@ -152,10 +158,10 @@ class Connection:
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._object_factory = object_factory
         self._is_sync = False
-        self._api_name = ""
         self._child_ws_connections: List["Connection"] = []
         self._loop = loop
         self._playwright_future: asyncio.Future["Playwright"] = loop.create_future()
+        self._error: Optional[BaseException] = None
 
     async def run_as_sync(self) -> None:
         self._is_sync = True
@@ -260,11 +266,10 @@ class Connection:
                     g.switch(self._replace_guids_with_channels(params))
             else:
                 object._channel.emit(method, self._replace_guids_with_channels(params))
-        except Exception:
-            print(
-                "Error dispatching the event",
-                "".join(traceback.format_exception(*sys.exc_info())),
-            )
+        except BaseException as exc:
+            print("Error occured in event listener", file=sys.stderr)
+            traceback.print_exc()
+            self._error = exc
 
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
