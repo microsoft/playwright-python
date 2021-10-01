@@ -10619,7 +10619,7 @@ class Browser(SyncContextManager):
         no_viewport : Union[bool, NoneType]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
-            Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
         bypass_csp : Union[bool, NoneType]
@@ -10638,7 +10638,7 @@ class Browser(SyncContextManager):
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
         extra_http_headers : Union[Dict[str, str], NoneType]
-            An object containing additional HTTP headers to be sent with every request. All header values must be strings.
+            An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, NoneType]
             Whether to emulate network being offline. Defaults to `false`.
         http_credentials : Union[{username: str, password: str}, NoneType]
@@ -10793,7 +10793,7 @@ class Browser(SyncContextManager):
         no_viewport : Union[bool, NoneType]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
-            Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
         bypass_csp : Union[bool, NoneType]
@@ -10812,7 +10812,7 @@ class Browser(SyncContextManager):
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
         extra_http_headers : Union[Dict[str, str], NoneType]
-            An object containing additional HTTP headers to be sent with every request. All header values must be strings.
+            An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, NoneType]
             Whether to emulate network being offline. Defaults to `false`.
         http_credentials : Union[{username: str, password: str}, NoneType]
@@ -11286,7 +11286,7 @@ class BrowserType(SyncBase):
         no_viewport : Union[bool, NoneType]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
         ignore_https_errors : Union[bool, NoneType]
-            Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         java_script_enabled : Union[bool, NoneType]
             Whether or not to enable JavaScript in the context. Defaults to `true`.
         bypass_csp : Union[bool, NoneType]
@@ -11305,7 +11305,7 @@ class BrowserType(SyncBase):
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for more
             details.
         extra_http_headers : Union[Dict[str, str], NoneType]
-            An object containing additional HTTP headers to be sent with every request. All header values must be strings.
+            An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, NoneType]
             Whether to emulate network being offline. Defaults to `false`.
         http_credentials : Union[{username: str, password: str}, NoneType]
