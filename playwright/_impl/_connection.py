@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import sys
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -266,7 +267,7 @@ class Connection:
             else:
                 object._channel.emit(method, self._replace_guids_with_channels(params))
         except BaseException as exc:
-            print("Event Listener Error")
+            print("Error occured in event listener", file=sys.stderr)
             traceback.print_exc()
             self._error = exc
 
