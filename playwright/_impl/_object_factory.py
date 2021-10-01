@@ -30,13 +30,7 @@ from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
 from playwright._impl._stream import Stream
-
-
-class DummyObject(ChannelOwner):
-    def __init__(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
-    ) -> None:
-        super().__init__(parent, type, guid, initializer)
+from playwright._impl.jsonpipe import JsonPipe
 
 
 def create_remote_object(
@@ -82,4 +76,6 @@ def create_remote_object(
         return Worker(parent, type, guid, initializer)
     if type == "Selectors":
         return Selectors(parent, type, guid, initializer)
-    return DummyObject(parent, type, guid, initializer)
+    if type == "JsonPipe":
+        return JsonPipe(parent, type, guid, initializer)
+    return ChannelOwner(parent, type, guid, initializer)

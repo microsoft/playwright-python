@@ -11507,9 +11507,9 @@ class BrowserType(SyncBase):
             self._sync(
                 "browser_type.connect",
                 self._impl_obj.connect(
-                    ws_endpoint=ws_endpoint,
+                    wsEndpoint=ws_endpoint,
                     timeout=timeout,
-                    slow_mo=slow_mo,
+                    slowMo=slow_mo,
                     headers=mapping.to_impl(headers),
                 ),
             )

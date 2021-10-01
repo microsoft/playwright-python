@@ -170,7 +170,7 @@ class Browser(ChannelOwner):
             if not is_safe_close_error(e):
                 raise e
         if self._is_connected_over_websocket:
-            await self._connection.stop_async()
+            await self._connection.stop()
 
     @property
     def version(self) -> str:

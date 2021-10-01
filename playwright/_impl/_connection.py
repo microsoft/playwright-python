@@ -13,16 +13,16 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
 from playwright._impl._helper import ParsedMessagePayload, parse_error
-from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
@@ -51,16 +51,8 @@ class Channel(AsyncIOEventEmitter):
             error = self._connection._error
             self._connection._error = None
             raise error
-        done, _ = await asyncio.wait(
-            {
-                self._connection._transport.on_error_future,
-                callback.future,
-            },
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if not callback.future.done():
-            callback.future.cancel()
-        result = next(iter(done)).result()
+
+        result = await callback.future
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:
@@ -145,22 +137,20 @@ class Connection:
     def __init__(
         self,
         dispatcher_fiber: Any,
-        object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
-        transport: Transport,
         loop: asyncio.AbstractEventLoop,
+        on_close: Callable[[], Awaitable[None]] = None,
     ) -> None:
+        self._loop = loop
         self._dispatcher_fiber = dispatcher_fiber
-        self._transport = transport
-        self._transport.on_message = lambda msg: self.dispatch(msg)
         self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
-        self._object_factory = object_factory
         self._is_sync = False
         self._child_ws_connections: List["Connection"] = []
-        self._loop = loop
-        self.playwright_future: asyncio.Future["Playwright"] = loop.create_future()
+        self.playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
+        self.on_message: Callable[[Dict], Union[Awaitable[None], None]]
+        self.on_close = on_close
         self._error: Optional[BaseException] = None
 
     async def run_as_sync(self) -> None:
@@ -168,29 +158,12 @@ class Connection:
         await self.run()
 
     async def run(self) -> None:
-        self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
 
         async def init() -> None:
             self.playwright_future.set_result(await self._root_object.initialize())
 
-        await self._transport.connect()
-        self._loop.create_task(init())
-        await self._transport.run()
-
-    def stop_sync(self) -> None:
-        self._transport.request_stop()
-        self._dispatcher_fiber.switch()
-        self.cleanup()
-
-    async def stop_async(self) -> None:
-        self._transport.request_stop()
-        await self._transport.wait_until_stopped()
-        self.cleanup()
-
-    def cleanup(self) -> None:
-        for ws_connection in self._child_ws_connections:
-            ws_connection._transport.dispose()
+        asyncio.create_task(init())
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]
@@ -220,7 +193,10 @@ class Connection:
             "params": self._replace_channels_with_guids(params),
             "metadata": metadata,
         }
-        self._transport.send(message)
+
+        result = self.on_message(message)
+        if inspect.iscoroutine(result):
+            asyncio.create_task(result)  # type: ignore
         self._callbacks[id] = callback
         return callback
 
@@ -257,12 +233,17 @@ class Connection:
             return
         object = self._objects[guid]
         try:
+            params = (
+                params
+                if object._type == "JsonPipe"
+                else self._replace_guids_with_channels(params)
+            )
             if self._is_sync:
                 for listener in object._channel.listeners(method):
                     g = greenlet(listener)
-                    g.switch(self._replace_guids_with_channels(params))
+                    g.switch(params)
             else:
-                object._channel.emit(method, self._replace_guids_with_channels(params))
+                object._channel.emit(method, params)
         except BaseException as exc:
             print("Error occured in event listener", file=sys.stderr)
             traceback.print_exc()
@@ -271,22 +252,21 @@ class Connection:
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> ChannelOwner:
+        from ._object_factory import create_remote_object
+
         initializer = self._replace_guids_with_channels(initializer)
-        result = self._object_factory(parent, type, guid, initializer)
+        result = create_remote_object(parent, type, guid, initializer)
         if guid in self._waiting_for_object:
             self._waiting_for_object.pop(guid)(result)
         return result
 
-    def _replace_channels_with_guids(
-        self,
-        payload: Any,
-    ) -> Any:
+    def _replace_channels_with_guids(self, payload: Any) -> Any:
         if payload is None:
             return payload
         if isinstance(payload, Path):
             return str(payload)
         if isinstance(payload, list):
-            return list(map(self._replace_channels_with_guids, payload))
+            return list(map(lambda p: self._replace_channels_with_guids(p), payload))
         if isinstance(payload, Channel):
             return dict(guid=payload._guid)
         if isinstance(payload, dict):
@@ -309,6 +289,10 @@ class Connection:
                 result[key] = self._replace_guids_with_channels(value)
             return result
         return payload
+
+    async def stop(self) -> None:
+        if self.on_close:
+            await self.on_close()
 
 
 def from_channel(channel: Channel) -> Any:
