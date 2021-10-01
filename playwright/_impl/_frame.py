@@ -265,7 +265,7 @@ class Frame(ChannelOwner):
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
         return list(
             map(
-                cast(ElementHandle, from_channel),
+                from_channel,
                 await self._channel.send("querySelectorAll", dict(selector=selector)),
             )
         )

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import Dict, Union
+from typing import Any, Dict, Union
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner
@@ -37,7 +37,7 @@ class Selectors(ChannelOwner):
             raise Error("Either source or path should be specified")
         if path:
             script = (await async_readfile(path)).decode()
-        params: Dict = dict(name=name, source=script)
+        params: Dict[str, Any] = dict(name=name, source=script)
         if contentScript:
             params["contentScript"] = True
         await self._channel.send("register", params)

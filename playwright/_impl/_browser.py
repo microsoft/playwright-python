@@ -16,7 +16,7 @@ import base64
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -208,7 +208,8 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
     if "extraHTTPHeaders" in params:
         params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
     if "recordHarPath" in params:
-        params["recordHar"] = {"path": str(params["recordHarPath"])}
+        recordHar: Dict[str, Any] = {"path": str(params["recordHarPath"])}
+        params["recordHar"] = recordHar
         if "recordHarOmitContent" in params:
             params["recordHar"]["omitContent"] = params["recordHarOmitContent"]
             del params["recordHarOmitContent"]

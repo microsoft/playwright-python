@@ -181,6 +181,7 @@ def patch_error_message(message: Optional[str]) -> Optional[str]:
     match = re.match(r"(\w+)(: expected .*)", message)
     if match:
         message = to_snake_case(match.group(1)) + match.group(2)
+    assert message is not None
     message = message.replace(
         "Pass { acceptDownloads: true }", "Pass { accept_downloads: True }"
     )

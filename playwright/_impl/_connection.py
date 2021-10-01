@@ -204,10 +204,11 @@ class Connection:
         id = self._last_id
         callback = ProtocolCallback(self._loop)
         task = asyncio.current_task(self._loop)
-        callback.stack_trace = getattr(task, "__pw_stack_trace__", None)
-        if not callback.stack_trace:
-            callback.stack_trace = traceback.extract_stack()
-
+        stack_trace: Optional[traceback.StackSummary] = getattr(
+            task, "__pw_stack_trace__", None
+        )
+        callback.stack_trace = stack_trace or traceback.extract_stack()
+        self._callbacks[id] = callback
         metadata = {"stack": serialize_call_stack(callback.stack_trace)}
         api_name = getattr(task, "__pw_api_name__", None)
         if api_name:
