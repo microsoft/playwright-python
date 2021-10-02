@@ -191,9 +191,9 @@ class BrowserType(ChannelOwner):
         async def on_message(message: Dict) -> None:
             try:
                 await pipe.send(message)
-            except Exception as e:
+            except Exception:
                 pipe_closed()
-                raise e
+                raise
 
         connection.on_message = on_message
         pipe.on("message", connection.dispatch)

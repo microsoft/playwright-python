@@ -46,12 +46,13 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
-        callback = self._connection._send_message_to_server(self._guid, method, params)
+        callback = await self._connection._send_message_to_server(
+            self._guid, method, params
+        )
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
             raise error
-
         result = await callback.future
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
@@ -69,7 +70,9 @@ class Channel(AsyncIOEventEmitter):
     def send_no_reply(self, method: str, params: Dict = None) -> None:
         if params is None:
             params = {}
-        self._connection._send_message_to_server(self._guid, method, params)
+        asyncio.create_task(
+            self._connection._send_message_to_server(self._guid, method, params)
+        )
 
 
 class ChannelOwner(AsyncIOEventEmitter):
@@ -170,7 +173,7 @@ class Connection:
     ) -> None:
         self._waiting_for_object[guid] = callback
 
-    def _send_message_to_server(
+    async def _send_message_to_server(
         self, guid: str, method: str, params: Dict
     ) -> ProtocolCallback:
         self._last_id += 1
@@ -195,8 +198,11 @@ class Connection:
         }
 
         result = self.on_message(message)
-        if inspect.iscoroutine(result):
-            asyncio.create_task(result)  # type: ignore
+        if result is not None and inspect.iscoroutine(result):
+            try:
+                await result
+            except Exception as e:
+                callback.future.set_exception(e)
         self._callbacks[id] = callback
         return callback
 
