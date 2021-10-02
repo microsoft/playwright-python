@@ -44,7 +44,6 @@ class PipeTransport:
         self._stopped = False
         self._driver_executable = driver_executable
         self.on_message: Callable[[ParsedMessagePayload], None]
-        self.on_error_future: asyncio.Future = asyncio.Future()
         self._stopped_future = asyncio.Event()
 
     def request_stop(self) -> None:
@@ -63,26 +62,20 @@ class PipeTransport:
         if sys.platform == "win32" and sys.stdout is None:
             creationflags = subprocess.CREATE_NO_WINDOW
 
-        try:
-            # For pyinstaller
-            env = os.environ.copy()
-            if getattr(sys, "frozen", False):
-                env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
-
-            self._proc = await asyncio.create_subprocess_exec(
-                str(self._driver_executable),
-                "run-driver",
-                stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=_get_stderr_fileno(),
-                limit=32768,
-                creationflags=creationflags,
-                env=env,
-            )
-        except Exception as exc:
-            self.on_error_future.set_exception(exc)
-            raise exc
-
+        # For pyinstaller
+        env = os.environ.copy()
+        if getattr(sys, "frozen", False):
+            env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
+        self._proc = await asyncio.create_subprocess_exec(
+            str(self._driver_executable),
+            "run-driver",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=_get_stderr_fileno(),
+            limit=32768,
+            creationflags=creationflags,
+            env=env,
+        )
         self._output = self._proc.stdin
 
     async def run(self) -> None:

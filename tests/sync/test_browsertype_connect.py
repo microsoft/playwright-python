@@ -192,4 +192,4 @@ def test_connect_to_closed_server_without_hangs(
     remote_server.kill()
     with pytest.raises(Error) as exc:
         browser_type.connect(remote_server.ws_endpoint)
-    assert "websocket.connect: " in exc.value.message
+    assert "connect ECONNREFUSED" in exc.value.message

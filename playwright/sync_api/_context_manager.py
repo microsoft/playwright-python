@@ -53,7 +53,7 @@ Please use the Async API instead."""
                 loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
 
-        dispatcher_fiber = greenlet(greenlet_main)
+        self._dispatcher_fiber = dispatcher_fiber = greenlet(greenlet_main)
         self._connection = connection = Connection(dispatcher_fiber, loop)
         self._transport = transport = PipeTransport(loop, compute_driver_executable())
         connection.on_message = transport.send
@@ -79,3 +79,4 @@ Please use the Async API instead."""
 
     def __exit__(self, *args: Any) -> None:
         self._transport.request_stop()
+        self._dispatcher_fiber.switch()
