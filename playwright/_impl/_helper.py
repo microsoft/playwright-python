@@ -213,13 +213,15 @@ class RouteHandler:
         self._times = times
         self._handled_count = 0
 
+    def expired(self) -> bool:
+        return self._times is not None and self._handled_count >= self._times
+
     def matches(self, request_url: str) -> bool:
-        if self._times and self._handled_count >= self._times:
-            return False
         return self.matcher.matches(request_url)
 
     def handle(self, route: "Route", request: "Request") -> Union[Coroutine, Any]:
-        self._handled_count += 1
+        if self._times:
+            self._handled_count += 1
         return cast(
             Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
         )(route, request)

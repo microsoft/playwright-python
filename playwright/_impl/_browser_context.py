@@ -149,13 +149,20 @@ class BrowserContext(ChannelOwner):
             page._opener.emit(Page.Events.Popup, page)
 
     def _on_route(self, route: Route, request: Request) -> None:
+        handled = False
         for handler_entry in self._routes:
             if handler_entry.matches(request.url):
                 result = handler_entry.handle(route, request)
                 if inspect.iscoroutine(result):
                     asyncio.create_task(result)
-                return
-        asyncio.create_task(route.continue_())
+                handled = True
+                break
+        if not handled:
+            asyncio.create_task(route.continue_())
+        else:
+            self._routes = list(
+                filter(lambda route: route.expired() is False, self._routes)
+            )
 
     def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])

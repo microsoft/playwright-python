@@ -212,13 +212,20 @@ class Page(ChannelOwner):
         self.emit(Page.Events.FrameDetached, frame)
 
     def _on_route(self, route: Route, request: Request) -> None:
+        handled = False
         for handler_entry in self._routes:
             if handler_entry.matches(request.url):
                 result = handler_entry.handle(route, request)
                 if inspect.iscoroutine(result):
                     asyncio.create_task(result)
-                return
-        self._browser_context._on_route(route, request)
+                handled = True
+                break
+        if not handled:
+            self._browser_context._on_route(route, request)
+        else:
+            self._routes = list(
+                filter(lambda route: route.expired() is False, self._routes)
+            )
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
