@@ -192,7 +192,8 @@ class BrowserType(ChannelOwner):
             try:
                 await pipe.send(message)
             except Exception:
-                pipe_closed()
+                if not browser.is_connected:
+                    pipe_closed()
                 raise
 
         connection.on_message = on_message

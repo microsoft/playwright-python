@@ -66,10 +66,9 @@ class Browser(ChannelOwner):
         return f"<Browser type={self._browser_type} version={self.version}>"
 
     def _on_close(self) -> None:
-        if self._is_connected:
-            self._is_connected = False
-            self.emit(Browser.Events.Disconnected, self)
-            self._is_closed_or_closing = True
+        self._is_connected = False
+        self.emit(Browser.Events.Disconnected, self)
+        self._is_closed_or_closing = True
 
     @property
     def contexts(self) -> List[BrowserContext]:
