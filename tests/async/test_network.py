@@ -26,6 +26,8 @@ from tests.server import Server
 
 async def test_request_fulfill(page, server):
     async def handle_request(route: Route, request: Request):
+        headers = await route.request.all_headers()
+        assert headers["accept"]
         assert route.request == request
         assert repr(route) == f"<Route request={route.request}>"
         assert "empty.html" in request.url

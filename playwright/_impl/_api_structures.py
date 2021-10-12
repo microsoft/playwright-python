@@ -31,6 +31,17 @@ else:  # pragma: no cover
 class Cookie(TypedDict, total=False):
     name: str
     value: str
+    domain: str
+    path: str
+    expires: float
+    httpOnly: bool
+    secure: bool
+    sameSite: Literal["Lax", "None", "Strict"]
+
+
+class SetCookieParam(TypedDict, total=False):
+    name: str
+    value: str
     url: Optional[str]
     domain: Optional[str]
     path: Optional[str]
@@ -88,8 +99,8 @@ class ProxySettings(TypedDict, total=False):
 
 
 class StorageState(TypedDict, total=False):
-    cookies: Optional[List[Cookie]]
-    origins: Optional[List[OriginState]]
+    cookies: List[Cookie]
+    origins: List[OriginState]
 
 
 class ResourceTiming(TypedDict):

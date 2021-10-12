@@ -19,7 +19,12 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union, cast
 
-from playwright._impl._api_structures import Cookie, Geolocation, StorageState
+from playwright._impl._api_structures import (
+    Cookie,
+    Geolocation,
+    SetCookieParam,
+    StorageState,
+)
 from playwright._impl._api_types import Error
 from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
@@ -200,7 +205,7 @@ class BrowserContext(ChannelOwner):
             urls = [urls]
         return await self._channel.send("cookies", dict(urls=urls))
 
-    async def add_cookies(self, cookies: List[Cookie]) -> None:
+    async def add_cookies(self, cookies: List[SetCookieParam]) -> None:
         await self._channel.send("addCookies", dict(cookies=cookies))
 
     async def clear_cookies(self) -> None:
