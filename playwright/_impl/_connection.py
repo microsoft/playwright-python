@@ -151,7 +151,7 @@ class Connection:
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
-        self._transport.on_message = lambda msg: self._dispatch(msg)
+        self._transport.on_message = lambda msg: self.dispatch(msg)
         self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
@@ -160,7 +160,7 @@ class Connection:
         self._is_sync = False
         self._child_ws_connections: List["Connection"] = []
         self._loop = loop
-        self._playwright_future: asyncio.Future["Playwright"] = loop.create_future()
+        self.playwright_future: asyncio.Future["Playwright"] = loop.create_future()
         self._error: Optional[BaseException] = None
 
     async def run_as_sync(self) -> None:
@@ -172,14 +172,11 @@ class Connection:
         self._root_object = RootChannelOwner(self)
 
         async def init() -> None:
-            self._playwright_future.set_result(await self._root_object.initialize())
+            self.playwright_future.set_result(await self._root_object.initialize())
 
         await self._transport.connect()
         self._loop.create_task(init())
         await self._transport.run()
-
-    def get_playwright_future(self) -> asyncio.Future:
-        return self._playwright_future
 
     def stop_sync(self) -> None:
         self._transport.request_stop()
@@ -216,18 +213,18 @@ class Connection:
         if api_name:
             metadata["apiName"] = api_name
 
-        message = dict(
-            id=id,
-            guid=guid,
-            method=method,
-            params=self._replace_channels_with_guids(params, "params"),
-            metadata=metadata,
-        )
+        message = {
+            "id": id,
+            "guid": guid,
+            "method": method,
+            "params": self._replace_channels_with_guids(params),
+            "metadata": metadata,
+        }
         self._transport.send(message)
         self._callbacks[id] = callback
         return callback
 
-    def _dispatch(self, msg: ParsedMessagePayload) -> None:
+    def dispatch(self, msg: ParsedMessagePayload) -> None:
         id = msg.get("id")
         if id:
             callback = self._callbacks.pop(id)
@@ -280,21 +277,22 @@ class Connection:
             self._waiting_for_object.pop(guid)(result)
         return result
 
-    def _replace_channels_with_guids(self, payload: Any, param_name: str) -> Any:
+    def _replace_channels_with_guids(
+        self,
+        payload: Any,
+    ) -> Any:
         if payload is None:
             return payload
         if isinstance(payload, Path):
             return str(payload)
         if isinstance(payload, list):
-            return list(
-                map(lambda p: self._replace_channels_with_guids(p, "index"), payload)
-            )
+            return list(map(self._replace_channels_with_guids, payload))
         if isinstance(payload, Channel):
             return dict(guid=payload._guid)
         if isinstance(payload, dict):
             result = {}
-            for key in payload:
-                result[key] = self._replace_channels_with_guids(payload[key], key)
+            for key, value in payload.items():
+                result[key] = self._replace_channels_with_guids(value)
             return result
         return payload
 
@@ -302,13 +300,13 @@ class Connection:
         if payload is None:
             return payload
         if isinstance(payload, list):
-            return list(map(lambda p: self._replace_guids_with_channels(p), payload))
+            return list(map(self._replace_guids_with_channels, payload))
         if isinstance(payload, dict):
             if payload.get("guid") in self._objects:
                 return self._objects[payload["guid"]]._channel
             result = {}
-            for key in payload:
-                result[key] = self._replace_guids_with_channels(payload[key])
+            for key, value in payload.items():
+                result[key] = self._replace_guids_with_channels(value)
             return result
         return payload
 

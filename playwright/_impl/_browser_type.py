@@ -189,7 +189,7 @@ class BrowserType(ChannelOwner):
         )
         connection._is_sync = self._connection._is_sync
         connection._loop.create_task(connection.run())
-        playwright_future = connection.get_playwright_future()
+        playwright_future = connection.playwright_future
 
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
