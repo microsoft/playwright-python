@@ -33,6 +33,10 @@ from playwright._impl._stream import Stream
 from playwright._impl.jsonpipe import JsonPipe
 
 
+class DummyObject(ChannelOwner):
+    pass
+
+
 def create_remote_object(
     parent: ChannelOwner, type: str, guid: str, initializer: Dict
 ) -> ChannelOwner:
@@ -78,4 +82,4 @@ def create_remote_object(
         return Selectors(parent, type, guid, initializer)
     if type == "JsonPipe":
         return JsonPipe(parent, type, guid, initializer)
-    return ChannelOwner(parent, type, guid, initializer)
+    return DummyObject(parent, type, guid, initializer)
