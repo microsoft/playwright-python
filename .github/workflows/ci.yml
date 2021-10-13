@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: "3.10"
     - name: Install dependencies & browsers
       run: |
         python -m pip install --upgrade pip wheel
@@ -66,16 +66,16 @@ jobs:
           python-version: 3.9
           browser: webkit
         - os: ubuntu-latest
-          python-version: '3.10-dev'
+          python-version: '3.10'
           browser: chromium
         - os: windows-latest
-          python-version: '3.10-dev'
+          python-version: '3.10'
           browser: chromium
         - os: macos-latest
-          python-version: '3.10-dev'
+          python-version: '3.10'
           browser: chromium
         - os: macos-11.0
-          python-version: '3.10-dev'
+          python-version: '3.10'
           browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
@@ -139,7 +139,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: "3.10"
     - name: Install dependencies & browsers
       run: |
         python -m pip install --upgrade pip wheel
