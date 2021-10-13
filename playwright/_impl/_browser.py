@@ -166,7 +166,6 @@ class Browser(ChannelOwner):
         self._is_closed_or_closing = True
         if self._is_connected_over_websocket:
             await self._connection.stop()
-            self._is_connected = False
         try:
             await self._channel.send("close")
         except Exception as e:
