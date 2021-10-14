@@ -21,6 +21,8 @@ from playwright.sync_api import BrowserType, Error
 from tests.conftest import RemoteServer
 from tests.server import Server
 
+pytestmark = pytest.mark.skip("Not implemented")
+
 
 def test_browser_type_connect_slow_mo(
     server: Server, browser_type: BrowserType, launch_server: Callable[[], RemoteServer]

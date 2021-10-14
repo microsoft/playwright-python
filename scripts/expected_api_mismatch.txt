@@ -18,3 +18,4 @@ Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
 Method not implemented: PlaywrightAssertions.expect
+Method not implemented: BrowserType.connect
