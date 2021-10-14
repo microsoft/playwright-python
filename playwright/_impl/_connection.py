@@ -22,7 +22,7 @@ from greenlet import greenlet
 from pyee import AsyncIOEventEmitter
 
 from playwright._impl._helper import ParsedMessagePayload, parse_error
-from playwright._impl._transport import Transport
+from playwright._impl._transport import PipeTransport
 
 if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
@@ -146,7 +146,7 @@ class Connection:
         self,
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
-        transport: Transport,
+        transport: PipeTransport,
         loop: asyncio.AbstractEventLoop,
     ) -> None:
         self._dispatcher_fiber = dispatcher_fiber
@@ -181,16 +181,10 @@ class Connection:
     def stop_sync(self) -> None:
         self._transport.request_stop()
         self._dispatcher_fiber.switch()
-        self.cleanup()
 
     async def stop_async(self) -> None:
         self._transport.request_stop()
         await self._transport.wait_until_stopped()
-        self.cleanup()
-
-    def cleanup(self) -> None:
-        for ws_connection in self._child_ws_connections:
-            ws_connection._transport.dispose()
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]
