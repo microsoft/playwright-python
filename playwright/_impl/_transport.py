@@ -43,8 +43,8 @@ class PipeTransport:
     ) -> None:
         self._stopped = False
         self._driver_executable = driver_executable
-        self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
-        self.on_error_future: asyncio.Future = loop.create_future()
+        self.on_message: Callable[[ParsedMessagePayload], None]
+        self._stopped_event = asyncio.Event()
 
     def request_stop(self) -> None:
         assert self._output
@@ -52,36 +52,30 @@ class PipeTransport:
         self._output.close()
 
     async def wait_until_stopped(self) -> None:
-        await self._stopped_future
+        await self._stopped_event.wait()
         await self._proc.wait()
 
     async def connect(self) -> None:
-        self._stopped_future: asyncio.Future = asyncio.Future()
+
         # Hide the command-line window on Windows when using Pythonw.exe
         creationflags = 0
         if sys.platform == "win32" and sys.stdout is None:
             creationflags = subprocess.CREATE_NO_WINDOW
 
-        try:
-            # For pyinstaller
-            env = os.environ.copy()
-            if getattr(sys, "frozen", False):
-                env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "0")
-
-            self._proc = await asyncio.create_subprocess_exec(
-                str(self._driver_executable),
-                "run-driver",
-                stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=_get_stderr_fileno(),
-                limit=32768,
-                creationflags=creationflags,
-                env=env,
-            )
-        except Exception as exc:
-            self.on_error_future.set_exception(exc)
-            raise exc
-
+        # For pyinstaller
+        env = os.environ.copy()
+        if getattr(sys, "frozen", False):
+            env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
+        self._proc = await asyncio.create_subprocess_exec(
+            str(self._driver_executable),
+            "run-driver",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=_get_stderr_fileno(),
+            limit=32768,
+            creationflags=creationflags,
+            env=env,
+        )
         self._output = self._proc.stdin
 
     async def run(self) -> None:
@@ -91,13 +85,13 @@ class PipeTransport:
             try:
                 buffer = await self._proc.stdout.readexactly(4)
                 length = int.from_bytes(buffer, byteorder="little", signed=False)
-                buffer = bytes(0)
+                buffer = b""
                 while length:
                     to_read = min(length, 32768)
                     data = await self._proc.stdout.readexactly(to_read)
                     length -= to_read
                     if len(buffer):
-                        buffer = buffer + data
+                        buffer += data
                     else:
                         buffer = data
 
@@ -106,7 +100,7 @@ class PipeTransport:
             except asyncio.IncompleteReadError:
                 break
             await asyncio.sleep(0)
-        self._stopped_future.set_result(None)
+        self._stopped_event.set()
 
     def send(self, message: Dict) -> None:
         assert self._output

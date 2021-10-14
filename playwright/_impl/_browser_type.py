@@ -198,7 +198,7 @@ class BrowserType(ChannelOwner):
 
         connection.on_message = on_message
         pipe.on("message", connection.dispatch)
-        await connection.run()
+        await connection.init()
         playwright = await connection.playwright_future
         browser: Browser = from_channel(playwright._initializer["preLaunchedBrowser"])
         browser._is_remote = True

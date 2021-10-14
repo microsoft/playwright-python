@@ -63,7 +63,7 @@ Please use the Async API instead."""
         connection.on_message = transport.send
         transport.on_message = connection.dispatch
         loop.run_until_complete(self._transport.connect())
-        loop.run_until_complete(self._connection.run_as_sync())
+        loop.run_until_complete(self._connection.init_sync())
 
         g_self = greenlet.getcurrent()
 

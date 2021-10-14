@@ -35,7 +35,7 @@ class PlaywrightContextManager:
 
         await transport.connect()
         loop.create_task(transport.run())
-        await connection.run()
+        await connection.init()
         playwright_future = connection.playwright_future
         playwright = AsyncPlaywright(await playwright_future)
         playwright.stop = self.__aexit__  # type: ignore

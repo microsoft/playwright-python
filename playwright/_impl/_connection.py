@@ -146,7 +146,6 @@ class Connection:
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._is_sync = False
-        self._child_ws_connections: List["Connection"] = []
         self.playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
         self.on_message: Callable[[Dict], Union[Awaitable[None], None]]
         self.on_close = on_close
@@ -156,11 +155,11 @@ class Connection:
     def mark_as_remote(self) -> None:
         self.is_remote = True
 
-    async def run_as_sync(self) -> None:
+    async def init_sync(self) -> None:
         self._is_sync = True
-        await self.run()
+        await self.init()
 
-    async def run(self) -> None:
+    async def init(self) -> None:
         self._root_object = RootChannelOwner(self)
 
         async def init() -> None:
