@@ -11726,48 +11726,6 @@ class BrowserType(AsyncBase):
             )
         )
 
-    async def connect(
-        self,
-        ws_endpoint: str,
-        *,
-        timeout: float = None,
-        slow_mo: float = None,
-        headers: typing.Optional[typing.Dict[str, str]] = None
-    ) -> "Browser":
-        """BrowserType.connect
-
-        This methods attaches Playwright to an existing browser instance.
-
-        Parameters
-        ----------
-        ws_endpoint : str
-            A browser websocket endpoint to connect to.
-        timeout : Union[float, NoneType]
-            Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to
-            disable timeout.
-        slow_mo : Union[float, NoneType]
-            Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
-            Defaults to 0.
-        headers : Union[Dict[str, str], NoneType]
-            Additional HTTP headers to be sent with web socket connect request. Optional.
-
-        Returns
-        -------
-        Browser
-        """
-
-        return mapping.from_impl(
-            await self._async(
-                "browser_type.connect",
-                self._impl_obj.connect(
-                    ws_endpoint=ws_endpoint,
-                    timeout=timeout,
-                    slow_mo=slow_mo,
-                    headers=mapping.to_impl(headers),
-                ),
-            )
-        )
-
 
 mapping.register(BrowserTypeImpl, BrowserType)
 
