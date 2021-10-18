@@ -164,13 +164,13 @@ class Browser(ChannelOwner):
         if self._is_closed_or_closing:
             return
         self._is_closed_or_closing = True
-        if self._is_connected_over_websocket:
-            await self._connection.stop()
         try:
             await self._channel.send("close")
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
+        if self._is_connected_over_websocket:
+            await self._connection.stop()
 
     @property
     def version(self) -> str:
