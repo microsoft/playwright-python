@@ -210,7 +210,7 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
     if "recordHarPath" in params:
         params["recordHar"] = {"path": str(params["recordHarPath"])}
         if "recordHarOmitContent" in params:
-            params["recordHar"]["omitContent"] = True
+            params["recordHar"]["omitContent"] = params["recordHarOmitContent"]
             del params["recordHarOmitContent"]
         del params["recordHarPath"]
     if "recordVideoDir" in params:

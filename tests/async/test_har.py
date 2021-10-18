@@ -40,9 +40,22 @@ async def test_should_omit_content(browser, server, tmpdir):
         data = json.load(f)
         assert "log" in data
         log = data["log"]
-
         content1 = log["entries"][0]["response"]["content"]
         assert "text" not in content1
+
+
+async def test_should_not_omit_content(browser, server, tmpdir):
+    path = os.path.join(tmpdir, "log.har")
+    context = await browser.new_context(
+        record_har_path=path, record_har_omit_content=False
+    )
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/har.html")
+    await context.close()
+    with open(path) as f:
+        data = json.load(f)
+        content1 = data["log"]["entries"][0]["response"]["content"]
+        assert "text" in content1
 
 
 async def test_should_include_content(browser, server, tmpdir):
