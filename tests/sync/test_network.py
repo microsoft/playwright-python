@@ -34,7 +34,7 @@ def test_response_security_details(
     is_win: bool,
     is_linux: bool,
 ) -> None:
-    if browser_name == "webkit" and is_linux:
+    if (browser_name == "webkit" and is_linux) or (browser_name == "webkit" and is_win):
         pytest.skip("https://github.com/microsoft/playwright/issues/6759")
     page = browser.new_page(ignore_https_errors=True)
     response = page.goto(https_server.EMPTY_PAGE)
