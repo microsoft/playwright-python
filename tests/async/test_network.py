@@ -759,7 +759,7 @@ async def test_response_server_addr(page: Page, server: Server):
 async def test_response_security_details(
     browser: Browser, https_server: Server, browser_name, is_win, is_linux
 ):
-    if browser_name == "webkit" and is_linux:
+    if (browser_name == "webkit" and is_linux) or (browser_name == "webkit" and is_win):
         pytest.skip("https://github.com/microsoft/playwright/issues/6759")
     page = await browser.new_page(ignore_https_errors=True)
     response = await page.goto(https_server.EMPTY_PAGE)

@@ -7466,7 +7466,8 @@ class Page(SyncContextManager):
         `browser.new_context()` allows to set viewport size (and more) for all pages in the context at once.
 
         `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
-        viewport size before navigating to the page.
+        viewport size before navigating to the page. `page.set_viewport_size()` will also reset `screen` size, use
+        `browser.new_context()` with `screen` and `viewport` parameters if you need better control of these properties.
 
         ```py
         page = browser.new_page()
