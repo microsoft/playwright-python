@@ -212,20 +212,14 @@ class Page(ChannelOwner):
         self.emit(Page.Events.FrameDetached, frame)
 
     def _on_route(self, route: Route, request: Request) -> None:
-        handled = False
         for handler_entry in self._routes:
             if handler_entry.matches(request.url):
-                result = handler_entry.handle(route, request)
-                if inspect.iscoroutine(result):
-                    asyncio.create_task(result)
-                handled = True
-                break
-        if not handled:
-            self._browser_context._on_route(route, request)
-        else:
-            self._routes = list(
-                filter(lambda route: route.expired() is False, self._routes)
-            )
+                if handler_entry.handle(route, request):
+                    self._routes.remove(handler_entry)
+                    if len(self._routes) == 0:
+                        asyncio.create_task(self._disable_interception())
+                return
+        self._browser_context._on_route(route, request)
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
@@ -575,9 +569,10 @@ class Page(ChannelOwner):
             )
         )
         if len(self._routes) == 0:
-            await self._channel.send(
-                "setNetworkInterceptionEnabled", dict(enabled=False)
-            )
+            await self._disable_interception()
+
+    async def _disable_interception(self) -> None:
+        await self._channel.send("setNetworkInterceptionEnabled", dict(enabled=False))
 
     async def screenshot(
         self,
