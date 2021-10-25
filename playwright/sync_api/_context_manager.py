@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import sys
 from typing import Any
 
 from greenlet import greenlet
@@ -32,15 +33,15 @@ dispatcher_fiber: Any = None
 class PlaywrightContextManager:
     def __init__(self) -> None:
         self._playwright: SyncPlaywright
+        self._loop: asyncio.AbstractEventLoop
+        self._own_loop = False
 
     def __enter__(self) -> SyncPlaywright:
-        loop: asyncio.AbstractEventLoop
-        own_loop = None
         try:
-            loop = asyncio.get_running_loop()
+            self._loop = loop = asyncio.get_running_loop()
         except RuntimeError:
-            loop = asyncio.new_event_loop()
-            own_loop = loop
+            self._loop = loop = asyncio.new_event_loop()
+            self._own_loop = True
         if loop.is_running():
             raise Error(
                 """It looks like you are using Playwright Sync API inside the asyncio loop.
@@ -49,10 +50,6 @@ Please use the Async API instead."""
 
         def greenlet_main() -> None:
             loop.run_until_complete(self._connection.run_as_sync())
-
-            if own_loop:
-                loop.run_until_complete(loop.shutdown_asyncgens())
-                loop.close()
 
         global dispatcher_fiber
         dispatcher_fiber = greenlet(greenlet_main)
@@ -81,3 +78,15 @@ Please use the Async API instead."""
 
     def __exit__(self, *args: Any) -> None:
         self._connection.stop_sync()
+        # In Python 3.7, self._connection._transport.wait_until_stopped() hangs because
+        # it does not uses ThreadedChildWatcher which is used in Python 3.8+.
+        # Hence waiting for child process is skipped in Python 3.7.
+        # See https://bugs.python.org/issue35621
+        # See https://stackoverflow.com/questions/28915607/does-asyncio-support-running-a-subprocess-from-a-non-main-thread/28917653#28917653
+        if sys.version_info >= (3, 8):
+            self._loop.run_until_complete(
+                self._connection._transport.wait_until_stopped()
+            )
+        if self._own_loop:
+            self._loop.run_until_complete(self._loop.shutdown_asyncgens())
+            self._loop.close()

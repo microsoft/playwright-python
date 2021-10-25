@@ -37,7 +37,7 @@ class PlaywrightContextManager:
         loop.create_task(self._connection.run())
         playwright_future = self._connection.playwright_future
 
-        done, pending = await asyncio.wait(
+        done, _ = await asyncio.wait(
             {self._connection._transport.on_error_future, playwright_future},
             return_when=asyncio.FIRST_COMPLETED,
         )
