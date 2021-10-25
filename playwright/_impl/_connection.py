@@ -145,18 +145,19 @@ class Connection:
     def __init__(
         self,
         dispatcher_fiber: Any,
-        object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
         loop: asyncio.AbstractEventLoop,
     ) -> None:
+        from ._object_factory import create_remote_object
+
+        self._object_factory = create_remote_object
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
-        self._transport.on_message = lambda msg: self.dispatch(msg)
+        self._transport.on_message = self.dispatch
         self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
-        self._object_factory = object_factory
         self._is_sync = False
         self._child_ws_connections: List["Connection"] = []
         self._loop = loop

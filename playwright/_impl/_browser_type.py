@@ -183,7 +183,6 @@ class BrowserType(ChannelOwner):
         )
         connection = Connection(
             self._connection._dispatcher_fiber,
-            self._connection._object_factory,
             transport,
             self._connection._loop,
         )
