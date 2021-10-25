@@ -1,3 +1,36 @@
 [build-system]
 requires = ["setuptools-scm==6.3.2", "wheel==0.37.0", "auditwheel==5.0.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "-Wall -rsx -vv -s"
+markers = [
+    "skip_browser",
+    "only_browser",
+    "skip_platform",
+    "only_platform"
+]
+junit_family = "xunit2"
+
+[tool.mypy]
+ignore_missing_imports = true
+python_version = "3.7"
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests/async.*"
+ignore_errors = true
+
+[tool.isort]
+profile = "black"
+
+[tool.pyright]
+include = ["playwright"]
+ignore = ["tests/", "scripts/"]
+pythonVersion = "3.7"
+reportMissingImports = false
+reportTypedDictNotRequiredAccess = false
