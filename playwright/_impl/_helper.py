@@ -13,6 +13,7 @@
 # limitations under the License.
 import asyncio
 import fnmatch
+import inspect
 import math
 import os
 import re
@@ -207,25 +208,26 @@ class RouteHandler:
         self,
         matcher: URLMatcher,
         handler: RouteHandlerCallback,
-        times: Optional[int],
+        times: Optional[int] = None,
     ):
         self.matcher = matcher
         self.handler = handler
-        self._times = times
+        self._times = times if times else 2 ** 32
         self._handled_count = 0
-
-    def expired(self) -> bool:
-        return self._times is not None and self._handled_count >= self._times
 
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
-    def handle(self, route: "Route", request: "Request") -> Union[Coroutine, Any]:
-        if self._times:
+    def handle(self, route: "Route", request: "Request") -> bool:
+        try:
+            result = cast(
+                Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
+            )(route, request)
+            if inspect.iscoroutine(result):
+                asyncio.create_task(result)
+        finally:
             self._handled_count += 1
-        return cast(
-            Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
-        )(route, request)
+            return self._handled_count >= self._times
 
 
 def is_safe_close_error(error: Exception) -> bool:

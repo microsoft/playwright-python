@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import inspect
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -154,20 +153,14 @@ class BrowserContext(ChannelOwner):
             page._opener.emit(Page.Events.Popup, page)
 
     def _on_route(self, route: Route, request: Request) -> None:
-        handled = False
         for handler_entry in self._routes:
             if handler_entry.matches(request.url):
-                result = handler_entry.handle(route, request)
-                if inspect.iscoroutine(result):
-                    asyncio.create_task(result)
-                handled = True
+                if handler_entry.handle(route, request):
+                    self._routes.remove(handler_entry)
+                    if not len(self._routes) == 0:
+                        asyncio.create_task(self._disable_interception())
                 break
-        if not handled:
-            asyncio.create_task(route.continue_())
-        else:
-            self._routes = list(
-                filter(lambda route: route.expired() is False, self._routes)
-            )
+        route._internal_continue()
 
     def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])
@@ -279,9 +272,10 @@ class BrowserContext(ChannelOwner):
             )
         )
         if len(self._routes) == 0:
-            await self._channel.send(
-                "setNetworkInterceptionEnabled", dict(enabled=False)
-            )
+            await self._disable_interception()
+
+    async def _disable_interception(self) -> None:
+        await self._channel.send("setNetworkInterceptionEnabled", dict(enabled=False))
 
     def expect_event(
         self,

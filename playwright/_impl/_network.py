@@ -238,6 +238,15 @@ class Route(ChannelOwner):
             overrides["postData"] = base64.b64encode(postData).decode()
         await self._channel.send("continue", cast(Any, overrides))
 
+    def _internal_continue(self) -> None:
+        async def continue_route() -> None:
+            try:
+                await self.continue_()
+            except Exception:
+                pass
+
+        asyncio.create_task(continue_route())
+
 
 class Response(ChannelOwner):
     def __init__(
