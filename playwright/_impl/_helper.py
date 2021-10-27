@@ -217,7 +217,7 @@ class RouteHandler:
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
-    def handle(self, route: "Route", request: "Request") -> int:
+    def handle(self, route: "Route", request: "Request") -> bool:
         try:
             result = cast(
                 Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
