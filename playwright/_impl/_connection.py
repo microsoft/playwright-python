@@ -136,6 +136,7 @@ class Connection:
     def __init__(
         self,
         dispatcher_fiber: Any,
+        object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         loop: asyncio.AbstractEventLoop,
         on_close: Callable[[], Awaitable[None]] = None,
     ) -> None:
@@ -151,6 +152,7 @@ class Connection:
         self.on_close = on_close
         self._error: Optional[BaseException] = None
         self.is_remote = False
+        self._object_factory = object_factory
 
     def mark_as_remote(self) -> None:
         self.is_remote = True
@@ -262,10 +264,8 @@ class Connection:
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> ChannelOwner:
-        from ._object_factory import create_remote_object
-
         initializer = self._replace_guids_with_channels(initializer)
-        result = create_remote_object(parent, type, guid, initializer)
+        result = self._object_factory(parent, type, guid, initializer)
         if guid in self._waiting_for_object:
             self._waiting_for_object.pop(guid)(result)
         return result

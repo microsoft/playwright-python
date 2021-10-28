@@ -174,7 +174,10 @@ class BrowserType(ChannelOwner):
             await self._channel.send("connect", locals_to_params(locals()))
         )
         connection = Connection(
-            self._connection._dispatcher_fiber, asyncio.get_running_loop(), pipe.close
+            self._connection._dispatcher_fiber,
+            self._connection._object_factory,
+            asyncio.get_running_loop(),
+            pipe.close,
         )
         connection.mark_as_remote()
         connection._is_sync = self._connection._is_sync
