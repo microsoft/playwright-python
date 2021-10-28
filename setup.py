@@ -40,6 +40,36 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
             os.chmod(extracted_path, attr)
 
 
+def package_driver(
+    base_wheel_location: str,
+    target_wheel_location: str,
+    platform: str,
+    driver_name: str,
+) -> None:
+    zip_file = f"playwright-{driver_version}-{driver_name}.zip"
+    if not os.path.exists("driver/" + zip_file):
+        url = f"https://playwright.azureedge.net/builds/driver/next/{zip_file}"
+        print("Fetching ", url)
+        # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
+        subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+
+    zip_file = f"driver/playwright-{driver_version}-{driver_name}.zip"
+    with zipfile.ZipFile(zip_file, "r") as zip:
+        extractall(zip, f"driver/{driver_name}")
+    if sys.platform == platform:
+        with zipfile.ZipFile(zip_file, "r") as zip:
+            extractall(zip, "playwright/driver")
+
+    shutil.copy(base_wheel_location, target_wheel_location)
+    with zipfile.ZipFile(target_wheel_location, "a") as zip:
+        driver_root = os.path.abspath(f"driver/{driver_name}")
+        for dir_path, _, files in os.walk(driver_root):
+            for file in files:
+                from_path = os.path.join(dir_path, file)
+                to_path = os.path.relpath(from_path, driver_root)
+                zip.write(from_path, f"playwright/driver/{to_path}")
+
+
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
     user_options = BDistWheelCommand.user_options + [
         ("all", "a", "create wheels for all platforms")
@@ -60,58 +90,50 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
-        platform_map = {
-            "darwin": "mac",
-            "linux": "linux",
-            "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
-        }
-        if self.all:
-            platforms = ["mac", "linux", "win32", "win32_x64"]
-        else:
-            platforms = [platform_map[sys.platform]]
-        for platform in platforms:
-            zip_file = f"playwright-{driver_version}-{platform}.zip"
-            if not os.path.exists("driver/" + zip_file):
-                url = "https://playwright.azureedge.net/builds/driver/"
-                url = url + "next/"
-                url = url + zip_file
-                print("Fetching ", url)
-                # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
-                subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+
         base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
 
+        if self.all:
+            platforms = ["linux", "win32", "darwin"]
+        else:
+            platforms = [sys.platform]
         for platform in platforms:
-            zip_file = f"driver/playwright-{driver_version}-{platform}.zip"
-            with zipfile.ZipFile(zip_file, "r") as zip:
-                extractall(zip, f"driver/{platform}")
-            if platform_map[sys.platform] == platform:
-                with zipfile.ZipFile(zip_file, "r") as zip:
-                    extractall(zip, "playwright/driver")
-            wheel = ""
-            if platform == "mac":
-                wheel = "macosx_10_13_x86_64.whl"
             if platform == "linux":
-                wheel = "manylinux1_x86_64.whl"
-            if platform == "win32":
-                wheel = "win32.whl"
-            if platform == "win32_x64":
-                wheel = "win_amd64.whl"
-            wheel_location = without_platform + wheel
-            shutil.copy(base_wheel_location, wheel_location)
-            with zipfile.ZipFile(wheel_location, "a") as zip:
-                driver_root = os.path.abspath(f"driver/{platform}")
-                for dir_path, _, files in os.walk(driver_root):
-                    for file in files:
-                        from_path = os.path.join(dir_path, file)
-                        to_path = os.path.relpath(from_path, driver_root)
-                        zip.write(from_path, f"playwright/driver/{to_path}")
-            if platform == "mac" and self.all:
-                # Ship mac both as 10_13 as and 11_0 universal to work across Macs.
-                universal_location = without_platform + "macosx_11_0_universal2.whl"
-                shutil.copyfile(wheel_location, universal_location)
-                with zipfile.ZipFile(universal_location, "a") as zip:
-                    zip.writestr("playwright/driver/README.md", "Universal Mac package")
+                package_driver(
+                    base_wheel_location,
+                    without_platform + "manylinux1_x86_64.whl",
+                    platform,
+                    "linux",
+                )
+            elif platform == "darwin":
+                package_driver(
+                    base_wheel_location,
+                    without_platform + "macosx_10_13_x86_64.whl",
+                    platform,
+                    "mac",
+                )
+                if self.all:
+                    package_driver(
+                        base_wheel_location,
+                        without_platform + "macosx_11_0_universal2.whl",
+                        platform,
+                        "mac",
+                    )
+            elif platform == "win32":
+                package_driver(
+                    base_wheel_location,
+                    without_platform + "win_amd64.whl",
+                    platform,
+                    "win32_x64",
+                )
+                if self.all:
+                    package_driver(
+                        base_wheel_location,
+                        without_platform + "win32.whl",
+                        platform,
+                        "win32_x64",
+                    )
 
         os.remove(base_wheel_location)
         if InWheel:
