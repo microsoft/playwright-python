@@ -40,6 +40,11 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
             os.chmod(extracted_path, attr)
 
 
+def rm_if_exists(path: str) -> None:
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
 def package_driver(
     base_wheel_location: str,
     target_wheel_location: str,
@@ -56,6 +61,8 @@ def package_driver(
     zip_file = f"driver/playwright-{driver_version}-{driver_name}.zip"
     with zipfile.ZipFile(zip_file, "r") as zip:
         extractall(zip, f"driver/{driver_name}")
+
+    # For local development environment usage:
     if sys.platform == platform:
         with zipfile.ZipFile(zip_file, "r") as zip:
             extractall(zip, "playwright/driver")
@@ -81,12 +88,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         self.all = False
 
     def run(self) -> None:
-        if os.path.exists("build"):
-            shutil.rmtree("build")
-        if os.path.exists("dist"):
-            shutil.rmtree("dist")
-        if os.path.exists("playwright.egg-info"):
-            shutil.rmtree("playwright.egg-info")
+        rm_if_exists("build")
+        rm_if_exists("dist")
+        rm_if_exists("playwright.egg-info")
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
@@ -94,10 +98,13 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
 
+        # If invoked without the '--all' CLI argument, then we'll only create
+        # wheels for the current platform.
         if self.all:
             platforms = ["linux", "win32", "darwin"]
         else:
             platforms = [sys.platform]
+
         for platform in platforms:
             if platform == "linux":
                 package_driver(
@@ -113,6 +120,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     platform,
                     "mac",
                 )
+                # If we're building macOS and all the wheels, we'll also build
+                # the macOS universal wheel for macOS 11+. This gets used when we
+                # publish to PyPI.
                 if self.all:
                     package_driver(
                         base_wheel_location,
@@ -127,6 +137,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     platform,
                     "win32_x64",
                 )
+                # If we're building Windows and all the wheels, we'll also build
+                # the 32 Bit Windows wheel (32 bit Python installation). This
+                # gets used when we publish to PyPI.
                 if self.all:
                     package_driver(
                         base_wheel_location,
