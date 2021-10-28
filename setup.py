@@ -60,6 +60,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
+
         platform_to_driver_map = {
             "darwin": "mac",
             "linux": "linux",
@@ -69,6 +70,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             drivers = list(platform_to_driver_map.values())
         else:
             drivers = [platform_to_driver_map[sys.platform]]
+
         # 1. Download necessary zip files
         for driver in drivers:
             zip_file = f"playwright-{driver_version}-{driver}.zip"
@@ -77,25 +79,31 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 print("Fetching ", url)
                 # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
                 subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+
         # 2. Determine base wheel file
         base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
 
-        # 3. Create a copy of the base wheel file and add the platform-specific driver
+        # 3. Build wheel/drivers combination list
+        driver_to_wheels_map = {
+            "mac": ["macosx_10_13_x86_64.whl", "macosx_11_0_universal2.whl"],
+            "linux": ["manylinux1_x86_64.whl"],
+            "win32_x64": ["win32.whl", "win_amd64.whl"],
+        }
+        wheels_driver_to_build = []
         for driver in drivers:
+            for wheel in driver_to_wheels_map[driver]:
+                wheels_driver_to_build.append((driver, wheel))
+
+        # 4. Build the platform-specific wheels based on the base wheel file
+        for driver, wheel in wheels_driver_to_build:
             zip_file = f"driver/playwright-{driver_version}-{driver}.zip"
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{driver}")
-            # 3.1 For local development, we need to copy the driver to the playwright/driver directory.
+            # 4.1 For local development, we need to copy the driver to the playwright/driver directory.
             if platform_to_driver_map[sys.platform] == driver:
                 with zipfile.ZipFile(zip_file, "r") as zip:
                     extractall(zip, "playwright/driver")
-            platform_to_wheel_map = {
-                "mac": "macosx_10_13_x86_64.whl",
-                "linux": "manylinux1_x86_64.whl",
-                "win32_x64": "win_amd64.whl",
-            }
-            wheel = platform_to_wheel_map[driver]
             wheel_location = without_platform + wheel
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
@@ -105,20 +113,8 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
                         zip.write(from_path, f"playwright/driver/{to_path}")
-            # Ship mac both as 10_13 as and 11_0 universal to work across Macs.
-            if driver == "mac" and self.all:
-                universal_location = without_platform + "macosx_11_0_universal2.whl"
-                shutil.copyfile(wheel_location, universal_location)
-                with zipfile.ZipFile(universal_location, "a") as zip:
-                    zip.writestr("playwright/driver/README.md", "Universal Mac package")
-            # Ship Windows both as 32 bit as and 64 bit to work across both architectures.
-            if driver == "win32_x64" and self.all:
-                universal_location = without_platform + "win32.whl"
-                shutil.copyfile(wheel_location, universal_location)
-                with zipfile.ZipFile(universal_location, "a") as zip:
-                    zip.writestr(
-                        "playwright/driver/README.md", "32 Bit Windows package"
-                    )
+                    # different PIP wheels can't be identical when getting uploaded
+                    zip.writestr("playwright/driver/README", f"Wheel for {wheel}")
 
         os.remove(base_wheel_location)
         if InWheel:
