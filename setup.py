@@ -60,17 +60,19 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
-        platform_map = {
+
+        platform_to_driver_map = {
             "darwin": "mac",
             "linux": "linux",
-            "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
+            "win32": "win32",
         }
+        # 1. Download necessary zip files
         if self.all:
-            platforms = ["mac", "linux", "win32", "win32_x64"]
+            drivers = ["mac", "linux", "win32"]
         else:
-            platforms = [platform_map[sys.platform]]
-        for platform in platforms:
-            zip_file = f"playwright-{driver_version}-{platform}.zip"
+            drivers = [platform_to_driver_map[sys.platform]]
+        for driver in drivers:
+            zip_file = f"playwright-{driver_version}-{driver}.zip"
             if not os.path.exists("driver/" + zip_file):
                 url = "https://playwright.azureedge.net/builds/driver/"
                 url = url + "next/"
@@ -81,36 +83,34 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
 
-        for platform in platforms:
-            zip_file = f"driver/playwright-{driver_version}-{platform}.zip"
+        # 2. Bake wheels.
+        wheel_to_driver_map = {
+            "macosx_10_13_x86_64.whl": "mac",
+            "macosx_11_0_universal2.whl": "mac",
+            "manylinux1_x86_64.whl": "linux",
+            "win32.whl": "win32",
+            "win_amd64.whl": "win32",
+        }
+        if self.all:
+            wheels = wheel_to_driver_map.keys()
+        else:
+            wheels = []
+        for wheel in wheels:
+            driver = wheel_to_driver_map[wheel]
+            zip_file = f"driver/playwright-{driver_version}-{driver}.zip"
             with zipfile.ZipFile(zip_file, "r") as zip:
-                extractall(zip, f"driver/{platform}")
-            if platform_map[sys.platform] == platform:
-                with zipfile.ZipFile(zip_file, "r") as zip:
-                    extractall(zip, "playwright/driver")
-            wheel = ""
-            if platform == "mac":
-                wheel = "macosx_10_13_x86_64.whl"
-            if platform == "linux":
-                wheel = "manylinux1_x86_64.whl"
-            if platform == "win32":
-                wheel = "win32.whl"
-            if platform == "win32_x64":
-                wheel = "win_amd64.whl"
+                extractall(zip, f"driver/{driver}")
             wheel_location = without_platform + wheel
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
-                driver_root = os.path.abspath(f"driver/{platform}")
+                driver_root = os.path.abspath(f"driver/{driver}")
                 for dir_path, _, files in os.walk(driver_root):
                     for file in files:
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
                         zip.write(from_path, f"playwright/driver/{to_path}")
-            if platform == "mac" and self.all:
-                # Ship mac both as 10_13 as and 11_0 universal to work across Macs.
-                universal_location = without_platform + "macosx_11_0_universal2.whl"
-                shutil.copyfile(wheel_location, universal_location)
-                with zipfile.ZipFile(universal_location, "a") as zip:
+                if wheel == "macosx_11_0_universal2.whl":
+                    # Make sure Mac wheels differ.
                     zip.writestr("playwright/driver/README.md", "Universal Mac package")
 
         os.remove(base_wheel_location)
