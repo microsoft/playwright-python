@@ -51,67 +51,72 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         self.all = False
 
     def run(self) -> None:
-        if os.path.exists("build"):
-            shutil.rmtree("build")
-        if os.path.exists("dist"):
-            shutil.rmtree("dist")
-        if os.path.exists("playwright.egg-info"):
-            shutil.rmtree("playwright.egg-info")
+        shutil.rmtree("build", ignore_errors=True)
+        shutil.rmtree("dist", ignore_errors=True)
+        shutil.rmtree("playwright.egg-info", ignore_errors=True)
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
-        platform_map = {
-            "darwin": "mac",
-            "linux": "linux",
-            "win32": "win32_x64" if sys.maxsize > 2 ** 32 else "win32",
-        }
         if self.all:
-            platforms = ["mac", "linux", "win32", "win32_x64"]
+            # If building for all platforms
+            platform_map = {
+                "darwin": {
+                    "zip_name": "mac",
+                    "wheels": ["macosx_10_13_x86_64.whl", "macosx_11_0_universal2.whl"],
+                },
+                "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
+                "win32": {
+                    "zip_name": "win32_x64",
+                    "wheels": ["win32.whl", "win_amd64.whl"],
+                },
+            }
+            platforms = [*platform_map.values()]
         else:
+            # If building for only current platform
+            platform_map = {
+                "darwin": {
+                    "zip_name": "mac",
+                    "wheels": ["macosx_10_13_x86_64.whl"],
+                },
+                "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
+                "win32": {
+                    "zip_name": "win32_x64",
+                    "wheels": ["win_amd64.whl"],
+                },
+            }
             platforms = [platform_map[sys.platform]]
         for platform in platforms:
-            zip_file = f"playwright-{driver_version}-{platform}.zip"
+            zip_file = f"playwright-{driver_version}-{platform['zip_name']}.zip"
             if not os.path.exists("driver/" + zip_file):
                 url = "https://playwright.azureedge.net/builds/driver/"
-                url = url + "next/"
-                url = url + zip_file
-                print("Fetching ", url)
+                url += "next/"
+                url += zip_file
+                print(f"Fetching {url}")
                 # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
                 subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
         base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
 
         for platform in platforms:
-            zip_file = f"driver/playwright-{driver_version}-{platform}.zip"
+            zip_file = f"driver/playwright-{driver_version}-{platform['zip_name']}.zip"
             with zipfile.ZipFile(zip_file, "r") as zip:
-                extractall(zip, f"driver/{platform}")
-            if platform_map[sys.platform] == platform:
+                extractall(zip, f"driver/{platform['zip_name']}")
+            if platform_map[sys.platform] in platforms:
                 with zipfile.ZipFile(zip_file, "r") as zip:
                     extractall(zip, "playwright/driver")
-            wheel = ""
-            if platform == "mac":
-                wheel = "macosx_10_13_x86_64.whl"
-            if platform == "linux":
-                wheel = "manylinux1_x86_64.whl"
-            if platform == "win32":
-                wheel = "win32.whl"
-            if platform == "win32_x64":
-                wheel = "win_amd64.whl"
-            wheel_location = without_platform + wheel
-            shutil.copy(base_wheel_location, wheel_location)
-            with zipfile.ZipFile(wheel_location, "a") as zip:
-                driver_root = os.path.abspath(f"driver/{platform}")
-                for dir_path, _, files in os.walk(driver_root):
-                    for file in files:
-                        from_path = os.path.join(dir_path, file)
-                        to_path = os.path.relpath(from_path, driver_root)
-                        zip.write(from_path, f"playwright/driver/{to_path}")
-            if platform == "mac" and self.all:
-                # Ship mac both as 10_13 as and 11_0 universal to work across Macs.
-                universal_location = without_platform + "macosx_11_0_universal2.whl"
-                shutil.copyfile(wheel_location, universal_location)
-                with zipfile.ZipFile(universal_location, "a") as zip:
-                    zip.writestr("playwright/driver/README.md", "Universal Mac package")
+            for wheel in platform["wheels"]:
+                wheel_location = without_platform + wheel
+                shutil.copy(base_wheel_location, wheel_location)
+                with zipfile.ZipFile(wheel_location, "a") as zip:
+                    driver_root = os.path.abspath(f"driver/{platform['zip_name']}")
+                    for dir_path, _, files in os.walk(driver_root):
+                        for file in files:
+                            from_path = os.path.join(dir_path, file)
+                            to_path = os.path.relpath(from_path, driver_root)
+                            zip.write(from_path, f"playwright/driver/{to_path}")
+                    zip.writestr(
+                        "playwright/driver/README.md", f"{wheel} driver package"
+                    )
 
         os.remove(base_wheel_location)
         if InWheel:
@@ -121,7 +126,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     in_wheel=whlfile,
                     out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
                 ):
-                    print("Updating RECORD file of %s" % whlfile)
+                    print(f"Updating RECORD file of {whlfile}")
             shutil.rmtree(self.dist_dir)
             print("Copying new wheels")
             shutil.move("wheelhouse", self.dist_dir)
