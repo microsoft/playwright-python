@@ -57,20 +57,33 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)
-        platform_map = {
-            "darwin": {
-                "zip_name": "mac",
-                "wheels": ["macosx_10_13_x86_64.whl", "macosx_11_0_universal2.whl"],
-            },
-            "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
-            "win32": {
-                "zip_name": "win32_x64",
-                "wheels": ["win32.whl", "win_amd64.whl"],
-            },
-        }
         if self.all:
+            # If building for all platforms
+            platform_map = {
+                "darwin": {
+                    "zip_name": "mac",
+                    "wheels": ["macosx_10_13_x86_64.whl", "macosx_11_0_universal2.whl"],
+                },
+                "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
+                "win32": {
+                    "zip_name": "win32_x64",
+                    "wheels": ["win32.whl", "win_amd64.whl"],
+                },
+            }
             platforms = [*platform_map.values()]
         else:
+            # If building for only current platform
+            platform_map = {
+                "darwin": {
+                    "zip_name": "mac",
+                    "wheels": ["macosx_10_13_x86_64.whl"],
+                },
+                "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
+                "win32": {
+                    "zip_name": "win32_x64",
+                    "wheels": ["win_amd64.whl"],
+                },
+            }
             platforms = [platform_map[sys.platform]]
         for platform in platforms:
             zip_file = f"playwright-{driver_version}-{platform['zip_name']}.zip"
