@@ -19,7 +19,7 @@ requirements:
     - python
     - wheel
     - pip
-    - curl
+    - requests
     - setuptools_scm
   run:
     - python

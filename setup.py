@@ -16,12 +16,12 @@ import glob
 import os
 import platform
 import shutil
-import subprocess
 import sys
 import zipfile
 from pathlib import Path
 from typing import Dict, List
 
+import requests
 from setuptools import find_packages, setup
 
 try:
@@ -55,8 +55,8 @@ def download_driver(zip_name: str) -> None:
         url = url + "next/"
     url = url + zip_file
     print(f"Fetching {url}")
-    # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
-    subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+    with open(f"driver/{zip_file}", "wb") as f:
+        f.write(requests.get(url).content)
 
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
