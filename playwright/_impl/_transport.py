@@ -114,7 +114,7 @@ class PipeTransport(Transport):
         try:
             # For pyinstaller
             env = os.environ.copy()
-            if getattr(sys, "frozen", False):
+            if getattr(sys, "frozen", False) and "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
                 env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
 
             self._proc = await asyncio.create_subprocess_exec(
