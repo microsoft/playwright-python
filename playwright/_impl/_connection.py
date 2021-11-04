@@ -162,6 +162,10 @@ class Connection:
         self._loop = loop
         self.playwright_future: asyncio.Future["Playwright"] = loop.create_future()
         self._error: Optional[BaseException] = None
+        self.is_remote = False
+
+    def mark_as_remote(self) -> None:
+        self.is_remote = True
 
     async def run_as_sync(self) -> None:
         self._is_sync = True

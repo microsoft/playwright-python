@@ -48,21 +48,19 @@ class Tracing:
         await self._channel.send("tracingStop")
 
     async def _do_stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
+        result = await self._channel.send_return_as_dict(
+            "tracingStopChunk",
+            {
+                "save": bool(path),
+                "skipCompress": False,
+            },
+        )
         artifact = cast(
             Optional[Artifact],
-            from_nullable_channel(
-                await self._channel.send(
-                    "tracingStopChunk",
-                    {
-                        "save": bool(path),
-                    },
-                )
-            ),
+            from_nullable_channel(result.get("artifact")),
         )
         if not artifact:
             return
-        if self._context._browser:
-            artifact._is_remote = self._context._browser._is_remote
         if path:
             await artifact.save_as(path)
         await artifact.delete()

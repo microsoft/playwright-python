@@ -257,8 +257,6 @@ class Page(ChannelOwner):
         url = params["url"]
         suggested_filename = params["suggestedFilename"]
         artifact = cast(Artifact, from_channel(params["artifact"]))
-        if self._browser_context._browser:
-            artifact._is_remote = self._browser_context._browser._is_remote
         self.emit(
             Page.Events.Download, Download(self, url, suggested_filename, artifact)
         )
@@ -477,7 +475,9 @@ class Page(ChannelOwner):
         )
 
     async def wait_for_load_state(
-        self, state: DocumentLoadState = None, timeout: float = None
+        self,
+        state: Literal["domcontentloaded", "load", "networkidle"] = None,
+        timeout: float = None,
     ) -> None:
         return await self._main_frame.wait_for_load_state(**locals_to_params(locals()))
 

@@ -308,8 +308,6 @@ class BrowserContext(ChannelOwner):
                 har = cast(
                     Artifact, from_channel(await self._channel.send("harExport"))
                 )
-                if self.browser and self.browser._is_remote:
-                    har._is_remote = True
                 await har.save_as(
                     cast(Dict[str, str], self._options["recordHar"])["path"]
                 )

@@ -120,3 +120,12 @@ async def test_wait_for_url_should_work_with_url_match_for_same_document_navigat
     await page.evaluate("history.pushState({}, '', '/third.html')")
     await page.wait_for_url(re.compile(r"third\.html"))
     assert "/third.html" in page.url
+
+
+async def test_wait_for_url_should_work_with_commit(page: Page, server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.evaluate(
+        "url => window.location.href = url", server.PREFIX + "/grid.html"
+    )
+    await page.wait_for_url("**/grid.html", wait_until="commit")
+    assert "grid.html" in page.url

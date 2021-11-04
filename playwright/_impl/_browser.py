@@ -56,8 +56,7 @@ class Browser(ChannelOwner):
         self._browser_type = parent
         self._is_connected = True
         self._is_closed_or_closing = False
-        self._is_remote = False
-        self._is_connected_over_websocket = False
+        self._should_close_connection_on_close = False
 
         self._contexts: List[BrowserContext] = []
         self._channel.on("close", lambda _: self._on_close())
@@ -169,7 +168,7 @@ class Browser(ChannelOwner):
         except Exception as e:
             if not is_safe_close_error(e):
                 raise e
-        if self._is_connected_over_websocket:
+        if self._should_close_connection_on_close:
             await self._connection.stop_async()
 
     @property

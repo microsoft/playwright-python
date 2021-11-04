@@ -225,7 +225,7 @@ async def test_goto_should_throw_if_networkidle2_is_passed_as_an_option(page, se
     with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE, wait_until="networkidle2")
     assert (
-        "wait_until: expected one of (load|domcontentloaded|networkidle)"
+        "wait_until: expected one of (load|domcontentloaded|networkidle|commit)"
         in exc_info.value.message
     )
 
@@ -419,6 +419,11 @@ async def test_goto_should_reject_referer_option_when_set_extra_http_headers_pro
         '"referer" is already specified as extra HTTP header' in exc_info.value.message
     )
     assert server.PREFIX + "/grid.html" in exc_info.value.message
+
+
+async def test_goto_should_work_with_commit(page: Page, server):
+    await page.goto(server.EMPTY_PAGE, wait_until="commit")
+    assert page.url == server.EMPTY_PAGE
 
 
 async def test_network_idle_should_navigate_to_empty_page_with_networkidle(
@@ -632,6 +637,17 @@ async def test_expect_navigation_should_work_for_cross_process_navigations(
     await goto_task
 
 
+async def test_wait_for_nav_should_work_with_commit(page: Page, server):
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_navigation(wait_until="commit") as response_info:
+        await page.evaluate(
+            "url => window.location.href = url", server.PREFIX + "/grid.html"
+        )
+    response = await response_info.value
+    assert response.ok
+    assert "grid.html" in response.url
+
+
 async def test_wait_for_load_state_should_respect_timeout(page, server):
     requests = []
 
@@ -656,7 +672,7 @@ async def test_wait_for_load_state_should_throw_for_bad_state(page, server):
     with pytest.raises(Error) as exc_info:
         await page.wait_for_load_state("bad")
     assert (
-        "state: expected one of (load|domcontentloaded|networkidle)"
+        "state: expected one of (load|domcontentloaded|networkidle|commit)"
         in exc_info.value.message
     )
 

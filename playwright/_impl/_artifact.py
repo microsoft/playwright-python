@@ -26,11 +26,10 @@ class Artifact(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._is_remote = False
         self.absolute_path = initializer["absolutePath"]
 
     async def path_after_finished(self) -> Optional[pathlib.Path]:
-        if self._is_remote:
+        if self._connection.is_remote:
             raise Error(
                 "Path is not available when using browser_type.connect(). Use save_as() to save a local copy."
             )
