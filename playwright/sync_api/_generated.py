@@ -2970,7 +2970,7 @@ class Frame(SyncBase):
         url: str,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None,
         referer: str = None
     ) -> typing.Optional["Response"]:
         """Frame.goto
@@ -3003,11 +3003,12 @@ class Frame(SyncBase):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         referer : Union[str, NoneType]
             Referer header value. If provided it will take preference over the referer header value set by
             `page.set_extra_http_headers()`.
@@ -3030,7 +3031,7 @@ class Frame(SyncBase):
         self,
         *,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None
     ) -> EventContextManager["Response"]:
         """Frame.expect_navigation
@@ -3057,11 +3058,12 @@ class Frame(SyncBase):
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if the
             parameter is a string without wilcard characters, the method will wait for navigation to URL that is exactly equal to
             the string.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         timeout : Union[float, NoneType]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
@@ -3083,7 +3085,7 @@ class Frame(SyncBase):
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
         *,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None
     ) -> NoneType:
         """Frame.wait_for_url
@@ -3101,11 +3103,12 @@ class Frame(SyncBase):
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if the
             parameter is a string without wilcard characters, the method will wait for navigation to URL that is exactly equal to
             the string.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         timeout : Union[float, NoneType]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
@@ -3807,7 +3810,7 @@ class Frame(SyncBase):
         html: str,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None
     ) -> NoneType:
         """Frame.set_content
 
@@ -3820,11 +3823,12 @@ class Frame(SyncBase):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         """
 
         return mapping.from_maybe_impl(
@@ -7049,7 +7053,7 @@ class Page(SyncContextManager):
         html: str,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None
     ) -> NoneType:
         """Page.set_content
 
@@ -7062,11 +7066,12 @@ class Page(SyncContextManager):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         """
 
         return mapping.from_maybe_impl(
@@ -7083,7 +7088,7 @@ class Page(SyncContextManager):
         url: str,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None,
         referer: str = None
     ) -> typing.Optional["Response"]:
         """Page.goto
@@ -7120,11 +7125,12 @@ class Page(SyncContextManager):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         referer : Union[str, NoneType]
             Referer header value. If provided it will take preference over the referer header value set by
             `page.set_extra_http_headers()`.
@@ -7147,12 +7153,12 @@ class Page(SyncContextManager):
         self,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None
     ) -> typing.Optional["Response"]:
         """Page.reload
 
-        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-        last redirect.
+        This method reloads the current page, in the same way as if the user had triggered a browser refresh. Returns the main
+        resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
 
         Parameters
         ----------
@@ -7161,11 +7167,12 @@ class Page(SyncContextManager):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
 
         Returns
         -------
@@ -7234,7 +7241,7 @@ class Page(SyncContextManager):
         self,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]],
         *,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None
     ) -> NoneType:
         """Page.wait_for_url
@@ -7254,11 +7261,12 @@ class Page(SyncContextManager):
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if the
             parameter is a string without wilcard characters, the method will wait for navigation to URL that is exactly equal to
             the string.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         timeout : Union[float, NoneType]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,
@@ -7316,7 +7324,7 @@ class Page(SyncContextManager):
         self,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None
     ) -> typing.Optional["Response"]:
         """Page.go_back
 
@@ -7332,11 +7340,12 @@ class Page(SyncContextManager):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
 
         Returns
         -------
@@ -7354,7 +7363,7 @@ class Page(SyncContextManager):
         self,
         *,
         timeout: float = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None
     ) -> typing.Optional["Response"]:
         """Page.go_forward
 
@@ -7370,11 +7379,12 @@ class Page(SyncContextManager):
             changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
             `page.set_default_timeout()` methods.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
 
         Returns
         -------
@@ -9187,7 +9197,7 @@ class Page(SyncContextManager):
         self,
         *,
         url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        wait_until: Literal["domcontentloaded", "load", "networkidle"] = None,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None
     ) -> EventContextManager["Response"]:
         """Page.expect_navigation
@@ -9217,11 +9227,12 @@ class Page(SyncContextManager):
             A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if the
             parameter is a string without wilcard characters, the method will wait for navigation to URL that is exactly equal to
             the string.
-        wait_until : Union["domcontentloaded", "load", "networkidle", NoneType]
+        wait_until : Union["commit", "domcontentloaded", "load", "networkidle", NoneType]
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
             - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+            - `'commit'` - consider operation to be finished when network response is received and the document started loading.
         timeout : Union[float, NoneType]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be
             changed by using the `browser_context.set_default_navigation_timeout()`,

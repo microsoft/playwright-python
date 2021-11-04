@@ -59,7 +59,7 @@ RouteHandlerCallback = Union[
 ColorScheme = Literal["dark", "light", "no-preference"]
 ForcedColors = Literal["active", "none"]
 ReducedMotion = Literal["no-preference", "reduce"]
-DocumentLoadState = Literal["domcontentloaded", "load", "networkidle"]
+DocumentLoadState = Literal["commit", "domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
 

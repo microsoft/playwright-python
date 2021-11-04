@@ -183,7 +183,7 @@ class Frame(ChannelOwner):
             if wait_until not in self._load_states:
                 t = deadline - monotonic_time()
                 if t > 0:
-                    await self.wait_for_load_state(state=wait_until, timeout=t)
+                    await self._wait_for_load_state_impl(state=wait_until, timeout=t)
             if "newDocument" in event and "request" in event["newDocument"]:
                 request = from_channel(event["newDocument"]["request"])
                 return await request.response()
@@ -199,7 +199,7 @@ class Frame(ChannelOwner):
     ) -> None:
         matcher = URLMatcher(self._page._browser_context._options.get("baseURL"), url)
         if matcher.matches(self.url):
-            await self.wait_for_load_state(state=wait_until, timeout=timeout)
+            await self._wait_for_load_state_impl(state=wait_until, timeout=timeout)
             return
         async with self.expect_navigation(
             url=url, wait_until=wait_until, timeout=timeout
@@ -207,12 +207,21 @@ class Frame(ChannelOwner):
             pass
 
     async def wait_for_load_state(
+        self,
+        state: Literal["domcontentloaded", "load", "networkidle"] = None,
+        timeout: float = None,
+    ) -> None:
+        return await self._wait_for_load_state_impl(state, timeout)
+
+    async def _wait_for_load_state_impl(
         self, state: DocumentLoadState = None, timeout: float = None
     ) -> None:
         if not state:
             state = "load"
-        if state not in ("load", "domcontentloaded", "networkidle"):
-            raise Error("state: expected one of (load|domcontentloaded|networkidle)")
+        if state not in ("load", "domcontentloaded", "networkidle", "commit"):
+            raise Error(
+                "state: expected one of (load|domcontentloaded|networkidle|commit)"
+            )
         if state in self._load_states:
             return
         wait_helper = self._setup_navigation_wait_helper("wait_for_load_state", timeout)

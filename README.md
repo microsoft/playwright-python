@@ -4,7 +4,7 @@ Playwright is a Python library to automate [Chromium](https://www.chromium.org/H
 
 |          | Linux | macOS | Windows |
 |   :---   | :---: | :---: | :---:   |
-| Chromium <!-- GEN:chromium-version -->97.0.4666.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| Chromium <!-- GEN:chromium-version -->97.0.4681.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 | WebKit <!-- GEN:webkit-version -->15.4<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 | Firefox <!-- GEN:firefox-version -->93.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 

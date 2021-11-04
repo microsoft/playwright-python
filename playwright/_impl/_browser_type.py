@@ -157,7 +157,6 @@ class BrowserType(ChannelOwner):
         )
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
-        browser._is_remote = True
 
         default_context = cast(
             Optional[BrowserContext],
@@ -187,6 +186,7 @@ class BrowserType(ChannelOwner):
             transport,
             self._connection._loop,
         )
+        connection.mark_as_remote()
         connection._is_sync = self._connection._is_sync
         connection._loop.create_task(connection.run())
         playwright_future = connection.playwright_future
@@ -205,8 +205,7 @@ class BrowserType(ChannelOwner):
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
-        browser._is_remote = True
-        browser._is_connected_over_websocket = True
+        browser._should_close_connection_on_close = True
 
         def handle_transport_close() -> None:
             for context in browser.contexts:
