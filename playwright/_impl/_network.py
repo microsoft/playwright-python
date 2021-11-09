@@ -330,7 +330,7 @@ class Response(ChannelOwner):
         content = await self.body()
         return content.decode()
 
-    async def json(self) -> Union[Any]:
+    async def json(self) -> Any:
         return json.loads(await self.text())
 
     @property
