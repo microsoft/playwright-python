@@ -14,13 +14,18 @@
 
 import abc
 import asyncio
+from greenlet import greenlet
+import contextlib
+
+from playwright.sync_base import dispatcher_fiber
+from playwright._impl._event_context_manager import EventContextManagerImpl
 import gzip
 import mimetypes
 import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
-from typing import Any, Callable, Dict, Set, Tuple
+from typing import Any, Callable, ContextManager, Dict, Set, Tuple
 from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
@@ -143,6 +148,30 @@ class Server:
         self.request_subscribers[path] = future
         return await future
 
+    @contextlib.contextmanager
+    def expect_request(self, path):
+        future = asyncio.create_task(self.wait_for_request(path))
+
+        class CallbackValue:
+            def __init__(self) -> None:
+                self._value = None
+
+            @property
+            def value(self):
+                return self._value
+
+        g_self = greenlet.getcurrent()
+        cb_wrapper = CallbackValue()
+
+        def done_cb(task):
+            cb_wrapper._value = future.result()
+            g_self.switch()
+
+        future.add_done_callback(done_cb)
+        yield cb_wrapper
+        while not future.done():
+            dispatcher_fiber.switch
+ 
     def set_auth(self, path: str, username: str, password: str) -> None:
         self.auth[path] = (username, password)
 

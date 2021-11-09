@@ -240,16 +240,8 @@ class APIRequestContext(ChannelOwner):
             urlOrRequest, str
         ), "First argument must be either URL string or Request"
         assert (
-            len(
-                list(
-                    filter(
-                        lambda entry: entry is True,
-                        [data is not None, form is not None, multipart is not None],
-                    )
-                )
-            )
-            <= 1
-        ), "Only one of 'data', 'form' or 'multipart' can be specified"
+            (1 if data else 0) + (1 if form else 0) + (1 if multipart else 0)
+        ) <= 1, "Only one of 'data', 'form' or 'multipart' can be specified"
         url = request.url if request else urlOrRequest
         method = method or (request.method if request else "GET")
         # Cannot call allHeaders() here as the request may be paused inside route handler.
@@ -347,7 +339,7 @@ class APIResponse:
 
     @property
     def ok(self) -> bool:
-        return self.status == 0 or (self.status >= 200 and self.status <= 299)
+        return self.status >= 200 and self.status <= 299
 
     @property
     def url(self) -> str:
