@@ -33,6 +33,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
+from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._helper import (
     RouteHandler,
@@ -82,6 +83,9 @@ class BrowserContext(ChannelOwner):
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._tracing = Tracing(self)
+        self._request: APIRequestContext = from_channel(
+            initializer["APIRequestContext"]
+        )
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -411,3 +415,7 @@ class BrowserContext(ChannelOwner):
     @property
     def tracing(self) -> Tracing:
         return self._tracing
+
+    @property
+    def request(self) -> "APIRequestContext":
+        return self._request

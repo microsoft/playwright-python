@@ -70,7 +70,7 @@ async def test_evaluate_throw_for_detached_frames(page, server, utils):
         await frame1.evaluate("7 * 8")
     except Error as e:
         error = e
-    assert "Execution Context is not available in detached frame" in error.message
+    assert "Frame was detached" in error.message
 
 
 async def test_evaluate_isolated_between_frames(page, server, utils):

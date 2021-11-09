@@ -167,6 +167,9 @@ class Locator:
     ) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> {selector}")
 
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        return FrameLocator(self._frame, selector)
+
     async def element_handle(
         self,
         timeout: float = None,
@@ -471,3 +474,17 @@ class Locator:
                 noWaitAfter=noWaitAfter,
                 trial=trial,
             )
+
+
+class FrameLocator:
+    def __init__(self, frame: "Frame", selector: str) -> None:
+        self._frame = frame
+        self._loop = frame._loop
+        self._dispatcher_fiber = frame._connection._dispatcher_fiber
+        self._selector = f"{selector} >> control=enter-frame"
+
+    def locator(self, selector: str) -> Locator:
+        return Locator(self._frame, f"{self._selector} >> {selector}")
+
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        return FrameLocator(self._frame, f"{self._selector} >> {selector}")

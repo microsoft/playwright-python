@@ -24,6 +24,9 @@ import playwright.async_api._generated
 from playwright.async_api._context_manager import PlaywrightContextManager
 from playwright.async_api._generated import (
     Accessibility,
+    APIRequest,
+    APIRequestContext,
+    APIResponse,
     Browser,
     BrowserContext,
     BrowserType,
@@ -76,6 +79,9 @@ def async_playwright() -> PlaywrightContextManager:
 __all__ = [
     "async_playwright",
     "Accessibility",
+    "APIRequest",
+    "APIRequestContext",
+    "APIResponse",
     "Browser",
     "BrowserContext",
     "BrowserType",

@@ -431,7 +431,7 @@ class DocumentationProvider:
             return "Dict"
         if type_name == "Function":
             return "Callable"
-        if type_name == "Buffer":
+        if type_name == "Buffer" or type_name == "ReadStream":
             return "bytes"
         if type_name == "URL":
             return "str"

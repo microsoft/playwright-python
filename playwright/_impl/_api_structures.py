@@ -159,3 +159,15 @@ class NameValue(TypedDict):
 
 HeadersArray = List[NameValue]
 Headers = Dict[str, str]
+
+
+class ServerFilePayload(TypedDict):
+    name: str
+    mimeType: str
+    buffer: str
+
+
+class FormField(TypedDict, total=False):
+    name: str
+    value: Optional[str]
+    file: Optional[ServerFilePayload]

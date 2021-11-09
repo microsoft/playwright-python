@@ -51,12 +51,16 @@ from playwright._impl._console_message import ConsoleMessage as ConsoleMessageIm
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
+from playwright._impl._fetch import APIRequest as APIRequestImpl
+from playwright._impl._fetch import APIRequestContext as APIRequestContextImpl
+from playwright._impl._fetch import APIResponse as APIResponseImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl
 from playwright._impl._frame import Frame as FrameImpl
 from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
 from playwright._impl._input import Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
+from playwright._impl._locator import FrameLocator as FrameLocatorImpl
 from playwright._impl._locator import Locator as LocatorImpl
 from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
@@ -4244,6 +4248,30 @@ class Frame(SyncBase):
 
         return mapping.from_impl(self._impl_obj.locator(selector=selector))
 
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        """Frame.frame_locator
+
+        When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+        that iframe. Following snippet locates element with text \"Submit\" in the iframe with id `my-frame`, like `<iframe
+        id=\"my-frame\">`:
+
+        ```py
+        locator = frame.frame_locator(\"#my-iframe\").locator(\"text=Submit\")
+        locator.click()
+        ```
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        FrameLocator
+        """
+
+        return mapping.from_impl(self._impl_obj.frame_locator(selector=selector))
+
     def focus(
         self, selector: str, *, strict: bool = None, timeout: float = None
     ) -> NoneType:
@@ -5131,6 +5159,46 @@ class Frame(SyncBase):
 
 
 mapping.register(FrameImpl, Frame)
+
+
+class FrameLocator(SyncBase):
+    def locator(self, selector: str) -> "Locator":
+        """FrameLocator.locator
+
+        The method finds an element matching the specified selector in the FrameLocator's subtree.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        """FrameLocator.frame_locator
+
+        When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+        that iframe.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        FrameLocator
+        """
+
+        return mapping.from_impl(self._impl_obj.frame_locator(selector=selector))
+
+
+mapping.register(FrameLocatorImpl, FrameLocator)
 
 
 class Worker(SyncBase):
@@ -8086,6 +8154,30 @@ class Page(SyncContextManager):
 
         return mapping.from_impl(self._impl_obj.locator(selector=selector))
 
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        """Page.frame_locator
+
+        When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+        that iframe. Following snippet locates element with text \"Submit\" in the iframe with id `my-frame`, like `<iframe
+        id=\"my-frame\">`:
+
+        ```py
+        locator = page.frame_locator(\"#my-iframe\").locator(\"text=Submit\")
+        locator.click()
+        ```
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        FrameLocator
+        """
+
+        return mapping.from_impl(self._impl_obj.frame_locator(selector=selector))
+
     def focus(
         self, selector: str, *, strict: bool = None, timeout: float = None
     ) -> NoneType:
@@ -9794,6 +9886,18 @@ class BrowserContext(SyncContextManager):
         Tracing
         """
         return mapping.from_impl(self._impl_obj.tracing)
+
+    @property
+    def request(self) -> "APIRequestContext":
+        """BrowserContext.request
+
+        API testing helper associated with this context. Requests made with this API will use context cookies.
+
+        Returns
+        -------
+        APIRequestContext
+        """
+        return mapping.from_impl(self._impl_obj.request)
 
     def set_default_navigation_timeout(self, timeout: float) -> NoneType:
         """BrowserContext.set_default_navigation_timeout
@@ -11610,6 +11714,18 @@ class Playwright(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.webkit)
 
+    @property
+    def request(self) -> "APIRequest":
+        """Playwright.request
+
+        Exposes API that can be used for the Web API testing.
+
+        Returns
+        -------
+        APIRequest
+        """
+        return mapping.from_impl(self._impl_obj.request)
+
     def __getitem__(self, value: str) -> "BrowserType":
 
         return mapping.from_impl(self._impl_obj.__getitem__(value=value))
@@ -11643,7 +11759,12 @@ mapping.register(PlaywrightImpl, Playwright)
 
 class Tracing(SyncBase):
     def start(
-        self, *, name: str = None, snapshots: bool = None, screenshots: bool = None
+        self,
+        *,
+        name: str = None,
+        title: str = None,
+        snapshots: bool = None,
+        screenshots: bool = None
     ) -> NoneType:
         """Tracing.start
 
@@ -11661,6 +11782,8 @@ class Tracing(SyncBase):
         name : Union[str, NoneType]
             If specified, the trace is going to be saved into the file with the given name inside the `tracesDir` folder specified
             in `browser_type.launch()`.
+        title : Union[str, NoneType]
+            Trace name to be shown in the Trace Viewer.
         snapshots : Union[bool, NoneType]
             Whether to capture DOM snapshot on every action.
         screenshots : Union[bool, NoneType]
@@ -11671,12 +11794,12 @@ class Tracing(SyncBase):
             self._sync(
                 "tracing.start",
                 self._impl_obj.start(
-                    name=name, snapshots=snapshots, screenshots=screenshots
+                    name=name, title=title, snapshots=snapshots, screenshots=screenshots
                 ),
             )
         )
 
-    def start_chunk(self) -> NoneType:
+    def start_chunk(self, *, title: str = None) -> NoneType:
         """Tracing.start_chunk
 
         Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
@@ -11698,10 +11821,15 @@ class Tracing(SyncBase):
         # Save a second trace file with different actions.
         context.tracing.stop_chunk(path = \"trace2.zip\")
         ```
+
+        Parameters
+        ----------
+        title : Union[str, NoneType]
+            Trace name to be shown in the Trace Viewer.
         """
 
         return mapping.from_maybe_impl(
-            self._sync("tracing.start_chunk", self._impl_obj.start_chunk())
+            self._sync("tracing.start_chunk", self._impl_obj.start_chunk(title=title))
         )
 
     def stop_chunk(self, *, path: typing.Union[str, pathlib.Path] = None) -> NoneType:
@@ -12226,8 +12354,7 @@ class Locator(SyncBase):
     def locator(self, selector: str) -> "Locator":
         """Locator.locator
 
-        The method finds an element matching the specified selector in the `Locator`'s subtree. See
-        [Working with selectors](./selectors.md) for more details.
+        The method finds an element matching the specified selector in the `Locator`'s subtree.
 
         Parameters
         ----------
@@ -12240,6 +12367,29 @@ class Locator(SyncBase):
         """
 
         return mapping.from_impl(self._impl_obj.locator(selector=selector))
+
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        """Locator.frame_locator
+
+        When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+        that iframe:
+
+        ```py
+        locator = page.frame_locator(\"text=Submit\").locator(\"text=Submit\")
+        locator.click()
+        ```
+
+        Parameters
+        ----------
+        selector : str
+            A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+
+        Returns
+        -------
+        FrameLocator
+        """
+
+        return mapping.from_impl(self._impl_obj.frame_locator(selector=selector))
 
     def element_handle(self, *, timeout: float = None) -> "ElementHandle":
         """Locator.element_handle
@@ -13190,3 +13340,720 @@ class Locator(SyncBase):
 
 
 mapping.register(LocatorImpl, Locator)
+
+
+class APIResponse(SyncBase):
+    @property
+    def ok(self) -> bool:
+        """APIResponse.ok
+
+        Contains a boolean stating whether the response was successful (status in the range 200-299) or not.
+
+        Returns
+        -------
+        bool
+        """
+        return mapping.from_maybe_impl(self._impl_obj.ok)
+
+    @property
+    def url(self) -> str:
+        """APIResponse.url
+
+        Contains the URL of the response.
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.url)
+
+    @property
+    def status(self) -> int:
+        """APIResponse.status
+
+        Contains the status code of the response (e.g., 200 for a success).
+
+        Returns
+        -------
+        int
+        """
+        return mapping.from_maybe_impl(self._impl_obj.status)
+
+    @property
+    def status_text(self) -> str:
+        """APIResponse.status_text
+
+        Contains the status text of the response (e.g. usually an \"OK\" for a success).
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.status_text)
+
+    @property
+    def headers(self) -> typing.Dict[str, str]:
+        """APIResponse.headers
+
+        An object with all the response HTTP headers associated with this response.
+
+        Returns
+        -------
+        Dict[str, str]
+        """
+        return mapping.from_maybe_impl(self._impl_obj.headers)
+
+    @property
+    def headers_array(self) -> typing.List[NameValue]:
+        """APIResponse.headers_array
+
+        An array with all the request HTTP headers associated with this response. Header names are not lower-cased. Headers with
+        multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+
+        Returns
+        -------
+        List[{name: str, value: str}]
+        """
+        return mapping.from_impl_list(self._impl_obj.headers_array)
+
+    def body(self) -> bytes:
+        """APIResponse.body
+
+        Returns the buffer with response body.
+
+        Returns
+        -------
+        bytes
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("api_response.body", self._impl_obj.body())
+        )
+
+    def text(self) -> str:
+        """APIResponse.text
+
+        Returns the text representation of response body.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("api_response.text", self._impl_obj.text())
+        )
+
+    def json(self) -> typing.Any:
+        """APIResponse.json
+
+        Returns the JSON representation of response body.
+
+        This method will throw if the response body is not parsable via `JSON.parse`.
+
+        Returns
+        -------
+        Any
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("api_response.json", self._impl_obj.json())
+        )
+
+    def dispose(self) -> NoneType:
+        """APIResponse.dispose
+
+        Disposes the body of this response. If not called then the body will stay in memory until the context closes.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("api_response.dispose", self._impl_obj.dispose())
+        )
+
+
+mapping.register(APIResponseImpl, APIResponse)
+
+
+class APIRequestContext(SyncBase):
+    def dispose(self) -> NoneType:
+        """APIRequestContext.dispose
+
+        All responses returned by `a_pi_request_context.get()` and similar methods are stored in the memory, so that you
+        can later call `a_pi_response.body()`. This method discards all stored responses, and makes
+        `a_pi_response.body()` throw \"Response disposed\" error.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("api_request_context.dispose", self._impl_obj.dispose())
+        )
+
+    def delete(
+        self,
+        url: str,
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Union[typing.Any, bytes, str] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.delete
+
+        Sends HTTP(S) [DELETE](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE) request and returns its
+        response. The method will populate request cookies from the context and update context cookies from the response. The
+        method will automatically follow redirects.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        data : Union[Any, bytes, str, NoneType]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], NoneType]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.delete",
+                self._impl_obj.delete(
+                    url=url,
+                    params=mapping.to_impl(params),
+                    headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def head(
+        self,
+        url: str,
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.head
+
+        Sends HTTP(S) [HEAD](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD) request and returns its response.
+        The method will populate request cookies from the context and update context cookies from the response. The method will
+        automatically follow redirects.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.head",
+                self._impl_obj.head(
+                    url=url,
+                    params=mapping.to_impl(params),
+                    headers=mapping.to_impl(headers),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def get(
+        self,
+        url: str,
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.get
+
+        Sends HTTP(S) [GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET) request and returns its response. The
+        method will populate request cookies from the context and update context cookies from the response. The method will
+        automatically follow redirects.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.get",
+                self._impl_obj.get(
+                    url=url,
+                    params=mapping.to_impl(params),
+                    headers=mapping.to_impl(headers),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def patch(
+        self,
+        url: str,
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Union[typing.Any, bytes, str] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.patch
+
+        Sends HTTP(S) [PATCH](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH) request and returns its response.
+        The method will populate request cookies from the context and update context cookies from the response. The method will
+        automatically follow redirects.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        data : Union[Any, bytes, str, NoneType]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], NoneType]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.patch",
+                self._impl_obj.patch(
+                    url=url,
+                    params=mapping.to_impl(params),
+                    headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def put(
+        self,
+        url: str,
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Union[typing.Any, bytes, str] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.put
+
+        Sends HTTP(S) [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) request and returns its response. The
+        method will populate request cookies from the context and update context cookies from the response. The method will
+        automatically follow redirects.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        data : Union[Any, bytes, str, NoneType]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], NoneType]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.put",
+                self._impl_obj.put(
+                    url=url,
+                    params=mapping.to_impl(params),
+                    headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def post(
+        self,
+        url: str,
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Union[typing.Any, bytes, str] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.post
+
+        Sends HTTP(S) [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) request and returns its response.
+        The method will populate request cookies from the context and update context cookies from the response. The method will
+        automatically follow redirects.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        data : Union[Any, bytes, str, NoneType]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], NoneType]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.post",
+                self._impl_obj.post(
+                    url=url,
+                    params=mapping.to_impl(params),
+                    headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def fetch(
+        self,
+        url_or_request: typing.Union[str, "Request"],
+        *,
+        params: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
+        method: str = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Union[typing.Any, bytes, str] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
+        timeout: float = None,
+        fail_on_status_code: bool = None,
+        ignore_https_errors: bool = None
+    ) -> "APIResponse":
+        """APIRequestContext.fetch
+
+        Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and update
+        context cookies from the response. The method will automatically follow redirects.
+
+        Parameters
+        ----------
+        url_or_request : Union[Request, str]
+            Target URL or Request to get all parameters from.
+        params : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Query parameters to be send with the URL.
+        method : Union[str, NoneType]
+            If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
+            [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)). If not specified, GET method is used.
+        headers : Union[Dict[str, str], NoneType]
+            Allows to set HTTP headers.
+        data : Union[Any, bytes, str, NoneType]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], NoneType]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], NoneType]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
+        timeout : Union[float, NoneType]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        fail_on_status_code : Union[bool, NoneType]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.fetch",
+                self._impl_obj.fetch(
+                    urlOrRequest=url_or_request,
+                    params=mapping.to_impl(params),
+                    method=method,
+                    headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
+                    timeout=timeout,
+                    failOnStatusCode=fail_on_status_code,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                ),
+            )
+        )
+
+    def storage_state(
+        self, *, path: typing.Union[str, pathlib.Path] = None
+    ) -> StorageState:
+        """APIRequestContext.storage_state
+
+        Returns storage state for this request context, contains current cookies and local storage snapshot if it was passed to
+        the constructor.
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str, NoneType]
+            The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
+            working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
+
+        Returns
+        -------
+        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request_context.storage_state",
+                self._impl_obj.storage_state(path=path),
+            )
+        )
+
+
+mapping.register(APIRequestContextImpl, APIRequestContext)
+
+
+class APIRequest(SyncBase):
+    def new_context(
+        self,
+        *,
+        base_url: str = None,
+        extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
+        http_credentials: HttpCredentials = None,
+        ignore_https_errors: bool = None,
+        proxy: ProxySettings = None,
+        user_agent: str = None,
+        timeout: float = None,
+        storage_state: typing.Union[StorageState, str, pathlib.Path] = None
+    ) -> "APIRequestContext":
+        """APIRequest.new_context
+
+        Creates new instances of `APIRequestContext`.
+
+        Parameters
+        ----------
+        base_url : Union[str, NoneType]
+            Methods like `a_pi_request_context.get()` take the base URL into consideration by using the
+            [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL.
+            Examples:
+            - baseURL: `http://localhost:3000` and sending request to `/bar.html` results in `http://localhost:3000/bar.html`
+            - baseURL: `http://localhost:3000/foo/` and sending request to `./bar.html` results in
+              `http://localhost:3000/foo/bar.html`
+        extra_http_headers : Union[Dict[str, str], NoneType]
+            An object containing additional HTTP headers to be sent with every request.
+        http_credentials : Union[{username: str, password: str}, NoneType]
+            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+        ignore_https_errors : Union[bool, NoneType]
+            Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
+            Network proxy settings.
+        user_agent : Union[str, NoneType]
+            Specific user agent to use in this context.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds to wait for the response. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+        storage_state : Union[pathlib.Path, str, {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, NoneType]
+            Populates context with given storage state. This option can be used to initialize context with logged-in information
+            obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`. Either a path to the
+            file with saved storage, or the value returned by one of `browser_context.storage_state()` or
+            `a_pi_request_context.storage_state()` methods.
+
+        Returns
+        -------
+        APIRequestContext
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                "api_request.new_context",
+                self._impl_obj.new_context(
+                    baseURL=base_url,
+                    extraHTTPHeaders=mapping.to_impl(extra_http_headers),
+                    httpCredentials=http_credentials,
+                    ignoreHTTPSErrors=ignore_https_errors,
+                    proxy=proxy,
+                    userAgent=user_agent,
+                    timeout=timeout,
+                    storageState=storage_state,
+                ),
+            )
+        )
+
+
+mapping.register(APIRequestImpl, APIRequest)
