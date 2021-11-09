@@ -15,7 +15,7 @@ junit_family = "xunit2"
 [tool.mypy]
 ignore_missing_imports = true
 python_version = "3.7"
-warn_unused_ignores = true
+warn_unused_ignores = false
 warn_redundant_casts = true
 warn_unused_configs = true
 check_untyped_defs = true

@@ -69,7 +69,7 @@ async def test_should_support_global_timeout_option(
     playwright: Playwright, server: Server
 ):
     request = await playwright.request.new_context(timeout=1)
-    server.set_route("/empty.html", lambda req, resp: None)
+    server.set_route("/empty.html", lambda req: None)
     with pytest.raises(Error, match="Request timed out after 1ms"):
         await request.get(server.EMPTY_PAGE)
 
