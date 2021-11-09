@@ -114,7 +114,7 @@ async def test_should_inherit_offline_from_browser_context(context, server):
 async def test_should_inherit_http_credentials_from_browser_context(
     browser: Browser, server
 ):
-    server.set_auth("/title.html", b"user", b"pass")
+    server.set_auth("/title.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "user", "password": "pass"}
     )

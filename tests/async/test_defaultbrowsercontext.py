@@ -188,7 +188,7 @@ async def test_should_support_http_credentials_option(server, launch_persistent)
     (page, context) = await launch_persistent(
         http_credentials={"username": "user", "password": "pass"}
     )
-    server.set_auth("/playground.html", b"user", b"pass")
+    server.set_auth("/playground.html", "user", "pass")
     response = await page.goto(server.PREFIX + "/playground.html")
     assert response.status == 200
 
