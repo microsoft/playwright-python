@@ -98,8 +98,8 @@ class Server:
                     creds_correct = False
                     if authorization_header:
                         creds_correct = auth.get(path) == (
-                            request.getUser(),
-                            request.getPassword(),
+                            request.getUser().decode(),
+                            request.getPassword().decode(),
                         )
                     if not creds_correct:
                         request.setHeader(

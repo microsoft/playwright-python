@@ -535,14 +535,14 @@ async def test_route_should_fall_back_to_context_route(context, server):
 
 
 async def test_auth_should_fail_without_credentials(context, server):
-    server.set_auth("/empty.html", b"user", b"pass")
+    server.set_auth("/empty.html", "user", "pass")
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
     assert response.status == 401
 
 
 async def test_auth_should_work_with_correct_credentials(browser, server):
-    server.set_auth("/empty.html", b"user", b"pass")
+    server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "user", "password": "pass"}
     )
@@ -553,7 +553,7 @@ async def test_auth_should_work_with_correct_credentials(browser, server):
 
 
 async def test_auth_should_fail_with_wrong_credentials(browser, server):
-    server.set_auth("/empty.html", b"user", b"pass")
+    server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "foo", "password": "bar"}
     )
@@ -564,7 +564,7 @@ async def test_auth_should_fail_with_wrong_credentials(browser, server):
 
 
 async def test_auth_should_return_resource_body(browser, server):
-    server.set_auth("/playground.html", b"user", b"pass")
+    server.set_auth("/playground.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "user", "password": "pass"}
     )
