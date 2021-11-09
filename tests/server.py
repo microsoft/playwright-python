@@ -14,22 +14,25 @@
 
 import abc
 import asyncio
+import contextlib
 import gzip
 import mimetypes
 import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
-from typing import Any, Callable, Dict, Set, Tuple
+from typing import Any, Callable, Dict, Generator, Generic, Set, Tuple, TypeVar
 from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
+from greenlet import greenlet
 from OpenSSL import crypto
 from twisted.internet import reactor, ssl
 from twisted.internet.protocol import ClientFactory
 from twisted.web import http
 
 from playwright._impl._path_utils import get_file_dirname
+from playwright.sync_api._context_manager import dispatcher_fiber
 
 _dirname = get_file_dirname()
 
@@ -39,6 +42,18 @@ def find_free_port() -> int:
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
+
+T = TypeVar("T")
+
+
+class ExpectResponse(Generic[T]):
+    def __init__(self) -> None:
+        self._value: T
+
+    @property
+    def value(self) -> T:
+        return self._value
 
 
 class Server:
@@ -142,6 +157,24 @@ class Server:
         future: asyncio.Future["http.Request"] = asyncio.Future()
         self.request_subscribers[path] = future
         return await future
+
+    @contextlib.contextmanager
+    def expect_request(
+        self, path: str
+    ) -> Generator[ExpectResponse[http.Request], None, None]:
+        future = asyncio.create_task(self.wait_for_request(path))
+
+        g_self = greenlet.getcurrent()
+        cb_wrapper: ExpectResponse[http.Request] = ExpectResponse()
+
+        def done_cb(task: asyncio.Task) -> None:
+            cb_wrapper._value = future.result()
+            g_self.switch()
+
+        future.add_done_callback(done_cb)
+        yield cb_wrapper
+        while not future.done():
+            dispatcher_fiber.switch()
 
     def set_auth(self, path: str, username: str, password: str) -> None:
         self.auth[path] = (username, password)

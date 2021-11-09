@@ -31,14 +31,19 @@ class Tracing:
         self._dispatcher_fiber = context._channel._connection._dispatcher_fiber
 
     async def start(
-        self, name: str = None, snapshots: bool = None, screenshots: bool = None
+        self,
+        name: str = None,
+        title: str = None,
+        snapshots: bool = None,
+        screenshots: bool = None,
     ) -> None:
         params = locals_to_params(locals())
         await self._channel.send("tracingStart", params)
-        await self._channel.send("tracingStartChunk")
+        await self.start_chunk(title)
 
-    async def start_chunk(self) -> None:
-        await self._channel.send("tracingStartChunk")
+    async def start_chunk(self, title: str = None) -> None:
+        params = locals_to_params(locals())
+        await self._channel.send("tracingStartChunk", params)
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._do_stop_chunk(path)

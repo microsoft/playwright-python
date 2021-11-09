@@ -16,6 +16,7 @@ from typing import Dict
 
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._fetch import APIRequest
 from playwright._impl._selectors import Selectors
 
 
@@ -25,11 +26,13 @@ class Playwright(ChannelOwner):
     chromium: BrowserType
     firefox: BrowserType
     webkit: BrowserType
+    request: APIRequest
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self.request = APIRequest(self)
         self.chromium = from_channel(initializer["chromium"])
         self.firefox = from_channel(initializer["firefox"])
         self.webkit = from_channel(initializer["webkit"])

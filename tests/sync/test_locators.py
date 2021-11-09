@@ -456,3 +456,64 @@ def test_locators_set_checked(page: Page) -> None:
     assert page.evaluate("checkbox.checked")
     locator.set_checked(False)
     assert page.evaluate("checkbox.checked") is False
+
+
+def route_iframe(page: Page) -> None:
+    page.route(
+        "**/empty.html",
+        lambda route: route.fulfill(
+            body='<iframe src="iframe.html"></iframe>', content_type="text/html"
+        ),
+    )
+    page.route(
+        "**/iframe.html",
+        lambda route: route.fulfill(
+            body="""<html>
+          <div>
+            <button>Hello iframe</button>
+            <iframe src="iframe-2.html"></iframe>
+          </div>
+          <span>1</span>
+          <span>2</span>
+        </html>""",
+            content_type="text/html",
+        ),
+    )
+    page.route(
+        "**/iframe-2.html",
+        lambda route: route.fulfill(
+            body="<html><button>Hello nested iframe</button></html>",
+            content_type="text/html",
+        ),
+    )
+
+
+def test_locators_frame_should_work_with_iframe(page: Page, server: Server) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    button = page.frame_locator("iframe").locator("button")
+    button.wait_for()
+    assert button.inner_text() == "Hello iframe"
+    button.click()
+
+
+def test_locators_frame_should_work_for_nested_iframe(
+    page: Page, server: Server
+) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    button = page.frame_locator("iframe").frame_locator("iframe").locator("button")
+    button.wait_for()
+    assert button.inner_text() == "Hello nested iframe"
+    button.click()
+
+
+def test_locators_frame_should_work_with_locator_frame_locator(
+    page: Page, server: Server
+) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    button = page.locator("body").frame_locator("iframe").locator("button")
+    button.wait_for()
+    assert button.inner_text() == "Hello iframe"
+    button.click()

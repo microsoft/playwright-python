@@ -46,7 +46,7 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
-from playwright._impl._locator import Locator
+from playwright._impl._locator import FrameLocator, Locator
 from playwright._impl._network import Response
 from playwright._impl._wait_helper import WaitHelper
 
@@ -500,6 +500,9 @@ class Frame(ChannelOwner):
         selector: str,
     ) -> Locator:
         return Locator(self, selector)
+
+    def frame_locator(self, selector: str) -> FrameLocator:
+        return FrameLocator(self, selector)
 
     async def focus(
         self, selector: str, strict: bool = None, timeout: float = None

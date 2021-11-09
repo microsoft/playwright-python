@@ -278,6 +278,7 @@ class Response(ChannelOwner):
 
     @property
     def ok(self) -> bool:
+        # Status 0 is for file:// URLs
         return self._initializer["status"] == 0 or (
             self._initializer["status"] >= 200 and self._initializer["status"] <= 299
         )

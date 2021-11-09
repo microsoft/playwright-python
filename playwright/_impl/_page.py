@@ -83,7 +83,7 @@ else:  # pragma: no cover
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
-    from playwright._impl._locator import Locator
+    from playwright._impl._locator import FrameLocator, Locator
     from playwright._impl._network import WebSocket
 
 
@@ -669,6 +669,9 @@ class Page(ChannelOwner):
         selector: str,
     ) -> "Locator":
         return self._main_frame.locator(selector)
+
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        return self.main_frame.frame_locator(selector)
 
     async def focus(
         self, selector: str, strict: bool = None, timeout: float = None

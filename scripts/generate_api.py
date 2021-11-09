@@ -34,12 +34,13 @@ from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._dialog import Dialog
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
+from playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
 from playwright._impl._helper import to_snake_case
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import JSHandle, Serializable
-from playwright._impl._locator import Locator
+from playwright._impl._locator import FrameLocator, Locator
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import Page, Worker
 from playwright._impl._playwright import Playwright
@@ -236,8 +237,9 @@ from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._tracing import Tracing as TracingImpl
-from playwright._impl._locator import Locator as LocatorImpl
+from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
 from playwright._impl._api_types import Error
+from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
 """
 
 
@@ -254,6 +256,7 @@ all_types = [
     Accessibility,
     FileChooser,
     Frame,
+    FrameLocator,
     Worker,
     Selectors,
     ConsoleMessage,
@@ -268,6 +271,9 @@ all_types = [
     Playwright,
     Tracing,
     Locator,
+    APIResponse,
+    APIRequestContext,
+    APIRequest,
 ]
 
 api_globals = globals()

@@ -24,6 +24,9 @@ import playwright.sync_api._generated
 from playwright.sync_api._context_manager import PlaywrightContextManager
 from playwright.sync_api._generated import (
     Accessibility,
+    APIRequest,
+    APIRequestContext,
+    APIResponse,
     Browser,
     BrowserContext,
     BrowserType,
@@ -75,6 +78,9 @@ def sync_playwright() -> PlaywrightContextManager:
 
 __all__ = [
     "Accessibility",
+    "APIRequest",
+    "APIRequestContext",
+    "APIResponse",
     "Browser",
     "BrowserContext",
     "BrowserType",

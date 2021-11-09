@@ -474,3 +474,66 @@ async def test_locators_wait_for(page: Page) -> None:
     await page.eval_on_selector("div", "div => div.innerHTML = '<span>target</span>'")
     await task
     assert await locator.text_content() == "target"
+
+
+async def route_iframe(page: Page) -> None:
+    await page.route(
+        "**/empty.html",
+        lambda route: route.fulfill(
+            body='<iframe src="iframe.html"></iframe>', content_type="text/html"
+        ),
+    )
+    await page.route(
+        "**/iframe.html",
+        lambda route: route.fulfill(
+            body="""<html>
+          <div>
+            <button>Hello iframe</button>
+            <iframe src="iframe-2.html"></iframe>
+          </div>
+          <span>1</span>
+          <span>2</span>
+        </html>""",
+            content_type="text/html",
+        ),
+    )
+    await page.route(
+        "**/iframe-2.html",
+        lambda route: route.fulfill(
+            body="<html><button>Hello nested iframe</button></html>",
+            content_type="text/html",
+        ),
+    )
+
+
+async def test_locators_frame_should_work_with_iframe(
+    page: Page, server: Server
+) -> None:
+    await route_iframe(page)
+    await page.goto(server.EMPTY_PAGE)
+    button = page.frame_locator("iframe").locator("button")
+    await button.wait_for()
+    assert await button.inner_text() == "Hello iframe"
+    await button.click()
+
+
+async def test_locators_frame_should_work_for_nested_iframe(
+    page: Page, server: Server
+) -> None:
+    await route_iframe(page)
+    await page.goto(server.EMPTY_PAGE)
+    button = page.frame_locator("iframe").frame_locator("iframe").locator("button")
+    await button.wait_for()
+    assert await button.inner_text() == "Hello nested iframe"
+    await button.click()
+
+
+async def test_locators_frame_should_work_with_locator_frame_locator(
+    page: Page, server: Server
+) -> None:
+    await route_iframe(page)
+    await page.goto(server.EMPTY_PAGE)
+    button = page.locator("body").frame_locator("iframe").locator("button")
+    await button.wait_for()
+    assert await button.inner_text() == "Hello iframe"
+    await button.click()

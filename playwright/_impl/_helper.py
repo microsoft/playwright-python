@@ -275,3 +275,21 @@ def to_impl(obj: T) -> T:
     if hasattr(obj, "_impl_obj"):
         return cast(Any, obj)._impl_obj
     return obj
+
+
+def object_to_array(obj: Optional[Dict]) -> Optional[List[NameValue]]:
+    if not obj:
+        return None
+    result = []
+    for key, value in obj.items():
+        result.append(NameValue(name=key, value=str(value)))
+    return result
+
+
+def is_file_payload(value: Optional[Any]) -> bool:
+    return (
+        isinstance(value, dict)
+        and "name" in value
+        and "mimeType" in value
+        and "buffer" in value
+    )
