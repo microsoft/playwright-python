@@ -14,7 +14,7 @@
 
 from pathlib import Path
 
-from playwright.sync_api import Browser
+from playwright.sync_api import Browser, BrowserContext
 from tests.server import Server
 
 
@@ -27,3 +27,29 @@ def test_browser_context_output_trace(
     page.goto(server.PREFIX + "/grid.html")
     context.tracing.stop(path=tmp_path / "trace.zip")
     assert Path(tmp_path / "trace.zip").exists()
+
+
+def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
+    context: BrowserContext,
+) -> None:
+    context.tracing.stop()
+
+
+def test_browser_context_output_trace_chunk(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    context = browser.new_context()
+    context.tracing.start(screenshots=True, snapshots=True)
+    page = context.new_page()
+    page.goto(server.PREFIX + "/grid.html")
+    button = page.locator(".box").first
+
+    context.tracing.start_chunk(title="foo")
+    button.click()
+    context.tracing.stop_chunk(path=tmp_path / "trace1.zip")
+    assert Path(tmp_path / "trace1.zip").exists()
+
+    context.tracing.start_chunk(title="foo")
+    button.click()
+    context.tracing.stop_chunk(path=tmp_path / "trace2.zip")
+    assert Path(tmp_path / "trace2.zip").exists()
