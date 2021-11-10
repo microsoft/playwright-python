@@ -14,6 +14,7 @@
 
 import os
 from typing import Callable
+from urllib.parse import urlparse
 
 import pytest
 
@@ -517,3 +518,50 @@ def test_locators_frame_should_work_with_locator_frame_locator(
     button.wait_for()
     assert button.inner_text() == "Hello iframe"
     button.click()
+
+
+def route_ambiguous(page: Page) -> None:
+    page.route(
+        "**/empty.html",
+        lambda route: route.fulfill(
+            body="""
+        <iframe src="iframe-1.html"></iframe>
+        <iframe src="iframe-2.html"></iframe>
+        <iframe src="iframe-3.html"></iframe>
+    """,
+            content_type="text/html",
+        ),
+    )
+    page.route(
+        "**/iframe-*",
+        lambda route: route.fulfill(
+            body=f"<html><button>Hello from {urlparse(route.request.url).path[1:]}</button></html>",
+            content_type="text/html",
+        ),
+    )
+
+
+def test_locator_frame_locator_should_throw_on_ambiguity(
+    page: Page, server: Server
+) -> None:
+    route_ambiguous(page)
+    page.goto(server.EMPTY_PAGE)
+    button = page.locator("body").frame_locator("iframe").locator("button")
+    with pytest.raises(
+        Error,
+        match='.*strict mode violation: "body >> iframe" resolved to 3 elements.*',
+    ):
+        button.wait_for()
+
+
+def test_locator_frame_locator_should_not_throw_on_first_last_nth(
+    page: Page, server: Server
+) -> None:
+    route_ambiguous(page)
+    page.goto(server.EMPTY_PAGE)
+    button1 = page.locator("body").frame_locator("iframe").first.locator("button")
+    assert button1.text_content() == "Hello from iframe-1.html"
+    button2 = page.locator("body").frame_locator("iframe").nth(1).locator("button")
+    assert button2.text_content() == "Hello from iframe-2.html"
+    button3 = page.locator("body").frame_locator("iframe").last.locator("button")
+    assert button3.text_content() == "Hello from iframe-3.html"

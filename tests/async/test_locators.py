@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from urllib.parse import urlparse
 
 import pytest
 
@@ -537,3 +538,50 @@ async def test_locators_frame_should_work_with_locator_frame_locator(
     await button.wait_for()
     assert await button.inner_text() == "Hello iframe"
     await button.click()
+
+
+async def route_ambiguous(page: Page) -> None:
+    await page.route(
+        "**/empty.html",
+        lambda route: route.fulfill(
+            body="""
+        <iframe src="iframe-1.html"></iframe>
+        <iframe src="iframe-2.html"></iframe>
+        <iframe src="iframe-3.html"></iframe>
+    """,
+            content_type="text/html",
+        ),
+    )
+    await page.route(
+        "**/iframe-*",
+        lambda route: route.fulfill(
+            body=f"<html><button>Hello from {urlparse(route.request.url).path[1:]}</button></html>",
+            content_type="text/html",
+        ),
+    )
+
+
+async def test_locator_frame_locator_should_throw_on_ambiguity(
+    page: Page, server: Server
+) -> None:
+    await route_ambiguous(page)
+    await page.goto(server.EMPTY_PAGE)
+    button = page.locator("body").frame_locator("iframe").locator("button")
+    with pytest.raises(
+        Error,
+        match='.*strict mode violation: "body >> iframe" resolved to 3 elements.*',
+    ):
+        await button.wait_for()
+
+
+async def test_locator_frame_locator_should_not_throw_on_first_last_nth(
+    page: Page, server: Server
+) -> None:
+    await route_ambiguous(page)
+    await page.goto(server.EMPTY_PAGE)
+    button1 = page.locator("body").frame_locator("iframe").first.locator("button")
+    assert await button1.text_content() == "Hello from iframe-1.html"
+    button2 = page.locator("body").frame_locator("iframe").nth(1).locator("button")
+    assert await button2.text_content() == "Hello from iframe-2.html"
+    button3 = page.locator("body").frame_locator("iframe").last.locator("button")
+    assert await button3.text_content() == "Hello from iframe-3.html"
