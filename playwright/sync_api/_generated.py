@@ -5162,6 +5162,30 @@ mapping.register(FrameImpl, Frame)
 
 
 class FrameLocator(SyncBase):
+    @property
+    def first(self) -> "FrameLocator":
+        """FrameLocator.first
+
+        Returns locator to the first matching frame.
+
+        Returns
+        -------
+        FrameLocator
+        """
+        return mapping.from_impl(self._impl_obj.first)
+
+    @property
+    def last(self) -> "FrameLocator":
+        """FrameLocator.last
+
+        Returns locator to the last matching frame.
+
+        Returns
+        -------
+        FrameLocator
+        """
+        return mapping.from_impl(self._impl_obj.last)
+
     def locator(self, selector: str) -> "Locator":
         """FrameLocator.locator
 
@@ -5196,6 +5220,22 @@ class FrameLocator(SyncBase):
         """
 
         return mapping.from_impl(self._impl_obj.frame_locator(selector=selector))
+
+    def nth(self, index: int) -> "FrameLocator":
+        """FrameLocator.nth
+
+        Returns locator to the n-th matching frame.
+
+        Parameters
+        ----------
+        index : int
+
+        Returns
+        -------
+        FrameLocator
+        """
+
+        return mapping.from_impl(self._impl_obj.nth(index=index))
 
 
 mapping.register(FrameLocatorImpl, FrameLocator)
@@ -13515,7 +13555,7 @@ class APIRequestContext(SyncBase):
         url : str
             Target URL.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], NoneType]
             Allows to set HTTP headers.
         data : Union[Any, bytes, str, NoneType]
@@ -13583,7 +13623,7 @@ class APIRequestContext(SyncBase):
         url : str
             Target URL.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], NoneType]
             Allows to set HTTP headers.
         timeout : Union[float, NoneType]
@@ -13635,7 +13675,7 @@ class APIRequestContext(SyncBase):
         url : str
             Target URL.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], NoneType]
             Allows to set HTTP headers.
         timeout : Union[float, NoneType]
@@ -13692,7 +13732,7 @@ class APIRequestContext(SyncBase):
         url : str
             Target URL.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], NoneType]
             Allows to set HTTP headers.
         data : Union[Any, bytes, str, NoneType]
@@ -13765,7 +13805,7 @@ class APIRequestContext(SyncBase):
         url : str
             Target URL.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], NoneType]
             Allows to set HTTP headers.
         data : Union[Any, bytes, str, NoneType]
@@ -13838,7 +13878,7 @@ class APIRequestContext(SyncBase):
         url : str
             Target URL.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], NoneType]
             Allows to set HTTP headers.
         data : Union[Any, bytes, str, NoneType]
@@ -13911,7 +13951,7 @@ class APIRequestContext(SyncBase):
         url_or_request : Union[Request, str]
             Target URL or Request to get all parameters from.
         params : Union[Dict[str, Union[bool, float, str]], NoneType]
-            Query parameters to be send with the URL.
+            Query parameters to be sent with the URL.
         method : Union[str, NoneType]
             If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
             [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)). If not specified, GET method is used.

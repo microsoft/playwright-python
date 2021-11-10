@@ -168,7 +168,7 @@ class Locator:
         return Locator(self._frame, f"{self._selector} >> {selector}")
 
     def frame_locator(self, selector: str) -> "FrameLocator":
-        return FrameLocator(self._frame, selector)
+        return FrameLocator(self._frame, self._selector + " >> " + selector)
 
     async def element_handle(
         self,
@@ -477,14 +477,29 @@ class Locator:
 
 
 class FrameLocator:
-    def __init__(self, frame: "Frame", selector: str) -> None:
+    def __init__(self, frame: "Frame", frame_selector: str) -> None:
         self._frame = frame
         self._loop = frame._loop
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
-        self._selector = f"{selector} >> control=enter-frame"
+        self._frame_selector = frame_selector
 
     def locator(self, selector: str) -> Locator:
-        return Locator(self._frame, f"{self._selector} >> {selector}")
+        return Locator(
+            self._frame, f"{self._frame_selector} >> control=enter-frame >> {selector}"
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
-        return FrameLocator(self._frame, f"{self._selector} >> {selector}")
+        return FrameLocator(
+            self._frame, f"{self._frame_selector} >> control=enter-frame >> {selector}"
+        )
+
+    @property
+    def first(self) -> "FrameLocator":
+        return FrameLocator(self._frame, f"{self._frame_selector} >> nth=0")
+
+    @property
+    def last(self) -> "FrameLocator":
+        return FrameLocator(self._frame, f"{self._frame_selector} >> nth=-1")
+
+    def nth(self, index: int) -> "FrameLocator":
+        return FrameLocator(self._frame, f"{self._frame_selector} >> nth={index}")
