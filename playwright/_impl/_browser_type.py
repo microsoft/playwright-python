@@ -205,7 +205,7 @@ class BrowserType(ChannelOwner):
         playwright = await connection.playwright_future
         browser: Browser = from_channel(playwright._initializer["preLaunchedBrowser"])
         browser._is_remote = True
-        browser._is_connected_over_websocket = True
+        browser._should_close_connection_on_close = True
         return browser
 
 
