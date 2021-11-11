@@ -212,7 +212,7 @@ class RouteHandler:
     ):
         self.matcher = matcher
         self.handler = handler
-        self._times = times if times else 2 ** 32
+        self._times = times if times else math.inf
         self._handled_count = 0
 
     def matches(self, request_url: str) -> bool:
