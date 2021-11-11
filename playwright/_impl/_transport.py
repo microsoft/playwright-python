@@ -65,7 +65,7 @@ class PipeTransport:
         # For pyinstaller
         env = os.environ.copy()
         if getattr(sys, "frozen", False):
-            env["PLAYWRIGHT_BROWSERS_PATH"] = "0"
+            env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "0")
         self._proc = await asyncio.create_subprocess_exec(
             str(self._driver_executable),
             "run-driver",
