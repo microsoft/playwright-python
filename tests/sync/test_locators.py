@@ -496,6 +496,10 @@ def test_locators_frame_should_work_with_iframe(page: Page, server: Server) -> N
     button.wait_for()
     assert button.inner_text() == "Hello iframe"
     button.click()
+    assert (
+        repr(page.frame_locator("iframe"))
+        == f"<FrameLocator frame=<Frame name= url='{server.PREFIX}/empty.html'> selector='iframe'>"
+    )
 
 
 def test_locators_frame_should_work_for_nested_iframe(
