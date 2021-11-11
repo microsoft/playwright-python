@@ -60,61 +60,86 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         if self.all:
             # If building for all platforms
             platform_map = {
-                "darwin": {
-                    "zip_name": "mac",
-                    "wheels": ["macosx_10_13_x86_64.whl", "macosx_11_0_universal2.whl"],
-                },
-                "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
-                "win32": {
-                    "zip_name": "win32_x64",
-                    "wheels": ["win32.whl", "win_amd64.whl"],
-                },
+                "darwin": [
+                    {
+                        "zip_name": "mac",
+                        "wheels": [
+                            "macosx_10_13_x86_64.whl",
+                            "macosx_11_0_universal2.whl",
+                        ],
+                    },
+                    {
+                        "zip_name": "mac-arm64",
+                        "wheels": [
+                            "macosx_11_0_arm64.whl",
+                        ],
+                    },
+                ],
+                "linux": [
+                    {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
+                    {
+                        "zip_name": "linux-arm64",
+                        "wheels": ["manylinux_2_17_aarch64.manylinux2014_aarch64.whl"],
+                    },
+                ],
+                "win32": [
+                    {
+                        "zip_name": "win32_x64",
+                        "wheels": ["win32.whl", "win_amd64.whl"],
+                    }
+                ],
             }
             platforms = [*platform_map.values()]
         else:
             # If building for only current platform
             platform_map = {
-                "darwin": {
-                    "zip_name": "mac",
-                    "wheels": ["macosx_10_13_x86_64.whl"],
-                },
-                "linux": {"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]},
-                "win32": {
-                    "zip_name": "win32_x64",
-                    "wheels": ["win_amd64.whl"],
-                },
+                "darwin": [
+                    {
+                        "zip_name": "mac",
+                        "wheels": ["macosx_10_13_x86_64.whl"],
+                    },
+                ],
+                "linux": [{"zip_name": "linux", "wheels": ["manylinux1_x86_64.whl"]}],
+                "win32": [
+                    {
+                        "zip_name": "win32_x64",
+                        "wheels": ["win_amd64.whl"],
+                    }
+                ],
             }
             platforms = [platform_map[sys.platform]]
         for platform in platforms:
-            zip_file = f"playwright-{driver_version}-{platform['zip_name']}.zip"
-            if not os.path.exists("driver/" + zip_file):
-                url = f"https://playwright.azureedge.net/builds/driver/next/{zip_file}"
-                print(f"Fetching {url}")
-                # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
-                subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+            for arch in platform:
+                zip_file = f"playwright-{driver_version}-{arch['zip_name']}.zip"
+                if not os.path.exists("driver/" + zip_file):
+                    url = f"https://playwright.azureedge.net/builds/driver/next/{zip_file}"
+                    print(f"Fetching {url}")
+                    # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
+                    subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
         base_wheel_location = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
 
         for platform in platforms:
-            zip_file = f"driver/playwright-{driver_version}-{platform['zip_name']}.zip"
-            with zipfile.ZipFile(zip_file, "r") as zip:
-                extractall(zip, f"driver/{platform['zip_name']}")
-            if platform_map[sys.platform] in platforms:
+            for arch in platform:
+                zip_file = f"driver/playwright-{driver_version}-{arch['zip_name']}.zip"
                 with zipfile.ZipFile(zip_file, "r") as zip:
-                    extractall(zip, "playwright/driver")
-            for wheel in platform["wheels"]:
-                wheel_location = without_platform + wheel
-                shutil.copy(base_wheel_location, wheel_location)
-                with zipfile.ZipFile(wheel_location, "a") as zip:
-                    driver_root = os.path.abspath(f"driver/{platform['zip_name']}")
-                    for dir_path, _, files in os.walk(driver_root):
-                        for file in files:
-                            from_path = os.path.join(dir_path, file)
-                            to_path = os.path.relpath(from_path, driver_root)
-                            zip.write(from_path, f"playwright/driver/{to_path}")
-                    zip.writestr(
-                        "playwright/driver/README.md", f"{wheel} driver package"
-                    )
+                    extractall(zip, f"driver/{arch['zip_name']}")
+                if platform_map[sys.platform][0] in platform:
+                    with zipfile.ZipFile(zip_file, "r") as zip:
+                        extractall(zip, "playwright/driver")
+                for wheel in arch["wheels"]:
+                    wheel_location = without_platform + wheel
+                    shutil.copy(base_wheel_location, wheel_location)
+                    with zipfile.ZipFile(wheel_location, "a") as zip:
+                        driver_root = os.path.abspath(f"driver/{arch['zip_name']}")
+                        for dir_path, _, files in os.walk(driver_root):
+                            for file in files:
+                                from_path = os.path.join(dir_path, file)
+                                to_path = os.path.relpath(from_path, driver_root)
+                                zip.write(from_path, f"playwright/driver/{to_path}")
+                        zip.writestr(
+                            "playwright/driver/README.md", f"{wheel} driver package"
+                        )
 
         os.remove(base_wheel_location)
         if InWheel:
