@@ -503,3 +503,6 @@ class FrameLocator:
 
     def nth(self, index: int) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth={index}")
+
+    def __repr__(self) -> str:
+        return f"<FrameLocator frame={self._frame!r} selector={self._frame_selector!r}>"
