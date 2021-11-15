@@ -55,7 +55,7 @@ def assetdir() -> Path:
 @pytest.fixture(scope="session")
 def launch_arguments(pytestconfig: Any) -> Dict:
     return {
-        "headless": not pytestconfig.getoption("--headful"),
+        "headless": not pytestconfig.getoption("--headed"),
         "channel": pytestconfig.getoption("--browser-channel"),
     }
 
@@ -181,10 +181,10 @@ def pytest_addoption(parser: Any) -> None:
         help="Browser channel to be used.",
     )
     parser.addoption(
-        "--headful",
+        "--headed",
         action="store_true",
         default=False,
-        help="Run tests in headful mode.",
+        help="Run tests in headed mode.",
     )
 
 
