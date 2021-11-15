@@ -3222,7 +3222,7 @@ class Frame(SyncBase):
         `ElementHandle` instances can be passed as an argument to the `frame.evaluate()`:
 
         ```py
-        body_handle = frame.query_selector(\"body\")
+        body_handle = frame.evaluate(\"document.body\")
         html = frame.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         body_handle.dispose()
         ```
@@ -3309,6 +3309,8 @@ class Frame(SyncBase):
 
         Returns the ElementHandle pointing to the frame element.
 
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
+
         The method finds an element matching the specified selector within the frame. See
         [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 
@@ -3336,6 +3338,8 @@ class Frame(SyncBase):
         """Frame.query_selector_all
 
         Returns the ElementHandles pointing to the frame elements.
+
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 
         The method finds all elements matching the specified selector within the frame. See
         [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
@@ -3369,6 +3373,9 @@ class Frame(SyncBase):
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
         `detached`.
+
+        > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
+        web-first assertions make the code wait-for-selector-free.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
         the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
@@ -3707,6 +3714,9 @@ class Frame(SyncBase):
 
         Returns the return value of `expression`.
 
+        > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
+        tests. Use `locator.evaluate()`, other `Locator` helper methods or web-first assertions instead.
+
         The method finds an element matching the specified selector within the frame and passes it as a first argument to
         `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
         method throws an error.
@@ -3758,6 +3768,9 @@ class Frame(SyncBase):
         """Frame.eval_on_selector_all
 
         Returns the return value of `expression`.
+
+        > NOTE: In most cases, `locator.evaluate_all()`, other `Locator` helper methods and web-first assertions do a
+        better job.
 
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements
         as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
@@ -5373,11 +5386,11 @@ class Selectors(SyncBase):
             page.set_content('<div><button>Click me</button></div>')
 
             # Use the selector prefixed with its name.
-            button = page.query_selector('tag=button')
+            button = page.locator('tag=button')
             # Combine it with other selector engines.
             page.click('tag=div >> text=\"Click me\"')
             # Can use it in any methods supporting selectors.
-            button_count = page.eval_on_selector_all('tag=button', 'buttons => buttons.length')
+            button_count = page.locator('tag=button').count()
             print(button_count)
             browser.close()
 
@@ -6309,8 +6322,10 @@ class Page(SyncContextManager):
     ) -> typing.Optional["ElementHandle"]:
         """Page.query_selector
 
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
+
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
-        return value resolves to `null`. To wait for an element on the page, use `page.wait_for_selector()`.
+        return value resolves to `null`. To wait for an element on the page, use `locator.wait_for()`.
 
         Shortcut for main frame's `frame.query_selector()`.
 
@@ -6336,6 +6351,8 @@ class Page(SyncContextManager):
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
         """Page.query_selector_all
+
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `[]`.
@@ -6371,6 +6388,9 @@ class Page(SyncContextManager):
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
         `detached`.
+
+        > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
+        web-first assertions make the code wait-for-selector-free.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
         the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
@@ -6727,7 +6747,7 @@ class Page(SyncContextManager):
         `ElementHandle` instances can be passed as an argument to the `page.evaluate()`:
 
         ```py
-        body_handle = page.query_selector(\"body\")
+        body_handle = page.evaluate(\"document.body\")
         html = page.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         body_handle.dispose()
         ```
@@ -6819,6 +6839,9 @@ class Page(SyncContextManager):
     ) -> typing.Any:
         """Page.eval_on_selector
 
+        > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
+        tests. Use `locator.evaluate()`, other `Locator` helper methods or web-first assertions instead.
+
         The method finds an element matching the specified selector within the page and passes it as a first argument to
         `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 
@@ -6869,6 +6892,9 @@ class Page(SyncContextManager):
         self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """Page.eval_on_selector_all
+
+        > NOTE: In most cases, `locator.evaluate_all()`, other `Locator` helper methods and web-first assertions do a
+        better job.
 
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as
         a first argument to `expression`. Returns the result of `expression` invocation.
