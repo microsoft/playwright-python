@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import sys
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -171,3 +171,27 @@ class FormField(TypedDict, total=False):
     name: str
     value: Optional[str]
     file: Optional[ServerFilePayload]
+
+
+class ExpectedTextValue(TypedDict, total=False):
+    string: str
+    regexSource: str
+    regexFlags: str
+    matchSubstring: bool
+    normalizeWhiteSpace: bool
+
+
+class FrameExpectOptions(TypedDict, total=False):
+    expressionArg: Any
+    expectedText: Optional[List[ExpectedTextValue]]
+    expectedNumber: Optional[int]
+    expectedValue: Optional[Any]
+    useInnerText: Optional[bool]
+    isNot: bool
+    timeout: Optional[float]
+
+
+class FrameExpectResult(TypedDict):
+    matches: bool
+    received: Any
+    log: List[str]

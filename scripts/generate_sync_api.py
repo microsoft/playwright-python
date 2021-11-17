@@ -42,7 +42,7 @@ def generate(t: Any) -> None:
     base_class = t.__bases__[0].__name__
     if class_name in ["Page", "BrowserContext", "Browser"]:
         base_sync_class = "SyncContextManager"
-    elif base_class in ["ChannelOwner", "object"]:
+    elif base_class in ["ChannelOwner", "object", "AssertionsBase"]:
         base_sync_class = "SyncBase"
     else:
         base_sync_class = base_class

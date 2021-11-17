@@ -83,6 +83,7 @@ else:  # pragma: no cover
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
+    from playwright._impl._fetch import APIRequestContext
     from playwright._impl._locator import FrameLocator, Locator
     from playwright._impl._network import WebSocket
 
@@ -816,6 +817,10 @@ class Page(ChannelOwner):
     @property
     def workers(self) -> List["Worker"]:
         return self._workers.copy()
+
+    @property
+    def request(self) -> "APIRequestContext":
+        return self.context.request
 
     async def pause(self) -> None:
         await self._browser_context._pause()
