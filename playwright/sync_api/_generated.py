@@ -14140,19 +14140,6 @@ mapping.register(APIRequestImpl, APIRequest)
 
 
 class PageAssertions(SyncBase):
-    @property
-    def does_not(self) -> "PageAssertions":
-        """PageAssertions.does_not
-
-        Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't contain
-        `\"error\"`:
-
-        Returns
-        -------
-        PageAssertions
-        """
-        return mapping.from_impl(self._impl_obj.does_not)
-
     def to_have_title(
         self,
         title_or_reg_exp: typing.Union[typing.Pattern, str],
@@ -14175,6 +14162,33 @@ class PageAssertions(SyncBase):
             self._sync(
                 "page_assertions.to_have_title",
                 self._impl_obj.to_have_title(
+                    title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_title(
+        self,
+        title_or_reg_exp: typing.Union[typing.Pattern, str],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """PageAssertions.not_to_have_title
+
+        The opposite of `page_assertions.to_have_title()`.
+
+        Parameters
+        ----------
+        title_or_reg_exp : Union[Pattern, str]
+            Expected title or RegExp.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page_assertions.not_to_have_title",
+                self._impl_obj.not_to_have_title(
                     title_or_reg_exp=title_or_reg_exp, timeout=timeout
                 ),
             )
@@ -14207,24 +14221,38 @@ class PageAssertions(SyncBase):
             )
         )
 
+    def not_to_have_url(
+        self,
+        url_or_reg_exp: typing.Union[typing.Pattern, str],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """PageAssertions.not_to_have_url
+
+        The opposite of `page_assertions.to_have_url()`.
+
+        Parameters
+        ----------
+        url_or_reg_exp : Union[Pattern, str]
+            Expected substring or RegExp.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page_assertions.not_to_have_url",
+                self._impl_obj.not_to_have_url(
+                    url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                ),
+            )
+        )
+
 
 mapping.register(PageAssertionsImpl, PageAssertions)
 
 
 class LocatorAssertions(SyncBase):
-    @property
-    def does_not(self) -> "LocatorAssertions":
-        """LocatorAssertions.does_not
-
-        Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain text
-        `\"error\"`:
-
-        Returns
-        -------
-        LocatorAssertions
-        """
-        return mapping.from_impl(self._impl_obj.does_not)
-
     def to_contain_text(
         self,
         expected: typing.Union[
@@ -14260,6 +14288,38 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_contain_text(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        use_inner_text: bool = None,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_contain_text
+
+        The opposite of `locator_assertions.to_contain_text()`.
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected substring or RegExp or a list of those.
+        use_inner_text : Union[bool, NoneType]
+            Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_contain_text",
+                self._impl_obj.not_to_contain_text(
+                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                ),
+            )
+        )
+
     def to_have_attribute(
         self,
         name: str,
@@ -14285,6 +14345,36 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_have_attribute",
                 self._impl_obj.to_have_attribute(
+                    name=name, value=value, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_attribute(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_attribute
+
+        The opposite of `locator_assertions.to_have_attribute()`.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        value : Union[Pattern, str]
+            Expected attribute value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_attribute",
+                self._impl_obj.not_to_have_attribute(
                     name=name, value=value, timeout=timeout
                 ),
             )
@@ -14319,6 +14409,33 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_have_class(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_class
+
+        The opposite of `locator_assertions.to_have_class()`.
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected class or RegExp or a list of those.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_class",
+                self._impl_obj.not_to_have_class(expected=expected, timeout=timeout),
+            )
+        )
+
     def to_have_count(self, count: int, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_have_count
 
@@ -14336,6 +14453,26 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_have_count",
                 self._impl_obj.to_have_count(count=count, timeout=timeout),
+            )
+        )
+
+    def not_to_have_count(self, count: int, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_have_count
+
+        The opposite of `locator_assertions.to_have_count()`.
+
+        Parameters
+        ----------
+        count : int
+            Expected count.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_count",
+                self._impl_obj.not_to_have_count(count=count, timeout=timeout),
             )
         )
 
@@ -14367,6 +14504,34 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_have_css(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_css
+
+        The opposite of `locator_assertions.to_have_css()`.
+
+        Parameters
+        ----------
+        name : str
+            CSS property name.
+        value : Union[Pattern, str]
+            CSS property value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_css",
+                self._impl_obj.not_to_have_css(name=name, value=value, timeout=timeout),
+            )
+        )
+
     def to_have_id(
         self, id: typing.Union[str, typing.Pattern], *, timeout: float = None
     ) -> NoneType:
@@ -14386,6 +14551,28 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_have_id",
                 self._impl_obj.to_have_id(id=id, timeout=timeout),
+            )
+        )
+
+    def not_to_have_id(
+        self, id: typing.Union[str, typing.Pattern], *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_id
+
+        The opposite of `locator_assertions.to_have_id()`.
+
+        Parameters
+        ----------
+        id : Union[Pattern, str]
+            Element id.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_id",
+                self._impl_obj.not_to_have_id(id=id, timeout=timeout),
             )
         )
 
@@ -14416,6 +14603,32 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_have_js_property(
+        self, name: str, value: typing.Any, *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_js_property
+
+        The opposite of `locator_assertions.to_have_js_property()`.
+
+        Parameters
+        ----------
+        name : str
+            Property name.
+        value : Any
+            Property value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_js_property",
+                self._impl_obj.not_to_have_js_property(
+                    name=name, value=mapping.to_impl(value), timeout=timeout
+                ),
+            )
+        )
+
     def to_have_value(
         self, value: typing.Union[str, typing.Pattern], *, timeout: float = None
     ) -> NoneType:
@@ -14436,6 +14649,28 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_have_value",
                 self._impl_obj.to_have_value(value=value, timeout=timeout),
+            )
+        )
+
+    def not_to_have_value(
+        self, value: typing.Union[str, typing.Pattern], *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_value
+
+        The opposite of `locator_assertions.to_have_value()`.
+
+        Parameters
+        ----------
+        value : Union[Pattern, str]
+            Expected value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_value",
+                self._impl_obj.not_to_have_value(value=value, timeout=timeout),
             )
         )
 
@@ -14473,6 +14708,38 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_have_text(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        use_inner_text: bool = None,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_text
+
+        The opposite of `locator_assertions.to_have_text()`.
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected substring or RegExp or a list of those.
+        use_inner_text : Union[bool, NoneType]
+            Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_text",
+                self._impl_obj.not_to_have_text(
+                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                ),
+            )
+        )
+
     def to_be_checked(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_checked
 
@@ -14488,6 +14755,24 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_be_checked",
                 self._impl_obj.to_be_checked(timeout=timeout),
+            )
+        )
+
+    def not_to_be_checked(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_checked
+
+        The opposite of `locator_assertions.to_be_checked()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_checked",
+                self._impl_obj.not_to_be_checked(timeout=timeout),
             )
         )
 
@@ -14509,6 +14794,24 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_be_disabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_disabled
+
+        The opposite of `locator_assertions.to_be_disabled()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_disabled",
+                self._impl_obj.not_to_be_disabled(timeout=timeout),
+            )
+        )
+
     def to_be_editable(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_editable
 
@@ -14524,6 +14827,24 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_be_editable",
                 self._impl_obj.to_be_editable(timeout=timeout),
+            )
+        )
+
+    def not_to_be_editable(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_editable
+
+        The opposite of `locator_assertions.to_be_editable()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_editable",
+                self._impl_obj.not_to_be_editable(timeout=timeout),
             )
         )
 
@@ -14545,6 +14866,24 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_be_empty(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_empty
+
+        The opposite of `locator_assertions.to_be_empty()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_empty",
+                self._impl_obj.not_to_be_empty(timeout=timeout),
+            )
+        )
+
     def to_be_enabled(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_enabled
 
@@ -14560,6 +14899,24 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_be_enabled",
                 self._impl_obj.to_be_enabled(timeout=timeout),
+            )
+        )
+
+    def not_to_be_enabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_enabled
+
+        The opposite of `locator_assertions.to_be_enabled()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_enabled",
+                self._impl_obj.not_to_be_enabled(timeout=timeout),
             )
         )
 
@@ -14581,6 +14938,24 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_be_hidden(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_hidden
+
+        The opposite of `locator_assertions.to_be_hidden()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_hidden",
+                self._impl_obj.not_to_be_hidden(timeout=timeout),
+            )
+        )
+
     def to_be_visible(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_visible
 
@@ -14599,6 +14974,24 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    def not_to_be_visible(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_visible
+
+        The opposite of `locator_assertions.to_be_visible()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_visible",
+                self._impl_obj.not_to_be_visible(timeout=timeout),
+            )
+        )
+
     def to_be_focused(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_focused
 
@@ -14614,6 +15007,24 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_be_focused",
                 self._impl_obj.to_be_focused(timeout=timeout),
+            )
+        )
+
+    def not_to_be_focused(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_focused
+
+        The opposite of `locator_assertions.to_be_focused()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_focused",
+                self._impl_obj.not_to_be_focused(timeout=timeout),
             )
         )
 
