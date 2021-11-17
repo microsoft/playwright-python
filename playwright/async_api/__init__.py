@@ -83,16 +83,16 @@ def async_playwright() -> PlaywrightContextManager:
 
 
 @overload
-def assert_that(page_or_locator: Page) -> PageAssertions:
+def expect(page_or_locator: Page) -> PageAssertions:
     ...
 
 
 @overload
-def assert_that(page_or_locator: Locator) -> LocatorAssertions:
+def expect(page_or_locator: Locator) -> LocatorAssertions:
     ...
 
 
-def assert_that(
+def expect(
     page_or_locator: Union[Page, Locator]
 ) -> Union[PageAssertions, LocatorAssertions]:
     if isinstance(page_or_locator, Page):
@@ -103,7 +103,7 @@ def assert_that(
 
 
 __all__ = [
-    "assert_that",
+    "expect",
     "async_playwright",
     "Accessibility",
     "APIRequest",

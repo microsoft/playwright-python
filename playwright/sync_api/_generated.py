@@ -14153,13 +14153,13 @@ class PageAssertions(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.does_not)
 
-    def has_title(
+    def to_have_title(
         self,
         title_or_reg_exp: typing.Union[typing.Pattern, str],
         *,
         timeout: float = None
     ) -> NoneType:
-        """PageAssertions.has_title
+        """PageAssertions.to_have_title
 
         Ensures the page has the given title.
 
@@ -14173,20 +14173,20 @@ class PageAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "page_assertions.has_title",
-                self._impl_obj.has_title(
+                "page_assertions.to_have_title",
+                self._impl_obj.to_have_title(
                     title_or_reg_exp=title_or_reg_exp, timeout=timeout
                 ),
             )
         )
 
-    def has_url(
+    def to_have_url(
         self,
         url_or_reg_exp: typing.Union[str, typing.Pattern],
         *,
         timeout: float = None
     ) -> NoneType:
-        """PageAssertions.has_url
+        """PageAssertions.to_have_url
 
         Ensures the page is navigated to the given URL.
 
@@ -14200,8 +14200,10 @@ class PageAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "page_assertions.has_url",
-                self._impl_obj.has_url(url_or_reg_exp=url_or_reg_exp, timeout=timeout),
+                "page_assertions.to_have_url",
+                self._impl_obj.to_have_url(
+                    url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                ),
             )
         )
 
@@ -14223,7 +14225,7 @@ class LocatorAssertions(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.does_not)
 
-    def contains_text(
+    def to_contain_text(
         self,
         expected: typing.Union[
             typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
@@ -14232,7 +14234,7 @@ class LocatorAssertions(SyncBase):
         use_inner_text: bool = None,
         timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.contains_text
+        """LocatorAssertions.to_contain_text
 
         Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the value
         as well.
@@ -14251,21 +14253,21 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.contains_text",
-                self._impl_obj.contains_text(
+                "locator_assertions.to_contain_text",
+                self._impl_obj.to_contain_text(
                     expected=expected, use_inner_text=use_inner_text, timeout=timeout
                 ),
             )
         )
 
-    def has_attribute(
+    def to_have_attribute(
         self,
         name: str,
         value: typing.Union[str, typing.Pattern],
         *,
         timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_attribute
+        """LocatorAssertions.to_have_attribute
 
         Ensures the `Locator` points to an element with given attribute.
 
@@ -14281,12 +14283,14 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_attribute",
-                self._impl_obj.has_attribute(name=name, value=value, timeout=timeout),
+                "locator_assertions.to_have_attribute",
+                self._impl_obj.to_have_attribute(
+                    name=name, value=value, timeout=timeout
+                ),
             )
         )
 
-    def has_class(
+    def to_have_class(
         self,
         expected: typing.Union[
             typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
@@ -14294,7 +14298,7 @@ class LocatorAssertions(SyncBase):
         *,
         timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_class
+        """LocatorAssertions.to_have_class
 
         Ensures the `Locator` points to an element with given CSS class.
 
@@ -14310,13 +14314,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_class",
-                self._impl_obj.has_class(expected=expected, timeout=timeout),
+                "locator_assertions.to_have_class",
+                self._impl_obj.to_have_class(expected=expected, timeout=timeout),
             )
         )
 
-    def has_count(self, count: int, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.has_count
+    def to_have_count(self, count: int, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_have_count
 
         Ensures the `Locator` resolves to an exact number of DOM nodes.
 
@@ -14330,19 +14334,19 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_count",
-                self._impl_obj.has_count(count=count, timeout=timeout),
+                "locator_assertions.to_have_count",
+                self._impl_obj.to_have_count(count=count, timeout=timeout),
             )
         )
 
-    def has_css(
+    def to_have_css(
         self,
         name: str,
         value: typing.Union[str, typing.Pattern],
         *,
         timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_css
+        """LocatorAssertions.to_have_css
 
         Ensures the `Locator` resolves to an element with the given computed CSS style.
 
@@ -14358,15 +14362,15 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_css",
-                self._impl_obj.has_css(name=name, value=value, timeout=timeout),
+                "locator_assertions.to_have_css",
+                self._impl_obj.to_have_css(name=name, value=value, timeout=timeout),
             )
         )
 
-    def has_id(
+    def to_have_id(
         self, id: typing.Union[str, typing.Pattern], *, timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_id
+        """LocatorAssertions.to_have_id
 
         Ensures the `Locator` points to an element with the given DOM Node ID.
 
@@ -14380,15 +14384,15 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_id",
-                self._impl_obj.has_id(id=id, timeout=timeout),
+                "locator_assertions.to_have_id",
+                self._impl_obj.to_have_id(id=id, timeout=timeout),
             )
         )
 
-    def has_js_property(
+    def to_have_js_property(
         self, name: str, value: typing.Any, *, timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_js_property
+        """LocatorAssertions.to_have_js_property
 
         Ensures the `Locator` points to an element with given JavaScript property. Note that this property can be of a primitive
         type as well as a plain serializable JavaScript object.
@@ -14405,17 +14409,17 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_js_property",
-                self._impl_obj.has_js_property(
+                "locator_assertions.to_have_js_property",
+                self._impl_obj.to_have_js_property(
                     name=name, value=mapping.to_impl(value), timeout=timeout
                 ),
             )
         )
 
-    def has_value(
+    def to_have_value(
         self, value: typing.Union[str, typing.Pattern], *, timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_value
+        """LocatorAssertions.to_have_value
 
         Ensures the `Locator` points to an element with the given input value. You can use regular expressions for the value as
         well.
@@ -14430,12 +14434,12 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_value",
-                self._impl_obj.has_value(value=value, timeout=timeout),
+                "locator_assertions.to_have_value",
+                self._impl_obj.to_have_value(value=value, timeout=timeout),
             )
         )
 
-    def has_text(
+    def to_have_text(
         self,
         expected: typing.Union[
             typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
@@ -14444,7 +14448,7 @@ class LocatorAssertions(SyncBase):
         use_inner_text: bool = None,
         timeout: float = None
     ) -> NoneType:
-        """LocatorAssertions.has_text
+        """LocatorAssertions.to_have_text
 
         Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as well.
 
@@ -14462,15 +14466,15 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.has_text",
-                self._impl_obj.has_text(
+                "locator_assertions.to_have_text",
+                self._impl_obj.to_have_text(
                     expected=expected, use_inner_text=use_inner_text, timeout=timeout
                 ),
             )
         )
 
-    def is_checked(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_checked
+    def to_be_checked(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_checked
 
         Ensures the `Locator` points to a checked input.
 
@@ -14482,13 +14486,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_checked",
-                self._impl_obj.is_checked(timeout=timeout),
+                "locator_assertions.to_be_checked",
+                self._impl_obj.to_be_checked(timeout=timeout),
             )
         )
 
-    def is_disabled(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_disabled
+    def to_be_disabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_disabled
 
         Ensures the `Locator` points to a disabled element.
 
@@ -14500,13 +14504,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_disabled",
-                self._impl_obj.is_disabled(timeout=timeout),
+                "locator_assertions.to_be_disabled",
+                self._impl_obj.to_be_disabled(timeout=timeout),
             )
         )
 
-    def is_editable(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_editable
+    def to_be_editable(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_editable
 
         Ensures the `Locator` points to an editable element.
 
@@ -14518,13 +14522,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_editable",
-                self._impl_obj.is_editable(timeout=timeout),
+                "locator_assertions.to_be_editable",
+                self._impl_obj.to_be_editable(timeout=timeout),
             )
         )
 
-    def is_empty(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_empty
+    def to_be_empty(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_empty
 
         Ensures the `Locator` points to an empty editable element or to a DOM node that has no text.
 
@@ -14536,12 +14540,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_empty", self._impl_obj.is_empty(timeout=timeout)
+                "locator_assertions.to_be_empty",
+                self._impl_obj.to_be_empty(timeout=timeout),
             )
         )
 
-    def is_enabled(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_enabled
+    def to_be_enabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_enabled
 
         Ensures the `Locator` points to an enabled element.
 
@@ -14553,13 +14558,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_enabled",
-                self._impl_obj.is_enabled(timeout=timeout),
+                "locator_assertions.to_be_enabled",
+                self._impl_obj.to_be_enabled(timeout=timeout),
             )
         )
 
-    def is_hidden(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_hidden
+    def to_be_hidden(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_hidden
 
         Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](./actionability.md#visible).
 
@@ -14571,13 +14576,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_hidden",
-                self._impl_obj.is_hidden(timeout=timeout),
+                "locator_assertions.to_be_hidden",
+                self._impl_obj.to_be_hidden(timeout=timeout),
             )
         )
 
-    def is_visible(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_visible
+    def to_be_visible(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_visible
 
         Ensures the `Locator` points to a [visible](./actionability.md#visible) DOM node.
 
@@ -14589,13 +14594,13 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_visible",
-                self._impl_obj.is_visible(timeout=timeout),
+                "locator_assertions.to_be_visible",
+                self._impl_obj.to_be_visible(timeout=timeout),
             )
         )
 
-    def is_focused(self, *, timeout: float = None) -> NoneType:
-        """LocatorAssertions.is_focused
+    def to_be_focused(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_focused
 
         Ensures the `Locator` points to a focused DOM node.
 
@@ -14607,8 +14612,8 @@ class LocatorAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                "locator_assertions.is_focused",
-                self._impl_obj.is_focused(timeout=timeout),
+                "locator_assertions.to_be_focused",
+                self._impl_obj.to_be_focused(timeout=timeout),
             )
         )
 

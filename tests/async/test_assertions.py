@@ -17,11 +17,11 @@ from datetime import datetime
 
 import pytest
 
-from playwright.async_api import Browser, Page, assert_that
+from playwright.async_api import Browser, Page, expect
 from tests.server import Server
 
 
-async def test_assertions_page_has_title(page: Page, server: Server) -> None:
+async def test_assertions_page_to_have_title(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
@@ -33,25 +33,25 @@ async def test_assertions_page_has_title(page: Page, server: Server) -> None:
         </script>
     """
     )
-    await assert_that(page).has_title("new title")
-    await assert_that(page).has_title(re.compile("new title"))
+    await expect(page).to_have_title("new title")
+    await expect(page).to_have_title(re.compile("new title"))
     with pytest.raises(AssertionError):
-        await assert_that(page).has_title("not the current title", timeout=100)
+        await expect(page).to_have_title("not the current title", timeout=100)
     with pytest.raises(AssertionError):
-        await assert_that(page).has_title(
+        await expect(page).to_have_title(
             re.compile("not the current title"), timeout=100
         )
     with pytest.raises(AssertionError):
-        await assert_that(page).does_not.has_title(re.compile("new title"), timeout=100)
+        await expect(page).does_not.to_have_title(re.compile("new title"), timeout=100)
     with pytest.raises(AssertionError):
-        await assert_that(page).does_not.has_title("new title", timeout=100)
-    await assert_that(page).does_not.has_title("great title", timeout=100)
-    await assert_that(page).has_title("great title")
-    await assert_that(page).has_title(re.compile("great title"))
-    await assert_that(page).does_not.has_title("new title", timeout=100)
+        await expect(page).does_not.to_have_title("new title", timeout=100)
+    await expect(page).does_not.to_have_title("great title", timeout=100)
+    await expect(page).to_have_title("great title")
+    await expect(page).to_have_title(re.compile("great title"))
+    await expect(page).does_not.to_have_title("new title", timeout=100)
 
 
-async def test_assertions_page_has_url(page: Page, server: Server) -> None:
+async def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
@@ -62,218 +62,218 @@ async def test_assertions_page_has_url(page: Page, server: Server) -> None:
         </script>
     """
     )
-    await assert_that(page).has_url(server.EMPTY_PAGE)
-    await assert_that(page).has_url(re.compile(r".*/empty\.html"))
+    await expect(page).to_have_url(server.EMPTY_PAGE)
+    await expect(page).to_have_url(re.compile(r".*/empty\.html"))
     with pytest.raises(AssertionError):
-        await assert_that(page).has_url("nooooo", timeout=100)
+        await expect(page).to_have_url("nooooo", timeout=100)
     with pytest.raises(AssertionError):
-        await assert_that(page).has_url(re.compile("not-the-url"), timeout=100)
-    await assert_that(page).has_url(server.PREFIX + "/grid.html")
-    await assert_that(page).does_not.has_url(server.EMPTY_PAGE, timeout=100)
+        await expect(page).to_have_url(re.compile("not-the-url"), timeout=100)
+    await expect(page).to_have_url(server.PREFIX + "/grid.html")
+    await expect(page).does_not.to_have_url(server.EMPTY_PAGE, timeout=100)
     with pytest.raises(AssertionError):
-        await assert_that(page).does_not.has_url(
+        await expect(page).does_not.to_have_url(
             re.compile(r".*/grid\.html"), timeout=100
         )
     with pytest.raises(AssertionError):
-        await assert_that(page).does_not.has_url(
+        await expect(page).does_not.to_have_url(
             server.PREFIX + "/grid.html", timeout=100
         )
-    await assert_that(page).has_url(re.compile(r".*/grid\.html"))
-    await assert_that(page).does_not.has_url("**/empty.html", timeout=100)
+    await expect(page).to_have_url(re.compile(r".*/grid\.html"))
+    await expect(page).does_not.to_have_url("**/empty.html", timeout=100)
 
 
-async def test_assertions_page_has_url_with_base_url(
+async def test_assertions_page_to_have_url_with_base_url(
     browser: Browser, server: Server
 ) -> None:
     page = await browser.new_page(base_url=server.PREFIX)
     await page.goto("/empty.html")
-    await assert_that(page).has_url("/empty.html")
-    await assert_that(page).has_url(re.compile(r".*/empty\.html"))
+    await expect(page).to_have_url("/empty.html")
+    await expect(page).to_have_url(re.compile(r".*/empty\.html"))
     await page.close()
 
 
-async def test_assertions_locator_contains_text(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_contain_text(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div id=foobar>kek</div>")
-    await assert_that(page.locator("div#foobar")).contains_text("kek")
-    await assert_that(page.locator("div#foobar")).does_not.contains_text(
+    await expect(page.locator("div#foobar")).to_contain_text("kek")
+    await expect(page.locator("div#foobar")).does_not.to_contain_text(
         "bar", timeout=100
     )
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("div#foobar")).contains_text("bar", timeout=100)
+        await expect(page.locator("div#foobar")).to_contain_text("bar", timeout=100)
 
     await page.set_content("<div>Text \n1</div><div>Text2</div><div>Text3</div>")
-    await assert_that(page.locator("div")).contains_text(
+    await expect(page.locator("div")).to_contain_text(
         ["ext     1", re.compile("ext3")]
     )
 
 
-async def test_assertions_locator_has_attribute(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div id=foobar>kek</div>")
-    await assert_that(page.locator("div#foobar")).has_attribute("id", "foobar")
-    await assert_that(page.locator("div#foobar")).has_attribute(
+    await expect(page.locator("div#foobar")).to_have_attribute("id", "foobar")
+    await expect(page.locator("div#foobar")).to_have_attribute(
         "id", re.compile("foobar")
     )
-    await assert_that(page.locator("div#foobar")).does_not.has_attribute(
+    await expect(page.locator("div#foobar")).does_not.to_have_attribute(
         "id", "kek", timeout=100
     )
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("div#foobar")).has_attribute(
+        await expect(page.locator("div#foobar")).to_have_attribute(
             "id", "koko", timeout=100
         )
 
 
-async def test_assertions_locator_has_class(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div class=foobar>kek</div>")
-    await assert_that(page.locator("div.foobar")).has_class("foobar")
-    await assert_that(page.locator("div.foobar")).has_class(["foobar"])
-    await assert_that(page.locator("div.foobar")).has_class(re.compile("foobar"))
-    await assert_that(page.locator("div.foobar")).has_class([re.compile("foobar")])
-    await assert_that(page.locator("div.foobar")).does_not.has_class(
+    await expect(page.locator("div.foobar")).to_have_class("foobar")
+    await expect(page.locator("div.foobar")).to_have_class(["foobar"])
+    await expect(page.locator("div.foobar")).to_have_class(re.compile("foobar"))
+    await expect(page.locator("div.foobar")).to_have_class([re.compile("foobar")])
+    await expect(page.locator("div.foobar")).does_not.to_have_class(
         "kekstar", timeout=100
     )
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("div.foobar")).has_class("oh-no", timeout=100)
+        await expect(page.locator("div.foobar")).to_have_class("oh-no", timeout=100)
 
 
-async def test_assertions_locator_has_count(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_count(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div class=foobar>kek</div><div class=foobar>kek</div>")
-    await assert_that(page.locator("div.foobar")).has_count(2)
-    await assert_that(page.locator("div.foobar")).does_not.has_count(42, timeout=100)
+    await expect(page.locator("div.foobar")).to_have_count(2)
+    await expect(page.locator("div.foobar")).does_not.to_have_count(42, timeout=100)
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("div.foobar")).has_count(42, timeout=100)
+        await expect(page.locator("div.foobar")).to_have_count(42, timeout=100)
 
 
-async def test_assertions_locator_has_css(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_css(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         "<div class=foobar style='color: rgb(234, 74, 90);'>kek</div>"
     )
-    await assert_that(page.locator("div.foobar")).has_css("color", "rgb(234, 74, 90)")
-    await assert_that(page.locator("div.foobar")).does_not.has_css(
+    await expect(page.locator("div.foobar")).to_have_css("color", "rgb(234, 74, 90)")
+    await expect(page.locator("div.foobar")).does_not.to_have_css(
         "color", "rgb(42, 42, 42)", timeout=100
     )
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("div.foobar")).has_css(
+        await expect(page.locator("div.foobar")).to_have_css(
             "color", "rgb(42, 42, 42)", timeout=100
         )
 
 
-async def test_assertions_locator_has_id(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_id(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div class=foobar id=kek>kek</div>")
-    await assert_that(page.locator("div.foobar")).has_id("kek")
-    await assert_that(page.locator("div.foobar")).does_not.has_id("top", timeout=100)
+    await expect(page.locator("div.foobar")).to_have_id("kek")
+    await expect(page.locator("div.foobar")).does_not.to_have_id("top", timeout=100)
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("div.foobar")).has_id("top", timeout=100)
+        await expect(page.locator("div.foobar")).to_have_id("top", timeout=100)
 
 
-async def test_assertions_locator_has_js_property(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_js_property(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div></div>")
     await page.eval_on_selector(
         "div", "e => e.foo = { a: 1, b: 'string', c: new Date(1627503992000) }"
     )
-    await assert_that(page.locator("div")).has_js_property(
+    await expect(page.locator("div")).to_have_js_property(
         "foo",
         {"a": 1, "b": "string", "c": datetime.utcfromtimestamp(1627503992000 / 1000)},
     )
 
 
-async def test_assertions_locator_has_text(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_text(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div id=foobar>kek</div>")
-    await assert_that(page.locator("div#foobar")).has_text("kek")
-    await assert_that(page.locator("div#foobar")).does_not.has_text("top", timeout=100)
+    await expect(page.locator("div#foobar")).to_have_text("kek")
+    await expect(page.locator("div#foobar")).does_not.to_have_text("top", timeout=100)
 
     await page.set_content("<div>Text    \n1</div><div>Text   2a</div>")
     # Should only normalize whitespace in the first item.
-    await assert_that(page.locator("div")).has_text(
+    await expect(page.locator("div")).to_have_text(
         ["Text  1", re.compile(r"Text   \d+a")]
     )
 
 
-async def test_assertions_locator_value(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_have_value(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<input type=text id=foo>")
     my_input = page.locator("#foo")
-    await assert_that(my_input).has_value("")
-    await assert_that(my_input).does_not.has_value("bar", timeout=100)
+    await expect(my_input).to_have_value("")
+    await expect(my_input).does_not.to_have_value("bar", timeout=100)
     await my_input.fill("kektus")
-    await assert_that(my_input).has_value("kektus")
+    await expect(my_input).to_have_value("kektus")
 
 
-async def test_assertions_locator_is_checked(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_be_checked(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<input type=checkbox>")
     my_checkbox = page.locator("input")
-    await assert_that(my_checkbox).does_not.is_checked()
+    await expect(my_checkbox).does_not.to_be_checked()
     with pytest.raises(AssertionError):
-        await assert_that(my_checkbox).is_checked(timeout=100)
+        await expect(my_checkbox).to_be_checked(timeout=100)
     await my_checkbox.check()
-    await assert_that(my_checkbox).is_checked()
+    await expect(my_checkbox).to_be_checked()
 
 
-async def test_assertions_locator_is_disabled_enabled(
+async def test_assertions_locator_to_be_disabled_enabled(
     page: Page, server: Server
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<input type=checkbox>")
     my_checkbox = page.locator("input")
-    await assert_that(my_checkbox).does_not.is_disabled()
-    await assert_that(my_checkbox).is_enabled()
+    await expect(my_checkbox).does_not.to_be_disabled()
+    await expect(my_checkbox).to_be_enabled()
     with pytest.raises(AssertionError):
-        await assert_that(my_checkbox).is_disabled(timeout=100)
+        await expect(my_checkbox).to_be_disabled(timeout=100)
     await my_checkbox.evaluate("e => e.disabled = true")
-    await assert_that(my_checkbox).is_disabled()
+    await expect(my_checkbox).to_be_disabled()
     with pytest.raises(AssertionError):
-        await assert_that(my_checkbox).is_enabled(timeout=100)
+        await expect(my_checkbox).to_be_enabled(timeout=100)
 
 
-async def test_assertions_locator_is_editable(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_be_editable(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<input></input><button disabled>Text</button>")
-    await assert_that(page.locator("button")).does_not.is_editable()
-    await assert_that(page.locator("input")).is_editable()
+    await expect(page.locator("button")).does_not.to_be_editable()
+    await expect(page.locator("input")).to_be_editable()
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("button")).is_editable(timeout=100)
+        await expect(page.locator("button")).to_be_editable(timeout=100)
 
 
-async def test_assertions_locator_is_empty(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_be_empty(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         "<input value=text name=input1></input><input name=input2></input>"
     )
-    await assert_that(page.locator("input[name=input1]")).does_not.is_empty()
-    await assert_that(page.locator("input[name=input2]")).is_empty()
+    await expect(page.locator("input[name=input1]")).does_not.to_be_empty()
+    await expect(page.locator("input[name=input2]")).to_be_empty()
     with pytest.raises(AssertionError):
-        await assert_that(page.locator("input[name=input1]")).is_empty(timeout=100)
+        await expect(page.locator("input[name=input1]")).to_be_empty(timeout=100)
 
 
-async def test_assertions_locator_is_focused(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_be_focused(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<input type=checkbox>")
     my_checkbox = page.locator("input")
     with pytest.raises(AssertionError):
-        await assert_that(my_checkbox).is_focused(timeout=100)
+        await expect(my_checkbox).to_be_focused(timeout=100)
     await my_checkbox.focus()
-    await assert_that(my_checkbox).is_focused()
+    await expect(my_checkbox).to_be_focused()
 
 
-async def test_assertions_locator_is_hidden_visible(page: Page, server: Server) -> None:
+async def test_assertions_locator_to_be_hidden_visible(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div style='width: 50px; height: 50px;'>Something</div>")
     my_checkbox = page.locator("div")
-    await assert_that(my_checkbox).is_visible()
+    await expect(my_checkbox).to_be_visible()
     with pytest.raises(AssertionError):
-        await assert_that(my_checkbox).is_hidden(timeout=100)
+        await expect(my_checkbox).to_be_hidden(timeout=100)
     await my_checkbox.evaluate("e => e.style.display = 'none'")
-    await assert_that(my_checkbox).is_hidden()
+    await expect(my_checkbox).to_be_hidden()
     with pytest.raises(AssertionError):
-        await assert_that(my_checkbox).is_visible(timeout=100)
+        await expect(my_checkbox).to_be_visible(timeout=100)
 
 
 async def test_assertions_should_serialize_regexp_correctly(
@@ -281,7 +281,7 @@ async def test_assertions_should_serialize_regexp_correctly(
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div>iGnOrEcAsE</div>")
-    await assert_that(page.locator("div")).has_text(
+    await expect(page.locator("div")).to_have_text(
         re.compile(r"ignorecase", re.IGNORECASE)
     )
     await page.set_content(
@@ -291,7 +291,7 @@ lines
 between
 end</div>"""
     )
-    await assert_that(page.locator("div")).has_text(
+    await expect(page.locator("div")).to_have_text(
         re.compile(r"start.*end", re.DOTALL)
     )
     await page.set_content(
@@ -299,6 +299,6 @@ end</div>"""
 line2
 line3</div>"""
     )
-    await assert_that(page.locator("div")).has_text(
+    await expect(page.locator("div")).to_have_text(
         re.compile(r"^line2$", re.MULTILINE)
     )

@@ -56,7 +56,7 @@ class PageAssertions(AssertionsBase):
         super().__init__(page.locator(":root"), is_not)
         self._actual_page = page
 
-    async def has_title(
+    async def to_have_title(
         self, title_or_reg_exp: Union[Pattern, str], timeout: float = None
     ) -> None:
         expected_values = to_expected_text_values(
@@ -69,7 +69,7 @@ class PageAssertions(AssertionsBase):
             "Page title expected to be",
         )
 
-    async def has_url(
+    async def to_have_url(
         self, url_or_reg_exp: Union[str, Pattern], timeout: float = None
     ) -> None:
         base_url = self._actual_page.context._options.get("baseURL")
@@ -97,7 +97,7 @@ class LocatorAssertions(AssertionsBase):
     def does_not(self) -> "LocatorAssertions":
         return LocatorAssertions(self._actual_locator, not self._is_not)
 
-    async def contains_text(
+    async def to_contain_text(
         self,
         expected: Union[List[Pattern], List[str], Pattern, str],
         use_inner_text: bool = None,
@@ -132,7 +132,7 @@ class LocatorAssertions(AssertionsBase):
                 "Locator expected to contain text",
             )
 
-    async def has_attribute(
+    async def to_have_attribute(
         self,
         name: str,
         value: Union[str, Pattern],
@@ -148,7 +148,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to have attribute",
         )
 
-    async def has_class(
+    async def to_have_class(
         self,
         expected: Union[List[Pattern], List[str], Pattern, str],
         timeout: float = None,
@@ -170,7 +170,7 @@ class LocatorAssertions(AssertionsBase):
                 "Locator expected to have class",
             )
 
-    async def has_count(
+    async def to_have_count(
         self,
         count: int,
         timeout: float = None,
@@ -182,7 +182,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to have count",
         )
 
-    async def has_css(
+    async def to_have_css(
         self,
         name: str,
         value: Union[str, Pattern],
@@ -198,7 +198,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to have CSS",
         )
 
-    async def has_id(
+    async def to_have_id(
         self,
         id: Union[str, Pattern],
         timeout: float = None,
@@ -211,7 +211,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to have ID",
         )
 
-    async def has_js_property(
+    async def to_have_js_property(
         self,
         name: str,
         value: Any,
@@ -226,7 +226,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to have JS Property",
         )
 
-    async def has_value(
+    async def to_have_value(
         self,
         value: Union[str, Pattern],
         timeout: float = None,
@@ -239,7 +239,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to have Value",
         )
 
-    async def has_text(
+    async def to_have_text(
         self,
         expected: Union[List[Pattern], List[str], Pattern, str],
         use_inner_text: bool = None,
@@ -274,7 +274,7 @@ class LocatorAssertions(AssertionsBase):
                 "Locator expected to have text",
             )
 
-    async def is_checked(
+    async def to_be_checked(
         self,
         timeout: float = None,
     ) -> None:
@@ -285,7 +285,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be checked",
         )
 
-    async def is_disabled(
+    async def to_be_disabled(
         self,
         timeout: float = None,
     ) -> None:
@@ -296,7 +296,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be disabled",
         )
 
-    async def is_editable(
+    async def to_be_editable(
         self,
         timeout: float = None,
     ) -> None:
@@ -307,7 +307,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be editable",
         )
 
-    async def is_empty(
+    async def to_be_empty(
         self,
         timeout: float = None,
     ) -> None:
@@ -318,7 +318,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be empty",
         )
 
-    async def is_enabled(
+    async def to_be_enabled(
         self,
         timeout: float = None,
     ) -> None:
@@ -329,7 +329,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be enabled",
         )
 
-    async def is_hidden(
+    async def to_be_hidden(
         self,
         timeout: float = None,
     ) -> None:
@@ -340,7 +340,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be hidden",
         )
 
-    async def is_visible(
+    async def to_be_visible(
         self,
         timeout: float = None,
     ) -> None:
@@ -351,7 +351,7 @@ class LocatorAssertions(AssertionsBase):
             "Locator expected to be visible",
         )
 
-    async def is_focused(
+    async def to_be_focused(
         self,
         timeout: float = None,
     ) -> None:
