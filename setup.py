@@ -28,7 +28,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.17.0-1637005716000"
+driver_version = "1.17.0-rc1"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -112,7 +112,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             for arch in platform:
                 zip_file = f"playwright-{driver_version}-{arch['zip_name']}.zip"
                 if not os.path.exists("driver/" + zip_file):
-                    url = f"https://playwright.azureedge.net/builds/driver/next/{zip_file}"
+                    url = f"https://playwright.azureedge.net/builds/driver/{zip_file}"
                     print(f"Fetching {url}")
                     # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
                     subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
