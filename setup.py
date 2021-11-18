@@ -112,7 +112,14 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             for arch in platform:
                 zip_file = f"playwright-{driver_version}-{arch['zip_name']}.zip"
                 if not os.path.exists("driver/" + zip_file):
-                    url = f"https://playwright.azureedge.net/builds/driver/next/{zip_file}"
+                    url = "https://playwright.azureedge.net/builds/driver/"
+                    if (
+                        "-alpha" in driver_version
+                        or "-beta" in driver_version
+                        or "-next" in driver_version
+                    ):
+                        url = url + "next/"
+                    url = url + zip_file
                     print(f"Fetching {url}")
                     # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
                     subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
