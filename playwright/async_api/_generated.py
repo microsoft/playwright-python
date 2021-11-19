@@ -14434,6 +14434,7 @@ class PageAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14461,6 +14462,7 @@ class PageAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14488,6 +14490,7 @@ class PageAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14515,6 +14518,7 @@ class PageAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14555,6 +14559,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14587,6 +14592,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14617,6 +14623,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14647,6 +14654,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14678,6 +14686,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14705,6 +14714,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14725,6 +14735,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14745,6 +14756,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14773,6 +14785,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14801,6 +14814,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14823,6 +14837,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14845,6 +14860,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14870,6 +14886,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14896,6 +14913,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14921,6 +14939,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14943,6 +14962,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -14975,6 +14995,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15007,6 +15028,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15027,6 +15049,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15045,6 +15068,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15063,6 +15087,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15081,6 +15106,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15099,6 +15125,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15117,6 +15144,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15135,6 +15163,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15153,6 +15182,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15171,6 +15201,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15189,6 +15220,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15207,6 +15239,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15225,6 +15258,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15243,6 +15277,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15261,6 +15296,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15279,6 +15315,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
@@ -15297,6 +15334,7 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(

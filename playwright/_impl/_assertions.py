@@ -34,6 +34,7 @@ class AssertionsBase:
         expected: Any,
         message: str,
     ) -> None:
+        __tracebackhide__ = True
         expect_options["isNot"] = self._is_not
         if expect_options.get("timeout") is None:
             expect_options["timeout"] = 5_000
@@ -43,11 +44,11 @@ class AssertionsBase:
             del expect_options["useInnerText"]
         result = await self._actual_locator._expect(expression, expect_options)
         if result["matches"] == self._is_not:
-            log = "".join(result.get("log", ""))
-            if log.strip():
+            log = "\n".join(result.get("log", "")).strip()
+            if log:
                 log = "\nCall log:\n" + log
-            if expected is None:
-                raise AssertionError(f"{message} {log}")
+            if expected is not None:
+                raise AssertionError(f"{message} '{expected}' {log}")
             raise AssertionError(f"{message} {log}")
 
 
@@ -66,6 +67,7 @@ class PageAssertions(AssertionsBase):
         expected_values = to_expected_text_values(
             [title_or_reg_exp], normalize_white_space=True
         )
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.have.title",
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
@@ -76,11 +78,13 @@ class PageAssertions(AssertionsBase):
     async def not_to_have_title(
         self, title_or_reg_exp: Union[Pattern, str], timeout: float = None
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_title(title_or_reg_exp, timeout)
 
     async def to_have_url(
         self, url_or_reg_exp: Union[str, Pattern], timeout: float = None
     ) -> None:
+        __tracebackhide__ = True
         base_url = self._actual_page.context._options.get("baseURL")
         if isinstance(url_or_reg_exp, str) and base_url:
             url_or_reg_exp = urljoin(base_url, url_or_reg_exp)
@@ -95,6 +99,7 @@ class PageAssertions(AssertionsBase):
     async def not_to_have_url(
         self, url_or_reg_exp: Union[Pattern, str], timeout: float = None
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_url(url_or_reg_exp, timeout)
 
 
@@ -113,6 +118,7 @@ class LocatorAssertions(AssertionsBase):
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         if isinstance(expected, list):
             expected_text = to_expected_text_values(
                 expected, match_substring=True, normalize_white_space=True
@@ -148,6 +154,7 @@ class LocatorAssertions(AssertionsBase):
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_contain_text(expected, use_inner_text, timeout)
 
     async def to_have_attribute(
@@ -156,6 +163,7 @@ class LocatorAssertions(AssertionsBase):
         value: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
         await self._expect_impl(
             "to.have.attribute",
@@ -172,6 +180,7 @@ class LocatorAssertions(AssertionsBase):
         value: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_attribute(name, value, timeout)
 
     async def to_have_class(
@@ -179,6 +188,7 @@ class LocatorAssertions(AssertionsBase):
         expected: Union[List[Pattern], List[str], Pattern, str],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         if isinstance(expected, list):
             expected_text = to_expected_text_values(expected)
             await self._expect_impl(
@@ -201,6 +211,7 @@ class LocatorAssertions(AssertionsBase):
         expected: Union[List[Pattern], List[str], Pattern, str],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_class(expected, timeout)
 
     async def to_have_count(
@@ -208,6 +219,7 @@ class LocatorAssertions(AssertionsBase):
         count: int,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.have.count",
             FrameExpectOptions(expectedNumber=count, timeout=timeout),
@@ -220,6 +232,7 @@ class LocatorAssertions(AssertionsBase):
         count: int,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_count(count, timeout)
 
     async def to_have_css(
@@ -228,6 +241,7 @@ class LocatorAssertions(AssertionsBase):
         value: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
         await self._expect_impl(
             "to.have.css",
@@ -244,6 +258,7 @@ class LocatorAssertions(AssertionsBase):
         value: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_css(name, value, timeout)
 
     async def to_have_id(
@@ -251,6 +266,7 @@ class LocatorAssertions(AssertionsBase):
         id: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         expected_text = to_expected_text_values([id])
         await self._expect_impl(
             "to.have.id",
@@ -264,6 +280,7 @@ class LocatorAssertions(AssertionsBase):
         id: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_id(id, timeout)
 
     async def to_have_js_property(
@@ -272,6 +289,7 @@ class LocatorAssertions(AssertionsBase):
         value: Any,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.have.property",
             FrameExpectOptions(
@@ -287,6 +305,7 @@ class LocatorAssertions(AssertionsBase):
         value: Any,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_js_property(name, value, timeout)
 
     async def to_have_value(
@@ -294,6 +313,7 @@ class LocatorAssertions(AssertionsBase):
         value: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
         await self._expect_impl(
             "to.have.value",
@@ -307,6 +327,7 @@ class LocatorAssertions(AssertionsBase):
         value: Union[str, Pattern],
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_value(value, timeout)
 
     async def to_have_text(
@@ -315,6 +336,7 @@ class LocatorAssertions(AssertionsBase):
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         if isinstance(expected, list):
             expected_text = to_expected_text_values(
                 expected, normalize_white_space=True
@@ -350,12 +372,14 @@ class LocatorAssertions(AssertionsBase):
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_have_text(expected, use_inner_text, timeout)
 
     async def to_be_checked(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.checked",
             FrameExpectOptions(timeout=timeout),
@@ -367,12 +391,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_checked(timeout)
 
     async def to_be_disabled(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.disabled",
             FrameExpectOptions(timeout=timeout),
@@ -384,12 +410,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_disabled(timeout)
 
     async def to_be_editable(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.editable",
             FrameExpectOptions(timeout=timeout),
@@ -401,12 +429,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_editable(timeout)
 
     async def to_be_empty(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.empty",
             FrameExpectOptions(timeout=timeout),
@@ -418,12 +448,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_empty(timeout)
 
     async def to_be_enabled(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.enabled",
             FrameExpectOptions(timeout=timeout),
@@ -435,12 +467,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_enabled(timeout)
 
     async def to_be_hidden(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.hidden",
             FrameExpectOptions(timeout=timeout),
@@ -452,12 +486,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_hidden(timeout)
 
     async def to_be_visible(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.visible",
             FrameExpectOptions(timeout=timeout),
@@ -469,12 +505,14 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_visible(timeout)
 
     async def to_be_focused(
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._expect_impl(
             "to.be.focused",
             FrameExpectOptions(timeout=timeout),
@@ -486,6 +524,7 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
     ) -> None:
+        __tracebackhide__ = True
         await self._not.to_be_focused(timeout)
 
 

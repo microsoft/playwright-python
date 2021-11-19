@@ -14157,6 +14157,7 @@ class PageAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14184,6 +14185,7 @@ class PageAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14211,6 +14213,7 @@ class PageAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14238,6 +14241,7 @@ class PageAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14278,6 +14282,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14310,6 +14315,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14340,6 +14346,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14370,6 +14377,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14401,6 +14409,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14428,6 +14437,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14448,6 +14458,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14468,6 +14479,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14496,6 +14508,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14524,6 +14537,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14546,6 +14560,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14568,6 +14583,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14593,6 +14609,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14619,6 +14636,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14644,6 +14662,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14666,6 +14685,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14698,6 +14718,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14730,6 +14751,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14750,6 +14772,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14768,6 +14791,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14786,6 +14810,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14804,6 +14829,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14822,6 +14848,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14840,6 +14867,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14858,6 +14886,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14876,6 +14905,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14894,6 +14924,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14912,6 +14943,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14930,6 +14962,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14948,6 +14981,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14966,6 +15000,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -14984,6 +15019,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -15002,6 +15038,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(
@@ -15020,6 +15057,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
+        __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             self._sync(

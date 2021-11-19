@@ -98,6 +98,8 @@ def generate(t: Any) -> None:
                 documentation_provider.print_entry(
                     class_name, name, get_type_hints(value, api_globals)
                 )
+            if class_name in ["LocatorAssertions", "PageAssertions"]:
+                print("        __tracebackhide__ = True")
             if "expect_" in name:
                 print("")
                 print(
