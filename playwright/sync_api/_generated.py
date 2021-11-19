@@ -43,6 +43,8 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._api_types import Error
+from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
+from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -3222,7 +3224,7 @@ class Frame(SyncBase):
         `ElementHandle` instances can be passed as an argument to the `frame.evaluate()`:
 
         ```py
-        body_handle = frame.query_selector(\"body\")
+        body_handle = frame.evaluate(\"document.body\")
         html = frame.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         body_handle.dispose()
         ```
@@ -3309,6 +3311,8 @@ class Frame(SyncBase):
 
         Returns the ElementHandle pointing to the frame element.
 
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
+
         The method finds an element matching the specified selector within the frame. See
         [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 
@@ -3336,6 +3340,8 @@ class Frame(SyncBase):
         """Frame.query_selector_all
 
         Returns the ElementHandles pointing to the frame elements.
+
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 
         The method finds all elements matching the specified selector within the frame. See
         [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
@@ -3369,6 +3375,9 @@ class Frame(SyncBase):
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
         `detached`.
+
+        > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
+        web-first assertions make the code wait-for-selector-free.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
         the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
@@ -3707,6 +3716,9 @@ class Frame(SyncBase):
 
         Returns the return value of `expression`.
 
+        > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
+        tests. Use `locator.evaluate()`, other `Locator` helper methods or web-first assertions instead.
+
         The method finds an element matching the specified selector within the frame and passes it as a first argument to
         `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
         method throws an error.
@@ -3758,6 +3770,9 @@ class Frame(SyncBase):
         """Frame.eval_on_selector_all
 
         Returns the return value of `expression`.
+
+        > NOTE: In most cases, `locator.evaluate_all()`, other `Locator` helper methods and web-first assertions do a
+        better job.
 
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements
         as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
@@ -5373,11 +5388,11 @@ class Selectors(SyncBase):
             page.set_content('<div><button>Click me</button></div>')
 
             # Use the selector prefixed with its name.
-            button = page.query_selector('tag=button')
+            button = page.locator('tag=button')
             # Combine it with other selector engines.
             page.click('tag=div >> text=\"Click me\"')
             # Can use it in any methods supporting selectors.
-            button_count = page.eval_on_selector_all('tag=button', 'buttons => buttons.length')
+            button_count = page.locator('tag=button').count()
             print(button_count)
             browser.close()
 
@@ -6203,6 +6218,18 @@ class Page(SyncContextManager):
         return mapping.from_impl_list(self._impl_obj.workers)
 
     @property
+    def request(self) -> "APIRequestContext":
+        """Page.request
+
+        API testing helper associated with this page. Requests made with this API will use page cookies.
+
+        Returns
+        -------
+        APIRequestContext
+        """
+        return mapping.from_impl(self._impl_obj.request)
+
+    @property
     def video(self) -> typing.Optional["Video"]:
         """Page.video
 
@@ -6309,8 +6336,10 @@ class Page(SyncContextManager):
     ) -> typing.Optional["ElementHandle"]:
         """Page.query_selector
 
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
+
         The method finds an element matching the specified selector within the page. If no elements match the selector, the
-        return value resolves to `null`. To wait for an element on the page, use `page.wait_for_selector()`.
+        return value resolves to `null`. To wait for an element on the page, use `locator.wait_for()`.
 
         Shortcut for main frame's `frame.query_selector()`.
 
@@ -6336,6 +6365,8 @@ class Page(SyncContextManager):
 
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
         """Page.query_selector_all
+
+        > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 
         The method finds all elements matching the specified selector within the page. If no elements match the selector, the
         return value resolves to `[]`.
@@ -6371,6 +6402,9 @@ class Page(SyncContextManager):
 
         Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
         `detached`.
+
+        > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
+        web-first assertions make the code wait-for-selector-free.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
         the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
@@ -6727,7 +6761,7 @@ class Page(SyncContextManager):
         `ElementHandle` instances can be passed as an argument to the `page.evaluate()`:
 
         ```py
-        body_handle = page.query_selector(\"body\")
+        body_handle = page.evaluate(\"document.body\")
         html = page.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         body_handle.dispose()
         ```
@@ -6819,6 +6853,9 @@ class Page(SyncContextManager):
     ) -> typing.Any:
         """Page.eval_on_selector
 
+        > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
+        tests. Use `locator.evaluate()`, other `Locator` helper methods or web-first assertions instead.
+
         The method finds an element matching the specified selector within the page and passes it as a first argument to
         `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 
@@ -6869,6 +6906,9 @@ class Page(SyncContextManager):
         self, selector: str, expression: str, arg: typing.Any = None
     ) -> typing.Any:
         """Page.eval_on_selector_all
+
+        > NOTE: In most cases, `locator.evaluate_all()`, other `Locator` helper methods and web-first assertions do a
+        better job.
 
         The method finds all elements matching the specified selector within the page and passes an array of matched elements as
         a first argument to `expression`. Returns the result of `expression` invocation.
@@ -14097,3 +14137,934 @@ class APIRequest(SyncBase):
 
 
 mapping.register(APIRequestImpl, APIRequest)
+
+
+class PageAssertions(SyncBase):
+    def to_have_title(
+        self,
+        title_or_reg_exp: typing.Union[typing.Pattern, str],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """PageAssertions.to_have_title
+
+        Ensures the page has the given title.
+
+        Parameters
+        ----------
+        title_or_reg_exp : Union[Pattern, str]
+            Expected title or RegExp.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page_assertions.to_have_title",
+                self._impl_obj.to_have_title(
+                    title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_title(
+        self,
+        title_or_reg_exp: typing.Union[typing.Pattern, str],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """PageAssertions.not_to_have_title
+
+        The opposite of `page_assertions.to_have_title()`.
+
+        Parameters
+        ----------
+        title_or_reg_exp : Union[Pattern, str]
+            Expected title or RegExp.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page_assertions.not_to_have_title",
+                self._impl_obj.not_to_have_title(
+                    title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                ),
+            )
+        )
+
+    def to_have_url(
+        self,
+        url_or_reg_exp: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """PageAssertions.to_have_url
+
+        Ensures the page is navigated to the given URL.
+
+        Parameters
+        ----------
+        url_or_reg_exp : Union[Pattern, str]
+            Expected substring or RegExp.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page_assertions.to_have_url",
+                self._impl_obj.to_have_url(
+                    url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_url(
+        self,
+        url_or_reg_exp: typing.Union[typing.Pattern, str],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """PageAssertions.not_to_have_url
+
+        The opposite of `page_assertions.to_have_url()`.
+
+        Parameters
+        ----------
+        url_or_reg_exp : Union[Pattern, str]
+            Expected substring or RegExp.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "page_assertions.not_to_have_url",
+                self._impl_obj.not_to_have_url(
+                    url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                ),
+            )
+        )
+
+
+mapping.register(PageAssertionsImpl, PageAssertions)
+
+
+class LocatorAssertions(SyncBase):
+    def to_contain_text(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        use_inner_text: bool = None,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_contain_text
+
+        Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the value
+        as well.
+
+        Note that if array is passed as an expected value, entire lists can be asserted:
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected substring or RegExp or a list of those.
+        use_inner_text : Union[bool, NoneType]
+            Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_contain_text",
+                self._impl_obj.to_contain_text(
+                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_contain_text(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        use_inner_text: bool = None,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_contain_text
+
+        The opposite of `locator_assertions.to_contain_text()`.
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected substring or RegExp or a list of those.
+        use_inner_text : Union[bool, NoneType]
+            Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_contain_text",
+                self._impl_obj.not_to_contain_text(
+                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                ),
+            )
+        )
+
+    def to_have_attribute(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_attribute
+
+        Ensures the `Locator` points to an element with given attribute.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        value : Union[Pattern, str]
+            Expected attribute value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_attribute",
+                self._impl_obj.to_have_attribute(
+                    name=name, value=value, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_attribute(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_attribute
+
+        The opposite of `locator_assertions.to_have_attribute()`.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        value : Union[Pattern, str]
+            Expected attribute value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_attribute",
+                self._impl_obj.not_to_have_attribute(
+                    name=name, value=value, timeout=timeout
+                ),
+            )
+        )
+
+    def to_have_class(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_class
+
+        Ensures the `Locator` points to an element with given CSS class.
+
+        Note that if array is passed as an expected value, entire lists can be asserted:
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected class or RegExp or a list of those.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_class",
+                self._impl_obj.to_have_class(expected=expected, timeout=timeout),
+            )
+        )
+
+    def not_to_have_class(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_class
+
+        The opposite of `locator_assertions.to_have_class()`.
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected class or RegExp or a list of those.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_class",
+                self._impl_obj.not_to_have_class(expected=expected, timeout=timeout),
+            )
+        )
+
+    def to_have_count(self, count: int, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_have_count
+
+        Ensures the `Locator` resolves to an exact number of DOM nodes.
+
+        Parameters
+        ----------
+        count : int
+            Expected count.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_count",
+                self._impl_obj.to_have_count(count=count, timeout=timeout),
+            )
+        )
+
+    def not_to_have_count(self, count: int, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_have_count
+
+        The opposite of `locator_assertions.to_have_count()`.
+
+        Parameters
+        ----------
+        count : int
+            Expected count.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_count",
+                self._impl_obj.not_to_have_count(count=count, timeout=timeout),
+            )
+        )
+
+    def to_have_css(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_css
+
+        Ensures the `Locator` resolves to an element with the given computed CSS style.
+
+        Parameters
+        ----------
+        name : str
+            CSS property name.
+        value : Union[Pattern, str]
+            CSS property value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_css",
+                self._impl_obj.to_have_css(name=name, value=value, timeout=timeout),
+            )
+        )
+
+    def not_to_have_css(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_css
+
+        The opposite of `locator_assertions.to_have_css()`.
+
+        Parameters
+        ----------
+        name : str
+            CSS property name.
+        value : Union[Pattern, str]
+            CSS property value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_css",
+                self._impl_obj.not_to_have_css(name=name, value=value, timeout=timeout),
+            )
+        )
+
+    def to_have_id(
+        self, id: typing.Union[str, typing.Pattern], *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_id
+
+        Ensures the `Locator` points to an element with the given DOM Node ID.
+
+        Parameters
+        ----------
+        id : Union[Pattern, str]
+            Element id.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_id",
+                self._impl_obj.to_have_id(id=id, timeout=timeout),
+            )
+        )
+
+    def not_to_have_id(
+        self, id: typing.Union[str, typing.Pattern], *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_id
+
+        The opposite of `locator_assertions.to_have_id()`.
+
+        Parameters
+        ----------
+        id : Union[Pattern, str]
+            Element id.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_id",
+                self._impl_obj.not_to_have_id(id=id, timeout=timeout),
+            )
+        )
+
+    def to_have_js_property(
+        self, name: str, value: typing.Any, *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_js_property
+
+        Ensures the `Locator` points to an element with given JavaScript property. Note that this property can be of a primitive
+        type as well as a plain serializable JavaScript object.
+
+        Parameters
+        ----------
+        name : str
+            Property name.
+        value : Any
+            Property value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_js_property",
+                self._impl_obj.to_have_js_property(
+                    name=name, value=mapping.to_impl(value), timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_js_property(
+        self, name: str, value: typing.Any, *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_js_property
+
+        The opposite of `locator_assertions.to_have_js_property()`.
+
+        Parameters
+        ----------
+        name : str
+            Property name.
+        value : Any
+            Property value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_js_property",
+                self._impl_obj.not_to_have_js_property(
+                    name=name, value=mapping.to_impl(value), timeout=timeout
+                ),
+            )
+        )
+
+    def to_have_value(
+        self, value: typing.Union[str, typing.Pattern], *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_value
+
+        Ensures the `Locator` points to an element with the given input value. You can use regular expressions for the value as
+        well.
+
+        Parameters
+        ----------
+        value : Union[Pattern, str]
+            Expected value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_value",
+                self._impl_obj.to_have_value(value=value, timeout=timeout),
+            )
+        )
+
+    def not_to_have_value(
+        self, value: typing.Union[str, typing.Pattern], *, timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_value
+
+        The opposite of `locator_assertions.to_have_value()`.
+
+        Parameters
+        ----------
+        value : Union[Pattern, str]
+            Expected value.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_value",
+                self._impl_obj.not_to_have_value(value=value, timeout=timeout),
+            )
+        )
+
+    def to_have_text(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        use_inner_text: bool = None,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_text
+
+        Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as well.
+
+        Note that if array is passed as an expected value, entire lists can be asserted:
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected substring or RegExp or a list of those.
+        use_inner_text : Union[bool, NoneType]
+            Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_have_text",
+                self._impl_obj.to_have_text(
+                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                ),
+            )
+        )
+
+    def not_to_have_text(
+        self,
+        expected: typing.Union[
+            typing.List[typing.Pattern], typing.List[str], typing.Pattern, str
+        ],
+        *,
+        use_inner_text: bool = None,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_text
+
+        The opposite of `locator_assertions.to_have_text()`.
+
+        Parameters
+        ----------
+        expected : Union[List[Pattern], List[str], Pattern, str]
+            Expected substring or RegExp or a list of those.
+        use_inner_text : Union[bool, NoneType]
+            Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_have_text",
+                self._impl_obj.not_to_have_text(
+                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                ),
+            )
+        )
+
+    def to_be_checked(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_checked
+
+        Ensures the `Locator` points to a checked input.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_checked",
+                self._impl_obj.to_be_checked(timeout=timeout),
+            )
+        )
+
+    def not_to_be_checked(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_checked
+
+        The opposite of `locator_assertions.to_be_checked()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_checked",
+                self._impl_obj.not_to_be_checked(timeout=timeout),
+            )
+        )
+
+    def to_be_disabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_disabled
+
+        Ensures the `Locator` points to a disabled element.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_disabled",
+                self._impl_obj.to_be_disabled(timeout=timeout),
+            )
+        )
+
+    def not_to_be_disabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_disabled
+
+        The opposite of `locator_assertions.to_be_disabled()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_disabled",
+                self._impl_obj.not_to_be_disabled(timeout=timeout),
+            )
+        )
+
+    def to_be_editable(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_editable
+
+        Ensures the `Locator` points to an editable element.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_editable",
+                self._impl_obj.to_be_editable(timeout=timeout),
+            )
+        )
+
+    def not_to_be_editable(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_editable
+
+        The opposite of `locator_assertions.to_be_editable()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_editable",
+                self._impl_obj.not_to_be_editable(timeout=timeout),
+            )
+        )
+
+    def to_be_empty(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_empty
+
+        Ensures the `Locator` points to an empty editable element or to a DOM node that has no text.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_empty",
+                self._impl_obj.to_be_empty(timeout=timeout),
+            )
+        )
+
+    def not_to_be_empty(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_empty
+
+        The opposite of `locator_assertions.to_be_empty()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_empty",
+                self._impl_obj.not_to_be_empty(timeout=timeout),
+            )
+        )
+
+    def to_be_enabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_enabled
+
+        Ensures the `Locator` points to an enabled element.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_enabled",
+                self._impl_obj.to_be_enabled(timeout=timeout),
+            )
+        )
+
+    def not_to_be_enabled(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_enabled
+
+        The opposite of `locator_assertions.to_be_enabled()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_enabled",
+                self._impl_obj.not_to_be_enabled(timeout=timeout),
+            )
+        )
+
+    def to_be_hidden(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_hidden
+
+        Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](./actionability.md#visible).
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_hidden",
+                self._impl_obj.to_be_hidden(timeout=timeout),
+            )
+        )
+
+    def not_to_be_hidden(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_hidden
+
+        The opposite of `locator_assertions.to_be_hidden()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_hidden",
+                self._impl_obj.not_to_be_hidden(timeout=timeout),
+            )
+        )
+
+    def to_be_visible(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_visible
+
+        Ensures the `Locator` points to a [visible](./actionability.md#visible) DOM node.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_visible",
+                self._impl_obj.to_be_visible(timeout=timeout),
+            )
+        )
+
+    def not_to_be_visible(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_visible
+
+        The opposite of `locator_assertions.to_be_visible()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_visible",
+                self._impl_obj.not_to_be_visible(timeout=timeout),
+            )
+        )
+
+    def to_be_focused(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.to_be_focused
+
+        Ensures the `Locator` points to a focused DOM node.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.to_be_focused",
+                self._impl_obj.to_be_focused(timeout=timeout),
+            )
+        )
+
+    def not_to_be_focused(self, *, timeout: float = None) -> NoneType:
+        """LocatorAssertions.not_to_be_focused
+
+        The opposite of `locator_assertions.to_be_focused()`.
+
+        Parameters
+        ----------
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "locator_assertions.not_to_be_focused",
+                self._impl_obj.not_to_be_focused(timeout=timeout),
+            )
+        )
+
+
+mapping.register(LocatorAssertionsImpl, LocatorAssertions)

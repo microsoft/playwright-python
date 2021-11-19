@@ -26,7 +26,13 @@ from typing import (
     Union,
 )
 
-from playwright._impl._api_structures import FilePayload, FloatRect, Position
+from playwright._impl._api_structures import (
+    FilePayload,
+    FloatRect,
+    FrameExpectOptions,
+    FrameExpectResult,
+    Position,
+)
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._helper import (
     Error,
@@ -35,7 +41,7 @@ from playwright._impl._helper import (
     locals_to_params,
     monotonic_time,
 )
-from playwright._impl._js_handle import Serializable
+from playwright._impl._js_handle import Serializable, parse_value, serialize_argument
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -474,6 +480,23 @@ class Locator:
                 noWaitAfter=noWaitAfter,
                 trial=trial,
             )
+
+    async def _expect(
+        self, expression: str, options: FrameExpectOptions
+    ) -> FrameExpectResult:
+        if "expectedValue" in options:
+            options["expectedValue"] = serialize_argument(options["expectedValue"])
+        result = await self._frame._channel.send_return_as_dict(
+            "expect",
+            {
+                "selector": self._selector,
+                "expression": expression,
+                **options,
+            },
+        )
+        if result.get("received"):
+            result["received"] = parse_value(result["received"])
+        return result
 
 
 class FrameLocator:

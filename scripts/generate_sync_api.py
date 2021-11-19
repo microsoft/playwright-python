@@ -42,7 +42,7 @@ def generate(t: Any) -> None:
     base_class = t.__bases__[0].__name__
     if class_name in ["Page", "BrowserContext", "Browser"]:
         base_sync_class = "SyncContextManager"
-    elif base_class in ["ChannelOwner", "object"]:
+    elif base_class in ["ChannelOwner", "object", "AssertionsBase"]:
         base_sync_class = "SyncBase"
     else:
         base_sync_class = base_class
@@ -95,6 +95,8 @@ def generate(t: Any) -> None:
                 documentation_provider.print_entry(
                     class_name, name, get_type_hints(value, api_globals)
                 )
+            if class_name in ["LocatorAssertions", "PageAssertions"]:
+                print("        __tracebackhide__ = True")
             if "expect_" in name:
                 print(
                     f"        return EventContextManager(self, self._impl_obj.{name}({arguments(value, 12)}).future)"

@@ -26,6 +26,7 @@ from typing import (  # type: ignore
 )
 
 from playwright._impl._accessibility import Accessibility
+from playwright._impl._assertions import LocatorAssertions, PageAssertions
 from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._browser_type import BrowserType
@@ -240,6 +241,7 @@ from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
 from playwright._impl._api_types import Error
 from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
+from playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl
 """
 
 
@@ -274,6 +276,8 @@ all_types = [
     APIResponse,
     APIRequestContext,
     APIRequest,
+    PageAssertions,
+    LocatorAssertions,
 ]
 
 api_globals = globals()

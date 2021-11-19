@@ -17,3 +17,4 @@ Parameter type mismatch in Page.unroute(handler=): documented as Union[Callable[
 Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
+Method not implemented: PlaywrightAssertions.expect
