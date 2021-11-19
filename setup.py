@@ -124,13 +124,14 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 
         wheels = base_wheel_bundles
         if not self.all:
+            # Limit to 1, since for MacOS e.g. we have multiple wheels for the same platform and architecture and Conda expects 1.
             wheels = list(
                 filter(
                     lambda wheel: wheel["platform"] == sys.platform
                     and wheel["machine"] == platform.machine().lower(),
                     base_wheel_bundles,
                 )
-            )
+            )[:1]
         self._build_wheels(wheels)
 
     def _build_wheels(
