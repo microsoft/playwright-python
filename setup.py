@@ -109,7 +109,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             },
             {
                 "wheel": "win32.whl",
-                "machine": "amd64",
+                "machine": "i386",
                 "platform": "win32",
                 "zip_name": "win32_x64",
             },
@@ -120,20 +120,27 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 "zip_name": "win32_x64",
             },
         ]
-        self._install_local_driver(base_wheel_bundles)
-        if self.all:
-            self._install_all_wheels(base_wheel_bundles)
+        self._download_and_extract_local_driver(base_wheel_bundles)
 
-    def _install_all_wheels(
+        wheels = base_wheel_bundles
+        if not self.all:
+            wheels = list(
+                filter(
+                    lambda wheel: wheel["platform"] == sys.platform
+                    and wheel["machine"] == platform.machine().lower(),
+                    base_wheel_bundles,
+                )
+            )
+        self._build_wheels(wheels)
+
+    def _build_wheels(
         self,
         wheels: List[Dict[str, str]],
     ) -> None:
-        for wheel_bundle in wheels:
-            download_driver(wheel_bundle["zip_name"])
         base_wheel_location: str = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
-
         for wheel_bundle in wheels:
+            download_driver(wheel_bundle["zip_name"])
             zip_file = (
                 f"driver/playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
             )
@@ -152,7 +159,6 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     "playwright/driver/README.md",
                     f"{wheel_bundle['wheel']} driver package",
                 )
-
         os.remove(base_wheel_location)
         if InWheel:
             for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
@@ -168,7 +174,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         else:
             print("auditwheel not installed, not updating RECORD file")
 
-    def _install_local_driver(
+    def _download_and_extract_local_driver(
         self,
         wheels: List[Dict[str, str]],
     ) -> None:
@@ -176,7 +182,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             map(
                 lambda wheel: wheel["zip_name"],
                 filter(
-                    lambda wheel: wheel["machine"] == platform.machine()
+                    lambda wheel: wheel["machine"] == platform.machine().lower()
                     and wheel["platform"] == sys.platform,
                     wheels,
                 ),
