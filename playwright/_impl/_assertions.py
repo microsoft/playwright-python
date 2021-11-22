@@ -25,6 +25,7 @@ class AssertionsBase:
     def __init__(self, locator: Locator, is_not: bool = False) -> None:
         self._actual_locator = locator
         self._loop = locator._loop
+        self._dispatcher_fiber = locator._dispatcher_fiber
         self._is_not = is_not
 
     async def _expect_impl(
@@ -114,7 +115,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_contain_text(
         self,
-        expected: Union[List[Pattern], List[str], Pattern, str],
+        expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
@@ -150,7 +151,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_contain_text(
         self,
-        expected: Union[List[Pattern], List[str], Pattern, str],
+        expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
@@ -185,7 +186,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_class(
         self,
-        expected: Union[List[Pattern], List[str], Pattern, str],
+        expected: Union[List[Union[Pattern, str]], Pattern, str],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -208,7 +209,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_class(
         self,
-        expected: Union[List[Pattern], List[str], Pattern, str],
+        expected: Union[List[Union[Pattern, str]], Pattern, str],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -332,7 +333,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_text(
         self,
-        expected: Union[List[Pattern], List[str], Pattern, str],
+        expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
@@ -368,7 +369,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_text(
         self,
-        expected: Union[List[Pattern], List[str], Pattern, str],
+        expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
     ) -> None:
