@@ -388,7 +388,9 @@ def test_accessibility_should_work_an_input(page: Page) -> None:
     }
 
 
-def test_accessibility_should_work_on_a_menu(page: Page, is_webkit: bool) -> None:
+def test_accessibility_should_work_on_a_menu(
+    page: Page, is_webkit: bool, is_chromium: str, browser_channel: str
+) -> None:
     page.set_content(
         """
         <div role="menu" title="My Menu">
@@ -409,7 +411,7 @@ def test_accessibility_should_work_on_a_menu(page: Page, is_webkit: bool) -> Non
             {"role": "menuitem", "name": "Third Item"},
         ],
     }
-    if is_webkit:
+    if is_webkit or (is_chromium and not browser_channel):
         golden["orientation"] = "vertical"
     assert page.accessibility.snapshot(root=menu) == golden
 

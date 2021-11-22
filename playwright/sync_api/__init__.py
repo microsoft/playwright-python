@@ -18,9 +18,13 @@ Firefox and WebKit with a single API. Playwright is built to enable cross-browse
 web automation that is ever-green, capable, reliable and fast.
 """
 
+from typing import Union, overload
+
 import playwright._impl._api_structures
 import playwright._impl._api_types
 import playwright.sync_api._generated
+from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
+from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright.sync_api._context_manager import PlaywrightContextManager
 from playwright.sync_api._generated import (
     Accessibility,
@@ -40,8 +44,10 @@ from playwright.sync_api._generated import (
     JSHandle,
     Keyboard,
     Locator,
+    LocatorAssertions,
     Mouse,
     Page,
+    PageAssertions,
     Playwright,
     Request,
     Response,
@@ -76,7 +82,28 @@ def sync_playwright() -> PlaywrightContextManager:
     return PlaywrightContextManager()
 
 
+@overload
+def expect(page_or_locator: Page) -> PageAssertions:
+    ...
+
+
+@overload
+def expect(page_or_locator: Locator) -> LocatorAssertions:
+    ...
+
+
+def expect(
+    page_or_locator: Union[Page, Locator]
+) -> Union[PageAssertions, LocatorAssertions]:
+    if isinstance(page_or_locator, Page):
+        return PageAssertions(PageAssertionsImpl(page_or_locator._impl_obj))
+    elif isinstance(page_or_locator, Locator):
+        return LocatorAssertions(LocatorAssertionsImpl(page_or_locator._impl_obj))
+    raise ValueError(f"Unsupported type: {type(page_or_locator)}")
+
+
 __all__ = [
+    "expect",
     "Accessibility",
     "APIRequest",
     "APIRequestContext",
