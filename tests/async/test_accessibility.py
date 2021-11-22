@@ -374,7 +374,9 @@ async def test_accessibility_should_work_an_input(page):
     }
 
 
-async def test_accessibility_should_work_on_a_menu(page, is_webkit):
+async def test_accessibility_should_work_on_a_menu(
+    page, is_webkit, is_chromium, browser_channel
+):
     await page.set_content(
         """
         <div role="menu" title="My Menu">
@@ -395,7 +397,7 @@ async def test_accessibility_should_work_on_a_menu(page, is_webkit):
             {"role": "menuitem", "name": "Third Item"},
         ],
     }
-    if is_webkit:
+    if is_webkit or (is_chromium and not browser_channel):
         golden["orientation"] = "vertical"
     assert await page.accessibility.snapshot(root=menu) == golden
 
