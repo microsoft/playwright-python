@@ -25,14 +25,12 @@ from typing import Any, Callable, Dict, Generator, Generic, Set, Tuple, TypeVar
 from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
-from greenlet import greenlet
 from OpenSSL import crypto
 from twisted.internet import reactor, ssl
 from twisted.internet.protocol import ClientFactory
 from twisted.web import http
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.sync_api._context_manager import dispatcher_fiber
 
 _dirname = get_file_dirname()
 
@@ -164,17 +162,13 @@ class Server:
     ) -> Generator[ExpectResponse[http.Request], None, None]:
         future = asyncio.create_task(self.wait_for_request(path))
 
-        g_self = greenlet.getcurrent()
         cb_wrapper: ExpectResponse[http.Request] = ExpectResponse()
 
         def done_cb(task: asyncio.Task) -> None:
             cb_wrapper._value = future.result()
-            g_self.switch()
 
         future.add_done_callback(done_cb)
         yield cb_wrapper
-        while not future.done():
-            dispatcher_fiber.switch()
 
     def set_auth(self, path: str, username: str, password: str) -> None:
         self.auth[path] = (username, password)

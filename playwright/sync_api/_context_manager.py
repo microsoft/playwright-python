@@ -25,9 +25,6 @@ from playwright._impl._playwright import Playwright
 from playwright._impl._transport import PipeTransport
 from playwright.sync_api._generated import Playwright as SyncPlaywright
 
-# Used for sync API tests
-dispatcher_fiber: Any = None
-
 
 class PlaywrightContextManager:
     def __init__(self) -> None:
@@ -54,7 +51,6 @@ Please use the Async API instead."""
                 loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
 
-        global dispatcher_fiber
         dispatcher_fiber = greenlet(greenlet_main)
         self._connection = Connection(
             dispatcher_fiber,
