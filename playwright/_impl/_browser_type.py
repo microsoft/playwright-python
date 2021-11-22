@@ -152,9 +152,6 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
-        params["sdkLanguage"] = (
-            "python" if self._connection._is_sync else "python-async"
-        )
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
 
