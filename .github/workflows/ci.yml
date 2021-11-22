@@ -33,6 +33,25 @@ jobs:
       run: bash scripts/update_api.sh
     - name: Verify generated API is up to date
       run: git diff --exit-code
+  arm64:
+    name: Test on arm64 
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/setup-qemu-action@v1
+      with:
+        image: tonistiigi/binfmt:latest
+        platforms: all
+    - name: Test
+      run: |
+        sudo chown -R 0 $(pwd)
+        docker run --platform linux/arm64 -e debian_frontend=noninteractive --user=root -v $(pwd):/playwright --workdir /playwright --name playwright-docker-arm64 -td ubuntu:focal /bin/bash
+        docker exec playwright-docker-arm64 apt-get update -y 
+        docker exec playwright-docker-arm64 apt-get install python3.8 python3-pip git curl -y
+        docker exec playwright-docker-arm64 pip install pip wheel -U
+        docker exec playwright-docker-arm64 pip install . -r local-requirements.txt
+        docker exec playwright-docker-arm64 playwright install --with-deps
+        docker exec playwright-docker-arm64 xvfb-run pytest tests/ --timeout 90
 
   build:
     name: Build
