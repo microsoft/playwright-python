@@ -198,7 +198,6 @@ class Browser(ChannelOwner):
 
 
 async def normalize_context_params(is_sync: bool, params: Dict) -> None:
-    params["sdkLanguage"] = "python" if is_sync else "python-async"
     if params.get("noViewport"):
         del params["noViewport"]
         params["noDefaultViewport"] = True
