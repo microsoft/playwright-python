@@ -17,12 +17,14 @@ import subprocess
 import sys
 
 from playwright._impl._driver import compute_driver_executable
+from playwright._repo_version import version
 
 
 def main() -> None:
     driver_executable = compute_driver_executable()
     env = os.environ.copy()
     env["PW_CLI_TARGET_LANG"] = "python"
+    env["PW_CLI_DISPLAY_VERSION"] = version
     completed_process = subprocess.run([str(driver_executable), *sys.argv[1:]], env=env)
     sys.exit(completed_process.returncode)
 
