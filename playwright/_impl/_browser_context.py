@@ -137,7 +137,7 @@ class BrowserContext(ChannelOwner):
             "requestFinished",
             lambda params: self._on_request_finished(
                 from_channel(params["request"]),
-                from_nullable_channel(params["response"]),
+                from_nullable_channel(params["response"]) if "response" in params else False,
                 params["responseEndTiming"],
                 from_nullable_channel(params.get("page")),
             ),
