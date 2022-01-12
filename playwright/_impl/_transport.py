@@ -35,7 +35,7 @@ from playwright._impl._helper import ParsedMessagePayload
 def _get_stderr_fileno() -> Optional[int]:
     try:
         return sys.stderr.fileno()
-    except (AttributeError, io.UnsupportedOperation):
+    except (AttributeError, io.UnsupportedOperation, ValueError):
         # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
         # https://docs.python.org/3/library/faulthandler.html#issue-with-file-descriptors
         # This is potentially dangerous, but the best we can do.
