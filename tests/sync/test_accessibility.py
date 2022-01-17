@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any, Dict
+
 import pytest
 
 from playwright.sync_api import Page
@@ -220,6 +222,7 @@ def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable_field
     Edit this image: <img src="fakeimage.png" alt="my fake image">
     </div>"""
     )
+    golden: Dict[str, Any]
     if is_firefox:
         golden = {
             "role": "textbox",
