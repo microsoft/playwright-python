@@ -14,10 +14,12 @@
 
 import asyncio
 import inspect
+import os
 import sys
 from pathlib import Path
 
 import playwright
+from playwright._repo_version import version
 
 
 def compute_driver_executable() -> Path:
@@ -42,3 +44,13 @@ if sys.version_info.major == 3 and sys.version_info.minor == 7:
             # uvloop does not support child watcher
             # see https://github.com/microsoft/playwright-python/issues/582
             pass
+
+
+def get_driver_env() -> dict:
+    env = os.environ.copy()
+    env["PW_CLI_TARGET_LANG"] = "python"
+    env[
+        "PW_CLI_TARGET_LANG_VERSION"
+    ] = f"{sys.version_info.major}.{sys.version_info.minor}"
+    env["PW_CLI_DISPLAY_VERSION"] = version
+    return env

@@ -28,6 +28,7 @@ from pyee import AsyncIOEventEmitter
 from websockets.client import connect as websocket_connect
 
 from playwright._impl._api_types import Error
+from playwright._impl._driver import get_driver_env
 from playwright._impl._helper import ParsedMessagePayload
 
 
@@ -116,7 +117,7 @@ class PipeTransport(Transport):
 
         try:
             # For pyinstaller
-            env = os.environ.copy()
+            env = get_driver_env()
             if getattr(sys, "frozen", False):
                 env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "0")
 

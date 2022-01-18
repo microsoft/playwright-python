@@ -14,6 +14,7 @@
 
 import asyncio
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -263,3 +264,16 @@ async def test_should_accept_already_serialized_data_as_bytes_when_content_type_
     body = req.post_body
     assert body == stringified_value
     await request.dispose()
+
+
+async def test_should_contain_default_user_agent(
+    playwright: Playwright, server: Server
+):
+    request = await playwright.request.new_context()
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.get(server.EMPTY_PAGE),
+    )
+    user_agent = request.getHeader("user-agent")
+    assert "python" in user_agent
+    assert f"{sys.version_info.major}.{sys.version_info.minor}" in user_agent
