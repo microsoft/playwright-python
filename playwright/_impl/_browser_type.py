@@ -51,6 +51,7 @@ class BrowserType(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        _playwright: "Playwright"
 
     def __repr__(self) -> str:
         return f"<BrowserType name={self.name} executable_path={self.executable_path}>"
@@ -85,7 +86,11 @@ class BrowserType(ChannelOwner):
     ) -> Browser:
         params = locals_to_params(locals())
         normalize_launch_params(params)
-        return from_channel(await self._channel.send("launch", params))
+        browser = cast(
+            Browser, from_channel(await self._channel.send("launch", params))
+        )
+        browser._utils = self._playwright._utils
+        return browser
 
     async def launch_persistent_context(
         self,
@@ -142,6 +147,7 @@ class BrowserType(ChannelOwner):
             await self._channel.send("launchPersistentContext", params)
         )
         context._options = params
+        context._local_utils = self._playwright._utils
         return context
 
     async def connect_over_cdp(
@@ -154,6 +160,7 @@ class BrowserType(ChannelOwner):
         params = locals_to_params(locals())
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
+        browser._utils = self._playwright._utils
 
         default_context = cast(
             Optional[BrowserContext],
@@ -203,6 +210,7 @@ class BrowserType(ChannelOwner):
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
         browser._should_close_connection_on_close = True
+        browser._utils = self._playwright._utils
 
         def handle_transport_close() -> None:
             for context in browser.contexts:

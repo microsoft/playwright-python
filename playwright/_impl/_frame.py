@@ -15,7 +15,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Set, Union, cast
 
 from pyee import EventEmitter
 
@@ -101,6 +101,9 @@ class Frame(ChannelOwner):
         self._event_emitter.emit("navigated", event)
         if "error" not in event and hasattr(self, "_page") and self._page:
             self._page.emit("framenavigated", self)
+
+    async def _query_count(self, selector: str) -> int:
+        return await self._channel.send("queryCount", {"selector": selector})
 
     @property
     def page(self) -> "Page":
@@ -495,11 +498,8 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
-    def locator(
-        self,
-        selector: str,
-    ) -> Locator:
-        return Locator(self, selector)
+    def locator(self, selector: str, has_text: Union[str, Pattern] = None) -> Locator:
+        return Locator(self, selector, has_text=has_text)
 
     def frame_locator(self, selector: str) -> FrameLocator:
         return FrameLocator(self, selector)

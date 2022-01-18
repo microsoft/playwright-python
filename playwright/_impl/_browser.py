@@ -36,6 +36,7 @@ from playwright._impl._helper import (
     is_safe_close_error,
     locals_to_params,
 )
+from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
 
@@ -59,6 +60,7 @@ class Browser(ChannelOwner):
         self._should_close_connection_on_close = False
 
         self._contexts: List[BrowserContext] = []
+        _utils: LocalUtils
         self._channel.on("close", lambda _: self._on_close())
 
     def __repr__(self) -> str:

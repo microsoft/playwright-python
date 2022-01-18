@@ -17,6 +17,7 @@ from typing import Dict
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._fetch import APIRequest
+from playwright._impl._local_utils import LocalUtils
 from playwright._impl._selectors import Selectors
 
 
@@ -34,14 +35,18 @@ class Playwright(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self.request = APIRequest(self)
         self.chromium = from_channel(initializer["chromium"])
+        self.chromium._playwright = self
         self.firefox = from_channel(initializer["firefox"])
+        self.firefox._playwright = self
         self.webkit = from_channel(initializer["webkit"])
+        self.webkit._playwright = self
         self.selectors = from_channel(initializer["selectors"])
         self.devices = {}
         self.devices = {
             device["name"]: parse_device_descriptor(device["descriptor"])
             for device in initializer["deviceDescriptors"]
         }
+        self._utils: LocalUtils = from_channel(initializer["utils"])
 
     def __getitem__(self, value: str) -> "BrowserType":
         if value == "chromium":

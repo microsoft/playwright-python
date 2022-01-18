@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import zipfile
 from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
-from playwright.async_api import Browser, BrowserContext
+from playwright.async_api import Browser, BrowserContext, Page
 from tests.server import Server
 
 
@@ -53,3 +56,35 @@ async def test_browser_context_output_trace_chunk(
     await button.click()
     await context.tracing.stop_chunk(path=tmp_path / "trace2.zip")
     assert Path(tmp_path / "trace2.zip").exists()
+
+
+async def test_should_collect_sources(
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+):
+    await context.tracing.start(sources=True)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button>Click</button>")
+    await page.click("button")
+    path = tmp_path / "trace.zip"
+    await context.tracing.stop(path=path)
+
+    (resources, events) = parse_trace(path)
+    current_file_content = Path(__file__).read_bytes()
+    found_current_file = False
+    for name, resource in resources.items():
+        if resource == current_file_content:
+            found_current_file = True
+            break
+    assert found_current_file
+
+
+def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
+    resources: Dict[str, bytes] = {}
+    with zipfile.ZipFile(path, "r") as zip:
+        for name in zip.namelist():
+            resources[name] = zip.read(name)
+    events: List[Any] = []
+    for name in ["trace.trace", "trace.network"]:
+        for line in resources[name].decode().splitlines():
+            events.append(json.loads(line))
+    return (resources, events)

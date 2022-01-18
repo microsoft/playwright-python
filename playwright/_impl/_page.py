@@ -19,7 +19,17 @@ import re
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Union,
+    cast,
+)
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
@@ -197,6 +207,13 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "worker", lambda params: self._on_worker(from_channel(params["worker"]))
+        )
+        self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
+        self.on(
+            Page.Events.Close, lambda _: self._closed_or_crashed_future.set_result(True)
+        )
+        self.on(
+            Page.Events.Crash, lambda _: self._closed_or_crashed_future.set_result(True)
         )
 
     def __repr__(self) -> str:
@@ -668,8 +685,9 @@ class Page(ChannelOwner):
     def locator(
         self,
         selector: str,
+        has_text: Union[str, Pattern] = None,
     ) -> "Locator":
-        return self._main_frame.locator(selector)
+        return self._main_frame.locator(selector, has_text=has_text)
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return self.main_frame.frame_locator(selector)
@@ -880,7 +898,7 @@ class Page(ChannelOwner):
             timeout = self._timeout_settings.timeout()
         wait_helper = WaitHelper(self, f"page.expect_event({event})")
         wait_helper.reject_on_timeout(
-            timeout, f'Timeout while waiting for event "{event}"'
+            timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
         )
         if log_line:
             wait_helper.log(log_line)

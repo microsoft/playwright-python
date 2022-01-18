@@ -47,6 +47,7 @@ from playwright._impl._helper import (
     locals_to_params,
     to_impl,
 )
+from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._tracing import Tracing
@@ -86,6 +87,7 @@ class BrowserContext(ChannelOwner):
         self._request: APIRequestContext = from_channel(
             initializer["APIRequestContext"]
         )
+        _local_utils: LocalUtils
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -291,7 +293,7 @@ class BrowserContext(ChannelOwner):
             timeout = self._timeout_settings.timeout()
         wait_helper = WaitHelper(self, f"browser_context.expect_event({event})")
         wait_helper.reject_on_timeout(
-            timeout, f'Timeout while waiting for event "{event}"'
+            timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
         )
         if event != BrowserContext.Events.Close:
             wait_helper.reject_on_event(
