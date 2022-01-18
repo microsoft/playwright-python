@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from playwright.async_api import Error, Page, TimeoutError
+from playwright.async_api import Error, Page, Route, TimeoutError
 from tests.server import Server
 
 
@@ -958,7 +958,6 @@ async def test_fill_should_throw_on_unsupported_inputs(page, server):
         "file",
         "image",
         "radio",
-        "range",
         "reset",
         "submit",
     ]:
@@ -1332,3 +1331,35 @@ async def test_should_emulate_forced_colors(page):
     await page.emulate_media(forced_colors="active")
     assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
     assert not await page.evaluate("matchMedia('(forced-colors: none)').matches")
+
+
+async def test_should_not_throw_when_continuing_while_page_is_closing(
+    page: Page, server: Server
+):
+    done = None
+
+    def handle_route(route: Route) -> None:
+        nonlocal done
+        done = asyncio.gather(route.continue_(), page.close())
+
+    await page.route("**/*", handle_route)
+    with pytest.raises(Error):
+        await page.goto(server.EMPTY_PAGE)
+    await done
+
+
+async def test_should_not_throw_when_continuing_after_page_is_closed(
+    page: Page, server: Server
+):
+    done = asyncio.Future()
+
+    async def handle_route(route: Route) -> None:
+        await page.close()
+        await route.continue_()
+        nonlocal done
+        done.set_result(True)
+
+    await page.route("**/*", handle_route)
+    with pytest.raises(Error):
+        await page.goto(server.EMPTY_PAGE)
+    await done

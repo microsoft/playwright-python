@@ -13,12 +13,13 @@
 # limitations under the License.
 
 import os
+import re
 from urllib.parse import urlparse
 
 import pytest
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.async_api import Error, Page
+from playwright.async_api import Error, Page, expect
 from tests.server import Server
 
 _dirname = get_file_dirname()
@@ -585,3 +586,62 @@ async def test_locator_frame_locator_should_not_throw_on_first_last_nth(
     assert await button2.text_content() == "Hello from iframe-2.html"
     button3 = page.locator("body").frame_locator("iframe").last.locator("button")
     assert await button3.text_content() == "Hello from iframe-3.html"
+
+
+async def test_drag_to(page: Page, server: Server) -> None:
+    await page.goto(server.PREFIX + "/drag-n-drop.html")
+    await page.locator("#source").drag_to(page.locator("#target"))
+    assert (
+        await page.eval_on_selector(
+            "#target", "target => target.contains(document.querySelector('#source'))"
+        )
+        is True
+    )
+
+
+async def test_locator_query_should_filter_by_text(page: Page, server: Server) -> None:
+    await page.set_content("<div>Foobar</div><div>Bar</div>")
+    await expect(page.locator("div", has_text="Foo")).to_have_text("Foobar")
+
+
+async def test_locator_query_should_filter_by_text_2(
+    page: Page, server: Server
+) -> None:
+    await page.set_content("<div>foo <span>hello world</span> bar</div>")
+    await expect(page.locator("div", has_text="hello world")).to_have_text(
+        "foo hello world bar"
+    )
+
+
+async def test_locator_query_should_filter_by_regex(page: Page, server: Server) -> None:
+    await page.set_content("<div>Foobar</div><div>Bar</div>")
+    await expect(page.locator("div", has_text=re.compile(r"Foo.*"))).to_have_text(
+        "Foobar"
+    )
+
+
+async def test_locator_query_should_filter_by_text_with_quotes(
+    page: Page, server: Server
+) -> None:
+    await page.set_content('<div>Hello "world"</div><div>Hello world</div>')
+    await expect(page.locator("div", has_text='Hello "world"')).to_have_text(
+        'Hello "world"'
+    )
+
+
+async def test_locator_query_should_filter_by_regex_with_quotes(
+    page: Page, server: Server
+) -> None:
+    await page.set_content('<div>Hello "world"</div><div>Hello world</div>')
+    await expect(
+        page.locator("div", has_text=re.compile('Hello "world"'))
+    ).to_have_text('Hello "world"')
+
+
+async def test_locator_query_should_filter_by_regex_and_regexp_flags(
+    page: Page, server: Server
+) -> None:
+    await page.set_content('<div>Hello "world"</div><div>Hello world</div>')
+    await expect(
+        page.locator("div", has_text=re.compile('hElLo "world', re.IGNORECASE))
+    ).to_have_text('Hello "world"')

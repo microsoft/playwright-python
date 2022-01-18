@@ -36,6 +36,7 @@ class Tracing:
         title: str = None,
         snapshots: bool = None,
         screenshots: bool = None,
+        sources: bool = None,
     ) -> None:
         params = locals_to_params(locals())
         await self._channel.send("tracingStart", params)
@@ -52,20 +53,39 @@ class Tracing:
         await self._do_stop_chunk(path)
         await self._channel.send("tracingStop")
 
-    async def _do_stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
+    async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
+        is_local = not self._channel._connection.is_remote
+
+        mode = "doNotSave"
+        if file_path:
+            if is_local:
+                mode = "compressTraceAndSources"
+            else:
+                mode = "compressTrace"
+
         result = await self._channel.send_return_as_dict(
             "tracingStopChunk",
             {
-                "save": bool(path),
-                "skipCompress": False,
+                "mode": mode,
             },
         )
+        if not file_path:
+            # Not interested in artifacts.
+            return
+
         artifact = cast(
             Optional[Artifact],
             from_nullable_channel(result.get("artifact")),
         )
+
         if not artifact:
+            # The artifact may be missing if the browser closed while stopping tracing.
             return
-        if path:
-            await artifact.save_as(path)
+
+        # Save trace to the final local file.
+        await artifact.save_as(file_path)
         await artifact.delete()
+
+        # Add local sources to the remote trace if necessary.
+        if result.get("sourceEntries", []):
+            await self._context._local_utils.zip(file_path, result["sourceEntries"])

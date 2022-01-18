@@ -15,7 +15,6 @@ import asyncio
 import os
 from asyncio.futures import Future
 from pathlib import Path
-from typing import Optional
 
 import pytest
 
@@ -60,16 +59,7 @@ async def test_should_report_downloads_with_accept_downloads_false(page: Page, s
         repr(download)
         == f"<Download url={download.url!r} suggested_filename={download.suggested_filename!r}>"
     )
-    error: Optional[Error] = None
-    try:
-        await download.path()
-    except Error as exc:
-        error = exc
-    failure_reason = await download.failure()
-    assert failure_reason
-    assert "accept_downloads" in failure_reason
-    assert error
-    assert "accept_downloads: True" in error.message
+    assert await download.path()
 
 
 async def test_should_report_downloads_with_accept_downloads_true(browser, server):

@@ -19,7 +19,17 @@ import mimetypes
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Union,
+    cast,
+)
 from urllib import parse
 
 from playwright._impl._api_structures import (
@@ -179,7 +189,9 @@ class Route(ChannelOwner):
         return from_channel(self._initializer["request"])
 
     async def abort(self, errorCode: str = None) -> None:
-        await self._channel.send("abort", locals_to_params(locals()))
+        await self._race_with_page_close(
+            self._channel.send("abort", locals_to_params(locals()))
+        )
 
     async def fulfill(
         self,
@@ -216,7 +228,7 @@ class Route(ChannelOwner):
         if length and "content-length" not in headers:
             headers["content-length"] = str(length)
         params["headers"] = serialize_headers(headers)
-        await self._channel.send("fulfill", params)
+        await self._race_with_page_close(self._channel.send("fulfill", params))
 
     async def continue_(
         self,
@@ -236,7 +248,9 @@ class Route(ChannelOwner):
             overrides["postData"] = base64.b64encode(postData.encode()).decode()
         elif isinstance(postData, bytes):
             overrides["postData"] = base64.b64encode(postData).decode()
-        await self._channel.send("continue", cast(Any, overrides))
+        await self._race_with_page_close(
+            self._channel.send("continue", cast(Any, overrides))
+        )
 
     def _internal_continue(self) -> None:
         async def continue_route() -> None:
@@ -246,6 +260,19 @@ class Route(ChannelOwner):
                 pass
 
         asyncio.create_task(continue_route())
+
+    async def _race_with_page_close(self, future: Coroutine) -> None:
+        if hasattr(self.request.frame, "_page"):
+            page = self.request.frame._page
+            # When page closes or crashes, we catch any potential rejects from this Route.
+            # Note that page could be missing when routing popup's initial request that
+            # does not have a Page initialized just yet.
+            await asyncio.wait(
+                [future, page._closed_or_crashed_future],
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+        else:
+            await future
 
 
 class Response(ChannelOwner):
@@ -388,7 +415,8 @@ class WebSocket(ChannelOwner):
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
         wait_helper = WaitHelper(self, f"web_socket.expect_event({event})")
         wait_helper.reject_on_timeout(
-            cast(float, timeout), f'Timeout while waiting for event "{event}"'
+            cast(float, timeout),
+            f'Timeout {timeout}ms exceeded while waiting for event "{event}"',
         )
         if event != WebSocket.Events.Close:
             wait_helper.reject_on_event(

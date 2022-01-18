@@ -22,6 +22,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Pattern,
     TypeVar,
     Union,
 )
@@ -42,6 +43,7 @@ from playwright._impl._helper import (
     monotonic_time,
 )
 from playwright._impl._js_handle import Serializable, parse_value, serialize_argument
+from playwright._impl._str_utils import escape_regex_flags, escape_with_quotes
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -56,11 +58,22 @@ T = TypeVar("T")
 
 
 class Locator:
-    def __init__(self, frame: "Frame", selector: str) -> None:
+    def __init__(
+        self, frame: "Frame", selector: str, has_text: Union[str, Pattern] = None
+    ) -> None:
         self._frame = frame
         self._selector = selector
         self._loop = frame._loop
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
+
+        if has_text:
+            if isinstance(has_text, Pattern):
+                pattern = escape_with_quotes(has_text.pattern, '"')
+                flags = escape_regex_flags(has_text)
+                self._selector += f' >> :scope:text-matches({pattern}, "{flags}")'
+            else:
+                escaped = escape_with_quotes(has_text, '"')
+                self._selector += f" >> :scope:has-text({escaped})"
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
@@ -170,8 +183,11 @@ class Locator:
     def locator(
         self,
         selector: str,
+        has_text: Union[str, Pattern] = None,
     ) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >> {selector}")
+        return Locator(
+            self._frame, f"{self._selector} >> {selector}", has_text=has_text
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector + " >> " + selector)
@@ -208,7 +224,23 @@ class Locator:
     async def count(
         self,
     ) -> int:
-        return int(await self.evaluate_all("ee => ee.length"))
+        return await self._frame._query_count(self._selector)
+
+    async def drag_to(
+        self,
+        target: "Locator",
+        force: bool = None,
+        noWaitAfter: bool = None,
+        timeout: float = None,
+        trial: bool = None,
+        sourcePosition: Position = None,
+        targetPosition: Position = None,
+    ) -> None:
+        params = locals_to_params(locals())
+        del params["target"]
+        return await self._frame.drag_and_drop(
+            self._selector, target._selector, strict=True, **params
+        )
 
     async def get_attribute(self, name: str, timeout: float = None) -> Optional[str]:
         params = locals_to_params(locals())
@@ -506,9 +538,11 @@ class FrameLocator:
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
         self._frame_selector = frame_selector
 
-    def locator(self, selector: str) -> Locator:
+    def locator(self, selector: str, has_text: Union[str, Pattern] = None) -> Locator:
         return Locator(
-            self._frame, f"{self._frame_selector} >> control=enter-frame >> {selector}"
+            self._frame,
+            f"{self._frame_selector} >> control=enter-frame >> {selector}",
+            has_text=has_text,
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":

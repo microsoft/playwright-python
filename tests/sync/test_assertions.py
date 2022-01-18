@@ -190,7 +190,13 @@ def test_assertions_locator_to_be_checked(page: Page, server: Server) -> None:
     expect(my_checkbox).not_to_be_checked()
     with pytest.raises(AssertionError):
         expect(my_checkbox).to_be_checked(timeout=100)
+    expect(my_checkbox).to_be_checked(timeout=100, checked=False)
+    with pytest.raises(AssertionError):
+        expect(my_checkbox).to_be_checked(timeout=100, checked=True)
     my_checkbox.check()
+    expect(my_checkbox).to_be_checked(timeout=100, checked=True)
+    with pytest.raises(AssertionError):
+        expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     expect(my_checkbox).to_be_checked()
 
 

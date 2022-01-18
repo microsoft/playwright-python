@@ -4300,7 +4300,9 @@ class Frame(AsyncBase):
             )
         )
 
-    def locator(self, selector: str) -> "Locator":
+    def locator(
+        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+    ) -> "Locator":
         """Frame.locator
 
         The method returns an element locator that can be used to perform actions in the frame. Locator is resolved to the
@@ -4311,13 +4313,18 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+        has_text : Union[Pattern, str, NoneType]
+            Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
+            `"Playwright"` matches `<article><div>Playwright</div></article>`.
 
         Returns
         -------
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+        return mapping.from_impl(
+            self._impl_obj.locator(selector=selector, has_text=has_text)
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Frame.frame_locator
@@ -5260,7 +5267,9 @@ class FrameLocator(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.last)
 
-    def locator(self, selector: str) -> "Locator":
+    def locator(
+        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+    ) -> "Locator":
         """FrameLocator.locator
 
         The method finds an element matching the specified selector in the FrameLocator's subtree.
@@ -5269,13 +5278,18 @@ class FrameLocator(AsyncBase):
         ----------
         selector : str
             A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+        has_text : Union[Pattern, str, NoneType]
+            Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
+            `"Playwright"` matches `<article><div>Playwright</div></article>`.
 
         Returns
         -------
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+        return mapping.from_impl(
+            self._impl_obj.locator(selector=selector, has_text=has_text)
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         """FrameLocator.frame_locator
@@ -5869,11 +5883,7 @@ class Page(AsyncContextManager):
     ) -> None:
         """
         Emitted when attachment download started. User can access basic file operations on downloaded content via the passed
-        `Download` instance.
-
-        > NOTE: Browser context **must** be created with the `acceptDownloads` set to `true` when user needs access to the
-        downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
-        performed and user has no access to the downloaded files."""
+        `Download` instance."""
 
     @typing.overload
     def on(
@@ -6120,11 +6130,7 @@ class Page(AsyncContextManager):
     ) -> None:
         """
         Emitted when attachment download started. User can access basic file operations on downloaded content via the passed
-        `Download` instance.
-
-        > NOTE: Browser context **must** be created with the `acceptDownloads` set to `true` when user needs access to the
-        downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
-        performed and user has no access to the downloaded files."""
+        `Download` instance."""
 
     @typing.overload
     def once(
@@ -8404,7 +8410,9 @@ class Page(AsyncContextManager):
             )
         )
 
-    def locator(self, selector: str) -> "Locator":
+    def locator(
+        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+    ) -> "Locator":
         """Page.locator
 
         The method returns an element locator that can be used to perform actions on the page. Locator is resolved to the
@@ -8417,13 +8425,18 @@ class Page(AsyncContextManager):
         ----------
         selector : str
             A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+        has_text : Union[Pattern, str, NoneType]
+            Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
+            `"Playwright"` matches `<article><div>Playwright</div></article>`.
 
         Returns
         -------
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+        return mapping.from_impl(
+            self._impl_obj.locator(selector=selector, has_text=has_text)
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Page.frame_locator
@@ -11124,7 +11137,7 @@ class Browser(AsyncContextManager):
 
             > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         accept_downloads : Union[bool, NoneType]
-            Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+            Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
             Network proxy settings to use with this context.
 
@@ -11155,6 +11168,8 @@ class Browser(AsyncContextManager):
             Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
+            - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
+              `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
             It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
@@ -11298,7 +11313,7 @@ class Browser(AsyncContextManager):
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'no-preference'`.
         accept_downloads : Union[bool, NoneType]
-            Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+            Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, NoneType], username: Union[str, NoneType], password: Union[str, NoneType]}, NoneType]
             Network proxy settings to use with this context.
 
@@ -11329,6 +11344,8 @@ class Browser(AsyncContextManager):
             Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
+            - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
+              `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
             It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
@@ -11792,7 +11809,7 @@ class BrowserType(AsyncBase):
 
             > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         accept_downloads : Union[bool, NoneType]
-            Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
+            Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         traces_dir : Union[pathlib.Path, str, NoneType]
             If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, NoneType]
@@ -11817,6 +11834,8 @@ class BrowserType(AsyncBase):
             Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
+            - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
+              `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
             It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
@@ -12104,7 +12123,8 @@ class Tracing(AsyncBase):
         name: str = None,
         title: str = None,
         snapshots: bool = None,
-        screenshots: bool = None
+        screenshots: bool = None,
+        sources: bool = None
     ) -> NoneType:
         """Tracing.start
 
@@ -12128,13 +12148,19 @@ class Tracing(AsyncBase):
             Whether to capture DOM snapshot on every action.
         screenshots : Union[bool, NoneType]
             Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
+        sources : Union[bool, NoneType]
+            Whether to include source files for trace actions.
         """
 
         return mapping.from_maybe_impl(
             await self._async(
                 "tracing.start",
                 self._impl_obj.start(
-                    name=name, title=title, snapshots=snapshots, screenshots=screenshots
+                    name=name,
+                    title=title,
+                    snapshots=snapshots,
+                    screenshots=screenshots,
+                    sources=sources,
                 ),
             )
         )
@@ -12699,7 +12725,9 @@ class Locator(AsyncBase):
             )
         )
 
-    def locator(self, selector: str) -> "Locator":
+    def locator(
+        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+    ) -> "Locator":
         """Locator.locator
 
         The method finds an element matching the specified selector in the `Locator`'s subtree.
@@ -12708,13 +12736,18 @@ class Locator(AsyncBase):
         ----------
         selector : str
             A selector to use when resolving DOM element. See [working with selectors](./selectors.md) for more details.
+        has_text : Union[Pattern, str, NoneType]
+            Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
+            `"Playwright"` matches `<article><div>Playwright</div></article>`.
 
         Returns
         -------
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.locator(selector=selector))
+        return mapping.from_impl(
+            self._impl_obj.locator(selector=selector, has_text=has_text)
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Locator.frame_locator
@@ -12822,6 +12855,58 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._async("locator.count", self._impl_obj.count())
+        )
+
+    async def drag_to(
+        self,
+        target: "Locator",
+        *,
+        force: bool = None,
+        no_wait_after: bool = None,
+        timeout: float = None,
+        trial: bool = None,
+        source_position: Position = None,
+        target_position: Position = None
+    ) -> NoneType:
+        """Locator.drag_to
+
+        Parameters
+        ----------
+        target : Locator
+            Locator of the element to drag to.
+        force : Union[bool, NoneType]
+            Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+        no_wait_after : Union[bool, NoneType]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        timeout : Union[float, NoneType]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        trial : Union[bool, NoneType]
+            When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to
+            `false`. Useful to wait until the element is ready for the action without performing it.
+        source_position : Union[{x: float, y: float}, NoneType]
+            Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
+        target_position : Union[{x: float, y: float}, NoneType]
+            Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
+            specified, some visible point of the element is used.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._async(
+                "locator.drag_to",
+                self._impl_obj.drag_to(
+                    target=target._impl_obj,
+                    force=force,
+                    noWaitAfter=no_wait_after,
+                    timeout=timeout,
+                    trial=trial,
+                    sourcePosition=source_position,
+                    targetPosition=target_position,
+                ),
+            )
         )
 
     async def get_attribute(
@@ -14373,6 +14458,8 @@ class APIRequest(AsyncBase):
             - baseURL: `http://localhost:3000` and sending request to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and sending request to `./bar.html` results in
               `http://localhost:3000/foo/bar.html`
+            - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
+              `http://localhost:3000/bar.html`
         extra_http_headers : Union[Dict[str, str], NoneType]
             An object containing additional HTTP headers to be sent with every request.
         http_credentials : Union[{username: str, password: str}, NoneType]
@@ -14426,6 +14513,14 @@ class PageAssertions(AsyncBase):
         """PageAssertions.to_have_title
 
         Ensures the page has the given title.
+
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        # ...
+        await expect(page).to_have_title(re.compile(r\".*checkout\"))
+        ```
 
         Parameters
         ----------
@@ -14482,6 +14577,14 @@ class PageAssertions(AsyncBase):
         """PageAssertions.to_have_url
 
         Ensures the page is navigated to the given URL.
+
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        # ...
+        await expect(page).to_have_url(re.compile(\".*checkout\"))
+        ```
 
         Parameters
         ----------
@@ -14548,7 +14651,24 @@ class LocatorAssertions(AsyncBase):
         Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the value
         as well.
 
-        Note that if array is passed as an expected value, entire lists can be asserted:
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        locator = page.locator('.title')
+        await expect(locator).to_contain_text(\"substring\")
+        await expect(locator).to_contain_text(re.compile(r\"\\d messages\"))
+        ```
+
+        Note that if array is passed as an expected value, entire lists of elements can be asserted:
+
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        locator = page.locator(\"list > .list-item\")
+        await expect(locator).to_contain_text([\"Text 1\", \"Text 4\", \"Text 5\"])
+        ```
 
         Parameters
         ----------
@@ -14614,6 +14734,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an element with given attribute.
 
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"input\")
+        await expect(locator).to_have_attribute(\"type\", \"text\")
+        ```
+
         Parameters
         ----------
         name : str
@@ -14677,7 +14804,21 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an element with given CSS class.
 
-        Note that if array is passed as an expected value, entire lists can be asserted:
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"#component\")
+        await expect(locator).to_have_class(re.compile(r\"selected\"))
+        ```
+
+        Note that if array is passed as an expected value, entire lists of elements can be asserted:
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"list > .component\")
+        await expect(locator).to_have_class([\"component\", \"component selected\", \"component\"])
+        ```
 
         Parameters
         ----------
@@ -14728,6 +14869,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` resolves to an exact number of DOM nodes.
 
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"list > .component\")
+        await expect(locator).to_have_count(3)
+        ```
+
         Parameters
         ----------
         count : int
@@ -14775,6 +14923,13 @@ class LocatorAssertions(AsyncBase):
         """LocatorAssertions.to_have_css
 
         Ensures the `Locator` resolves to an element with the given computed CSS style.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"button\")
+        await expect(locator).to_have_css(\"display\", \"flex\")
+        ```
 
         Parameters
         ----------
@@ -14830,6 +14985,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an element with the given DOM Node ID.
 
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"input\")
+        await expect(locator).to_have_id(\"lastname\")
+        ```
+
         Parameters
         ----------
         id : Union[Pattern, str]
@@ -14876,6 +15038,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an element with given JavaScript property. Note that this property can be of a primitive
         type as well as a plain serializable JavaScript object.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\".component\")
+        await expect(locator).to_have_js_property(\"loaded\", True)
+        ```
 
         Parameters
         ----------
@@ -14932,6 +15101,14 @@ class LocatorAssertions(AsyncBase):
         Ensures the `Locator` points to an element with the given input value. You can use regular expressions for the value as
         well.
 
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        locator = page.locator(\"input[type=number]\")
+        await expect(locator).to_have_value(re.compile(r\"[0-9]\"))
+        ```
+
         Parameters
         ----------
         value : Union[Pattern, str]
@@ -14984,7 +15161,23 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as well.
 
-        Note that if array is passed as an expected value, entire lists can be asserted:
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        locator = page.locator(\".title\")
+        await expect(locator).to_have_text(re.compile(r\"Welcome, Test User\"))
+        await expect(locator).to_have_text(re.compile(r\"Welcome, .*\"))
+        ```
+
+        Note that if array is passed as an expected value, entire lists of elements can be asserted:
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"list > .component\")
+        await expect(locator).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
+        ```
 
         Parameters
         ----------
@@ -15039,22 +15232,32 @@ class LocatorAssertions(AsyncBase):
             )
         )
 
-    async def to_be_checked(self, *, timeout: float = None) -> NoneType:
+    async def to_be_checked(
+        self, *, timeout: float = None, checked: bool = None
+    ) -> NoneType:
         """LocatorAssertions.to_be_checked
 
         Ensures the `Locator` points to a checked input.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\".subscribe\")
+        await expect(locator).to_be_checked()
+        ```
 
         Parameters
         ----------
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        checked : Union[bool, NoneType]
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._async(
                 "locator_assertions.to_be_checked",
-                self._impl_obj.to_be_checked(timeout=timeout),
+                self._impl_obj.to_be_checked(timeout=timeout, checked=checked),
             )
         )
 
@@ -15081,6 +15284,13 @@ class LocatorAssertions(AsyncBase):
         """LocatorAssertions.to_be_disabled
 
         Ensures the `Locator` points to a disabled element.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"button.submit\")
+        await expect(locator).to_be_disabled()
+        ```
 
         Parameters
         ----------
@@ -15120,6 +15330,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an editable element.
 
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\".input\")
+        await expect(locator).to_be_editable()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -15157,6 +15374,13 @@ class LocatorAssertions(AsyncBase):
         """LocatorAssertions.to_be_empty
 
         Ensures the `Locator` points to an empty editable element or to a DOM node that has no text.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"div.warning\")
+        await expect(locator).to_be_empty()
+        ```
 
         Parameters
         ----------
@@ -15196,6 +15420,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to an enabled element.
 
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"button.submit\")
+        await expect(locator).to_be_enabled()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -15233,6 +15464,13 @@ class LocatorAssertions(AsyncBase):
         """LocatorAssertions.to_be_hidden
 
         Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](./actionability.md#visible).
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator('.my-element')
+        await expect(locator).to_be_hidden()
+        ```
 
         Parameters
         ----------
@@ -15272,6 +15510,13 @@ class LocatorAssertions(AsyncBase):
 
         Ensures the `Locator` points to a [visible](./actionability.md#visible) DOM node.
 
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator('.my-element')
+        await expect(locator).to_be_visible()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -15309,6 +15554,13 @@ class LocatorAssertions(AsyncBase):
         """LocatorAssertions.to_be_focused
 
         Ensures the `Locator` points to a focused DOM node.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator('input')
+        await expect(locator).to_be_focused()
+        ```
 
         Parameters
         ----------

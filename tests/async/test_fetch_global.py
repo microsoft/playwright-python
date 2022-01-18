@@ -15,6 +15,7 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -197,3 +198,68 @@ async def test_storage_state_should_round_trip_through_file(
     request2 = await playwright.request.new_context(storage_state=path)
     state2 = await request2.storage_state()
     assert state2 == expected
+
+
+serialization_data = [
+    [{"foo": "bar"}],
+    [["foo", "bar", 2021]],
+    ["foo"],
+    [True],
+    [2021],
+]
+
+
+@pytest.mark.parametrize("serialization", serialization_data)
+async def test_should_json_stringify_body_when_content_type_is_application_json(
+    playwright: Playwright, server: Server, serialization: Any
+):
+    request = await playwright.request.new_context()
+    [req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.post(
+            server.EMPTY_PAGE,
+            headers={"content-type": "application/json"},
+            data=serialization,
+        ),
+    )
+    body = req.post_body
+    assert body.decode() == json.dumps(serialization, separators=(",", ":"))
+    await request.dispose()
+
+
+@pytest.mark.parametrize("serialization", serialization_data)
+async def test_should_not_double_stringify_body_when_content_type_is_application_json(
+    playwright: Playwright, server: Server, serialization: Any
+):
+    request = await playwright.request.new_context()
+    stringified_value = json.dumps(serialization, separators=(",", ":"))
+    [req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.post(
+            server.EMPTY_PAGE,
+            headers={"content-type": "application/json"},
+            data=stringified_value,
+        ),
+    )
+
+    body = req.post_body
+    assert body.decode() == stringified_value
+    await request.dispose()
+
+
+async def test_should_accept_already_serialized_data_as_bytes_when_content_type_is_application_json(
+    playwright: Playwright, server: Server
+):
+    request = await playwright.request.new_context()
+    stringified_value = json.dumps({"foo": "bar"}, separators=(",", ":")).encode()
+    [req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.post(
+            server.EMPTY_PAGE,
+            headers={"content-type": "application/json"},
+            data=stringified_value,
+        ),
+    )
+    body = req.post_body
+    assert body == stringified_value
+    await request.dispose()

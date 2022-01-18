@@ -204,7 +204,13 @@ async def test_assertions_locator_to_be_checked(page: Page, server: Server) -> N
     await expect(my_checkbox).not_to_be_checked()
     with pytest.raises(AssertionError):
         await expect(my_checkbox).to_be_checked(timeout=100)
+    await expect(my_checkbox).to_be_checked(timeout=100, checked=False)
+    with pytest.raises(AssertionError):
+        await expect(my_checkbox).to_be_checked(timeout=100, checked=True)
     await my_checkbox.check()
+    await expect(my_checkbox).to_be_checked(timeout=100, checked=True)
+    with pytest.raises(AssertionError):
+        await expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     await expect(my_checkbox).to_be_checked()
 
 

@@ -247,16 +247,19 @@ class APIRequestContext(ChannelOwner):
         # Cannot call allHeaders() here as the request may be paused inside route handler.
         headers_obj = headers or (request.headers if request else None)
         serialized_headers = serialize_headers(headers_obj) if headers_obj else None
-        json_data = None
+        json_data: Any = None
         form_data: Optional[List[NameValue]] = None
         multipart_data: Optional[List[FormField]] = None
         post_data_buffer: Optional[bytes] = None
         if data:
             if isinstance(data, str):
-                post_data_buffer = data.encode()
+                if is_json_content_type(serialized_headers):
+                    json_data = data
+                else:
+                    post_data_buffer = data.encode()
             elif isinstance(data, bytes):
                 post_data_buffer = data
-            elif isinstance(data, (dict, list)):
+            elif isinstance(data, (dict, list, int, bool)):
                 json_data = data
             else:
                 raise Error(f"Unsupported 'data' type: {type(data)}")
@@ -290,7 +293,7 @@ class APIRequestContext(ChannelOwner):
         def filter_none(input: Dict) -> Dict:
             return {k: v for k, v in input.items() if v is not None}
 
-        result = await self._channel.send_return_as_dict(
+        response = await self._channel.send(
             "fetch",
             filter_none(
                 {
@@ -308,9 +311,7 @@ class APIRequestContext(ChannelOwner):
                 }
             ),
         )
-        if result.get("error"):
-            raise Error(result["error"])
-        return APIResponse(self, result["response"])
+        return APIResponse(self, response)
 
     async def storage_state(
         self, path: Union[pathlib.Path, str] = None
@@ -336,6 +337,9 @@ class APIResponse:
         self._request = context
         self._initializer = initializer
         self._headers = network.RawHeaders(initializer["headers"])
+
+    def __repr__(self) -> str:
+        return f"<APIResponse url={self.url!r} status={self.status!r} status_text={self.status_text!r}>"
 
     @property
     def ok(self) -> bool:
@@ -395,3 +399,12 @@ class APIResponse:
 
     def _fetch_uid(self) -> str:
         return self._initializer["fetchUid"]
+
+
+def is_json_content_type(headers: network.HeadersArray = None) -> bool:
+    if not headers:
+        return False
+    for header in headers:
+        if header["name"] == "Content-Type":
+            return header["value"].startswith("application/json")
+    return False

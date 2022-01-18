@@ -26,6 +26,7 @@ from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._js_handle import JSHandle
+from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._playwright import Playwright
@@ -67,6 +68,8 @@ def create_remote_object(
         return Frame(parent, type, guid, initializer)
     if type == "JSHandle":
         return JSHandle(parent, type, guid, initializer)
+    if type == "LocalUtils":
+        return LocalUtils(parent, type, guid, initializer)
     if type == "Page":
         return Page(parent, type, guid, initializer)
     if type == "Playwright":

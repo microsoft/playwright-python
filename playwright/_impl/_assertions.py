@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 from typing import Any, List, Pattern, Union
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
 from playwright._impl._locator import Locator
 from playwright._impl._page import Page
+from playwright._impl._str_utils import escape_regex_flags
 
 
 class AssertionsBase:
@@ -379,10 +379,13 @@ class LocatorAssertions(AssertionsBase):
     async def to_be_checked(
         self,
         timeout: float = None,
+        checked: bool = None,
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
-            "to.be.checked",
+            "to.be.checked"
+            if checked is None or checked is True
+            else "to.be.unchecked",
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be checked",
@@ -534,27 +537,10 @@ def expected_regex(
 ) -> ExpectedTextValue:
     expected = ExpectedTextValue(
         regexSource=pattern.pattern,
+        regexFlags=escape_regex_flags(pattern),
         matchSubstring=match_substring,
         normalizeWhiteSpace=normalize_white_space,
     )
-    if pattern.flags != 0:
-        expected["regexFlags"] = ""
-        if (pattern.flags & int(re.IGNORECASE)) != 0:
-            expected["regexFlags"] += "i"
-        if (pattern.flags & int(re.DOTALL)) != 0:
-            expected["regexFlags"] += "s"
-        if (pattern.flags & int(re.MULTILINE)) != 0:
-            expected["regexFlags"] += "m"
-        assert (
-            pattern.flags
-            & ~(
-                int(re.MULTILINE)
-                | int(re.IGNORECASE)
-                | int(re.DOTALL)
-                | int(re.UNICODE)
-            )
-            == 0
-        ), "Unexpected re.Pattern flag, only MULTILINE, IGNORECASE and DOTALL are supported."
     return expected
 
 
