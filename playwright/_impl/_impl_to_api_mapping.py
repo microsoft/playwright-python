@@ -13,8 +13,7 @@
 # limitations under the License.
 
 import inspect
-from types import MethodType
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional
 
 from playwright._impl._api_types import Error
 
@@ -91,13 +90,11 @@ class ImplToApiMapping:
             )
 
         if inspect.ismethod(handler):
-            wrapper = getattr(
-                cast(MethodType, handler).__self__, IMPL_ATTR + handler.__name__, None
-            )
+            wrapper = getattr(handler.__self__, IMPL_ATTR + handler.__name__, None)
             if not wrapper:
                 wrapper = wrapper_func
                 setattr(
-                    cast(MethodType, handler).__self__,
+                    handler.__self__,
                     IMPL_ATTR + handler.__name__,
                     wrapper,
                 )
