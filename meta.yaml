@@ -24,7 +24,7 @@ requirements:
   run:
     - python
     - greenlet >=0.4
-    - pyee >=8.0.1
+    - pyee >=9.0.0
     - websockets >=8.1
     - typing_extensions # [py<39]
 test:
