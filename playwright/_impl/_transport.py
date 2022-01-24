@@ -24,7 +24,13 @@ from typing import Callable, Dict, Optional, Union
 
 import websockets
 import websockets.exceptions
-from pyee import AsyncIOEventEmitter
+
+try:
+    from pyee.asyncio import AsyncIOEventEmitter
+except ImportError:
+    # pyee < 9.0.0
+    from pyee import AsyncIOEventEmitter
+
 from websockets.client import connect as websocket_connect
 
 from playwright._impl._api_types import Error
