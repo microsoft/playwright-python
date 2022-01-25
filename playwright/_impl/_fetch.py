@@ -400,6 +400,14 @@ class APIResponse:
     def _fetch_uid(self) -> str:
         return self._initializer["fetchUid"]
 
+    async def _fetch_log(self) -> List[str]:
+        return await self._request._channel.send(
+            "fetchLog",
+            {
+                "fetchUid": self._fetch_uid(),
+            },
+        )
+
 
 def is_json_content_type(headers: network.HeadersArray = None) -> bool:
     if not headers:
