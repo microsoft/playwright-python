@@ -268,7 +268,7 @@ class Route(ChannelOwner):
             # Note that page could be missing when routing popup's initial request that
             # does not have a Page initialized just yet.
             await asyncio.wait(
-                [future, page._closed_or_crashed_future],
+                [asyncio.create_task(future), page._closed_or_crashed_future],
                 return_when=asyncio.FIRST_COMPLETED,
             )
         else:
