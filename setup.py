@@ -208,9 +208,9 @@ setup(
     packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
     install_requires=[
-        "websockets>=8.1",
-        "greenlet>=1.0.0",
-        "pyee>=8.0.1",
+        "websockets==10.1",
+        "greenlet==1.1.2",
+        "pyee==8.1.0",
         "typing-extensions;python_version<='3.8'",
     ],
     classifiers=[
