@@ -302,7 +302,7 @@ async def test_should_default_to_setting_secure_cookie_for_https_websites(
 
 
 async def test_should_be_able_to_set_unsecure_cookie_for_http_website(
-    context, page, server
+    context, page, server, is_firefox
 ):
     await page.goto(server.EMPTY_PAGE)
     HTTP_URL = "http://example.com"
@@ -354,9 +354,7 @@ async def test_should_set_cookies_for_a_frame(context, page, server):
     assert await page.frames[1].evaluate("document.cookie") == "frame-cookie=value"
 
 
-async def test_should_not_block_third_party_cookies(
-    context, page, server, is_chromium, is_firefox
-):
+async def test_should_not_block_third_party_cookies(context, page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         """src => {
@@ -372,21 +370,5 @@ async def test_should_not_block_third_party_cookies(
     )
     await page.frames[1].evaluate("document.cookie = 'username=John Doe'")
     await page.wait_for_timeout(2000)
-    allows_third_party = is_firefox
     cookies = await context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
-
-    if allows_third_party:
-        assert cookies == [
-            {
-                "domain": "127.0.0.1",
-                "expires": -1,
-                "httpOnly": False,
-                "name": "username",
-                "path": "/",
-                "sameSite": "Lax" if is_chromium else "None",
-                "secure": False,
-                "value": "John Doe",
-            }
-        ]
-    else:
-        assert cookies == []
+    assert cookies == []

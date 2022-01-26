@@ -15609,7 +15609,6 @@ class APIResponseAssertions(AsyncBase):
         Ensures the response status code is within [200..299] range.
 
         ```py
-        import re
         from playwright.async_api import expect
 
         # ...

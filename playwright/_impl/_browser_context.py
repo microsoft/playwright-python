@@ -47,7 +47,6 @@ from playwright._impl._helper import (
     locals_to_params,
     to_impl,
 )
-from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._tracing import Tracing
@@ -83,11 +82,10 @@ class BrowserContext(ChannelOwner):
         self._options: Dict[str, Any] = {}
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
-        self._tracing = Tracing(self)
+        self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._request: APIRequestContext = from_channel(
             initializer["APIRequestContext"]
         )
-        _local_utils: LocalUtils
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),

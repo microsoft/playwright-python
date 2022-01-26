@@ -41,6 +41,7 @@ from playwright._impl._helper import (
     object_to_array,
 )
 from playwright._impl._network import serialize_headers
+from playwright._impl._tracing import Tracing
 
 if typing.TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
@@ -72,7 +73,12 @@ class APIRequest:
                 )
         if "extraHTTPHeaders" in params:
             params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
-        return from_channel(await self.playwright._channel.send("newRequest", params))
+        context = cast(
+            APIRequestContext,
+            from_channel(await self.playwright._channel.send("newRequest", params)),
+        )
+        context._tracing._local_utils = self.playwright._utils
+        return context
 
 
 class APIRequestContext(ChannelOwner):
@@ -80,6 +86,7 @@ class APIRequestContext(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._tracing: Tracing = from_channel(initializer["tracing"])
 
     async def dispose(self) -> None:
         await self._channel.send("dispose")

@@ -32,6 +32,7 @@ from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
 from playwright._impl._stream import Stream
+from playwright._impl._tracing import Tracing
 
 
 class DummyObject(ChannelOwner):
@@ -82,6 +83,8 @@ def create_remote_object(
         return Route(parent, type, guid, initializer)
     if type == "Stream":
         return Stream(parent, type, guid, initializer)
+    if type == "Tracing":
+        return Tracing(parent, type, guid, initializer)
     if type == "WebSocket":
         return WebSocket(parent, type, guid, initializer)
     if type == "Worker":

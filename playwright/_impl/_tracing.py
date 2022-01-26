@@ -13,22 +13,20 @@
 # limitations under the License.
 
 import pathlib
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 from playwright._impl._artifact import Artifact
-from playwright._impl._connection import from_nullable_channel
+from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._helper import locals_to_params
-
-if TYPE_CHECKING:  # pragma: no cover
-    from playwright._impl._browser_context import BrowserContext
+from playwright._impl._local_utils import LocalUtils
 
 
-class Tracing:
-    def __init__(self, context: "BrowserContext") -> None:
-        self._context = context
-        self._channel = context._channel
-        self._loop = context._loop
-        self._dispatcher_fiber = context._channel._connection._dispatcher_fiber
+class Tracing(ChannelOwner):
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
+        _local_utils: LocalUtils
 
     async def start(
         self,
@@ -54,7 +52,7 @@ class Tracing:
         await self._channel.send("tracingStop")
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
-        is_local = not self._channel._connection.is_remote
+        is_local = not self._connection.is_remote
 
         mode = "doNotSave"
         if file_path:
@@ -88,4 +86,4 @@ class Tracing:
 
         # Add local sources to the remote trace if necessary.
         if result.get("sourceEntries", []):
-            await self._context._local_utils.zip(file_path, result["sourceEntries"])
+            await self._local_utils.zip(file_path, result["sourceEntries"])

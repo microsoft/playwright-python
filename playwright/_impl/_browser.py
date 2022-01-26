@@ -16,7 +16,7 @@ import base64
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -115,10 +115,11 @@ class Browser(ChannelOwner):
         await normalize_context_params(self._connection._is_sync, params)
 
         channel = await self._channel.send("newContext", params)
-        context = from_channel(channel)
+        context = cast(BrowserContext, from_channel(channel))
         self._contexts.append(context)
         context._browser = self
         context._options = params
+        context._tracing._local_utils = self._local_utils
         return context
 
     async def new_page(
