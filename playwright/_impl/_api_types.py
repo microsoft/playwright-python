@@ -27,5 +27,5 @@ class Error(Exception):
         super().__init__(message)
 
 
-class TimeoutError(Error):
+class TimeoutError(Error, TimeoutError):
     pass
