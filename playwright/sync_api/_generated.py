@@ -43,6 +43,9 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._api_types import Error
+from playwright._impl._assertions import (
+    APIResponseAssertions as APIResponseAssertionsImpl,
+)
 from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright._impl._browser import Browser as BrowserImpl
@@ -15318,3 +15321,40 @@ class LocatorAssertions(SyncBase):
 
 
 mapping.register(LocatorAssertionsImpl, LocatorAssertions)
+
+
+class APIResponseAssertions(SyncBase):
+    def to_be_ok(self) -> NoneType:
+        """APIResponseAssertions.to_be_ok
+
+        Ensures the response status code is within [200..299] range.
+
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        # ...
+        expect(response).to_be_ok()
+        ```
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync("api_response_assertions.to_be_ok", self._impl_obj.to_be_ok())
+        )
+
+    def not_to_be_ok(self) -> NoneType:
+        """APIResponseAssertions.not_to_be_ok
+
+        The opposite of `a_pi_response_assertions.to_be_ok()`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                "api_response_assertions.not_to_be_ok", self._impl_obj.not_to_be_ok()
+            )
+        )
+
+
+mapping.register(APIResponseAssertionsImpl, APIResponseAssertions)

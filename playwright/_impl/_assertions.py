@@ -16,6 +16,7 @@ from typing import Any, List, Pattern, Union
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
+from playwright._impl._fetch import APIResponse
 from playwright._impl._locator import Locator
 from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
@@ -530,6 +531,37 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_be_focused(timeout)
+
+
+class APIResponseAssertions:
+    def __init__(self, response: APIResponse, is_not: bool = False) -> None:
+        self._loop = response._loop
+        self._dispatcher_fiber = response._dispatcher_fiber
+        self._is_not = is_not
+        self._actual = response
+
+    @property
+    def _not(self) -> "APIResponseAssertions":
+        return APIResponseAssertions(self._actual, not self._is_not)
+
+    async def to_be_ok(
+        self,
+    ) -> None:
+        __tracebackhide__ = True
+        if self._is_not is not self._actual.ok:
+            return
+        message = f"Response status expected to be within [200..299] range, was '{self._actual.status}'"
+        if self._is_not:
+            message = message.replace("expected to", "expected not to")
+        log_list = await self._actual._fetch_log()
+        log = "\n".join(log_list).strip()
+        if log:
+            message += f"\n Call log:\n{log}"
+        raise AssertionError(message)
+
+    async def not_to_be_ok(self) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_ok()
 
 
 def expected_regex(

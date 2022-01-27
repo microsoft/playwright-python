@@ -23,6 +23,9 @@ from typing import Union, overload
 import playwright._impl._api_structures
 import playwright._impl._api_types
 import playwright.sync_api._generated
+from playwright._impl._assertions import (
+    APIResponseAssertions as APIResponseAssertionsImpl,
+)
 from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright.sync_api._context_manager import PlaywrightContextManager
@@ -31,6 +34,7 @@ from playwright.sync_api._generated import (
     APIRequest,
     APIRequestContext,
     APIResponse,
+    APIResponseAssertions,
     Browser,
     BrowserContext,
     BrowserType,
@@ -83,23 +87,30 @@ def sync_playwright() -> PlaywrightContextManager:
 
 
 @overload
-def expect(page_or_locator: Page) -> PageAssertions:
+def expect(actual: Page) -> PageAssertions:
     ...
 
 
 @overload
-def expect(page_or_locator: Locator) -> LocatorAssertions:
+def expect(actual: Locator) -> LocatorAssertions:
+    ...
+
+
+@overload
+def expect(actual: APIResponse) -> APIResponseAssertions:
     ...
 
 
 def expect(
-    page_or_locator: Union[Page, Locator]
-) -> Union[PageAssertions, LocatorAssertions]:
-    if isinstance(page_or_locator, Page):
-        return PageAssertions(PageAssertionsImpl(page_or_locator._impl_obj))
-    elif isinstance(page_or_locator, Locator):
-        return LocatorAssertions(LocatorAssertionsImpl(page_or_locator._impl_obj))
-    raise ValueError(f"Unsupported type: {type(page_or_locator)}")
+    actual: Union[Page, Locator, APIResponse]
+) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
+    if isinstance(actual, Page):
+        return PageAssertions(PageAssertionsImpl(actual._impl_obj))
+    elif isinstance(actual, Locator):
+        return LocatorAssertions(LocatorAssertionsImpl(actual._impl_obj))
+    elif isinstance(actual, APIResponse):
+        return APIResponseAssertions(APIResponseAssertionsImpl(actual._impl_obj))
+    raise ValueError(f"Unsupported type: {type(actual)}")
 
 
 __all__ = [

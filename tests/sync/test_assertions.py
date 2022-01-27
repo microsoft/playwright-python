@@ -277,3 +277,22 @@ line2
 line3</div>"""
     )
     expect(page.locator("div")).to_have_text(re.compile(r"^line2$", re.MULTILINE))
+
+
+def test_assertions_response_is_ok_pass(page: Page, server: Server) -> None:
+    response = page.request.get(server.EMPTY_PAGE)
+    expect(response).to_be_ok()
+
+
+def test_assertions_response_is_ok_pass_with_not(page: Page, server: Server) -> None:
+    response = page.request.get(server.PREFIX + "/unknown")
+    expect(response).not_to_be_ok()
+
+
+def test_assertions_response_is_ok_fail(page: Page, server: Server) -> None:
+    response = page.request.get(server.PREFIX + "/unknown")
+    with pytest.raises(AssertionError) as excinfo:
+        expect(response).to_be_ok()
+    error_message = str(excinfo.value)
+    assert ("→ GET " + server.PREFIX + "/unknown") in error_message
+    assert "← 404 Not Found" in error_message

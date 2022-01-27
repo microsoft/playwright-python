@@ -34,6 +34,7 @@ async def test_should_work(page, server, is_webkit, is_mac):
     assert timing["responseEnd"] < 10000
 
 
+@flaky
 async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
     if is_webkit and is_win:
         pytest.skip()

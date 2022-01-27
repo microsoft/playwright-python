@@ -37,7 +37,9 @@ async def launch_persistent(tmpdir, launch_arguments, browser_type):
     await context.close()
 
 
-async def test_context_cookies_should_work(server, launch_persistent, is_chromium):
+async def test_context_cookies_should_work(
+    server, launch_persistent, is_chromium, is_firefox
+):
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
@@ -57,7 +59,7 @@ async def test_context_cookies_should_work(server, launch_persistent, is_chromiu
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": "Lax" if (is_chromium or is_firefox) else "None",
         }
     ]
 
@@ -99,9 +101,7 @@ async def test_context_clear_cookies_should_work(server, launch_persistent):
     assert await page.evaluate("document.cookie") == ""
 
 
-async def test_should_not_block_third_party_cookies(
-    server, launch_persistent, is_chromium, is_firefox
-):
+async def test_should_not_block_third_party_cookies(server, launch_persistent):
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
@@ -124,24 +124,9 @@ async def test_should_not_block_third_party_cookies(
     )
 
     await page.wait_for_timeout(2000)
-    allows_third_party = is_firefox
-    assert document_cookie == ("username=John Doe" if allows_third_party else "")
+    assert document_cookie == ""
     cookies = await context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
-    if allows_third_party:
-        assert cookies == [
-            {
-                "domain": "127.0.0.1",
-                "expires": -1,
-                "httpOnly": False,
-                "name": "username",
-                "path": "/",
-                "sameSite": "None",
-                "secure": False,
-                "value": "John Doe",
-            }
-        ]
-    else:
-        assert cookies == []
+    assert cookies == []
 
 
 async def test_should_support_viewport_option(launch_persistent, utils):
