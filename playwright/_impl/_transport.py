@@ -34,12 +34,15 @@ from playwright._impl._helper import ParsedMessagePayload
 
 # Sourced from: https://github.com/pytest-dev/pytest/blob/da01ee0a4bb0af780167ecd228ab3ad249511302/src/_pytest/faulthandler.py#L69-L77
 def _get_stderr_fileno() -> Optional[int]:
-    if sys.stderr.closed:
-        return None
-
     try:
+        if sys.stderr.closed:
+            return None
+
         return sys.stderr.fileno()
     except (AttributeError, io.UnsupportedOperation):
+        # pyinstaller apps may not have stderr
+        if not hasattr(sys.stderr, 'closed'):
+            return None
         # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
         # https://docs.python.org/3/library/faulthandler.html#issue-with-file-descriptors
         # This is potentially dangerous, but the best we can do.
