@@ -34,10 +34,14 @@ from playwright._impl._helper import ParsedMessagePayload
 
 # Sourced from: https://github.com/pytest-dev/pytest/blob/da01ee0a4bb0af780167ecd228ab3ad249511302/src/_pytest/faulthandler.py#L69-L77
 def _get_stderr_fileno() -> Optional[int]:
-    if sys.stderr.closed:
-        return None
-
     try:
+        # when using pythonw, sys.stderr is None.
+        # when Pyinstaller is used, there is no closed attribute because Pyinstaller monkey-patches it with a NullWriter class
+        if sys.stderr is None or not hasattr(sys.stderr, "closed"):
+            return None
+        if sys.stderr.closed:
+            return None
+
         return sys.stderr.fileno()
     except (AttributeError, io.UnsupportedOperation):
         # pytest-xdist monkeypatches sys.stderr with an object that is not an actual file.
