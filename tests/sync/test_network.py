@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.sync_api import Browser, Page
+from playwright.sync_api import Browser, Page, Playwright, Route
 from tests.server import Server
 
 
@@ -73,3 +73,20 @@ def test_response_security_details_none_without_https(
     assert response
     security_details = response.security_details()
     assert security_details is None
+
+
+def test_should_fulfill_with_global_fetch_result(
+    page: Page, playwright: Playwright, server: Server
+) -> None:
+    def handle_request(route: Route) -> None:
+        request = playwright.request.new_context()
+        response = request.get(server.PREFIX + "/simple.json")
+        route.fulfill(response=response)
+        request.dispose()
+
+    page.route("**/*", handle_request)
+
+    response = page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    assert response.json() == {"foo": "bar"}

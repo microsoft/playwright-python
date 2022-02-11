@@ -17,7 +17,7 @@ import json
 
 import pytest
 
-from playwright.async_api import Browser, BrowserContext, Error, Page, Route
+from playwright.async_api import Browser, BrowserContext, Error, Page, Playwright, Route
 from tests.server import Server
 
 
@@ -945,3 +945,20 @@ async def test_context_route_should_support_times_parameter(
     await page.goto(server.EMPTY_PAGE)
     await page.goto(server.EMPTY_PAGE)
     assert len(intercepted) == 1
+
+
+async def test_should_fulfill_with_global_fetch_result(
+    page: Page, playwright: Playwright, server: Server
+) -> None:
+    async def handle_request(route: Route) -> None:
+        request = await playwright.request.new_context()
+        response = await request.get(server.PREFIX + "/simple.json")
+        await route.fulfill(response=response)
+        await request.dispose()
+
+    await page.route("**/*", handle_request)
+
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    assert await response.json() == {"foo": "bar"}

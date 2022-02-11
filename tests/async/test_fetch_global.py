@@ -41,7 +41,9 @@ async def test_should_work(playwright: Playwright, method: str, server: Server):
         "name": "Content-Type",
         "value": "application/json",
     } in response.headers_array
-    assert await response.text() == ("" if method == "head" else '{"foo": "bar"}\n')
+    assert await response.text() == (
+        "" if method in ["head", "put"] else '{"foo": "bar"}\n'
+    )
 
 
 async def test_should_dispose_global_request(playwright: Playwright, server: Server):

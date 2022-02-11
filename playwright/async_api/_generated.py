@@ -667,7 +667,8 @@ class Route(AsyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         body: typing.Union[str, bytes] = None,
         path: typing.Union[str, pathlib.Path] = None,
-        content_type: str = None
+        content_type: str = None,
+        response: "APIResponse" = None
     ) -> NoneType:
         """Route.fulfill
 
@@ -701,6 +702,9 @@ class Route(AsyncBase):
             is resolved relative to the current working directory.
         content_type : Union[str, NoneType]
             If set, equals to setting `Content-Type` response header.
+        response : Union[APIResponse, NoneType]
+            `APIResponse` to fulfill route's request with. Individual fields of the response (such as headers) can be overridden
+            using fulfill options.
         """
 
         return mapping.from_maybe_impl(
@@ -712,6 +716,7 @@ class Route(AsyncBase):
                     body=body,
                     path=path,
                     contentType=content_type,
+                    response=response._impl_obj if response else None,
                 ),
             )
         )
@@ -4304,7 +4309,11 @@ class Frame(AsyncBase):
         )
 
     def locator(
-        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+        self,
+        selector: str,
+        *,
+        has_text: typing.Union[str, typing.Pattern] = None,
+        has: "Locator" = None
     ) -> "Locator":
         """Frame.locator
 
@@ -4319,6 +4328,11 @@ class Frame(AsyncBase):
         has_text : Union[Pattern, str, NoneType]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
             `"Playwright"` matches `<article><div>Playwright</div></article>`.
+        has : Union[Locator, NoneType]
+            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
+            For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -4326,7 +4340,9 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_impl(
-            self._impl_obj.locator(selector=selector, has_text=has_text)
+            self._impl_obj.locator(
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+            )
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
@@ -5271,7 +5287,11 @@ class FrameLocator(AsyncBase):
         return mapping.from_impl(self._impl_obj.last)
 
     def locator(
-        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+        self,
+        selector: str,
+        *,
+        has_text: typing.Union[str, typing.Pattern] = None,
+        has: "Locator" = None
     ) -> "Locator":
         """FrameLocator.locator
 
@@ -5284,6 +5304,11 @@ class FrameLocator(AsyncBase):
         has_text : Union[Pattern, str, NoneType]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
             `"Playwright"` matches `<article><div>Playwright</div></article>`.
+        has : Union[Locator, NoneType]
+            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
+            For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -5291,7 +5316,9 @@ class FrameLocator(AsyncBase):
         """
 
         return mapping.from_impl(
-            self._impl_obj.locator(selector=selector, has_text=has_text)
+            self._impl_obj.locator(
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+            )
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
@@ -8414,7 +8441,11 @@ class Page(AsyncContextManager):
         )
 
     def locator(
-        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+        self,
+        selector: str,
+        *,
+        has_text: typing.Union[str, typing.Pattern] = None,
+        has: "Locator" = None
     ) -> "Locator":
         """Page.locator
 
@@ -8431,6 +8462,11 @@ class Page(AsyncContextManager):
         has_text : Union[Pattern, str, NoneType]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
             `"Playwright"` matches `<article><div>Playwright</div></article>`.
+        has : Union[Locator, NoneType]
+            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
+            For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -8438,7 +8474,9 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_impl(
-            self._impl_obj.locator(selector=selector, has_text=has_text)
+            self._impl_obj.locator(
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+            )
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
@@ -9756,13 +9794,13 @@ class Page(AsyncContextManager):
         ```py
         async with page.expect_response(\"https://example.com/resource\") as response_info:
             await page.click(\"input\")
-        response = response_info.value
+        response = await response_info.value
         return response.ok
 
         # or with a lambda
         async with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200) as response_info:
             await page.click(\"input\")
-        response = response_info.value
+        response = await response_info.value
         return response.ok
         ```
 
@@ -12148,7 +12186,9 @@ class Tracing(AsyncBase):
         title : Union[str, NoneType]
             Trace name to be shown in the Trace Viewer.
         snapshots : Union[bool, NoneType]
-            Whether to capture DOM snapshot on every action.
+            If this option is true tracing will
+            - capture DOM snapshot on every action
+            - record network activity
         screenshots : Union[bool, NoneType]
             Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
         sources : Union[bool, NoneType]
@@ -12242,6 +12282,18 @@ mapping.register(TracingImpl, Tracing)
 
 
 class Locator(AsyncBase):
+    @property
+    def page(self) -> "Page":
+        """Locator.page
+
+        A page this locator belongs to.
+
+        Returns
+        -------
+        Page
+        """
+        return mapping.from_impl(self._impl_obj.page)
+
     @property
     def first(self) -> "Locator":
         """Locator.first
@@ -12729,7 +12781,11 @@ class Locator(AsyncBase):
         )
 
     def locator(
-        self, selector: str, *, has_text: typing.Union[str, typing.Pattern] = None
+        self,
+        selector: str,
+        *,
+        has_text: typing.Union[str, typing.Pattern] = None,
+        has: "Locator" = None
     ) -> "Locator":
         """Locator.locator
 
@@ -12742,6 +12798,11 @@ class Locator(AsyncBase):
         has_text : Union[Pattern, str, NoneType]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. For example,
             `"Playwright"` matches `<article><div>Playwright</div></article>`.
+        has : Union[Locator, NoneType]
+            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
+            For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -12749,7 +12810,9 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_impl(
-            self._impl_obj.locator(selector=selector, has_text=has_text)
+            self._impl_obj.locator(
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+            )
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":

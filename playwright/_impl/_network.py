@@ -51,6 +51,7 @@ from playwright._impl._helper import ContinueParameters, locals_to_params
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
 
 
@@ -124,7 +125,7 @@ class Request(ChannelOwner):
     @property
     def post_data_buffer(self) -> Optional[bytes]:
         b64_content = self._initializer.get("postData")
-        if not b64_content:
+        if b64_content is None:
             return None
         return base64.b64decode(b64_content)
 
@@ -200,8 +201,25 @@ class Route(ChannelOwner):
         body: Union[str, bytes] = None,
         path: Union[str, Path] = None,
         contentType: str = None,
+        response: "APIResponse" = None,
     ) -> None:
         params = locals_to_params(locals())
+        if response:
+            del params["response"]
+            params["status"] = (
+                params["status"] if params.get("status") else response.status
+            )
+            params["headers"] = (
+                params["headers"] if params.get("headers") else response.headers
+            )
+            from playwright._impl._fetch import APIResponse
+
+            if body is None and path is None and isinstance(response, APIResponse):
+                if response._request._connection is self._connection:
+                    params["fetchResponseUid"] = response._fetch_uid
+                else:
+                    body = await response.body()
+
         length = 0
         if isinstance(body, str):
             params["body"] = body

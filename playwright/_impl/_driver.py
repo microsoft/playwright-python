@@ -48,9 +48,7 @@ if sys.version_info.major == 3 and sys.version_info.minor == 7:
 
 def get_driver_env() -> dict:
     env = os.environ.copy()
-    env["PW_CLI_TARGET_LANG"] = "python"
-    env[
-        "PW_CLI_TARGET_LANG_VERSION"
-    ] = f"{sys.version_info.major}.{sys.version_info.minor}"
+    env["PW_LANG_NAME"] = "python"
+    env["PW_LANG_NAME_VERSION"] = f"{sys.version_info.major}.{sys.version_info.minor}"
     env["PW_CLI_DISPLAY_VERSION"] = version
     return env

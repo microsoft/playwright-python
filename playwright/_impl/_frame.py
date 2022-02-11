@@ -498,8 +498,10 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
-    def locator(self, selector: str, has_text: Union[str, Pattern] = None) -> Locator:
-        return Locator(self, selector, has_text=has_text)
+    def locator(
+        self, selector: str, has_text: Union[str, Pattern] = None, has: Locator = None
+    ) -> Locator:
+        return Locator(self, selector, has_text=has_text, has=has)
 
     def frame_locator(self, selector: str) -> FrameLocator:
         return FrameLocator(self, selector)

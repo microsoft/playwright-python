@@ -159,10 +159,13 @@ class BrowserContext(ChannelOwner):
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
             if handler_entry.matches(request.url):
-                if handler_entry.handle(route, request):
-                    self._routes.remove(handler_entry)
-                    if not len(self._routes) == 0:
-                        asyncio.create_task(self._disable_interception())
+                try:
+                    handler_entry.handle(route, request)
+                finally:
+                    if not handler_entry.is_active:
+                        self._routes.remove(handler_entry)
+                        if not len(self._routes) == 0:
+                            asyncio.create_task(self._disable_interception())
                 break
         route._internal_continue()
 
