@@ -377,7 +377,7 @@ class APIResponse:
             result = await self._request._channel.send_return_as_dict(
                 "fetchResponseBody",
                 {
-                    "fetchUid": self._fetch_uid(),
+                    "fetchUid": self._fetch_uid,
                 },
             )
             if result is None:
@@ -400,10 +400,11 @@ class APIResponse:
         await self._request._channel.send(
             "disposeAPIResponse",
             {
-                "fetchUid": self._fetch_uid(),
+                "fetchUid": self._fetch_uid,
             },
         )
 
+    @property
     def _fetch_uid(self) -> str:
         return self._initializer["fetchUid"]
 
@@ -411,7 +412,7 @@ class APIResponse:
         return await self._request._channel.send(
             "fetchLog",
             {
-                "fetchUid": self._fetch_uid(),
+                "fetchUid": self._fetch_uid,
             },
         )
 

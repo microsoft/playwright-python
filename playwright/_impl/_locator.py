@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import pathlib
 import sys
 from typing import (
@@ -53,13 +54,18 @@ else:  # pragma: no cover
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._frame import Frame
     from playwright._impl._js_handle import JSHandle
+    from playwright._impl._page import Page
 
 T = TypeVar("T")
 
 
 class Locator:
     def __init__(
-        self, frame: "Frame", selector: str, has_text: Union[str, Pattern] = None
+        self,
+        frame: "Frame",
+        selector: str,
+        has_text: Union[str, Pattern] = None,
+        has: "Locator" = None,
     ) -> None:
         self._frame = frame
         self._selector = selector
@@ -74,6 +80,11 @@ class Locator:
             else:
                 escaped = escape_with_quotes(has_text, '"')
                 self._selector += f" >> :scope:has-text({escaped})"
+
+        if has:
+            if has._frame != frame:
+                raise Error('Inner "has" locator must belong to the same frame.')
+            self._selector += " >> has=" + json.dumps(has._selector)
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
@@ -95,6 +106,10 @@ class Locator:
             )
         finally:
             await handle.dispose()
+
+    @property
+    def page(self) -> "Page":
+        return self._frame.page
 
     async def bounding_box(self, timeout: float = None) -> Optional[FloatRect]:
         return await self._with_element(
@@ -184,9 +199,13 @@ class Locator:
         self,
         selector: str,
         has_text: Union[str, Pattern] = None,
+        has: "Locator" = None,
     ) -> "Locator":
         return Locator(
-            self._frame, f"{self._selector} >> {selector}", has_text=has_text
+            self._frame,
+            f"{self._selector} >> {selector}",
+            has_text=has_text,
+            has=has,
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
@@ -538,11 +557,14 @@ class FrameLocator:
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
         self._frame_selector = frame_selector
 
-    def locator(self, selector: str, has_text: Union[str, Pattern] = None) -> Locator:
+    def locator(
+        self, selector: str, has_text: Union[str, Pattern] = None, has: "Locator" = None
+    ) -> Locator:
         return Locator(
             self._frame,
             f"{self._frame_selector} >> control=enter-frame >> {selector}",
             has_text=has_text,
+            has=has,
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":

@@ -397,9 +397,12 @@ async def test_accessibility_should_work_on_a_menu(
             {"role": "menuitem", "name": "Third Item"},
         ],
     }
-    if is_webkit or (is_chromium and not browser_channel):
-        golden["orientation"] = "vertical"
-    assert await page.accessibility.snapshot(root=menu) == golden
+    actual = await page.accessibility.snapshot(root=menu)
+    assert actual
+    # Different per browser channel
+    if "orientation" in actual:
+        del actual["orientation"]
+    assert actual == golden
 
 
 async def test_accessibility_should_return_null_when_the_element_is_no_longer_in_DOM(

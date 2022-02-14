@@ -17,7 +17,7 @@ from typing import Callable
 
 import pytest
 
-from playwright.sync_api import BrowserType, Error
+from playwright.sync_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
 from tests.server import Server
 
@@ -193,3 +193,31 @@ def test_connect_to_closed_server_without_hangs(
     with pytest.raises(Error) as exc:
         browser_type.connect(remote_server.ws_endpoint)
     assert "websocket.connect: " in exc.value.message
+
+
+def test_browser_type_connect_should_fulfill_with_global_fetch_result(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    playwright: Playwright,
+    server: Server,
+) -> None:
+    # Launch another server to not affect other tests.
+    remote = launch_server()
+
+    browser = browser_type.connect(remote.ws_endpoint)
+    context = browser.new_context()
+    page = context.new_page()
+
+    def handle_request(route: Route) -> None:
+        request = playwright.request.new_context()
+        response = request.get(server.PREFIX + "/simple.json")
+        return route.fulfill(response=response)
+
+    page.route("**/*", handle_request)
+
+    response = page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    assert response.json() == {"foo": "bar"}
+
+    remote.kill()

@@ -19,14 +19,15 @@ import objgraph
 import pytest
 
 from playwright.async_api import async_playwright
+from tests.server import Server
 
 
 @pytest.mark.asyncio
-async def test_memory_objects() -> None:
+async def test_memory_objects(server: Server) -> None:
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        await page.goto("https://example.com")
+        await page.goto(server.EMPTY_PAGE)
 
         page.on("dialog", lambda dialog: dialog.dismiss())
         for _ in range(100):

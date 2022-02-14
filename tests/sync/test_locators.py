@@ -623,3 +623,61 @@ def test_locator_query_should_filter_by_regex_and_regexp_flags(
     expect(
         page.locator("div", has_text=re.compile('hElLo "world', re.IGNORECASE))
     ).to_have_text('Hello "world"')
+
+
+def test_locator_should_return_page(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/frames/two-frames.html")
+    outer = page.locator("#outer")
+    assert outer.page == page
+
+    inner = outer.locator("#inner")
+    assert inner.page == page
+
+    in_frame = page.frames[1].locator("div")
+    assert in_frame.page == page
+
+
+def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
+    page.set_content("<div><span>hello</span></div><div><span>world</span></div>")
+    expect(page.locator("div", has=page.locator("text=world"))).to_have_count(1)
+    assert (
+        page.locator("div", has=page.locator("text=world")).evaluate("e => e.outerHTML")
+        == "<div><span>world</span></div>"
+    )
+    expect(page.locator("div", has=page.locator('text="hello"'))).to_have_count(1)
+    assert (
+        page.locator("div", has=page.locator('text="hello"')).evaluate(
+            "e => e.outerHTML"
+        )
+        == "<div><span>hello</span></div>"
+    )
+    expect(page.locator("div", has=page.locator("xpath=./span"))).to_have_count(2)
+    expect(page.locator("div", has=page.locator("span"))).to_have_count(2)
+    expect(page.locator("div", has=page.locator("span", has_text="wor"))).to_have_count(
+        1
+    )
+    assert (
+        page.locator("div", has=page.locator("span", has_text="wor")).evaluate(
+            "e => e.outerHTML"
+        )
+        == "<div><span>world</span></div>"
+    )
+    expect(
+        page.locator(
+            "div",
+            has=page.locator("span"),
+            has_text="wor",
+        )
+    ).to_have_count(1)
+
+
+def test_locator_should_enforce_same_frame_for_has_locator(
+    page: Page, server: Server
+) -> None:
+    page.goto(server.PREFIX + "/frames/two-frames.html")
+    child = page.frames[1]
+    with pytest.raises(Error) as exc_info:
+        page.locator("div", has=child.locator("span"))
+    assert (
+        'Inner "has" locator must belong to the same frame.' in exc_info.value.message
+    )

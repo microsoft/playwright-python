@@ -73,7 +73,7 @@ def test_should_add_session_cookies_to_request(
         ]
     )
     with server.expect_request("/empty.html") as server_req:
-        context.request.get(server.EMPTY_PAGE),
+        context.request.get(server.EMPTY_PAGE)
     assert server_req.value.getHeader("Cookie") == "username=John Doe"
 
 

@@ -46,12 +46,15 @@ class AssertionsBase:
             del expect_options["useInnerText"]
         result = await self._actual_locator._expect(expression, expect_options)
         if result["matches"] == self._is_not:
+            actual = result.get("received")
             log = "\n".join(result.get("log", "")).strip()
             if log:
                 log = "\nCall log:\n" + log
             if expected is not None:
-                raise AssertionError(f"{message} '{expected}' {log}")
-            raise AssertionError(f"{message} {log}")
+                raise AssertionError(
+                    f"{message} '{expected}'\nActual value: {actual} {log}"
+                )
+            raise AssertionError(f"{message}\nActual value: {actual} {log}")
 
 
 class PageAssertions(AssertionsBase):

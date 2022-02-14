@@ -16,6 +16,7 @@ import asyncio
 import inspect
 import io
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -55,7 +56,9 @@ def assetdir() -> Path:
 @pytest.fixture(scope="session")
 def launch_arguments(pytestconfig: Any) -> Dict:
     return {
-        "headless": not pytestconfig.getoption("--headed"),
+        "headless": not (
+            pytestconfig.getoption("--headed") or os.getenv("HEADFUL", False)
+        ),
         "channel": pytestconfig.getoption("--browser-channel"),
     }
 

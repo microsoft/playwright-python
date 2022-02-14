@@ -232,10 +232,13 @@ class Page(ChannelOwner):
     def _on_route(self, route: Route, request: Request) -> None:
         for handler_entry in self._routes:
             if handler_entry.matches(request.url):
-                if handler_entry.handle(route, request):
-                    self._routes.remove(handler_entry)
-                    if len(self._routes) == 0:
-                        asyncio.create_task(self._disable_interception())
+                try:
+                    handler_entry.handle(route, request)
+                finally:
+                    if not handler_entry.is_active:
+                        self._routes.remove(handler_entry)
+                        if len(self._routes) == 0:
+                            asyncio.create_task(self._disable_interception())
                 return
         self._browser_context._on_route(route, request)
 
@@ -686,8 +689,9 @@ class Page(ChannelOwner):
         self,
         selector: str,
         has_text: Union[str, Pattern] = None,
+        has: "Locator" = None,
     ) -> "Locator":
-        return self._main_frame.locator(selector, has_text=has_text)
+        return self._main_frame.locator(selector, has_text=has_text, has=has)
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return self.main_frame.frame_locator(selector)

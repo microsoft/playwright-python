@@ -218,16 +218,17 @@ class RouteHandler:
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
-    def handle(self, route: "Route", request: "Request") -> bool:
-        try:
-            result = cast(
-                Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
-            )(route, request)
-            if inspect.iscoroutine(result):
-                asyncio.create_task(result)
-        finally:
-            self._handled_count += 1
-            return self._handled_count >= self._times
+    def handle(self, route: "Route", request: "Request") -> None:
+        self._handled_count += 1
+        result = cast(
+            Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
+        )(route, request)
+        if inspect.iscoroutine(result):
+            asyncio.create_task(result)
+
+    @property
+    def is_active(self) -> bool:
+        return self._handled_count < self._times
 
 
 def is_safe_close_error(error: Exception) -> bool:

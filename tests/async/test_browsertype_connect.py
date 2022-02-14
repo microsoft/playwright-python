@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Callable
+
 import pytest
 
-from playwright.async_api import BrowserType, Error
+from playwright.async_api import BrowserType, Error, Playwright, Route
+from tests.conftest import RemoteServer
 from tests.server import Server
 
 
@@ -209,3 +212,32 @@ async def test_connect_to_closed_server_without_hangs(
     with pytest.raises(Error) as exc:
         await browser_type.connect(remote_server.ws_endpoint)
     assert "websocket.connect: " in exc.value.message
+
+
+async def test_should_fulfill_with_global_fetch_result(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    playwright: Playwright,
+    server: Server,
+) -> None:
+    # Launch another server to not affect other tests.
+    remote = launch_server()
+
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+
+    async def handle_request(route: Route) -> None:
+        request = await playwright.request.new_context()
+        response = await request.get(server.PREFIX + "/simple.json")
+        await route.fulfill(response=response)
+        await request.dispose()
+
+    await page.route("**/*", handle_request)
+
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    assert await response.json() == {"foo": "bar"}
+
+    remote.kill()
