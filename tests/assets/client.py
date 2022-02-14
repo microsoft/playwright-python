@@ -21,7 +21,7 @@ def main(playwright: Playwright) -> None:
     for browser_type in [playwright.chromium, playwright.firefox, playwright.webkit]:
         browser = browser_type.launch()
         page = browser.new_page()
-        page.goto("https://example.com")
+        page.goto("data:text/html,Foobar")
         here = Path(__file__).parent.resolve()
         page.screenshot(path=here / f"{browser_type.name}.png")
         page.close()

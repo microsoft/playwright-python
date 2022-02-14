@@ -41,13 +41,13 @@ def test_sync_query_selector(page: Page) -> None:
     assert e1.inner_text() == e2.inner_text()
 
 
-def test_page_repr(page: Page) -> None:
-    page.goto("https://example.com")
+def test_page_repr(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
     assert repr(page) == f"<Page url={page.url!r}>"
 
 
-def test_frame_repr(page: Page) -> None:
-    page.goto("https://example.com")
+def test_frame_repr(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
     assert (
         repr(page.main_frame)
         == f"<Frame name={page.main_frame.name} url={page.main_frame.url!r}>"
