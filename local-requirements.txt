@@ -13,7 +13,6 @@ pytest==7.0.1
 pytest-asyncio==0.18.1
 pytest-cov==3.0.0
 pytest-repeat==0.9.1
-pytest-sugar==0.9.4
 pytest-timeout==2.1.0
 pytest-xdist==2.5.0
 requests==2.27.1
