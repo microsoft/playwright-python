@@ -912,17 +912,25 @@ async def test_frame_wait_for_nav_should_work(page, server):
     assert "/frames/one-frame.html" in page.url
 
 
-async def test_frame_wait_for_nav_should_fail_when_frame_detaches(page, server):
+async def test_frame_wait_for_nav_should_fail_when_frame_detaches(page, server: Server):
     await page.goto(server.PREFIX + "/frames/one-frame.html")
     frame = page.frames[1]
     server.set_route("/empty.html", lambda _: None)
     with pytest.raises(Error) as exc_info:
         async with frame.expect_navigation():
+
+            async def after_it():
+                await server.wait_for_request("/empty.html")
+                await page.eval_on_selector(
+                    "iframe", "frame => setTimeout(() => frame.remove(), 0)"
+                )
+
             await asyncio.gather(
-                frame.evaluate('window.location = "/empty.html"'),
-                page.evaluate(
-                    'setTimeout(() => document.querySelector("iframe").remove())'
+                page.eval_on_selector(
+                    "iframe",
+                    "frame => frame.contentWindow.location.href = '/empty.html'",
                 ),
+                after_it(),
             )
     assert "frame was detached" in exc_info.value.message
 

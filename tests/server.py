@@ -51,6 +51,8 @@ class ExpectResponse(Generic[T]):
 
     @property
     def value(self) -> T:
+        if not hasattr(self, "_value"):
+            raise ValueError("no received value")
         return self._value
 
 
@@ -100,8 +102,11 @@ class Server:
                 uri = urlparse(request.uri.decode())
                 path = uri.path
 
-                if request_subscribers.get(path):
-                    request_subscribers[path].set_result(request)
+                request_subscriber = request_subscribers.get(path)
+                if request_subscriber:
+                    request_subscriber._loop.call_soon_threadsafe(
+                        request_subscriber.set_result, request
+                    )
                     request_subscribers.pop(path)
 
                 if auth.get(path):
