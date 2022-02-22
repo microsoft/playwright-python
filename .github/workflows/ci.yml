@@ -36,7 +36,7 @@ jobs:
 
   build:
     name: Build
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       DEBUG: pw:*
       DEBUG_FILE: pw-log.txt
@@ -119,7 +119,7 @@ jobs:
 
   test-stable:
     name: Stable
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       DEBUG: pw:*
       DEBUG_FILE: pw-log.txt
