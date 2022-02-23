@@ -285,10 +285,13 @@ class Route(ChannelOwner):
             # When page closes or crashes, we catch any potential rejects from this Route.
             # Note that page could be missing when routing popup's initial request that
             # does not have a Page initialized just yet.
+            fut = asyncio.create_task(future)
             await asyncio.wait(
-                [asyncio.create_task(future), page._closed_or_crashed_future],
+                [fut, page._closed_or_crashed_future],
                 return_when=asyncio.FIRST_COMPLETED,
             )
+            if page._closed_or_crashed_future.done():
+                await asyncio.gather(fut, return_exceptions=True)
         else:
             await future
 
