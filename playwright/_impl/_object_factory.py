@@ -30,7 +30,7 @@ from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._playwright import Playwright
-from playwright._impl._selectors import Selectors
+from playwright._impl._selectors import SelectorsOwner
 from playwright._impl._stream import Stream
 from playwright._impl._tracing import Tracing
 
@@ -90,5 +90,5 @@ def create_remote_object(
     if type == "Worker":
         return Worker(parent, type, guid, initializer)
     if type == "Selectors":
-        return Selectors(parent, type, guid, initializer)
+        return SelectorsOwner(parent, type, guid, initializer)
     return DummyObject(parent, type, guid, initializer)

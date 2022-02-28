@@ -206,6 +206,7 @@ class BrowserType(ChannelOwner):
         if not timeout_future.done():
             timeout_future.cancel()
         playwright: "Playwright" = next(iter(done)).result()
+        playwright._set_selectors(self._playwright.selectors)
         self._connection._child_ws_connections.append(connection)
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
@@ -219,6 +220,7 @@ class BrowserType(ChannelOwner):
                     page._on_close()
                 context._on_close()
             browser._on_close()
+            connection.cleanup()
 
         transport.once("close", handle_transport_close)
 

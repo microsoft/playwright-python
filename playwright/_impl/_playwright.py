@@ -18,7 +18,7 @@ from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._fetch import APIRequest
 from playwright._impl._local_utils import LocalUtils
-from playwright._impl._selectors import Selectors
+from playwright._impl._selectors import Selectors, SelectorsOwner
 
 
 class Playwright(ChannelOwner):
@@ -40,7 +40,14 @@ class Playwright(ChannelOwner):
         self.firefox._playwright = self
         self.webkit = from_channel(initializer["webkit"])
         self.webkit._playwright = self
-        self.selectors = from_channel(initializer["selectors"])
+
+        self.selectors = Selectors(self._loop)
+        selectors_owner: SelectorsOwner = from_channel(initializer["selectors"])
+        self.selectors._add_channel(selectors_owner)
+
+        self._connection.on(
+            "close", lambda: self.selectors._remove_channel(selectors_owner)
+        )
         self.devices = {}
         self.devices = {
             device["name"]: parse_device_descriptor(device["descriptor"])
@@ -56,6 +63,12 @@ class Playwright(ChannelOwner):
         elif value == "webkit":
             return self.webkit
         raise ValueError("Invalid browser " + value)
+
+    def _set_selectors(self, selectors: SelectorsOwner) -> None:
+        selectors_owner = from_channel(self._initializer["selectors"])
+        self.selectors._remove_channel(selectors_owner)
+        self.selectors = selectors
+        self.selectors._add_channel(selectors_owner)
 
     def stop(self) -> None:
         pass

@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from greenlet import greenlet
-from pyee import AsyncIOEventEmitter
+from pyee import AsyncIOEventEmitter, EventEmitter
 
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
@@ -141,7 +141,7 @@ class RootChannelOwner(ChannelOwner):
         )
 
 
-class Connection:
+class Connection(EventEmitter):
     def __init__(
         self,
         dispatcher_fiber: Any,
@@ -149,6 +149,7 @@ class Connection:
         transport: Transport,
         loop: asyncio.AbstractEventLoop,
     ) -> None:
+        super().__init__()
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self.dispatch(msg)
@@ -195,6 +196,7 @@ class Connection:
     def cleanup(self) -> None:
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
+        self.emit("close")
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]
