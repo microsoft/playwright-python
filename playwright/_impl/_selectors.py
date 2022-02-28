@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Set, Union
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._helper import async_readfile
 
 
-class Selectors(ChannelOwner):
-    def __init__(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
-    ) -> None:
-        super().__init__(parent, type, guid, initializer)
+class Selectors:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+        self._loop = loop
+        self._channels: Set[SelectorsOwner] = set()
+        self._registrations: List[Dict] = []
 
     async def register(
         self,
@@ -40,4 +41,23 @@ class Selectors(ChannelOwner):
         params: Dict[str, Any] = dict(name=name, source=script)
         if contentScript:
             params["contentScript"] = True
-        await self._channel.send("register", params)
+        for channel in self._channels:
+            await channel._channel.send("register", params)
+        self._registrations.append(params)
+
+    def _add_channel(self, channel: "SelectorsOwner") -> None:
+        self._channels.add(channel)
+        for params in self._registrations:
+            # This should not fail except for connection closure, but just in case we catch.
+            channel._channel.send_no_reply("register", params)
+
+    def _remove_channel(self, channel: "SelectorsOwner") -> None:
+        if channel in self._channels:
+            self._channels.remove(channel)
+
+
+class SelectorsOwner(ChannelOwner):
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
