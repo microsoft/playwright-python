@@ -3,7 +3,7 @@ import pytest
 from playwright.async_api import Error, Page
 
 
-async def test_selectors_register_should_work(selectors, browser):
+async def test_selectors_register_should_work(selectors, browser, browser_name):
     tag_selector = """
         {
             create(root, target) {
@@ -17,23 +17,40 @@ async def test_selectors_register_should_work(selectors, browser):
             }
         }"""
 
+    selector_name = f"tag_{browser_name}"
+    selector2_name = f"tag2_{browser_name}"
+
     # Register one engine before creating context.
-    await selectors.register("tag", tag_selector)
+    await selectors.register(selector_name, tag_selector)
 
     context = await browser.new_context()
     # Register another engine after creating context.
-    await selectors.register("tag2", tag_selector)
+    await selectors.register(selector2_name, tag_selector)
 
     page = await context.new_page()
     await page.set_content("<div><span></span></div><div></div>")
 
-    assert await page.eval_on_selector("tag=DIV", "e => e.nodeName") == "DIV"
-    assert await page.eval_on_selector("tag=SPAN", "e => e.nodeName") == "SPAN"
-    assert await page.eval_on_selector_all("tag=DIV", "es => es.length") == 2
+    assert (
+        await page.eval_on_selector(f"{selector_name}=DIV", "e => e.nodeName") == "DIV"
+    )
+    assert (
+        await page.eval_on_selector(f"{selector_name}=SPAN", "e => e.nodeName")
+        == "SPAN"
+    )
+    assert (
+        await page.eval_on_selector_all(f"{selector_name}=DIV", "es => es.length") == 2
+    )
 
-    assert await page.eval_on_selector("tag2=DIV", "e => e.nodeName") == "DIV"
-    assert await page.eval_on_selector("tag2=SPAN", "e => e.nodeName") == "SPAN"
-    assert await page.eval_on_selector_all("tag2=DIV", "es => es.length") == 2
+    assert (
+        await page.eval_on_selector(f"{selector2_name}=DIV", "e => e.nodeName") == "DIV"
+    )
+    assert (
+        await page.eval_on_selector(f"{selector2_name}=SPAN", "e => e.nodeName")
+        == "SPAN"
+    )
+    assert (
+        await page.eval_on_selector_all(f"{selector2_name}=DIV", "es => es.length") == 2
+    )
 
     # Selector names are case-sensitive.
     with pytest.raises(Error) as exc:
