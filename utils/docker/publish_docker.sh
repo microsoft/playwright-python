@@ -6,7 +6,7 @@ set +x
 trap "cd $(pwd -P)" EXIT
 cd "$(dirname "$0")"
 
-MCR_IMAGE_NAME="playwright-python"
+MCR_IMAGE_NAME="playwright/python"
 PW_VERSION=$(python -c "from playwright._repo_version import version;print(version)")
 
 RELEASE_CHANNEL="$1"
