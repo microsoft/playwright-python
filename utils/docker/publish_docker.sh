@@ -43,13 +43,13 @@ FOCAL_TAGS=(
   "next"
   "sha-${GITHUB_SHA}"
   "next-focal"
-  "v${PW_VERSION}-focal"
-  "v${PW_VERSION}"
 )
 
 if [[ "$RELEASE_CHANNEL" == "stable" ]]; then
   FOCAL_TAGS+=("latest")
   FOCAL_TAGS+=("focal")
+  FOCAL_TAGS+=("v${PW_VERSION}-focal")
+  FOCAL_TAGS+=("v${PW_VERSION}")
 fi
 
 tag_and_push() {
