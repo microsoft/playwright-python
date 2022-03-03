@@ -194,21 +194,29 @@ def pytest_addoption(parser: Any) -> None:
 @pytest.fixture(scope="session")
 def assert_to_be_golden(browser_name: str) -> Callable[[bytes, str], None]:
     def compare(received_raw: bytes, golden_name: str) -> None:
-        golden_file = (_dirname / f"golden-{browser_name}" / golden_name).read_bytes()
-        received_image = Image.open(io.BytesIO(received_raw))
-        golden_image = Image.open(io.BytesIO(golden_file))
+        golden_file_path = _dirname / f"golden-{browser_name}" / golden_name
+        try:
+            golden_file = golden_file_path.read_bytes()
+            received_image = Image.open(io.BytesIO(received_raw))
+            golden_image = Image.open(io.BytesIO(golden_file))
 
-        if golden_image.size != received_image.size:
-            pytest.fail("Image size differs to golden image")
-            return
-        diff_pixels = pixelmatch(
-            from_PIL_to_raw_data(received_image),
-            from_PIL_to_raw_data(golden_image),
-            golden_image.size[0],
-            golden_image.size[1],
-            threshold=0.2,
-        )
-        assert diff_pixels == 0
+            if golden_image.size != received_image.size:
+                pytest.fail("Image size differs to golden image")
+                return
+            diff_pixels = pixelmatch(
+                from_PIL_to_raw_data(received_image),
+                from_PIL_to_raw_data(golden_image),
+                golden_image.size[0],
+                golden_image.size[1],
+                threshold=0.2,
+            )
+            assert diff_pixels == 0
+        except Exception:
+            if os.getenv("PW_WRITE_SCREENSHOT"):
+                golden_file_path.parent.mkdir(parents=True, exist_ok=True)
+                golden_file_path.write_bytes(received_raw)
+                print(f"Wrote {golden_file_path}")
+            raise
 
     return compare
 
@@ -229,7 +237,9 @@ class RemoteServer:
                 str(node_executable),
                 str(cli_js),
                 "launch-server",
+                "--browser",
                 browser_name,
+                "--config",
                 str(tmpfile),
             ],
             stdout=subprocess.PIPE,

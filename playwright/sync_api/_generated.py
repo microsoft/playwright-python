@@ -1724,7 +1724,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.hover",
                 self._impl_obj.hover(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -1793,7 +1793,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.click",
                 self._impl_obj.click(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -1866,7 +1866,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.dblclick",
                 self._impl_obj.dblclick(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -1953,9 +1953,9 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.select_option",
                 self._impl_obj.select_option(
-                    value=value,
-                    index=index,
-                    label=label,
+                    value=mapping.to_impl(value),
+                    index=mapping.to_impl(index),
+                    label=mapping.to_impl(label),
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     force=force,
@@ -2017,7 +2017,7 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.tap",
                 self._impl_obj.tap(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -2153,7 +2153,9 @@ class ElementHandle(JSHandle):
             self._sync(
                 "element_handle.set_input_files",
                 self._impl_obj.set_input_files(
-                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                    files=mapping.to_impl(files),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
                 ),
             )
         )
@@ -2483,7 +2485,9 @@ class ElementHandle(JSHandle):
         type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
-        omit_background: bool = None
+        omit_background: bool = None,
+        disable_animations: bool = None,
+        mask: typing.List["Locator"] = None
     ) -> bytes:
         """ElementHandle.screenshot
 
@@ -2508,6 +2512,12 @@ class ElementHandle(JSHandle):
         omit_background : Union[bool, NoneType]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
+        disable_animations : Union[bool, NoneType]
+            When true, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment depending on
+            their duration:
+        mask : Union[List[Locator], NoneType]
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            `#FF00FF` that completely covers its bounding box.
 
         Returns
         -------
@@ -2523,6 +2533,8 @@ class ElementHandle(JSHandle):
                     path=path,
                     quality=quality,
                     omitBackground=omit_background,
+                    disableAnimations=disable_animations,
+                    mask=mapping.to_impl(mask),
                 ),
             )
         )
@@ -2907,7 +2919,9 @@ class FileChooser(SyncBase):
             self._sync(
                 "file_chooser.set_files",
                 self._impl_obj.set_files(
-                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                    files=mapping.to_impl(files),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
                 ),
             )
         )
@@ -4025,7 +4039,7 @@ class Frame(SyncBase):
                 "frame.click",
                 self._impl_obj.click(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -4108,7 +4122,7 @@ class Frame(SyncBase):
                 "frame.dblclick",
                 self._impl_obj.dblclick(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -4183,7 +4197,7 @@ class Frame(SyncBase):
                 "frame.tap",
                 self._impl_obj.tap(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -4530,7 +4544,7 @@ class Frame(SyncBase):
                 "frame.hover",
                 self._impl_obj.hover(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -4671,9 +4685,9 @@ class Frame(SyncBase):
                 "frame.select_option",
                 self._impl_obj.select_option(
                     selector=selector,
-                    value=value,
-                    index=index,
-                    label=label,
+                    value=mapping.to_impl(value),
+                    index=mapping.to_impl(index),
+                    label=mapping.to_impl(label),
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
@@ -4762,7 +4776,7 @@ class Frame(SyncBase):
                 "frame.set_input_files",
                 self._impl_obj.set_input_files(
                     selector=selector,
-                    files=files,
+                    files=mapping.to_impl(files),
                     strict=strict,
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
@@ -7659,9 +7673,10 @@ class Page(SyncContextManager):
         In the case of multiple pages in a single browser, each page can have its own viewport size. However,
         `browser.new_context()` allows to set viewport size (and more) for all pages in the context at once.
 
-        `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
-        viewport size before navigating to the page. `page.set_viewport_size()` will also reset `screen` size, use
-        `browser.new_context()` with `screen` and `viewport` parameters if you need better control of these properties.
+        `page.set_viewport_size()` will resize the page. A lot of websites don't expect phones to change size, so you
+        should set the viewport size before navigating to the page. `page.set_viewport_size()` will also reset `screen`
+        size, use `browser.new_context()` with `screen` and `viewport` parameters if you need better control of these
+        properties.
 
         ```py
         page = browser.new_page()
@@ -7849,7 +7864,9 @@ class Page(SyncContextManager):
         quality: int = None,
         omit_background: bool = None,
         full_page: bool = None,
-        clip: FloatRect = None
+        clip: FloatRect = None,
+        disable_animations: bool = None,
+        mask: typing.List["Locator"] = None
     ) -> bytes:
         """Page.screenshot
 
@@ -7876,6 +7893,12 @@ class Page(SyncContextManager):
             `false`.
         clip : Union[{x: float, y: float, width: float, height: float}, NoneType]
             An object which specifies clipping of the resulting image. Should have the following fields:
+        disable_animations : Union[bool, NoneType]
+            When true, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment depending on
+            their duration:
+        mask : Union[List[Locator], NoneType]
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            `#FF00FF` that completely covers its bounding box.
 
         Returns
         -------
@@ -7893,6 +7916,8 @@ class Page(SyncContextManager):
                     omitBackground=omit_background,
                     fullPage=full_page,
                     clip=clip,
+                    disableAnimations=disable_animations,
+                    mask=mapping.to_impl(mask),
                 ),
             )
         )
@@ -8016,7 +8041,7 @@ class Page(SyncContextManager):
                 "page.click",
                 self._impl_obj.click(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -8101,7 +8126,7 @@ class Page(SyncContextManager):
                 "page.dblclick",
                 self._impl_obj.dblclick(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -8178,7 +8203,7 @@ class Page(SyncContextManager):
                 "page.tap",
                 self._impl_obj.tap(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -8533,7 +8558,7 @@ class Page(SyncContextManager):
                 "page.hover",
                 self._impl_obj.hover(
                     selector=selector,
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -8677,9 +8702,9 @@ class Page(SyncContextManager):
                 "page.select_option",
                 self._impl_obj.select_option(
                     selector=selector,
-                    value=value,
-                    index=index,
-                    label=label,
+                    value=mapping.to_impl(value),
+                    index=mapping.to_impl(index),
+                    label=mapping.to_impl(label),
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
@@ -8768,7 +8793,7 @@ class Page(SyncContextManager):
                 "page.set_input_files",
                 self._impl_obj.set_input_files(
                     selector=selector,
-                    files=files,
+                    files=mapping.to_impl(files),
                     timeout=timeout,
                     strict=strict,
                     noWaitAfter=no_wait_after,
@@ -10108,7 +10133,10 @@ class BrowserContext(SyncContextManager):
         """
 
         return mapping.from_impl_list(
-            self._sync("browser_context.cookies", self._impl_obj.cookies(urls=urls))
+            self._sync(
+                "browser_context.cookies",
+                self._impl_obj.cookies(urls=mapping.to_impl(urls)),
+            )
         )
 
     def add_cookies(self, cookies: typing.List[SetCookieParam]) -> NoneType:
@@ -10129,7 +10157,7 @@ class BrowserContext(SyncContextManager):
         return mapping.from_maybe_impl(
             self._sync(
                 "browser_context.add_cookies",
-                self._impl_obj.add_cookies(cookies=cookies),
+                self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies)),
             )
         )
 
@@ -10179,7 +10207,7 @@ class BrowserContext(SyncContextManager):
             self._sync(
                 "browser_context.grant_permissions",
                 self._impl_obj.grant_permissions(
-                    permissions=permissions, origin=origin
+                    permissions=mapping.to_impl(permissions), origin=origin
                 ),
             )
         )
@@ -10978,7 +11006,7 @@ class Browser(SyncContextManager):
                     locale=locale,
                     timezoneId=timezone_id,
                     geolocation=geolocation,
-                    permissions=permissions,
+                    permissions=mapping.to_impl(permissions),
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                     offline=offline,
                     httpCredentials=http_credentials,
@@ -11154,7 +11182,7 @@ class Browser(SyncContextManager):
                     locale=locale,
                     timezoneId=timezone_id,
                     geolocation=geolocation,
-                    permissions=permissions,
+                    permissions=mapping.to_impl(permissions),
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                     offline=offline,
                     httpCredentials=http_credentials,
@@ -11255,7 +11283,7 @@ class Browser(SyncContextManager):
                     page=page._impl_obj if page else None,
                     path=path,
                     screenshots=screenshots,
-                    categories=categories,
+                    categories=mapping.to_impl(categories),
                 ),
             )
         )
@@ -11419,8 +11447,8 @@ class BrowserType(SyncBase):
                 self._impl_obj.launch(
                     executablePath=executable_path,
                     channel=channel,
-                    args=args,
-                    ignoreDefaultArgs=ignore_default_args,
+                    args=mapping.to_impl(args),
+                    ignoreDefaultArgs=mapping.to_impl(ignore_default_args),
                     handleSIGINT=handle_sigint,
                     handleSIGTERM=handle_sigterm,
                     handleSIGHUP=handle_sighup,
@@ -11637,8 +11665,8 @@ class BrowserType(SyncBase):
                     userDataDir=user_data_dir,
                     channel=channel,
                     executablePath=executable_path,
-                    args=args,
-                    ignoreDefaultArgs=ignore_default_args,
+                    args=mapping.to_impl(args),
+                    ignoreDefaultArgs=mapping.to_impl(ignore_default_args),
                     handleSIGINT=handle_sigint,
                     handleSIGTERM=handle_sigterm,
                     handleSIGHUP=handle_sighup,
@@ -11659,7 +11687,7 @@ class BrowserType(SyncBase):
                     locale=locale,
                     timezoneId=timezone_id,
                     geolocation=geolocation,
-                    permissions=permissions,
+                    permissions=mapping.to_impl(permissions),
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                     offline=offline,
                     httpCredentials=http_credentials,
@@ -12207,7 +12235,7 @@ class Locator(SyncBase):
             self._sync(
                 "locator.click",
                 self._impl_obj.click(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -12280,7 +12308,7 @@ class Locator(SyncBase):
             self._sync(
                 "locator.dblclick",
                 self._impl_obj.dblclick(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     delay=delay,
                     button=button,
@@ -12778,7 +12806,7 @@ class Locator(SyncBase):
             self._sync(
                 "locator.hover",
                 self._impl_obj.hover(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -13033,7 +13061,9 @@ class Locator(SyncBase):
         type: Literal["jpeg", "png"] = None,
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
-        omit_background: bool = None
+        omit_background: bool = None,
+        disable_animations: bool = None,
+        mask: typing.List["Locator"] = None
     ) -> bytes:
         """Locator.screenshot
 
@@ -13058,6 +13088,12 @@ class Locator(SyncBase):
         omit_background : Union[bool, NoneType]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
+        disable_animations : Union[bool, NoneType]
+            When true, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment depending on
+            their duration:
+        mask : Union[List[Locator], NoneType]
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            `#FF00FF` that completely covers its bounding box.
 
         Returns
         -------
@@ -13073,6 +13109,8 @@ class Locator(SyncBase):
                     path=path,
                     quality=quality,
                     omitBackground=omit_background,
+                    disableAnimations=disable_animations,
+                    mask=mapping.to_impl(mask),
                 ),
             )
         )
@@ -13173,9 +13211,9 @@ class Locator(SyncBase):
             self._sync(
                 "locator.select_option",
                 self._impl_obj.select_option(
-                    value=value,
-                    index=index,
-                    label=label,
+                    value=mapping.to_impl(value),
+                    index=mapping.to_impl(index),
+                    label=mapping.to_impl(label),
                     element=mapping.to_impl(element),
                     timeout=timeout,
                     noWaitAfter=no_wait_after,
@@ -13243,7 +13281,9 @@ class Locator(SyncBase):
             self._sync(
                 "locator.set_input_files",
                 self._impl_obj.set_input_files(
-                    files=files, timeout=timeout, noWaitAfter=no_wait_after
+                    files=mapping.to_impl(files),
+                    timeout=timeout,
+                    noWaitAfter=no_wait_after,
                 ),
             )
         )
@@ -13301,7 +13341,7 @@ class Locator(SyncBase):
             self._sync(
                 "locator.tap",
                 self._impl_obj.tap(
-                    modifiers=modifiers,
+                    modifiers=mapping.to_impl(modifiers),
                     position=position,
                     timeout=timeout,
                     force=force,
@@ -13567,6 +13607,17 @@ class Locator(SyncBase):
                     trial=trial,
                 ),
             )
+        )
+
+    def highlight(self) -> NoneType:
+        """Locator.highlight
+
+        Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
+        `locator.highlight()`.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync("locator.highlight", self._impl_obj.highlight())
         )
 
 
@@ -14474,7 +14525,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_contain_text",
                 self._impl_obj.to_contain_text(
-                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                    expected=mapping.to_impl(expected),
+                    use_inner_text=use_inner_text,
+                    timeout=timeout,
                 ),
             )
         )
@@ -14507,7 +14560,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.not_to_contain_text",
                 self._impl_obj.not_to_contain_text(
-                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                    expected=mapping.to_impl(expected),
+                    use_inner_text=use_inner_text,
+                    timeout=timeout,
                 ),
             )
         )
@@ -14621,7 +14676,9 @@ class LocatorAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 "locator_assertions.to_have_class",
-                self._impl_obj.to_have_class(expected=expected, timeout=timeout),
+                self._impl_obj.to_have_class(
+                    expected=mapping.to_impl(expected), timeout=timeout
+                ),
             )
         )
 
@@ -14649,7 +14706,9 @@ class LocatorAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 "locator_assertions.not_to_have_class",
-                self._impl_obj.not_to_have_class(expected=expected, timeout=timeout),
+                self._impl_obj.not_to_have_class(
+                    expected=mapping.to_impl(expected), timeout=timeout
+                ),
             )
         )
 
@@ -14983,7 +15042,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.to_have_text",
                 self._impl_obj.to_have_text(
-                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                    expected=mapping.to_impl(expected),
+                    use_inner_text=use_inner_text,
+                    timeout=timeout,
                 ),
             )
         )
@@ -15016,7 +15077,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 "locator_assertions.not_to_have_text",
                 self._impl_obj.not_to_have_text(
-                    expected=expected, use_inner_text=use_inner_text, timeout=timeout
+                    expected=mapping.to_impl(expected),
+                    use_inner_text=use_inner_text,
+                    timeout=timeout,
                 ),
             )
         )

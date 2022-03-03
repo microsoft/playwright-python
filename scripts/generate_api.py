@@ -147,6 +147,7 @@ def arguments(func: FunctionType, indent: int) -> str:
         elif (
             "typing.Any" in value_str
             or "typing.Dict" in value_str
+            or "typing.List" in value_str
             or "Handle" in value_str
         ):
             tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")
