@@ -599,6 +599,49 @@ async def test_drag_to(page: Page, server: Server) -> None:
     )
 
 
+async def test_drag_to_with_position(page: Page, server: Server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content(
+        """
+      <div style="width:100px;height:100px;background:red;" id="red">
+      </div>
+      <div style="width:100px;height:100px;background:blue;" id="blue">
+      </div>
+    """
+    )
+    events_handle = await page.evaluate_handle(
+        """
+        () => {
+        const events = [];
+        document.getElementById('red').addEventListener('mousedown', event => {
+            events.push({
+            type: 'mousedown',
+            x: event.offsetX,
+            y: event.offsetY,
+            });
+        });
+        document.getElementById('blue').addEventListener('mouseup', event => {
+            events.push({
+            type: 'mouseup',
+            x: event.offsetX,
+            y: event.offsetY,
+            });
+        });
+        return events;
+        }
+    """
+    )
+    await page.locator("#red").drag_to(
+        page.locator("#blue"),
+        source_position={"x": 34, "y": 7},
+        target_position={"x": 10, "y": 20},
+    )
+    assert await events_handle.json_value() == [
+        {"type": "mousedown", "x": 34, "y": 7},
+        {"type": "mouseup", "x": 10, "y": 20},
+    ]
+
+
 async def test_locator_query_should_filter_by_text(page: Page, server: Server) -> None:
     await page.set_content("<div>Foobar</div><div>Bar</div>")
     await expect(page.locator("div", has_text="Foo")).to_have_text("Foobar")

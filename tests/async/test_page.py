@@ -1292,6 +1292,50 @@ async def test_drag_and_drop_helper_method(page: Page, server: Server):
     )
 
 
+async def test_drag_and_drop_with_position(page: Page, server: Server):
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content(
+        """
+      <div style="width:100px;height:100px;background:red;" id="red">
+      </div>
+      <div style="width:100px;height:100px;background:blue;" id="blue">
+      </div>
+    """
+    )
+    events_handle = await page.evaluate_handle(
+        """
+        () => {
+        const events = [];
+        document.getElementById('red').addEventListener('mousedown', event => {
+            events.push({
+            type: 'mousedown',
+            x: event.offsetX,
+            y: event.offsetY,
+            });
+        });
+        document.getElementById('blue').addEventListener('mouseup', event => {
+            events.push({
+            type: 'mouseup',
+            x: event.offsetX,
+            y: event.offsetY,
+            });
+        });
+        return events;
+        }
+    """
+    )
+    await page.drag_and_drop(
+        "#red",
+        "#blue",
+        source_position={"x": 34, "y": 7},
+        target_position={"x": 10, "y": 20},
+    )
+    assert await events_handle.json_value() == [
+        {"type": "mousedown", "x": 34, "y": 7},
+        {"type": "mouseup", "x": 10, "y": 20},
+    ]
+
+
 async def test_should_check_box_using_set_checked(page: Page):
     await page.set_content("`<input id='checkbox' type='checkbox'></input>`")
     await page.set_checked("input", True)

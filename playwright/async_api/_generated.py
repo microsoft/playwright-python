@@ -4644,8 +4644,8 @@ class Frame(AsyncBase):
                 self._impl_obj.drag_and_drop(
                     source=source,
                     target=target,
-                    source_position=source_position,
-                    target_position=target_position,
+                    sourcePosition=source_position,
+                    targetPosition=target_position,
                     force=force,
                     noWaitAfter=no_wait_after,
                     strict=strict,
@@ -8782,8 +8782,8 @@ class Page(AsyncContextManager):
                 self._impl_obj.drag_and_drop(
                     source=source,
                     target=target,
-                    source_position=source_position,
-                    target_position=target_position,
+                    sourcePosition=source_position,
+                    targetPosition=target_position,
                     force=force,
                     noWaitAfter=no_wait_after,
                     timeout=timeout,
