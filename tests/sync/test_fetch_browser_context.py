@@ -212,9 +212,9 @@ def test_should_support_multipart_form_data(
             },
         )
     assert server_req.value.method == b"POST"
-    assert server_req.value.getHeader("Content-Type").startswith(
-        "multipart/form-data; "
-    )
+    content_type = server_req.value.getHeader("Content-Type")
+    assert content_type
+    assert content_type.startswith("multipart/form-data; ")
     assert server_req.value.getHeader("Content-Length") == str(
         len(server_req.value.post_body)  # type: ignore
     )
