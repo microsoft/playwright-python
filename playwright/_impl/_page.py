@@ -604,10 +604,24 @@ class Page(ChannelOwner):
         omitBackground: bool = None,
         fullPage: bool = None,
         clip: FloatRect = None,
+        disableAnimations: bool = None,
+        mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
+        if "mask" in params:
+            params["mask"] = list(
+                map(
+                    lambda locator: (
+                        {
+                            "frame": locator._frame._channel,
+                            "selector": locator._selector,
+                        }
+                    ),
+                    params["mask"],
+                )
+            )
         encoded_binary = await self._channel.send("screenshot", params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:

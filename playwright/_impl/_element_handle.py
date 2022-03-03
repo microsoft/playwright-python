@@ -41,6 +41,7 @@ else:  # pragma: no cover
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._frame import Frame
+    from playwright._impl._locator import Locator
 
 
 class ElementHandle(JSHandle):
@@ -269,10 +270,24 @@ class ElementHandle(JSHandle):
         path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
+        disableAnimations: bool = None,
+        mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
+        if "mask" in params:
+            params["mask"] = list(
+                map(
+                    lambda locator: (
+                        {
+                            "frame": locator._frame._channel,
+                            "selector": locator._selector,
+                        }
+                    ),
+                    params["mask"],
+                )
+            )
         encoded_binary = await self._channel.send("screenshot", params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:

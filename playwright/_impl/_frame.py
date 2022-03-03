@@ -695,3 +695,6 @@ class Frame(ChannelOwner):
                 strict=strict,
                 trial=trial,
             )
+
+    async def _highlight(self, selector: str) -> None:
+        await self._channel.send("highlight", {"selector": selector})

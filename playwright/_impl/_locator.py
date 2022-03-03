@@ -227,14 +227,14 @@ class Locator:
 
     @property
     def first(self) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >>  nth=0")
+        return Locator(self._frame, f"{self._selector} >> nth=0")
 
     @property
     def last(self) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >>  nth=-1")
+        return Locator(self._frame, f"{self._selector} >> nth=-1")
 
     def nth(self, index: int) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >>  nth={index}")
+        return Locator(self._frame, f"{self._selector} >> nth={index}")
 
     async def focus(self, timeout: float = None) -> None:
         params = locals_to_params(locals())
@@ -373,6 +373,8 @@ class Locator:
         path: Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
+        disableAnimations: bool = None,
+        mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         return await self._with_element(
@@ -548,6 +550,9 @@ class Locator:
         if result.get("received"):
             result["received"] = parse_value(result["received"])
         return result
+
+    async def highlight(self) -> None:
+        await self._frame._highlight(self._selector)
 
 
 class FrameLocator:

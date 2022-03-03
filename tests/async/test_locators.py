@@ -748,3 +748,9 @@ async def test_locator_should_enforce_same_frame_for_has_locator(
     assert (
         'Inner "has" locator must belong to the same frame.' in exc_info.value.message
     )
+
+
+async def test_locator_highlight_should_work(page: Page, server: Server) -> None:
+    await page.goto(server.PREFIX + "/grid.html")
+    await page.locator(".box").nth(3).highlight()
+    assert await page.locator("x-pw-glass").is_visible()
