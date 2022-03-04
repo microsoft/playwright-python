@@ -23,16 +23,7 @@ from tests.server import Server
 
 async def test_assertions_page_to_have_title(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
-    await page.set_content(
-        """
-        <script>
-            document.title = 'new title';
-            setTimeout(() => {
-                document.title = 'great title';
-            }, 2000);
-        </script>
-    """
-    )
+    await page.set_content("<title>new title</title>")
     await expect(page).to_have_title("new title")
     await expect(page).to_have_title(re.compile("new title"))
     with pytest.raises(AssertionError):
@@ -46,27 +37,32 @@ async def test_assertions_page_to_have_title(page: Page, server: Server) -> None
     with pytest.raises(AssertionError):
         await expect(page).not_to_have_title("new title", timeout=100)
     await expect(page).not_to_have_title("great title", timeout=100)
+    await page.evaluate(
+        """
+        setTimeout(() => {
+            document.title = 'great title';
+        }, 2000);
+    """
+    )
     await expect(page).to_have_title("great title")
     await expect(page).to_have_title(re.compile("great title"))
 
 
 async def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
-    await page.set_content(
-        """
-        <script>
-            setTimeout(() => {
-                window.location = window.location.origin + '/grid.html';
-            }, 2000);
-        </script>
-    """
-    )
     await expect(page).to_have_url(server.EMPTY_PAGE)
     await expect(page).to_have_url(re.compile(r".*/empty\.html"))
     with pytest.raises(AssertionError):
         await expect(page).to_have_url("nooooo", timeout=100)
     with pytest.raises(AssertionError):
         await expect(page).to_have_url(re.compile("not-the-url"), timeout=100)
+    await page.evaluate(
+        """
+        setTimeout(() => {
+            window.location = window.location.origin + '/grid.html';
+        }, 2000);
+    """
+    )
     await expect(page).to_have_url(server.PREFIX + "/grid.html")
     await expect(page).not_to_have_url(server.EMPTY_PAGE, timeout=100)
     with pytest.raises(AssertionError):

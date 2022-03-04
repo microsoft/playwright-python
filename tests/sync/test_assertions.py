@@ -23,16 +23,7 @@ from tests.server import Server
 
 def test_assertions_page_to_have_title(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.set_content(
-        """
-        <script>
-            document.title = 'new title';
-            setTimeout(() => {
-                document.title = 'great title';
-            }, 2000);
-        </script>
-    """
-    )
+    page.set_content("<title>new title</title>")
     expect(page).to_have_title("new title")
     expect(page).to_have_title(re.compile("new title"))
     with pytest.raises(AssertionError):
@@ -44,27 +35,32 @@ def test_assertions_page_to_have_title(page: Page, server: Server) -> None:
     with pytest.raises(AssertionError):
         expect(page).not_to_have_title("new title", timeout=100)
     expect(page).not_to_have_title("great title", timeout=100)
+    page.evaluate(
+        """
+        setTimeout(() => {
+            document.title = 'great title';
+        }, 2000);
+    """
+    )
     expect(page).to_have_title("great title")
     expect(page).to_have_title(re.compile("great title"))
 
 
 def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.set_content(
-        """
-        <script>
-            setTimeout(() => {
-                window.location = window.location.origin + '/grid.html';
-            }, 2000);
-        </script>
-    """
-    )
     expect(page).to_have_url(server.EMPTY_PAGE)
     expect(page).to_have_url(re.compile(r".*/empty\.html"))
     with pytest.raises(AssertionError):
         expect(page).to_have_url("nooooo", timeout=100)
     with pytest.raises(AssertionError):
         expect(page).to_have_url(re.compile("not-the-url"), timeout=100)
+    page.evaluate(
+        """
+        setTimeout(() => {
+            window.location = window.location.origin + '/grid.html';
+        }, 2000);
+    """
+    )
     expect(page).to_have_url(server.PREFIX + "/grid.html")
     expect(page).not_to_have_url(server.EMPTY_PAGE, timeout=100)
     with pytest.raises(AssertionError):

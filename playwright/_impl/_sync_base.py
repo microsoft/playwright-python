@@ -96,15 +96,13 @@ class SyncBase(ImplWrapper):
         return self._impl_obj.__str__()
 
     def _sync(self, api_name: str, coro: Awaitable) -> Any:
+        __tracebackhide__ = True
         g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)
         setattr(task, "__pw_api_name__", api_name)
         setattr(task, "__pw_stack_trace__", traceback.extract_stack())
 
-        def callback(result: Any) -> None:
-            g_self.switch()
-
-        task.add_done_callback(callback)
+        task.add_done_callback(lambda _: g_self.switch())
         while not task.done():
             self._dispatcher_fiber.switch()
         asyncio._set_running_loop(self._loop)
