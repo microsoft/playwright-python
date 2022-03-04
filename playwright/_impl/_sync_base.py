@@ -15,18 +15,7 @@
 import asyncio
 import traceback
 from types import TracebackType
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    cast,
-)
+from typing import Any, Awaitable, Callable, Dict, Generic, List, Type, TypeVar, cast
 
 import greenlet
 
@@ -42,29 +31,19 @@ Self = TypeVar("Self", bound="SyncContextManager")
 class EventInfo(Generic[T]):
     def __init__(self, sync_base: "SyncBase", future: "asyncio.Future[T]") -> None:
         self._sync_base = sync_base
-        self._value: Optional[T] = None
-        self._exception: Optional[Exception] = None
         self._future = future
         g_self = greenlet.getcurrent()
-
-        def done_callback(task: "asyncio.Future[T]") -> None:
-            try:
-                self._value = mapping.from_maybe_impl(self._future.result())
-            except Exception as e:
-                self._exception = e
-            finally:
-                g_self.switch()
-
-        self._future.add_done_callback(done_callback)
+        self._future.add_done_callback(lambda _: g_self.switch())
 
     @property
     def value(self) -> T:
         while not self._future.done():
             self._sync_base._dispatcher_fiber.switch()
         asyncio._set_running_loop(self._sync_base._loop)
-        if self._exception:
-            raise self._exception
-        return cast(T, self._value)
+        exception = self._future.exception()
+        if exception:
+            raise exception
+        return cast(T, mapping.from_maybe_impl(self._future.result()))
 
     def is_done(self) -> bool:
         return self._future.done()
