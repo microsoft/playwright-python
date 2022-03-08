@@ -33,7 +33,6 @@ fi
 
 BIONIC_TAGS=(
   "next-bionic"
-  "v${PW_VERSION}-bionic"
 )
 if [[ "$RELEASE_CHANNEL" == "stable" ]]; then
   BIONIC_TAGS+=("bionic")
