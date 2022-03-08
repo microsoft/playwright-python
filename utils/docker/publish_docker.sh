@@ -113,6 +113,9 @@ publish_docker_manifest () {
   done
 }
 
+publish_docker_images_with_arch_suffix bionic amd64
+publish_docker_manifest bionic amd64
+
 publish_docker_images_with_arch_suffix focal amd64
 publish_docker_images_with_arch_suffix focal arm64
 publish_docker_manifest focal amd64 arm64
