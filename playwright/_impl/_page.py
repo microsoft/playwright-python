@@ -604,7 +604,7 @@ class Page(ChannelOwner):
         omitBackground: bool = None,
         fullPage: bool = None,
         clip: FloatRect = None,
-        disableAnimations: bool = None,
+        animations: Literal["disabled"] = None,
         mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())

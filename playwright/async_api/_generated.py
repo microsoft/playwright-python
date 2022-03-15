@@ -2537,7 +2537,7 @@ class ElementHandle(JSHandle):
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omit_background: bool = None,
-        disable_animations: bool = None,
+        animations: Literal["disabled"] = None,
         mask: typing.List["Locator"] = None
     ) -> bytes:
         """ElementHandle.screenshot
@@ -2563,9 +2563,11 @@ class ElementHandle(JSHandle):
         omit_background : Union[bool, NoneType]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
-        disable_animations : Union[bool, NoneType]
-            When true, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment depending on
-            their duration:
+        animations : Union["disabled", NoneType]
+            When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment
+            depending on their duration:
+            - finite animations are fast-forwarded to completion, so they'll fire `transitionend` event.
+            - infinite animations are canceled to initial state, and then played over after the screenshot.
         mask : Union[List[Locator], NoneType]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
             `#FF00FF` that completely covers its bounding box.
@@ -2584,7 +2586,7 @@ class ElementHandle(JSHandle):
                     path=path,
                     quality=quality,
                     omitBackground=omit_background,
-                    disableAnimations=disable_animations,
+                    animations=animations,
                     mask=mapping.to_impl(mask),
                 ),
             )
@@ -8054,7 +8056,7 @@ class Page(AsyncContextManager):
         omit_background: bool = None,
         full_page: bool = None,
         clip: FloatRect = None,
-        disable_animations: bool = None,
+        animations: Literal["disabled"] = None,
         mask: typing.List["Locator"] = None
     ) -> bytes:
         """Page.screenshot
@@ -8082,9 +8084,11 @@ class Page(AsyncContextManager):
             `false`.
         clip : Union[{x: float, y: float, width: float, height: float}, NoneType]
             An object which specifies clipping of the resulting image. Should have the following fields:
-        disable_animations : Union[bool, NoneType]
-            When true, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment depending on
-            their duration:
+        animations : Union["disabled", NoneType]
+            When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment
+            depending on their duration:
+            - finite animations are fast-forwarded to completion, so they'll fire `transitionend` event.
+            - infinite animations are canceled to initial state, and then played over after the screenshot.
         mask : Union[List[Locator], NoneType]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
             `#FF00FF` that completely covers its bounding box.
@@ -8105,7 +8109,7 @@ class Page(AsyncContextManager):
                     omitBackground=omit_background,
                     fullPage=full_page,
                     clip=clip,
-                    disableAnimations=disable_animations,
+                    animations=animations,
                     mask=mapping.to_impl(mask),
                 ),
             )
@@ -10431,7 +10435,6 @@ class BrowserContext(AsyncContextManager):
             - `'midi'`
             - `'midi-sysex'` (system-exclusive midi)
             - `'notifications'`
-            - `'push'`
             - `'camera'`
             - `'microphone'`
             - `'background-sync'`
@@ -13342,7 +13345,7 @@ class Locator(AsyncBase):
         path: typing.Union[str, pathlib.Path] = None,
         quality: int = None,
         omit_background: bool = None,
-        disable_animations: bool = None,
+        animations: Literal["disabled"] = None,
         mask: typing.List["Locator"] = None
     ) -> bytes:
         """Locator.screenshot
@@ -13368,9 +13371,11 @@ class Locator(AsyncBase):
         omit_background : Union[bool, NoneType]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
-        disable_animations : Union[bool, NoneType]
-            When true, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment depending on
-            their duration:
+        animations : Union["disabled", NoneType]
+            When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different treatment
+            depending on their duration:
+            - finite animations are fast-forwarded to completion, so they'll fire `transitionend` event.
+            - infinite animations are canceled to initial state, and then played over after the screenshot.
         mask : Union[List[Locator], NoneType]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
             `#FF00FF` that completely covers its bounding box.
@@ -13389,7 +13394,7 @@ class Locator(AsyncBase):
                     path=path,
                     quality=quality,
                     omitBackground=omit_background,
-                    disableAnimations=disable_animations,
+                    animations=animations,
                     mask=mapping.to_impl(mask),
                 ),
             )

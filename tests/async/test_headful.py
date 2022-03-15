@@ -76,7 +76,7 @@ async def test_should_close_browser_after_context_menu_was_triggered(
 
 
 async def test_should_not_block_third_party_cookies(
-    browser_type, launch_arguments, server
+    browser_type, launch_arguments, server, is_chromium, is_firefox
 ):
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page = await browser.new_page()
@@ -101,9 +101,24 @@ async def test_should_not_block_third_party_cookies(
     )
 
     await page.wait_for_timeout(2000)
-    assert document_cookie == ""
+    allows_third_party = is_firefox
+    assert document_cookie == ("username=John Doe" if allows_third_party else "")
     cookies = await page.context.cookies(server.CROSS_PROCESS_PREFIX + "/grid.html")
-    assert cookies == []
+    if allows_third_party:
+        assert cookies == [
+            {
+                "domain": "127.0.0.1",
+                "expires": -1,
+                "httpOnly": False,
+                "name": "username",
+                "path": "/",
+                "sameSite": "Lax" if is_chromium else "None",
+                "secure": False,
+                "value": "John Doe",
+            }
+        ]
+    else:
+        assert cookies == []
 
     await browser.close()
 

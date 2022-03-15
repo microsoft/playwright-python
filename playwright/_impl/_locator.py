@@ -373,7 +373,7 @@ class Locator:
         path: Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
-        disableAnimations: bool = None,
+        animations: Literal["disabled"] = None,
         mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
