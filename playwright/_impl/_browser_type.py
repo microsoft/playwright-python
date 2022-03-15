@@ -182,6 +182,8 @@ class BrowserType(ChannelOwner):
         if timeout is None:
             timeout = 30000
 
+        headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
+
         transport = WebSocketTransport(
             self._connection._loop, ws_endpoint, headers, slow_mo
         )
