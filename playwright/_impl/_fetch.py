@@ -390,7 +390,7 @@ class APIResponse:
 
     async def text(self) -> str:
         content = await self.body()
-        return content.decode()
+        return content.decode("utf-8", "ignore")
 
     async def json(self) -> Any:
         content = await self.text()
