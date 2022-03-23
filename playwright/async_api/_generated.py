@@ -6450,7 +6450,8 @@ class Page(AsyncContextManager):
     def request(self) -> "APIRequestContext":
         """Page.request
 
-        API testing helper associated with this page. Requests made with this API will use page cookies.
+        API testing helper associated with this page. This method returns the same instance as
+        `browser_context.request` on the page's context. See `browser_context.request` for more details.
 
         Returns
         -------
