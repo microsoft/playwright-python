@@ -124,6 +124,22 @@ class ProtocolCallback:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.stack_trace: traceback.StackSummary = traceback.StackSummary()
         self.future = loop.create_future()
+        # The outer task can get cancelled by the user, this forwards the cancellation to the inner task.
+        current_task = asyncio.current_task()
+
+        def cb(task: asyncio.Task) -> None:
+            if current_task:
+                current_task.remove_done_callback(cb)
+            if task.cancelled():
+                self.future.cancel()
+
+        if current_task:
+            current_task.add_done_callback(cb)
+            self.future.add_done_callback(
+                lambda _: current_task.remove_done_callback(cb)
+                if current_task
+                else None
+            )
 
 
 class RootChannelOwner(ChannelOwner):
