@@ -17,7 +17,7 @@ pytest-timeout==2.1.0
 pytest-xdist==2.5.0
 requests==2.27.1
 service_identity==21.1.0
-setuptools==62.0.0
+setuptools==60.9.3
 twine==4.0.0
 twisted==22.2.0
 types-pyOpenSSL==22.0.1
