@@ -270,7 +270,9 @@ class ElementHandle(JSHandle):
         path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
-        animations: Literal["disabled"] = None,
+        animations: Literal["allow", "disabled"] = None,
+        caret: Literal["hide", "initial"] = None,
+        scale: Literal["css", "device"] = None,
         mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
