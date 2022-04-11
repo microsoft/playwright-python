@@ -2,6 +2,7 @@ FROM ubuntu:focal
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=America/Los_Angeles
+ARG DOCKER_IMAGE_NAME_TEMPLATE="mcr.microsoft.com/playwright/python:v%version%-focal"
 
 # === INSTALL Python ===
 
@@ -38,6 +39,7 @@ RUN mkdir /ms-playwright && \
     if [ "$(uname -m)" = "x86_64" ]; then pip install /tmp/*manylinux1_x86_64*.whl; fi && \
     # if its arm64 then install the manylinux1_aarch64 pip package
     if [ "$(uname -m)" = "aarch64" ]; then pip install /tmp/*manylinux_2_17_aarch64*.whl; fi && \
+    playwright mark-docker-image "${DOCKER_IMAGE_NAME_TEMPLATE}" && \
     playwright install --with-deps && rm -rf /var/lib/apt/lists/* && \
     rm /tmp/*.whl && \
     rm -rf /ms-playwright-agent && \
