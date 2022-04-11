@@ -3,13 +3,17 @@ on:
   push:
     paths:
       - '.github/workflows/test_docker.yml'
+      - 'setup.py'
     branches:
       - main
+      - release-*
   pull_request:
     paths:
       - '.github/workflows/test_docker.yml'
+      - 'setup.py'
     branches:
       - main
+      - release-*
 jobs:
   build:
     timeout-minutes: 60
