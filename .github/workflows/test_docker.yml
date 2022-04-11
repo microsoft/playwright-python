@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/test_docker.yml'
       - 'setup.py'
+      - '**/Dockerfile.*'
     branches:
       - main
       - release-*
@@ -11,6 +12,7 @@ on:
     paths:
       - '.github/workflows/test_docker.yml'
       - 'setup.py'
+      - '**/Dockerfile.*'
     branches:
       - main
       - release-*
