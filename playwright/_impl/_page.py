@@ -210,10 +210,16 @@ class Page(ChannelOwner):
         )
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
-            Page.Events.Close, lambda _: self._closed_or_crashed_future.set_result(True)
+            Page.Events.Close,
+            lambda _: self._closed_or_crashed_future.set_result(True)
+            if not self._closed_or_crashed_future.done()
+            else None,
         )
         self.on(
-            Page.Events.Crash, lambda _: self._closed_or_crashed_future.set_result(True)
+            Page.Events.Crash,
+            lambda _: self._closed_or_crashed_future.set_result(True)
+            if not self._closed_or_crashed_future.done()
+            else None,
         )
 
     def __repr__(self) -> str:
