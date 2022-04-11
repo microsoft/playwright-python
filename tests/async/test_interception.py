@@ -547,11 +547,11 @@ async def test_page_route_should_support_cors_with_GET(page, server, browser_nam
     await page.goto(server.EMPTY_PAGE)
 
     async def handle_route(route, request):
-        headers = (
-            {"access-control-allow-origin": "*"}
+        headers = {
+            "access-control-allow-origin": "*"
             if request.url.endswith("allow")
-            else {}
-        )
+            else "none"
+        }
         await route.fulfill(
             content_type="application/json",
             headers=headers,
