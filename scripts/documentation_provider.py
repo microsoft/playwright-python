@@ -26,6 +26,7 @@ from typing import (  # type: ignore
     get_origin,
     get_type_hints,
 )
+from urllib.parse import urljoin
 
 from playwright._impl._helper import to_snake_case
 
@@ -270,7 +271,21 @@ class DocumentationProvider:
                 result.append(self.render_links(line))
             if skip_example and line.strip() == "```":
                 skip_example = False
-        return self.indent_paragraph("\n".join(result), indent)
+        comment = self.indent_paragraph("\n".join(result), indent)
+        return self.resolve_playwright_dev_links(comment)
+
+    def resolve_playwright_dev_links(self, comment: str) -> str:
+        def replace_callback(m: re.Match) -> str:
+            link_text = m.group(1)
+            link_href = m.group(2)
+            resolved = urljoin(
+                "https://playwright.dev/python/docs/api/", link_href.replace(".md", "")
+            )
+            return f"[{link_text}]({resolved})"
+
+        # matches against internal markdown links which start with '.'/'..'
+        # e.g. [Playwright](./class-foobar.md)
+        return re.sub(r"\[([^\]]+)\]\((\.[^\)]+)\)", replace_callback, comment)
 
     def render_links(self, comment: str) -> str:
         for [old, new] in self.links.items():

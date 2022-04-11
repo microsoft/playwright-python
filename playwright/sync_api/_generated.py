@@ -1539,7 +1539,7 @@ class ElementHandle(JSHandle):
     def is_disabled(self) -> bool:
         """ElementHandle.is_disabled
 
-        Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+        Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Returns
         -------
@@ -1553,7 +1553,7 @@ class ElementHandle(JSHandle):
     def is_editable(self) -> bool:
         """ElementHandle.is_editable
 
-        Returns whether the element is [editable](../actionability.md#editable).
+        Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
         Returns
         -------
@@ -1567,7 +1567,7 @@ class ElementHandle(JSHandle):
     def is_enabled(self) -> bool:
         """ElementHandle.is_enabled
 
-        Returns whether the element is [enabled](../actionability.md#enabled).
+        Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Returns
         -------
@@ -1581,7 +1581,7 @@ class ElementHandle(JSHandle):
     def is_hidden(self) -> bool:
         """ElementHandle.is_hidden
 
-        Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).
+        Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).
 
         Returns
         -------
@@ -1595,7 +1595,7 @@ class ElementHandle(JSHandle):
     def is_visible(self) -> bool:
         """ElementHandle.is_visible
 
-        Returns whether the element is [visible](../actionability.md#visible).
+        Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible).
 
         Returns
         -------
@@ -1657,7 +1657,7 @@ class ElementHandle(JSHandle):
     def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
         """ElementHandle.scroll_into_view_if_needed
 
-        This method waits for [actionability](../actionability.md) checks, then tries to scroll element into view, unless it is
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, then tries to scroll element into view, unless it is
         completely visible as defined by
         [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 
@@ -1692,7 +1692,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.hover
 
         This method hovers over the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -1751,7 +1751,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.click
 
         This method clicks the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -1823,7 +1823,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.dblclick
 
         This method double clicks the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
@@ -1891,7 +1891,7 @@ class ElementHandle(JSHandle):
     ) -> typing.List[str]:
         """ElementHandle.select_option
 
-        This method waits for [actionability](../actionability.md) checks, waits until all specified options are present in the
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits until all specified options are present in the
         `<select>` element and selects these options.
 
         If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -1979,7 +1979,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.tap
 
         This method taps the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -2037,7 +2037,7 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.fill
 
-        This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an `input`
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, fills it and triggers an `input`
         event after filling. Note that you can pass an empty string to clear the input field.
 
         If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
@@ -2074,7 +2074,7 @@ class ElementHandle(JSHandle):
     def select_text(self, *, force: bool = None, timeout: float = None) -> NoneType:
         """ElementHandle.select_text
 
-        This method waits for [actionability](../actionability.md) checks, then focuses the element and selects all its text
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, then focuses the element and selects all its text
         content.
 
         Parameters
@@ -2289,7 +2289,7 @@ class ElementHandle(JSHandle):
         This method checks or unchecks an element by performing the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws.
         1. If the element already has the right checked state, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -2348,7 +2348,7 @@ class ElementHandle(JSHandle):
         This method checks the element by performing the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
            this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -2405,7 +2405,7 @@ class ElementHandle(JSHandle):
         This method checks the element by performing the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -2495,7 +2495,7 @@ class ElementHandle(JSHandle):
 
         Returns the buffer with the captured screenshot.
 
-        This method waits for the [actionability](../actionability.md) checks, then scrolls element into view before taking a
+        This method waits for the [actionability](https://playwright.dev/python/docs/actionability) checks, then scrolls element into view before taking a
         screenshot. If the element is detached from DOM, the method throws an error.
 
         Parameters
@@ -2558,7 +2558,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.query_selector
 
         The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
-        [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns `null`.
+        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns `null`.
 
         Parameters
         ----------
@@ -2581,7 +2581,7 @@ class ElementHandle(JSHandle):
         """ElementHandle.query_selector_all
 
         The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See
-        [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns empty array.
+        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns empty array.
 
         Parameters
         ----------
@@ -2608,7 +2608,7 @@ class ElementHandle(JSHandle):
         Returns the return value of `expression`.
 
         The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
-        argument to `expression`. See [Working with selectors](../selectors.md) for more details. If no elements match the
+        argument to `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the
         selector, the method throws an error.
 
         If `expression` returns a [Promise], then `element_handle.eval_on_selector()` would wait for the promise to resolve
@@ -2654,7 +2654,7 @@ class ElementHandle(JSHandle):
         Returns the return value of `expression`.
 
         The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
-        matched elements as a first argument to `expression`. See [Working with selectors](../selectors.md) for more details.
+        matched elements as a first argument to `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details.
 
         If `expression` returns a [Promise], then `element_handle.eval_on_selector_all()` would wait for the promise to
         resolve and return its value.
@@ -2709,16 +2709,16 @@ class ElementHandle(JSHandle):
 
         Returns when the element satisfies the `state`.
 
-        Depending on the `state` parameter, this method waits for one of the [actionability](../actionability.md) checks to
+        Depending on the `state` parameter, this method waits for one of the [actionability](https://playwright.dev/python/docs/actionability) checks to
         pass. This method throws when the element is detached while waiting, unless waiting for the `\"hidden\"` state.
-        - `\"visible\"` Wait until the element is [visible](../actionability.md#visible).
-        - `\"hidden\"` Wait until the element is [not visible](../actionability.md#visible) or
-          [not attached](../actionability.md#attached). Note that waiting for hidden does not throw when the element detaches.
-        - `\"stable\"` Wait until the element is both [visible](../actionability.md#visible) and
-          [stable](../actionability.md#stable).
-        - `\"enabled\"` Wait until the element is [enabled](../actionability.md#enabled).
-        - `\"disabled\"` Wait until the element is [not enabled](../actionability.md#enabled).
-        - `\"editable\"` Wait until the element is [editable](../actionability.md#editable).
+        - `\"visible\"` Wait until the element is [visible](https://playwright.dev/python/docs/actionability#visible).
+        - `\"hidden\"` Wait until the element is [not visible](https://playwright.dev/python/docs/actionability#visible) or
+          [not attached](https://playwright.dev/python/docs/actionability#attached). Note that waiting for hidden does not throw when the element detaches.
+        - `\"stable\"` Wait until the element is both [visible](https://playwright.dev/python/docs/actionability#visible) and
+          [stable](https://playwright.dev/python/docs/actionability#stable).
+        - `\"enabled\"` Wait until the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
+        - `\"disabled\"` Wait until the element is [not enabled](https://playwright.dev/python/docs/actionability#enabled).
+        - `\"editable\"` Wait until the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
         If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
 
@@ -3352,7 +3352,7 @@ class Frame(SyncBase):
         > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 
         The method finds an element matching the specified selector within the frame. See
-        [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns `null`.
+        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns `null`.
 
         Parameters
         ----------
@@ -3382,7 +3382,7 @@ class Frame(SyncBase):
         > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 
         The method finds all elements matching the specified selector within the frame. See
-        [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns empty array.
+        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns empty array.
 
         Parameters
         ----------
@@ -3511,7 +3511,7 @@ class Frame(SyncBase):
     ) -> bool:
         """Frame.is_disabled
 
-        Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+        Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Parameters
         ----------
@@ -3544,7 +3544,7 @@ class Frame(SyncBase):
     ) -> bool:
         """Frame.is_editable
 
-        Returns whether the element is [editable](../actionability.md#editable).
+        Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
         Parameters
         ----------
@@ -3577,7 +3577,7 @@ class Frame(SyncBase):
     ) -> bool:
         """Frame.is_enabled
 
-        Returns whether the element is [enabled](../actionability.md#enabled).
+        Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Parameters
         ----------
@@ -3610,7 +3610,7 @@ class Frame(SyncBase):
     ) -> bool:
         """Frame.is_hidden
 
-        Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).  `selector` that does not
+        Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).  `selector` that does not
         match any elements is considered hidden.
 
         Parameters
@@ -3644,7 +3644,7 @@ class Frame(SyncBase):
     ) -> bool:
         """Frame.is_visible
 
-        Returns whether the element is [visible](../actionability.md#visible). `selector` that does not match any elements is
+        Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible). `selector` that does not match any elements is
         considered not visible.
 
         Parameters
@@ -3758,7 +3758,7 @@ class Frame(SyncBase):
         tests. Use `locator.evaluate()`, other `Locator` helper methods or web-first assertions instead.
 
         The method finds an element matching the specified selector within the frame and passes it as a first argument to
-        `expression`. See [Working with selectors](../selectors.md) for more details. If no elements match the selector, the
+        `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, the
         method throws an error.
 
         If `expression` returns a [Promise], then `frame.eval_on_selector()` would wait for the promise to resolve and
@@ -3813,7 +3813,7 @@ class Frame(SyncBase):
         better job.
 
         The method finds all elements matching the specified selector within the frame and passes an array of matched elements
-        as a first argument to `expression`. See [Working with selectors](../selectors.md) for more details.
+        as a first argument to `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details.
 
         If `expression` returns a [Promise], then `frame.eval_on_selector_all()` would wait for the promise to resolve and
         return its value.
@@ -4007,7 +4007,7 @@ class Frame(SyncBase):
 
         This method clicks an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
@@ -4089,7 +4089,7 @@ class Frame(SyncBase):
 
         This method double clicks an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
@@ -4169,7 +4169,7 @@ class Frame(SyncBase):
 
         This method taps an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
@@ -4236,7 +4236,7 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.fill
 
-        This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, focuses the
+        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the
         element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
         field.
 
@@ -4523,7 +4523,7 @@ class Frame(SyncBase):
 
         This method hovers over an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
@@ -4645,7 +4645,7 @@ class Frame(SyncBase):
     ) -> typing.List[str]:
         """Frame.select_option
 
-        This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits until
+        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits until
         all specified options are present in the `<select>` element and selects these options.
 
         If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -4939,7 +4939,7 @@ class Frame(SyncBase):
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            checked, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -5006,7 +5006,7 @@ class Frame(SyncBase):
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -5176,7 +5176,7 @@ class Frame(SyncBase):
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
         1. If the element already has the right checked state, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -6601,7 +6601,7 @@ class Page(SyncContextManager):
     ) -> bool:
         """Page.is_disabled
 
-        Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+        Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Parameters
         ----------
@@ -6634,7 +6634,7 @@ class Page(SyncContextManager):
     ) -> bool:
         """Page.is_editable
 
-        Returns whether the element is [editable](../actionability.md#editable).
+        Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
         Parameters
         ----------
@@ -6667,7 +6667,7 @@ class Page(SyncContextManager):
     ) -> bool:
         """Page.is_enabled
 
-        Returns whether the element is [enabled](../actionability.md#enabled).
+        Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Parameters
         ----------
@@ -6700,7 +6700,7 @@ class Page(SyncContextManager):
     ) -> bool:
         """Page.is_hidden
 
-        Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).  `selector` that does not
+        Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).  `selector` that does not
         match any elements is considered hidden.
 
         Parameters
@@ -6734,7 +6734,7 @@ class Page(SyncContextManager):
     ) -> bool:
         """Page.is_visible
 
-        Returns whether the element is [visible](../actionability.md#visible). `selector` that does not match any elements is
+        Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible). `selector` that does not match any elements is
         considered not visible.
 
         Parameters
@@ -8057,7 +8057,7 @@ class Page(SyncContextManager):
 
         This method clicks an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
@@ -8141,7 +8141,7 @@ class Page(SyncContextManager):
 
         This method double clicks an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
@@ -8223,7 +8223,7 @@ class Page(SyncContextManager):
 
         This method taps an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
@@ -8292,7 +8292,7 @@ class Page(SyncContextManager):
     ) -> NoneType:
         """Page.fill
 
-        This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, focuses the
+        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the
         element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
         field.
 
@@ -8585,7 +8585,7 @@ class Page(SyncContextManager):
 
         This method hovers over an element matching `selector` by performing the following steps:
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
@@ -8709,7 +8709,7 @@ class Page(SyncContextManager):
     ) -> typing.List[str]:
         """Page.select_option
 
-        This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits until
+        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits until
         all specified options are present in the `<select>` element and selects these options.
 
         If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -9022,7 +9022,7 @@ class Page(SyncContextManager):
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            checked, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -9091,7 +9091,7 @@ class Page(SyncContextManager):
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -9609,7 +9609,7 @@ class Page(SyncContextManager):
     ) -> EventContextManager["Request"]:
         """Page.expect_request
 
-        Waits for the matching request and returns it. See [waiting for event](../events.md#waiting-for-event) for more details
+        Waits for the matching request and returns it. See [waiting for event](https://playwright.dev/python/docs/events#waiting-for-event) for more details
         about events.
 
         ```py
@@ -9685,7 +9685,7 @@ class Page(SyncContextManager):
     ) -> EventContextManager["Response"]:
         """Page.expect_response
 
-        Returns the matched response. See [waiting for event](../events.md#waiting-for-event) for more details about events.
+        Returns the matched response. See [waiting for event](https://playwright.dev/python/docs/events#waiting-for-event) for more details about events.
 
         ```py
         with page.expect_response(\"https://example.com/resource\") as response_info:
@@ -9801,7 +9801,7 @@ class Page(SyncContextManager):
         1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
         1. If the element already has the right checked state, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -11318,8 +11318,8 @@ class Browser(SyncContextManager):
         """Browser.start_tracing
 
         > NOTE: This API controls [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool)
-        which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be
-        found [here](./class-tracing).
+        which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](https://playwright.dev/python/docs/trace-viewer) could be
+        found [here](https://playwright.dev/python/docs/api/class-tracing).
 
         You can use `browser.start_tracing()` and `browser.stop_tracing()` to create a trace file that can be
         opened in Chrome DevTools performance panel.
@@ -11358,8 +11358,8 @@ class Browser(SyncContextManager):
         """Browser.stop_tracing
 
         > NOTE: This API controls [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool)
-        which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be
-        found [here](./class-tracing).
+        which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](https://playwright.dev/python/docs/trace-viewer) could be
+        found [here](https://playwright.dev/python/docs/api/class-tracing).
 
         Returns the buffer with trace data.
 
@@ -11902,7 +11902,7 @@ class Playwright(SyncBase):
     def selectors(self) -> "Selectors":
         """Playwright.selectors
 
-        Selectors can be used to install custom selector engines. See [Working with selectors](../selectors.md) for more
+        Selectors can be used to install custom selector engines. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more
         information.
 
         Returns
@@ -12197,7 +12197,7 @@ class Locator(SyncBase):
         This method checks the element by performing the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
            this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -12258,7 +12258,7 @@ class Locator(SyncBase):
         """Locator.click
 
         This method clicks the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -12330,7 +12330,7 @@ class Locator(SyncBase):
         """Locator.dblclick
 
         This method double clicks the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
@@ -12571,7 +12571,7 @@ class Locator(SyncBase):
     ) -> NoneType:
         """Locator.fill
 
-        This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an `input`
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, fills it and triggers an `input`
         event after filling. Note that you can pass an empty string to clear the input field.
 
         If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
@@ -12840,7 +12840,7 @@ class Locator(SyncBase):
         """Locator.hover
 
         This method hovers over the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -12966,7 +12966,7 @@ class Locator(SyncBase):
     def is_disabled(self, *, timeout: float = None) -> bool:
         """Locator.is_disabled
 
-        Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+        Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Parameters
         ----------
@@ -12988,7 +12988,7 @@ class Locator(SyncBase):
     def is_editable(self, *, timeout: float = None) -> bool:
         """Locator.is_editable
 
-        Returns whether the element is [editable](../actionability.md#editable).
+        Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
         Parameters
         ----------
@@ -13010,7 +13010,7 @@ class Locator(SyncBase):
     def is_enabled(self, *, timeout: float = None) -> bool:
         """Locator.is_enabled
 
-        Returns whether the element is [enabled](../actionability.md#enabled).
+        Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
 
         Parameters
         ----------
@@ -13030,7 +13030,7 @@ class Locator(SyncBase):
     def is_hidden(self, *, timeout: float = None) -> bool:
         """Locator.is_hidden
 
-        Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).
+        Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).
 
         Parameters
         ----------
@@ -13050,7 +13050,7 @@ class Locator(SyncBase):
     def is_visible(self, *, timeout: float = None) -> bool:
         """Locator.is_visible
 
-        Returns whether the element is [visible](../actionability.md#visible).
+        Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible).
 
         Parameters
         ----------
@@ -13137,7 +13137,7 @@ class Locator(SyncBase):
 
         Returns the buffer with the captured screenshot.
 
-        This method waits for the [actionability](../actionability.md) checks, then scrolls element into view before taking a
+        This method waits for the [actionability](https://playwright.dev/python/docs/actionability) checks, then scrolls element into view before taking a
         screenshot. If the element is detached from DOM, the method throws an error.
 
         Parameters
@@ -13199,7 +13199,7 @@ class Locator(SyncBase):
     def scroll_into_view_if_needed(self, *, timeout: float = None) -> NoneType:
         """Locator.scroll_into_view_if_needed
 
-        This method waits for [actionability](../actionability.md) checks, then tries to scroll element into view, unless it is
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, then tries to scroll element into view, unless it is
         completely visible as defined by
         [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 
@@ -13230,7 +13230,7 @@ class Locator(SyncBase):
     ) -> typing.List[str]:
         """Locator.select_option
 
-        This method waits for [actionability](../actionability.md) checks, waits until all specified options are present in the
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits until all specified options are present in the
         `<select>` element and selects these options.
 
         If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -13306,7 +13306,7 @@ class Locator(SyncBase):
     def select_text(self, *, force: bool = None, timeout: float = None) -> NoneType:
         """Locator.select_text
 
-        This method waits for [actionability](../actionability.md) checks, then focuses the element and selects all its text
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, then focuses the element and selects all its text
         content.
 
         Parameters
@@ -13384,7 +13384,7 @@ class Locator(SyncBase):
         """Locator.tap
 
         This method taps the element by performing the following steps:
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -13519,7 +13519,7 @@ class Locator(SyncBase):
         This method checks the element by performing the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
         1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -13645,7 +13645,7 @@ class Locator(SyncBase):
         This method checks or unchecks an element by performing the following steps:
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
         1. If the element already has the right checked state, this method returns immediately.
-        1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
+        1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If the
            element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
@@ -15394,7 +15394,7 @@ class LocatorAssertions(SyncBase):
     def to_be_hidden(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_hidden
 
-        Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](./actionability.md#visible).
+        Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](https://playwright.dev/python/docs/api/actionability#visible).
 
         ```py
         from playwright.sync_api import expect
@@ -15439,7 +15439,7 @@ class LocatorAssertions(SyncBase):
     def to_be_visible(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_visible
 
-        Ensures the `Locator` points to a [visible](./actionability.md#visible) DOM node.
+        Ensures the `Locator` points to a [visible](https://playwright.dev/python/docs/api/actionability#visible) DOM node.
 
         ```py
         from playwright.sync_api import expect
