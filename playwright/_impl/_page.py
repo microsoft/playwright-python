@@ -83,6 +83,7 @@ from playwright._impl._js_handle import (
     serialize_argument,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
+from playwright._impl._set_input_files_helpers import convert_input_files
 from playwright._impl._video import Video
 from playwright._impl._wait_helper import WaitHelper
 

@@ -14,6 +14,8 @@
 
 import asyncio
 import os
+from pprint import pprint
+from shutil import ExecError
 
 import pytest
 
@@ -284,3 +286,43 @@ async def _listen_for_wheel_events(page: Page, selector: str) -> None:
     """,
         selector,
     )
+
+
+# FIXME: skip if not CR, mark slow
+async def test_should_upload_large_file(page, server, tmp_path):
+    await page.goto(server.PREFIX + "/input/fileupload.html")
+    large_file_path = tmp_path / "200MB.zip"
+    with large_file_path.open("w") as f:
+        data = "A" * 1024
+        for i in range(0, 5 * 1024):
+            f.write(data)
+    input = page.locator('input[type="file"]')
+    events = await input.evaluate_handle(
+        """
+        e => {
+            const events = [];
+            e.addEventListener('input', () => events.push('input'));
+            e.addEventListener('change', () => events.push('change'));
+            return events;
+        }
+    """
+    )
+
+    await input.set_input_files(large_file_path)
+    assert await input.evaluate("e => e.files[0].name") == "200MB.zip"
+    assert await events.evaluate("e => e") == ["input", "change"]
+
+    server_request = None
+
+    def handler(request):
+        server_request = request
+        request.finish()
+
+    server.set_route("/upload", handler)
+
+    await page.click("input[type=submit]")
+
+    # FIXME: add assertions
+    #   expect(file1.originalFilename).toBe('200MB.zip');
+    #   expect(file1.size).toBe(200 * 1024 * 1024);
+    #   await Promise.all([uploadFile, file1.filepath].map(fs.promises.unlink));

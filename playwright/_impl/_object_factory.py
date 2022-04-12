@@ -33,6 +33,7 @@ from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import SelectorsOwner
 from playwright._impl._stream import Stream
 from playwright._impl._tracing import Tracing
+from playwright._impl._writeable_stream import WriteableStream
 
 
 class DummyObject(ChannelOwner):
@@ -89,6 +90,14 @@ def create_remote_object(
         return WebSocket(parent, type, guid, initializer)
     if type == "Worker":
         return Worker(parent, type, guid, initializer)
+    if type == "WriteableStream":
+        print("WRITEABLE STREAM")
+        print("WRITEABLE STREAM")
+        print("WRITEABLE STREAM")
+        print("WRITEABLE STREAM")
+        print("WRITEABLE STREAM")
+        print("WRITEABLE STREAM")
+        return WriteableStream(parent, type, guid, initializer)
     if type == "Selectors":
         return SelectorsOwner(parent, type, guid, initializer)
     return DummyObject(parent, type, guid, initializer)
