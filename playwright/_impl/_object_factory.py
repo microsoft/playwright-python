@@ -91,12 +91,6 @@ def create_remote_object(
     if type == "Worker":
         return Worker(parent, type, guid, initializer)
     if type == "WriteableStream":
-        print("WRITEABLE STREAM")
-        print("WRITEABLE STREAM")
-        print("WRITEABLE STREAM")
-        print("WRITEABLE STREAM")
-        print("WRITEABLE STREAM")
-        print("WRITEABLE STREAM")
         return WriteableStream(parent, type, guid, initializer)
     if type == "Selectors":
         return SelectorsOwner(parent, type, guid, initializer)

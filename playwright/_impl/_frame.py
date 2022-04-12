@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Set, Union, cast
 
 from pyee import EventEmitter
-from requests import delete
 
 from playwright._impl._api_structures import FilePayload, Position
 from playwright._impl._api_types import Error
