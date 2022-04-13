@@ -78,3 +78,10 @@ def test_add_init_script_support_multiple_scripts(page: Page) -> None:
     page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert page.evaluate("window.script1") == 1
     assert page.evaluate("window.script2") == 2
+
+
+def test_should_work_with_trailing_comments(page: Page) -> None:
+    page.add_init_script("// comment")
+    page.add_init_script("window.secret = 42;")
+    page.goto("data:text/html,<html></html>")
+    assert page.evaluate("secret") == 42

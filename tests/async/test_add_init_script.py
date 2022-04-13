@@ -74,3 +74,10 @@ async def test_add_init_script_support_multiple_scripts(page):
     await page.goto("data:text/html,<script>window.result = window.injected</script>")
     assert await page.evaluate("window.script1") == 1
     assert await page.evaluate("window.script2") == 2
+
+
+async def test_should_work_with_trailing_comments(page):
+    await page.add_init_script("// comment")
+    await page.add_init_script("window.secret = 42;")
+    await page.goto("data:text/html,<html></html>")
+    assert await page.evaluate("secret") == 42
