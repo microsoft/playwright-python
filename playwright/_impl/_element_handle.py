@@ -195,7 +195,7 @@ class ElementHandle(JSHandle):
         if not frame:
             raise Error("Cannot set input files to detached element")
         converted = await convert_input_files(files, frame.page.context)
-        if converted["files"]:
+        if converted["files"] is not None:
             await self._channel.send(
                 "setInputFiles", {**params, "files": converted["files"]}
             )
