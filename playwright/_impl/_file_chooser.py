@@ -12,13 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
 
 from playwright._impl._api_structures import FilePayload
-from playwright._impl._helper import async_readfile
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
@@ -56,28 +53,3 @@ class FileChooser:
         noWaitAfter: bool = None,
     ) -> None:
         await self._element_handle.set_input_files(files, timeout, noWaitAfter)
-
-
-async def normalize_file_payloads(
-    files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]]
-) -> List:
-    file_list = files if isinstance(files, list) else [files]
-    file_payloads: List = []
-    for item in file_list:
-        if isinstance(item, (str, Path)):
-            file_payloads.append(
-                {
-                    "name": os.path.basename(item),
-                    "buffer": base64.b64encode(await async_readfile(item)).decode(),
-                }
-            )
-        else:
-            file_payloads.append(
-                {
-                    "name": item["name"],
-                    "mimeType": item["mimeType"],
-                    "buffer": base64.b64encode(item["buffer"]).decode(),
-                }
-            )
-
-    return file_payloads

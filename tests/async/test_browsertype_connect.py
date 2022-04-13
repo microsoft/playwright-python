@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+import re
 from typing import Callable
 
 import pytest
@@ -241,3 +243,58 @@ async def test_should_fulfill_with_global_fetch_result(
     assert await response.json() == {"foo": "bar"}
 
     remote.kill()
+
+
+@pytest.mark.only_browser("chromium")
+async def test_should_upload_large_file(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    playwright: Playwright,
+    server: Server,
+    tmp_path,
+):
+    remote = launch_server()
+
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+
+    await page.goto(server.PREFIX + "/input/fileupload.html")
+    large_file_path = tmp_path / "200MB.zip"
+    data = b"A" * 1024
+    with large_file_path.open("wb") as f:
+        for i in range(0, 200 * 1024 * 1024, len(data)):
+            f.write(data)
+    input = page.locator('input[type="file"]')
+    events = await input.evaluate_handle(
+        """
+        e => {
+            const events = [];
+            e.addEventListener('input', () => events.push('input'));
+            e.addEventListener('change', () => events.push('change'));
+            return events;
+        }
+    """
+    )
+
+    await input.set_input_files(large_file_path)
+    assert await input.evaluate("e => e.files[0].name") == "200MB.zip"
+    assert await events.evaluate("e => e") == ["input", "change"]
+
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/upload"),
+        page.click("input[type=submit]"),
+    )
+
+    contents = request.args[b"file1"][0]
+    assert len(contents) == 200 * 1024 * 1024
+    assert contents[:1024] == data
+    # flake8: noqa: E203
+    assert contents[len(contents) - 1024 :] == data
+    match = re.search(
+        rb'^.*Content-Disposition: form-data; name="(?P<name>.*)"; filename="(?P<filename>.*)".*$',
+        request.post_body,
+        re.MULTILINE,
+    )
+    assert match.group("name") == b"file1"
+    assert match.group("filename") == b"200MB.zip"

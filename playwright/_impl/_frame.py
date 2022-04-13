@@ -28,7 +28,6 @@ from playwright._impl._connection import (
 )
 from playwright._impl._element_handle import ElementHandle, convert_select_option_values
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._file_chooser import normalize_file_payloads
 from playwright._impl._helper import (
     DocumentLoadState,
     FrameNavigatedEvent,
@@ -48,6 +47,7 @@ from playwright._impl._js_handle import (
 )
 from playwright._impl._locator import FrameLocator, Locator
 from playwright._impl._network import Response
+from playwright._impl._set_input_files_helpers import convert_input_files
 from playwright._impl._wait_helper import WaitHelper
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -598,8 +598,16 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
     ) -> None:
         params = locals_to_params(locals())
-        params["files"] = await normalize_file_payloads(files)
-        await self._channel.send("setInputFiles", params)
+        converted = await convert_input_files(files, self.page.context)
+        if converted["files"] is not None:
+            await self._channel.send(
+                "setInputFiles", {**params, "files": converted["files"]}
+            )
+        else:
+            await self._channel.send(
+                "setInputFilePaths",
+                locals_to_params({**params, **converted, "files": None}),
+            )
 
     async def type(
         self,

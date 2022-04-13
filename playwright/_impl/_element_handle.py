@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, ca
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
-from playwright._impl._file_chooser import normalize_file_payloads
 from playwright._impl._helper import (
+    Error,
     KeyboardModifier,
     MouseButton,
     async_writefile,
@@ -33,6 +33,7 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
+from playwright._impl._set_input_files_helpers import convert_input_files
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -190,8 +191,19 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
     ) -> None:
         params = locals_to_params(locals())
-        params["files"] = await normalize_file_payloads(files)
-        await self._channel.send("setInputFiles", params)
+        frame = await self.owner_frame()
+        if not frame:
+            raise Error("Cannot set input files to detached element")
+        converted = await convert_input_files(files, frame.page.context)
+        if converted["files"] is not None:
+            await self._channel.send(
+                "setInputFiles", {**params, "files": converted["files"]}
+            )
+        else:
+            await self._channel.send(
+                "setInputFilePaths",
+                locals_to_params({**params, **converted, "files": None}),
+            )
 
     async def focus(self) -> None:
         await self._channel.send("focus")
