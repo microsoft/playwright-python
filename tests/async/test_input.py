@@ -316,7 +316,6 @@ async def test_should_upload_large_file(page, server, tmp_path):
     def handler(request):
         file_upload.set_result(request)
         request.finish()
-
     server.set_route("/upload", handler)
 
     await page.click("input[type=submit]")

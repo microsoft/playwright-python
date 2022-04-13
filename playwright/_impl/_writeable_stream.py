@@ -36,11 +36,5 @@ class WriteableStream(ChannelOwner):
                 data = f.read(COPY_BUFSIZE)
                 if not data:
                     break
-                await stream.write(data)
-        await stream.close()
-
-    async def write(self, chunk: bytes):
-        await self._channel.send("write", {"binary": base64.b64encode(chunk)})
-
-    async def close(self):
-        await self._channel.send('close')
+                await stream.send("write", {"binary": base64.b64encode(data).decode()})
+        await stream.send('close')
