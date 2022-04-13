@@ -34,9 +34,9 @@ async def convert_input_files(
 
     has_large_buffer = any(
         [
-            not isinstance(f, (str, Path))
-            and len(f.get("buffer", "")) > SIZE_LIMIT_IN_BYTES
+            len(f.get("buffer", "")) > SIZE_LIMIT_IN_BYTES
             for f in file_list
+            if not isinstance(f, (str, Path))
         ]
     )
     if has_large_buffer:
@@ -46,8 +46,9 @@ async def convert_input_files(
 
     has_large_file = any(
         [
-            isinstance(f, (str, Path)) and os.stat(f).st_size > SIZE_LIMIT_IN_BYTES
+            os.stat(f).st_size > SIZE_LIMIT_IN_BYTES
             for f in file_list
+            if isinstance(f, (str, Path))
         ]
     )
     if has_large_file:
