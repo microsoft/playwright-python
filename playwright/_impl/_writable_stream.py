@@ -14,13 +14,14 @@
 
 import base64
 import os
-from typing import Dict
-
-# COPY_BUFSIZE is taken from shutil.py in the standard library
-_WINDOWS = os.name == 'nt'
-COPY_BUFSIZE = 1024 * 1024 if _WINDOWS else 64 * 1024
+from pathlib import Path
+from typing import Dict, Union
 
 from playwright._impl._connection import ChannelOwner
+
+# COPY_BUFSIZE is taken from shutil.py in the standard library
+_WINDOWS = os.name == "nt"
+COPY_BUFSIZE = 1024 * 1024 if _WINDOWS else 64 * 1024
 
 
 class WritableStream(ChannelOwner):
@@ -30,11 +31,11 @@ class WritableStream(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
 
     @staticmethod
-    async def copy(path: os.PathLike, stream: 'WritableStream'):
-        with open(path, 'rb') as f:
+    async def copy(path: Union[str, Path], stream: "WritableStream") -> None:
+        with open(path, "rb") as f:
             while True:
                 data = f.read(COPY_BUFSIZE)
                 if not data:
                     break
                 await stream.send("write", {"binary": base64.b64encode(data).decode()})
-        await stream.send('close')
+        await stream.send("close")

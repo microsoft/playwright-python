@@ -1,9 +1,13 @@
 import base64
 import os
-import shutil
+import sys
 from pathlib import Path
-from posixpath import basename
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Optional, Union
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import TypedDict
+else:  # pragma: no cover
+    from typing_extensions import TypedDict
 
 from playwright._impl._helper import Error, async_readfile
 from playwright._impl._writable_stream import WritableStream
@@ -16,46 +20,59 @@ from playwright._impl._api_structures import FilePayload
 SIZE_LIMIT_IN_BYTES = 50 * 1024 * 1024
 
 
+class InputFilesList(TypedDict):
+    streams: Optional[List[WritableStream]]
+    localPaths: Optional[List[str]]
+    files: Optional[List[FilePayload]]
+
+
 async def convert_input_files(
     files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
     context: "BrowserContext",
-):
-    files = files if isinstance(files, list) else [files]
+) -> InputFilesList:
+    file_list = files if isinstance(files, list) else [files]
 
-    has_large_buffer = list(
-        filter(
-            lambda f: not isinstance(f, (str, Path))
-            and len(f.get("buffer", "")) > SIZE_LIMIT_IN_BYTES,
-            files,
-        )
+    has_large_buffer = any(
+        [
+            not isinstance(f, (str, Path))
+            and len(f.get("buffer", "")) > SIZE_LIMIT_IN_BYTES
+            for f in file_list
+        ]
     )
     if has_large_buffer:
         raise Error(
             "Cannot set buffer larger than 50Mb, please write it to a file and pass its path instead."
         )
 
-    has_large_file = list(
-        map(
-            lambda f: os.stat(f).st_size,
-            filter(lambda f: isinstance(f, (str, Path)), files),
-        )
+    has_large_file = any(
+        [
+            isinstance(f, (str, Path)) and os.stat(f).st_size > SIZE_LIMIT_IN_BYTES
+            for f in file_list
+        ]
     )
     if has_large_file:
         if context._channel._connection.is_remote:
             streams = []
-            for file in files:
+            for file in file_list:
+                assert isinstance(file, (str, Path))
                 stream: WritableStream = await context._channel.send(
                     "createTempFile", {"name": os.path.basename(file)}
                 )
                 await WritableStream.copy(file, stream)
                 streams.append(stream)
-            return {"streams": streams}
-        return {"localPaths": list(map(lambda f: Path(f).absolute().resolve(), files))}
+            return InputFilesList(streams=streams, localPaths=None, files=None)
+        local_paths = []
+        for p in file_list:
+            assert isinstance(p, (str, Path))
+            local_paths.append(str(Path(p).absolute().resolve()))
+        return InputFilesList(streams=None, localPaths=local_paths, files=None)
 
-    return {"files": await normalize_file_payloads(files)}
+    return InputFilesList(
+        streams=None, localPaths=None, files=await _normalize_file_payloads(files)
+    )
 
 
-async def normalize_file_payloads(
+async def _normalize_file_payloads(
     files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]]
 ) -> List:
     file_list = files if isinstance(files, list) else [files]

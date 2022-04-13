@@ -599,9 +599,10 @@ class Frame(ChannelOwner):
     ) -> None:
         params = locals_to_params(locals())
         converted = await convert_input_files(files, self.page.context)
-        if converted.get("files") is not None:
-            params["files"] = converted.get("files")
-            await self._channel.send("setInputFiles", params)
+        if converted["files"]:
+            await self._channel.send(
+                "setInputFiles", {**params, "files": converted["files"]}
+            )
         else:
             await self._channel.send(
                 "setInputFilePaths",

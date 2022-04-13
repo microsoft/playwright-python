@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable
-
 import asyncio
 import re
+from typing import Callable
+
 import pytest
 
 from playwright.async_api import BrowserType, Error, Playwright, Route
@@ -244,13 +244,15 @@ async def test_should_fulfill_with_global_fetch_result(
 
     remote.kill()
 
+
 @pytest.mark.only_browser("chromium")
 async def test_should_upload_large_file(
     browser_type: BrowserType,
     launch_server: Callable[[], RemoteServer],
     playwright: Playwright,
     server: Server,
-    tmp_path):
+    tmp_path,
+):
     remote = launch_server()
 
     browser = await browser_type.connect(remote.ws_endpoint)
@@ -259,7 +261,7 @@ async def test_should_upload_large_file(
 
     await page.goto(server.PREFIX + "/input/fileupload.html")
     large_file_path = tmp_path / "200MB.zip"
-    data = b'A' * 1024
+    data = b"A" * 1024
     with large_file_path.open("wb") as f:
         for i in range(0, 200 * 1024 * 1024, len(data)):
             f.write(data)
@@ -279,18 +281,20 @@ async def test_should_upload_large_file(
     assert await input.evaluate("e => e.files[0].name") == "200MB.zip"
     assert await events.evaluate("e => e") == ["input", "change"]
 
-    file_upload = asyncio.Future()
-    def handler(request):
-        file_upload.set_result(request)
-        request.finish()
-    server.set_route("/upload", handler)
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/upload"),
+        page.click("input[type=submit]"),
+    )
 
-    await page.click("input[type=submit]")
-    request = await file_upload
-    contents = request.args[b'file1'][0]
+    contents = request.args[b"file1"][0]
     assert len(contents) == 200 * 1024 * 1024
     assert contents[:1024] == data
-    assert contents[len(contents)-1024:] == data
-    match = re.search(rb'^.*Content-Disposition: form-data; name="(?P<name>.*)"; filename="(?P<filename>.*)".*$', request.post_body, re.MULTILINE)
-    assert match.group('name') == b'file1'
-    assert match.group('filename') == b'200MB.zip'
+    # flake8: noqa: E203
+    assert contents[len(contents) - 1024 :] == data
+    match = re.search(
+        rb'^.*Content-Disposition: form-data; name="(?P<name>.*)"; filename="(?P<filename>.*)".*$',
+        request.post_body,
+        re.MULTILINE,
+    )
+    assert match.group("name") == b"file1"
+    assert match.group("filename") == b"200MB.zip"
