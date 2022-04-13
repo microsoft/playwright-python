@@ -9,6 +9,7 @@ if sys.version_info >= (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import TypedDict
 
+from playwright._impl._connection import Channel, from_channel
 from playwright._impl._helper import Error, async_readfile
 from playwright._impl._writable_stream import WritableStream
 
@@ -21,7 +22,7 @@ SIZE_LIMIT_IN_BYTES = 50 * 1024 * 1024
 
 
 class InputFilesList(TypedDict):
-    streams: Optional[List[WritableStream]]
+    streams: Optional[List[Channel]]
     localPaths: Optional[List[str]]
     files: Optional[List[FilePayload]]
 
@@ -56,11 +57,13 @@ async def convert_input_files(
             streams = []
             for file in file_list:
                 assert isinstance(file, (str, Path))
-                stream: WritableStream = await context._channel.send(
-                    "createTempFile", {"name": os.path.basename(file)}
+                stream: WritableStream = from_channel(
+                    await context._channel.send(
+                        "createTempFile", {"name": os.path.basename(file)}
+                    )
                 )
-                await WritableStream.copy(file, stream)
-                streams.append(stream)
+                await stream.copy(file)
+                streams.append(stream._channel)
             return InputFilesList(streams=streams, localPaths=None, files=None)
         local_paths = []
         for p in file_list:

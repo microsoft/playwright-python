@@ -30,12 +30,13 @@ class WritableStream(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
-    @staticmethod
-    async def copy(path: Union[str, Path], stream: "WritableStream") -> None:
+    async def copy(self, path: Union[str, Path]) -> None:
         with open(path, "rb") as f:
             while True:
                 data = f.read(COPY_BUFSIZE)
                 if not data:
                     break
-                await stream.send("write", {"binary": base64.b64encode(data).decode()})
-        await stream.send("close")
+                await self._channel.send(
+                    "write", {"binary": base64.b64encode(data).decode()}
+                )
+        await self._channel.send("close")
