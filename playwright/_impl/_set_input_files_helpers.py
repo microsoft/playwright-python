@@ -6,7 +6,7 @@ from posixpath import basename
 from typing import TYPE_CHECKING, List, Union
 
 from playwright._impl._helper import Error, async_readfile
-from playwright._impl._writeable_stream import WriteableStream
+from playwright._impl._writable_stream import WritableStream
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
@@ -44,10 +44,10 @@ async def convert_input_files(
         if context._channel._connection.is_remote:
             streams = []
             for file in files:
-                stream: WriteableStream = await context._channel.send(
+                stream: WritableStream = await context._channel.send(
                     "createTempFile", {"name": os.path.basename(file)}
                 )
-                await WriteableStream.copy(file, stream)
+                await WritableStream.copy(file, stream)
                 streams.append(stream)
             return {"streams": streams}
         return {"localPaths": list(map(lambda f: Path(f).absolute().resolve(), files))}
