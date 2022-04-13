@@ -44,11 +44,10 @@ async def convert_input_files(
         if context._channel._connection.is_remote:
             streams = []
             for file in files:
-                stream = await context._channel.send(
+                stream: WriteableStream = await context._channel.send(
                     "createTempFile", {"name": os.path.basename(file)}
                 )
-                with open(file, "rb") as f:
-                    shutil.copyfileobj(f, stream)
+                await WriteableStream.copy(file, stream)
                 streams.append(stream)
             return {"streams": streams}
         return {"localPaths": list(map(lambda f: Path(f).absolute().resolve(), files))}

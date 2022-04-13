@@ -13,7 +13,12 @@
 # limitations under the License.
 
 import base64
+import os
 from typing import Dict
+
+# COPY_BUFSIZE is taken from shutil.py in the standard library
+_WINDOWS = os.name == 'nt'
+COPY_BUFSIZE = 1024 * 1024 if _WINDOWS else 64 * 1024
 
 from playwright._impl._connection import ChannelOwner
 
@@ -24,9 +29,18 @@ class WriteableStream(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
-    # FIXME: These need to be async and await the channel send
-    def write(self, chunk: bytes):
-        self._channel.send("write", {"binary": base64.b64encode(chunk)})
+    @staticmethod
+    async def copy(path: os.PathLike, stream: 'WriteableStream'):
+        with open(path, 'rb') as f:
+            while True:
+                data = f.read(COPY_BUFSIZE)
+                if not data:
+                    break
+                await stream.write(data)
+        await stream.close()
 
-    def close(self):
-        pass
+    async def write(self, chunk: bytes):
+        await self._channel.send("write", {"binary": base64.b64encode(chunk)})
+
+    async def close(self):
+        await self._channel.send('close')
