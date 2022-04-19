@@ -118,19 +118,6 @@ class PipeTransport(Transport):
         if sys.platform == "win32" and sys.stdout is None:
             creationflags = subprocess.CREATE_NO_WINDOW
 
-        # In Python 3.7, self._proc.wait() hangs because it does not use ThreadedChildWatcher
-        # which is used in Python 3.8+. This is unix specific and also takes care about
-        # cleaning up zombie processes. See https://bugs.python.org/issue35621
-        if (
-            sys.version_info[0] == 3
-            and sys.version_info[1] == 7
-            and sys.platform != "win32"
-            and isinstance(asyncio.get_child_watcher(), asyncio.SafeChildWatcher)
-        ):
-            from ._py37ThreadedChildWatcher import ThreadedChildWatcher  # type: ignore
-
-            watcher = ThreadedChildWatcher()
-            asyncio.set_child_watcher(watcher)
         try:
             # For pyinstaller
             env = get_driver_env()
