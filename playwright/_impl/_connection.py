@@ -180,6 +180,7 @@ class Connection(EventEmitter):
         self.playwright_future: asyncio.Future["Playwright"] = loop.create_future()
         self._error: Optional[BaseException] = None
         self.is_remote = False
+        self._init_task: Optional[asyncio.Task] = None
 
     def mark_as_remote(self) -> None:
         self.is_remote = True
@@ -196,12 +197,13 @@ class Connection(EventEmitter):
             self.playwright_future.set_result(await self._root_object.initialize())
 
         await self._transport.connect()
-        self._loop.create_task(init())
+        self._init_task = self._loop.create_task(init())
         await self._transport.run()
 
     def stop_sync(self) -> None:
         self._transport.request_stop()
         self._dispatcher_fiber.switch()
+        self._loop.run_until_complete(self._transport.wait_until_stopped())
         self.cleanup()
 
     async def stop_async(self) -> None:
@@ -210,6 +212,8 @@ class Connection(EventEmitter):
         self.cleanup()
 
     def cleanup(self) -> None:
+        if self._init_task and not self._init_task.done():
+            self._init_task.cancel()
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
         self.emit("close")

@@ -110,7 +110,6 @@ class PipeTransport(Transport):
 
     async def wait_until_stopped(self) -> None:
         await self._stopped_future
-        await self._proc.wait()
 
     async def connect(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
@@ -119,6 +118,19 @@ class PipeTransport(Transport):
         if sys.platform == "win32" and sys.stdout is None:
             creationflags = subprocess.CREATE_NO_WINDOW
 
+        # In Python 3.7, self._proc.wait() hangs because it does not use ThreadedChildWatcher
+        # which is used in Python 3.8+. This is unix specific and also takes care about
+        # cleaning up zombie processes. See https://bugs.python.org/issue35621
+        if (
+            sys.version_info[0] == 3
+            and sys.version_info[1] == 7
+            and sys.platform != "win32"
+            and isinstance(asyncio.get_child_watcher(), asyncio.SafeChildWatcher)
+        ):
+            from ._py37ThreadedChildWatcher import ThreadedChildWatcher  # type: ignore
+
+            watcher = ThreadedChildWatcher()
+            asyncio.set_child_watcher(watcher)
         try:
             # For pyinstaller
             env = get_driver_env()
@@ -147,22 +159,30 @@ class PipeTransport(Transport):
         while not self._stopped:
             try:
                 buffer = await self._proc.stdout.readexactly(4)
+                if self._stopped:
+                    break
                 length = int.from_bytes(buffer, byteorder="little", signed=False)
                 buffer = bytes(0)
                 while length:
                     to_read = min(length, 32768)
                     data = await self._proc.stdout.readexactly(to_read)
+                    if self._stopped:
+                        break
                     length -= to_read
                     if len(buffer):
                         buffer = buffer + data
                     else:
                         buffer = data
+                if self._stopped:
+                    break
 
                 obj = self.deserialize_message(buffer)
                 self.on_message(obj)
             except asyncio.IncompleteReadError:
                 break
             await asyncio.sleep(0)
+
+        await self._proc.wait()
         self._stopped_future.set_result(None)
 
     def send(self, message: Dict) -> None:
