@@ -93,9 +93,9 @@ class Position(TypedDict):
 
 class ProxySettings(TypedDict, total=False):
     server: str
-    bypass: Optional[str]
-    username: Optional[str]
-    password: Optional[str]
+    bypass: str
+    username: str
+    password: str
 
 
 class StorageState(TypedDict, total=False):
