@@ -407,14 +407,16 @@ async def test_should_wait_for_display_contents_to_become_visible(page):
     await waiting_helper(page, 'div => div.style.display = "block"')
 
 
-async def test_should_wait_for_visibility_hidden_to_become_visible(page):
+async def test_should_work_for_visibility_hidden_element(page):
     await page.set_content('<div style="visibility:hidden">Hello</div>')
-    await waiting_helper(page, 'div => div.style.visibility = "visible"')
+    div = await page.query_selector("div")
+    await div.scroll_into_view_if_needed()
 
 
-async def test_should_wait_for_zero_sized_element_to_become_visible(page):
+async def test_should_work_for_zero_sized_element(page):
     await page.set_content('<div style="height:0">Hello</div>')
-    await waiting_helper(page, 'div => div.style.height = "100px"')
+    div = await page.query_selector("div")
+    await div.scroll_into_view_if_needed()
 
 
 async def test_should_wait_for_nested_display_none_to_become_visible(page):
@@ -427,7 +429,7 @@ async def test_should_timeout_waiting_for_visible(page):
     div = await page.query_selector("div")
     with pytest.raises(Error) as exc_info:
         await div.scroll_into_view_if_needed(timeout=3000)
-    assert "element is not visible" in exc_info.value.message
+    assert "element is not displayed, retrying in 100ms" in exc_info.value.message
 
 
 async def test_fill_input(page, server):
