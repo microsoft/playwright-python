@@ -236,6 +236,18 @@ class Locator:
     def nth(self, index: int) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> nth={index}")
 
+    def that(
+        self,
+        has_text: Union[str, Pattern] = None,
+        has: "Locator" = None,
+    ) -> "Locator":
+        return Locator(
+            self._frame,
+            self._selector,
+            has_text=has_text,
+            has=has,
+        )
+
     async def focus(self, timeout: float = None) -> None:
         params = locals_to_params(locals())
         return await self._frame.focus(self._selector, strict=True, **params)

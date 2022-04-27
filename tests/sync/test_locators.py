@@ -681,3 +681,31 @@ def test_locator_should_enforce_same_frame_for_has_locator(
     assert (
         'Inner "has" locator must belong to the same frame.' in exc_info.value.message
     )
+
+
+def test_should_support_locator_that(page: Page) -> None:
+    page.set_content(
+        "<section><div><span>hello</span></div><div><span>world</span></div></section>"
+    )
+
+    expect(page.locator("div").that(has_text="hello")).to_have_count(1)
+    expect(page.locator("div", has_text="hello").that(has_text="hello")).to_have_count(
+        1
+    )
+    expect(page.locator("div", has_text="hello").that(has_text="world")).to_have_count(
+        0
+    )
+    expect(
+        page.locator("section", has_text="hello").that(has_text="world")
+    ).to_have_count(1)
+    expect(page.locator("div").that(has_text="hello").locator("span")).to_have_count(1)
+    expect(
+        page.locator("div").that(has=page.locator("span", has_text="world"))
+    ).to_have_count(1)
+    expect(page.locator("div").that(has=page.locator("span"))).to_have_count(2)
+    expect(
+        page.locator("div").that(
+            has=page.locator("span"),
+            has_text="world",
+        )
+    ).to_have_count(1)

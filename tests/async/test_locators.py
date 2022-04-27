@@ -754,3 +754,33 @@ async def test_locator_highlight_should_work(page: Page, server: Server) -> None
     await page.goto(server.PREFIX + "/grid.html")
     await page.locator(".box").nth(3).highlight()
     assert await page.locator("x-pw-glass").is_visible()
+
+
+async def test_should_support_locator_that(page: Page) -> None:
+    await page.set_content(
+        "<section><div><span>hello</span></div><div><span>world</span></div></section>"
+    )
+
+    await expect(page.locator("div").that(has_text="hello")).to_have_count(1)
+    await expect(
+        page.locator("div", has_text="hello").that(has_text="hello")
+    ).to_have_count(1)
+    await expect(
+        page.locator("div", has_text="hello").that(has_text="world")
+    ).to_have_count(0)
+    await expect(
+        page.locator("section", has_text="hello").that(has_text="world")
+    ).to_have_count(1)
+    await expect(
+        page.locator("div").that(has_text="hello").locator("span")
+    ).to_have_count(1)
+    await expect(
+        page.locator("div").that(has=page.locator("span", has_text="world"))
+    ).to_have_count(1)
+    await expect(page.locator("div").that(has=page.locator("span"))).to_have_count(2)
+    await expect(
+        page.locator("div").that(
+            has=page.locator("span"),
+            has_text="world",
+        )
+    ).to_have_count(1)

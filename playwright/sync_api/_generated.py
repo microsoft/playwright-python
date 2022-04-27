@@ -2077,6 +2077,10 @@ class ElementHandle(JSHandle):
         This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, then focuses the element and selects all its text
         content.
 
+        If the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), focuses and selects text in the
+        control instead.
+
         Parameters
         ----------
         force : Union[bool, NoneType]
@@ -2096,7 +2100,10 @@ class ElementHandle(JSHandle):
     def input_value(self, *, timeout: float = None) -> str:
         """ElementHandle.input_value
 
-        Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+
+        Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 
         Parameters
         ----------
@@ -2131,11 +2138,13 @@ class ElementHandle(JSHandle):
     ) -> NoneType:
         """ElementHandle.set_input_files
 
-        This method expects `elementHandle` to point to an
-        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
         are resolved relative to the the current working directory. For empty array, clears the selected files.
+
+        This method expects [`elementHandle`] to point to an
+        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 
         Parameters
         ----------
@@ -4719,7 +4728,10 @@ class Frame(SyncBase):
     ) -> str:
         """Frame.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+
+        Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 
         Parameters
         ----------
@@ -4764,11 +4776,13 @@ class Frame(SyncBase):
     ) -> NoneType:
         """Frame.set_input_files
 
-        This method expects `selector` to point to an
-        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
         are resolved relative to the the current working directory. For empty array, clears the selected files.
+
+        This method expects `selector` to point to an
+        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 
         Parameters
         ----------
@@ -7342,8 +7356,8 @@ class Page(SyncContextManager):
     ) -> typing.Optional["Response"]:
         """Page.goto
 
-        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-        last redirect.
+        Returns the main resource response. In case of multiple redirects, the navigation will resolve with the first
+        non-redirect response.
 
         The method will throw an error if:
         - there's an SSL error (e.g. in case of self-signed certificates).
@@ -8786,7 +8800,10 @@ class Page(SyncContextManager):
     ) -> str:
         """Page.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+
+        Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 
         Parameters
         ----------
@@ -8831,11 +8848,13 @@ class Page(SyncContextManager):
     ) -> NoneType:
         """Page.set_input_files
 
-        This method expects `selector` to point to an
-        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
         are resolved relative to the the current working directory. For empty array, clears the selected files.
+
+        This method expects `selector` to point to an
+        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 
         Parameters
         ----------
@@ -12717,6 +12736,37 @@ class Locator(SyncBase):
 
         return mapping.from_impl(self._impl_obj.nth(index=index))
 
+    def that(
+        self,
+        *,
+        has_text: typing.Union[str, typing.Pattern] = None,
+        has: "Locator" = None
+    ) -> "Locator":
+        """Locator.that
+
+        This method narrows existing locator according to the options, for example filters by text.
+
+        Parameters
+        ----------
+        has_text : Union[Pattern, str, NoneType]
+            Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When passed a
+            [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
+            `<article><div>Playwright</div></article>`.
+        has : Union[Locator, NoneType]
+            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
+            For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.that(has_text=has_text, has=has._impl_obj if has else None)
+        )
+
     def focus(self, *, timeout: float = None) -> NoneType:
         """Locator.focus
 
@@ -12924,7 +12974,10 @@ class Locator(SyncBase):
     def input_value(self, *, timeout: float = None) -> str:
         """Locator.input_value
 
-        Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+
+        Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 
         Parameters
         ----------
@@ -13309,6 +13362,10 @@ class Locator(SyncBase):
         This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, then focuses the element and selects all its text
         content.
 
+        If the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), focuses and selects text in the
+        control instead.
+
         Parameters
         ----------
         force : Union[bool, NoneType]
@@ -13340,11 +13397,13 @@ class Locator(SyncBase):
     ) -> NoneType:
         """Locator.set_input_files
 
-        This method expects `element` to point to an
-        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
-
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
         are resolved relative to the the current working directory. For empty array, clears the selected files.
+
+        This method expects [`locator`] to point to an
+        [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+        `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 
         Parameters
         ----------
@@ -15214,7 +15273,10 @@ class LocatorAssertions(SyncBase):
     def to_be_disabled(self, *, timeout: float = None) -> NoneType:
         """LocatorAssertions.to_be_disabled
 
-        Ensures the `Locator` points to a disabled element.
+        Ensures the `Locator` points to a disabled element. Element is disabled if it has \"disabled\" attribute or is disabled
+        via ['aria-disabled'](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-disabled). Note
+        that only native control elements such as HTML `button`, `input`, `select`, `textarea`, `option`, `optgroup` can be
+        disabled by setting \"disabled\" attribute. \"disabled\" attribute on other elements is ignored by the browser.
 
         ```py
         from playwright.sync_api import expect
