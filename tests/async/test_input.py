@@ -14,7 +14,6 @@
 
 import asyncio
 import os
-import platform
 import re
 
 import pytest
@@ -288,12 +287,7 @@ async def _listen_for_wheel_events(page: Page, selector: str) -> None:
     )
 
 
-async def test_should_upload_large_file(page, server, tmp_path, is_mac, is_webkit):
-    if is_mac and is_webkit and int(platform.release().split(".")[0]) < 20:
-        pytest.skip(
-            "WebKit for macOS 10.15 is frozen and does not have corresponding protocol features."
-        )
-
+async def test_should_upload_large_file(page, server, tmp_path):
     await page.goto(server.PREFIX + "/input/fileupload.html")
     large_file_path = tmp_path / "200MB.zip"
     data = b"A" * 1024

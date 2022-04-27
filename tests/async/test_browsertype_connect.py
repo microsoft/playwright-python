@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import platform
 import re
 from typing import Callable
 
@@ -251,15 +250,8 @@ async def test_should_upload_large_file(
     launch_server: Callable[[], RemoteServer],
     playwright: Playwright,
     server: Server,
-    is_mac: bool,
-    is_webkit: bool,
     tmp_path,
 ):
-    if is_mac and is_webkit and int(platform.release().split(".")[0]) < 20:
-        pytest.skip(
-            "WebKit for macOS 10.15 is frozen and does not have corresponding protocol features."
-        )
-
     remote = launch_server()
 
     browser = await browser_type.connect(remote.ws_endpoint)
