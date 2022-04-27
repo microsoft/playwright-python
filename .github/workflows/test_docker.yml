@@ -36,6 +36,8 @@ jobs:
     - name: Test
       run: |
         CONTAINER_ID="$(docker run --rm -v $(pwd):/root/playwright --name playwright-docker-test --workdir /root/playwright/ -d -t playwright-python:localbuild-focal /bin/bash)"
+        # Fix permissions for Git inside the container
+        docker exec "${CONTAINER_ID}" chown -R root:root /root/playwright
         docker exec "${CONTAINER_ID}" pip install -r local-requirements.txt
         docker exec "${CONTAINER_ID}" pip install -e .
         docker exec "${CONTAINER_ID}" python setup.py bdist_wheel
