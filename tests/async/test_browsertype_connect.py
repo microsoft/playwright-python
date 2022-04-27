@@ -245,7 +245,6 @@ async def test_should_fulfill_with_global_fetch_result(
     remote.kill()
 
 
-@pytest.mark.only_browser("chromium")
 async def test_should_upload_large_file(
     browser_type: BrowserType,
     launch_server: Callable[[], RemoteServer],

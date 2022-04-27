@@ -287,7 +287,6 @@ async def _listen_for_wheel_events(page: Page, selector: str) -> None:
     )
 
 
-@pytest.mark.only_browser("chromium")
 async def test_should_upload_large_file(page, server, tmp_path):
     await page.goto(server.PREFIX + "/input/fileupload.html")
     large_file_path = tmp_path / "200MB.zip"
