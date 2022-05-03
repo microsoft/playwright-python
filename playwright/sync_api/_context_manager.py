@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any
+import sys
+from typing import Any, Optional
 
 from greenlet import greenlet
 
@@ -29,34 +30,45 @@ from playwright.sync_api._generated import Playwright as SyncPlaywright
 class PlaywrightContextManager:
     def __init__(self) -> None:
         self._playwright: SyncPlaywright
+        self._loop: asyncio.AbstractEventLoop
+        self._own_loop = False
+        self._watcher: Optional[asyncio.AbstractChildWatcher] = None
 
     def __enter__(self) -> SyncPlaywright:
-        loop: asyncio.AbstractEventLoop
-        own_loop = None
         try:
-            loop = asyncio.get_running_loop()
+            self._loop = asyncio.get_running_loop()
         except RuntimeError:
-            loop = asyncio.new_event_loop()
-            own_loop = loop
-        if loop.is_running():
+            self._loop = asyncio.new_event_loop()
+            self._own_loop = True
+        if self._loop.is_running():
             raise Error(
                 """It looks like you are using Playwright Sync API inside the asyncio loop.
 Please use the Async API instead."""
             )
 
-        def greenlet_main() -> None:
-            loop.run_until_complete(self._connection.run_as_sync())
+        # In Python 3.7, asyncio.Process.wait() hangs because it does not use ThreadedChildWatcher
+        # which is used in Python 3.8+. This is unix specific and also takes care about
+        # cleaning up zombie processes. See https://bugs.python.org/issue35621
+        if (
+            sys.version_info[0] == 3
+            and sys.version_info[1] == 7
+            and sys.platform != "win32"
+            and isinstance(asyncio.get_child_watcher(), asyncio.SafeChildWatcher)
+        ):
+            from ._py37ThreadedChildWatcher import ThreadedChildWatcher  # type: ignore
 
-            if own_loop:
-                loop.run_until_complete(loop.shutdown_asyncgens())
-                loop.close()
+            self._watcher = ThreadedChildWatcher()
+            asyncio.set_child_watcher(self._watcher)  # type: ignore
+
+        def greenlet_main() -> None:
+            self._loop.run_until_complete(self._connection.run_as_sync())
 
         dispatcher_fiber = greenlet(greenlet_main)
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
-            PipeTransport(loop, compute_driver_executable()),
-            loop,
+            PipeTransport(self._loop, compute_driver_executable()),
+            self._loop,
         )
 
         g_self = greenlet.getcurrent()
@@ -77,3 +89,8 @@ Please use the Async API instead."""
 
     def __exit__(self, *args: Any) -> None:
         self._connection.stop_sync()
+        if self._watcher:
+            self._watcher.close()
+        if self._own_loop:
+            self._loop.run_until_complete(self._loop.shutdown_asyncgens())
+            self._loop.close()
