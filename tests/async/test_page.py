@@ -1407,3 +1407,14 @@ async def test_should_not_throw_when_continuing_after_page_is_closed(
     with pytest.raises(Error):
         await page.goto(server.EMPTY_PAGE)
     await done
+
+
+async def test_expose_binding_should_serialize_cycles(page: Page):
+    binding_values = []
+
+    def binding(source, o):
+        binding_values.append(o)
+
+    await page.expose_binding("log", lambda source, o: binding(source, o))
+    await page.evaluate("const a = {}; a.b = a; window.log(a)")
+    assert binding_values[0]["b"] == binding_values[0]

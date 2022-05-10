@@ -152,18 +152,23 @@ async def test_evaluate_properly_serialize_none_arguments(page):
     assert await page.evaluate("x => ({a: x})", None) == {"a": None}
 
 
-async def test_evaluate_fail_for_circular_object(page):
-    assert (
-        await page.evaluate(
-            """() => {
-                const a = {};
+async def test_should_alias_window_document_and_node(page):
+    object = await page.evaluate("[window, document, document.body]")
+    assert object == ["ref: <Window>", "ref: <Document>", "ref: <Node>"]
+
+
+async def test_evaluate_should_work_for_circular_object(page):
+    a = await page.evaluate(
+        """() => {
+                const a = {x: 47};
                 const b = {a};
                 a.b = b;
                 return a;
             }"""
-        )
-        is None
     )
+
+    assert a["b"]["a"]["b"]["a"]["x"] == 47
+    assert a["b"]["a"] == a
 
 
 async def test_evaluate_accept_string(page):

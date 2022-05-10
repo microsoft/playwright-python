@@ -14,9 +14,8 @@
 
 import math
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
-from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner, from_channel
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -90,13 +89,17 @@ class JSHandle(ChannelOwner):
         return parse_result(await self._channel.send("jsonValue"))
 
 
-def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
+def serialize_value(value: Any, handles: List[JSHandle]) -> Any:
+    return _inner_serialize_value(value=value, handles=handles, visited=set())
+
+
+def _inner_serialize_value(
+    value: Any, handles: List[JSHandle], visited: Set[int]
+) -> Any:
     if isinstance(value, JSHandle):
         h = len(handles)
         handles.append(value._channel)
         return dict(h=h)
-    if depth > 100:
-        raise Error("Maximum argument depth exceeded")
     if value is None:
         return dict(v="null")
     if isinstance(value, float):
@@ -117,30 +120,44 @@ def serialize_value(value: Any, handles: List[JSHandle], depth: int) -> Any:
     if isinstance(value, str):
         return {"s": value}
 
+    ref_id = id(value)
+    if ref_id in visited:
+        return dict(ref=ref_id)
+    else:
+        visited.add(ref_id)
+
     if isinstance(value, list):
-        result = list(map(lambda a: serialize_value(a, handles, depth + 1), value))
-        return dict(a=result)
+        result = []
+        for h in handles:
+            result.append(_inner_serialize_value(h, handles, visited))
+        return dict(a=result, id=ref_id)
 
     if isinstance(value, dict):
         result = []
         for name in value:
             result.append(
-                {"k": name, "v": serialize_value(value[name], handles, depth + 1)}
+                {"k": name, "v": _inner_serialize_value(value[name], handles, visited)}
             )
-        return dict(o=result)
+        return dict(o=result, id=ref_id)
     return dict(v="undefined")
 
 
 def serialize_argument(arg: Serializable = None) -> Any:
     handles: List[JSHandle] = []
-    value = serialize_value(arg, handles, 0)
+    value = serialize_value(arg, handles)
     return dict(value=value, handles=handles)
 
 
 def parse_value(value: Any) -> Any:
+    return _inner_parse_value(value=value, refs={})
+
+
+def _inner_parse_value(value: Any, refs: Dict[int, Any]) -> Any:
     if value is None:
         return None
     if isinstance(value, dict):
+        if "ref" in value:
+            return refs[value["ref"]]
         if "v" in value:
             v = value["v"]
             if v == "Infinity":
@@ -158,14 +175,21 @@ def parse_value(value: Any) -> Any:
             return v
 
         if "a" in value:
-            return list(map(lambda e: parse_value(e), value["a"]))
+            a: List[Any] = []
+            refs[value["id"]] = a
+            for e in value["a"]:
+                a.append(_inner_parse_value(e, refs))
+            return a
 
         if "d" in value:
             return datetime.fromisoformat(value["d"][:-1])
 
         if "o" in value:
-            o = value["o"]
-            return {e["k"]: parse_value(e["v"]) for e in o}
+            o: Dict = {}
+            refs[value["id"]] = o
+            for e in value["o"]:
+                o[e["k"]] = _inner_parse_value(e["v"], refs)
+            return o
 
         if "n" in value:
             return value["n"]
