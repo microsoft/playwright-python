@@ -738,7 +738,7 @@ async def test_locator_should_support_has_locator(page: Page, server: Server) ->
     ).to_have_count(1)
 
 
-async def test_locator_should_enforce_same_frame_for_has_locator(
+async def test_locator_should_enforce_same_frame_for_has_and_layout_locators(
     page: Page, server: Server
 ) -> None:
     await page.goto(server.PREFIX + "/frames/two-frames.html")
@@ -748,6 +748,10 @@ async def test_locator_should_enforce_same_frame_for_has_locator(
     assert (
         'Inner "has" locator must belong to the same frame.' in exc_info.value.message
     )
+    for option in ["has", "leftOf", "rightOf", "above", "below", "near"]:
+        with pytest.raises(Error) as exc_info:
+            page.locator("div", {option: child.locator("span")})
+        assert f'Inner "{option}" locator must belong to the same frame.' in exc_info
 
 
 async def test_locator_highlight_should_work(page: Page, server: Server) -> None:

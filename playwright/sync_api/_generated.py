@@ -2139,9 +2139,9 @@ class ElementHandle(JSHandle):
         """ElementHandle.set_input_files
 
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-        are resolved relative to the the current working directory. For empty array, clears the selected files.
+        are resolved relative to the current working directory. For empty array, clears the selected files.
 
-        This method expects [`elementHandle`] to point to an
+        This method expects `ElementHandle` to point to an
         [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
         `<label>` element that has an associated
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
@@ -2502,10 +2502,14 @@ class ElementHandle(JSHandle):
     ) -> bytes:
         """ElementHandle.screenshot
 
-        Returns the buffer with the captured screenshot.
+        This method captures a screenshot of the page, clipped to the size and position of this particular element. If the
+        element is covered by other elements, it will not be actually visible on the screenshot. If the element is a scrollable
+        container, only the currently scrolled content will be visible on the screenshot.
 
         This method waits for the [actionability](https://playwright.dev/python/docs/actionability) checks, then scrolls element into view before taking a
         screenshot. If the element is detached from DOM, the method throws an error.
+
+        Returns the buffer with the captured screenshot.
 
         Parameters
         ----------
@@ -2926,7 +2930,7 @@ class FileChooser(SyncBase):
         """FileChooser.set_files
 
         Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then
-        they are resolved relative to the the current working directory. For empty array, clears the selected files.
+        they are resolved relative to the current working directory. For empty array, clears the selected files.
 
         Parameters
         ----------
@@ -4296,13 +4300,20 @@ class Frame(SyncBase):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None
+        has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None
     ) -> "Locator":
         """Frame.locator
 
         The method returns an element locator that can be used to perform actions in the frame. Locator is resolved to the
         element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
         different DOM elements. That would happen if the DOM structure between those actions has changed.
+
+        [Learn more about locators](https://playwright.dev/python/docs/locators).
 
         Parameters
         ----------
@@ -4317,6 +4328,36 @@ class Frame(SyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        left_of : Union[Locator, NoneType]
+            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
+            is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        right_of : Union[Locator, NoneType]
+            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        above : Union[Locator, NoneType]
+            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        below : Union[Locator, NoneType]
+            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        near : Union[Locator, NoneType]
+            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
+            queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -4325,7 +4366,14 @@ class Frame(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector=selector,
+                has_text=has_text,
+                has=has._impl_obj if has else None,
+                left_of=left_of._impl_obj if left_of else None,
+                right_of=right_of._impl_obj if right_of else None,
+                above=above._impl_obj if above else None,
+                below=below._impl_obj if below else None,
+                near=near._impl_obj if near else None,
             )
         )
 
@@ -4777,7 +4825,7 @@ class Frame(SyncBase):
         """Frame.set_input_files
 
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-        are resolved relative to the the current working directory. For empty array, clears the selected files.
+        are resolved relative to the current working directory. For empty array, clears the selected files.
 
         This method expects `selector` to point to an
         [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
@@ -5277,7 +5325,12 @@ class FrameLocator(SyncBase):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None
+        has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None
     ) -> "Locator":
         """FrameLocator.locator
 
@@ -5296,6 +5349,36 @@ class FrameLocator(SyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        left_of : Union[Locator, NoneType]
+            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
+            is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        right_of : Union[Locator, NoneType]
+            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        above : Union[Locator, NoneType]
+            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        below : Union[Locator, NoneType]
+            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        near : Union[Locator, NoneType]
+            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
+            queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -5304,7 +5387,14 @@ class FrameLocator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector=selector,
+                has_text=has_text,
+                has=has._impl_obj if has else None,
+                left_of=left_of._impl_obj if left_of else None,
+                right_of=right_of._impl_obj if right_of else None,
+                above=above._impl_obj if above else None,
+                below=below._impl_obj if below else None,
+                near=near._impl_obj if near else None,
             )
         )
 
@@ -8359,13 +8449,20 @@ class Page(SyncContextManager):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None
+        has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None
     ) -> "Locator":
         """Page.locator
 
         The method returns an element locator that can be used to perform actions on the page. Locator is resolved to the
         element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
         different DOM elements. That would happen if the DOM structure between those actions has changed.
+
+        [Learn more about locators](https://playwright.dev/python/docs/locators).
 
         Shortcut for main frame's `frame.locator()`.
 
@@ -8382,6 +8479,36 @@ class Page(SyncContextManager):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        left_of : Union[Locator, NoneType]
+            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
+            is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        right_of : Union[Locator, NoneType]
+            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        above : Union[Locator, NoneType]
+            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        below : Union[Locator, NoneType]
+            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        near : Union[Locator, NoneType]
+            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
+            queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -8390,7 +8517,14 @@ class Page(SyncContextManager):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector=selector,
+                has_text=has_text,
+                has=has._impl_obj if has else None,
+                left_of=left_of._impl_obj if left_of else None,
+                right_of=right_of._impl_obj if right_of else None,
+                above=above._impl_obj if above else None,
+                below=below._impl_obj if below else None,
+                near=near._impl_obj if near else None,
             )
         )
 
@@ -8849,7 +8983,7 @@ class Page(SyncContextManager):
         """Page.set_input_files
 
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-        are resolved relative to the the current working directory. For empty array, clears the selected files.
+        are resolved relative to the current working directory. For empty array, clears the selected files.
 
         This method expects `selector` to point to an
         [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
@@ -12629,11 +12763,17 @@ class Locator(SyncBase):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None
+        has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None
     ) -> "Locator":
         """Locator.locator
 
-        The method finds an element matching the specified selector in the `Locator`'s subtree.
+        The method finds an element matching the specified selector in the `Locator`'s subtree. It also accepts filter options,
+        similar to `locator.filter()` method.
 
         Parameters
         ----------
@@ -12648,6 +12788,36 @@ class Locator(SyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        left_of : Union[Locator, NoneType]
+            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
+            is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        right_of : Union[Locator, NoneType]
+            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        above : Union[Locator, NoneType]
+            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        below : Union[Locator, NoneType]
+            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        near : Union[Locator, NoneType]
+            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
+            queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -12656,7 +12826,14 @@ class Locator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector=selector,
+                has_text=has_text,
+                has=has._impl_obj if has else None,
+                left_of=left_of._impl_obj if left_of else None,
+                right_of=right_of._impl_obj if right_of else None,
+                above=above._impl_obj if above else None,
+                below=below._impl_obj if below else None,
+                near=near._impl_obj if near else None,
             )
         )
 
@@ -12736,13 +12913,18 @@ class Locator(SyncBase):
 
         return mapping.from_impl(self._impl_obj.nth(index=index))
 
-    def that(
+    def filter(
         self,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None
+        has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None
     ) -> "Locator":
-        """Locator.that
+        """Locator.filter
 
         This method narrows existing locator according to the options, for example filters by text.
 
@@ -12757,6 +12939,36 @@ class Locator(SyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        left_of : Union[Locator, NoneType]
+            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
+            is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        right_of : Union[Locator, NoneType]
+            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        above : Union[Locator, NoneType]
+            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        below : Union[Locator, NoneType]
+            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
+            locator is queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        near : Union[Locator, NoneType]
+            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
+            queried against the same root as the outer one. More details in
+            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -12764,7 +12976,15 @@ class Locator(SyncBase):
         """
 
         return mapping.from_impl(
-            self._impl_obj.that(has_text=has_text, has=has._impl_obj if has else None)
+            self._impl_obj.filter(
+                has_text=has_text,
+                has=has._impl_obj if has else None,
+                left_of=left_of._impl_obj if left_of else None,
+                right_of=right_of._impl_obj if right_of else None,
+                above=above._impl_obj if above else None,
+                below=below._impl_obj if below else None,
+                near=near._impl_obj if near else None,
+            )
         )
 
     def focus(self, *, timeout: float = None) -> NoneType:
@@ -13188,10 +13408,14 @@ class Locator(SyncBase):
     ) -> bytes:
         """Locator.screenshot
 
-        Returns the buffer with the captured screenshot.
+        This method captures a screenshot of the page, clipped to the size and position of a particular element matching the
+        locator. If the element is covered by other elements, it will not be actually visible on the screenshot. If the element
+        is a scrollable container, only the currently scrolled content will be visible on the screenshot.
 
         This method waits for the [actionability](https://playwright.dev/python/docs/actionability) checks, then scrolls element into view before taking a
         screenshot. If the element is detached from DOM, the method throws an error.
+
+        Returns the buffer with the captured screenshot.
 
         Parameters
         ----------
@@ -13398,9 +13622,9 @@ class Locator(SyncBase):
         """Locator.set_input_files
 
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-        are resolved relative to the the current working directory. For empty array, clears the selected files.
+        are resolved relative to the current working directory. For empty array, clears the selected files.
 
-        This method expects [`locator`] to point to an
+        This method expects `Locator` to point to an
         [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
         `<label>` element that has an associated
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
