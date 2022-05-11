@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from playwright._impl._api_types import Error
-from playwright._impl._visited_util import StrongDict
+from playwright._impl._visited_util import Map
 
 API_ATTR = "_pw_api_instance_"
 IMPL_ATTR = "_pw_impl_instance_"
@@ -37,7 +37,9 @@ class ImplToApiMapping:
     def register(self, impl_class: type, api_class: type) -> None:
         self._mapping[impl_class] = api_class
 
-    def from_maybe_impl(self, obj: Any, visited: StrongDict = StrongDict()) -> Any:
+    def from_maybe_impl(
+        self, obj: Any, visited: Map[Any, Union[List, Dict]] = Map()
+    ) -> Any:
         if not obj:
             return obj
         if isinstance(obj, dict):
@@ -81,7 +83,7 @@ class ImplToApiMapping:
     def from_impl_dict(self, map: Dict[str, Any]) -> Dict[str, Any]:
         return {name: self.from_impl(value) for name, value in map.items()}
 
-    def to_impl(self, obj: Any, visited: StrongDict = StrongDict()) -> Any:
+    def to_impl(self, obj: Any, visited: Map[Any, Union[List, Dict]] = Map()) -> Any:
         try:
             if not obj:
                 return obj

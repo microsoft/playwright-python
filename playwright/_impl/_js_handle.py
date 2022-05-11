@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._visited_util import StrongDict
+from playwright._impl._visited_util import Map
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
@@ -91,7 +91,7 @@ class JSHandle(ChannelOwner):
 
 
 def serialize_value(
-    value: Any, handles: List[JSHandle], visited: StrongDict = StrongDict()
+    value: Any, handles: List[JSHandle], visited: Map[Any, bool] = Map()
 ) -> Any:
     if isinstance(value, JSHandle):
         h = len(handles)

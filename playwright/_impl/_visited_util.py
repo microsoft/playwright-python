@@ -1,26 +1,31 @@
-from typing import Any, Dict, List
+from dataclasses import dataclass
+from typing import Dict, Generic, TypeVar
+
+K = TypeVar("K")
+V = TypeVar("V")
 
 
-class StrongDict:
-    """Like a Dict, but can use arbitrary values as keys."""
+@dataclass
+class Entry(Generic[K, V]):
+    public_id: int
+    key: K
+    value: V
 
+
+class Map(Generic[K, V]):
     def __init__(self) -> None:
-        self._entries: Dict[int, Any] = {}
-        # Python built-in |id| only guarantees uniqueness if objects have overlapping lifetimes,
-        # therefore we retain references to ensure overlapping lifetimes and validity of ids.
-        self._do_not_gc: List[Any] = []
+        self._entries: Dict[int, Entry] = {}
+        self._last_id = 0
 
-    def __contains__(self, item: Any) -> bool:
+    def __contains__(self, item: K) -> bool:
         return id(item) in self._entries
 
-    def __setitem__(self, idx: Any, value: Any) -> None:
-        self._do_not_gc.append(idx)
-        self._entries[id(idx)] = value
+    def __setitem__(self, idx: K, value: V) -> None:
+        self._last_id += 1
+        self._entries[id(idx)] = Entry(public_id=self._last_id, key=idx, value=value)
 
-    def __getitem__(self, obj: Any) -> Any:
-        return self._entries[id(obj)]
+    def __getitem__(self, obj: K) -> Entry:
+        return self._entries[id(obj)].value
 
-    def lookup_id(self, obj: Any) -> int:
-        _id = id(obj)
-        assert _id in self._entries
-        return _id
+    def lookup_id(self, obj: K) -> int:
+        return self._entries[id(obj)].public_id
