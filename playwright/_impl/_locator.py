@@ -88,13 +88,8 @@ class Locator:
                 escaped = escape_with_quotes(has_text, '"')
                 self._selector += f" >> :scope:has-text({escaped})"
 
-        if has:
-            if has._frame != frame:
-                raise Error('Inner "has" locator must belong to the same frame.')
-            self._selector += " >> has=" + json.dumps(has._selector)
-
         for inner in ["has", "left_of", "right_of", "above", "below", "near"]:
-            locator: "Locator" = cast("Locator", _params.get(inner))
+            locator: Optional["Locator"] = cast("Locator", _params.get(inner))
             if not locator:
                 continue
             if locator._frame != frame:
