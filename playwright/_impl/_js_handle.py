@@ -14,9 +14,10 @@
 
 import math
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._visited_util import StrongDict
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
@@ -89,12 +90,8 @@ class JSHandle(ChannelOwner):
         return parse_result(await self._channel.send("jsonValue"))
 
 
-def serialize_value(value: Any, handles: List[JSHandle]) -> Any:
-    return _inner_serialize_value(value=value, handles=handles, visited=set())
-
-
-def _inner_serialize_value(
-    value: Any, handles: List[JSHandle], visited: Set[int]
+def serialize_value(
+    value: Any, handles: List[JSHandle], visited: StrongDict = StrongDict()
 ) -> Any:
     if isinstance(value, JSHandle):
         h = len(handles)
@@ -120,25 +117,22 @@ def _inner_serialize_value(
     if isinstance(value, str):
         return {"s": value}
 
-    ref_id = id(value)
-    if ref_id in visited:
-        return dict(ref=ref_id)
-    else:
-        visited.add(ref_id)
+    if value in visited:
+        return dict(ref=visited.lookup_id(value))
 
     if isinstance(value, list):
-        result = []
-        for h in handles:
-            result.append(_inner_serialize_value(h, handles, visited))
-        return dict(a=result, id=ref_id)
+        visited[value] = True
+        a = []
+        for e in value:
+            a.append(serialize_value(e, handles, visited))
+        return dict(a=a, id=visited.lookup_id(value))
 
     if isinstance(value, dict):
-        result = []
+        visited[value] = True
+        o = []
         for name in value:
-            result.append(
-                {"k": name, "v": _inner_serialize_value(value[name], handles, visited)}
-            )
-        return dict(o=result, id=ref_id)
+            o.append({"k": name, "v": serialize_value(value[name], handles, visited)})
+        return dict(o=o, id=visited.lookup_id(value))
     return dict(v="undefined")
 
 
@@ -148,16 +142,13 @@ def serialize_argument(arg: Serializable = None) -> Any:
     return dict(value=value, handles=handles)
 
 
-def parse_value(value: Any) -> Any:
-    return _inner_parse_value(value=value, refs={})
-
-
-def _inner_parse_value(value: Any, refs: Dict[int, Any]) -> Any:
+def parse_value(value: Any, refs: Dict[int, Any] = {}) -> Any:
     if value is None:
         return None
     if isinstance(value, dict):
         if "ref" in value:
             return refs[value["ref"]]
+
         if "v" in value:
             v = value["v"]
             if v == "Infinity":
@@ -175,10 +166,10 @@ def _inner_parse_value(value: Any, refs: Dict[int, Any]) -> Any:
             return v
 
         if "a" in value:
-            a: List[Any] = []
+            a: List = []
             refs[value["id"]] = a
             for e in value["a"]:
-                a.append(_inner_parse_value(e, refs))
+                a.append(parse_value(e, refs))
             return a
 
         if "d" in value:
@@ -188,7 +179,7 @@ def _inner_parse_value(value: Any, refs: Dict[int, Any]) -> Any:
             o: Dict = {}
             refs[value["id"]] = o
             for e in value["o"]:
-                o[e["k"]] = _inner_parse_value(e["v"], refs)
+                o[e["k"]] = parse_value(e["v"], refs)
             return o
 
         if "n" in value:
