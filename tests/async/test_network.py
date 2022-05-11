@@ -18,6 +18,7 @@ from asyncio import Future
 from typing import Dict, List
 
 import pytest
+from flaky import flaky
 from twisted.web import http
 
 from playwright.async_api import Browser, Error, Page, Request, Route
@@ -719,6 +720,7 @@ async def test_set_extra_http_headers_should_work_with_extra_headers_from_browse
     assert request.getHeader("foo") == "bar"
 
 
+@flaky  # Flaky upstream https://devops.aslushnikov.com/flakiness2.html#filter_spec=should+override+extra+headers+from+browser+context&test_parameter_filters=%5B%5B%22browserName%22%2C%5B%5B%22webkit%22%2C%22include%22%5D%5D%5D%2C%5B%22video%22%2C%5B%5Btrue%2C%22exclude%22%5D%5D%5D%2C%5B%22platform%22%2C%5B%5B%22Windows%22%2C%22include%22%5D%5D%5D%5D
 async def test_set_extra_http_headers_should_override_extra_headers_from_browser_context(
     browser, server
 ):

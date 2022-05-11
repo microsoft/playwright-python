@@ -26,6 +26,7 @@ from typing import (
     Pattern,
     TypeVar,
     Union,
+    cast,
 )
 
 from playwright._impl._api_structures import (
@@ -66,7 +67,13 @@ class Locator:
         selector: str,
         has_text: Union[str, Pattern] = None,
         has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None,
     ) -> None:
+        _params = locals()
         self._frame = frame
         self._selector = selector
         self._loop = frame._loop
@@ -81,10 +88,18 @@ class Locator:
                 escaped = escape_with_quotes(has_text, '"')
                 self._selector += f" >> :scope:has-text({escaped})"
 
-        if has:
-            if has._frame != frame:
-                raise Error('Inner "has" locator must belong to the same frame.')
-            self._selector += " >> has=" + json.dumps(has._selector)
+        for inner in ["has", "left_of", "right_of", "above", "below", "near"]:
+            locator: Optional["Locator"] = cast("Locator", _params.get(inner))
+            if not locator:
+                continue
+            if locator._frame != frame:
+                raise Error(f'Inner "{inner}" locator must belong to the same frame.')
+            engine_name = inner
+            if engine_name == "left_of":
+                engine_name = "left-of"
+            elif engine_name == "right_of":
+                engine_name = "right-of"
+            self._selector += f" >> {engine_name}=" + json.dumps(locator._selector)
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
@@ -200,12 +215,22 @@ class Locator:
         selector: str,
         has_text: Union[str, Pattern] = None,
         has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None,
     ) -> "Locator":
         return Locator(
             self._frame,
             f"{self._selector} >> {selector}",
             has_text=has_text,
             has=has,
+            left_of=left_of,
+            right_of=right_of,
+            above=above,
+            below=below,
+            near=near,
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
@@ -236,16 +261,26 @@ class Locator:
     def nth(self, index: int) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> nth={index}")
 
-    def that(
+    def filter(
         self,
         has_text: Union[str, Pattern] = None,
         has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None,
     ) -> "Locator":
         return Locator(
             self._frame,
             self._selector,
             has_text=has_text,
             has=has,
+            left_of=left_of,
+            right_of=right_of,
+            above=above,
+            below=below,
+            near=near,
         )
 
     async def focus(self, timeout: float = None) -> None:
@@ -577,13 +612,26 @@ class FrameLocator:
         self._frame_selector = frame_selector
 
     def locator(
-        self, selector: str, has_text: Union[str, Pattern] = None, has: "Locator" = None
+        self,
+        selector: str,
+        has_text: Union[str, Pattern] = None,
+        has: "Locator" = None,
+        left_of: "Locator" = None,
+        right_of: "Locator" = None,
+        above: "Locator" = None,
+        below: "Locator" = None,
+        near: "Locator" = None,
     ) -> Locator:
         return Locator(
             self._frame,
             f"{self._frame_selector} >> control=enter-frame >> {selector}",
             has_text=has_text,
             has=has,
+            left_of=left_of,
+            right_of=right_of,
+            above=above,
+            below=below,
+            near=near,
         )
 
     def frame_locator(self, selector: str) -> "FrameLocator":

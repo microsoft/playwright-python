@@ -16,7 +16,7 @@ import json
 import math
 from datetime import datetime
 
-from playwright.async_api import Error, Page
+from playwright.async_api import Page
 
 
 async def test_jshandle_evaluate_work(page: Page):
@@ -65,15 +65,13 @@ async def test_jshandle_evaluate_accept_multiple_nested_handles(page):
     }
 
 
-async def test_jshandle_evaluate_throw_for_circular_objects(page):
+async def test_jshandle_evaluate_should_work_for_circular_objects(page):
     a = {"x": 1}
     a["y"] = a
-    error = None
-    try:
-        await page.evaluate("x => x", a)
-    except Error as e:
-        error = e
-    assert "Maximum argument depth exceeded" in error.message
+    result = await page.evaluate("a => { a.y.x += 1; return a; }", a)
+    assert result["x"] == 2
+    assert result["y"]["x"] == 2
+    assert result == result["y"]
 
 
 async def test_jshandle_evaluate_accept_same_nested_object_multiple_times(page):
@@ -178,14 +176,14 @@ async def test_jshandle_json_value_work_with_dates(page):
     assert json == datetime.fromisoformat("2020-05-27T01:31:38.506")
 
 
-async def test_jshandle_json_value_throw_for_circular_object(page):
-    handle = await page.evaluate_handle("window")
-    error = None
-    try:
-        await handle.json_value()
-    except Error as e:
-        error = e
-    assert "Argument is a circular structure" in error.message
+async def test_jshandle_json_value_should_work_for_circular_object(page):
+    handle = await page.evaluate_handle("const a = {}; a.b = a; a")
+    a = {}
+    a["b"] = a
+    result = await handle.json_value()
+    # Node test looks like the below, but assert isn't smart enough to handle this:
+    # assert await handle.json_value() == a
+    assert result["b"] == result
 
 
 async def test_jshandle_as_element_work(page):

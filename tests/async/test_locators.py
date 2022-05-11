@@ -738,16 +738,18 @@ async def test_locator_should_support_has_locator(page: Page, server: Server) ->
     ).to_have_count(1)
 
 
-async def test_locator_should_enforce_same_frame_for_has_locator(
+async def test_locator_should_enforce_same_frame_for_has_and_layout_locators(
     page: Page, server: Server
 ) -> None:
     await page.goto(server.PREFIX + "/frames/two-frames.html")
     child = page.frames[1]
-    with pytest.raises(Error) as exc_info:
-        page.locator("div", has=child.locator("span"))
-    assert (
-        'Inner "has" locator must belong to the same frame.' in exc_info.value.message
-    )
+    for option in ["has", "left_of", "right_of", "above", "below", "near"]:
+        with pytest.raises(Error) as exc_info:
+            page.locator("div", **{option: child.locator("span")})
+        assert (
+            f'Inner "{option}" locator must belong to the same frame.'
+            in exc_info.value.message
+        )
 
 
 async def test_locator_highlight_should_work(page: Page, server: Server) -> None:
@@ -761,25 +763,25 @@ async def test_should_support_locator_that(page: Page) -> None:
         "<section><div><span>hello</span></div><div><span>world</span></div></section>"
     )
 
-    await expect(page.locator("div").that(has_text="hello")).to_have_count(1)
+    await expect(page.locator("div").filter(has_text="hello")).to_have_count(1)
     await expect(
-        page.locator("div", has_text="hello").that(has_text="hello")
+        page.locator("div", has_text="hello").filter(has_text="hello")
     ).to_have_count(1)
     await expect(
-        page.locator("div", has_text="hello").that(has_text="world")
+        page.locator("div", has_text="hello").filter(has_text="world")
     ).to_have_count(0)
     await expect(
-        page.locator("section", has_text="hello").that(has_text="world")
+        page.locator("section", has_text="hello").filter(has_text="world")
     ).to_have_count(1)
     await expect(
-        page.locator("div").that(has_text="hello").locator("span")
+        page.locator("div").filter(has_text="hello").locator("span")
     ).to_have_count(1)
     await expect(
-        page.locator("div").that(has=page.locator("span", has_text="world"))
+        page.locator("div").filter(has=page.locator("span", has_text="world"))
     ).to_have_count(1)
-    await expect(page.locator("div").that(has=page.locator("span"))).to_have_count(2)
+    await expect(page.locator("div").filter(has=page.locator("span"))).to_have_count(2)
     await expect(
-        page.locator("div").that(
+        page.locator("div").filter(
             has=page.locator("span"),
             has_text="world",
         )

@@ -12,24 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 import pytest
 from flaky import flaky
 
 
-async def test_should_work(page, server, is_webkit, is_mac):
-    if is_webkit and is_mac:
-        pytest.skip()
+async def test_should_work(page, server):
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(server.EMPTY_PAGE)
     request = await request_info.value
     timing = request.timing
-    assert timing["domainLookupStart"] >= -1
-    assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
-    assert timing["connectStart"] >= timing["domainLookupEnd"]
-    assert timing["secureConnectionStart"] == -1
-    assert timing["connectEnd"] > timing["secureConnectionStart"]
+    verify_connections_timing_consistency(timing)
     assert timing["requestStart"] >= timing["connectEnd"]
-    assert timing["responseStart"] > timing["requestStart"]
+    assert timing["responseStart"] >= timing["requestStart"]
     assert timing["responseEnd"] >= timing["responseStart"]
     assert timing["responseEnd"] < 10000
 
@@ -41,22 +37,9 @@ async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webk
     requests = []
     page.on("requestfinished", lambda request: requests.append(request))
     await page.goto(server.PREFIX + "/one-style.html")
-    # TODO: https://github.com/microsoft/playwright/issues/12789
     assert len(requests) >= 2
     timing = requests[1].timing
-    if is_webkit and is_win:
-        # Curl does not reuse connections.
-        assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
-        assert timing["connectStart"] >= timing["domainLookupEnd"]
-        assert timing["secureConnectionStart"] == -1
-        assert timing["connectEnd"] > timing["secureConnectionStart"]
-    else:
-        assert timing["domainLookupEnd"] == 0 or timing["domainLookupEnd"] == -1
-        assert timing["connectStart"] == 0 or timing["connectStart"] == -1
-        assert timing["connectEnd"] == 0 or timing["connectEnd"] == -1
-        assert timing["secureConnectionStart"] == -1
-
-    assert timing["domainLookupStart"] == 0 or timing["domainLookupStart"] == -1
+    verify_connections_timing_consistency(timing)
     assert timing["requestStart"] >= 0
     assert timing["responseStart"] > timing["requestStart"]
     assert timing["responseEnd"] >= timing["responseStart"]
@@ -64,23 +47,15 @@ async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webk
 
 
 @flaky  # Upstream flaky
-async def test_should_work_for_ssl(browser, https_server, is_mac, is_webkit):
-    if is_webkit and is_mac:
-        pytest.skip()
+async def test_should_work_for_ssl(browser, https_server):
     page = await browser.new_page(ignore_https_errors=True)
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(https_server.EMPTY_PAGE)
     request = await request_info.value
     timing = request.timing
-    if not (is_webkit and is_mac):
-        assert timing["domainLookupStart"] >= -1
-        assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
-        assert timing["connectStart"] >= timing["domainLookupEnd"]
-        assert timing["secureConnectionStart"] > timing["connectStart"]
-        assert timing["connectEnd"] > timing["secureConnectionStart"]
-        assert timing["requestStart"] >= timing["connectEnd"]
-
-    assert timing["responseStart"] > timing["requestStart"]
+    verify_connections_timing_consistency(timing)
+    assert timing["requestStart"] >= timing["connectEnd"]
+    assert timing["responseStart"] >= timing["requestStart"]
     assert timing["responseEnd"] >= timing["responseStart"]
     assert timing["responseEnd"] < 10000
     await page.close()
@@ -100,23 +75,27 @@ async def test_should_work_for_redirect(page, server):
     assert responses[1].url == server.PREFIX + "/empty.html"
 
     timing1 = responses[0].request.timing
-    assert timing1["domainLookupStart"] >= -1
-    assert timing1["domainLookupEnd"] >= timing1["domainLookupStart"]
-    assert timing1["connectStart"] >= timing1["domainLookupEnd"]
-    assert timing1["secureConnectionStart"] == -1
-    assert timing1["connectEnd"] > timing1["secureConnectionStart"]
+    verify_connections_timing_consistency(timing1)
     assert timing1["requestStart"] >= timing1["connectEnd"]
     assert timing1["responseStart"] > timing1["requestStart"]
     assert timing1["responseEnd"] >= timing1["responseStart"]
     assert timing1["responseEnd"] < 10000
 
     timing2 = responses[1].request.timing
-    assert timing2["domainLookupStart"] == -1
-    assert timing2["domainLookupEnd"] == -1
-    assert timing2["connectStart"] == -1
-    assert timing2["secureConnectionStart"] == -1
-    assert timing2["connectEnd"] == -1
+    verify_connections_timing_consistency(timing2)
     assert timing2["requestStart"] >= 0
     assert timing2["responseStart"] > timing2["requestStart"]
     assert timing2["responseEnd"] >= timing2["responseStart"]
     assert timing2["responseEnd"] < 10000
+
+
+def verify_timing_value(value: float, previous: float) -> None:
+    assert value == -1 or value > 0 and value >= previous
+
+
+def verify_connections_timing_consistency(timing: Dict) -> None:
+    verify_timing_value(timing["domainLookupStart"], -1)
+    verify_timing_value(timing["domainLookupEnd"], timing["domainLookupStart"])
+    verify_timing_value(timing["connectStart"], timing["domainLookupEnd"])
+    verify_timing_value(timing["secureConnectionStart"], timing["connectStart"])
+    verify_timing_value(timing["connectEnd"], timing["secureConnectionStart"])

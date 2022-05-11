@@ -13,9 +13,10 @@
 # limitations under the License.
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from playwright._impl._api_types import Error
+from playwright._impl._map import Map
 
 API_ATTR = "_pw_api_instance_"
 IMPL_ATTR = "_pw_impl_instance_"
@@ -36,13 +37,27 @@ class ImplToApiMapping:
     def register(self, impl_class: type, api_class: type) -> None:
         self._mapping[impl_class] = api_class
 
-    def from_maybe_impl(self, obj: Any) -> Any:
+    def from_maybe_impl(
+        self, obj: Any, visited: Map[Any, Union[List, Dict]] = Map()
+    ) -> Any:
         if not obj:
             return obj
         if isinstance(obj, dict):
-            return {name: self.from_maybe_impl(value) for name, value in obj.items()}
+            if obj in visited:
+                return visited[obj]
+            o: Dict = {}
+            visited[obj] = o
+            for name, value in obj.items():
+                o[name] = self.from_maybe_impl(value, visited)
+            return o
         if isinstance(obj, list):
-            return [self.from_maybe_impl(item) for item in obj]
+            if obj in visited:
+                return visited[obj]
+            a: List = []
+            visited[obj] = a
+            for item in obj:
+                a.append(self.from_maybe_impl(item, visited))
+            return a
         api_class = self._mapping.get(type(obj))
         if api_class:
             api_instance = getattr(obj, API_ATTR, None)
@@ -68,14 +83,26 @@ class ImplToApiMapping:
     def from_impl_dict(self, map: Dict[str, Any]) -> Dict[str, Any]:
         return {name: self.from_impl(value) for name, value in map.items()}
 
-    def to_impl(self, obj: Any) -> Any:
+    def to_impl(self, obj: Any, visited: Map[Any, Union[List, Dict]] = Map()) -> Any:
         try:
             if not obj:
                 return obj
             if isinstance(obj, dict):
-                return {name: self.to_impl(value) for name, value in obj.items()}
+                if obj in visited:
+                    return visited[obj]
+                o: Dict = {}
+                visited[obj] = o
+                for name, value in obj.items():
+                    o[name] = self.to_impl(value, visited)
+                return o
             if isinstance(obj, list):
-                return [self.to_impl(item) for item in obj]
+                if obj in visited:
+                    return visited[obj]
+                a: List = []
+                visited[obj] = a
+                for item in obj:
+                    a.append(self.to_impl(item, visited))
+                return a
             if isinstance(obj, ImplWrapper):
                 return obj._impl_obj
             return obj
