@@ -13,17 +13,30 @@
 # limitations under the License.
 
 import math
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._visited_util import Map
+from playwright._impl._map import Map
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._element_handle import ElementHandle
 
 
 Serializable = Any
+
+
+@dataclass
+class VisitorInfo:
+    visited: Map[Any, int] = Map()
+    last_id: int = 0
+
+    def visit(self, obj: Any) -> int:
+        assert obj not in self.visited
+        self.last_id += 1
+        self.visited[obj] = self.last_id
+        return self.last_id
 
 
 class JSHandle(ChannelOwner):
@@ -91,7 +104,7 @@ class JSHandle(ChannelOwner):
 
 
 def serialize_value(
-    value: Any, handles: List[JSHandle], visited: Map[Any, bool] = Map()
+    value: Any, handles: List[JSHandle], visitor_info: VisitorInfo = VisitorInfo()
 ) -> Any:
     if isinstance(value, JSHandle):
         h = len(handles)
@@ -117,22 +130,24 @@ def serialize_value(
     if isinstance(value, str):
         return {"s": value}
 
-    if value in visited:
-        return dict(ref=visited.lookup_id(value))
+    if value in visitor_info.visited:
+        return dict(ref=visitor_info.visited[value])
 
     if isinstance(value, list):
-        visited[value] = True
+        id = visitor_info.visit(value)
         a = []
         for e in value:
-            a.append(serialize_value(e, handles, visited))
-        return dict(a=a, id=visited.lookup_id(value))
+            a.append(serialize_value(e, handles, visitor_info))
+        return dict(a=a, id=id)
 
     if isinstance(value, dict):
-        visited[value] = True
+        id = visitor_info.visit(value)
         o = []
         for name in value:
-            o.append({"k": name, "v": serialize_value(value[name], handles, visited)})
-        return dict(o=o, id=visited.lookup_id(value))
+            o.append(
+                {"k": name, "v": serialize_value(value[name], handles, visitor_info)}
+            )
+        return dict(o=o, id=id)
     return dict(v="undefined")
 
 
