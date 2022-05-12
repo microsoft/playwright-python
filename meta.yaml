@@ -21,6 +21,7 @@ requirements:
     - pip
     - curl
     - setuptools_scm
+    - auditwheel
   run:
     - python
     - greenlet ==1.1.2
