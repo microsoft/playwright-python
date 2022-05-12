@@ -243,12 +243,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
 
     assert await page.eval_on_selector("div:right-of(#id6)", "e => e.id") == "id7"
     assert await page.eval_on_selector('div >> right-of="#id6"', "e => e.id") == "id7"
-    assert (
-        await page.locator("div", right_of=page.locator("#id6")).first.evaluate(
-            "e => e.id"
-        )
-        == "id7"
-    )
     assert await page.eval_on_selector("div:right-of(#id1)", "e => e.id") == "id2"
     assert await page.eval_on_selector('div >> right-of="#id1"', "e => e.id") == "id2"
     assert await page.eval_on_selector("div:right-of(#id3)", "e => e.id") == "id4"
@@ -270,12 +264,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
             'div >> right-of="#id3"', "els => els.map(e => e.id).join(',')"
         )
         == "id4,id2,id5,id7,id8,id9"
-    )
-    assert (
-        await page.locator("div", right_of=page.locator("#id3"))
-        .locator("span")
-        .evaluate_all("els => els.map(e => e.textContent).join(',')")
-        == "4,2,5,7,8,9"
     )
     assert (
         await page.eval_on_selector_all(
@@ -318,12 +306,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
 
     assert await page.eval_on_selector("div:left-of(#id2)", "e => e.id") == "id1"
     assert await page.eval_on_selector('div >> left-of="#id2"', "e => e.id") == "id1"
-    assert (
-        await page.locator("div", left_of=page.locator("#id2")).first.evaluate(
-            "e => e.id"
-        )
-        == "id1"
-    )
     assert await page.query_selector("div:left-of(#id0)") is None
     assert await page.query_selector('div >> left-of="#id0"') is None
     assert await page.eval_on_selector("div:left-of(#id5)", "e => e.id") == "id0"
@@ -366,12 +348,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
 
     assert await page.eval_on_selector("div:above(#id0)", "e => e.id") == "id3"
     assert await page.eval_on_selector('div >> above="#id0"', "e => e.id") == "id3"
-    assert (
-        await page.locator("div", above=page.locator("#id0")).first.evaluate(
-            "e => e.id"
-        )
-        == "id3"
-    )
     assert await page.eval_on_selector("div:above(#id5)", "e => e.id") == "id4"
     assert await page.eval_on_selector('div >> above="#id5"', "e => e.id") == "id4"
     assert await page.eval_on_selector("div:above(#id7)", "e => e.id") == "id5"
@@ -409,12 +385,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
 
     assert await page.eval_on_selector("div:below(#id4)", "e => e.id") == "id5"
     assert await page.eval_on_selector('div >> below="#id4"', "e => e.id") == "id5"
-    assert (
-        await page.locator("div", below=page.locator("#id4")).first.evaluate(
-            "e => e.id"
-        )
-        == "id5"
-    )
     assert await page.eval_on_selector("div:below(#id3)", "e => e.id") == "id0"
     assert await page.eval_on_selector('div >> below="#id3"', "e => e.id") == "id0"
     assert await page.eval_on_selector("div:below(#id2)", "e => e.id") == "id4"
@@ -454,10 +424,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
 
     assert await page.eval_on_selector("div:near(#id0)", "e => e.id") == "id3"
     assert await page.eval_on_selector('div >> near="#id0"', "e => e.id") == "id3"
-    assert (
-        await page.locator("div", near=page.locator("#id0")).first.evaluate("e => e.id")
-        == "id3"
-    )
     assert (
         await page.eval_on_selector_all(
             "div:near(#id7)", "els => els.map(e => e.id).join(',')"
@@ -536,12 +502,6 @@ async def test_should_work_with_layout_selectors(page: Page) -> None:
     )
     assert (
         await page.eval_on_selector('div >> below="#id5" >> above="#id8"', "e => e.id")
-        == "id7"
-    )
-    assert (
-        await page.locator(
-            "div", below=page.locator("#id5"), above=page.locator("#id8")
-        ).first.evaluate("e => e.id")
         == "id7"
     )
 
