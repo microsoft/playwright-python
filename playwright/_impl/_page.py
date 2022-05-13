@@ -712,22 +712,8 @@ class Page(ChannelOwner):
         selector: str,
         has_text: Union[str, Pattern] = None,
         has: "Locator" = None,
-        left_of: "Locator" = None,
-        right_of: "Locator" = None,
-        above: "Locator" = None,
-        below: "Locator" = None,
-        near: "Locator" = None,
     ) -> "Locator":
-        return self._main_frame.locator(
-            selector,
-            has_text=has_text,
-            has=has,
-            left_of=left_of,
-            right_of=right_of,
-            above=above,
-            below=below,
-            near=near,
-        )
+        return self._main_frame.locator(selector, has_text=has_text, has=has)
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return self.main_frame.frame_locator(selector)

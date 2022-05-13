@@ -4356,12 +4356,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None,
-        left_of: "Locator" = None,
-        right_of: "Locator" = None,
-        above: "Locator" = None,
-        below: "Locator" = None,
-        near: "Locator" = None
+        has: "Locator" = None
     ) -> "Locator":
         """Frame.locator
 
@@ -4384,36 +4379,6 @@ class Frame(AsyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        left_of : Union[Locator, NoneType]
-            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
-            is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        right_of : Union[Locator, NoneType]
-            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        above : Union[Locator, NoneType]
-            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        below : Union[Locator, NoneType]
-            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        near : Union[Locator, NoneType]
-            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
-            queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -4422,14 +4387,7 @@ class Frame(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector,
-                has_text=has_text,
-                has=has._impl_obj if has else None,
-                left_of=left_of._impl_obj if left_of else None,
-                right_of=right_of._impl_obj if right_of else None,
-                above=above._impl_obj if above else None,
-                below=below._impl_obj if below else None,
-                near=near._impl_obj if near else None,
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
             )
         )
 
@@ -5384,12 +5342,7 @@ class FrameLocator(AsyncBase):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None,
-        left_of: "Locator" = None,
-        right_of: "Locator" = None,
-        above: "Locator" = None,
-        below: "Locator" = None,
-        near: "Locator" = None
+        has: "Locator" = None
     ) -> "Locator":
         """FrameLocator.locator
 
@@ -5408,36 +5361,6 @@ class FrameLocator(AsyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        left_of : Union[Locator, NoneType]
-            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
-            is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        right_of : Union[Locator, NoneType]
-            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        above : Union[Locator, NoneType]
-            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        below : Union[Locator, NoneType]
-            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        near : Union[Locator, NoneType]
-            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
-            queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -5446,14 +5369,7 @@ class FrameLocator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector,
-                has_text=has_text,
-                has=has._impl_obj if has else None,
-                left_of=left_of._impl_obj if left_of else None,
-                right_of=right_of._impl_obj if right_of else None,
-                above=above._impl_obj if above else None,
-                below=below._impl_obj if below else None,
-                near=near._impl_obj if near else None,
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
             )
         )
 
@@ -8640,12 +8556,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None,
-        left_of: "Locator" = None,
-        right_of: "Locator" = None,
-        above: "Locator" = None,
-        below: "Locator" = None,
-        near: "Locator" = None
+        has: "Locator" = None
     ) -> "Locator":
         """Page.locator
 
@@ -8670,36 +8581,6 @@ class Page(AsyncContextManager):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        left_of : Union[Locator, NoneType]
-            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
-            is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        right_of : Union[Locator, NoneType]
-            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        above : Union[Locator, NoneType]
-            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        below : Union[Locator, NoneType]
-            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        near : Union[Locator, NoneType]
-            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
-            queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -8708,14 +8589,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector,
-                has_text=has_text,
-                has=has._impl_obj if has else None,
-                left_of=left_of._impl_obj if left_of else None,
-                right_of=right_of._impl_obj if right_of else None,
-                above=above._impl_obj if above else None,
-                below=below._impl_obj if below else None,
-                near=near._impl_obj if near else None,
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
             )
         )
 
@@ -13029,12 +12903,7 @@ class Locator(AsyncBase):
         selector: str,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None,
-        left_of: "Locator" = None,
-        right_of: "Locator" = None,
-        above: "Locator" = None,
-        below: "Locator" = None,
-        near: "Locator" = None
+        has: "Locator" = None
     ) -> "Locator":
         """Locator.locator
 
@@ -13054,36 +12923,6 @@ class Locator(AsyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        left_of : Union[Locator, NoneType]
-            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
-            is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        right_of : Union[Locator, NoneType]
-            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        above : Union[Locator, NoneType]
-            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        below : Union[Locator, NoneType]
-            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        near : Union[Locator, NoneType]
-            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
-            queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -13092,14 +12931,7 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector,
-                has_text=has_text,
-                has=has._impl_obj if has else None,
-                left_of=left_of._impl_obj if left_of else None,
-                right_of=right_of._impl_obj if right_of else None,
-                above=above._impl_obj if above else None,
-                below=below._impl_obj if below else None,
-                near=near._impl_obj if near else None,
+                selector=selector, has_text=has_text, has=has._impl_obj if has else None
             )
         )
 
@@ -13185,12 +13017,7 @@ class Locator(AsyncBase):
         self,
         *,
         has_text: typing.Union[str, typing.Pattern] = None,
-        has: "Locator" = None,
-        left_of: "Locator" = None,
-        right_of: "Locator" = None,
-        above: "Locator" = None,
-        below: "Locator" = None,
-        near: "Locator" = None
+        has: "Locator" = None
     ) -> "Locator":
         """Locator.filter
 
@@ -13207,36 +13034,6 @@ class Locator(AsyncBase):
             For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        left_of : Union[Locator, NoneType]
-            Matches elements that are to the left of any element matching the inner locator, at any vertical position. Inner locator
-            is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        right_of : Union[Locator, NoneType]
-            Matches elements that are to the right of any element matching the inner locator, at any vertical position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        above : Union[Locator, NoneType]
-            Matches elements that are above any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        below : Union[Locator, NoneType]
-            Matches elements that are below any of the elements matching the inner locator, at any horizontal position. Inner
-            locator is queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        near : Union[Locator, NoneType]
-            Matches elements that are near (<= 50 css pixels) any of the elements matching the inner locator. Inner locator is
-            queried against the same root as the outer one. More details in
-            [layout selectors](../selectors.md#selecting-elements-based-on-layout) guide.
-
-            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
         Returns
         -------
@@ -13244,15 +13041,7 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_impl(
-            self._impl_obj.filter(
-                has_text=has_text,
-                has=has._impl_obj if has else None,
-                left_of=left_of._impl_obj if left_of else None,
-                right_of=right_of._impl_obj if right_of else None,
-                above=above._impl_obj if above else None,
-                below=below._impl_obj if below else None,
-                near=near._impl_obj if near else None,
-            )
+            self._impl_obj.filter(has_text=has_text, has=has._impl_obj if has else None)
         )
 
     async def focus(self, *, timeout: float = None) -> NoneType:
