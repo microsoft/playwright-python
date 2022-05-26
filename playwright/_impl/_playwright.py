@@ -41,7 +41,7 @@ class Playwright(ChannelOwner):
         self.webkit = from_channel(initializer["webkit"])
         self.webkit._playwright = self
 
-        self.selectors = Selectors(self._loop)
+        self.selectors = Selectors(self._loop, self._dispatcher_fiber)
         selectors_owner: SelectorsOwner = from_channel(initializer["selectors"])
         self.selectors._add_channel(selectors_owner)
 

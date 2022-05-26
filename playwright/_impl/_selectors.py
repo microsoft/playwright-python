@@ -22,10 +22,11 @@ from playwright._impl._helper import async_readfile
 
 
 class Selectors:
-    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop, dispatcher_fiber: Any) -> None:
         self._loop = loop
         self._channels: Set[SelectorsOwner] = set()
         self._registrations: List[Dict] = []
+        self._dispatcher_fiber = dispatcher_fiber
 
     async def register(
         self,

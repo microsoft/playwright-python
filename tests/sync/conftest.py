@@ -23,6 +23,7 @@ from playwright.sync_api import (
     BrowserType,
     Page,
     Playwright,
+    Selectors,
     sync_playwright,
 )
 
@@ -77,3 +78,8 @@ def page(context: BrowserContext) -> Generator[Page, None, None]:
     page = context.new_page()
     yield page
     page.close()
+
+
+@pytest.fixture(scope="session")
+def selectors(playwright: Playwright) -> Selectors:
+    return playwright.selectors
