@@ -85,15 +85,17 @@ async def test_should_emit_frame_events(page, ws_server):
 
 
 async def test_should_emit_binary_frame_events(page, ws_server):
+    done_task = asyncio.Future()
     sent = []
     received = []
 
     def on_web_socket(ws):
         ws.on("framesent", lambda payload: sent.append(payload))
         ws.on("framereceived", lambda payload: received.append(payload))
+        ws.on("close", lambda: done_task.set_result(None))
 
     page.on("websocket", on_web_socket)
-    async with page.expect_event("websocket") as ws_info:
+    async with page.expect_event("websocket"):
         await page.evaluate(
             """port => {
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
@@ -107,9 +109,7 @@ async def test_should_emit_binary_frame_events(page, ws_server):
         }""",
             ws_server.PORT,
         )
-    ws = await ws_info.value
-    if not ws.is_closed():
-        await ws.wait_for_event("close")
+    await done_task
     assert sent == [b"\x00\x01\x02\x03\x04", "echo-bin"]
     assert received == ["incoming", b"\x04\x02"]
 
