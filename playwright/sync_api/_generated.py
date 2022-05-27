@@ -2540,7 +2540,9 @@ class ElementHandle(JSHandle):
         scale : Union["css", "device", NoneType]
             When set to `"css"`, screenshot will have a single pixel per each css pixel on the page. For high-dpi devices, this will
             keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenhots of
-            high-dpi devices will be twice as large or even larger. Defaults to `"device"`.
+            high-dpi devices will be twice as large or even larger.
+
+            Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
             `#FF00FF` that completely covers its bounding box.
@@ -7979,7 +7981,9 @@ class Page(SyncContextManager):
         scale : Union["css", "device", NoneType]
             When set to `"css"`, screenshot will have a single pixel per each css pixel on the page. For high-dpi devices, this will
             keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenhots of
-            high-dpi devices will be twice as large or even larger. Defaults to `"device"`.
+            high-dpi devices will be twice as large or even larger.
+
+            Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
             `#FF00FF` that completely covers its bounding box.
@@ -13235,7 +13239,9 @@ class Locator(SyncBase):
         scale : Union["css", "device", NoneType]
             When set to `"css"`, screenshot will have a single pixel per each css pixel on the page. For high-dpi devices, this will
             keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenhots of
-            high-dpi devices will be twice as large or even larger. Defaults to `"device"`.
+            high-dpi devices will be twice as large or even larger.
+
+            Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
             `#FF00FF` that completely covers its bounding box.
