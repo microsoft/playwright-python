@@ -251,7 +251,7 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
     assert len(failed_requests) == 1
     failed_request = failed_requests[0]
     if is_webkit:
-        assert failed_request.failure == "Request intercepted"
+        assert failed_request.failure == "Blocked by Web Inspector"
     elif is_firefox:
         assert failed_request.failure == "NS_ERROR_OFFLINE"
     else:
@@ -277,7 +277,7 @@ async def test_page_route_should_fail_navigation_when_aborting_main_resource(
         await page.goto(server.EMPTY_PAGE)
     assert exc
     if is_webkit:
-        assert "Request intercepted" in exc.value.message
+        assert "Blocked by Web Inspector" in exc.value.message
     elif is_firefox:
         assert "NS_ERROR_FAILURE" in exc.value.message
     else:
