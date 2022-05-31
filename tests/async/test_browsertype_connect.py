@@ -282,7 +282,7 @@ async def test_should_upload_large_file(
 
     [request, _] = await asyncio.gather(
         server.wait_for_request("/upload"),
-        page.click("input[type=submit]"),
+        page.click("input[type=submit]", timeout=60_000),
     )
 
     contents = request.args[b"file1"][0]
