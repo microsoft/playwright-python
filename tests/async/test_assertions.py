@@ -27,16 +27,16 @@ async def test_assertions_page_to_have_title(page: Page, server: Server) -> None
     await expect(page).to_have_title("new title")
     await expect(page).to_have_title(re.compile("new title"))
     with pytest.raises(AssertionError):
-        await expect(page).to_have_title("not the current title", timeout=100)
+        await expect(page).to_have_title("not the current title", timeout=750)
     with pytest.raises(AssertionError):
         await expect(page).to_have_title(
-            re.compile("not the current title"), timeout=100
+            re.compile("not the current title"), timeout=750
         )
     with pytest.raises(AssertionError):
-        await expect(page).not_to_have_title(re.compile("new title"), timeout=100)
+        await expect(page).not_to_have_title(re.compile("new title"), timeout=750)
     with pytest.raises(AssertionError):
-        await expect(page).not_to_have_title("new title", timeout=100)
-    await expect(page).not_to_have_title("great title", timeout=100)
+        await expect(page).not_to_have_title("new title", timeout=750)
+    await expect(page).not_to_have_title("great title", timeout=750)
     await page.evaluate(
         """
         setTimeout(() => {
@@ -53,9 +53,9 @@ async def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
     await expect(page).to_have_url(server.EMPTY_PAGE)
     await expect(page).to_have_url(re.compile(r".*/empty\.html"))
     with pytest.raises(AssertionError):
-        await expect(page).to_have_url("nooooo", timeout=100)
+        await expect(page).to_have_url("nooooo", timeout=750)
     with pytest.raises(AssertionError):
-        await expect(page).to_have_url(re.compile("not-the-url"), timeout=100)
+        await expect(page).to_have_url(re.compile("not-the-url"), timeout=750)
     await page.evaluate(
         """
         setTimeout(() => {
@@ -64,13 +64,13 @@ async def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
     """
     )
     await expect(page).to_have_url(server.PREFIX + "/grid.html")
-    await expect(page).not_to_have_url(server.EMPTY_PAGE, timeout=100)
+    await expect(page).not_to_have_url(server.EMPTY_PAGE, timeout=750)
     with pytest.raises(AssertionError):
-        await expect(page).not_to_have_url(re.compile(r".*/grid\.html"), timeout=100)
+        await expect(page).not_to_have_url(re.compile(r".*/grid\.html"), timeout=750)
     with pytest.raises(AssertionError):
-        await expect(page).not_to_have_url(server.PREFIX + "/grid.html", timeout=100)
+        await expect(page).not_to_have_url(server.PREFIX + "/grid.html", timeout=750)
     await expect(page).to_have_url(re.compile(r".*/grid\.html"))
-    await expect(page).not_to_have_url("**/empty.html", timeout=100)
+    await expect(page).not_to_have_url("**/empty.html", timeout=750)
 
 
 async def test_assertions_page_to_have_url_with_base_url(
