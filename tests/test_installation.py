@@ -20,7 +20,7 @@ from pathlib import Path
 from venv import EnvBuilder
 
 
-def test_install(tmp_path: Path) -> None:
+def test_install(tmp_path: Path, browser_name: str) -> None:
     env = EnvBuilder(with_pip=True)
     env.create(env_dir=tmp_path)
     context = env.ensure_directories(tmp_path)
@@ -43,10 +43,10 @@ def test_install(tmp_path: Path) -> None:
     environ = os.environ.copy()
     environ["PLAYWRIGHT_BROWSERS_PATH"] = str(tmp_path)
     subprocess.check_output(
-        [context.env_exe, "-m", "playwright", "install"], env=environ
+        [context.env_exe, "-m", "playwright", "install", browser_name], env=environ
     )
     shutil.copyfile(root / "tests" / "assets" / "client.py", tmp_path / "main.py")
-    subprocess.check_output([context.env_exe, str(tmp_path / "main.py")], env=environ)
-    assert (tmp_path / "chromium.png").exists()
-    assert (tmp_path / "firefox.png").exists()
-    assert (tmp_path / "webkit.png").exists()
+    subprocess.check_output(
+        [context.env_exe, str(tmp_path / "main.py"), browser_name], env=environ
+    )
+    assert (tmp_path / f"{browser_name}.png").exists()
