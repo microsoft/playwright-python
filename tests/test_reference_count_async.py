@@ -23,9 +23,9 @@ from tests.server import Server
 
 
 @pytest.mark.asyncio
-async def test_memory_objects(server: Server) -> None:
+async def test_memory_objects(server: Server, browser_name: str) -> None:
     async with async_playwright() as p:
-        browser = await p.chromium.launch()
+        browser = await p[browser_name].launch()
         page = await browser.new_page()
         await page.goto(server.EMPTY_PAGE)
 
