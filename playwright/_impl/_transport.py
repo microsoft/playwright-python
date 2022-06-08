@@ -210,7 +210,9 @@ class WebSocketTransport(AsyncIOEventEmitter, Transport):
     async def connect(self) -> None:
         try:
             self._connection = await websocket_connect(
-                self.ws_endpoint, extra_headers=self.headers
+                self.ws_endpoint,
+                extra_headers=self.headers,
+                max_size=256 * 1024 * 1024,  # 256Mb
             )
         except Exception as exc:
             self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
