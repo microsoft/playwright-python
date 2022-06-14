@@ -309,51 +309,6 @@ async def test_should_restore_state_from_userDataDir(
     await browser_context3.close()
 
 
-async def test_should_restore_cookies_from_userDataDir(
-    browser_type,
-    launch_arguments,
-    tmp_path_factory,
-    server,
-    is_chromium,
-    is_win,
-    is_mac,
-):
-    if is_chromium and (is_win or is_mac):
-        pytest.skip()
-    userDataDir = tmp_path_factory.mktemp("1")
-    browser_context = await browser_type.launch_persistent_context(
-        userDataDir, **launch_arguments
-    )
-    page = await browser_context.new_page()
-    await page.goto(server.EMPTY_PAGE)
-    document_cookie = await page.evaluate(
-        """() => {
-    document.cookie = 'doSomethingOnlyOnce=true; expires=Fri, 31 Dec 9999 23:59:59 GMT';
-    return document.cookie;
-  }"""
-    )
-
-    assert document_cookie == "doSomethingOnlyOnce=true"
-    await browser_context.close()
-
-    browser_context2 = await browser_type.launch_persistent_context(
-        userDataDir, **launch_arguments
-    )
-    page2 = await browser_context2.new_page()
-    await page2.goto(server.EMPTY_PAGE)
-    assert await page2.evaluate("() => document.cookie") == "doSomethingOnlyOnce=true"
-    await browser_context2.close()
-
-    userDataDir2 = tmp_path_factory.mktemp("2")
-    browser_context3 = await browser_type.launch_persistent_context(
-        userDataDir2, **launch_arguments
-    )
-    page3 = await browser_context3.new_page()
-    await page3.goto(server.EMPTY_PAGE)
-    assert await page3.evaluate("() => document.cookie") != "doSomethingOnlyOnce=true"
-    await browser_context3.close()
-
-
 async def test_should_have_default_url_when_launching_browser(launch_persistent):
     (page, context) = await launch_persistent()
     urls = list(map(lambda p: p.url, context.pages))
