@@ -103,8 +103,8 @@ async def test_should_collect_trace_with_resources_but_no_js(
     assert events_have_entry(events, "Keyboard.insert_text") is True
     assert events_have_entry(events, "Page.close") is True
 
-    assert len(list(filter(lambda e: e["type"] == "frame-snapshot", events))) > 1
-    assert len(list(filter(lambda e: e["type"] == "screencast-frame", events))) > 1
+    assert len(list(filter(lambda e: e["type"] == "frame-snapshot", events))) >= 1
+    assert len(list(filter(lambda e: e["type"] == "screencast-frame", events))) >= 1
     style = list(
         filter(
             lambda e: e["type"] == "resource-snapshot"

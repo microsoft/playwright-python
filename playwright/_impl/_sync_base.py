@@ -14,6 +14,7 @@
 
 import asyncio
 import inspect
+import traceback
 from types import TracebackType
 from typing import Any, Awaitable, Callable, Dict, Generic, List, Type, TypeVar, cast
 
@@ -79,6 +80,7 @@ class SyncBase(ImplWrapper):
         g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)
         setattr(task, "__pw_stack__", inspect.stack())
+        setattr(task, "__pw_stack_trace__", traceback.extract_stack())
 
         task.add_done_callback(lambda _: g_self.switch())
         while not task.done():

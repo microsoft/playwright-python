@@ -141,7 +141,7 @@ class ChannelOwner(AsyncIOEventEmitter):
 
 class ProtocolCallback:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
-        self.stack_trace: traceback.StackSummary = traceback.StackSummary()
+        self.stack_trace: traceback.StackSummary
         self.future = loop.create_future()
         # The outer task can get cancelled by the user, this forwards the cancellation to the inner task.
         current_task = asyncio.current_task()
@@ -252,10 +252,10 @@ class Connection(EventEmitter):
         id = self._last_id
         callback = ProtocolCallback(self._loop)
         task = asyncio.current_task(self._loop)
-        stack_trace: Optional[traceback.StackSummary] = getattr(
-            task, "__pw_stack_trace__", None
+        callback.stack_trace = cast(
+            traceback.StackSummary,
+            getattr(task, "__pw_stack_trace__", traceback.extract_stack()),
         )
-        callback.stack_trace = stack_trace or traceback.extract_stack()
         self._callbacks[id] = callback
         message = {
             "id": id,
