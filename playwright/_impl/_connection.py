@@ -13,14 +13,27 @@
 # limitations under the License.
 
 import asyncio
+import contextvars
+import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Union,
+    cast,
+)
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter, EventEmitter
 
+import playwright
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
@@ -36,10 +49,21 @@ class Channel(AsyncIOEventEmitter):
         self._object: Optional[ChannelOwner] = None
 
     async def send(self, method: str, params: Dict = None) -> Any:
-        return await self.inner_send(method, params, False)
+        return await self._connection.wrap_api_call(
+            lambda: self.inner_send(method, params, False)
+        )
 
     async def send_return_as_dict(self, method: str, params: Dict = None) -> Any:
-        return await self.inner_send(method, params, True)
+        return await self._connection.wrap_api_call(
+            lambda: self.inner_send(method, params, True)
+        )
+
+    def send_no_reply(self, method: str, params: Dict = None) -> None:
+        self._connection.wrap_api_call_sync(
+            lambda: self._connection._send_message_to_server(
+                self._guid, method, {} if params is None else params
+            )
+        )
 
     async def inner_send(
         self, method: str, params: Optional[Dict], return_as_dict: bool
@@ -73,11 +97,6 @@ class Channel(AsyncIOEventEmitter):
         assert len(result) == 1
         key = next(iter(result))
         return result[key]
-
-    def send_no_reply(self, method: str, params: Dict = None) -> None:
-        if params is None:
-            params = {}
-        self._connection._send_message_to_server(self._guid, method, params)
 
 
 class ChannelOwner(AsyncIOEventEmitter):
@@ -181,6 +200,9 @@ class Connection(EventEmitter):
         self._error: Optional[BaseException] = None
         self.is_remote = False
         self._init_task: Optional[asyncio.Task] = None
+        self._api_zone: contextvars.ContextVar[List] = contextvars.ContextVar(
+            "ApiZone", default=[None]
+        )
 
     def mark_as_remote(self) -> None:
         self.is_remote = True
@@ -235,17 +257,12 @@ class Connection(EventEmitter):
         )
         callback.stack_trace = stack_trace or traceback.extract_stack()
         self._callbacks[id] = callback
-        metadata = {"stack": serialize_call_stack(callback.stack_trace)}
-        api_name = getattr(task, "__pw_api_name__", None)
-        if api_name:
-            metadata["apiName"] = api_name
-
         message = {
             "id": id,
             "guid": guid,
             "method": method,
             "params": self._replace_channels_with_guids(params),
-            "metadata": metadata,
+            "metadata": self._api_zone.get()[0],
         }
         self._transport.send(message)
         self._callbacks[id] = callback
@@ -337,6 +354,40 @@ class Connection(EventEmitter):
             return result
         return payload
 
+    async def wrap_api_call(
+        self, cb: Callable[[], Coroutine], is_internal: bool = False
+    ) -> Any:
+        zones = self._api_zone.get()
+        if zones[0] is not None:
+            result = cb()
+            return (
+                await cast(Coroutine, result) if asyncio.iscoroutine(result) else result
+            )
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
+        metadata = _extract_metadata_from_stack(st, is_internal)
+        if metadata:
+            self._api_zone.get()[0] = metadata
+
+        try:
+            return await cb()
+        finally:
+            self._api_zone.get()[0] = None
+
+    def wrap_api_call_sync(self, cb: Callable, is_internal: bool = False) -> Any:
+        zones = self._api_zone.get()
+        if zones[0] is not None:
+            return cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
+        metadata = _extract_metadata_from_stack(st, is_internal)
+        if metadata:
+            self._api_zone.get()[0] = metadata
+        try:
+            return cb()
+        finally:
+            self._api_zone.get()[0] = None
+
 
 def from_channel(channel: Channel) -> Any:
     return channel._object
@@ -346,13 +397,40 @@ def from_nullable_channel(channel: Optional[Channel]) -> Optional[Any]:
     return channel._object if channel else None
 
 
-def serialize_call_stack(stack_trace: traceback.StackSummary) -> List[Dict]:
+def _extract_metadata_from_stack(
+    st: List[inspect.FrameInfo], is_internal: bool
+) -> Optional[Dict]:
+    playwright_module_path = str(Path(playwright.__file__).parents[0])
+    last_internal_api_name = ""
+    api_name = ""
     stack: List[Dict] = []
-    for frame in stack_trace:
-        if "_generated.py" in frame.filename:
-            break
-        stack.append(
-            {"file": frame.filename, "line": frame.lineno, "function": frame.name}
-        )
-    stack.reverse()
-    return stack
+    for frame in st:
+        is_playwright_internal = frame.filename.startswith(playwright_module_path)
+
+        method_name = ""
+        if "self" in frame[0].f_locals:
+            method_name = frame[0].f_locals["self"].__class__.__name__ + "."
+        method_name += frame[0].f_code.co_name
+
+        if not is_playwright_internal:
+            stack.append(
+                {
+                    "file": frame.filename,
+                    "line": frame.lineno,
+                    "function": method_name,
+                }
+            )
+        if is_playwright_internal:
+            last_internal_api_name = method_name
+        elif last_internal_api_name:
+            api_name = last_internal_api_name
+            last_internal_api_name = ""
+    if not api_name:
+        api_name = last_internal_api_name
+    if api_name:
+        return {
+            "apiName": api_name,
+            "stack": stack,
+            "isInternal": is_internal,
+        }
+    return None

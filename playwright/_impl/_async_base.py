@@ -13,9 +13,8 @@
 # limitations under the License.
 
 import asyncio
-import traceback
 from types import TracebackType
-from typing import Any, Awaitable, Callable, Generic, Type, TypeVar
+from typing import Any, Callable, Generic, Type, TypeVar
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -61,12 +60,6 @@ class AsyncBase(ImplWrapper):
 
     def __str__(self) -> str:
         return self._impl_obj.__str__()
-
-    def _async(self, api_name: str, coro: Awaitable) -> Any:
-        task = asyncio.current_task()
-        setattr(task, "__pw_api_name__", api_name)
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack())
-        return coro
 
     def _wrap_handler(self, handler: Any) -> Callable[..., None]:
         if callable(handler):
