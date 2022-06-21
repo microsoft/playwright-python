@@ -200,8 +200,8 @@ class Connection(EventEmitter):
         self._error: Optional[BaseException] = None
         self.is_remote = False
         self._init_task: Optional[asyncio.Task] = None
-        self._api_zone: contextvars.ContextVar[List] = contextvars.ContextVar(
-            "ApiZone", default=[None]
+        self._api_zone: contextvars.ContextVar[Optional[Dict]] = contextvars.ContextVar(
+            "ApiZone", default=None
         )
 
     def mark_as_remote(self) -> None:
@@ -262,7 +262,7 @@ class Connection(EventEmitter):
             "guid": guid,
             "method": method,
             "params": self._replace_channels_with_guids(params),
-            "metadata": self._api_zone.get()[0],
+            "metadata": self._api_zone.get(),
         }
         self._transport.send(message)
         self._callbacks[id] = callback
@@ -357,8 +357,7 @@ class Connection(EventEmitter):
     async def wrap_api_call(
         self, cb: Callable[[], Coroutine], is_internal: bool = False
     ) -> Any:
-        zones = self._api_zone.get()
-        if zones[0] is not None:
+        if self._api_zone.get():
             result = cb()
             return (
                 await cast(Coroutine, result) if asyncio.iscoroutine(result) else result
@@ -367,26 +366,25 @@ class Connection(EventEmitter):
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
         metadata = _extract_metadata_from_stack(st, is_internal)
         if metadata:
-            self._api_zone.get()[0] = metadata
+            self._api_zone.set(metadata)
 
         try:
             return await cb()
         finally:
-            self._api_zone.get()[0] = None
+            self._api_zone.set(None)
 
     def wrap_api_call_sync(self, cb: Callable, is_internal: bool = False) -> Any:
-        zones = self._api_zone.get()
-        if zones[0] is not None:
+        if self._api_zone.get():
             return cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
         metadata = _extract_metadata_from_stack(st, is_internal)
         if metadata:
-            self._api_zone.get()[0] = metadata
+            self._api_zone.set(metadata)
         try:
             return cb()
         finally:
-            self._api_zone.get()[0] = None
+            self._api_zone.set(None)
 
 
 def from_channel(channel: Channel) -> Any:
