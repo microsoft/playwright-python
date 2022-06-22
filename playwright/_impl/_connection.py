@@ -59,7 +59,7 @@ class Channel(AsyncIOEventEmitter):
         )
 
     def send_no_reply(self, method: str, params: Dict = None) -> None:
-        self._connection.wrap_api_call_sync(
+        self._connection.wrap_api_call(
             lambda: self._connection._send_message_to_server(
                 self._guid, method, {} if params is None else params
             )
@@ -354,37 +354,27 @@ class Connection(EventEmitter):
             return result
         return payload
 
-    async def wrap_api_call(
-        self, cb: Callable[[], Coroutine], is_internal: bool = False
-    ) -> Any:
+    def wrap_api_call(self, cb: Callable[[], Any], is_internal: bool = False) -> Any:
         if self._api_zone.get():
             result = cb()
-            return (
-                await cast(Coroutine, result) if asyncio.iscoroutine(result) else result
-            )
+            return cast(Coroutine, result) if asyncio.iscoroutine(result) else result
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
         metadata = _extract_metadata_from_stack(st, is_internal)
         if metadata:
             self._api_zone.set(metadata)
+        result = cb()
 
-        try:
-            return await cb()
-        finally:
-            self._api_zone.set(None)
+        async def _() -> None:
+            try:
+                return await result
+            finally:
+                self._api_zone.set(None)
 
-    def wrap_api_call_sync(self, cb: Callable, is_internal: bool = False) -> Any:
-        if self._api_zone.get():
-            return cb()
-        task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        metadata = _extract_metadata_from_stack(st, is_internal)
-        if metadata:
-            self._api_zone.set(metadata)
-        try:
-            return cb()
-        finally:
-            self._api_zone.set(None)
+        if asyncio.iscoroutine(result):
+            return _()
+        self._api_zone.set(None)
+        return result
 
 
 def from_channel(channel: Channel) -> Any:
