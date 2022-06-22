@@ -18,17 +18,7 @@ import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Optional,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter, EventEmitter
@@ -356,8 +346,7 @@ class Connection(EventEmitter):
 
     def wrap_api_call(self, cb: Callable[[], Any], is_internal: bool = False) -> Any:
         if self._api_zone.get():
-            result = cb()
-            return cast(Coroutine, result) if asyncio.iscoroutine(result) else result
+            return cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
         metadata = _extract_metadata_from_stack(st, is_internal)
