@@ -19,7 +19,6 @@ import sys
 from types import FunctionType
 from typing import Any, get_type_hints
 
-from playwright._impl._helper import to_snake_case
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -110,13 +109,10 @@ def generate(t: Any) -> None:
                     get_type_hints(value, api_globals)["return"]
                 )
                 if is_async:
-                    prefix = (
-                        prefix
-                        + f'self._sync("{to_snake_case(class_name)}.{name}", self._impl_obj.{name}('
-                    )
+                    prefix += f"self._sync(self._impl_obj.{name}("
                     suffix = "))" + suffix
                 else:
-                    prefix = prefix + f"self._impl_obj.{name}("
+                    prefix += f"self._impl_obj.{name}("
                     suffix = ")" + suffix
 
                 print(

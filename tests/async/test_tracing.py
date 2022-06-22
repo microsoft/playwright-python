@@ -78,6 +78,119 @@ async def test_should_collect_sources(
     assert found_current_file
 
 
+async def test_should_collect_trace_with_resources_but_no_js(
+    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+) -> None:
+    await context.tracing.start(screenshots=True, snapshots=True)
+    await page.goto(server.PREFIX + "/frames/frame.html")
+    await page.set_content("<button>Click</button>")
+    await page.click('"Click"')
+    await page.mouse.move(20, 20)
+    await page.mouse.dblclick(30, 30)
+    await page.keyboard.insert_text("abc")
+    await page.wait_for_timeout(2000)  # Give it some time to produce screenshots.
+    await page.close()
+    trace_file_path = tmpdir / "trace.zip"
+    await context.tracing.stop(path=trace_file_path)
+
+    (_, events) = parse_trace(trace_file_path)
+    assert events[0]["type"] == "context-options"
+    assert events_have_entry(events, "Page.goto") is True
+    assert events_have_entry(events, "Page.set_content") is True
+    assert events_have_entry(events, "Page.click") is True
+    assert events_have_entry(events, "Mouse.move") is True
+    assert events_have_entry(events, "Mouse.dblclick") is True
+    assert events_have_entry(events, "Keyboard.insert_text") is True
+    assert events_have_entry(events, "Page.close") is True
+
+    assert len(list(filter(lambda e: e["type"] == "frame-snapshot", events))) >= 1
+    assert len(list(filter(lambda e: e["type"] == "screencast-frame", events))) >= 1
+    style = list(
+        filter(
+            lambda e: e["type"] == "resource-snapshot"
+            and e["snapshot"]["request"]["url"].endswith("style.css"),
+            events,
+        )
+    )[0]
+    assert style
+    assert style["snapshot"]["response"]["content"]["_sha1"]
+    script = list(
+        filter(
+            lambda e: e["type"] == "resource-snapshot"
+            and e["snapshot"]["request"]["url"].endswith("script.js"),
+            events,
+        )
+    )[0]
+    assert script
+    assert script["snapshot"]["response"]["content"].get("_sha1") is None
+
+
+async def test_should_collect_two_traces(
+    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+) -> None:
+    await context.tracing.start(screenshots=True, snapshots=True)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button>Click</button>")
+    await page.click('"Click"')
+    tracing1_path = tmpdir / "trace1.zip"
+    await context.tracing.stop(path=tracing1_path)
+
+    await context.tracing.start(screenshots=True, snapshots=True)
+    await page.dblclick('"Click"')
+    await page.close()
+    tracing2_path = tmpdir / "trace2.zip"
+    await context.tracing.stop(path=tracing2_path)
+
+    (_, events) = parse_trace(tracing1_path)
+    assert events[0]["type"] == "context-options"
+    assert events_have_entry(events, "Page.goto") is True
+    assert events_have_entry(events, "Page.set_content") is True
+    assert events_have_entry(events, "Page.click") is True
+    assert events_have_entry(events, "Page.dblclick") is False
+    assert events_have_entry(events, "Page.close") is False
+
+    (_, events) = parse_trace(tracing2_path)
+    assert events[0]["type"] == "context-options"
+    assert events_have_entry(events, "Page.goto") is False
+    assert events_have_entry(events, "Page.set_content") is False
+    assert events_have_entry(events, "Page.click") is False
+    assert events_have_entry(events, "Page.dblclick") is True
+    assert events_have_entry(events, "Page.close") is True
+
+
+async def test_should_not_throw_when_stopping_without_start_but_not_exporting(
+    context: BrowserContext,
+) -> None:
+    await context.tracing.stop()
+
+
+async def test_should_work_with_playwright_context_managers(
+    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+) -> None:
+    await context.tracing.start(screenshots=True, snapshots=True)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button>Click</button>")
+    async with page.expect_console_message() as message_info:
+        await page.evaluate('() => console.log("hello")')
+        await page.click('"Click"')
+    assert (await message_info.value).text == "hello"
+
+    async with page.expect_popup():
+        await page.evaluate("window._popup = window.open(document.location.href)")
+    trace_file_path = tmpdir / "trace.zip"
+    await context.tracing.stop(path=trace_file_path)
+
+    (_, events) = parse_trace(trace_file_path)
+    assert events[0]["type"] == "context-options"
+    assert events_have_entry(events, "Page.goto")
+    assert events_have_entry(events, "Page.set_content")
+    assert events_have_entry(events, "Page.expect_console_message")
+    assert events_have_entry(events, "Page.evaluate")
+    assert events_have_entry(events, "Page.click")
+    assert events_have_entry(events, "Page.expect_popup")
+    assert events_have_entry(events, "Page.evaluate")
+
+
 def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
     resources: Dict[str, bytes] = {}
     with zipfile.ZipFile(path, "r") as zip:
@@ -88,3 +201,7 @@ def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
         for line in resources[name].decode().splitlines():
             events.append(json.loads(line))
     return (resources, events)
+
+
+def events_have_entry(events: List[Any], api_name: str) -> bool:
+    return any(e.get("metadata", {}).get("apiName") == api_name for e in events)

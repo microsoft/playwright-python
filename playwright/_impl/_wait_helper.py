@@ -48,21 +48,19 @@ class WaitHelper:
         )
 
     def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
-        try:
-            info = {
-                "waitId": wait_id,
-                "phase": "after",
-            }
-            if error:
-                info["error"] = str(error)
-            self._channel.send_no_reply(
+        self._channel._connection.wrap_api_call(
+            lambda: self._channel.send_no_reply(
                 "waitForEventInfo",
                 {
-                    "info": info,
+                    "info": {
+                        "waitId": wait_id,
+                        "phase": "after",
+                        **({"error": str(error)} if error else {}),
+                    },
                 },
-            )
-        except Exception:
-            pass
+            ),
+            True,
+        )
 
     def reject_on_event(
         self,
@@ -129,15 +127,18 @@ class WaitHelper:
     def log(self, message: str) -> None:
         self._logs.append(message)
         try:
-            self._channel.send_no_reply(
-                "waitForEventInfo",
-                {
-                    "info": {
-                        "waitId": self._wait_id,
-                        "phase": "log",
-                        "message": message,
+            self._channel._connection.wrap_api_call(
+                lambda: self._channel.send_no_reply(
+                    "waitForEventInfo",
+                    {
+                        "info": {
+                            "waitId": self._wait_id,
+                            "phase": "log",
+                            "message": message,
+                        },
                     },
-                },
+                ),
+                True,
             )
         except Exception:
             pass

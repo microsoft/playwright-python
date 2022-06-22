@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Page
+import pytest
+
+from playwright.sync_api import Error, Page
 from tests.server import Server
 
 
@@ -66,3 +68,11 @@ def test_should_set_bodysize_to_0(page: Page, server: Server) -> None:
     sizes = request.sizes()
     assert sizes["requestBodySize"] == 0
     assert sizes["requestHeadersSize"] >= 200
+
+
+def test_sync_stacks_should_work(page: Page, server: Server) -> None:
+    page.route("**/empty.html", lambda route: route.abort())
+    with pytest.raises(Error) as exc_info:
+        page.goto(server.EMPTY_PAGE)
+    assert exc_info.value.stack
+    assert __file__ in exc_info.value.stack

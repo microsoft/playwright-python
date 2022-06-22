@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import traceback
 from types import TracebackType
 from typing import Any, Awaitable, Callable, Dict, Generic, List, Type, TypeVar, cast
@@ -74,11 +75,11 @@ class SyncBase(ImplWrapper):
     def __str__(self) -> str:
         return self._impl_obj.__str__()
 
-    def _sync(self, api_name: str, coro: Awaitable) -> Any:
+    def _sync(self, coro: Awaitable) -> Any:
         __tracebackhide__ = True
         g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)
-        setattr(task, "__pw_api_name__", api_name)
+        setattr(task, "__pw_stack__", inspect.stack())
         setattr(task, "__pw_stack_trace__", traceback.extract_stack())
 
         task.add_done_callback(lambda _: g_self.switch())
@@ -147,7 +148,7 @@ class SyncContextManager(SyncBase):
         self,
         exc_type: Type[BaseException],
         exc_val: BaseException,
-        traceback: TracebackType,
+        _traceback: TracebackType,
     ) -> None:
         self.close()
 
