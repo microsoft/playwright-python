@@ -51,6 +51,7 @@ from playwright._impl._helper import (
     ContinueParameters,
     FallbackOverrides,
     locals_to_params,
+    makeasync,
 )
 from playwright._impl._wait_helper import WaitHelper
 
@@ -217,7 +218,8 @@ class Route(ChannelOwner):
         self._handling_future = asyncio.Future()
         return self._handling_future
 
-    async def fallback(
+    @makeasync()
+    def fallback(
         self,
         url: Optional[str] = None,
         method: Optional[str] = None,

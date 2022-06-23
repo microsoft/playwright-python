@@ -736,7 +736,7 @@ class Route(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.fallback(
+            self._impl_obj.fallback(
                 url=url,
                 method=method,
                 headers=mapping.to_impl(headers),

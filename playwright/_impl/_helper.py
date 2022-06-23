@@ -308,3 +308,18 @@ def is_file_payload(value: Optional[Any]) -> bool:
         and "mimeType" in value
         and "buffer" in value
     )
+
+
+MAKE_ASYNC_ATTR = "__pw_make_async__"
+
+
+def makeasync() -> Callable[[Callable], Callable]:
+    def decorator(func: Callable) -> Callable:
+        setattr(func, MAKE_ASYNC_ATTR, True)
+        return func
+
+    return decorator
+
+
+def is_makeasync(value: Any) -> bool:
+    return inspect.isfunction(value) and getattr(value, MAKE_ASYNC_ATTR, False)

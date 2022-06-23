@@ -742,13 +742,11 @@ class Route(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync(
-                self._impl_obj.fallback(
-                    url=url,
-                    method=method,
-                    headers=mapping.to_impl(headers),
-                    post_data=post_data,
-                )
+            self._impl_obj.fallback(
+                url=url,
+                method=method,
+                headers=mapping.to_impl(headers),
+                post_data=post_data,
             )
         )
 

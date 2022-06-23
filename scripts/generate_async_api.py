@@ -18,6 +18,7 @@ import re
 from types import FunctionType
 from typing import Any, get_type_hints
 
+from playwright._impl._helper import is_makeasync
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -82,13 +83,14 @@ def generate(t: Any) -> None:
             if name.startswith("_") and name not in allow_without_docs_methods:
                 continue
             is_async = inspect.iscoroutinefunction(value)
+            make_async = is_makeasync(value)
             return_type_value = return_type(value)
             return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
             return_type_value = return_type_value.replace(
                 "EventContextManager", "AsyncEventContextManager"
             )
             print("")
-            async_prefix = "async " if is_async else ""
+            async_prefix = "async " if is_async or make_async else ""
             print(
                 f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
