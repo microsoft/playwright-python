@@ -194,10 +194,20 @@ class Request(AsyncBase):
         print(response.request.redirected_from.url) # \"http://example.com\"
         ```
 
+        ```py
+        response = page.goto(\"http://example.com\")
+        print(response.request.redirected_from.url) # \"http://example.com\"
+        ```
+
         If the website `https://google.com` has no redirects:
 
         ```py
         response = await page.goto(\"https://google.com\")
+        print(response.request.redirected_from) # None
+        ```
+
+        ```py
+        response = page.goto(\"https://google.com\")
         print(response.request.redirected_from) # None
         ```
 
@@ -255,6 +265,13 @@ class Request(AsyncBase):
         async with page.expect_event(\"requestfinished\") as request_info:
             await page.goto(\"http://example.com\")
         request = await request_info.value
+        print(request.timing)
+        ```
+
+        ```py
+        with page.expect_event(\"requestfinished\") as request_info:
+            page.goto(\"http://example.com\")
+        request = request_info.value
         print(request.timing)
         ```
 
@@ -418,6 +435,19 @@ class Response(AsyncBase):
         Dict[str, str]
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
+
+    @property
+    def from_service_worker(self) -> bool:
+        """Response.from_service_worker
+
+        Indicates whether this Response was fullfilled by a Service Worker's Fetch Handler (i.e. via
+        [FetchEvent.respondWith](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith)).
+
+        Returns
+        -------
+        bool
+        """
+        return mapping.from_maybe_impl(self._impl_obj.from_service_worker)
 
     @property
     def request(self) -> "Request":
@@ -591,6 +621,129 @@ class Route(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.request)
 
+    async def fallback(
+        self,
+        *,
+        url: str = None,
+        method: str = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        post_data: typing.Union[str, bytes] = None
+    ) -> NoneType:
+        """Route.fallback
+
+        When several routes match the given pattern, they run in the order opposite to their registration. That way the last
+        registered route can always override all the previos ones. In the example below, request will be handled by the
+        bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
+        registered route.
+
+        ```py
+        await page.route(\"**/*\", lambda route: route.abort())  # Runs last.
+        await page.route(\"**/*\", lambda route: route.fallback())  # Runs second.
+        await page.route(\"**/*\", lambda route: route.fallback())  # Runs first.
+        ```
+
+        ```py
+        page.route(\"**/*\", lambda route: route.abort())  # Runs last.
+        page.route(\"**/*\", lambda route: route.fallback())  # Runs second.
+        page.route(\"**/*\", lambda route: route.fallback())  # Runs first.
+        ```
+
+        Registering multiple routes is useful when you want separate handlers to handle different kinds of requests, for example
+        API calls vs page resources or GET requests vs POST requests as in the example below.
+
+        ```py
+        # Handle GET requests.
+        def handle_post(route):
+            if route.request.method != \"GET\":
+                route.fallback()
+                return
+          # Handling GET only.
+          # ...
+
+        # Handle POST requests.
+        def handle_post(route):
+            if route.request.method != \"POST\":
+                route.fallback()
+                return
+          # Handling POST only.
+          # ...
+
+        await page.route(\"**/*\", handle_get)
+        await page.route(\"**/*\", handle_post)
+        ```
+
+        ```py
+        # Handle GET requests.
+        def handle_post(route):
+            if route.request.method != \"GET\":
+                route.fallback()
+                return
+          # Handling GET only.
+          # ...
+
+        # Handle POST requests.
+        def handle_post(route):
+            if route.request.method != \"POST\":
+                route.fallback()
+                return
+          # Handling POST only.
+          # ...
+
+        page.route(\"**/*\", handle_get)
+        page.route(\"**/*\", handle_post)
+        ```
+
+        One can also modify request while falling back to the subsequent handler, that way intermediate route handler can modify
+        url, method, headers and postData of the request.
+
+        ```py
+        async def handle(route, request):
+            # override headers
+            headers = {
+                **request.headers,
+                \"foo\": \"foo-value\" # set \"foo\" header
+                \"bar\": None # remove \"bar\" header
+            }
+            await route.fallback(headers=headers)
+        }
+        await page.route(\"**/*\", handle)
+        ```
+
+        ```py
+        def handle(route, request):
+            # override headers
+            headers = {
+                **request.headers,
+                \"foo\": \"foo-value\" # set \"foo\" header
+                \"bar\": None # remove \"bar\" header
+            }
+            route.fallback(headers=headers)
+        }
+        page.route(\"**/*\", handle)
+        ```
+
+        Parameters
+        ----------
+        url : Union[str, NoneType]
+            If set changes the request URL. New URL must have same protocol as original one. Changing the URL won't affect the route
+            matching, all the routes are matched using the original request URL.
+        method : Union[str, NoneType]
+            If set changes the request method (e.g. GET or POST)
+        headers : Union[Dict[str, str], NoneType]
+            If set changes the request HTTP headers. Header values will be converted to a string.
+        post_data : Union[bytes, str, NoneType]
+            If set changes the post data of request
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.fallback(
+                url=url,
+                method=method,
+                headers=mapping.to_impl(headers),
+                post_data=post_data,
+            )
+        )
+
     async def abort(self, error_code: str = None) -> NoneType:
         """Route.abort
 
@@ -643,10 +796,21 @@ class Route(AsyncBase):
             body=\"not found!\"))
         ```
 
+        ```py
+        page.route(\"**/*\", lambda route: route.fulfill(
+            status=404,
+            content_type=\"text/plain\",
+            body=\"not found!\"))
+        ```
+
         An example of serving static file:
 
         ```py
         await page.route(\"**/xhr_endpoint\", lambda route: route.fulfill(path=\"mock_data.json\"))
+        ```
+
+        ```py
+        page.route(\"**/xhr_endpoint\", lambda route: route.fulfill(path=\"mock_data.json\"))
         ```
 
         Parameters
@@ -695,12 +859,25 @@ class Route(AsyncBase):
             # override headers
             headers = {
                 **request.headers,
-                \"foo\": \"bar\" # set \"foo\" header
-                \"origin\": None # remove \"origin\" header
+                \"foo\": \"foo-value\" # set \"foo\" header
+                \"bar\": None # remove \"bar\" header
             }
             await route.continue_(headers=headers)
         }
         await page.route(\"**/*\", handle)
+        ```
+
+        ```py
+        def handle(route, request):
+            # override headers
+            headers = {
+                **request.headers,
+                \"foo\": \"foo-value\" # set \"foo\" header
+                \"bar\": None # remove \"bar\" header
+            }
+            route.continue_(headers=headers)
+        }
+        page.route(\"**/*\", handle)
         ```
 
         Parameters
@@ -971,6 +1148,10 @@ class Keyboard(AsyncBase):
         await page.keyboard.insert_text(\"嗨\")
         ```
 
+        ```py
+        page.keyboard.insert_text(\"嗨\")
+        ```
+
         > NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 
         Parameters
@@ -991,6 +1172,11 @@ class Keyboard(AsyncBase):
         ```py
         await page.keyboard.type(\"Hello\") # types instantly
         await page.keyboard.type(\"World\", delay=100) # types slower, like a user
+        ```
+
+        ```py
+        page.keyboard.type(\"Hello\") # types instantly
+        page.keyboard.type(\"World\", delay=100) # types slower, like a user
         ```
 
         > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
@@ -1038,6 +1224,18 @@ class Keyboard(AsyncBase):
         await page.keyboard.press(\"Shift+O\")
         await page.screenshot(path=\"o.png\")
         await browser.close()
+        ```
+
+        ```py
+        page = browser.new_page()
+        page.goto(\"https://keycode.info\")
+        page.keyboard.press(\"a\")
+        page.screenshot(path=\"a.png\")
+        page.keyboard.press(\"ArrowLeft\")
+        page.screenshot(path=\"arrow_left.png\")
+        page.keyboard.press(\"Shift+O\")
+        page.screenshot(path=\"o.png\")
+        browser.close()
         ```
 
         Shortcut for `keyboard.down()` and `keyboard.up()`.
@@ -1233,6 +1431,11 @@ class JSHandle(AsyncBase):
         assert await tweet_handle.evaluate(\"node => node.innerText\") == \"10 retweets\"
         ```
 
+        ```py
+        tweet_handle = page.query_selector(\".tweet .retweets\")
+        assert tweet_handle.evaluate(\"node => node.innerText\") == \"10 retweets\"
+        ```
+
         Parameters
         ----------
         expression : str
@@ -1318,6 +1521,14 @@ class JSHandle(AsyncBase):
         window_handle = properties.get(\"window\")
         document_handle = properties.get(\"document\")
         await handle.dispose()
+        ```
+
+        ```py
+        handle = page.evaluate_handle(\"{window, document}\")
+        properties = handle.get_properties()
+        window_handle = properties.get(\"window\")
+        document_handle = properties.get(\"document\")
+        handle.dispose()
         ```
 
         Returns
@@ -1541,6 +1752,10 @@ class ElementHandle(JSHandle):
         await element_handle.dispatch_event(\"click\")
         ```
 
+        ```py
+        element_handle.dispatch_event(\"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -1559,6 +1774,12 @@ class ElementHandle(JSHandle):
         # note you can only create data_transfer in chromium and firefox
         data_transfer = await page.evaluate_handle(\"new DataTransfer()\")
         await element_handle.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
+        ```
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = page.evaluate_handle(\"new DataTransfer()\")
+        element_handle.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
         ```
 
         Parameters
@@ -1820,6 +2041,15 @@ class ElementHandle(JSHandle):
         await handle.select_option(value=[\"red\", \"green\", \"blue\"])
         ```
 
+        ```py
+        # single selection matching the value
+        handle.select_option(\"blue\")
+        # single selection matching both the label
+        handle.select_option(label=\"blue\")
+        # multiple selection
+        handle.select_option(value=[\"red\", \"green\", \"blue\"])
+        ```
+
         Parameters
         ----------
         value : Union[List[str], str, NoneType]
@@ -2076,12 +2306,23 @@ class ElementHandle(JSHandle):
         await element_handle.type(\"world\", delay=100) # types slower, like a user
         ```
 
+        ```py
+        element_handle.type(\"hello\") # types instantly
+        element_handle.type(\"world\", delay=100) # types slower, like a user
+        ```
+
         An example of typing into a text field and then submitting the form:
 
         ```py
         element_handle = await page.query_selector(\"input\")
         await element_handle.type(\"some text\")
         await element_handle.press(\"Enter\")
+        ```
+
+        ```py
+        element_handle = page.query_selector(\"input\")
+        element_handle.type(\"some text\")
+        element_handle.press(\"Enter\")
         ```
 
         Parameters
@@ -2341,6 +2582,11 @@ class ElementHandle(JSHandle):
         await page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
         ```
 
+        ```py
+        box = element_handle.bounding_box()
+        page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
+        ```
+
         Returns
         -------
         Union[{x: float, y: float, width: float, height: float}, NoneType]
@@ -2489,6 +2735,12 @@ class ElementHandle(JSHandle):
         assert await tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") = \"10\"
         ```
 
+        ```py
+        tweet_handle = page.query_selector(\".tweet\")
+        assert tweet_handle.eval_on_selector(\".like\", \"node => node.innerText\") == \"100\"
+        assert tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") = \"10\"
+        ```
+
         Parameters
         ----------
         selector : str
@@ -2535,6 +2787,11 @@ class ElementHandle(JSHandle):
         ```py
         feed_handle = await page.query_selector(\".feed\")
         assert await feed_handle.eval_on_selector_all(\".tweet\", \"nodes => nodes.map(n => n.innerText)\") == [\"hello!\", \"hi!\"]
+        ```
+
+        ```py
+        feed_handle = page.query_selector(\".feed\")
+        assert feed_handle.eval_on_selector_all(\".tweet\", \"nodes => nodes.map(n => n.innerText)\") == [\"hello!\", \"hi!\"]
         ```
 
         Parameters
@@ -2621,6 +2878,13 @@ class ElementHandle(JSHandle):
         span = await div.wait_for_selector(\"span\", state=\"attached\")
         ```
 
+        ```py
+        page.set_content(\"<div><span></span></div>\")
+        div = page.query_selector(\"div\")
+        # waiting for the \"span\" selector relative to the div.
+        span = div.wait_for_selector(\"span\", state=\"attached\")
+        ```
+
         > NOTE: This method does not work across navigations, use `page.wait_for_selector()` instead.
 
         Parameters
@@ -2676,6 +2940,11 @@ class Accessibility(AsyncBase):
         print(snapshot)
         ```
 
+        ```py
+        snapshot = page.accessibility.snapshot()
+        print(snapshot)
+        ```
+
         An example of logging the focused node's name:
 
         ```py
@@ -2689,6 +2958,22 @@ class Accessibility(AsyncBase):
             return None
 
         snapshot = await page.accessibility.snapshot()
+        node = find_focused_node(snapshot)
+        if node:
+            print(node[\"name\"])
+        ```
+
+        ```py
+        def find_focused_node(node):
+            if (node.get(\"focused\"))
+                return node
+            for child in (node.get(\"children\") or []):
+                found_node = find_focused_node(child)
+                if (found_node)
+                    return found_node
+            return None
+
+        snapshot = page.accessibility.snapshot()
         node = find_focused_node(snapshot)
         if node:
             print(node[\"name\"])
@@ -2937,6 +3222,12 @@ class Frame(AsyncBase):
         # Resolves after navigation has finished
         ```
 
+        ```py
+        with frame.expect_navigation():
+            frame.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        # Resolves after navigation has finished
+        ```
+
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
@@ -2985,6 +3276,11 @@ class Frame(AsyncBase):
         await frame.wait_for_url(\"**/target.html\")
         ```
 
+        ```py
+        frame.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        frame.wait_for_url(\"**/target.html\")
+        ```
+
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern, str]
@@ -3028,6 +3324,11 @@ class Frame(AsyncBase):
         await frame.wait_for_load_state() # the promise resolves after \"load\" event.
         ```
 
+        ```py
+        frame.click(\"button\") # click triggers navigation.
+        frame.wait_for_load_state() # the promise resolves after \"load\" event.
+        ```
+
         Parameters
         ----------
         state : Union["domcontentloaded", "load", "networkidle", NoneType]
@@ -3063,6 +3364,12 @@ class Frame(AsyncBase):
         assert frame == content_frame
         ```
 
+        ```py
+        frame_element = frame.frame_element()
+        content_frame = frame_element.content_frame()
+        assert frame == content_frame
+        ```
+
         Returns
         -------
         ElementHandle
@@ -3087,6 +3394,11 @@ class Frame(AsyncBase):
         print(result) # prints \"56\"
         ```
 
+        ```py
+        result = frame.evaluate(\"([x, y]) => Promise.resolve(x * y)\", [7, 8])
+        print(result) # prints \"56\"
+        ```
+
         A string can also be passed in instead of a function.
 
         ```py
@@ -3095,12 +3407,24 @@ class Frame(AsyncBase):
         print(await frame.evaluate(f\"1 + {x}\")) # prints \"11\"
         ```
 
+        ```py
+        print(frame.evaluate(\"1 + 2\")) # prints \"3\"
+        x = 10
+        print(frame.evaluate(f\"1 + {x}\")) # prints \"11\"
+        ```
+
         `ElementHandle` instances can be passed as an argument to the `frame.evaluate()`:
 
         ```py
         body_handle = await frame.evaluate(\"document.body\")
         html = await frame.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         await body_handle.dispose()
+        ```
+
+        ```py
+        body_handle = frame.evaluate(\"document.body\")
+        html = frame.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
+        body_handle.dispose()
         ```
 
         Parameters
@@ -3140,10 +3464,19 @@ class Frame(AsyncBase):
         a_window_handle # handle for the window object.
         ```
 
+        ```py
+        a_window_handle = frame.evaluate_handle(\"Promise.resolve(window)\")
+        a_window_handle # handle for the window object.
+        ```
+
         A string can also be passed in instead of a function.
 
         ```py
         a_handle = await page.evaluate_handle(\"document\") # handle for the \"document\"
+        ```
+
+        ```py
+        a_handle = page.evaluate_handle(\"document\") # handle for the \"document\"
         ```
 
         `JSHandle` instances can be passed as an argument to the `frame.evaluate_handle()`:
@@ -3153,6 +3486,13 @@ class Frame(AsyncBase):
         result_handle = await page.evaluate_handle(\"body => body.innerHTML\", a_handle)
         print(await result_handle.json_value())
         await result_handle.dispose()
+        ```
+
+        ```py
+        a_handle = page.evaluate_handle(\"document.body\")
+        result_handle = page.evaluate_handle(\"body => body.innerHTML\", a_handle)
+        print(result_handle.json_value())
+        result_handle.dispose()
         ```
 
         Parameters
@@ -3267,6 +3607,23 @@ class Frame(AsyncBase):
             async with async_playwright() as playwright:
                 await run(playwright)
         asyncio.run(main())
+        ```
+
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            chromium = playwright.chromium
+            browser = chromium.launch()
+            page = browser.new_page()
+            for current_url in [\"https://google.com\", \"https://bbc.com\"]:
+                page.goto(current_url, wait_until=\"domcontentloaded\")
+                element = page.main_frame.wait_for_selector(\"img\")
+                print(\"Loaded image: \" + str(element.get_attribute(\"src\")))
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
         ```
 
         Parameters
@@ -3500,6 +3857,10 @@ class Frame(AsyncBase):
         await frame.dispatch_event(\"button#submit\", \"click\")
         ```
 
+        ```py
+        frame.dispatch_event(\"button#submit\", \"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -3518,6 +3879,12 @@ class Frame(AsyncBase):
         # note you can only create data_transfer in chromium and firefox
         data_transfer = await frame.evaluate_handle(\"new DataTransfer()\")
         await frame.dispatch_event(\"#source\", \"dragstart\", { \"dataTransfer\": data_transfer })
+        ```
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = frame.evaluate_handle(\"new DataTransfer()\")
+        frame.dispatch_event(\"#source\", \"dragstart\", { \"dataTransfer\": data_transfer })
         ```
 
         Parameters
@@ -3577,6 +3944,12 @@ class Frame(AsyncBase):
         html = await frame.eval_on_selector(\".main-container\", \"(e, suffix) => e.outerHTML + suffix\", \"hello\")
         ```
 
+        ```py
+        search_value = frame.eval_on_selector(\"#search\", \"el => el.value\")
+        preload_href = frame.eval_on_selector(\"link[rel=preload]\", \"el => el.href\")
+        html = frame.eval_on_selector(\".main-container\", \"(e, suffix) => e.outerHTML + suffix\", \"hello\")
+        ```
+
         Parameters
         ----------
         selector : str
@@ -3624,6 +3997,10 @@ class Frame(AsyncBase):
 
         ```py
         divs_counts = await frame.eval_on_selector_all(\"div\", \"(divs, min) => divs.length >= min\", 10)
+        ```
+
+        ```py
+        divs_counts = frame.eval_on_selector_all(\"div\", \"(divs, min) => divs.length >= min\", 10)
         ```
 
         Parameters
@@ -4110,6 +4487,11 @@ class Frame(AsyncBase):
         await locator.click()
         ```
 
+        ```py
+        locator = frame.frame_locator(\"#my-iframe\").locator(\"text=Submit\")
+        locator.click()
+        ```
+
         Parameters
         ----------
         selector : str
@@ -4424,6 +4806,15 @@ class Frame(AsyncBase):
         await frame.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
         ```
 
+        ```py
+        # single selection matching the value
+        frame.select_option(\"select#colors\", \"blue\")
+        # single selection matching both the label
+        frame.select_option(\"select#colors\", label=\"blue\")
+        # multiple selection
+        frame.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
+        ```
+
         Parameters
         ----------
         selector : str
@@ -4576,6 +4967,11 @@ class Frame(AsyncBase):
         ```py
         await frame.type(\"#mytextarea\", \"hello\") # types instantly
         await frame.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
+        ```
+
+        ```py
+        frame.type(\"#mytextarea\", \"hello\") # types instantly
+        frame.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
         ```
 
         Parameters
@@ -4849,11 +5245,31 @@ class Frame(AsyncBase):
         asyncio.run(main())
         ```
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch()
+            page = browser.new_page()
+            page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\")
+            page.main_frame.wait_for_function(\"() => window.x > 0\")
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         To pass an argument to the predicate of `frame.waitForFunction` function:
 
         ```py
         selector = \".foo\"
         await frame.wait_for_function(\"selector => !!document.querySelector(selector)\", selector)
+        ```
+
+        ```py
+        selector = \".foo\"
+        frame.wait_for_function(\"selector => !!document.querySelector(selector)\", selector)
         ```
 
         Parameters
@@ -5215,6 +5631,41 @@ class Selectors(AsyncBase):
         asyncio.run(main())
         ```
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            tag_selector = \"\"\"
+              {
+                  // Returns the first element matching given selector in the root's subtree.
+                  query(root, selector) {
+                      return root.querySelector(selector);
+                  },
+                  // Returns all elements matching given selector in the root's subtree.
+                  queryAll(root, selector) {
+                      return Array.from(root.querySelectorAll(selector));
+                  }
+              }\"\"\"
+
+            # Register the engine. Selectors will be prefixed with \"tag=\".
+            playwright.selectors.register(\"tag\", tag_selector)
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content('<div><button>Click me</button></div>')
+
+            # Use the selector prefixed with its name.
+            button = page.locator('tag=button')
+            # Combine it with other selector engines.
+            page.click('tag=div >> text=\"Click me\"')
+            # Can use it in any methods supporting selectors.
+            button_count = page.locator('tag=button').count()
+            print(button_count)
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         Parameters
         ----------
         name : str
@@ -5536,6 +5987,15 @@ class Page(AsyncContextManager):
 
         page.on(\"console\", print_args)
         await page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        ```
+
+        ```py
+        def print_args(msg):
+            for arg in msg.args:
+                print(arg.json_value())
+
+        page.on(\"console\", print_args)
+        page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
         ```"""
 
     @typing.overload
@@ -5558,6 +6018,16 @@ class Page(AsyncContextManager):
             await page.wait_for_event(\"popup\")
         except Error as e:
             # when the page crashes, exception message contains \"crash\".
+        ```
+
+        ```py
+        try:
+            # crash might happen during a click.
+            page.click(\"button\")
+            # or while waiting for an event.
+            page.wait_for_event(\"popup\")
+        except Error as e:
+            # when the page crashes, exception message contains \"crash\".
         ```"""
 
     @typing.overload
@@ -5572,7 +6042,7 @@ class Page(AsyncContextManager):
         [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog, and
         actions like click will never finish.
 
-        ```python
+        ```py
         page.on(\"dialog\", lambda dialog: dialog.accept())
         ```
 
@@ -5665,6 +6135,14 @@ class Page(AsyncContextManager):
 
         # Navigate to a page with an exception.
         await page.goto(\"data:text/html,<script>throw new Error('test')</script>\")
+        ```
+
+        ```py
+        # Log all uncaught errors to the terminal
+        page.on(\"pageerror\", lambda exc: print(f\"uncaught exception: {exc}\"))
+
+        # Navigate to a page with an exception.
+        page.goto(\"data:text/html,<script>throw new Error('test')</script>\")
         ```"""
 
     @typing.overload
@@ -5686,6 +6164,13 @@ class Page(AsyncContextManager):
             page.evaluate(\"window.open('https://example.com')\")
         popup = await page_info.value
         print(await popup.evaluate(\"location.href\"))
+        ```
+
+        ```py
+        with page.expect_event(\"popup\") as page_info:
+            page.evaluate(\"window.open('https://example.com')\")
+        popup = page_info.value
+        print(popup.evaluate(\"location.href\"))
         ```
 
         > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
@@ -5710,7 +6195,7 @@ class Page(AsyncContextManager):
         """
         Emitted when a request fails, for example by timing out.
 
-        ```python
+        ```py
         page.on(\"requestfailed\", lambda request: print(request.url + \" \" + request.failure.error_text))
         ```
 
@@ -5799,6 +6284,15 @@ class Page(AsyncContextManager):
 
         page.on(\"console\", print_args)
         await page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        ```
+
+        ```py
+        def print_args(msg):
+            for arg in msg.args:
+                print(arg.json_value())
+
+        page.on(\"console\", print_args)
+        page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
         ```"""
 
     @typing.overload
@@ -5821,6 +6315,16 @@ class Page(AsyncContextManager):
             await page.wait_for_event(\"popup\")
         except Error as e:
             # when the page crashes, exception message contains \"crash\".
+        ```
+
+        ```py
+        try:
+            # crash might happen during a click.
+            page.click(\"button\")
+            # or while waiting for an event.
+            page.wait_for_event(\"popup\")
+        except Error as e:
+            # when the page crashes, exception message contains \"crash\".
         ```"""
 
     @typing.overload
@@ -5835,7 +6339,7 @@ class Page(AsyncContextManager):
         [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog, and
         actions like click will never finish.
 
-        ```python
+        ```py
         page.on(\"dialog\", lambda dialog: dialog.accept())
         ```
 
@@ -5928,6 +6432,14 @@ class Page(AsyncContextManager):
 
         # Navigate to a page with an exception.
         await page.goto(\"data:text/html,<script>throw new Error('test')</script>\")
+        ```
+
+        ```py
+        # Log all uncaught errors to the terminal
+        page.on(\"pageerror\", lambda exc: print(f\"uncaught exception: {exc}\"))
+
+        # Navigate to a page with an exception.
+        page.goto(\"data:text/html,<script>throw new Error('test')</script>\")
         ```"""
 
     @typing.overload
@@ -5949,6 +6461,13 @@ class Page(AsyncContextManager):
             page.evaluate(\"window.open('https://example.com')\")
         popup = await page_info.value
         print(await popup.evaluate(\"location.href\"))
+        ```
+
+        ```py
+        with page.expect_event(\"popup\") as page_info:
+            page.evaluate(\"window.open('https://example.com')\")
+        popup = page_info.value
+        print(popup.evaluate(\"location.href\"))
         ```
 
         > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
@@ -5973,7 +6492,7 @@ class Page(AsyncContextManager):
         """
         Emitted when a request fails, for example by timing out.
 
-        ```python
+        ```py
         page.on(\"requestfailed\", lambda request: print(request.url + \" \" + request.failure.error_text))
         ```
 
@@ -6349,6 +6868,23 @@ class Page(AsyncContextManager):
         asyncio.run(main())
         ```
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            chromium = playwright.chromium
+            browser = chromium.launch()
+            page = browser.new_page()
+            for current_url in [\"https://google.com\", \"https://bbc.com\"]:
+                page.goto(current_url, wait_until=\"domcontentloaded\")
+                element = page.wait_for_selector(\"img\")
+                print(\"Loaded image: \" + str(element.get_attribute(\"src\")))
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         Parameters
         ----------
         selector : str
@@ -6580,6 +7116,10 @@ class Page(AsyncContextManager):
         await page.dispatch_event(\"button#submit\", \"click\")
         ```
 
+        ```py
+        page.dispatch_event(\"button#submit\", \"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -6598,6 +7138,12 @@ class Page(AsyncContextManager):
         # note you can only create data_transfer in chromium and firefox
         data_transfer = await page.evaluate_handle(\"new DataTransfer()\")
         await page.dispatch_event(\"#source\", \"dragstart\", { \"dataTransfer\": data_transfer })
+        ```
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = page.evaluate_handle(\"new DataTransfer()\")
+        page.dispatch_event(\"#source\", \"dragstart\", { \"dataTransfer\": data_transfer })
         ```
 
         Parameters
@@ -6646,6 +7192,11 @@ class Page(AsyncContextManager):
         print(result) # prints \"56\"
         ```
 
+        ```py
+        result = page.evaluate(\"([x, y]) => Promise.resolve(x * y)\", [7, 8])
+        print(result) # prints \"56\"
+        ```
+
         A string can also be passed in instead of a function:
 
         ```py
@@ -6654,12 +7205,24 @@ class Page(AsyncContextManager):
         print(await page.evaluate(f\"1 + {x}\")) # prints \"11\"
         ```
 
+        ```py
+        print(page.evaluate(\"1 + 2\")) # prints \"3\"
+        x = 10
+        print(page.evaluate(f\"1 + {x}\")) # prints \"11\"
+        ```
+
         `ElementHandle` instances can be passed as an argument to the `page.evaluate()`:
 
         ```py
         body_handle = await page.evaluate(\"document.body\")
         html = await page.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         await body_handle.dispose()
+        ```
+
+        ```py
+        body_handle = page.evaluate(\"document.body\")
+        html = page.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
+        body_handle.dispose()
         ```
 
         Shortcut for main frame's `frame.evaluate()`.
@@ -6701,10 +7264,19 @@ class Page(AsyncContextManager):
         a_window_handle # handle for the window object.
         ```
 
+        ```py
+        a_window_handle = page.evaluate_handle(\"Promise.resolve(window)\")
+        a_window_handle # handle for the window object.
+        ```
+
         A string can also be passed in instead of a function:
 
         ```py
         a_handle = await page.evaluate_handle(\"document\") # handle for the \"document\"
+        ```
+
+        ```py
+        a_handle = page.evaluate_handle(\"document\") # handle for the \"document\"
         ```
 
         `JSHandle` instances can be passed as an argument to the `page.evaluate_handle()`:
@@ -6714,6 +7286,13 @@ class Page(AsyncContextManager):
         result_handle = await page.evaluate_handle(\"body => body.innerHTML\", a_handle)
         print(await result_handle.json_value())
         await result_handle.dispose()
+        ```
+
+        ```py
+        a_handle = page.evaluate_handle(\"document.body\")
+        result_handle = page.evaluate_handle(\"body => body.innerHTML\", a_handle)
+        print(result_handle.json_value())
+        result_handle.dispose()
         ```
 
         Parameters
@@ -6760,6 +7339,12 @@ class Page(AsyncContextManager):
         search_value = await page.eval_on_selector(\"#search\", \"el => el.value\")
         preload_href = await page.eval_on_selector(\"link[rel=preload]\", \"el => el.href\")
         html = await page.eval_on_selector(\".main-container\", \"(e, suffix) => e.outer_html + suffix\", \"hello\")
+        ```
+
+        ```py
+        search_value = page.eval_on_selector(\"#search\", \"el => el.value\")
+        preload_href = page.eval_on_selector(\"link[rel=preload]\", \"el => el.href\")
+        html = page.eval_on_selector(\".main-container\", \"(e, suffix) => e.outer_html + suffix\", \"hello\")
         ```
 
         Shortcut for main frame's `frame.eval_on_selector()`.
@@ -6809,6 +7394,10 @@ class Page(AsyncContextManager):
 
         ```py
         div_counts = await page.eval_on_selector_all(\"div\", \"(divs, min) => divs.length >= min\", 10)
+        ```
+
+        ```py
+        div_counts = page.eval_on_selector_all(\"div\", \"(divs, min) => divs.length >= min\", 10)
         ```
 
         Parameters
@@ -6950,6 +7539,35 @@ class Page(AsyncContextManager):
         asyncio.run(main())
         ```
 
+        ```py
+        import hashlib
+        from playwright.sync_api import sync_playwright
+
+        def sha256(text):
+            m = hashlib.sha256()
+            m.update(bytes(text, \"utf8\"))
+            return m.hexdigest()
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=False)
+            page = browser.new_page()
+            page.expose_function(\"sha256\", sha256)
+            page.set_content(\"\"\"
+                <script>
+                  async function onClick() {
+                    document.querySelector('div').textContent = await window.sha256('PLAYWRIGHT');
+                  }
+                </script>
+                <button onclick=\"onClick()\">Click me</button>
+                <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         Parameters
         ----------
         name : str
@@ -7009,6 +7627,30 @@ class Page(AsyncContextManager):
         asyncio.run(main())
         ```
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=false)
+            context = browser.new_context()
+            page = context.new_page()
+            page.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
+            page.set_content(\"\"\"
+            <script>
+              async function onClick() {
+                document.querySelector('div').textContent = await window.pageURL();
+              }
+            </script>
+            <button onclick=\"onClick()\">Click me</button>
+            <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         An example of passing an element handle:
 
         ```py
@@ -7017,6 +7659,20 @@ class Page(AsyncContextManager):
 
         await page.expose_binding(\"clicked\", print, handle=true)
         await page.set_content(\"\"\"
+          <script>
+            document.addEventListener('click', event => window.clicked(event.target));
+          </script>
+          <div>Click me</div>
+          <div>Or click me</div>
+        \"\"\")
+        ```
+
+        ```py
+        def print(source, element):
+            print(element.text_content())
+
+        page.expose_binding(\"clicked\", print, handle=true)
+        page.set_content(\"\"\"
           <script>
             document.addEventListener('click', event => window.clicked(event.target));
           </script>
@@ -7221,12 +7877,26 @@ class Page(AsyncContextManager):
         ```
 
         ```py
+        page.click(\"button\") # click triggers navigation.
+        page.wait_for_load_state() # the promise resolves after \"load\" event.
+        ```
+
+        ```py
         async with page.expect_popup() as page_info:
             await page.click(\"button\") # click triggers a popup.
         popup = await page_info.value
          # Following resolves after \"domcontentloaded\" event.
         await popup.wait_for_load_state(\"domcontentloaded\")
         print(await popup.title()) # popup is ready to use.
+        ```
+
+        ```py
+        with page.expect_popup() as page_info:
+            page.click(\"button\") # click triggers a popup.
+        popup = page_info.value
+         # Following resolves after \"domcontentloaded\" event.
+        popup.wait_for_load_state(\"domcontentloaded\")
+        print(popup.title()) # popup is ready to use.
         ```
 
         Shortcut for main frame's `frame.wait_for_load_state()`.
@@ -7264,6 +7934,11 @@ class Page(AsyncContextManager):
         ```py
         await page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
         await page.wait_for_url(\"**/target.html\")
+        ```
+
+        ```py
+        page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        page.wait_for_url(\"**/target.html\")
         ```
 
         Shortcut for main frame's `frame.wait_for_url()`.
@@ -7430,6 +8105,25 @@ class Page(AsyncContextManager):
         ```
 
         ```py
+        page.evaluate(\"matchMedia('screen').matches\")
+        # → True
+        page.evaluate(\"matchMedia('print').matches\")
+        # → False
+
+        page.emulate_media(media=\"print\")
+        page.evaluate(\"matchMedia('screen').matches\")
+        # → False
+        page.evaluate(\"matchMedia('print').matches\")
+        # → True
+
+        page.emulate_media()
+        page.evaluate(\"matchMedia('screen').matches\")
+        # → True
+        page.evaluate(\"matchMedia('print').matches\")
+        # → False
+        ```
+
+        ```py
         await page.emulate_media(color_scheme=\"dark\")
         await page.evaluate(\"matchMedia('(prefers-color-scheme: dark)').matches\")
         # → True
@@ -7437,6 +8131,15 @@ class Page(AsyncContextManager):
         # → False
         await page.evaluate(\"matchMedia('(prefers-color-scheme: no-preference)').matches\")
         # → False
+        ```
+
+        ```py
+        page.emulate_media(color_scheme=\"dark\")
+        page.evaluate(\"matchMedia('(prefers-color-scheme: dark)').matches\")
+        # → True
+        page.evaluate(\"matchMedia('(prefers-color-scheme: light)').matches\")
+        # → False
+        page.evaluate(\"matchMedia('(prefers-color-scheme: no-preference)').matches\")
         ```
 
         Parameters
@@ -7483,6 +8186,12 @@ class Page(AsyncContextManager):
         await page.goto(\"https://example.com\")
         ```
 
+        ```py
+        page = browser.new_page()
+        page.set_viewport_size({\"width\": 640, \"height\": 480})
+        page.goto(\"https://example.com\")
+        ```
+
         Parameters
         ----------
         viewport_size : {width: int, height: int}
@@ -7520,6 +8229,11 @@ class Page(AsyncContextManager):
         await page.add_init_script(path=\"./preload.js\")
         ```
 
+        ```py
+        # in your playwright script, assuming the preload.js file is in same directory
+        page.add_init_script(path=\"./preload.js\")
+        ```
+
         > NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
@@ -7555,7 +8269,7 @@ class Page(AsyncContextManager):
         > NOTE: The handler will only be called for the first url if the response is a redirect.
         > NOTE: `page.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
-        request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
+        request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 
         An example of a naive handler that aborts all image requests:
 
@@ -7566,6 +8280,13 @@ class Page(AsyncContextManager):
         await browser.close()
         ```
 
+        ```py
+        page = browser.new_page()
+        page.route(\"**/*.{png,jpg,jpeg}\", lambda route: route.abort())
+        page.goto(\"https://example.com\")
+        browser.close()
+        ```
+
         or the same snippet using a regex pattern instead:
 
         ```py
@@ -7573,6 +8294,13 @@ class Page(AsyncContextManager):
         await page.route(re.compile(r\"(\\.png$)|(\\.jpg$)\"), lambda route: route.abort())
         await page.goto(\"https://example.com\")
         await browser.close()
+        ```
+
+        ```py
+        page = browser.new_page()
+        page.route(re.compile(r\"(\\.png$)|(\\.jpg$)\"), lambda route: route.abort())
+        page.goto(\"https://example.com\")
+        browser.close()
         ```
 
         It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
@@ -7585,6 +8313,15 @@ class Page(AsyncContextManager):
           else
             route.continue_()
         await page.route(\"/api/**\", handle_route)
+        ```
+
+        ```py
+        def handle_route(route):
+          if (\"my-string\" in route.request.post_data)
+            route.fulfill(body=\"mocked-data\")
+          else
+            route.continue_()
+        page.route(\"/api/**\", handle_route)
         ```
 
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
@@ -8113,6 +8850,11 @@ class Page(AsyncContextManager):
         await locator.click()
         ```
 
+        ```py
+        locator = page.frame_locator(\"#my-iframe\").locator(\"text=Submit\")
+        locator.click()
+        ```
+
         Parameters
         ----------
         selector : str
@@ -8431,6 +9173,15 @@ class Page(AsyncContextManager):
         await page.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
         ```
 
+        ```py
+        # single selection matching the value
+        page.select_option(\"select#colors\", \"blue\")
+        # single selection matching both the label
+        page.select_option(\"select#colors\", label=\"blue\")
+        # multiple selection
+        page.select_option(\"select#colors\", value=[\"red\", \"green\", \"blue\"])
+        ```
+
         Shortcut for main frame's `frame.select_option()`.
 
         Parameters
@@ -8588,6 +9339,11 @@ class Page(AsyncContextManager):
         await page.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
         ```
 
+        ```py
+        page.type(\"#mytextarea\", \"hello\") # types instantly
+        page.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
+        ```
+
         Shortcut for main frame's `frame.type()`.
 
         Parameters
@@ -8663,6 +9419,18 @@ class Page(AsyncContextManager):
         await page.press(\"body\", \"Shift+O\")
         await page.screenshot(path=\"o.png\")
         await browser.close()
+        ```
+
+        ```py
+        page = browser.new_page()
+        page.goto(\"https://keycode.info\")
+        page.press(\"body\", \"A\")
+        page.screenshot(path=\"a.png\")
+        page.press(\"body\", \"ArrowLeft\")
+        page.screenshot(path=\"arrow_left.png\")
+        page.press(\"body\", \"Shift+O\")
+        page.screenshot(path=\"o.png\")
+        browser.close()
         ```
 
         Parameters
@@ -8842,6 +9610,11 @@ class Page(AsyncContextManager):
         await page.wait_for_timeout(1000)
         ```
 
+        ```py
+        # wait for 1 second
+        page.wait_for_timeout(1000)
+        ```
+
         Shortcut for main frame's `frame.wait_for_timeout()`.
 
         Parameters
@@ -8886,11 +9659,31 @@ class Page(AsyncContextManager):
         asyncio.run(main())
         ```
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch()
+            page = browser.new_page()
+            page.evaluate(\"window.x = 0; setTimeout(() => { window.x = 100 }, 1000);\")
+            page.wait_for_function(\"() => window.x > 0\")
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         To pass an argument to the predicate of `page.wait_for_function()` function:
 
         ```py
         selector = \".foo\"
         await page.wait_for_function(\"selector => !!document.querySelector(selector)\", selector)
+        ```
+
+        ```py
+        selector = \".foo\"
+        page.wait_for_function(\"selector => !!document.querySelector(selector)\", selector)
         ```
 
         Shortcut for main frame's `frame.wait_for_function()`.
@@ -8972,6 +9765,12 @@ class Page(AsyncContextManager):
         # generates a pdf with \"screen\" media type.
         await page.emulate_media(media=\"screen\")
         await page.pdf(path=\"page.pdf\")
+        ```
+
+        ```py
+        # generates a pdf with \"screen\" media type.
+        page.emulate_media(media=\"screen\")
+        page.pdf(path=\"page.pdf\")
         ```
 
         The `width`, `height`, and `margin` options accept values labeled with units. Unlabeled values are treated as pixels.
@@ -9075,6 +9874,12 @@ class Page(AsyncContextManager):
         async with page.expect_event(\"framenavigated\") as event_info:
             await page.click(\"button\")
         frame = await event_info.value
+        ```
+
+        ```py
+        with page.expect_event(\"framenavigated\") as event_info:
+            page.click(\"button\")
+        frame = event_info.value
         ```
 
         Parameters
@@ -9214,6 +10019,12 @@ class Page(AsyncContextManager):
         # Resolves after navigation has finished
         ```
 
+        ```py
+        with page.expect_navigation():
+            page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+        # Resolves after navigation has finished
+        ```
+
         > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
         considered a navigation.
 
@@ -9303,6 +10114,17 @@ class Page(AsyncContextManager):
         second_request = await second.value
         ```
 
+        ```py
+        with page.expect_request(\"http://example.com/resource\") as first:
+            page.click('button')
+        first_request = first.value
+
+        # or with a lambda
+        with page.expect_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\") as second:
+            page.click('img')
+        second_request = second.value
+        ```
+
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Request], bool], Pattern, str]
@@ -9377,6 +10199,19 @@ class Page(AsyncContextManager):
         async with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200) as response_info:
             await page.click(\"input\")
         response = await response_info.value
+        return response.ok
+        ```
+
+        ```py
+        with page.expect_response(\"https://example.com/resource\") as response_info:
+            page.click(\"input\")
+        response = response_info.value
+        return response.ok
+
+        # or with a lambda
+        with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200) as response_info:
+            page.click(\"input\")
+        response = response_info.value
         return response.ok
         ```
 
@@ -9551,6 +10386,10 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         background_page = await context.wait_for_event(\"backgroundpage\")
+        ```
+
+        ```py
+        background_page = context.wait_for_event(\"backgroundpage\")
         ```"""
 
     @typing.overload
@@ -9586,6 +10425,13 @@ class BrowserContext(AsyncContextManager):
             await page.click(\"a[target=_blank]\"),
         page = await page_info.value
         print(await page.evaluate(\"location.href\"))
+        ```
+
+        ```py
+        with context.expect_page() as page_info:
+            page.click(\"a[target=_blank]\"),
+        page = page_info.value
+        print(page.evaluate(\"location.href\"))
         ```
 
         > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
@@ -9669,6 +10515,10 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         background_page = await context.wait_for_event(\"backgroundpage\")
+        ```
+
+        ```py
+        background_page = context.wait_for_event(\"backgroundpage\")
         ```"""
 
     @typing.overload
@@ -9704,6 +10554,13 @@ class BrowserContext(AsyncContextManager):
             await page.click(\"a[target=_blank]\"),
         page = await page_info.value
         print(await page.evaluate(\"location.href\"))
+        ```
+
+        ```py
+        with context.expect_page() as page_info:
+            page.click(\"a[target=_blank]\"),
+        page = page_info.value
+        print(page.evaluate(\"location.href\"))
         ```
 
         > NOTE: Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not need it
@@ -9934,6 +10791,10 @@ class BrowserContext(AsyncContextManager):
         await browser_context.add_cookies([cookie_object1, cookie_object2])
         ```
 
+        ```py
+        browser_context.add_cookies([cookie_object1, cookie_object2])
+        ```
+
         Parameters
         ----------
         cookies : List[{name: str, value: str, url: Union[str, NoneType], domain: Union[str, NoneType], path: Union[str, NoneType], expires: Union[float, NoneType], httpOnly: Union[bool, NoneType], secure: Union[bool, NoneType], sameSite: Union["Lax", "None", "Strict", NoneType]}]
@@ -9999,6 +10860,13 @@ class BrowserContext(AsyncContextManager):
         # do stuff ..
         context.clear_permissions()
         ```
+
+        ```py
+        context = browser.new_context()
+        context.grant_permissions([\"clipboard-read\"])
+        # do stuff ..
+        context.clear_permissions()
+        ```
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.clear_permissions())
@@ -10010,6 +10878,10 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         await browser_context.set_geolocation({\"latitude\": 59.95, \"longitude\": 30.31667})
+        ```
+
+        ```py
+        browser_context.set_geolocation({\"latitude\": 59.95, \"longitude\": 30.31667})
         ```
 
         > NOTE: Consider using `browser_context.grant_permissions()` to grant permissions for the browser context pages to
@@ -10078,6 +10950,11 @@ class BrowserContext(AsyncContextManager):
         await browser_context.add_init_script(path=\"preload.js\")
         ```
 
+        ```py
+        # in your playwright script, assuming the preload.js file is in same directory.
+        browser_context.add_init_script(path=\"preload.js\")
+        ```
+
         > NOTE: The order of evaluation of multiple scripts installed via `browser_context.add_init_script()` and
         `page.add_init_script()` is not defined.
 
@@ -10137,6 +11014,30 @@ class BrowserContext(AsyncContextManager):
         asyncio.run(main())
         ```
 
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=false)
+            context = browser.new_context()
+            context.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
+            page = context.new_page()
+            page.set_content(\"\"\"
+            <script>
+              async function onClick() {
+                document.querySelector('div').textContent = await window.pageURL();
+              }
+            </script>
+            <button onclick=\"onClick()\">Click me</button>
+            <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         An example of passing an element handle:
 
         ```py
@@ -10145,6 +11046,20 @@ class BrowserContext(AsyncContextManager):
 
         await context.expose_binding(\"clicked\", print, handle=true)
         await page.set_content(\"\"\"
+          <script>
+            document.addEventListener('click', event => window.clicked(event.target));
+          </script>
+          <div>Click me</div>
+          <div>Or click me</div>
+        \"\"\")
+        ```
+
+        ```py
+        def print(source, element):
+            print(element.text_content())
+
+        context.expose_binding(\"clicked\", print, handle=true)
+        page.set_content(\"\"\"
           <script>
             document.addEventListener('click', event => window.clicked(event.target));
           </script>
@@ -10215,6 +11130,36 @@ class BrowserContext(AsyncContextManager):
         asyncio.run(main())
         ```
 
+        ```py
+        import hashlib
+        from playwright.sync_api import sync_playwright
+
+        def sha256(text):
+            m = hashlib.sha256()
+            m.update(bytes(text, \"utf8\"))
+            return m.hexdigest()
+
+        def run(playwright):
+            webkit = playwright.webkit
+            browser = webkit.launch(headless=False)
+            context = browser.new_context()
+            context.expose_function(\"sha256\", sha256)
+            page = context.new_page()
+            page.set_content(\"\"\"
+                <script>
+                  async function onClick() {
+                    document.querySelector('div').textContent = await window.sha256('PLAYWRIGHT');
+                  }
+                </script>
+                <button onclick=\"onClick()\">Click me</button>
+                <div></div>
+            \"\"\")
+            page.click(\"button\")
+
+        with sync_playwright() as playwright:
+            run(playwright)
+        ```
+
         Parameters
         ----------
         name : str
@@ -10244,9 +11189,9 @@ class BrowserContext(AsyncContextManager):
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
         is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 
-        > NOTE: `page.route()` will not intercept requests intercepted by Service Worker. See
+        > NOTE: `browser_context.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
-        request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
+        request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 
         An example of a naive handler that aborts all image requests:
 
@@ -10256,6 +11201,14 @@ class BrowserContext(AsyncContextManager):
         await context.route(\"**/*.{png,jpg,jpeg}\", lambda route: route.abort())
         await page.goto(\"https://example.com\")
         await browser.close()
+        ```
+
+        ```py
+        context = browser.new_context()
+        page = context.new_page()
+        context.route(\"**/*.{png,jpg,jpeg}\", lambda route: route.abort())
+        page.goto(\"https://example.com\")
+        browser.close()
         ```
 
         or the same snippet using a regex pattern instead:
@@ -10269,6 +11222,16 @@ class BrowserContext(AsyncContextManager):
         await browser.close()
         ```
 
+        ```py
+        context = browser.new_context()
+        page = context.new_page()
+        context.route(re.compile(r\"(\\.png$)|(\\.jpg$)\"), lambda route: route.abort())
+        page = await context.new_page()
+        page = context.new_page()
+        page.goto(\"https://example.com\")
+        browser.close()
+        ```
+
         It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
         post data, and leaving all other requests as is:
 
@@ -10279,6 +11242,15 @@ class BrowserContext(AsyncContextManager):
           else
             route.continue_()
         await context.route(\"/api/**\", handle_route)
+        ```
+
+        ```py
+        def handle_route(route):
+          if (\"my-string\" in route.request.post_data)
+            route.fulfill(body=\"mocked-data\")
+          else
+            route.continue_()
+        context.route(\"/api/**\", handle_route)
         ```
 
         Page routes (set up with `page.route()`) take precedence over browser context routes when request matches both
@@ -10348,6 +11320,12 @@ class BrowserContext(AsyncContextManager):
         async with context.expect_event(\"page\") as event_info:
             await page.click(\"button\")
         page = await event_info.value
+        ```
+
+        ```py
+        with context.expect_event(\"page\") as event_info:
+            page.click(\"button\")
+        page = event_info.value
         ```
 
         Parameters
@@ -10559,11 +11537,30 @@ class Browser(AsyncContextManager):
         print(len(browser.contexts())) # prints `1`
         ```
 
+        ```py
+        browser = pw.webkit.launch()
+        print(len(browser.contexts())) # prints `0`
+        context = browser.new_context()
+        print(len(browser.contexts())) # prints `1`
+        ```
+
         Returns
         -------
         List[BrowserContext]
         """
         return mapping.from_impl_list(self._impl_obj.contexts)
+
+    @property
+    def browser_type(self) -> "BrowserType":
+        """Browser.browser_type
+
+        Get the browser type (chromium, firefox or webkit) that the browser belongs to.
+
+        Returns
+        -------
+        BrowserType
+        """
+        return mapping.from_impl(self._impl_obj.browser_type)
 
     @property
     def version(self) -> str:
@@ -10621,7 +11618,8 @@ class Browser(AsyncContextManager):
         record_video_size: ViewportSize = None,
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
         base_url: str = None,
-        strict_selectors: bool = None
+        strict_selectors: bool = None,
+        service_workers: Literal["allow", "block"] = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -10634,6 +11632,15 @@ class Browser(AsyncContextManager):
         # create a new page in a pristine context.
         page = await context.new_page()
         await page.goto(\"https://example.com\")
+        ```
+
+        ```py
+        browser = playwright.firefox.launch() # or \"chromium\" or \"webkit\".
+        # create a new incognito browser context.
+        context = browser.new_context()
+        # create a new page in a pristine context.
+        page = context.new_page()
+        page.goto(\"https://example.com\")
         ```
 
         Parameters
@@ -10723,9 +11730,13 @@ class Browser(AsyncContextManager):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
-            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
             more about the strict mode.
+        service_workers : Union["allow", "block", NoneType]
+            Whether to allow sites to register Service workers. Defaults to `'allow'`.
+            - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
+            - `'block'`: Playwright will block all registration of Service Workers.
 
         Returns
         -------
@@ -10764,6 +11775,7 @@ class Browser(AsyncContextManager):
                 storageState=storage_state,
                 baseURL=base_url,
                 strictSelectors=strict_selectors,
+                serviceWorkers=service_workers,
             )
         )
 
@@ -10799,7 +11811,8 @@ class Browser(AsyncContextManager):
         record_video_size: ViewportSize = None,
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
         base_url: str = None,
-        strict_selectors: bool = None
+        strict_selectors: bool = None,
+        service_workers: Literal["allow", "block"] = None
     ) -> "Page":
         """Browser.new_page
 
@@ -10896,9 +11909,13 @@ class Browser(AsyncContextManager):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
-            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
             more about the strict mode.
+        service_workers : Union["allow", "block", NoneType]
+            Whether to allow sites to register Service workers. Defaults to `'allow'`.
+            - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
+            - `'block'`: Playwright will block all registration of Service Workers.
 
         Returns
         -------
@@ -10937,6 +11954,7 @@ class Browser(AsyncContextManager):
                 storageState=storage_state,
                 baseURL=base_url,
                 strictSelectors=strict_selectors,
+                serviceWorkers=service_workers,
             )
         )
 
@@ -10989,6 +12007,12 @@ class Browser(AsyncContextManager):
         await browser.start_tracing(page, path=\"trace.json\")
         await page.goto(\"https://www.google.com\")
         await browser.stop_tracing()
+        ```
+
+        ```py
+        browser.start_tracing(page, path=\"trace.json\")
+        page.goto(\"https://www.google.com\")
+        browser.stop_tracing()
         ```
 
         Parameters
@@ -11088,6 +12112,12 @@ class BrowserType(AsyncBase):
 
         ```py
         browser = await playwright.chromium.launch( # or \"firefox\" or \"webkit\".
+            ignore_default_args=[\"--mute-audio\"]
+        )
+        ```
+
+        ```py
+        browser = playwright.chromium.launch( # or \"firefox\" or \"webkit\".
             ignore_default_args=[\"--mute-audio\"]
         )
         ```
@@ -11231,7 +12261,8 @@ class BrowserType(AsyncBase):
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
         base_url: str = None,
-        strict_selectors: bool = None
+        strict_selectors: bool = None,
+        service_workers: Literal["allow", "block"] = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -11368,9 +12399,13 @@ class BrowserType(AsyncBase):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
-            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
             more about the strict mode.
+        service_workers : Union["allow", "block", NoneType]
+            Whether to allow sites to register Service workers. Defaults to `'allow'`.
+            - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
+            - `'block'`: Playwright will block all registration of Service Workers.
 
         Returns
         -------
@@ -11423,6 +12458,7 @@ class BrowserType(AsyncBase):
                 recordVideoSize=record_video_size,
                 baseURL=base_url,
                 strictSelectors=strict_selectors,
+                serviceWorkers=service_workers,
             )
         )
 
@@ -11537,6 +12573,23 @@ class Playwright(AsyncBase):
             async with async_playwright() as playwright:
                 await run(playwright)
         asyncio.run(main())
+        ```
+
+        ```py
+        from playwright.sync_api import sync_playwright
+
+        def run(playwright):
+            webkit = playwright.webkit
+            iphone = playwright.devices[\"iPhone 6\"]
+            browser = webkit.launch()
+            context = browser.new_context(**iphone)
+            page = context.new_page()
+            page.goto(\"http://example.com\")
+            # other actions...
+            browser.close()
+
+        with sync_playwright() as playwright:
+            run(playwright)
         ```
 
         Returns
@@ -11658,6 +12711,13 @@ class Tracing(AsyncBase):
         await context.tracing.stop(path = \"trace.zip\")
         ```
 
+        ```py
+        context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        page = context.new_page()
+        page.goto(\"https://playwright.dev\")
+        context.tracing.stop(path = \"trace.zip\")
+        ```
+
         Parameters
         ----------
         name : Union[str, NoneType]
@@ -11706,6 +12766,22 @@ class Tracing(AsyncBase):
         await page.goto(\"http://example.com\")
         # Save a second trace file with different actions.
         await context.tracing.stop_chunk(path = \"trace2.zip\")
+        ```
+
+        ```py
+        context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        page = context.new_page()
+        page.goto(\"https://playwright.dev\")
+
+        context.tracing.start_chunk()
+        page.click(\"text=Get Started\")
+        # Everything between start_chunk and stop_chunk will be recorded in the trace.
+        context.tracing.stop_chunk(path = \"trace1.zip\")
+
+        context.tracing.start_chunk()
+        page.goto(\"http://example.com\")
+        # Save a second trace file with different actions.
+        context.tracing.stop_chunk(path = \"trace2.zip\")
         ```
 
         Parameters
@@ -11806,6 +12882,11 @@ class Locator(AsyncBase):
         ```py
         box = await element.bounding_box()
         await page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
+        ```
+
+        ```py
+        box = element.bounding_box()
+        page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
         ```
 
         Parameters
@@ -12029,6 +13110,10 @@ class Locator(AsyncBase):
         await element.dispatch_event(\"click\")
         ```
 
+        ```py
+        element.dispatch_event(\"click\")
+        ```
+
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
         and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
@@ -12047,6 +13132,12 @@ class Locator(AsyncBase):
         # note you can only create data_transfer in chromium and firefox
         data_transfer = await page.evaluate_handle(\"new DataTransfer()\")
         await element.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
+        ```
+
+        ```py
+        # note you can only create data_transfer in chromium and firefox
+        data_transfer = page.evaluate_handle(\"new DataTransfer()\")
+        element.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
         ```
 
         Parameters
@@ -12082,6 +13173,11 @@ class Locator(AsyncBase):
         ```py
         tweets = page.locator(\".tweet .retweets\")
         assert await tweets.evaluate(\"node => node.innerText\") == \"10 retweets\"
+        ```
+
+        ```py
+        tweets = page.locator(\".tweet .retweets\")
+        assert tweets.evaluate(\"node => node.innerText\") == \"10 retweets\"
         ```
 
         Parameters
@@ -12120,6 +13216,11 @@ class Locator(AsyncBase):
         ```py
         elements = page.locator(\"div\")
         div_counts = await elements(\"(divs, min) => divs.length >= min\", 10)
+        ```
+
+        ```py
+        elements = page.locator(\"div\")
+        div_counts = elements(\"(divs, min) => divs.length >= min\", 10)
         ```
 
         Parameters
@@ -12269,6 +13370,11 @@ class Locator(AsyncBase):
         await locator.click()
         ```
 
+        ```py
+        locator = page.frame_locator(\"iframe\").locator(\"text=Submit\")
+        locator.click()
+        ```
+
         Parameters
         ----------
         selector : str
@@ -12336,7 +13442,26 @@ class Locator(AsyncBase):
     ) -> "Locator":
         """Locator.filter
 
-        This method narrows existing locator according to the options, for example filters by text.
+        This method narrows existing locator according to the options, for example filters by text. It can be chained to filter
+        multiple times.
+
+        ```py
+        row_locator = page.lsocator(\"tr\")
+        # ...
+        await row_locator
+            .filter(has_text=\"text in column 1\")
+            .filter(has=page.locator(\"tr\", has_text=\"column 2 button\"))
+            .screenshot()
+        ```
+
+        ```py
+        row_locator = page.lsocator(\"tr\")
+        # ...
+        row_locator
+            .filter(has_text=\"text in column 1\")
+            .filter(has=page.locator(\"tr\", has_text=\"column 2 button\"))
+            .screenshot()
+        ```
 
         Parameters
         ----------
@@ -12861,6 +13986,15 @@ class Locator(AsyncBase):
         await element.select_option(value=[\"red\", \"green\", \"blue\"])
         ```
 
+        ```py
+        # single selection matching the value
+        element.select_option(\"blue\")
+        # single selection matching both the label
+        element.select_option(label=\"blue\")
+        # multiple selection
+        element.select_option(value=[\"red\", \"green\", \"blue\"])
+        ```
+
         Parameters
         ----------
         value : Union[List[str], str, NoneType]
@@ -13065,12 +14199,23 @@ class Locator(AsyncBase):
         await element.type(\"world\", delay=100) # types slower, like a user
         ```
 
+        ```py
+        element.type(\"hello\") # types instantly
+        element.type(\"world\", delay=100) # types slower, like a user
+        ```
+
         An example of typing into a text field and then submitting the form:
 
         ```py
         element = page.locator(\"input\")
         await element.type(\"some text\")
         await element.press(\"Enter\")
+        ```
+
+        ```py
+        element = page.locator(\"input\")
+        element.type(\"some text\")
+        element.press(\"Enter\")
         ```
 
         Parameters
@@ -13188,6 +14333,11 @@ class Locator(AsyncBase):
         ```py
         order_sent = page.locator(\"#order-sent\")
         await order_sent.wait_for()
+        ```
+
+        ```py
+        order_sent = page.locator(\"#order-sent\")
+        order_sent.wait_for()
         ```
 
         Parameters
@@ -13978,6 +15128,14 @@ class PageAssertions(AsyncBase):
         await expect(page).to_have_title(re.compile(r\".*checkout\"))
         ```
 
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        # ...
+        expect(page).to_have_title(re.compile(r\".*checkout\"))
+        ```
+
         Parameters
         ----------
         title_or_reg_exp : Union[Pattern, str]
@@ -14036,6 +15194,14 @@ class PageAssertions(AsyncBase):
         await expect(page).to_have_url(re.compile(\".*checkout\"))
         ```
 
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        # ...
+        expect(page).to_have_url(re.compile(\".*checkout\"))
+        ```
+
         Parameters
         ----------
         url_or_reg_exp : Union[Pattern, str]
@@ -14088,7 +15254,8 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.to_contain_text
 
@@ -14104,6 +15271,15 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_contain_text(re.compile(r\"\\d messages\"))
         ```
 
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        locator = page.locator('.title')
+        expect(locator).to_contain_text(\"substring\")
+        expect(locator).to_contain_text(re.compile(r\"\\d messages\"))
+        ```
+
         Note that if array is passed as an expected value, entire lists of elements can be asserted:
 
         ```py
@@ -14114,6 +15290,14 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_contain_text([\"Text 1\", \"Text 4\", \"Text 5\"])
         ```
 
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"list > .list-item\")
+        expect(locator).to_contain_text([\"Text 1\", \"Text 4\", \"Text 5\"])
+        ```
+
         Parameters
         ----------
         expected : Union[List[Union[Pattern, str]], Pattern, str]
@@ -14122,6 +15306,9 @@ class LocatorAssertions(AsyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14130,6 +15317,7 @@ class LocatorAssertions(AsyncBase):
                 expected=mapping.to_impl(expected),
                 use_inner_text=use_inner_text,
                 timeout=timeout,
+                ignore_case=ignore_case,
             )
         )
 
@@ -14140,7 +15328,8 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.not_to_contain_text
 
@@ -14154,6 +15343,9 @@ class LocatorAssertions(AsyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14162,6 +15354,7 @@ class LocatorAssertions(AsyncBase):
                 expected=mapping.to_impl(expected),
                 use_inner_text=use_inner_text,
                 timeout=timeout,
+                ignore_case=ignore_case,
             )
         )
 
@@ -14181,6 +15374,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\"input\")
         await expect(locator).to_have_attribute(\"type\", \"text\")
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"input\")
+        expect(locator).to_have_attribute(\"type\", \"text\")
         ```
 
         Parameters
@@ -14247,6 +15447,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_have_class(re.compile(r\"selected\"))
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"#component\")
+        expect(locator).to_have_class(re.compile(r\"selected\"))
+        ```
+
         Note that if array is passed as an expected value, entire lists of elements can be asserted:
 
         ```py
@@ -14254,6 +15461,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\"list > .component\")
         await expect(locator).to_have_class([\"component\", \"component selected\", \"component\"])
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"list > .component\")
+        expect(locator).to_have_class([\"component\", \"component selected\", \"component\"])
         ```
 
         Parameters
@@ -14310,6 +15524,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_have_count(3)
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"list > .component\")
+        expect(locator).to_have_count(3)
+        ```
+
         Parameters
         ----------
         count : int
@@ -14357,6 +15578,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\"button\")
         await expect(locator).to_have_css(\"display\", \"flex\")
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"button\")
+        expect(locator).to_have_css(\"display\", \"flex\")
         ```
 
         Parameters
@@ -14416,6 +15644,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_have_id(\"lastname\")
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"input\")
+        expect(locator).to_have_id(\"lastname\")
+        ```
+
         Parameters
         ----------
         id : Union[Pattern, str]
@@ -14462,6 +15697,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\".component\")
         await expect(locator).to_have_js_property(\"loaded\", True)
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\".component\")
+        expect(locator).to_have_js_property(\"loaded\", True)
         ```
 
         Parameters
@@ -14521,6 +15763,14 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_have_value(re.compile(r\"[0-9]\"))
         ```
 
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"input[type=number]\")
+        expect(locator).to_have_value(re.compile(r\"[0-9]\"))
+        ```
+
         Parameters
         ----------
         value : Union[Pattern, str]
@@ -14554,6 +15804,85 @@ class LocatorAssertions(AsyncBase):
             await self._impl_obj.not_to_have_value(value=value, timeout=timeout)
         )
 
+    async def to_have_values(
+        self,
+        values: typing.List[typing.Union[typing.Pattern, str]],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_values
+
+        Ensures the `Locator` points to multi-select/combobox (i.e. a `select` with the `multiple` attribute) and the specified
+        values are selected.
+
+        For example, given the following element:
+
+        ```html
+        <select id=\"favorite-colors\" multiple>
+          <option value=\"R\">Red</option>
+          <option value=\"G\">Green</option>
+          <option value=\"B\">Blue</option>
+        </select>
+        ```
+
+        ```py
+        import re
+        from playwright.async_api import expect
+
+        locator = page.locator(\"id=favorite-colors\")
+        await locator.select_option([\"R\", \"G\"])
+        await expect(locator).to_have_values([re.compile(r\"R\"), re.compile(r\"G\")])
+        ```
+
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"id=favorite-colors\")
+        locator.select_option([\"R\", \"G\"])
+        expect(locator).to_have_values([re.compile(r\"R\"), re.compile(r\"G\")])
+        ```
+
+        Parameters
+        ----------
+        values : List[Union[Pattern, str]]
+            Expected options currently selected.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_have_values(
+                values=mapping.to_impl(values), timeout=timeout
+            )
+        )
+
+    async def not_to_have_values(
+        self,
+        values: typing.List[typing.Union[typing.Pattern, str]],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_values
+
+        The opposite of `locator_assertions.to_have_values()`.
+
+        Parameters
+        ----------
+        values : List[Union[Pattern, str]]
+            Expected options currently selected.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_have_values(
+                values=mapping.to_impl(values), timeout=timeout
+            )
+        )
+
     async def to_have_text(
         self,
         expected: typing.Union[
@@ -14561,7 +15890,8 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.to_have_text
 
@@ -14576,6 +15906,15 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_have_text(re.compile(r\"Welcome, .*\"))
         ```
 
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        locator = page.locator(\".title\")
+        expect(locator).to_have_text(re.compile(r\"Welcome, Test User\"))
+        expect(locator).to_have_text(re.compile(r\"Welcome, .*\"))
+        ```
+
         Note that if array is passed as an expected value, entire lists of elements can be asserted:
 
         ```py
@@ -14583,6 +15922,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\"list > .component\")
         await expect(locator).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"list > .component\")
+        expect(locator).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
         ```
 
         Parameters
@@ -14593,6 +15939,9 @@ class LocatorAssertions(AsyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14601,6 +15950,7 @@ class LocatorAssertions(AsyncBase):
                 expected=mapping.to_impl(expected),
                 use_inner_text=use_inner_text,
                 timeout=timeout,
+                ignore_case=ignore_case,
             )
         )
 
@@ -14611,7 +15961,8 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.not_to_have_text
 
@@ -14625,6 +15976,9 @@ class LocatorAssertions(AsyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14633,6 +15987,7 @@ class LocatorAssertions(AsyncBase):
                 expected=mapping.to_impl(expected),
                 use_inner_text=use_inner_text,
                 timeout=timeout,
+                ignore_case=ignore_case,
             )
         )
 
@@ -14648,6 +16003,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\".subscribe\")
         await expect(locator).to_be_checked()
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\".subscribe\")
+        expect(locator).to_be_checked()
         ```
 
         Parameters
@@ -14693,6 +16055,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_be_disabled()
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"button.submit\")
+        expect(locator).to_be_disabled()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -14730,6 +16099,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\".input\")
         await expect(locator).to_be_editable()
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\".input\")
+        expect(locator).to_be_editable()
         ```
 
         Parameters
@@ -14771,6 +16147,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_be_empty()
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"div.warning\")
+        expect(locator).to_be_empty()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -14808,6 +16191,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\"button.submit\")
         await expect(locator).to_be_enabled()
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"button.submit\")
+        expect(locator).to_be_enabled()
         ```
 
         Parameters
@@ -14849,6 +16239,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_be_hidden()
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator('.my-element')
+        expect(locator).to_be_hidden()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -14888,6 +16285,13 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_be_visible()
         ```
 
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator('.my-element')
+        expect(locator).to_be_visible()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, NoneType]
@@ -14925,6 +16329,13 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator('input')
         await expect(locator).to_be_focused()
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator('input')
+        expect(locator).to_be_focused()
         ```
 
         Parameters
@@ -14969,6 +16380,14 @@ class APIResponseAssertions(AsyncBase):
 
         # ...
         await expect(response).to_be_ok()
+        ```
+
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        # ...
+        expect(response).to_be_ok()
         ```
         """
         __tracebackhide__ = True

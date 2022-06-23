@@ -62,6 +62,7 @@ ReducedMotion = Literal["no-preference", "reduce"]
 DocumentLoadState = Literal["commit", "domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
+ServiceWorkersPolicy = Literal["allow", "block"]
 
 
 class ErrorPayload(TypedDict, total=False):
@@ -76,6 +77,13 @@ class ContinueParameters(TypedDict, total=False):
     method: Optional[str]
     headers: Optional[List[NameValue]]
     postData: Optional[str]
+
+
+class FallbackOverrides(TypedDict, total=False):
+    url: Optional[str]
+    method: Optional[str]
+    headers: Optional[Dict[str, str]]
+    post_data: Optional[Union[str, bytes]]
 
 
 class ParsedMessageParams(TypedDict):
@@ -218,17 +226,23 @@ class RouteHandler:
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
-    def handle(self, route: "Route", request: "Request") -> None:
+    async def handle(self, route: "Route", request: "Request") -> bool:
         self._handled_count += 1
+        handled_future = route._start_handling()
+
         result = cast(
             Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
         )(route, request)
+
         if inspect.iscoroutine(result):
-            asyncio.create_task(result)
+            [handled, _] = await asyncio.gather(handled_future, result)
+            return handled
+
+        return await handled_future
 
     @property
-    def is_active(self) -> bool:
-        return self._handled_count < self._times
+    def will_expire(self) -> bool:
+        return self._handled_count + 1 >= self._times
 
 
 def is_safe_close_error(error: Exception) -> bool:

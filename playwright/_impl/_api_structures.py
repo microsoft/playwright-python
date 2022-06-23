@@ -179,6 +179,7 @@ class ExpectedTextValue(TypedDict, total=False):
     regexFlags: str
     matchSubstring: bool
     normalizeWhiteSpace: bool
+    ignoreCase: Optional[bool]
 
 
 class FrameExpectOptions(TypedDict, total=False):

@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from playwright.async_api import Error, Page, Route, TimeoutError
+from playwright.async_api import Error, Page, Route, TimeoutError, expect
 from tests.server import Server
 
 
@@ -1390,6 +1390,19 @@ async def test_should_not_throw_when_continuing_while_page_is_closing(
     with pytest.raises(Error):
         await page.goto(server.EMPTY_PAGE)
     await done
+
+
+async def test_route_should_work_with_async_handler_and_times(context, server, page):
+    async def handle(route, request):
+        await asyncio.sleep(1)
+        await route.fulfill(body="<html>intercepted</html>", content_type="text/html")
+
+    await page.route("**/*.html", handle, times=1)
+
+    await page.goto(server.EMPTY_PAGE)
+    await expect(page.locator("body")).to_have_text("intercepted")
+    await page.goto(server.EMPTY_PAGE)
+    await expect(page.locator("body")).not_to_have_text("intercepted")
 
 
 async def test_should_not_throw_when_continuing_after_page_is_closed(

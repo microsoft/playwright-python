@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Browser, Error
+from playwright.async_api import Browser, Error, expect
 from tests.server import Server
 
 
@@ -454,6 +454,19 @@ async def test_route_should_intercept(context, server):
     assert response.ok
     assert intercepted == [True]
     await context.close()
+
+
+async def test_route_should_work_with_async_handler_and_times(context, server, page):
+    async def handle(route, request):
+        await asyncio.sleep(1)
+        await route.fulfill(body="<html>intercepted</html>", content_type="text/html")
+
+    await context.route("**/*.html", handle, times=1)
+
+    await page.goto(server.EMPTY_PAGE)
+    await expect(page.locator("body")).to_have_text("intercepted")
+    await page.goto(server.EMPTY_PAGE)
+    await expect(page.locator("body")).not_to_have_text("intercepted")
 
 
 async def test_route_should_unroute(context, server):

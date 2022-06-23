@@ -194,8 +194,10 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: self._on_route(
-                from_channel(params["route"]), from_channel(params["request"])
+            lambda params: asyncio.create_task(
+                self._on_route(
+                    from_channel(params["route"]), from_channel(params["request"])
+                )
             ),
         )
         self._channel.on("video", lambda params: self._on_video(params))
@@ -235,18 +237,19 @@ class Page(ChannelOwner):
         frame._detached = True
         self.emit(Page.Events.FrameDetached, frame)
 
-    def _on_route(self, route: Route, request: Request) -> None:
-        for handler_entry in self._routes:
-            if handler_entry.matches(request.url):
-                try:
-                    handler_entry.handle(route, request)
-                finally:
-                    if not handler_entry.is_active:
-                        self._routes.remove(handler_entry)
-                        if len(self._routes) == 0:
-                            asyncio.create_task(self._disable_interception())
+    async def _on_route(self, route: Route, request: Request) -> None:
+        matching_handlers = filter(
+            lambda route_handler: route_handler.matches(request.url), self._routes
+        )
+        for route_handler in list(matching_handlers):
+            if route_handler.will_expire:
+                self._routes.remove(route_handler)
+            handled = await route_handler.handle(route, request)
+            if not self._routes:
+                asyncio.create_task(self._disable_interception())
+            if handled:
                 return
-        self._browser_context._on_route(route, request)
+        asyncio.create_task(self._browser_context._on_route(route, request))
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
