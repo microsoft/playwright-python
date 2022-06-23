@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
 import json
 import os
 from pathlib import Path
@@ -44,7 +43,8 @@ def test_should_omit_content(browser: Browser, server: Server, tmpdir: Path) -> 
         log = data["log"]
 
         content1 = log["entries"][0]["response"]["content"]
-        assert "text" not in content1
+        assert "text" in content1
+        assert "encoding" not in content1
 
 
 def test_should_include_content(browser: Browser, server: Server, tmpdir: Path) -> None:
@@ -59,7 +59,5 @@ def test_should_include_content(browser: Browser, server: Server, tmpdir: Path) 
         log = data["log"]
 
         content1 = log["entries"][0]["response"]["content"]
-        assert content1["encoding"] == "base64"
         assert content1["mimeType"] == "text/html"
-        s = base64.b64decode(content1["text"]).decode()
-        assert "HAR Page" in s
+        assert "HAR Page" in content1["text"]
