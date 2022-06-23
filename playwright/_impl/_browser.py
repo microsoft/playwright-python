@@ -32,6 +32,7 @@ from playwright._impl._helper import (
     ColorScheme,
     ForcedColors,
     ReducedMotion,
+    ServiceWorkersPolicy,
     async_readfile,
     is_safe_close_error,
     locals_to_params,
@@ -75,6 +76,10 @@ class Browser(ChannelOwner):
     def contexts(self) -> List[BrowserContext]:
         return self._contexts.copy()
 
+    @property
+    def browser_type(self) -> "BrowserType":
+        return self._browser_type
+
     def is_connected(self) -> bool:
         return self._is_connected
 
@@ -110,6 +115,7 @@ class Browser(ChannelOwner):
         storageState: Union[StorageState, str, Path] = None,
         baseURL: str = None,
         strictSelectors: bool = None,
+        serviceWorkers: ServiceWorkersPolicy = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
@@ -154,6 +160,7 @@ class Browser(ChannelOwner):
         storageState: Union[StorageState, str, Path] = None,
         baseURL: str = None,
         strictSelectors: bool = None,
+        serviceWorkers: ServiceWorkersPolicy = None,
     ) -> Page:
         params = locals_to_params(locals())
         context = await self.new_context(**params)

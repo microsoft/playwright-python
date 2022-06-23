@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, List, Pattern, Union
+from typing import Any, List, Optional, Pattern, Union
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
@@ -122,11 +122,15 @@ class LocatorAssertions(AssertionsBase):
         expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
+        ignore_case: bool = None,
     ) -> None:
         __tracebackhide__ = True
         if isinstance(expected, list):
             expected_text = to_expected_text_values(
-                expected, match_substring=True, normalize_white_space=True
+                expected,
+                match_substring=True,
+                normalize_white_space=True,
+                ignore_case=ignore_case,
             )
             await self._expect_impl(
                 "to.contain.text.array",
@@ -140,7 +144,10 @@ class LocatorAssertions(AssertionsBase):
             )
         else:
             expected_text = to_expected_text_values(
-                [expected], match_substring=True, normalize_white_space=True
+                [expected],
+                match_substring=True,
+                normalize_white_space=True,
+                ignore_case=ignore_case,
             )
             await self._expect_impl(
                 "to.have.text",
@@ -158,9 +165,10 @@ class LocatorAssertions(AssertionsBase):
         expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
+        ignore_case: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_contain_text(expected, use_inner_text, timeout)
+        await self._not.to_contain_text(expected, use_inner_text, timeout, ignore_case)
 
     async def to_have_attribute(
         self,
@@ -335,16 +343,41 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_have_value(value, timeout)
 
+    async def to_have_values(
+        self,
+        values: List[Union[Pattern, str]],
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        expected_text = to_expected_text_values(values)
+        await self._expect_impl(
+            "to.have.values",
+            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+            values,
+            "Locator expected to have Values",
+        )
+
+    async def not_to_have_values(
+        self,
+        values: List[Union[Pattern, str]],
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_values(values, timeout)
+
     async def to_have_text(
         self,
         expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
+        ignore_case: bool = None,
     ) -> None:
         __tracebackhide__ = True
         if isinstance(expected, list):
             expected_text = to_expected_text_values(
-                expected, normalize_white_space=True
+                expected,
+                normalize_white_space=True,
+                ignore_case=ignore_case,
             )
             await self._expect_impl(
                 "to.have.text.array",
@@ -358,7 +391,7 @@ class LocatorAssertions(AssertionsBase):
             )
         else:
             expected_text = to_expected_text_values(
-                [expected], normalize_white_space=True
+                [expected], normalize_white_space=True, ignore_case=ignore_case
             )
             await self._expect_impl(
                 "to.have.text",
@@ -376,9 +409,10 @@ class LocatorAssertions(AssertionsBase):
         expected: Union[List[Union[Pattern, str]], Pattern, str],
         use_inner_text: bool = None,
         timeout: float = None,
+        ignore_case: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_text(expected, use_inner_text, timeout)
+        await self._not.to_have_text(expected, use_inner_text, timeout, ignore_case)
 
     async def to_be_checked(
         self,
@@ -568,14 +602,20 @@ class APIResponseAssertions:
 
 
 def expected_regex(
-    pattern: Pattern, match_substring: bool, normalize_white_space: bool
+    pattern: Pattern,
+    match_substring: bool,
+    normalize_white_space: bool,
+    ignore_case: Optional[bool] = None,
 ) -> ExpectedTextValue:
     expected = ExpectedTextValue(
         regexSource=pattern.pattern,
         regexFlags=escape_regex_flags(pattern),
         matchSubstring=match_substring,
         normalizeWhiteSpace=normalize_white_space,
+        ignoreCase=ignore_case,
     )
+    if expected["ignoreCase"] is None:
+        del expected["ignoreCase"]
     return expected
 
 
@@ -583,18 +623,25 @@ def to_expected_text_values(
     items: Union[List[Pattern], List[str], List[Union[str, Pattern]]],
     match_substring: bool = False,
     normalize_white_space: bool = False,
+    ignore_case: Optional[bool] = None,
 ) -> List[ExpectedTextValue]:
     out: List[ExpectedTextValue] = []
     assert isinstance(items, list)
     for item in items:
         if isinstance(item, str):
+            o = ExpectedTextValue(
+                string=item,
+                matchSubstring=match_substring,
+                normalizeWhiteSpace=normalize_white_space,
+                ignoreCase=ignore_case,
+            )
+            if o["ignoreCase"] is None:
+                del o["ignoreCase"]
+            out.append(o)
+        elif isinstance(item, Pattern):
             out.append(
-                ExpectedTextValue(
-                    string=item,
-                    matchSubstring=match_substring,
-                    normalizeWhiteSpace=normalize_white_space,
+                expected_regex(
+                    item, match_substring, normalize_white_space, ignore_case
                 )
             )
-        elif isinstance(item, Pattern):
-            out.append(expected_regex(item, match_substring, normalize_white_space))
     return out

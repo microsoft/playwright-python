@@ -797,3 +797,16 @@ async def test_response_security_details_none_without_https(page: Page, server: 
     response = await page.goto(server.EMPTY_PAGE)
     security_details = await response.security_details()
     assert security_details is None
+
+
+async def test_should_report_if_request_was_from_service_worker(
+    page: Page, server: Server
+) -> None:
+    response = await page.goto(server.PREFIX + "/serviceworkers/fetch/sw.html")
+    assert response
+    assert not response.from_service_worker
+    await page.evaluate("() => window.activationPromise")
+    async with page.expect_response("**/example.txt") as response_info:
+        await page.evaluate("() => fetch('/example.txt')")
+    response = await response_info.value
+    assert response.from_service_worker
