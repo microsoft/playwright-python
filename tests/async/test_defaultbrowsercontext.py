@@ -235,8 +235,8 @@ async def test_should_support_timezone_id_option(launch_persistent):
 
 
 async def test_should_support_locale_option(launch_persistent):
-    (page, context) = await launch_persistent(locale="fr-CH")
-    assert await page.evaluate("() => navigator.language") == "fr-CH"
+    (page, context) = await launch_persistent(locale="fr-FR")
+    assert await page.evaluate("() => navigator.language") == "fr-FR"
 
 
 async def test_should_support_geolocation_and_permission_option(
