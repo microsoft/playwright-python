@@ -164,9 +164,6 @@ class Page(ChannelOwner):
         )
         self._channel.on("crash", lambda _: self._on_crash())
         self._channel.on("dialog", lambda params: self._on_dialog(params))
-        self._channel.on(
-            "domcontentloaded", lambda _: self.emit(Page.Events.DOMContentLoaded, self)
-        )
         self._channel.on("download", lambda params: self._on_download(params))
         self._channel.on(
             "fileChooser",
@@ -185,7 +182,6 @@ class Page(ChannelOwner):
             "frameDetached",
             lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
-        self._channel.on("load", lambda _: self.emit(Page.Events.Load, self))
         self._channel.on(
             "pageError",
             lambda params: self.emit(
