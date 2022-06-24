@@ -18,3 +18,11 @@ Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
 Method not implemented: PlaywrightAssertions.expect
+
+# Pending 1.23 ports
+Parameter not implemented: BrowserType.launch_persistent_context(record_har_url_filter=)
+Method not implemented: BrowserContext.route_from_har
+Method not implemented: Route.fallback
+Parameter not implemented: Browser.new_page(record_har_url_filter=)
+Method not implemented: Page.route_from_har
+Parameter not implemented: Browser.new_context(record_har_url_filter=)

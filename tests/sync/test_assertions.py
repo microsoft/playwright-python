@@ -17,7 +17,7 @@ from datetime import datetime
 
 import pytest
 
-from playwright.sync_api import Browser, Page, expect
+from playwright.sync_api import Browser, Error, Page, expect
 from tests.server import Server
 
 
@@ -158,7 +158,85 @@ def test_assertions_locator_to_have_js_property(page: Page, server: Server) -> N
     )
 
 
-def test_assertions_locator_to_have_text(page: Page, server: Server) -> None:
+def test_to_have_js_property_pass_string(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = 'string'")
+    locator = page.locator("div")
+    expect(locator).to_have_js_property("foo", "string")
+
+
+def test_to_have_js_property_fail_string(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = 'string'")
+    locator = page.locator("div")
+    with pytest.raises(AssertionError):
+        expect(locator).to_have_js_property("foo", "error", timeout=500)
+
+
+def test_to_have_js_property_pass_number(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = 2021")
+    locator = page.locator("div")
+    expect(locator).to_have_js_property("foo", 2021)
+
+
+def test_to_have_js_property_fail_number(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = 2021")
+    locator = page.locator("div")
+    with pytest.raises(AssertionError):
+        expect(locator).to_have_js_property("foo", 1, timeout=500)
+
+
+def test_to_have_js_property_pass_boolean(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = true")
+    locator = page.locator("div")
+    expect(locator).to_have_js_property("foo", True)
+
+
+def test_to_have_js_property_fail_boolean(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = false")
+    locator = page.locator("div")
+    with pytest.raises(AssertionError):
+        expect(locator).to_have_js_property("foo", True, timeout=500)
+
+
+def test_to_have_js_property_pass_boolean_2(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = false")
+    locator = page.locator("div")
+    expect(locator).to_have_js_property("foo", False)
+
+
+def test_to_have_js_property_fail_boolean_2(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = false")
+    locator = page.locator("div")
+    with pytest.raises(AssertionError):
+        expect(locator).to_have_js_property("foo", True, timeout=500)
+
+
+@pytest.mark.skip("https://github.com/microsoft/playwright/issues/14909")
+def test_to_have_js_property_pass_undefined(page: Page) -> None:
+    page.set_content("<div></div>")
+    locator = page.locator("div")
+    expect(locator).to_have_js_property(
+        "foo", None
+    )  # Python does not have an undefined
+
+
+def test_to_have_js_property_pass_null(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector("div", "e => e.foo = null")
+    locator = page.locator("div")
+    expect(locator).to_have_js_property("foo", None)
+
+
+def test_to_have_js_property_assertions_locator_to_have_text(
+    page: Page, server: Server
+) -> None:
     page.goto(server.EMPTY_PAGE)
     page.set_content("<div id=foobar>kek</div>")
     expect(page.locator("div#foobar")).to_have_text("kek")
@@ -169,6 +247,116 @@ def test_assertions_locator_to_have_text(page: Page, server: Server) -> None:
     expect(page.locator("div")).to_have_text(["Text  1", re.compile(r"Text   \d+a")])
 
 
+@pytest.mark.parametrize(
+    "method",
+    ["to_have_text", "to_contain_text"],
+)
+def test_ignore_case(page: Page, server: Server, method: str) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.set_content("<div id=target>apple BANANA</div><div>orange</div>")
+    getattr(expect(page.locator("div#target")), method)("apple BANANA")
+    getattr(expect(page.locator("div#target")), method)(
+        "apple banana", ignore_case=True
+    )
+    # defaults false
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div#target")), method)(
+            "apple banana",
+            timeout=300,
+        )
+    expected_error_msg = method.replace("_", " ")
+    assert expected_error_msg in str(excinfo.value)
+
+    # Array Variants
+    getattr(expect(page.locator("div")), method)(["apple BANANA", "orange"])
+    getattr(expect(page.locator("div")), method)(
+        ["apple banana", "ORANGE"], ignore_case=True
+    )
+    # defaults false
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div")), method)(
+            ["apple banana", "ORANGE"],
+            timeout=300,
+        )
+    assert expected_error_msg in str(excinfo.value)
+
+    # not variant
+    getattr(expect(page.locator("div#target")), f"not_{method}")("apple banana")
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div#target")), f"not_{method}")(
+            "apple banana",
+            ignore_case=True,
+            timeout=300,
+        )
+    assert f"not {expected_error_msg}" in str(excinfo)
+
+
+@pytest.mark.parametrize(
+    "method",
+    ["to_have_text", "to_contain_text"],
+)
+def test_ignore_case_regex(page: Page, server: Server, method: str) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.set_content("<div id=target>apple BANANA</div><div>orange</div>")
+    getattr(expect(page.locator("div#target")), method)(re.compile("apple BANANA"))
+    getattr(expect(page.locator("div#target")), method)(
+        re.compile("apple banana"), ignore_case=True
+    )
+    # defaults to regex flag
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div#target")), method)(
+            re.compile("apple banana"), timeout=300
+        )
+    expected_error_msg = method.replace("_", " ")
+    assert expected_error_msg in str(excinfo.value)
+    # overrides regex flag
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div#target")), method)(
+            re.compile("apple banana", re.IGNORECASE),
+            ignore_case=False,
+            timeout=300,
+        )
+    assert expected_error_msg in str(excinfo.value)
+
+    # Array Variants
+    getattr(expect(page.locator("div")), method)(
+        [re.compile("apple BANANA"), re.compile("orange")]
+    )
+    getattr(expect(page.locator("div")), method)(
+        [re.compile("apple banana"), re.compile("ORANGE")], ignore_case=True
+    )
+    # defaults regex flag
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div")), method)(
+            [re.compile("apple banana"), re.compile("ORANGE")],
+            timeout=300,
+        )
+    assert expected_error_msg in str(excinfo.value)
+    # overrides regex flag
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div")), method)(
+            [
+                re.compile("apple banana", re.IGNORECASE),
+                re.compile("ORANGE", re.IGNORECASE),
+            ],
+            ignore_case=False,
+            timeout=300,
+        )
+    assert expected_error_msg in str(excinfo.value)
+
+    # not variant
+    getattr(expect(page.locator("div#target")), f"not_{method}")(
+        re.compile("apple banana")
+    )
+    with pytest.raises(AssertionError) as excinfo:
+        getattr(expect(page.locator("div#target")), f"not_{method}")(
+            re.compile("apple banana"),
+            ignore_case=True,
+            timeout=300,
+        )
+    assert f"not {expected_error_msg}" in str(excinfo)
+
+
 def test_assertions_locator_to_have_value(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     page.set_content("<input type=text id=foo>")
@@ -177,6 +365,122 @@ def test_assertions_locator_to_have_value(page: Page, server: Server) -> None:
     expect(my_input).not_to_have_value("bar", timeout=100)
     my_input.fill("kektus")
     expect(my_input).to_have_value("kektus")
+
+
+def test_to_have_values_works_with_text(page: Page, server: Server) -> None:
+    page.set_content(
+        """
+        <select multiple>
+            <option value="R">Red</option>
+            <option value="G">Green</option>
+            <option value="B">Blue</option>
+        </select>
+    """
+    )
+    locator = page.locator("select")
+    locator.select_option(["R", "G"])
+    expect(locator).to_have_values(["R", "G"])
+
+
+def test_to_have_values_follows_labels(page: Page, server: Server) -> None:
+    page.set_content(
+        """
+        <label for="colors">Pick a Color</label>
+        <select id="colors" multiple>
+            <option value="R">Red</option>
+            <option value="G">Green</option>
+            <option value="B">Blue</option>
+        </select>
+    """
+    )
+    locator = page.locator("text=Pick a Color")
+    locator.select_option(["R", "G"])
+    expect(locator).to_have_values(["R", "G"])
+
+
+def test_to_have_values_exact_match_with_text(page: Page, server: Server) -> None:
+    page.set_content(
+        """
+        <select multiple>
+            <option value="RR">Red</option>
+            <option value="GG">Green</option>
+        </select>
+    """
+    )
+    locator = page.locator("select")
+    locator.select_option(["RR", "GG"])
+    with pytest.raises(AssertionError) as excinfo:
+        expect(locator).to_have_values(["R", "G"], timeout=500)
+    assert "Locator expected to have Values '['R', 'G']'" in str(excinfo.value)
+    assert "Actual value: ['RR', 'GG']" in str(excinfo.value)
+
+
+def test_to_have_values_works_with_regex(page: Page, server: Server) -> None:
+    page.set_content(
+        """
+        <select multiple>
+            <option value="R">Red</option>
+            <option value="G">Green</option>
+            <option value="B">Blue</option>
+        </select>
+    """
+    )
+    locator = page.locator("select")
+    locator.select_option(["R", "G"])
+    expect(locator).to_have_values([re.compile("R"), re.compile("G")])
+
+
+def test_to_have_values_fails_when_items_not_selected(
+    page: Page, server: Server
+) -> None:
+    page.set_content(
+        """
+        <select multiple>
+            <option value="R">Red</option>
+            <option value="G">Green</option>
+            <option value="B">Blue</option>
+        </select>
+    """
+    )
+    locator = page.locator("select")
+    locator.select_option(["B"])
+    with pytest.raises(AssertionError) as excinfo:
+        expect(locator).to_have_values(["R", "G"], timeout=500)
+    assert "Locator expected to have Values '['R', 'G']'" in str(excinfo.value)
+    assert "Actual value: ['B']" in str(excinfo.value)
+
+
+def test_to_have_values_fails_when_multiple_not_specified(
+    page: Page, server: Server
+) -> None:
+    page.set_content(
+        """
+        <select>
+            <option value="R">Red</option>
+            <option value="G">Green</option>
+            <option value="B">Blue</option>
+        </select>
+    """
+    )
+    locator = page.locator("select")
+    locator.select_option(["B"])
+    with pytest.raises(Error) as excinfo:
+        expect(locator).to_have_values(["R", "G"], timeout=500)
+    assert "Error: Not a select element with a multiple attribute" in str(excinfo.value)
+
+
+def test_to_have_values_fails_when_not_a_select_element(
+    page: Page, server: Server
+) -> None:
+    page.set_content(
+        """
+        <input type="text">
+    """
+    )
+    locator = page.locator("input")
+    with pytest.raises(Error) as excinfo:
+        expect(locator).to_have_values(["R", "G"], timeout=500)
+    assert "Error: Not a select element with a multiple attribute" in str(excinfo.value)
 
 
 def test_assertions_locator_to_be_checked(page: Page, server: Server) -> None:

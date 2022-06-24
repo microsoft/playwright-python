@@ -90,3 +90,15 @@ def test_should_fulfill_with_global_fetch_result(
     assert response
     assert response.status == 200
     assert response.json() == {"foo": "bar"}
+
+
+def test_should_report_if_request_was_from_service_worker(
+    page: Page, server: Server
+) -> None:
+    response = page.goto(server.PREFIX + "/serviceworkers/fetch/sw.html")
+    assert response
+    assert not response.from_service_worker
+    page.evaluate("() => window.activationPromise")
+    with page.expect_response("**/example.txt") as response_info:
+        page.evaluate("() => fetch('/example.txt')")
+    assert response_info.value.from_service_worker

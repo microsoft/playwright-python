@@ -94,6 +94,20 @@ class Frame(ChannelOwner):
             self._event_emitter.emit("loadstate", add)
         elif remove and remove in self._load_states:
             self._load_states.remove(remove)
+        if (
+            not self._parent_frame
+            and add == "load"
+            and hasattr(self, "_page")
+            and self._page
+        ):
+            self._page.emit("load", self)
+        if (
+            not self._parent_frame
+            and add == "domcontentloaded"
+            and hasattr(self, "_page")
+            and self._page
+        ):
+            self._page.emit("domcontentloaded", self)
 
     def _on_frame_navigated(self, event: FrameNavigatedEvent) -> None:
         self._url = event["url"]

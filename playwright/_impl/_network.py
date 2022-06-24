@@ -343,6 +343,10 @@ class Response(ChannelOwner):
     def headers(self) -> Headers:
         return self._provisional_headers.headers()
 
+    @property
+    def from_service_worker(self) -> bool:
+        return self._initializer["fromServiceWorker"]
+
     async def all_headers(self) -> Headers:
         return (await self._actual_headers()).headers()
 

@@ -64,6 +64,7 @@ ReducedMotion = Literal["no-preference", "reduce"]
 DocumentLoadState = Literal["commit", "domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
+ServiceWorkersPolicy = Literal["allow", "block"]
 
 
 class ErrorPayload(TypedDict, total=False):

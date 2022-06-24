@@ -130,6 +130,39 @@ async def test_load_should_fire_when_expected(page):
         await page.goto("about:blank")
 
 
+async def test_should_work_with_wait_for_loadstate(page: Page, server: Server) -> None:
+    messages = []
+    server.set_route(
+        "/empty.html",
+        lambda route, response: (
+            messages.append("route"),
+            response.set_header("Content-Type", "text/html"),
+            response.set_content(
+                "<link rel='stylesheet' href='./one-style.css'>", response.finish()
+            ),
+        ),
+    )
+
+    return messages
+    await page.set_content(f'<a id="anchor" href="{server.EMPTY_PAGE}">empty.html</a>')
+
+    async def wait_for_clickload():
+        await page.click("a")
+        await page.wait_for_load_state("load")
+        messages.append("clickload")
+
+    async def wait_for_page_load():
+        await page.wait_for_event("load")
+        messages.append("load")
+
+    await asyncio.gather(
+        wait_for_clickload(),
+        wait_for_page_load(),
+    )
+
+    assert messages == ["route", "load", "clickload"]
+
+
 async def test_async_stacks_should_work(page, server):
     await page.route(
         "**/empty.html", lambda route, response: asyncio.create_task(route.abort())

@@ -422,6 +422,19 @@ class Response(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
     @property
+    def from_service_worker(self) -> bool:
+        """Response.from_service_worker
+
+        Indicates whether this Response was fullfilled by a Service Worker's Fetch Handler (i.e. via
+        [FetchEvent.respondWith](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith)).
+
+        Returns
+        -------
+        bool
+        """
+        return mapping.from_maybe_impl(self._impl_obj.from_service_worker)
+
+    @property
     def request(self) -> "Request":
         """Response.request
 
@@ -705,8 +718,8 @@ class Route(SyncBase):
             # override headers
             headers = {
                 **request.headers,
-                \"foo\": \"bar\" # set \"foo\" header
-                \"origin\": None # remove \"origin\" header
+                \"foo\": \"foo-value\" # set \"foo\" header
+                \"bar\": None # remove \"bar\" header
             }
             route.continue_(headers=headers)
         }
@@ -1822,17 +1835,6 @@ class ElementHandle(JSHandle):
         handle.select_option(label=\"blue\")
         # multiple selection
         handle.select_option(value=[\"red\", \"green\", \"blue\"])
-        ```
-
-        ```py
-        # single selection matching the value
-        handle.select_option(\"blue\")
-        # single selection matching both the value and the label
-        handle.select_option(label=\"blue\")
-        # multiple selection
-        handle.select_option(\"red\", \"green\", \"blue\")
-        # multiple selection for blue, red and second option
-        handle.select_option(value=\"blue\", { index: 2 }, \"red\")
         ```
 
         Parameters
@@ -7586,7 +7588,7 @@ class Page(SyncContextManager):
         > NOTE: The handler will only be called for the first url if the response is a redirect.
         > NOTE: `page.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
-        request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
+        request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 
         An example of a naive handler that aborts all image requests:
 
@@ -10272,9 +10274,9 @@ class BrowserContext(SyncContextManager):
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
         is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 
-        > NOTE: `page.route()` will not intercept requests intercepted by Service Worker. See
+        > NOTE: `browser_context.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
-        request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
+        request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 
         An example of a naive handler that aborts all image requests:
 
@@ -10599,6 +10601,18 @@ class Browser(SyncContextManager):
         return mapping.from_impl_list(self._impl_obj.contexts)
 
     @property
+    def browser_type(self) -> "BrowserType":
+        """Browser.browser_type
+
+        Get the browser type (chromium, firefox or webkit) that the browser belongs to.
+
+        Returns
+        -------
+        BrowserType
+        """
+        return mapping.from_impl(self._impl_obj.browser_type)
+
+    @property
     def version(self) -> str:
         """Browser.version
 
@@ -10654,7 +10668,8 @@ class Browser(SyncContextManager):
         record_video_size: ViewportSize = None,
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
         base_url: str = None,
-        strict_selectors: bool = None
+        strict_selectors: bool = None,
+        service_workers: Literal["allow", "block"] = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -10756,9 +10771,13 @@ class Browser(SyncContextManager):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
-            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
             more about the strict mode.
+        service_workers : Union["allow", "block", NoneType]
+            Whether to allow sites to register Service workers. Defaults to `'allow'`.
+            - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
+            - `'block'`: Playwright will block all registration of Service Workers.
 
         Returns
         -------
@@ -10798,6 +10817,7 @@ class Browser(SyncContextManager):
                     storageState=storage_state,
                     baseURL=base_url,
                     strictSelectors=strict_selectors,
+                    serviceWorkers=service_workers,
                 )
             )
         )
@@ -10834,7 +10854,8 @@ class Browser(SyncContextManager):
         record_video_size: ViewportSize = None,
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
         base_url: str = None,
-        strict_selectors: bool = None
+        strict_selectors: bool = None,
+        service_workers: Literal["allow", "block"] = None
     ) -> "Page":
         """Browser.new_page
 
@@ -10931,9 +10952,13 @@ class Browser(SyncContextManager):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
-            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
             more about the strict mode.
+        service_workers : Union["allow", "block", NoneType]
+            Whether to allow sites to register Service workers. Defaults to `'allow'`.
+            - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
+            - `'block'`: Playwright will block all registration of Service Workers.
 
         Returns
         -------
@@ -10973,6 +10998,7 @@ class Browser(SyncContextManager):
                     storageState=storage_state,
                     baseURL=base_url,
                     strictSelectors=strict_selectors,
+                    serviceWorkers=service_workers,
                 )
             )
         )
@@ -11272,7 +11298,8 @@ class BrowserType(SyncBase):
         record_video_dir: typing.Union[str, pathlib.Path] = None,
         record_video_size: ViewportSize = None,
         base_url: str = None,
-        strict_selectors: bool = None
+        strict_selectors: bool = None,
+        service_workers: Literal["allow", "block"] = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -11409,9 +11436,13 @@ class BrowserType(SyncBase):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, NoneType]
-            It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
+            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors
             that imply single target DOM element will throw when more than one element matches the selector. See `Locator` to learn
             more about the strict mode.
+        service_workers : Union["allow", "block", NoneType]
+            Whether to allow sites to register Service workers. Defaults to `'allow'`.
+            - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
+            - `'block'`: Playwright will block all registration of Service Workers.
 
         Returns
         -------
@@ -11465,6 +11496,7 @@ class BrowserType(SyncBase):
                     recordVideoSize=record_video_size,
                     baseURL=base_url,
                     strictSelectors=strict_selectors,
+                    serviceWorkers=service_workers,
                 )
             )
         )
@@ -12398,7 +12430,17 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.filter
 
-        This method narrows existing locator according to the options, for example filters by text.
+        This method narrows existing locator according to the options, for example filters by text. It can be chained to filter
+        multiple times.
+
+        ```py
+        row_locator = page.lsocator(\"tr\")
+        # ...
+        row_locator
+            .filter(has_text=\"text in column 1\")
+            .filter(has=page.locator(\"tr\", has_text=\"column 2 button\"))
+            .screenshot()
+        ```
 
         Parameters
         ----------
@@ -12943,17 +12985,6 @@ class Locator(SyncBase):
         element.select_option(label=\"blue\")
         # multiple selection
         element.select_option(value=[\"red\", \"green\", \"blue\"])
-        ```
-
-        ```py
-        # single selection matching the value
-        element.select_option(\"blue\")
-        # single selection matching both the value and the label
-        element.select_option(label=\"blue\")
-        # multiple selection
-        element.select_option(\"red\", \"green\", \"blue\")
-        # multiple selection for blue, red and second option
-        element.select_option(value=\"blue\", { index: 2 }, \"red\")
         ```
 
         Parameters
@@ -14219,7 +14250,8 @@ class LocatorAssertions(SyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.to_contain_text
 
@@ -14253,6 +14285,9 @@ class LocatorAssertions(SyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14262,6 +14297,7 @@ class LocatorAssertions(SyncBase):
                     expected=mapping.to_impl(expected),
                     use_inner_text=use_inner_text,
                     timeout=timeout,
+                    ignore_case=ignore_case,
                 )
             )
         )
@@ -14273,7 +14309,8 @@ class LocatorAssertions(SyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.not_to_contain_text
 
@@ -14287,6 +14324,9 @@ class LocatorAssertions(SyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14296,6 +14336,7 @@ class LocatorAssertions(SyncBase):
                     expected=mapping.to_impl(expected),
                     use_inner_text=use_inner_text,
                     timeout=timeout,
+                    ignore_case=ignore_case,
                 )
             )
         )
@@ -14703,6 +14744,80 @@ class LocatorAssertions(SyncBase):
             self._sync(self._impl_obj.not_to_have_value(value=value, timeout=timeout))
         )
 
+    def to_have_values(
+        self,
+        values: typing.List[typing.Union[typing.Pattern, str]],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.to_have_values
+
+        Ensures the `Locator` points to multi-select/combobox (i.e. a `select` with the `multiple` attribute) and the specified
+        values are selected.
+
+        For example, given the following element:
+
+        ```html
+        <select id=\"favorite-colors\" multiple>
+          <option value=\"R\">Red</option>
+          <option value=\"G\">Green</option>
+          <option value=\"B\">Blue</option>
+        </select>
+        ```
+
+        ```py
+        import re
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"id=favorite-colors\")
+        locator.select_option([\"R\", \"G\"])
+        expect(locator).to_have_values([re.compile(r\"R\"), re.compile(r\"G\")])
+        ```
+
+        Parameters
+        ----------
+        values : List[Union[Pattern, str]]
+            Expected options currently selected.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.to_have_values(
+                    values=mapping.to_impl(values), timeout=timeout
+                )
+            )
+        )
+
+    def not_to_have_values(
+        self,
+        values: typing.List[typing.Union[typing.Pattern, str]],
+        *,
+        timeout: float = None
+    ) -> NoneType:
+        """LocatorAssertions.not_to_have_values
+
+        The opposite of `locator_assertions.to_have_values()`.
+
+        Parameters
+        ----------
+        values : List[Union[Pattern, str]]
+            Expected options currently selected.
+        timeout : Union[float, NoneType]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.not_to_have_values(
+                    values=mapping.to_impl(values), timeout=timeout
+                )
+            )
+        )
+
     def to_have_text(
         self,
         expected: typing.Union[
@@ -14710,7 +14825,8 @@ class LocatorAssertions(SyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.to_have_text
 
@@ -14742,6 +14858,9 @@ class LocatorAssertions(SyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14751,6 +14870,7 @@ class LocatorAssertions(SyncBase):
                     expected=mapping.to_impl(expected),
                     use_inner_text=use_inner_text,
                     timeout=timeout,
+                    ignore_case=ignore_case,
                 )
             )
         )
@@ -14762,7 +14882,8 @@ class LocatorAssertions(SyncBase):
         ],
         *,
         use_inner_text: bool = None,
-        timeout: float = None
+        timeout: float = None,
+        ignore_case: bool = None
     ) -> NoneType:
         """LocatorAssertions.not_to_have_text
 
@@ -14776,6 +14897,9 @@ class LocatorAssertions(SyncBase):
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
+        ignore_case : Union[bool, NoneType]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
@@ -14785,6 +14909,7 @@ class LocatorAssertions(SyncBase):
                     expected=mapping.to_impl(expected),
                     use_inner_text=use_inner_text,
                     timeout=timeout,
+                    ignore_case=ignore_case,
                 )
             )
         )

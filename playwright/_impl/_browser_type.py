@@ -37,6 +37,7 @@ from playwright._impl._helper import (
     Env,
     ForcedColors,
     ReducedMotion,
+    ServiceWorkersPolicy,
     locals_to_params,
 )
 from playwright._impl._transport import WebSocketTransport
@@ -138,6 +139,7 @@ class BrowserType(ChannelOwner):
         recordVideoSize: ViewportSize = None,
         baseURL: str = None,
         strictSelectors: bool = None,
+        serviceWorkers: ServiceWorkersPolicy = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
