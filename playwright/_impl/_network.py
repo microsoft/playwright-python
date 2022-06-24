@@ -290,6 +290,8 @@ class Route(ChannelOwner):
                 [fut, page._closed_or_crashed_future],
                 return_when=asyncio.FIRST_COMPLETED,
             )
+            if fut.done() and fut.exception():
+                raise cast(BaseException, fut.exception())
             if page._closed_or_crashed_future.done():
                 await asyncio.gather(fut, return_exceptions=True)
         else:

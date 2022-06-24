@@ -88,6 +88,21 @@ async def test_should_override_request_url(page, server):
     assert (await request).method == b"GET"
 
 
+async def test_should_raise_except(page, server):
+    exc_fut = asyncio.Future()
+
+    async def capture_exception(route):
+        try:
+            await route.continue_(url="file:///tmp/does-not-exist")
+            exc_fut.set_result(None)
+        except Exception as e:
+            exc_fut.set_result(e)
+
+    await page.route("**/*", capture_exception)
+    asyncio.create_task(page.goto(server.EMPTY_PAGE))
+    assert "New URL must have same protocol as overridden URL" in str(await exc_fut)
+
+
 async def test_should_amend_utf8_post_data(page, server):
     await page.goto(server.EMPTY_PAGE)
     await page.route(
