@@ -701,6 +701,91 @@ class Route(SyncBase):
             )
         )
 
+    def fallback(
+        self,
+        *,
+        url: str = None,
+        method: str = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        post_data: typing.Union[str, bytes] = None
+    ) -> NoneType:
+        """Route.fallback
+
+        When several routes match the given pattern, they run in the order opposite to their registration. That way the last
+        registered route can always override all the previos ones. In the example below, request will be handled by the
+        bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
+        registered route.
+
+        ```py
+        page.route(\"**/*\", lambda route: route.abort())  # Runs last.
+        page.route(\"**/*\", lambda route: route.fallback())  # Runs second.
+        page.route(\"**/*\", lambda route: route.fallback())  # Runs first.
+        ```
+
+        Registering multiple routes is useful when you want separate handlers to handle different kinds of requests, for example
+        API calls vs page resources or GET requests vs POST requests as in the example below.
+
+        ```py
+        # Handle GET requests.
+        def handle_post(route):
+            if route.request.method != \"GET\":
+                route.fallback()
+                return
+          # Handling GET only.
+          # ...
+
+        # Handle POST requests.
+        def handle_post(route):
+            if route.request.method != \"POST\":
+                route.fallback()
+                return
+          # Handling POST only.
+          # ...
+
+        page.route(\"**/*\", handle_get)
+        page.route(\"**/*\", handle_post)
+        ```
+
+        One can also modify request while falling back to the subsequent handler, that way intermediate route handler can modify
+        url, method, headers and postData of the request.
+
+        ```py
+        def handle(route, request):
+            # override headers
+            headers = {
+                **request.headers,
+                \"foo\": \"foo-value\" # set \"foo\" header
+                \"bar\": None # remove \"bar\" header
+            }
+            route.fallback(headers=headers)
+        }
+        page.route(\"**/*\", handle)
+        ```
+
+        Parameters
+        ----------
+        url : Union[str, NoneType]
+            If set changes the request URL. New URL must have same protocol as original one. Changing the URL won't affect the route
+            matching, all the routes are matched using the original request URL.
+        method : Union[str, NoneType]
+            If set changes the request method (e.g. GET or POST)
+        headers : Union[Dict[str, str], NoneType]
+            If set changes the request HTTP headers. Header values will be converted to a string.
+        post_data : Union[bytes, str, NoneType]
+            If set changes the post data of request
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.fallback(
+                    url=url,
+                    method=method,
+                    headers=mapping.to_impl(headers),
+                    postData=post_data,
+                )
+            )
+        )
+
     def continue_(
         self,
         *,

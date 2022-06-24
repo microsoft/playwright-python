@@ -96,8 +96,11 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: self._on_route(
-                from_channel(params.get("route")), from_channel(params.get("request"))
+            lambda params: asyncio.create_task(
+                self._on_route(
+                    from_channel(params.get("route")),
+                    from_channel(params.get("request")),
+                )
             ),
         )
 
@@ -156,18 +159,21 @@ class BrowserContext(ChannelOwner):
         if page._opener and not page._opener.is_closed():
             page._opener.emit(Page.Events.Popup, page)
 
-    def _on_route(self, route: Route, request: Request) -> None:
-        for handler_entry in self._routes:
-            if handler_entry.matches(request.url):
-                try:
-                    handler_entry.handle(route, request)
-                finally:
-                    if not handler_entry.is_active:
-                        self._routes.remove(handler_entry)
-                        if not len(self._routes) == 0:
-                            asyncio.create_task(self._disable_interception())
-                break
-        route._internal_continue()
+    async def _on_route(self, route: Route, request: Request) -> None:
+        route_handlers = self._routes.copy()
+        for route_handler in route_handlers:
+            if not route_handler.matches(request.url):
+                continue
+            if route_handler.will_expire:
+                self._routes.remove(route_handler)
+            try:
+                handled = await route_handler.handle(route, request)
+            finally:
+                if len(self._routes) == 0:
+                    asyncio.create_task(self._disable_interception())
+            if handled:
+                return
+        await route._internal_continue(is_internal=True)
 
     def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])

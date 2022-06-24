@@ -190,8 +190,10 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: self._on_route(
-                from_channel(params["route"]), from_channel(params["request"])
+            lambda params: asyncio.create_task(
+                self._on_route(
+                    from_channel(params["route"]), from_channel(params["request"])
+                )
             ),
         )
         self._channel.on("video", lambda params: self._on_video(params))
@@ -231,22 +233,21 @@ class Page(ChannelOwner):
         frame._detached = True
         self.emit(Page.Events.FrameDetached, frame)
 
-    def _on_route(self, route: Route, request: Request) -> None:
-        # Make this artificially async so that we could chain routes.
-        async def inner_route() -> None:
-            for handler_entry in self._routes:
-                if handler_entry.matches(request.url):
-                    try:
-                        handler_entry.handle(route, request)
-                    finally:
-                        if not handler_entry.is_active:
-                            self._routes.remove(handler_entry)
-                            if len(self._routes) == 0:
-                                asyncio.create_task(self._disable_interception())
-                    return
-            self._browser_context._on_route(route, request)
-
-        asyncio.create_task(inner_route())
+    async def _on_route(self, route: Route, request: Request) -> None:
+        route_handlers = self._routes.copy()
+        for route_handler in route_handlers:
+            if not route_handler.matches(request.url):
+                continue
+            if route_handler.will_expire:
+                self._routes.remove(route_handler)
+            try:
+                handled = await route_handler.handle(route, request)
+            finally:
+                if len(self._routes) == 0:
+                    asyncio.create_task(self._disable_interception())
+            if handled:
+                return
+        await self._browser_context._on_route(route, request)
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])

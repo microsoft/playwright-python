@@ -21,5 +21,4 @@ Method not implemented: PlaywrightAssertions.expect
 
 # Pending 1.23 ports
 Method not implemented: BrowserContext.route_from_har
-Method not implemented: Route.fallback
 Method not implemented: Page.route_from_har
