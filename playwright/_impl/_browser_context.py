@@ -262,7 +262,12 @@ class BrowserContext(ChannelOwner):
     ) -> None:
         self._routes.insert(
             0,
-            RouteHandler(URLMatcher(self._options.get("baseURL"), url), handler, times),
+            RouteHandler(
+                URLMatcher(self._options.get("baseURL"), url),
+                handler,
+                True if self._dispatcher_fiber else False,
+                times,
+            ),
         )
         if len(self._routes) == 1:
             await self._channel.send(

@@ -293,6 +293,9 @@ class Connection(EventEmitter):
         try:
             if self._is_sync:
                 for listener in object._channel.listeners(method):
+                    # Each event handler is a potentilly blocking context, create a fiber for each
+                    # and switch to them in order, until they block inside and pass control to each
+                    # other and then eventually back to dispatcher as listener functions return.
                     g = greenlet(listener)
                     g.switch(self._replace_guids_with_channels(params))
             else:

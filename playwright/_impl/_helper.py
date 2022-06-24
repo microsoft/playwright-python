@@ -37,6 +37,8 @@ from typing import (
 )
 from urllib.parse import urljoin
 
+from greenlet import greenlet
+
 from playwright._impl._api_structures import NameValue
 from playwright._impl._api_types import Error, TimeoutError
 
@@ -208,23 +210,34 @@ class RouteHandler:
         self,
         matcher: URLMatcher,
         handler: RouteHandlerCallback,
+        is_sync: bool,
         times: Optional[int] = None,
     ):
         self.matcher = matcher
         self.handler = handler
         self._times = times if times else math.inf
         self._handled_count = 0
+        self._is_sync = is_sync
 
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
     def handle(self, route: "Route", request: "Request") -> None:
-        self._handled_count += 1
-        result = cast(
-            Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
-        )(route, request)
-        if inspect.iscoroutine(result):
-            asyncio.create_task(result)
+        def impl() -> None:
+            self._handled_count += 1
+            result = cast(
+                Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
+            )(route, request)
+            if inspect.iscoroutine(result):
+                asyncio.create_task(result)
+
+        # As with event handlers, each route handler is a potentially blocking context
+        # so it needs a fiber.
+        if self._is_sync:
+            g = greenlet(impl)
+            g.switch()
+        else:
+            impl()
 
     @property
     def is_active(self) -> bool:

@@ -236,17 +236,21 @@ class Page(ChannelOwner):
         self.emit(Page.Events.FrameDetached, frame)
 
     def _on_route(self, route: Route, request: Request) -> None:
-        for handler_entry in self._routes:
-            if handler_entry.matches(request.url):
-                try:
-                    handler_entry.handle(route, request)
-                finally:
-                    if not handler_entry.is_active:
-                        self._routes.remove(handler_entry)
-                        if len(self._routes) == 0:
-                            asyncio.create_task(self._disable_interception())
-                return
-        self._browser_context._on_route(route, request)
+        # Make this artificially async so that we could chain routes.
+        async def inner_route() -> None:
+            for handler_entry in self._routes:
+                if handler_entry.matches(request.url):
+                    try:
+                        handler_entry.handle(route, request)
+                    finally:
+                        if not handler_entry.is_active:
+                            self._routes.remove(handler_entry)
+                            if len(self._routes) == 0:
+                                asyncio.create_task(self._disable_interception())
+                    return
+            self._browser_context._on_route(route, request)
+
+        asyncio.create_task(inner_route())
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
@@ -578,6 +582,7 @@ class Page(ChannelOwner):
             RouteHandler(
                 URLMatcher(self._browser_context._options.get("baseURL"), url),
                 handler,
+                True if self._dispatcher_fiber else False,
                 times,
             ),
         )

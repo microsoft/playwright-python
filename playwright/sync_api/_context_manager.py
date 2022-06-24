@@ -60,10 +60,14 @@ Please use the Async API instead."""
             self._watcher = ThreadedChildWatcher()
             asyncio.set_child_watcher(self._watcher)  # type: ignore
 
+        # Create a new fiber for the protocol dispatcher. It will be pumping events
+        # until the end of times. We will pass control to that fiber every time we
+        # block while waiting for a response.
         def greenlet_main() -> None:
             self._loop.run_until_complete(self._connection.run_as_sync())
 
         dispatcher_fiber = greenlet(greenlet_main)
+
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
@@ -77,9 +81,11 @@ Please use the Async API instead."""
             self._playwright = SyncPlaywright(playwright_impl)
             g_self.switch()
 
+        # Switch control to the dispatcher, it'll fire an event and pass control to
+        # the calling greenlet.
         self._connection.call_on_object_with_known_name("Playwright", callback_wrapper)
-
         dispatcher_fiber.switch()
+
         playwright = self._playwright
         playwright.stop = self.__exit__  # type: ignore
         return playwright
