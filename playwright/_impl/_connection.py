@@ -25,10 +25,10 @@ from pyee import AsyncIOEventEmitter, EventEmitter
 
 import playwright
 from playwright._impl._helper import ParsedMessagePayload, parse_error
-from playwright._impl._local_utils import LocalUtils
 from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
+    from playwright._impl._local_utils import LocalUtils
     from playwright._impl._playwright import Playwright
 
 
@@ -174,7 +174,7 @@ class Connection(EventEmitter):
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
         loop: asyncio.AbstractEventLoop,
-        local_utils: Optional[LocalUtils] = None,
+        local_utils: Optional["LocalUtils"] = None,
     ) -> None:
         super().__init__()
         self._dispatcher_fiber = dispatcher_fiber
@@ -195,10 +195,10 @@ class Connection(EventEmitter):
         self._api_zone: contextvars.ContextVar[Optional[Dict]] = contextvars.ContextVar(
             "ApiZone", default=None
         )
-        self._local_utils: Optional[LocalUtils] = local_utils
+        self._local_utils: Optional["LocalUtils"] = local_utils
 
     @property
-    def local_utils(self) -> LocalUtils:
+    def local_utils(self) -> "LocalUtils":
         assert self._local_utils
         return self._local_utils
 
