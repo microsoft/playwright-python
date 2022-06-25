@@ -16,7 +16,7 @@ import base64
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Pattern, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -40,6 +40,7 @@ from playwright._impl._helper import (
 from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
+from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_type import BrowserType
@@ -116,6 +117,7 @@ class Browser(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
+        recordHarUrlFilter: Union[Pattern, str] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
@@ -160,6 +162,7 @@ class Browser(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
+        recordHarUrlFilter: Union[Pattern, str] = None,
     ) -> Page:
         params = locals_to_params(locals())
         context = await self.new_context(**params)
@@ -220,6 +223,14 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
         if "recordHarOmitContent" in params:
             params["recordHar"]["omitContent"] = params["recordHarOmitContent"]
             del params["recordHarOmitContent"]
+        if "recordHarUrlFilter" in params:
+            opt = params["recordHarUrlFilter"]
+            if isinstance(opt, str):
+                params["recordHar"]["urlGlob"] = opt
+            if isinstance(opt, Pattern):
+                params["recordHar"]["urlRegexSource"] = opt.pattern
+                params["recordHar"]["urlRegexFlags"] = escape_regex_flags(opt)
+            del params["recordHarUrlFilter"]
         del params["recordHarPath"]
     if "recordVideoDir" in params:
         params["recordVideo"] = {"dir": str(params["recordVideoDir"])}

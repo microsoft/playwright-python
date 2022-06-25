@@ -10647,7 +10647,8 @@ class Browser(AsyncContextManager):
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
         base_url: str = None,
         strict_selectors: bool = None,
-        service_workers: Literal["allow", "block"] = None
+        service_workers: Literal["allow", "block"] = None,
+        record_har_url_filter: typing.Union[str, typing.Pattern] = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -10756,6 +10757,7 @@ class Browser(AsyncContextManager):
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
             - `'block'`: Playwright will block all registration of Service Workers.
+        record_har_url_filter : Union[Pattern, str, NoneType]
 
         Returns
         -------
@@ -10795,6 +10797,7 @@ class Browser(AsyncContextManager):
                 baseURL=base_url,
                 strictSelectors=strict_selectors,
                 serviceWorkers=service_workers,
+                recordHarUrlFilter=record_har_url_filter,
             )
         )
 
@@ -10831,7 +10834,8 @@ class Browser(AsyncContextManager):
         storage_state: typing.Union[StorageState, str, pathlib.Path] = None,
         base_url: str = None,
         strict_selectors: bool = None,
-        service_workers: Literal["allow", "block"] = None
+        service_workers: Literal["allow", "block"] = None,
+        record_har_url_filter: typing.Union[str, typing.Pattern] = None
     ) -> "Page":
         """Browser.new_page
 
@@ -10935,6 +10939,7 @@ class Browser(AsyncContextManager):
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
             - `'block'`: Playwright will block all registration of Service Workers.
+        record_har_url_filter : Union[Pattern, str, NoneType]
 
         Returns
         -------
@@ -10974,6 +10979,7 @@ class Browser(AsyncContextManager):
                 baseURL=base_url,
                 strictSelectors=strict_selectors,
                 serviceWorkers=service_workers,
+                recordHarUrlFilter=record_har_url_filter,
             )
         )
 
@@ -11269,7 +11275,8 @@ class BrowserType(AsyncBase):
         record_video_size: ViewportSize = None,
         base_url: str = None,
         strict_selectors: bool = None,
-        service_workers: Literal["allow", "block"] = None
+        service_workers: Literal["allow", "block"] = None,
+        record_har_url_filter: typing.Union[str, typing.Pattern] = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -11413,6 +11420,7 @@ class BrowserType(AsyncBase):
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
             - `'block'`: Playwright will block all registration of Service Workers.
+        record_har_url_filter : Union[Pattern, str, NoneType]
 
         Returns
         -------
@@ -11466,6 +11474,7 @@ class BrowserType(AsyncBase):
                 baseURL=base_url,
                 strictSelectors=strict_selectors,
                 serviceWorkers=service_workers,
+                recordHarUrlFilter=record_har_url_filter,
             )
         )
 

@@ -15,7 +15,7 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -139,6 +139,7 @@ class BrowserType(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
+        recordHarUrlFilter: Union[Pattern, str] = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
