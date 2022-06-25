@@ -134,7 +134,10 @@ class Server:
                 file_content = None
                 try:
                     file_content = (static_path / path[1:]).read_bytes()
-                    request.setHeader(b"Content-Type", mimetypes.guess_type(path)[0])
+                    content_type = mimetypes.guess_type(path)[0]
+                    if content_type and content_type.startswith("text/"):
+                        content_type += "; charset=utf-8"
+                    request.setHeader(b"Content-Type", content_type)
                     request.setHeader(b"Cache-Control", "no-cache, no-store")
                     if path in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")

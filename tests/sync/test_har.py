@@ -60,7 +60,7 @@ def test_should_include_content(browser: Browser, server: Server, tmpdir: Path) 
         log = data["log"]
 
         content1 = log["entries"][0]["response"]["content"]
-        assert content1["mimeType"] == "text/html"
+        assert content1["mimeType"] == "text/html; charset=utf-8"
         assert "HAR Page" in content1["text"]
 
 
