@@ -71,7 +71,10 @@ def create_remote_object(
     if type == "JSHandle":
         return JSHandle(parent, type, guid, initializer)
     if type == "LocalUtils":
-        return LocalUtils(parent, type, guid, initializer)
+        local_utils = LocalUtils(parent, type, guid, initializer)
+        if not local_utils._connection._local_utils:
+            local_utils._connection._local_utils = local_utils
+        return local_utils
     if type == "Page":
         return Page(parent, type, guid, initializer)
     if type == "Playwright":
