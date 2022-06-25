@@ -15,6 +15,7 @@
 import json
 import os
 import re
+import zipfile
 
 from playwright.async_api import Browser
 from tests.server import Server
@@ -34,6 +35,24 @@ async def test_should_work(browser, server, tmpdir):
 async def test_should_omit_content(browser, server, tmpdir):
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(
+        record_har_path=path,
+        record_har_content="omit",
+    )
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/har.html")
+    await context.close()
+    with open(path) as f:
+        data = json.load(f)
+        assert "log" in data
+        log = data["log"]
+        content1 = log["entries"][0]["response"]["content"]
+        assert "text" not in content1
+        assert "encoding" not in content1
+
+
+async def test_should_omit_content_legacy(browser, server, tmpdir):
+    path = os.path.join(tmpdir, "log.har")
+    context = await browser.new_context(
         record_har_path=path, record_har_omit_content=True
     )
     page = await context.new_page()
@@ -44,8 +63,65 @@ async def test_should_omit_content(browser, server, tmpdir):
         assert "log" in data
         log = data["log"]
         content1 = log["entries"][0]["response"]["content"]
-        assert "text" in content1
+        assert "text" not in content1
         assert "encoding" not in content1
+
+
+async def test_should_attach_content(browser, server, tmpdir, is_firefox):
+    path = os.path.join(tmpdir, "log.har.zip")
+    context = await browser.new_context(
+        record_har_path=path,
+        record_har_content="attach",
+    )
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/har.html")
+    await page.evaluate("() => fetch('/pptr.png').then(r => r.arrayBuffer())")
+    await context.close()
+    with zipfile.ZipFile(path) as z:
+        with z.open("har.har") as har:
+            entries = json.load(har)["log"]["entries"]
+
+            assert "encoding" not in entries[0]["response"]["content"]
+            assert (
+                entries[0]["response"]["content"]["mimeType"]
+                == "text/html; charset=utf-8"
+            )
+            assert (
+                "75841480e2606c03389077304342fac2c58ccb1b"
+                in entries[0]["response"]["content"]["_file"]
+            )
+            assert entries[0]["response"]["content"]["size"] >= 96
+            assert entries[0]["response"]["content"]["compression"] == 0
+
+            assert "encoding" not in entries[1]["response"]["content"]
+            assert (
+                entries[1]["response"]["content"]["mimeType"]
+                == "text/css; charset=utf-8"
+            )
+            assert (
+                "79f739d7bc88e80f55b9891a22bf13a2b4e18adb"
+                in entries[1]["response"]["content"]["_file"]
+            )
+            assert entries[1]["response"]["content"]["size"] >= 37
+            assert entries[1]["response"]["content"]["compression"] == 0
+
+            assert "encoding" not in entries[2]["response"]["content"]
+            assert entries[2]["response"]["content"]["mimeType"] == "image/png"
+            assert (
+                "a4c3a18f0bb83f5d9fe7ce561e065c36205762fa"
+                in entries[2]["response"]["content"]["_file"]
+            )
+            assert entries[2]["response"]["content"]["size"] >= 6000
+            assert entries[2]["response"]["content"]["compression"] == 0
+
+            with z.open("75841480e2606c03389077304342fac2c58ccb1b.html") as f:
+                assert b"HAR Page" in f.read()
+
+            with z.open("79f739d7bc88e80f55b9891a22bf13a2b4e18adb.css") as f:
+                assert b"pink" in f.read()
+
+            with z.open("a4c3a18f0bb83f5d9fe7ce561e065c36205762fa.png") as f:
+                assert len(f.read()) == entries[2]["response"]["content"]["size"]
 
 
 async def test_should_not_omit_content(browser, server, tmpdir):
@@ -76,6 +152,37 @@ async def test_should_include_content(browser, server, tmpdir):
         content1 = log["entries"][0]["response"]["content"]
         assert content1["mimeType"] == "text/html; charset=utf-8"
         assert "HAR Page" in content1["text"]
+
+
+async def test_should_default_to_full_mode(browser, server, tmpdir):
+    path = os.path.join(tmpdir, "log.har")
+    context = await browser.new_context(
+        record_har_path=path,
+    )
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/har.html")
+    await context.close()
+    with open(path) as f:
+        data = json.load(f)
+        assert "log" in data
+        log = data["log"]
+        assert log["entries"][0]["request"]["bodySize"] >= 0
+
+
+async def test_should_support_minimal_mode(browser, server, tmpdir):
+    path = os.path.join(tmpdir, "log.har")
+    context = await browser.new_context(
+        record_har_path=path,
+        record_har_mode="minimal",
+    )
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/har.html")
+    await context.close()
+    with open(path) as f:
+        data = json.load(f)
+        assert "log" in data
+        log = data["log"]
+        assert log["entries"][0]["request"]["bodySize"] == -1
 
 
 async def test_should_filter_by_glob(
