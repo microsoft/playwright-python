@@ -31,6 +31,8 @@ from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
     ColorScheme,
     ForcedColors,
+    HarContentPolicy,
+    HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
     async_readfile,
@@ -118,6 +120,8 @@ class Browser(ChannelOwner):
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
         recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarMode: HarMode = None,
+        recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
@@ -163,6 +167,8 @@ class Browser(ChannelOwner):
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
         recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarMode: HarMode = None,
+        recordHarContent: HarContentPolicy = None,
     ) -> Page:
         params = locals_to_params(locals())
         context = await self.new_context(**params)

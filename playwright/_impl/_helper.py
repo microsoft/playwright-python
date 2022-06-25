@@ -65,6 +65,8 @@ DocumentLoadState = Literal["commit", "domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]
 ServiceWorkersPolicy = Literal["allow", "block"]
+HarMode = Literal["full", "minimal"]
+HarContentPolicy = Literal["attach", "embed", "omit"]
 
 
 class ErrorPayload(TypedDict, total=False):

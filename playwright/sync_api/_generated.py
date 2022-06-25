@@ -10670,7 +10670,9 @@ class Browser(SyncContextManager):
         base_url: str = None,
         strict_selectors: bool = None,
         service_workers: Literal["allow", "block"] = None,
-        record_har_url_filter: typing.Union[str, typing.Pattern] = None
+        record_har_url_filter: typing.Union[str, typing.Pattern] = None,
+        record_har_mode: Literal["full", "minimal"] = None,
+        record_har_content: Literal["attach", "embed", "omit"] = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -10780,6 +10782,13 @@ class Browser(SyncContextManager):
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
             - `'block'`: Playwright will block all registration of Service Workers.
         record_har_url_filter : Union[Pattern, str, NoneType]
+        record_har_mode : Union["full", "minimal", NoneType]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page, cookies,
+            security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+        record_har_content : Union["attach", "embed", "omit", NoneType]
+            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach`
+            is specified, resources are persistet as separate files and all of these files are archived along with the HAR file.
+            Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
 
         Returns
         -------
@@ -10821,6 +10830,8 @@ class Browser(SyncContextManager):
                     strictSelectors=strict_selectors,
                     serviceWorkers=service_workers,
                     recordHarUrlFilter=record_har_url_filter,
+                    recordHarMode=record_har_mode,
+                    recordHarContent=record_har_content,
                 )
             )
         )
@@ -10859,7 +10870,9 @@ class Browser(SyncContextManager):
         base_url: str = None,
         strict_selectors: bool = None,
         service_workers: Literal["allow", "block"] = None,
-        record_har_url_filter: typing.Union[str, typing.Pattern] = None
+        record_har_url_filter: typing.Union[str, typing.Pattern] = None,
+        record_har_mode: Literal["full", "minimal"] = None,
+        record_har_content: Literal["attach", "embed", "omit"] = None
     ) -> "Page":
         """Browser.new_page
 
@@ -10964,6 +10977,13 @@ class Browser(SyncContextManager):
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
             - `'block'`: Playwright will block all registration of Service Workers.
         record_har_url_filter : Union[Pattern, str, NoneType]
+        record_har_mode : Union["full", "minimal", NoneType]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page, cookies,
+            security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+        record_har_content : Union["attach", "embed", "omit", NoneType]
+            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach`
+            is specified, resources are persistet as separate files and all of these files are archived along with the HAR file.
+            Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
 
         Returns
         -------
@@ -11005,6 +11025,8 @@ class Browser(SyncContextManager):
                     strictSelectors=strict_selectors,
                     serviceWorkers=service_workers,
                     recordHarUrlFilter=record_har_url_filter,
+                    recordHarMode=record_har_mode,
+                    recordHarContent=record_har_content,
                 )
             )
         )
@@ -11306,7 +11328,9 @@ class BrowserType(SyncBase):
         base_url: str = None,
         strict_selectors: bool = None,
         service_workers: Literal["allow", "block"] = None,
-        record_har_url_filter: typing.Union[str, typing.Pattern] = None
+        record_har_url_filter: typing.Union[str, typing.Pattern] = None,
+        record_har_mode: Literal["full", "minimal"] = None,
+        record_har_content: Literal["attach", "embed", "omit"] = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -11451,6 +11475,13 @@ class BrowserType(SyncBase):
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be registered.
             - `'block'`: Playwright will block all registration of Service Workers.
         record_har_url_filter : Union[Pattern, str, NoneType]
+        record_har_mode : Union["full", "minimal", NoneType]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page, cookies,
+            security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+        record_har_content : Union["attach", "embed", "omit", NoneType]
+            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach`
+            is specified, resources are persistet as separate files and all of these files are archived along with the HAR file.
+            Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
 
         Returns
         -------
@@ -11506,6 +11537,8 @@ class BrowserType(SyncBase):
                     strictSelectors=strict_selectors,
                     serviceWorkers=service_workers,
                     recordHarUrlFilter=record_har_url_filter,
+                    recordHarMode=record_har_mode,
+                    recordHarContent=record_har_content,
                 )
             )
         )
