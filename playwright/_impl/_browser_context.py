@@ -35,7 +35,9 @@ from playwright._impl._connection import (
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
+from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
+    RouteFromHarNotFoundPolicy,
     RouteHandler,
     RouteHandlerCallback,
     TimeoutSettings,
@@ -291,6 +293,20 @@ class BrowserContext(ChannelOwner):
         )
         if len(self._routes) == 0:
             await self._disable_interception()
+
+    async def route_from_har(
+        self,
+        har: Union[Path, str],
+        url: URLMatch = None,
+        not_found: RouteFromHarNotFoundPolicy = None,
+    ) -> None:
+        router = await HarRouter.create(
+            local_utils=self._connection.local_utils,
+            file=str(har),
+            not_found_action=not_found or "abort",
+            url_matcher=url,
+        )
+        await router.add_context_route(self)
 
     async def _disable_interception(self) -> None:
         await self._channel.send("setNetworkInterceptionEnabled", dict(enabled=False))

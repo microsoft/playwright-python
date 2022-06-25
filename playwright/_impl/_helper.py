@@ -49,6 +49,7 @@ else:  # pragma: no cover
 
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._api_structures import HeadersArray
     from playwright._impl._network import Request, Response, Route
 
 URLMatch = Union[str, Pattern, Callable[[str], bool]]
@@ -67,6 +68,7 @@ MouseButton = Literal["left", "middle", "right"]
 ServiceWorkersPolicy = Literal["allow", "block"]
 HarMode = Literal["full", "minimal"]
 HarContentPolicy = Literal["attach", "embed", "omit"]
+RouteFromHarNotFoundPolicy = Literal["abort", "fallback"]
 
 
 class ErrorPayload(TypedDict, total=False):
@@ -133,6 +135,15 @@ class URLMatcher:
         if self._regex_obj:
             return cast(bool, self._regex_obj.search(url))
         return False
+
+
+class HarLookupResult(TypedDict, total=False):
+    action: Literal["error", "redirect", "fulfill", "noentry"]
+    message: Optional[str]
+    redirectURL: Optional[str]
+    status: Optional[int]
+    headers: Optional["HeadersArray"]
+    body: Optional[str]
 
 
 class TimeoutSettings:

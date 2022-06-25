@@ -18,6 +18,7 @@ import os
 import pytest
 
 from playwright._impl._api_types import Error
+from playwright.async_api import expect
 
 
 @pytest.fixture()
@@ -336,3 +337,11 @@ async def test_should_fire_close_event_for_a_persistent_context(launch_persisten
 async def test_should_support_reduced_motion(launch_persistent):
     (page, context) = await launch_persistent(reduced_motion="reduce")
     assert await page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
+
+
+async def test_should_support_har_option(browser, server, assetdir, launch_persistent):
+    (page, context) = await launch_persistent()
+    await page.route_from_har(har=assetdir / "har-fulfill.har")
+    await page.goto("http://no.playwright/")
+    assert await page.evaluate("window.value") == "foo"
+    await expect(page.locator("body")).to_have_css("background-color", "rgb(255, 0, 0)")

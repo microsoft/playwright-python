@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List
+import base64
+from typing import Dict, List, Optional, cast
 
-from playwright._impl._api_structures import NameValue
+from playwright._impl._api_structures import HeadersArray, NameValue
 from playwright._impl._connection import ChannelOwner
+from playwright._impl._helper import HarLookupResult, locals_to_params
 
 
 class LocalUtils(ChannelOwner):
@@ -26,3 +28,28 @@ class LocalUtils(ChannelOwner):
 
     async def zip(self, zip_file: str, entries: List[NameValue]) -> None:
         await self._channel.send("zip", {"zipFile": zip_file, "entries": entries})
+
+    async def har_open(self, file: str) -> None:
+        params = locals_to_params(locals())
+        await self._channel.send("harOpen", params)
+
+    async def har_lookup(
+        self,
+        harId: str,
+        url: str,
+        method: str,
+        headers: HeadersArray,
+        isNavigationRequest: bool,
+        postData: Optional[bytes] = None,
+    ) -> HarLookupResult:
+        params = locals_to_params(locals())
+        if "postData" in params:
+            params["postData"] = base64.b64encode(params["postData"]).decode()
+        return cast(
+            HarLookupResult,
+            await self._channel.send_return_as_dict("harLookup", params),
+        )
+
+    async def har_close(self, harId: str) -> None:
+        params = locals_to_params(locals())
+        await self._channel.send("harClose", params)

@@ -355,7 +355,6 @@ class Route(ChannelOwner):
 
         return continue_route()
 
-    # FIXME: Port corresponding tests, and call this method
     async def _redirected_navigation_request(self, url: str) -> None:
         self._check_not_handled()
         await self._race_with_page_close(
