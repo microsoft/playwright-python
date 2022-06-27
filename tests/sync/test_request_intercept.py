@@ -43,7 +43,9 @@ def test_should_fulfill_intercepted_response(page: Page, server: Server) -> None
 def test_should_fulfill_response_with_empty_body(page: Page, server: Server) -> None:
     def handle(route: Route) -> None:
         response = page.request.fetch(route.request)
-        route.fulfill(response=response, status=201, body="")
+        route.fulfill(
+            response=response, status=201, body="", headers={"content-length": "0"}
+        )
 
     page.route("**/*", handle)
     response = page.goto(server.PREFIX + "/title.html")
