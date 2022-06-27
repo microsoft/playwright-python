@@ -47,12 +47,20 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._helper import ContinueParameters, locals_to_params
+from playwright._impl._helper import FallbackOverrideParameters, locals_to_params
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
+
+
+def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
+    return [
+        {"name": name, "value": value}
+        for name, value in headers.items()
+        if value is not None
+    ]
 
 
 class Request(ChannelOwner):
@@ -80,13 +88,21 @@ class Request(ChannelOwner):
         }
         self._provisional_headers = RawHeaders(self._initializer["headers"])
         self._all_headers_future: Optional[asyncio.Future[RawHeaders]] = None
+        self._fallback_overrides: FallbackOverrideParameters = (
+            FallbackOverrideParameters()
+        )
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
 
+    def _apply_fallback_overrides(self, overrides: FallbackOverrideParameters) -> None:
+        self._fallback_overrides = cast(
+            FallbackOverrideParameters, {**self._fallback_overrides, **overrides}
+        )
+
     @property
     def url(self) -> str:
-        return self._initializer["url"]
+        return cast(str, self._fallback_overrides.get("url", self._initializer["url"]))
 
     @property
     def resource_type(self) -> str:
@@ -94,7 +110,9 @@ class Request(ChannelOwner):
 
     @property
     def method(self) -> str:
-        return self._initializer["method"]
+        return cast(
+            str, self._fallback_overrides.get("method", self._initializer["method"])
+        )
 
     async def sizes(self) -> RequestSizes:
         response = await self.response()
@@ -104,10 +122,10 @@ class Request(ChannelOwner):
 
     @property
     def post_data(self) -> Optional[str]:
-        data = self.post_data_buffer
+        data = self._fallback_overrides.get("postData", self.post_data_buffer)
         if not data:
             return None
-        return data.decode()
+        return data.decode() if isinstance(data, bytes) else data
 
     @property
     def post_data_json(self) -> Optional[Any]:
@@ -124,6 +142,13 @@ class Request(ChannelOwner):
 
     @property
     def post_data_buffer(self) -> Optional[bytes]:
+        override = self._fallback_overrides.get("post_data")
+        if override:
+            return (
+                override.encode()
+                if isinstance(override, str)
+                else cast(bytes, override)
+            )
         b64_content = self._initializer.get("postData")
         if b64_content is None:
             return None
@@ -157,6 +182,9 @@ class Request(ChannelOwner):
 
     @property
     def headers(self) -> Headers:
+        override = self._fallback_overrides.get("headers")
+        if override:
+            return RawHeaders._from_headers_dict_lossy(override).headers()
         return self._provisional_headers.headers()
 
     async def all_headers(self) -> Headers:
@@ -169,6 +197,9 @@ class Request(ChannelOwner):
         return (await self._actual_headers()).get(name)
 
     async def _actual_headers(self) -> "RawHeaders":
+        override = self._fallback_overrides.get("headers")
+        if override:
+            return RawHeaders(serialize_headers(override))
         if not self._all_headers_future:
             self._all_headers_future = asyncio.Future()
             headers = await self._channel.send("rawRequestHeaders")
@@ -181,6 +212,21 @@ class Route(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._handling_future: Optional[asyncio.Future["bool"]] = None
+
+    def _start_handling(self) -> "asyncio.Future[bool]":
+        self._handling_future = asyncio.Future()
+        return self._handling_future
+
+    def _report_handled(self, done: bool) -> None:
+        chain = self._handling_future
+        assert chain
+        self._handling_future = None
+        chain.set_result(done)
+
+    def _check_not_handled(self) -> None:
+        if not self._handling_future:
+            raise Error("Route is already handled!")
 
     def __repr__(self) -> str:
         return f"<Route request={self.request}>"
@@ -203,6 +249,7 @@ class Route(ChannelOwner):
         contentType: str = None,
         response: "APIResponse" = None,
     ) -> None:
+        self._check_not_handled()
         params = locals_to_params(locals())
         if response:
             del params["response"]
@@ -247,6 +294,19 @@ class Route(ChannelOwner):
             headers["content-length"] = str(length)
         params["headers"] = serialize_headers(headers)
         await self._race_with_page_close(self._channel.send("fulfill", params))
+        self._report_handled(True)
+
+    async def fallback(
+        self,
+        url: str = None,
+        method: str = None,
+        headers: Dict[str, str] = None,
+        postData: Union[str, bytes] = None,
+    ) -> None:
+        overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
+        self._check_not_handled()
+        self.request._apply_fallback_overrides(overrides)
+        self._report_handled(False)
 
     async def continue_(
         self,
@@ -255,29 +315,53 @@ class Route(ChannelOwner):
         headers: Dict[str, str] = None,
         postData: Union[str, bytes] = None,
     ) -> None:
-        overrides: ContinueParameters = {}
-        if url:
-            overrides["url"] = url
-        if method:
-            overrides["method"] = method
-        if headers:
-            overrides["headers"] = serialize_headers(headers)
-        if isinstance(postData, str):
-            overrides["postData"] = base64.b64encode(postData.encode()).decode()
-        elif isinstance(postData, bytes):
-            overrides["postData"] = base64.b64encode(postData).decode()
-        await self._race_with_page_close(
-            self._channel.send("continue", cast(Any, overrides))
-        )
+        overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
+        self._check_not_handled()
+        self.request._apply_fallback_overrides(overrides)
+        await self._internal_continue()
+        self._report_handled(True)
 
-    def _internal_continue(self) -> None:
+    def _internal_continue(
+        self, is_internal: bool = False
+    ) -> Coroutine[Any, Any, None]:
         async def continue_route() -> None:
             try:
-                await self.continue_()
-            except Exception:
-                pass
+                post_data_for_wire: Optional[str] = None
+                post_data_from_overrides = self.request._fallback_overrides.get(
+                    "postData"
+                )
+                if post_data_from_overrides is not None:
+                    post_data_for_wire = (
+                        base64.b64encode(post_data_from_overrides.encode()).decode()
+                        if isinstance(post_data_from_overrides, str)
+                        else base64.b64encode(post_data_from_overrides).decode()
+                    )
+                params = locals_to_params(
+                    cast(Dict[str, str], self.request._fallback_overrides)
+                )
+                if "headers" in params:
+                    params["headers"] = serialize_headers(params["headers"])
+                if post_data_for_wire is not None:
+                    params["postData"] = post_data_for_wire
+                await self._race_with_page_close(
+                    self._channel.send(
+                        "continue",
+                        params,
+                    )
+                )
+            except Exception as e:
+                if not is_internal:
+                    raise e
 
-        asyncio.create_task(continue_route())
+        return continue_route()
+
+    # FIXME: Port corresponding tests, and call this method
+    async def _redirected_navigation_request(self, url: str) -> None:
+        self._check_not_handled()
+        await self._race_with_page_close(
+            self._channel.send("redirectNavigationRequest", {"url": url})
+        )
+        self._report_handled(True)
 
     async def _race_with_page_close(self, future: Coroutine) -> None:
         if hasattr(self.request.frame, "_page"):
@@ -484,16 +568,16 @@ class WebSocket(ChannelOwner):
         self.emit(WebSocket.Events.Close, self)
 
 
-def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
-    return [{"name": name, "value": value} for name, value in headers.items()]
-
-
 class RawHeaders:
     def __init__(self, headers: HeadersArray) -> None:
         self._headers_array = headers
         self._headers_map: Dict[str, Dict[str, bool]] = defaultdict(dict)
         for header in headers:
             self._headers_map[header["name"].lower()][header["value"]] = True
+
+    @staticmethod
+    def _from_headers_dict_lossy(headers: Dict[str, str]) -> "RawHeaders":
+        return RawHeaders(serialize_headers(headers))
 
     def get(self, name: str) -> Optional[str]:
         values = self.get_all(name)

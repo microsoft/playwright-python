@@ -76,11 +76,11 @@ class ErrorPayload(TypedDict, total=False):
     value: Optional[Any]
 
 
-class ContinueParameters(TypedDict, total=False):
+class FallbackOverrideParameters(TypedDict, total=False):
     url: Optional[str]
     method: Optional[str]
-    headers: Optional[List[NameValue]]
-    postData: Optional[str]
+    headers: Optional[Dict[str, str]]
+    postData: Optional[Union[str, bytes]]
 
 
 class ParsedMessageParams(TypedDict):
@@ -225,14 +225,17 @@ class RouteHandler:
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
-    def handle(self, route: "Route", request: "Request") -> None:
+    async def handle(self, route: "Route", request: "Request") -> bool:
+        handled_future = route._start_handling()
+        handler_task = []
+
         def impl() -> None:
             self._handled_count += 1
             result = cast(
                 Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
             )(route, request)
             if inspect.iscoroutine(result):
-                asyncio.create_task(result)
+                handler_task.append(asyncio.create_task(result))
 
         # As with event handlers, each route handler is a potentially blocking context
         # so it needs a fiber.
@@ -242,9 +245,12 @@ class RouteHandler:
         else:
             impl()
 
+        [handled, *_] = await asyncio.gather(handled_future, *handler_task)
+        return handled
+
     @property
-    def is_active(self) -> bool:
-        return self._handled_count < self._times
+    def will_expire(self) -> bool:
+        return self._handled_count + 1 >= self._times
 
 
 def is_safe_close_error(error: Exception) -> bool:
