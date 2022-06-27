@@ -336,29 +336,17 @@ class Route(ChannelOwner):
                         if isinstance(post_data_from_overrides, str)
                         else base64.b64encode(post_data_from_overrides).decode()
                     )
+                params = locals_to_params(
+                    cast(Dict[str, str], self.request._fallback_overrides)
+                )
+                if "headers" in params:
+                    params["headers"] = serialize_headers(params["headers"])
+                if post_data_for_wire is not None:
+                    params["postData"] = post_data_for_wire
                 await self._race_with_page_close(
                     self._channel.send(
                         "continue",
-                        cast(
-                            Any,
-                            locals_to_params(
-                                {
-                                    "url": self.request._fallback_overrides.get("url"),
-                                    "method": self.request._fallback_overrides.get(
-                                        "method"
-                                    ),
-                                    "headers": serialize_headers(
-                                        cast(
-                                            Dict[str, str],
-                                            self.request._fallback_overrides["headers"],
-                                        )
-                                    )
-                                    if self.request._fallback_overrides.get("headers")
-                                    else None,
-                                    "postData": post_data_for_wire,
-                                }
-                            ),
-                        ),
+                        params,
                     )
                 )
             except Exception as e:
