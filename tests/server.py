@@ -139,11 +139,11 @@ class Server:
                         content_type += "; charset=utf-8"
                     request.setHeader(b"Content-Type", content_type)
                     request.setHeader(b"Cache-Control", "no-cache, no-store")
-                    request.setHeader(b"Content-Length", str(len(file_content)))
                     if path in gzip_routes:
                         request.setHeader("Content-Encoding", "gzip")
                         request.write(gzip.compress(file_content))
                     else:
+                        request.setHeader(b"Content-Length", str(len(file_content)))
                         request.write(file_content)
                     self.setResponseCode(HTTPStatus.OK)
                 except (FileNotFoundError, IsADirectoryError, PermissionError):
