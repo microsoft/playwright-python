@@ -131,13 +131,13 @@ async def test_should_give_access_to_the_intercepted_response(
     assert response.status_text == "OK"
     assert response.ok is True
     assert response.url.endswith("/title.html") is True
-    assert response.headers["content-type"] == "text/html"
+    assert response.headers["content-type"] == "text/html; charset=utf-8"
     assert list(
         filter(
             lambda header: header["name"].lower() == "content-type",
             response.headers_array,
         )
-    ) == [{"name": "Content-Type", "value": "text/html"}]
+    ) == [{"name": "Content-Type", "value": "text/html; charset=utf-8"}]
 
     await asyncio.gather(
         route.fulfill(response=response),
