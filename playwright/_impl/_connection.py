@@ -28,6 +28,7 @@ from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
+    from playwright._impl._local_utils import LocalUtils
     from playwright._impl._playwright import Playwright
 
 
@@ -109,7 +110,7 @@ class ChannelOwner(AsyncIOEventEmitter):
             parent if isinstance(parent, ChannelOwner) else None
         )
         self._objects: Dict[str, "ChannelOwner"] = {}
-        self._channel = Channel(self._connection, guid)
+        self._channel: Channel = Channel(self._connection, guid)
         self._channel._object = self
         self._initializer = initializer
 
@@ -173,6 +174,7 @@ class Connection(EventEmitter):
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
         loop: asyncio.AbstractEventLoop,
+        local_utils: Optional["LocalUtils"] = None,
     ) -> None:
         super().__init__()
         self._dispatcher_fiber = dispatcher_fiber
@@ -193,6 +195,12 @@ class Connection(EventEmitter):
         self._api_zone: contextvars.ContextVar[Optional[Dict]] = contextvars.ContextVar(
             "ApiZone", default=None
         )
+        self._local_utils: Optional["LocalUtils"] = local_utils
+
+    @property
+    def local_utils(self) -> "LocalUtils":
+        assert self._local_utils
+        return self._local_utils
 
     def mark_as_remote(self) -> None:
         self.is_remote = True

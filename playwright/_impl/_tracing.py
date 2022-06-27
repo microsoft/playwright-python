@@ -18,7 +18,6 @@ from typing import Dict, Optional, Union, cast
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._helper import locals_to_params
-from playwright._impl._local_utils import LocalUtils
 
 
 class Tracing(ChannelOwner):
@@ -26,7 +25,6 @@ class Tracing(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        _local_utils: LocalUtils
 
     async def start(
         self,
@@ -86,4 +84,6 @@ class Tracing(ChannelOwner):
 
         # Add local sources to the remote trace if necessary.
         if result.get("sourceEntries", []):
-            await self._local_utils.zip(file_path, result["sourceEntries"])
+            await self._connection.local_utils.zip(
+                str(file_path), result["sourceEntries"]
+            )

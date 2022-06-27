@@ -78,7 +78,6 @@ class APIRequest:
             APIRequestContext,
             from_channel(await self.playwright._channel.send("newRequest", params)),
         )
-        context._tracing._local_utils = self.playwright._utils
         return context
 
 

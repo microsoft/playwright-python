@@ -125,7 +125,6 @@ class Browser(ChannelOwner):
         self._contexts.append(context)
         context._browser = self
         context._options = params
-        context._tracing._local_utils = self._local_utils
         return context
 
     async def new_page(
