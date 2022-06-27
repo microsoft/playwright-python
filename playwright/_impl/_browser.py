@@ -16,7 +16,7 @@ import base64
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Pattern, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -31,6 +31,8 @@ from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
     ColorScheme,
     ForcedColors,
+    HarContentPolicy,
+    HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
     async_readfile,
@@ -40,6 +42,7 @@ from playwright._impl._helper import (
 from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
+from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_type import BrowserType
@@ -116,6 +119,9 @@ class Browser(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
+        recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarMode: HarMode = None,
+        recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
@@ -160,6 +166,9 @@ class Browser(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
+        recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarMode: HarMode = None,
+        recordHarContent: HarContentPolicy = None,
     ) -> Page:
         params = locals_to_params(locals())
         context = await self.new_context(**params)
@@ -217,9 +226,30 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
     if "recordHarPath" in params:
         recordHar: Dict[str, Any] = {"path": str(params["recordHarPath"])}
         params["recordHar"] = recordHar
+        if "recordHarUrlFilter" in params:
+            opt = params["recordHarUrlFilter"]
+            if isinstance(opt, str):
+                params["recordHar"]["urlGlob"] = opt
+            if isinstance(opt, Pattern):
+                params["recordHar"]["urlRegexSource"] = opt.pattern
+                params["recordHar"]["urlRegexFlags"] = escape_regex_flags(opt)
+            del params["recordHarUrlFilter"]
+        if "recordHarMode" in params:
+            params["recordHar"]["mode"] = params["recordHarMode"]
+            del params["recordHarMode"]
+
+        new_content_api = None
+        old_content_api = None
+        if "recordHarContent" in params:
+            new_content_api = params["recordHarContent"]
+            del params["recordHarContent"]
         if "recordHarOmitContent" in params:
-            params["recordHar"]["omitContent"] = params["recordHarOmitContent"]
+            old_content_api = params["recordHarOmitContent"]
             del params["recordHarOmitContent"]
+        content = new_content_api or ("omit" if old_content_api else None)
+        if content:
+            params["recordHar"]["content"] = content
+
         del params["recordHarPath"]
     if "recordVideoDir" in params:
         params["recordVideo"] = {"dir": str(params["recordVideoDir"])}

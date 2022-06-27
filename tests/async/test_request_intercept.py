@@ -43,7 +43,9 @@ async def test_should_fulfill_intercepted_response(page: Page, server: Server):
 async def test_should_fulfill_response_with_empty_body(page: Page, server: Server):
     async def handle(route: Route):
         response = await page.request.fetch(route.request)
-        await route.fulfill(response=response, status=201, body="")
+        await route.fulfill(
+            response=response, status=201, body="", headers={"content-length": "0"}
+        )
 
     await page.route("**/*", handle)
     response = await page.goto(server.PREFIX + "/title.html")
@@ -131,13 +133,13 @@ async def test_should_give_access_to_the_intercepted_response(
     assert response.status_text == "OK"
     assert response.ok is True
     assert response.url.endswith("/title.html") is True
-    assert response.headers["content-type"] == "text/html"
+    assert response.headers["content-type"] == "text/html; charset=utf-8"
     assert list(
         filter(
             lambda header: header["name"].lower() == "content-type",
             response.headers_array,
         )
-    ) == [{"name": "Content-Type", "value": "text/html"}]
+    ) == [{"name": "Content-Type", "value": "text/html; charset=utf-8"}]
 
     await asyncio.gather(
         route.fulfill(response=response),

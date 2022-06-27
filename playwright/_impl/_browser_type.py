@@ -15,7 +15,7 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -36,6 +36,8 @@ from playwright._impl._helper import (
     ColorScheme,
     Env,
     ForcedColors,
+    HarContentPolicy,
+    HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
     locals_to_params,
@@ -139,6 +141,9 @@ class BrowserType(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
+        recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarMode: HarMode = None,
+        recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir))
         params = locals_to_params(locals())
