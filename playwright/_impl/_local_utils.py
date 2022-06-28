@@ -53,20 +53,3 @@ class LocalUtils(ChannelOwner):
     async def har_close(self, harId: str) -> None:
         params = locals_to_params(locals())
         await self._channel.send("harClose", params)
-
-    def log(self, level: str, method: str, message: str) -> None:
-        try:
-            self._channel._connection.wrap_api_call(
-                lambda: self._channel.send_no_reply(
-                    method,
-                    {
-                        level: {
-                            "phase": "log",
-                            "message": message,
-                        },
-                    },
-                ),
-                True,
-            )
-        except Exception:
-            pass
