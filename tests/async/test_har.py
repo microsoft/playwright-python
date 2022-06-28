@@ -20,6 +20,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
+from flaky import flaky
 
 from playwright.async_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
@@ -436,6 +437,7 @@ async def test_should_go_back_to_redirected_navigation(
     assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
 
 
+@flaky  # Flaky upstream
 async def test_should_go_forward_to_redirected_navigation(
     context: BrowserContext, server: Server, assetdir: Path
 ) -> None:
