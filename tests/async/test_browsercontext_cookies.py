@@ -57,13 +57,23 @@ async def test_should_get_a_non_session_cookie(context, page, server, is_chromiu
         date,
     )
     assert document_cookie == "username=John Doe"
-    assert await context.cookies() == [
+    cookies = await context.cookies()
+    expires = cookies[0]["expires"]
+    del cookies[0]["expires"]
+    # Browsers start to cap cookies with 400 days max expires value.
+    # See https://github.com/httpwg/http-extensions/pull/1732
+    # Chromium patch: https://chromium.googlesource.com/chromium/src/+/aaa5d2b55478eac2ee642653dcd77a50ac3faff6
+    # We want to make sure that expires date is at least 400 days in future.
+    # We use 355 to prevent flakes and not think about timezones!
+    assert datetime.datetime.fromtimestamp(
+        expires
+    ) - datetime.datetime.now() > datetime.timedelta(days=355)
+    assert cookies == [
         {
             "name": "username",
             "value": "John Doe",
             "domain": "localhost",
             "path": "/",
-            "expires": date / 1000,
             "httpOnly": False,
             "secure": False,
             "sameSite": "Lax" if is_chromium else "None",

@@ -268,7 +268,9 @@ class Request(SyncBase):
     def headers(self) -> typing.Dict[str, str]:
         """Request.headers
 
-        **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use `request.all_headers()` instead.
+        An object with the request HTTP headers. The header names are lower-cased. Note that this method does not return
+        security-related headers, including cookie-related ones. You can use `request.all_headers()` for complete list of
+        headers that include `cookie` information.
 
         Returns
         -------
@@ -413,7 +415,9 @@ class Response(SyncBase):
     def headers(self) -> typing.Dict[str, str]:
         """Response.headers
 
-        **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use `response.all_headers()` instead.
+        An object with the response HTTP headers. The header names are lower-cased. Note that this method does not return
+        security-related headers, including cookie-related ones. You can use `response.all_headers()` for complete list
+        of headers that include `cookie` information.
 
         Returns
         -------
@@ -7762,6 +7766,45 @@ class Page(SyncContextManager):
             )
         )
 
+    def route_from_har(
+        self,
+        har: typing.Union[pathlib.Path, str],
+        *,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        not_found: Literal["abort", "fallback"] = None
+    ) -> NoneType:
+        """Page.route_from_har
+
+        If specified the network requests that are made in the page will be served from the HAR file. Read more about
+        [Replaying from HAR](https://playwright.dev/python/docs/network#replaying-from-har).
+
+        Playwright will not serve requests intercepted by Service Worker from the HAR file. See
+        [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
+        request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+
+        Parameters
+        ----------
+        har : Union[pathlib.Path, str]
+            Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
+            relative path, then it is resolved relative to the current working directory.
+        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+            A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the pattern
+            will be surved from the HAR file. If not specified, all requests are served from the HAR file.
+        not_found : Union["abort", "fallback", NoneType]
+            - If set to 'abort' any request not found in the HAR file will be aborted.
+            - If set to 'fallback' missing requests will be sent to the network.
+
+            Defaults to abort.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.route_from_har(
+                    har=har, url=self._wrap_handler(url), not_found=not_found
+                )
+            )
+        )
+
     def screenshot(
         self,
         *,
@@ -10452,6 +10495,45 @@ class BrowserContext(SyncContextManager):
             self._sync(
                 self._impl_obj.unroute(
                     url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                )
+            )
+        )
+
+    def route_from_har(
+        self,
+        har: typing.Union[pathlib.Path, str],
+        *,
+        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
+        not_found: Literal["abort", "fallback"] = None
+    ) -> NoneType:
+        """BrowserContext.route_from_har
+
+        If specified the network requests that are made in the context will be served from the HAR file. Read more about
+        [Replaying from HAR](https://playwright.dev/python/docs/network#replaying-from-har).
+
+        Playwright will not serve requests intercepted by Service Worker from the HAR file. See
+        [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
+        request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+
+        Parameters
+        ----------
+        har : Union[pathlib.Path, str]
+            Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
+            relative path, then it is resolved relative to the current working directory.
+        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+            A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the pattern
+            will be surved from the HAR file. If not specified, all requests are served from the HAR file.
+        not_found : Union["abort", "fallback", NoneType]
+            - If set to 'abort' any request not found in the HAR file will be aborted.
+            - If set to 'fallback' falls through to the next route handler in the handler chain.
+
+            Defaults to abort.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.route_from_har(
+                    har=har, url=self._wrap_handler(url), not_found=not_found
                 )
             )
         )

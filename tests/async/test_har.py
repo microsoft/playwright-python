@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import json
 import os
 import re
 import zipfile
+from pathlib import Path
 
-from playwright.async_api import Browser
+import pytest
+from flaky import flaky
+
+from playwright.async_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
 
 
@@ -225,3 +230,350 @@ async def test_should_filter_by_regexp(
         log = data["log"]
         assert len(log["entries"]) == 1
         assert log["entries"][0]["request"]["url"].endswith("har.html")
+
+
+async def test_should_context_route_from_har_matching_the_method_and_following_redirects(
+    context: BrowserContext, assetdir: Path
+) -> None:
+    await context.route_from_har(har=assetdir / "har-fulfill.har")
+    page = await context.new_page()
+    await page.goto("http://no.playwright/")
+    # HAR contains a redirect for the script that should be followed automatically.
+    assert await page.evaluate("window.value") == "foo"
+    # HAR contains a POST for the css file that should not be used.
+    await expect(page.locator("body")).to_have_css("background-color", "rgb(255, 0, 0)")
+
+
+async def test_should_page_route_from_har_matching_the_method_and_following_redirects(
+    page: Page, assetdir: Path
+) -> None:
+    await page.route_from_har(har=assetdir / "har-fulfill.har")
+    await page.goto("http://no.playwright/")
+    # HAR contains a redirect for the script that should be followed automatically.
+    assert await page.evaluate("window.value") == "foo"
+    # HAR contains a POST for the css file that should not be used.
+    await expect(page.locator("body")).to_have_css("background-color", "rgb(255, 0, 0)")
+
+
+async def test_fallback_continue_should_continue_when_not_found_in_har(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(har=assetdir / "har-fulfill.har", not_found="fallback")
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/one-style.html")
+    await expect(page.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+
+
+async def test_by_default_should_abort_requests_not_found_in_har(
+    context: BrowserContext,
+    server: Server,
+    assetdir: Path,
+    is_chromium: bool,
+    is_webkit: bool,
+) -> None:
+    await context.route_from_har(har=assetdir / "har-fulfill.har")
+    page = await context.new_page()
+
+    with pytest.raises(Error) as exc_info:
+        await page.goto(server.EMPTY_PAGE)
+    assert exc_info.value
+    if is_chromium:
+        assert "net::ERR_FAILED" in exc_info.value.message
+    elif is_webkit:
+        assert "Blocked by Web Inspector" in exc_info.value.message
+    else:
+        assert "NS_ERROR_FAILURE" in exc_info.value.message
+
+
+async def test_fallback_continue_should_continue_requests_on_bad_har(
+    context: BrowserContext, server: Server, tmpdir: Path
+) -> None:
+    path_to_invalid_har = tmpdir / "invalid.har"
+    with path_to_invalid_har.open("w") as f:
+        json.dump({"log": {}}, f)
+    await context.route_from_har(har=path_to_invalid_har, not_found="fallback")
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/one-style.html")
+    await expect(page.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+
+
+async def test_should_only_handle_requests_matching_url_filter(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(
+        har=assetdir / "har-fulfill.har", not_found="fallback", url="**/*.js"
+    )
+    page = await context.new_page()
+
+    async def handler(route: Route):
+        assert route.request.url == "http://no.playwright/"
+        await route.fulfill(
+            status=200,
+            content_type="text/html",
+            body='<script src="./script.js"></script><div>hello</div>',
+        )
+
+    await context.route("http://no.playwright/", handler)
+    await page.goto("http://no.playwright/")
+    assert await page.evaluate("window.value") == "foo"
+    await expect(page.locator("body")).to_have_css(
+        "background-color", "rgba(0, 0, 0, 0)"
+    )
+
+
+async def test_should_only_handle_requests_matching_url_filter_no_fallback(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(har=assetdir / "har-fulfill.har", url="**/*.js")
+    page = await context.new_page()
+
+    async def handler(route: Route):
+        assert route.request.url == "http://no.playwright/"
+        await route.fulfill(
+            status=200,
+            content_type="text/html",
+            body='<script src="./script.js"></script><div>hello</div>',
+        )
+
+    await context.route("http://no.playwright/", handler)
+    await page.goto("http://no.playwright/")
+    assert await page.evaluate("window.value") == "foo"
+    await expect(page.locator("body")).to_have_css(
+        "background-color", "rgba(0, 0, 0, 0)"
+    )
+
+
+async def test_should_only_handle_requests_matching_url_filter_no_fallback_page(
+    page: Page, server: Server, assetdir: Path
+) -> None:
+    await page.route_from_har(har=assetdir / "har-fulfill.har", url="**/*.js")
+
+    async def handler(route: Route):
+        assert route.request.url == "http://no.playwright/"
+        await route.fulfill(
+            status=200,
+            content_type="text/html",
+            body='<script src="./script.js"></script><div>hello</div>',
+        )
+
+    await page.route("http://no.playwright/", handler)
+    await page.goto("http://no.playwright/")
+    assert await page.evaluate("window.value") == "foo"
+    await expect(page.locator("body")).to_have_css(
+        "background-color", "rgba(0, 0, 0, 0)"
+    )
+
+
+async def test_should_support_regex_filter(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(
+        har=assetdir / "har-fulfill.har",
+        url=re.compile(r".*(\.js|.*\.css|no.playwright\/)"),
+    )
+    page = await context.new_page()
+    await page.goto("http://no.playwright/")
+    assert await page.evaluate("window.value") == "foo"
+    await expect(page.locator("body")).to_have_css("background-color", "rgb(255, 0, 0)")
+
+
+async def test_should_change_document_url_after_redirected_navigation(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(har=assetdir / "har-redirect.har")
+    page = await context.new_page()
+
+    async with page.expect_navigation() as navigation_info:
+        await asyncio.gather(
+            page.wait_for_url("https://www.theverge.com/"),
+            page.goto("https://theverge.com/"),
+        )
+
+    response = await navigation_info.value
+    await expect(page).to_have_url("https://www.theverge.com/")
+    assert response.request.url == "https://www.theverge.com/"
+    assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
+
+
+async def test_should_change_document_url_after_redirected_navigation_on_click(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(
+        har=assetdir / "har-redirect.har", url=re.compile(r"/.*theverge.*/")
+    )
+    page = await context.new_page()
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content('<a href="https://theverge.com/">click me</a>')
+    async with page.expect_navigation() as navigation_info:
+        await asyncio.gather(
+            page.wait_for_url("https://www.theverge.com/"),
+            page.click("text=click me"),
+        )
+
+    response = await navigation_info.value
+    await expect(page).to_have_url("https://www.theverge.com/")
+    assert response.request.url == "https://www.theverge.com/"
+    assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
+
+
+async def test_should_go_back_to_redirected_navigation(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(
+        har=assetdir / "har-redirect.har", url=re.compile(r"/.*theverge.*/")
+    )
+    page = await context.new_page()
+    await page.goto("https://theverge.com/")
+    await page.goto(server.EMPTY_PAGE)
+    await expect(page).to_have_url(server.EMPTY_PAGE)
+
+    response = await page.go_back()
+    await expect(page).to_have_url("https://www.theverge.com/")
+    assert response.request.url == "https://www.theverge.com/"
+    assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
+
+
+@flaky(max_runs=5)  # Flaky upstream
+async def test_should_go_forward_to_redirected_navigation(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(
+        har=assetdir / "har-redirect.har", url=re.compile(r"/.*theverge.*/")
+    )
+    page = await context.new_page()
+    await page.goto("https://theverge.com/")
+    await page.goto(server.EMPTY_PAGE)
+    await expect(page).to_have_url(server.EMPTY_PAGE)
+    await page.goto("https://theverge.com/")
+    await expect(page).to_have_url("https://www.theverge.com/")
+    await page.go_back()
+    await expect(page).to_have_url(server.EMPTY_PAGE)
+    response = await page.go_forward()
+    await expect(page).to_have_url("https://www.theverge.com/")
+    assert response.request.url == "https://www.theverge.com/"
+    assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
+
+
+async def test_should_reload_redirected_navigation(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(
+        har=assetdir / "har-redirect.har", url=re.compile(r"/.*theverge.*/")
+    )
+    page = await context.new_page()
+    await page.goto("https://theverge.com/")
+    await expect(page).to_have_url("https://www.theverge.com/")
+    response = await page.reload()
+    await expect(page).to_have_url("https://www.theverge.com/")
+    assert response.request.url == "https://www.theverge.com/"
+    assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
+
+
+async def test_should_fulfill_from_har_with_content_in_a_file(
+    context: BrowserContext, server: Server, assetdir: Path
+) -> None:
+    await context.route_from_har(har=assetdir / "har-sha1.har")
+    page = await context.new_page()
+    await page.goto("http://no.playwright/")
+    assert await page.content() == "<html><head></head><body>Hello, world</body></html>"
+
+
+async def test_should_round_trip_har_zip(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+
+    har_path = tmpdir / "har.zip"
+    context_1 = await browser.new_context(
+        record_har_mode="minimal", record_har_path=har_path
+    )
+    page_1 = await context_1.new_page()
+    await page_1.goto(server.PREFIX + "/one-style.html")
+    await context_1.close()
+
+    context_2 = await browser.new_context()
+    await context_2.route_from_har(har=har_path, not_found="abort")
+    page_2 = await context_2.new_page()
+    await page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in await page_2.content()
+    await expect(page_2.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+
+
+async def test_should_round_trip_har_with_post_data(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
+    fetch_function = """
+        async (body) => {
+            const response = await fetch('/echo', { method: 'POST', body });
+            return await response.text();
+        };
+    """
+    har_path = tmpdir / "har.zip"
+    context_1 = await browser.new_context(
+        record_har_mode="minimal", record_har_path=har_path
+    )
+    page_1 = await context_1.new_page()
+    await page_1.goto(server.EMPTY_PAGE)
+
+    assert await page_1.evaluate(fetch_function, "1") == "1"
+    assert await page_1.evaluate(fetch_function, "2") == "2"
+    assert await page_1.evaluate(fetch_function, "3") == "3"
+    await context_1.close()
+
+    context_2 = await browser.new_context()
+    await context_2.route_from_har(har=har_path, not_found="abort")
+    page_2 = await context_2.new_page()
+    await page_2.goto(server.EMPTY_PAGE)
+    assert await page_2.evaluate(fetch_function, "1") == "1"
+    assert await page_2.evaluate(fetch_function, "2") == "2"
+    assert await page_2.evaluate(fetch_function, "3") == "3"
+    with pytest.raises(Exception):
+        await page_2.evaluate(fetch_function, "4")
+
+
+async def test_should_disambiguate_by_header(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    server.set_route(
+        "/echo", lambda req: (req.write(req.getHeader("baz").encode()), req.finish())
+    )
+    fetch_function = """
+        async (bazValue) => {
+            const response = await fetch('/echo', {
+            method: 'POST',
+            body: '',
+            headers: {
+                foo: 'foo-value',
+                bar: 'bar-value',
+                baz: bazValue,
+            }
+            });
+            return await response.text();
+        };
+    """
+    har_path = tmpdir / "har.zip"
+    context_1 = await browser.new_context(
+        record_har_mode="minimal", record_har_path=har_path
+    )
+    page_1 = await context_1.new_page()
+    await page_1.goto(server.EMPTY_PAGE)
+
+    assert await page_1.evaluate(fetch_function, "baz1") == "baz1"
+    assert await page_1.evaluate(fetch_function, "baz2") == "baz2"
+    assert await page_1.evaluate(fetch_function, "baz3") == "baz3"
+    await context_1.close()
+
+    context_2 = await browser.new_context()
+    await context_2.route_from_har(har=har_path)
+    page_2 = await context_2.new_page()
+    await page_2.goto(server.EMPTY_PAGE)
+    assert await page_2.evaluate(fetch_function, "baz1") == "baz1"
+    assert await page_2.evaluate(fetch_function, "baz2") == "baz2"
+    assert await page_2.evaluate(fetch_function, "baz3") == "baz3"
+    assert await page_2.evaluate(fetch_function, "baz4") == "baz1"

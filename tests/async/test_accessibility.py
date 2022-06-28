@@ -209,28 +209,29 @@ async def test_accessibility_filtering_children_of_leaf_nodes_rich_text_editable
 ):
     await page.set_content(
         """
-    <div contenteditable="true" role='textbox'>
-    Edit this image: <img src="fakeimage.png" alt="my fake image">
-    </div>"""
+        <div contenteditable="true">
+            Edit this image: <img src="fakeimage.png" alt="my fake image">
+        </div>
+    """
     )
     if is_firefox:
         golden = {
-            "role": "textbox",
+            "role": "section",
             "name": "",
-            "value": "Edit this image: my fake image",
-            "children": [{"role": "text", "name": "my fake image"}],
+            "children": [
+                {"role": "text leaf", "name": "Edit this image: "},
+                {"role": "text", "name": "my fake image"},
+            ],
         }
     else:
         golden = {
-            "role": "textbox",
+            "role": "generic",
             "name": "",
-            "multiline": True,
             "value": "Edit this image: ",
             "children": [
                 {"role": "text", "name": "Edit this image:"},
                 {"role": "img", "name": "my fake image"},
             ],
-            "value": "Edit this image: ",
         }
     snapshot = await page.accessibility.snapshot()
     assert snapshot["children"][0] == golden
