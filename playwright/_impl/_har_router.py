@@ -56,7 +56,6 @@ class HarRouter:
         )
         action = response["action"]
         if action == "redirect":
-            # debugLogger.log('api', `HAR: ${route.request().url()} redirected to ${response.redirectURL}`);
             redirect_url = response["redirectURL"]
             assert redirect_url
             await route._redirected_navigation_request(redirect_url)
@@ -77,8 +76,7 @@ class HarRouter:
 
         if action == "error":
             pass
-            # debugLogger.log('api', 'HAR: ' + response.message!);
-            # Report the error, but fall through to the default handler.
+        # Report the error, but fall through to the default handler.
 
         if self._not_found_action == "abort":
             await route.abort()
