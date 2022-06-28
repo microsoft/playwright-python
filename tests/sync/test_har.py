@@ -374,7 +374,7 @@ def test_should_go_back_to_redirected_navigation(
     assert page.evaluate("window.location.href") == "https://www.theverge.com/"
 
 
-@flaky  # Flaky upstream
+@flaky(max_runs=5)  # Flaky upstream
 def test_should_go_forward_to_redirected_navigation(
     context: BrowserContext, server: Server, assetdir: Path
 ) -> None:
