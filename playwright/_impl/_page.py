@@ -605,9 +605,13 @@ class Page(ChannelOwner):
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: URLMatch = None,
+        url: Union[Pattern, str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
+        update: bool = None,
     ) -> None:
+        if update:
+            await self._browser_context._record_into_har(har=har, page=self, url=url)
+            return
         router = await HarRouter.create(
             local_utils=self._connection.local_utils,
             file=str(har),

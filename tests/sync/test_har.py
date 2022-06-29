@@ -511,3 +511,92 @@ def test_should_disambiguate_by_header(
     assert page_2.evaluate(fetch_function, "baz2") == "baz2"
     assert page_2.evaluate(fetch_function, "baz3") == "baz3"
     assert page_2.evaluate(fetch_function, "baz4") == "baz1"
+
+
+def test_should_produce_extracted_zip(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.har"
+    context = browser.new_context(
+        record_har_mode="minimal", record_har_path=har_path, record_har_content="attach"
+    )
+    page_1 = context.new_page()
+    page_1.goto(server.PREFIX + "/one-style.html")
+    context.close()
+
+    assert har_path.exists()
+    with har_path.open() as r:
+        content = r.read()
+        assert "log" in content
+        assert "background-color" not in r.read()
+
+    context_2 = browser.new_context()
+    context_2.route_from_har(har_path, not_found="abort")
+    page_2 = context_2.new_page()
+    page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in page_2.content()
+    expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+
+
+def test_should_update_har_zip_for_context(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.zip"
+    context = browser.new_context()
+    context.route_from_har(har_path, update=True)
+    page_1 = context.new_page()
+    page_1.goto(server.PREFIX + "/one-style.html")
+    context.close()
+
+    assert har_path.exists()
+
+    context_2 = browser.new_context()
+    context_2.route_from_har(har_path, not_found="abort")
+    page_2 = context_2.new_page()
+    page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in page_2.content()
+    expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+
+
+def test_should_update_har_zip_for_page(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.zip"
+    context = browser.new_context()
+    page_1 = context.new_page()
+    page_1.route_from_har(har_path, update=True)
+    page_1.goto(server.PREFIX + "/one-style.html")
+    context.close()
+
+    assert har_path.exists()
+
+    context_2 = browser.new_context()
+    page_2 = context_2.new_page()
+    page_2.route_from_har(har_path, not_found="abort")
+    page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in page_2.content()
+    expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+
+
+def test_should_update_extracted_har_zip_for_page(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.har"
+    context = browser.new_context()
+    page_1 = context.new_page()
+    page_1.route_from_har(har_path, update=True)
+    page_1.goto(server.PREFIX + "/one-style.html")
+    context.close()
+
+    assert har_path.exists()
+    with har_path.open() as r:
+        content = r.read()
+        assert "log" in content
+        assert "background-color" not in r.read()
+
+    context_2 = browser.new_context()
+    page_2 = context_2.new_page()
+    page_2.route_from_har(har_path, not_found="abort")
+    page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in page_2.content()
+    expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")

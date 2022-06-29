@@ -16,7 +16,18 @@ import asyncio
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Set,
+    Union,
+    cast,
+)
 
 from playwright._impl._api_structures import (
     Cookie,
@@ -37,6 +48,7 @@ from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
+    HarRecordingMetadata,
     RouteFromHarNotFoundPolicy,
     RouteHandler,
     RouteHandlerCallback,
@@ -47,6 +59,7 @@ from playwright._impl._helper import (
     async_writefile,
     is_safe_close_error,
     locals_to_params,
+    prepare_record_har_options,
     to_impl,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
@@ -56,6 +69,7 @@ from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
+    from playwright._impl._browser_type import BrowserType
 
 
 class BrowserContext(ChannelOwner):
@@ -85,6 +99,7 @@ class BrowserContext(ChannelOwner):
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
+        self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(
             initializer["APIRequestContext"]
         )
@@ -201,6 +216,14 @@ class BrowserContext(ChannelOwner):
     def browser(self) -> Optional["Browser"]:
         return self._browser
 
+    def _set_browser_type(self, browser_type: "BrowserType") -> None:
+        self._browser_type = browser_type
+        if self._options.get("recordHar"):
+            self._har_recorders[""] = {
+                "path": self._options["recordHar"]["path"],
+                "content": self._options["recordHar"].get("content"),
+            }
+
     async def new_page(self) -> Page:
         if self._owner_page:
             raise Error("Please use browser.new_context()")
@@ -294,12 +317,37 @@ class BrowserContext(ChannelOwner):
         if len(self._routes) == 0:
             await self._disable_interception()
 
+    async def _record_into_har(
+        self,
+        har: Union[Path, str],
+        page: Optional[Page] = None,
+        url: Union[Pattern, str] = None,
+    ) -> None:
+        params = {
+            "options": prepare_record_har_options(
+                {
+                    "recordHarPath": har,
+                    "recordHarContent": "attach",
+                    "recordHarMode": "minimal",
+                    "recordHarUrlFilter": url,
+                }
+            )
+        }
+        if page:
+            params["page"] = page._channel
+        har_id = await self._channel.send("harStart", params)
+        self._har_recorders[har_id] = {"path": str(har), "content": "attach"}
+
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: URLMatch = None,
+        url: Union[Pattern, str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
+        update: bool = None,
     ) -> None:
+        if update:
+            await self._record_into_har(har=har, page=None, url=url)
+            return
         router = await HarRouter.create(
             local_utils=self._connection.local_utils,
             file=str(har),
@@ -338,13 +386,26 @@ class BrowserContext(ChannelOwner):
 
     async def close(self) -> None:
         try:
-            if self._options.get("recordHar"):
+            for har_id, params in self._har_recorders.items():
                 har = cast(
-                    Artifact, from_channel(await self._channel.send("harExport"))
+                    Artifact,
+                    from_channel(
+                        await self._channel.send("harExport", {"harId": har_id})
+                    ),
                 )
-                await har.save_as(
-                    cast(Dict[str, str], self._options["recordHar"])["path"]
-                )
+                # Server side will compress artifact if content is attach or if file is .zip.
+                is_compressed = params.get("content") == "attach" or params[
+                    "path"
+                ].endswith(".zip")
+                need_compressed = params["path"].endswith(".zip")
+                if is_compressed and not need_compressed:
+                    tmp_path = params["path"] + ".tmp"
+                    await har.save_as(tmp_path)
+                    await self._connection.local_utils.har_unzip(
+                        zipFile=tmp_path, harFile=params["path"]
+                    )
+                else:
+                    await har.save_as(params["path"])
                 await har.delete()
             await self._channel.send("close")
             await self._closed_future

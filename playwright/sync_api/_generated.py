@@ -7770,8 +7770,9 @@ class Page(SyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        not_found: Literal["abort", "fallback"] = None
+        url: typing.Union[str, typing.Pattern] = None,
+        not_found: Literal["abort", "fallback"] = None,
+        update: bool = None
     ) -> NoneType:
         """Page.route_from_har
 
@@ -7787,7 +7788,7 @@ class Page(SyncContextManager):
         har : Union[pathlib.Path, str]
             Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
             relative path, then it is resolved relative to the current working directory.
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+        url : Union[Pattern, str, NoneType]
             A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the pattern
             will be surved from the HAR file. If not specified, all requests are served from the HAR file.
         not_found : Union["abort", "fallback", NoneType]
@@ -7795,12 +7796,14 @@ class Page(SyncContextManager):
             - If set to 'fallback' missing requests will be sent to the network.
 
             Defaults to abort.
+        update : Union[bool, NoneType]
+            If specified, updates the given HAR with the actual network information instead of serving from file.
         """
 
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.route_from_har(
-                    har=har, url=self._wrap_handler(url), not_found=not_found
+                    har=har, url=url, not_found=not_found, update=update
                 )
             )
         )
@@ -10503,8 +10506,9 @@ class BrowserContext(SyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Union[str, typing.Pattern, typing.Callable[[str], bool]] = None,
-        not_found: Literal["abort", "fallback"] = None
+        url: typing.Union[str, typing.Pattern] = None,
+        not_found: Literal["abort", "fallback"] = None,
+        update: bool = None
     ) -> NoneType:
         """BrowserContext.route_from_har
 
@@ -10520,7 +10524,7 @@ class BrowserContext(SyncContextManager):
         har : Union[pathlib.Path, str]
             Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
             relative path, then it is resolved relative to the current working directory.
-        url : Union[Callable[[str], bool], Pattern, str, NoneType]
+        url : Union[Pattern, str, NoneType]
             A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the pattern
             will be surved from the HAR file. If not specified, all requests are served from the HAR file.
         not_found : Union["abort", "fallback", NoneType]
@@ -10528,12 +10532,14 @@ class BrowserContext(SyncContextManager):
             - If set to 'fallback' falls through to the next route handler in the handler chain.
 
             Defaults to abort.
+        update : Union[bool, NoneType]
+            If specified, updates the given HAR with the actual network information instead of serving from file.
         """
 
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.route_from_har(
-                    har=har, url=self._wrap_handler(url), not_found=not_found
+                    har=har, url=url, not_found=not_found, update=update
                 )
             )
         )
