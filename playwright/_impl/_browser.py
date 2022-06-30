@@ -16,7 +16,7 @@ import base64
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Pattern, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Pattern, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -38,11 +38,10 @@ from playwright._impl._helper import (
     async_readfile,
     is_safe_close_error,
     locals_to_params,
+    prepare_record_har_options,
 )
-from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import serialize_headers
 from playwright._impl._page import Page
-from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_type import BrowserType
@@ -64,7 +63,6 @@ class Browser(ChannelOwner):
         self._should_close_connection_on_close = False
 
         self._contexts: List[BrowserContext] = []
-        _utils: LocalUtils
         self._channel.on("close", lambda _: self._on_close())
 
     def __repr__(self) -> str:
@@ -131,6 +129,7 @@ class Browser(ChannelOwner):
         self._contexts.append(context)
         context._browser = self
         context._options = params
+        context._set_browser_type(self._browser_type)
         return context
 
     async def new_page(
@@ -176,6 +175,11 @@ class Browser(ChannelOwner):
         page._owned_context = context
         context._owner_page = page
         return page
+
+    def _set_browser_type(self, browser_type: "BrowserType") -> None:
+        self._browser_type = browser_type
+        for context in self._contexts:
+            context._set_browser_type(browser_type)
 
     async def close(self) -> None:
         if self._is_closed_or_closing:
@@ -224,32 +228,7 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
     if "extraHTTPHeaders" in params:
         params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
     if "recordHarPath" in params:
-        recordHar: Dict[str, Any] = {"path": str(params["recordHarPath"])}
-        params["recordHar"] = recordHar
-        if "recordHarUrlFilter" in params:
-            opt = params["recordHarUrlFilter"]
-            if isinstance(opt, str):
-                params["recordHar"]["urlGlob"] = opt
-            if isinstance(opt, Pattern):
-                params["recordHar"]["urlRegexSource"] = opt.pattern
-                params["recordHar"]["urlRegexFlags"] = escape_regex_flags(opt)
-            del params["recordHarUrlFilter"]
-        if "recordHarMode" in params:
-            params["recordHar"]["mode"] = params["recordHarMode"]
-            del params["recordHarMode"]
-
-        new_content_api = None
-        old_content_api = None
-        if "recordHarContent" in params:
-            new_content_api = params["recordHarContent"]
-            del params["recordHarContent"]
-        if "recordHarOmitContent" in params:
-            old_content_api = params["recordHarOmitContent"]
-            del params["recordHarOmitContent"]
-        content = new_content_api or ("omit" if old_content_api else None)
-        if content:
-            params["recordHar"]["content"] = content
-
+        params["recordHar"] = prepare_record_har_options(params)
         del params["recordHarPath"]
     if "recordVideoDir" in params:
         params["recordVideo"] = {"dir": str(params["recordVideoDir"])}

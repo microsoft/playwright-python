@@ -53,3 +53,7 @@ class LocalUtils(ChannelOwner):
     async def har_close(self, harId: str) -> None:
         params = locals_to_params(locals())
         await self._channel.send("harClose", params)
+
+    async def har_unzip(self, zipFile: str, harFile: str) -> None:
+        params = locals_to_params(locals())
+        await self._channel.send("harUnzip", params)

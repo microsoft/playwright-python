@@ -41,6 +41,7 @@ from greenlet import greenlet
 
 from playwright._impl._api_structures import NameValue
 from playwright._impl._api_types import Error, TimeoutError
+from playwright._impl._str_utils import escape_regex_flags
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -83,6 +84,40 @@ class FallbackOverrideParameters(TypedDict, total=False):
     method: Optional[str]
     headers: Optional[Dict[str, str]]
     postData: Optional[Union[str, bytes]]
+
+
+class HarRecordingMetadata(TypedDict, total=False):
+    path: str
+    content: Optional[HarContentPolicy]
+
+
+def prepare_record_har_options(params: Dict) -> Dict[str, Any]:
+    out_params: Dict[str, Any] = {"path": str(params["recordHarPath"])}
+    if "recordHarUrlFilter" in params:
+        opt = params["recordHarUrlFilter"]
+        if isinstance(opt, str):
+            out_params["urlGlob"] = opt
+        if isinstance(opt, Pattern):
+            out_params["urlRegexSource"] = opt.pattern
+            out_params["urlRegexFlags"] = escape_regex_flags(opt)
+        del params["recordHarUrlFilter"]
+    if "recordHarMode" in params:
+        out_params["mode"] = params["recordHarMode"]
+        del params["recordHarMode"]
+
+    new_content_api = None
+    old_content_api = None
+    if "recordHarContent" in params:
+        new_content_api = params["recordHarContent"]
+        del params["recordHarContent"]
+    if "recordHarOmitContent" in params:
+        old_content_api = params["recordHarOmitContent"]
+        del params["recordHarOmitContent"]
+    content = new_content_api or ("omit" if old_content_api else None)
+    if content:
+        out_params["content"] = content
+
+    return out_params
 
 
 class ParsedMessageParams(TypedDict):

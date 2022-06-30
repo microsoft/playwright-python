@@ -577,3 +577,100 @@ async def test_should_disambiguate_by_header(
     assert await page_2.evaluate(fetch_function, "baz2") == "baz2"
     assert await page_2.evaluate(fetch_function, "baz3") == "baz3"
     assert await page_2.evaluate(fetch_function, "baz4") == "baz1"
+
+
+async def test_should_produce_extracted_zip(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.har"
+    context = await browser.new_context(
+        record_har_mode="minimal", record_har_path=har_path, record_har_content="attach"
+    )
+    page_1 = await context.new_page()
+    await page_1.goto(server.PREFIX + "/one-style.html")
+    await context.close()
+
+    assert har_path.exists()
+    with har_path.open() as r:
+        content = r.read()
+        assert "log" in content
+        assert "background-color" not in r.read()
+
+    context_2 = await browser.new_context()
+    await context_2.route_from_har(har_path, not_found="abort")
+    page_2 = await context_2.new_page()
+    await page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in await page_2.content()
+    await expect(page_2.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+
+
+async def test_should_update_har_zip_for_context(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.zip"
+    context = await browser.new_context()
+    await context.route_from_har(har_path, update=True)
+    page_1 = await context.new_page()
+    await page_1.goto(server.PREFIX + "/one-style.html")
+    await context.close()
+
+    assert har_path.exists()
+
+    context_2 = await browser.new_context()
+    await context_2.route_from_har(har_path, not_found="abort")
+    page_2 = await context_2.new_page()
+    await page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in await page_2.content()
+    await expect(page_2.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+
+
+async def test_should_update_har_zip_for_page(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.zip"
+    context = await browser.new_context()
+    page_1 = await context.new_page()
+    await page_1.route_from_har(har_path, update=True)
+    await page_1.goto(server.PREFIX + "/one-style.html")
+    await context.close()
+
+    assert har_path.exists()
+
+    context_2 = await browser.new_context()
+    page_2 = await context_2.new_page()
+    await page_2.route_from_har(har_path, not_found="abort")
+    await page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in await page_2.content()
+    await expect(page_2.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+
+
+async def test_should_update_extracted_har_zip_for_page(
+    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.har"
+    context = await browser.new_context()
+    page_1 = await context.new_page()
+    await page_1.route_from_har(har_path, update=True)
+    await page_1.goto(server.PREFIX + "/one-style.html")
+    await context.close()
+
+    assert har_path.exists()
+    with har_path.open() as r:
+        content = r.read()
+        assert "log" in content
+        assert "background-color" not in r.read()
+
+    context_2 = await browser.new_context()
+    page_2 = await context_2.new_page()
+    await page_2.route_from_har(har_path, not_found="abort")
+    await page_2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in await page_2.content()
+    await expect(page_2.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )

@@ -92,6 +92,7 @@ class BrowserType(ChannelOwner):
         browser = cast(
             Browser, from_channel(await self._channel.send("launch", params))
         )
+        browser._set_browser_type(self)
         return browser
 
     async def launch_persistent_context(
@@ -154,6 +155,7 @@ class BrowserType(ChannelOwner):
             from_channel(await self._channel.send("launchPersistentContext", params)),
         )
         context._options = params
+        context._set_browser_type(self)
         return context
 
     async def connect_over_cdp(
@@ -174,6 +176,7 @@ class BrowserType(ChannelOwner):
         if default_context:
             browser._contexts.append(default_context)
             default_context._browser = browser
+        browser._set_browser_type(self)
         return browser
 
     async def connect(
@@ -230,6 +233,7 @@ class BrowserType(ChannelOwner):
 
         transport.once("close", handle_transport_close)
 
+        browser._set_browser_type(self)
         return browser
 
 
