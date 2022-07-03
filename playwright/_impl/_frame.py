@@ -100,14 +100,14 @@ class Frame(ChannelOwner):
             and hasattr(self, "_page")
             and self._page
         ):
-            self._page.emit("load", self)
+            self._page.emit("load", self._page)
         if (
             not self._parent_frame
             and add == "domcontentloaded"
             and hasattr(self, "_page")
             and self._page
         ):
-            self._page.emit("domcontentloaded", self)
+            self._page.emit("domcontentloaded", self._page)
 
     def _on_frame_navigated(self, event: FrameNavigatedEvent) -> None:
         self._url = event["url"]
