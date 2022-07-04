@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-from flaky import flaky
 
 from playwright.sync_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
@@ -374,7 +373,9 @@ def test_should_go_back_to_redirected_navigation(
     assert page.evaluate("window.location.href") == "https://www.theverge.com/"
 
 
-@flaky(max_runs=5)  # Flaky upstream
+@pytest.mark.skip_browser(
+    "firefox"
+)  # skipped upstream (https://github.com/microsoft/playwright/blob/6a8d835145e2f4002ee00b67a80a1f70af956703/tests/library/browsercontext-har.spec.ts#L214)
 def test_should_go_forward_to_redirected_navigation(
     context: BrowserContext, server: Server, assetdir: Path
 ) -> None:
