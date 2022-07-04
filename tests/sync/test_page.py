@@ -76,3 +76,11 @@ def test_sync_stacks_should_work(page: Page, server: Server) -> None:
         page.goto(server.EMPTY_PAGE)
     assert exc_info.value.stack
     assert __file__ in exc_info.value.stack
+
+
+def test_emitted_for_domcontentloaded_and_load(page: Page, server: Server) -> None:
+    with page.expect_event("domcontentloaded") as dom_info:
+        with page.expect_event("load") as load_info:
+            page.goto(server.EMPTY_PAGE)
+    assert isinstance(dom_info.value, Page)
+    assert isinstance(load_info.value, Page)
