@@ -89,19 +89,29 @@ async def test_should_collect_trace_with_resources_but_no_js(
     await page.mouse.dblclick(30, 30)
     await page.keyboard.insert_text("abc")
     await page.wait_for_timeout(2000)  # Give it some time to produce screenshots.
+    await page.route("**/empty.html", lambda route: route.continue_())
+    await page.goto(server.EMPTY_PAGE)
     await page.close()
     trace_file_path = tmpdir / "trace.zip"
     await context.tracing.stop(path=trace_file_path)
 
     (_, events) = parse_trace(trace_file_path)
     assert events[0]["type"] == "context-options"
-    assert events_have_entry(events, "Page.goto") is True
-    assert events_have_entry(events, "Page.set_content") is True
-    assert events_have_entry(events, "Page.click") is True
-    assert events_have_entry(events, "Mouse.move") is True
-    assert events_have_entry(events, "Mouse.dblclick") is True
-    assert events_have_entry(events, "Keyboard.insert_text") is True
-    assert events_have_entry(events, "Page.close") is True
+    assert get_actions(events) == [
+        "Page.goto",
+        "Page.set_content",
+        "Page.click",
+        "Mouse.move",
+        "Mouse.dblclick",
+        "Keyboard.insert_text",
+        "Page.wait_for_timeout",
+        "Page.route",
+        "Page.goto",
+        # FIXME: https://github.com/microsoft/playwright-python/issues/1397
+        "Channel.send",
+        "Page.close",
+        "Tracing.stop",
+    ]
 
     assert len(list(filter(lambda e: e["type"] == "frame-snapshot", events))) >= 1
     assert len(list(filter(lambda e: e["type"] == "screencast-frame", events))) >= 1
@@ -143,19 +153,16 @@ async def test_should_collect_two_traces(
 
     (_, events) = parse_trace(tracing1_path)
     assert events[0]["type"] == "context-options"
-    assert events_have_entry(events, "Page.goto") is True
-    assert events_have_entry(events, "Page.set_content") is True
-    assert events_have_entry(events, "Page.click") is True
-    assert events_have_entry(events, "Page.dblclick") is False
-    assert events_have_entry(events, "Page.close") is False
+    assert get_actions(events) == [
+        "Page.goto",
+        "Page.set_content",
+        "Page.click",
+        "Tracing.stop",
+    ]
 
     (_, events) = parse_trace(tracing2_path)
     assert events[0]["type"] == "context-options"
-    assert events_have_entry(events, "Page.goto") is False
-    assert events_have_entry(events, "Page.set_content") is False
-    assert events_have_entry(events, "Page.click") is False
-    assert events_have_entry(events, "Page.dblclick") is True
-    assert events_have_entry(events, "Page.close") is True
+    assert get_actions(events) == ["Page.dblclick", "Page.close", "Tracing.stop"]
 
 
 async def test_should_not_throw_when_stopping_without_start_but_not_exporting(
@@ -182,13 +189,16 @@ async def test_should_work_with_playwright_context_managers(
 
     (_, events) = parse_trace(trace_file_path)
     assert events[0]["type"] == "context-options"
-    assert events_have_entry(events, "Page.goto")
-    assert events_have_entry(events, "Page.set_content")
-    assert events_have_entry(events, "Page.expect_console_message")
-    assert events_have_entry(events, "Page.evaluate")
-    assert events_have_entry(events, "Page.click")
-    assert events_have_entry(events, "Page.expect_popup")
-    assert events_have_entry(events, "Page.evaluate")
+    assert get_actions(events) == [
+        "Page.goto",
+        "Page.set_content",
+        "Page.expect_console_message",
+        "Page.evaluate",
+        "Page.click",
+        "Page.expect_popup",
+        "Page.evaluate",
+        "Tracing.stop",
+    ]
 
 
 def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
@@ -203,5 +213,9 @@ def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
     return (resources, events)
 
 
-def events_have_entry(events: List[Any], api_name: str) -> bool:
-    return any(e.get("metadata", {}).get("apiName") == api_name for e in events)
+def get_actions(events: List[Any]) -> List[str]:
+    action_events = sorted(
+        list(filter(lambda e: e["type"] == "action", events)),
+        key=lambda e: e["metadata"]["startTime"],
+    )
+    return [e["metadata"]["apiName"] for e in action_events]
