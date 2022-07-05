@@ -48,7 +48,7 @@ class WaitHelper:
         )
 
     def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
-        self._channel._connection.wrap_api_call(
+        self._channel._connection.wrap_api_call_sync(
             lambda: self._channel.send_no_reply(
                 "waitForEventInfo",
                 {
@@ -127,7 +127,7 @@ class WaitHelper:
     def log(self, message: str) -> None:
         self._logs.append(message)
         try:
-            self._channel._connection.wrap_api_call(
+            self._channel._connection.wrap_api_call_sync(
                 lambda: self._channel.send_no_reply(
                     "waitForEventInfo",
                     {

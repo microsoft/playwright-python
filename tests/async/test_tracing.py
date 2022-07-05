@@ -89,8 +89,13 @@ async def test_should_collect_trace_with_resources_but_no_js(
     await page.mouse.dblclick(30, 30)
     await page.keyboard.insert_text("abc")
     await page.wait_for_timeout(2000)  # Give it some time to produce screenshots.
-    await page.route("**/empty.html", lambda route: route.continue_())
+    await page.route(
+        "**/empty.html", lambda route: route.continue_()
+    )  # should produce a route.continue_ entry.
     await page.goto(server.EMPTY_PAGE)
+    await page.goto(
+        server.PREFIX + "/one-style.html"
+    )  # should not produce a route.continue_ entry since we continue all routes if no match.
     await page.close()
     trace_file_path = tmpdir / "trace.zip"
     await context.tracing.stop(path=trace_file_path)
@@ -107,8 +112,8 @@ async def test_should_collect_trace_with_resources_but_no_js(
         "Page.wait_for_timeout",
         "Page.route",
         "Page.goto",
-        # FIXME: https://github.com/microsoft/playwright-python/issues/1397
-        "Channel.send",
+        "Route.continue_",
+        "Page.goto",
         "Page.close",
         "Tracing.stop",
     ]
@@ -215,7 +220,13 @@ def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
 
 def get_actions(events: List[Any]) -> List[str]:
     action_events = sorted(
-        list(filter(lambda e: e["type"] == "action", events)),
+        list(
+            filter(
+                lambda e: e["type"] == "action"
+                and e["metadata"].get("internal", False) is False,
+                events,
+            )
+        ),
         key=lambda e: e["metadata"]["startTime"],
     )
     return [e["metadata"]["apiName"] for e in action_events]

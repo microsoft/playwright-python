@@ -50,7 +50,7 @@ class Channel(AsyncIOEventEmitter):
         )
 
     def send_no_reply(self, method: str, params: Dict = None) -> None:
-        self._connection.wrap_api_call(
+        self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
                 self._guid, method, {} if params is None else params
             )
@@ -355,7 +355,24 @@ class Connection(EventEmitter):
             return result
         return payload
 
-    def wrap_api_call(self, cb: Callable[[], Any], is_internal: bool = False) -> Any:
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
+        metadata = _extract_metadata_from_stack(st, is_internal)
+        if metadata:
+            self._api_zone.set(metadata)
+        try:
+            return await cb()
+        finally:
+            self._api_zone.set(None)
+
+    def wrap_api_call_sync(
+        self, cb: Callable[[], Any], is_internal: bool = False
+    ) -> Any:
         if self._api_zone.get():
             return cb()
         task = asyncio.current_task(self._loop)
@@ -363,18 +380,10 @@ class Connection(EventEmitter):
         metadata = _extract_metadata_from_stack(st, is_internal)
         if metadata:
             self._api_zone.set(metadata)
-        result = cb()
-
-        async def _() -> None:
-            try:
-                return await result
-            finally:
-                self._api_zone.set(None)
-
-        if asyncio.iscoroutine(result):
-            return _()
-        self._api_zone.set(None)
-        return result
+        try:
+            return cb()
+        finally:
+            self._api_zone.set(None)
 
 
 def from_channel(channel: Channel) -> Any:
@@ -388,6 +397,12 @@ def from_nullable_channel(channel: Optional[Channel]) -> Optional[Any]:
 def _extract_metadata_from_stack(
     st: List[inspect.FrameInfo], is_internal: bool
 ) -> Optional[Dict]:
+    if is_internal:
+        return {
+            "apiName": "",
+            "stack": [],
+            "internal": True,
+        }
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
     api_name = ""
@@ -419,6 +434,5 @@ def _extract_metadata_from_stack(
         return {
             "apiName": api_name,
             "stack": stack,
-            "isInternal": is_internal,
         }
     return None
