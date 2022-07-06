@@ -14,6 +14,7 @@
 
 import asyncio
 import base64
+import inspect
 import json
 import mimetypes
 from collections import defaultdict
@@ -343,11 +344,14 @@ class Route(ChannelOwner):
                     params["headers"] = serialize_headers(params["headers"])
                 if post_data_for_wire is not None:
                     params["postData"] = post_data_for_wire
-                await self._race_with_page_close(
-                    self._channel.send(
-                        "continue",
-                        params,
-                    )
+                await self._connection.wrap_api_call(
+                    lambda: self._race_with_page_close(
+                        self._channel.send(
+                            "continue",
+                            params,
+                        )
+                    ),
+                    is_internal,
                 )
             except Exception as e:
                 if not is_internal:
@@ -369,6 +373,14 @@ class Route(ChannelOwner):
             # Note that page could be missing when routing popup's initial request that
             # does not have a Page initialized just yet.
             fut = asyncio.create_task(future)
+            # Rewrite the user's stack to the new task which runs in the background.
+            setattr(
+                fut,
+                "__pw_stack__",
+                getattr(
+                    asyncio.current_task(self._loop), "__pw_stack__", inspect.stack()
+                ),
+            )
             await asyncio.wait(
                 [fut, page._closed_or_crashed_future],
                 return_when=asyncio.FIRST_COMPLETED,
