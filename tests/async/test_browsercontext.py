@@ -751,3 +751,4 @@ async def test_should_support_forced_colors(browser: Browser):
     page = await context.new_page()
     assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
     assert not await page.evaluate("matchMedia('(forced-colors: none)').matches")
+    await context.close()

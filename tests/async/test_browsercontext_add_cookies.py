@@ -174,12 +174,14 @@ async def test_should_isolate_cookies_between_launches(browser_factory, server):
             }
         ]
     )
+    await context_1.close()
     await browser_1.close()
 
     browser_2 = await browser_factory()
     context_2 = await browser_2.new_context()
     cookies = await context_2.cookies()
     assert cookies == []
+    await context_2.close()
     await browser_2.close()
 
 

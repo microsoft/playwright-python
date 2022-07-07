@@ -30,6 +30,7 @@ def test_browser_context_output_trace(
     page.goto(server.PREFIX + "/grid.html")
     context.tracing.stop(path=tmp_path / "trace.zip")
     assert Path(tmp_path / "trace.zip").exists()
+    context.close()
 
 
 def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
@@ -56,6 +57,7 @@ def test_browser_context_output_trace_chunk(
     button.click()
     context.tracing.stop_chunk(path=tmp_path / "trace2.zip")
     assert Path(tmp_path / "trace2.zip").exists()
+    context.close()
 
 
 def test_should_collect_sources(

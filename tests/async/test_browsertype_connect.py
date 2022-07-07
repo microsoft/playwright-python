@@ -34,12 +34,14 @@ async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
     assert len(browser_context.pages) == 1
     assert await page.evaluate("11 * 11") == 121
     await page.goto(server.EMPTY_PAGE)
+    browser_context.close()
     await browser.close()
 
     browser = await browser_type.connect(remote_server.ws_endpoint)
     browser_context = await browser.new_context()
     page = await browser_context.new_page()
     await page.goto(server.EMPTY_PAGE)
+    browser_context.close()
     await browser.close()
 
 
@@ -49,20 +51,22 @@ async def test_browser_type_connect_should_be_able_to_connect_two_browsers_at_th
     remote_server = launch_server()
     browser1 = await browser_type.connect(remote_server.ws_endpoint)
     assert len(browser1.contexts) == 0
-    await browser1.new_context()
+    browser1_context = await browser1.new_context()
     assert len(browser1.contexts) == 1
 
     browser2 = await browser_type.connect(remote_server.ws_endpoint)
     assert len(browser2.contexts) == 0
-    await browser2.new_context()
+    browser2_context = await browser2.new_context()
     assert len(browser2.contexts) == 1
     assert len(browser1.contexts) == 1
 
+    await browser1_context.close()
     await browser1.close()
     page2 = await browser2.new_page()
     # original browser should still work
     assert await page2.evaluate("7 * 6") == 42
 
+    await browser2_context.close()
     await browser2.close()
 
 
@@ -297,3 +301,5 @@ async def test_should_upload_large_file(
     )
     assert match.group("name") == b"file1"
     assert match.group("filename") == b"200MB.zip"
+    await context.close()
+    await browser.close()

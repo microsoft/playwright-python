@@ -47,12 +47,14 @@ def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
     assert len(browser_context.pages) == 1
     assert page.evaluate("11 * 11") == 121
     page.goto(server.EMPTY_PAGE)
+    browser_context.close()
     browser.close()
 
     browser = browser_type.connect(remote_server.ws_endpoint)
     browser_context = browser.new_context()
     page = browser_context.new_page()
     page.goto(server.EMPTY_PAGE)
+    browser_context.close()
     browser.close()
 
 
@@ -62,20 +64,22 @@ def test_browser_type_connect_should_be_able_to_connect_two_browsers_at_the_same
     remote_server = launch_server()
     browser1 = browser_type.connect(remote_server.ws_endpoint)
     assert len(browser1.contexts) == 0
-    browser1.new_context()
+    browser1_context = browser1.new_context()
     assert len(browser1.contexts) == 1
 
     browser2 = browser_type.connect(remote_server.ws_endpoint)
     assert len(browser2.contexts) == 0
-    browser2.new_context()
+    browser2_context = browser2.new_context()
     assert len(browser2.contexts) == 1
     assert len(browser1.contexts) == 1
 
+    browser1_context.close()
     browser1.close()
     page2 = browser2.new_page()
     # original browser should still work
     assert page2.evaluate("7 * 6") == 42
 
+    browser2_context.close()
     browser2.close()
 
 
@@ -219,5 +223,6 @@ def test_browser_type_connect_should_fulfill_with_global_fetch_result(
     assert response
     assert response.status == 200
     assert response.json() == {"foo": "bar"}
-
+    context.close()
+    browser.close()
     remote.kill()

@@ -30,6 +30,7 @@ async def test_browser_context_output_trace(
     await page.goto(server.PREFIX + "/grid.html")
     await context.tracing.stop(path=tmp_path / "trace.zip")
     assert Path(tmp_path / "trace.zip").exists()
+    await context.close()
 
 
 async def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
@@ -56,6 +57,7 @@ async def test_browser_context_output_trace_chunk(
     await button.click()
     await context.tracing.stop_chunk(path=tmp_path / "trace2.zip")
     assert Path(tmp_path / "trace2.zip").exists()
+    await context.close()
 
 
 async def test_should_collect_sources(
