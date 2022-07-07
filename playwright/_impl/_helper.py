@@ -362,3 +362,21 @@ def is_file_payload(value: Optional[Any]) -> bool:
         and "mimeType" in value
         and "buffer" in value
     )
+
+
+class BackgroundTaskTracker:
+    def __init__(self) -> None:
+        self._pending_tasks: List[asyncio.Task] = []
+
+    def create_task(self, coro: Coroutine) -> asyncio.Task:
+        task = asyncio.create_task(coro)
+        self._pending_tasks.append(task)
+        return task
+
+    def close(self) -> None:
+        try:
+            for task in self._pending_tasks:
+                if not task.done():
+                    task.cancel()
+        except Exception:
+            pass
