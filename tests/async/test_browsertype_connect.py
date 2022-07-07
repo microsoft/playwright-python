@@ -34,14 +34,14 @@ async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
     assert len(browser_context.pages) == 1
     assert await page.evaluate("11 * 11") == 121
     await page.goto(server.EMPTY_PAGE)
-    browser_context.close()
+    await browser_context.close()
     await browser.close()
 
     browser = await browser_type.connect(remote_server.ws_endpoint)
     browser_context = await browser.new_context()
     page = await browser_context.new_page()
     await page.goto(server.EMPTY_PAGE)
-    browser_context.close()
+    await browser_context.close()
     await browser.close()
 
 
