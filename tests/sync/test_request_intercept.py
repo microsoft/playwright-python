@@ -118,20 +118,6 @@ def test_should_support_fulfill_after_intercept(
     assert response.text() == original
 
 
-def test_should_cleanup_route_handlers_after_page_close(
-    context: BrowserContext, page: Page
-) -> None:
-    page.route("**", lambda r: None)
-    try:
-        page.goto("https://example.com", timeout=700)
-    except Exception:
-        pass
-    page.close()
-    assert len(asyncio.all_tasks()) == 1
-    for task in asyncio.all_tasks():
-        assert "_on_route" not in str(task)
-
-
 def test_should_cleanup_route_handlers_after_context_close(
     context: BrowserContext, page: Page
 ) -> None:

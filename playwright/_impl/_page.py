@@ -194,7 +194,7 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: self._background_task_tracker.create_task(
+            lambda params: self._browser_context._background_task_tracker.create_task(
                 self._on_route(
                     from_channel(params["route"]), from_channel(params["request"])
                 )
@@ -211,15 +211,11 @@ class Page(ChannelOwner):
             "worker", lambda params: self._on_worker(from_channel(params["worker"]))
         )
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
-
-        def _on_close(_: Any) -> None:
-            self._background_task_tracker.close()
-            if not self._closed_or_crashed_future.done():
-                self._closed_or_crashed_future.set_result(True)
-
         self.on(
             Page.Events.Close,
-            _on_close,
+            lambda _: self._closed_or_crashed_future.set_result(True)
+            if not self._closed_or_crashed_future.done()
+            else None,
         )
         self.on(
             Page.Events.Crash,
