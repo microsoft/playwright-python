@@ -248,7 +248,10 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route, request)
             finally:
                 if len(self._routes) == 0:
-                    await self._disable_interception()
+                    try:
+                        await self._disable_interception()
+                    except Exception:
+                        pass
             if handled:
                 return
         await self._browser_context._on_route(route, request)

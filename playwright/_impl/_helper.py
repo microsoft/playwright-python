@@ -370,6 +370,7 @@ class BackgroundTaskTracker:
 
     def create_task(self, coro: Coroutine) -> asyncio.Task:
         task = asyncio.create_task(coro)
+        task.add_done_callback(lambda task: self._pending_tasks.remove(task))
         self._pending_tasks.append(task)
         return task
 
