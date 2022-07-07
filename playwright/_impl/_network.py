@@ -223,7 +223,8 @@ class Route(ChannelOwner):
         chain = self._handling_future
         assert chain
         self._handling_future = None
-        chain.set_result(done)
+        if not chain.done():
+            chain.set_result(done)
 
     def _check_not_handled(self) -> None:
         if not self._handling_future:
@@ -320,6 +321,7 @@ class Route(ChannelOwner):
         self._check_not_handled()
         self.request._apply_fallback_overrides(overrides)
         await self._internal_continue()
+        self._report_handled(True)
 
     def _internal_continue(
         self, is_internal: bool = False
