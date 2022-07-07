@@ -133,6 +133,6 @@ def test_should_cleanup_route_handlers_after_context_close(
     except Exception:
         pass
     context.close()
-    assert len(asyncio.all_tasks()) == 1
+
     for task in asyncio.all_tasks():
         assert "_on_route" not in str(task)
