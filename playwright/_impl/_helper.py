@@ -378,5 +378,6 @@ class BackgroundTaskTracker:
             for task in self._pending_tasks:
                 if not task.done():
                     task.cancel()
+            asyncio.gather(*self._pending_tasks, return_exceptions=True)
         except Exception:
             pass
