@@ -63,6 +63,10 @@ def browser(
 ) -> Generator[Browser, None, None]:
     browser = browser_type.launch(**launch_arguments)
     yield browser
+    if browser.contexts:
+        raise Exception(
+            "Test failed to close a context it created via browser fixture. Explicitly close context, or use context fixture"
+        )
     browser.close()
 
 

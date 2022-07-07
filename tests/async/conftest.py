@@ -57,6 +57,10 @@ async def browser_factory(launch_arguments, browser_type):
 
     yield launch
     for browser in browsers:
+        if browser.contexts:
+            raise Exception(
+                "Test failed to close a context it created via browser_factory fixture. Explicitly close context, or use context_factory."
+            )
         await browser.close()
 
 
@@ -64,6 +68,10 @@ async def browser_factory(launch_arguments, browser_type):
 async def browser(browser_factory):
     browser = await browser_factory()
     yield browser
+    if browser.contexts:
+        raise Exception(
+            "Test failed to close a context it created via browser fixture. Explicitly close context, or use context_factory."
+        )
     await browser.close()
 
 
