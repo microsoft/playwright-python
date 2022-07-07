@@ -470,6 +470,7 @@ def test_should_round_trip_har_with_post_data(
     assert page_2.evaluate(fetch_function, "3") == "3"
     with pytest.raises(Exception):
         page_2.evaluate(fetch_function, "4")
+    context_2.close()
 
 
 def test_should_disambiguate_by_header(
@@ -511,6 +512,7 @@ def test_should_disambiguate_by_header(
     assert page_2.evaluate(fetch_function, "baz2") == "baz2"
     assert page_2.evaluate(fetch_function, "baz3") == "baz3"
     assert page_2.evaluate(fetch_function, "baz4") == "baz1"
+    context_2.close()
 
 
 def test_should_produce_extracted_zip(
@@ -536,6 +538,7 @@ def test_should_produce_extracted_zip(
     page_2.goto(server.PREFIX + "/one-style.html")
     assert "hello, world!" in page_2.content()
     expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+    context_2.close()
 
 
 def test_should_update_har_zip_for_context(
@@ -556,6 +559,7 @@ def test_should_update_har_zip_for_context(
     page_2.goto(server.PREFIX + "/one-style.html")
     assert "hello, world!" in page_2.content()
     expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+    context_2.close()
 
 
 def test_should_update_har_zip_for_page(
@@ -576,6 +580,7 @@ def test_should_update_har_zip_for_page(
     page_2.goto(server.PREFIX + "/one-style.html")
     assert "hello, world!" in page_2.content()
     expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+    context_2.close()
 
 
 def test_should_update_extracted_har_zip_for_page(
@@ -600,3 +605,4 @@ def test_should_update_extracted_har_zip_for_page(
     page_2.goto(server.PREFIX + "/one-style.html")
     assert "hello, world!" in page_2.content()
     expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+    context_2.close()

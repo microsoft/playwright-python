@@ -174,3 +174,20 @@ async def test_should_give_access_to_the_intercepted_response_body(
         route.fulfill(response=response),
         eval_task,
     )
+
+
+async def test_should_cleanup_route_handlers_after_context_close(
+    context: BrowserContext, page: Page
+) -> None:
+    async def handle(r: Route):
+        pass
+
+    await context.route("**", handle)
+    try:
+        await page.goto("https://example.com", timeout=700)
+    except Exception:
+        pass
+    await context.close()
+
+    for task in asyncio.all_tasks():
+        assert "_on_route" not in str(task)
