@@ -223,7 +223,8 @@ class Route(ChannelOwner):
         chain = self._handling_future
         assert chain
         self._handling_future = None
-        chain.set_result(done)
+        if not chain.done():
+            chain.set_result(done)
 
     def _check_not_handled(self) -> None:
         if not self._handling_future:
