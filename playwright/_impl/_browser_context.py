@@ -48,6 +48,7 @@ from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
+    BackgroundTaskTracker,
     HarRecordingMetadata,
     RouteFromHarNotFoundPolicy,
     RouteHandler,
@@ -103,6 +104,7 @@ class BrowserContext(ChannelOwner):
         self._request: APIRequestContext = from_channel(
             initializer["APIRequestContext"]
         )
+        self._background_task_tracker: BackgroundTaskTracker = BackgroundTaskTracker()
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -113,7 +115,7 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
+            lambda params: self._background_task_tracker.create_task(
                 self._on_route(
                     from_channel(params.get("route")),
                     from_channel(params.get("request")),
@@ -163,8 +165,14 @@ class BrowserContext(ChannelOwner):
             ),
         )
         self._closed_future: asyncio.Future = asyncio.Future()
+
+        def _on_close(_: Any) -> None:
+            self._background_task_tracker.close()
+            self._closed_future.set_result(True)
+
         self.once(
-            self.Events.Close, lambda context: self._closed_future.set_result(True)
+            self.Events.Close,
+            _on_close,
         )
 
     def __repr__(self) -> str:
@@ -187,7 +195,10 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route, request)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(self._disable_interception())
+                    try:
+                        await self._disable_interception()
+                    except Exception:
+                        pass
             if handled:
                 return
         await route._internal_continue(is_internal=True)

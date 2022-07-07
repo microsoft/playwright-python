@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from pathlib import Path
 
 from twisted.web import http
@@ -121,3 +122,17 @@ def test_should_support_fulfill_after_intercept(
     assert request.uri.decode() == "/title.html"
     original = (assetdir / "title.html").read_text()
     assert response.text() == original
+
+
+def test_should_cleanup_route_handlers_after_context_close(
+    context: BrowserContext, page: Page
+) -> None:
+    context.route("**", lambda r: None)
+    try:
+        page.goto("https://example.com", timeout=700)
+    except Exception:
+        pass
+    context.close()
+
+    for task in asyncio.all_tasks():
+        assert "_on_route" not in str(task)
