@@ -375,9 +375,6 @@ class BackgroundTaskTracker:
         return task
 
     def close(self) -> None:
-        try:
-            for task in self._pending_tasks:
-                if not task.done():
-                    task.cancel()
-        except Exception:
-            pass
+        for task in self._pending_tasks:
+            if not task.done():
+                task.cancel()
