@@ -146,7 +146,7 @@ class BrowserType(ChannelOwner):
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
-        userDataDir = str(Path(userDataDir))
+        userDataDir = str(Path(userDataDir)) if userDataDir else ""
         params = locals_to_params(locals())
         await normalize_context_params(self._connection._is_sync, params)
         normalize_launch_params(params)
