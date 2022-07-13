@@ -98,5 +98,8 @@ Please use the Async API instead."""
         if self._watcher:
             self._watcher.close()
         if self._own_loop:
+            tasks = asyncio.all_tasks(self._loop)
+            for t in [t for t in tasks if not (t.done() or t.cancelled())]:
+                t.cancel()
             self._loop.run_until_complete(self._loop.shutdown_asyncgens())
             self._loop.close()
