@@ -55,7 +55,6 @@ from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
-    BackgroundTaskTracker,
     ColorScheme,
     DocumentLoadState,
     ForcedColors,
@@ -152,7 +151,6 @@ class Page(ChannelOwner):
             self._browser_context._timeout_settings
         )
         self._video: Optional[Video] = None
-        self._background_task_tracker = BackgroundTaskTracker()
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
 
         self._channel.on(
@@ -194,7 +192,7 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: self._browser_context._background_task_tracker.create_task(
+            lambda params: asyncio.create_task(
                 self._on_route(
                     from_channel(params["route"]), from_channel(params["request"])
                 )
@@ -248,10 +246,7 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route, request)
             finally:
                 if len(self._routes) == 0:
-                    try:
-                        await self._disable_interception()
-                    except Exception:
-                        pass
+                    asyncio.create_task(self._disable_interception())
             if handled:
                 return
         await self._browser_context._on_route(route, request)

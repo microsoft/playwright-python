@@ -503,7 +503,6 @@ async def test_should_round_trip_har_zip(
     await expect(page_2.locator("body")).to_have_css(
         "background-color", "rgb(255, 192, 203)"
     )
-    await context_2.close()
 
 
 async def test_should_round_trip_har_with_post_data(
@@ -537,7 +536,6 @@ async def test_should_round_trip_har_with_post_data(
     assert await page_2.evaluate(fetch_function, "3") == "3"
     with pytest.raises(Exception):
         await page_2.evaluate(fetch_function, "4")
-    await context_2.close()
 
 
 async def test_should_disambiguate_by_header(
@@ -580,7 +578,6 @@ async def test_should_disambiguate_by_header(
     assert await page_2.evaluate(fetch_function, "baz2") == "baz2"
     assert await page_2.evaluate(fetch_function, "baz3") == "baz3"
     assert await page_2.evaluate(fetch_function, "baz4") == "baz1"
-    await context_2.close()
 
 
 async def test_should_produce_extracted_zip(
@@ -608,7 +605,6 @@ async def test_should_produce_extracted_zip(
     await expect(page_2.locator("body")).to_have_css(
         "background-color", "rgb(255, 192, 203)"
     )
-    await context_2.close()
 
 
 async def test_should_update_har_zip_for_context(
@@ -631,7 +627,6 @@ async def test_should_update_har_zip_for_context(
     await expect(page_2.locator("body")).to_have_css(
         "background-color", "rgb(255, 192, 203)"
     )
-    await context_2.close()
 
 
 async def test_should_update_har_zip_for_page(
@@ -654,7 +649,6 @@ async def test_should_update_har_zip_for_page(
     await expect(page_2.locator("body")).to_have_css(
         "background-color", "rgb(255, 192, 203)"
     )
-    await context_2.close()
 
 
 async def test_should_update_extracted_har_zip_for_page(
@@ -681,4 +675,3 @@ async def test_should_update_extracted_har_zip_for_page(
     await expect(page_2.locator("body")).to_have_css(
         "background-color", "rgb(255, 192, 203)"
     )
-    await context_2.close()
