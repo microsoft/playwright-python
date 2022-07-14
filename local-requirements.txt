@@ -3,6 +3,7 @@ autobahn==22.3.2
 black==22.3.0
 flake8==4.0.1
 flaky==3.7.0
+greenlet==1.1.2
 mypy==0.942
 objgraph==3.5.0
 Pillow==9.1.1
@@ -21,4 +22,5 @@ setuptools==60.9.3
 twine==3.8.0
 twisted==22.4.0
 types-pyOpenSSL==22.0.1
+websockets==10.3.0
 wheel==0.37.1
