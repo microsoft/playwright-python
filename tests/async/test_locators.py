@@ -784,3 +784,28 @@ async def test_should_support_locator_that(page: Page) -> None:
             has_text="world",
         )
     ).to_have_count(1)
+
+
+async def test_should_filter_by_case_insensitive_regex_in_multiple_children(
+    page: Page,
+) -> None:
+    await page.set_content(
+        '<div class="test"><h5>Title</h5> <h2><i>Text</i></h2></div>'
+    )
+    await expect(
+        page.locator("div", has_text=re.compile(r"^title text$", re.IGNORECASE))
+    ).to_have_class("test")
+
+
+async def test_should_filter_by_regex_with_special_symbols(
+    page: Page,
+) -> None:
+    await page.set_content(
+        '<div class="test"><h5>First/"and"</h5><h2><i>Second\\</i></h2></div>'
+    )
+    await expect(
+        page.locator("div", has_text=re.compile(r'^first\/".*"second\\$', re.S | re.I))
+    ).to_have_class("test")
+
+
+# });

@@ -16,6 +16,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from urllib.parse import ParseResult, urlparse, urlunparse
 
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._map import Map
@@ -129,6 +130,8 @@ def serialize_value(
         return {"n": value}
     if isinstance(value, str):
         return {"s": value}
+    if isinstance(value, ParseResult):
+        return {"u": urlunparse(value)}
 
     if value in visitor_info.visited:
         return dict(ref=visitor_info.visited[value])
@@ -179,6 +182,9 @@ def parse_value(value: Any, refs: Dict[int, Any] = {}) -> Any:
             if v == "null":
                 return None
             return v
+
+        if "u" in value:
+            return urlparse(value["u"])
 
         if "a" in value:
             a: List = []
