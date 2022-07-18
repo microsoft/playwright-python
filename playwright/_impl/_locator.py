@@ -74,9 +74,8 @@ class Locator:
 
         if has_text:
             if isinstance(has_text, Pattern):
-                pattern = escape_with_quotes(has_text.pattern, '"')
-                flags = escape_regex_flags(has_text)
-                self._selector += f' >> :scope:text-matches({pattern}, "{flags}")'
+                js_regex = f"/{has_text.pattern}/{escape_regex_flags(has_text)}"
+                self._selector += f' >> has={json.dumps("text=" + js_regex)}'
             else:
                 escaped = escape_with_quotes(has_text, '"')
                 self._selector += f" >> :scope:has-text({escaped})"

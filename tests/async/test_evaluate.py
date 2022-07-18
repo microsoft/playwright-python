@@ -14,6 +14,7 @@
 
 import math
 from datetime import datetime
+from urllib.parse import ParseResult, urlparse
 
 from playwright.async_api import Error
 
@@ -218,3 +219,37 @@ async def test_evaluate_jsonvalue_date(page):
         '() => ({ date: new Date("2020-05-27T01:31:38.506Z") })'
     )
     assert result == {"date": date}
+
+
+async def test_should_evaluate_url(page):
+    out = await page.evaluate(
+        "() => ({ someKey: new URL('https://user:pass@example.com/?foo=bar#hi') })"
+    )
+    assert out["someKey"] == ParseResult(
+        scheme="https",
+        netloc="user:pass@example.com",
+        path="/",
+        query="foo=bar",
+        params="",
+        fragment="hi",
+    )
+
+
+async def test_should_roundtrip_url(page):
+    in_ = urlparse("https://user:pass@example.com/?foo=bar#hi")
+    out = await page.evaluate("url => url", in_)
+    assert in_ == out
+
+
+async def test_should_roundtrip_complex_url(page):
+    in_ = urlparse(
+        "https://user:password@www.contoso.com:80/Home/Index.htm?q1=v1&q2=v2#FragmentName"
+    )
+    out = await page.evaluate("url => url", in_)
+    assert in_ == out
+
+
+async def test_evaluate_jsonvalue_url(page):
+    url = urlparse("https://example.com/")
+    result = await page.evaluate('() => ({ someKey: new URL("https://example.com/") })')
+    assert result == {"someKey": url}

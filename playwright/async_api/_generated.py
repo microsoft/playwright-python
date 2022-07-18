@@ -706,7 +706,7 @@ class Route(AsyncBase):
         """Route.fallback
 
         When several routes match the given pattern, they run in the order opposite to their registration. That way the last
-        registered route can always override all the previos ones. In the example below, request will be handled by the
+        registered route can always override all the previous ones. In the example below, request will be handled by the
         bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
         registered route.
 
@@ -2426,7 +2426,7 @@ class ElementHandle(JSHandle):
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
         calculated relative to the main frame viewport - which is usually the same as the browser window.
 
-        Scrolling affects the returned bonding box, similarly to
+        Scrolling affects the returned bounding box, similarly to
         [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect). That
         means `x` and/or `y` may be negative.
 
@@ -4451,7 +4451,11 @@ class Frame(AsyncBase):
         Parameters
         ----------
         source : str
+            A selector to search for an element to drag. If there are multiple elements satisfying the selector, the first will be
+            used. See [working with selectors](../selectors.md) for more details.
         target : str
+            A selector to search for an element to drop onto. If there are multiple elements satisfying the selector, the first will
+            be used. See [working with selectors](../selectors.md) for more details.
         source_position : Union[{x: float, y: float}, NoneType]
             Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
@@ -5302,7 +5306,7 @@ class Selectors(AsyncBase):
             # Use the selector prefixed with its name.
             button = await page.query_selector('tag=button')
             # Combine it with other selector engines.
-            await page.click('tag=div >> text=\"Click me\"')
+            await page.locator('tag=div >> text=\"Click me\"').click()
             # Can use it in any methods supporting selectors.
             button_count = await page.locator('tag=button').count()
             print(button_count)
@@ -7764,7 +7768,7 @@ class Page(AsyncContextManager):
             relative path, then it is resolved relative to the current working directory.
         url : Union[Pattern, str, NoneType]
             A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the pattern
-            will be surved from the HAR file. If not specified, all requests are served from the HAR file.
+            will be served from the HAR file. If not specified, all requests are served from the HAR file.
         not_found : Union["abort", "fallback", NoneType]
             - If set to 'abort' any request not found in the HAR file will be aborted.
             - If set to 'fallback' missing requests will be sent to the network.
@@ -8498,7 +8502,11 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         source : str
+            A selector to search for an element to drag. If there are multiple elements satisfying the selector, the first will be
+            used. See [working with selectors](../selectors.md) for more details.
         target : str
+            A selector to search for an element to drop onto. If there are multiple elements satisfying the selector, the first will
+            be used. See [working with selectors](../selectors.md) for more details.
         source_position : Union[{x: float, y: float}, NoneType]
             Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
@@ -9723,7 +9731,7 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         async with context.expect_page() as page_info:
-            await page.click(\"a[target=_blank]\"),
+            await page.locator(\"a[target=_blank]\").click(),
         page = await page_info.value
         print(await page.evaluate(\"location.href\"))
         ```
@@ -9841,7 +9849,7 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         async with context.expect_page() as page_info:
-            await page.click(\"a[target=_blank]\"),
+            await page.locator(\"a[target=_blank]\").click(),
         page = await page_info.value
         print(await page.evaluate(\"location.href\"))
         ```
@@ -10269,7 +10277,7 @@ class BrowserContext(AsyncContextManager):
             <button onclick=\"onClick()\">Click me</button>
             <div></div>
             \"\"\")
-            await page.click(\"button\")
+            await page.locator(\"button\").click()
 
         async def main():
             async with async_playwright() as playwright:
@@ -10347,7 +10355,7 @@ class BrowserContext(AsyncContextManager):
                 <button onclick=\"onClick()\">Click me</button>
                 <div></div>
             \"\"\")
-            await page.click(\"button\")
+            await page.locator(\"button\").click()
 
         async def main():
             async with async_playwright() as playwright:
@@ -10500,7 +10508,7 @@ class BrowserContext(AsyncContextManager):
             relative path, then it is resolved relative to the current working directory.
         url : Union[Pattern, str, NoneType]
             A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the pattern
-            will be surved from the HAR file. If not specified, all requests are served from the HAR file.
+            will be served from the HAR file. If not specified, all requests are served from the HAR file.
         not_found : Union["abort", "fallback", NoneType]
             - If set to 'abort' any request not found in the HAR file will be aborted.
             - If set to 'fallback' falls through to the next route handler in the handler chain.
@@ -10526,7 +10534,7 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         async with context.expect_event(\"page\") as event_info:
-            await page.click(\"button\")
+            await page.locator(\"button\").click()
         page = await event_info.value
         ```
 
@@ -10823,6 +10831,11 @@ class Browser(AsyncContextManager):
 
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
 
+        > NOTE: If directly using this method to create `BrowserContext`s, it is best practice to explicilty close the returned
+        context via `browser_context.close()` when your code is done with the `BrowserContext`, and before calling
+        `browser.close()`. This will ensure the `context` is closed gracefully and any artifacts—like HARs and
+        videos—are fully flushed and saved.
+
         ```py
         browser = await playwright.firefox.launch() # or \"chromium\" or \"webkit\".
         # create a new incognito browser context.
@@ -10830,6 +10843,10 @@ class Browser(AsyncContextManager):
         # create a new page in a pristine context.
         page = await context.new_page()
         await page.goto(\"https://example.com\")
+
+        # gracefully close up everything
+        await context.close()
+        await browser.close()
         ```
 
         Parameters
@@ -11180,6 +11197,10 @@ class Browser(AsyncContextManager):
 
         In case this browser is connected to, clears all created contexts belonging to this browser and disconnects from the
         browser server.
+
+        > NOTE: This is similar to force quitting the browser. Therefore, you should call `browser_context.close()` on
+        any `BrowserContext`'s you explicitly created earlier with `browser.new_context()` **before** calling
+        `browser.close()`.
 
         The `Browser` object itself is considered to be disposed and cannot be used anymore.
         """
@@ -11950,7 +11971,7 @@ class Tracing(AsyncBase):
         await page.goto(\"https://playwright.dev\")
 
         await context.tracing.start_chunk()
-        await page.click(\"text=Get Started\")
+        await page.locator(\"text=Get Started\").click()
         # Everything between start_chunk and stop_chunk will be recorded in the trace.
         await context.tracing.stop_chunk(path = \"trace1.zip\")
 
@@ -12045,7 +12066,7 @@ class Locator(AsyncBase):
         This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
         calculated relative to the main frame viewport - which is usually the same as the browser window.
 
-        Scrolling affects the returned bonding box, similarly to
+        Scrolling affects the returned bounding box, similarly to
         [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect). That
         means `x` and/or `y` may be negative.
 
@@ -14301,7 +14322,7 @@ class PageAssertions(AsyncBase):
         Parameters
         ----------
         url_or_reg_exp : Union[Pattern, str]
-            Expected substring or RegExp.
+            Expected URL string or RegExp.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
@@ -14326,7 +14347,7 @@ class PageAssertions(AsyncBase):
         Parameters
         ----------
         url_or_reg_exp : Union[Pattern, str]
-            Expected substring or RegExp.
+            Expected URL string or RegExp.
         timeout : Union[float, NoneType]
             Time to retry the assertion for.
         """
@@ -14510,13 +14531,19 @@ class LocatorAssertions(AsyncBase):
     ) -> NoneType:
         """LocatorAssertions.to_have_class
 
-        Ensures the `Locator` points to an element with given CSS class.
+        Ensures the `Locator` points to an element with given CSS classes. This needs to be a full match or using a relaxed
+        regular expression.
+
+        ```html
+        <div class='selected row' id='component'></div>
+        ```
 
         ```py
         from playwright.async_api import expect
 
         locator = page.locator(\"#component\")
         await expect(locator).to_have_class(re.compile(r\"selected\"))
+        await expect(locator).to_have_class(\"selected row\")
         ```
 
         Note that if array is passed as an expected value, entire lists of elements can be asserted:
