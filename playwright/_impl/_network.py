@@ -115,10 +115,6 @@ class Request(ChannelOwner):
             str, self._fallback_overrides.get("method", self._initializer["method"])
         )
 
-    @property
-    def service_worker(self) -> None:
-        pass
-
     async def sizes(self) -> RequestSizes:
         response = await self.response()
         if not response:
