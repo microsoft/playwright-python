@@ -321,7 +321,7 @@ class BrowserContext(ChannelOwner):
         self,
         har: Union[Path, str],
         page: Optional[Page] = None,
-        url: Union[Pattern, str] = None,
+        url: Union[Pattern[str], str] = None,
     ) -> None:
         params = {
             "options": prepare_record_har_options(
@@ -341,7 +341,7 @@ class BrowserContext(ChannelOwner):
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: Union[Pattern, str] = None,
+        url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
     ) -> None:
