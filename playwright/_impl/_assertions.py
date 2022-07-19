@@ -67,7 +67,7 @@ class PageAssertions(AssertionsBase):
         return PageAssertions(self._actual_page, not self._is_not)
 
     async def to_have_title(
-        self, title_or_reg_exp: Union[Pattern, str], timeout: float = None
+        self, title_or_reg_exp: Union[Pattern[str], str], timeout: float = None
     ) -> None:
         expected_values = to_expected_text_values(
             [title_or_reg_exp], normalize_white_space=True
@@ -81,13 +81,13 @@ class PageAssertions(AssertionsBase):
         )
 
     async def not_to_have_title(
-        self, title_or_reg_exp: Union[Pattern, str], timeout: float = None
+        self, title_or_reg_exp: Union[Pattern[str], str], timeout: float = None
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_have_title(title_or_reg_exp, timeout)
 
     async def to_have_url(
-        self, url_or_reg_exp: Union[str, Pattern], timeout: float = None
+        self, url_or_reg_exp: Union[str, Pattern[str]], timeout: float = None
     ) -> None:
         __tracebackhide__ = True
         base_url = self._actual_page.context._options.get("baseURL")
@@ -102,7 +102,7 @@ class PageAssertions(AssertionsBase):
         )
 
     async def not_to_have_url(
-        self, url_or_reg_exp: Union[Pattern, str], timeout: float = None
+        self, url_or_reg_exp: Union[Pattern[str], str], timeout: float = None
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_have_url(url_or_reg_exp, timeout)
@@ -119,7 +119,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_contain_text(
         self,
-        expected: Union[List[Union[Pattern, str]], Pattern, str],
+        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -162,7 +162,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_contain_text(
         self,
-        expected: Union[List[Union[Pattern, str]], Pattern, str],
+        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -173,7 +173,7 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_attribute(
         self,
         name: str,
-        value: Union[str, Pattern],
+        value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -190,7 +190,7 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_attribute(
         self,
         name: str,
-        value: Union[str, Pattern],
+        value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -198,7 +198,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_class(
         self,
-        expected: Union[List[Union[Pattern, str]], Pattern, str],
+        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -221,7 +221,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_class(
         self,
-        expected: Union[List[Union[Pattern, str]], Pattern, str],
+        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -251,7 +251,7 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_css(
         self,
         name: str,
-        value: Union[str, Pattern],
+        value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -268,7 +268,7 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_css(
         self,
         name: str,
-        value: Union[str, Pattern],
+        value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -276,7 +276,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_id(
         self,
-        id: Union[str, Pattern],
+        id: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -290,7 +290,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_id(
         self,
-        id: Union[str, Pattern],
+        id: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -323,7 +323,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_value(
         self,
-        value: Union[str, Pattern],
+        value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -337,7 +337,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_value(
         self,
-        value: Union[str, Pattern],
+        value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -345,7 +345,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_values(
         self,
-        values: List[Union[Pattern, str]],
+        values: List[Union[Pattern[str], str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -359,7 +359,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_values(
         self,
-        values: List[Union[Pattern, str]],
+        values: List[Union[Pattern[str], str]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -367,7 +367,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_text(
         self,
-        expected: Union[List[Union[Pattern, str]], Pattern, str],
+        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -406,7 +406,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_text(
         self,
-        expected: Union[List[Union[Pattern, str]], Pattern, str],
+        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -602,7 +602,7 @@ class APIResponseAssertions:
 
 
 def expected_regex(
-    pattern: Pattern,
+    pattern: Pattern[str],
     match_substring: bool,
     normalize_white_space: bool,
     ignore_case: Optional[bool] = None,
@@ -620,7 +620,7 @@ def expected_regex(
 
 
 def to_expected_text_values(
-    items: Union[List[Pattern], List[str], List[Union[str, Pattern]]],
+    items: Union[List[Pattern[str]], List[str], List[Union[str, Pattern[str]]]],
     match_substring: bool = False,
     normalize_white_space: bool = False,
     ignore_case: Optional[bool] = None,

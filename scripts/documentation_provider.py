@@ -371,6 +371,8 @@ class DocumentationProvider:
         if str(origin) == "<class 'collections.abc.Callable'>":
             args = get_args(value)
             return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+        if str(origin) == "<class 're.Pattern'>":
+            return "Pattern[str]"
         if str(origin) == "typing.Literal":
             args = get_args(value)
             if len(args) == 1:
@@ -451,7 +453,7 @@ class DocumentationProvider:
         if type_name == "URL":
             return "str"
         if type_name == "RegExp":
-            return "Pattern"
+            return "Pattern[str]"
         if type_name == "null":
             return "NoneType"
         if type_name == "EvaluationArgument":

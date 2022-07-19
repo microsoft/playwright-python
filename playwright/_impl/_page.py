@@ -605,7 +605,7 @@ class Page(ChannelOwner):
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: Union[Pattern, str] = None,
+        url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
     ) -> None:
@@ -732,7 +732,7 @@ class Page(ChannelOwner):
     def locator(
         self,
         selector: str,
-        has_text: Union[str, Pattern] = None,
+        has_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
     ) -> "Locator":
         return self._main_frame.locator(selector, has_text=has_text, has=has)

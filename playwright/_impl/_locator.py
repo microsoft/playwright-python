@@ -64,7 +64,7 @@ class Locator:
         self,
         frame: "Frame",
         selector: str,
-        has_text: Union[str, Pattern] = None,
+        has_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
     ) -> None:
         self._frame = frame
@@ -197,7 +197,7 @@ class Locator:
     def locator(
         self,
         selector: str,
-        has_text: Union[str, Pattern] = None,
+        has_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
     ) -> "Locator":
         return Locator(
@@ -237,7 +237,7 @@ class Locator:
 
     def filter(
         self,
-        has_text: Union[str, Pattern] = None,
+        has_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
     ) -> "Locator":
         return Locator(
@@ -576,7 +576,10 @@ class FrameLocator:
         self._frame_selector = frame_selector
 
     def locator(
-        self, selector: str, has_text: Union[str, Pattern] = None, has: "Locator" = None
+        self,
+        selector: str,
+        has_text: Union[str, Pattern[str]] = None,
+        has: "Locator" = None,
     ) -> Locator:
         return Locator(
             self._frame,

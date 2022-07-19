@@ -117,7 +117,7 @@ class Browser(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
-        recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarUrlFilter: Union[Pattern[str], str] = None,
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
@@ -165,7 +165,7 @@ class Browser(ChannelOwner):
         baseURL: str = None,
         strictSelectors: bool = None,
         serviceWorkers: ServiceWorkersPolicy = None,
-        recordHarUrlFilter: Union[Pattern, str] = None,
+        recordHarUrlFilter: Union[Pattern[str], str] = None,
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
     ) -> Page:
