@@ -372,8 +372,7 @@ class DocumentationProvider:
             args = get_args(value)
             return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
         if str(origin) == "<class 're.Pattern'>":
-            args = get_args(value)
-            return f"Pattern[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+            return "Pattern[str]"
         if str(origin) == "typing.Literal":
             args = get_args(value)
             if len(args) == 1:
