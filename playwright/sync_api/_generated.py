@@ -12674,7 +12674,7 @@ class Locator(SyncBase):
         multiple times.
 
         ```py
-        row_locator = page.lsocator(\"tr\")
+        row_locator = page.locator(\"tr\")
         # ...
         row_locator
             .filter(has_text=\"text in column 1\")
