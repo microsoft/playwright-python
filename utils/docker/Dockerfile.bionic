@@ -14,7 +14,7 @@ RUN apt-get update && \
     python get-pip.py && \
     rm get-pip.py && \
     # Feature-parity with node.js base images.
-    apt-get install -y --no-install-recommends git openssh-client && \
+    apt-get install -y --no-install-recommends git openssh-client gpg && \
     # clean apt cache
     rm -rf /var/lib/apt/lists/* && \
     # Create the pwuser
