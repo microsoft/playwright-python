@@ -23,7 +23,6 @@ from playwright._impl._api_structures import (
     ProxySettings,
     ViewportSize,
 )
-from playwright._impl._api_types import Error
 from playwright._impl._browser import Browser, normalize_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import (
@@ -42,8 +41,7 @@ from playwright._impl._helper import (
     ServiceWorkersPolicy,
     locals_to_params,
 )
-from playwright._impl._transport import WebSocketTransport
-from playwright._impl._wait_helper import throw_on_timeout
+from playwright._impl._json_pipe import JsonPipe
 
 if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
@@ -181,59 +179,50 @@ class BrowserType(ChannelOwner):
 
     async def connect(
         self,
-        ws_endpoint: str,
+        wsEndpoint: str,
         timeout: float = None,
-        slow_mo: float = None,
+        slowMo: float = None,
         headers: Dict[str, str] = None,
     ) -> Browser:
-        if timeout is None:
-            timeout = 30000
-
+        pipe: JsonPipe = from_channel(
+            await self._channel.send("connect", locals_to_params(locals()))
+        )
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
 
-        transport = WebSocketTransport(
-            self._connection._loop, ws_endpoint, headers, slow_mo
-        )
         connection = Connection(
             self._connection._dispatcher_fiber,
             self._connection._object_factory,
-            transport,
-            self._connection._loop,
+            asyncio.get_running_loop(),
+            pipe.close,
             local_utils=self._connection.local_utils,
         )
         connection.mark_as_remote()
         connection._is_sync = self._connection._is_sync
-        connection._loop.create_task(connection.run())
-        playwright_future = connection.playwright_future
 
-        timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
-        done, pending = await asyncio.wait(
-            {transport.on_error_future, playwright_future, timeout_future},
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if not playwright_future.done():
-            playwright_future.cancel()
-        if not timeout_future.done():
-            timeout_future.cancel()
-        playwright: "Playwright" = next(iter(done)).result()
-        playwright._set_selectors(self._playwright.selectors)
-        self._connection._child_ws_connections.append(connection)
-        pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
-        assert pre_launched_browser
-        browser = cast(Browser, from_channel(pre_launched_browser))
-        browser._should_close_connection_on_close = True
-
-        def handle_transport_close() -> None:
+        def pipe_closed() -> None:
             for context in browser.contexts:
                 for page in context.pages:
                     page._on_close()
                 context._on_close()
             browser._on_close()
-            connection.cleanup()
 
-        transport.once("close", handle_transport_close)
+        pipe.on("closed", pipe_closed)
 
-        browser._set_browser_type(self)
+        async def on_message(message: Dict) -> None:
+            try:
+                await pipe.send(message)
+            except Exception:
+                if not browser.is_connected:
+                    pipe_closed()
+                raise
+
+        connection.on_message = on_message
+        pipe.on("message", connection.dispatch)
+        await connection.init()
+        playwright = await connection.playwright_future
+        browser: Browser = from_channel(playwright._initializer["preLaunchedBrowser"])
+        browser._is_remote = True
+        browser._should_close_connection_on_close = True
         return browser
 
 

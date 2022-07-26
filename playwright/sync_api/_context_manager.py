@@ -33,6 +33,8 @@ class PlaywrightContextManager:
         self._loop: asyncio.AbstractEventLoop
         self._own_loop = False
         self._watcher: Optional[asyncio.AbstractChildWatcher] = None
+        self._connection: Connection
+        self._transport: PipeTransport
 
     def __enter__(self) -> SyncPlaywright:
         try:
@@ -64,16 +66,21 @@ Please use the Async API instead."""
         # until the end of times. We will pass control to that fiber every time we
         # block while waiting for a response.
         def greenlet_main() -> None:
-            self._loop.run_until_complete(self._connection.run_as_sync())
+            self._loop.run_until_complete(self._transport.run())
 
-        dispatcher_fiber = greenlet(greenlet_main)
+        # dispatcher_fiber = greenlet(greenlet_main)
 
-        self._connection = Connection(
-            dispatcher_fiber,
-            create_remote_object,
-            PipeTransport(self._loop, compute_driver_executable()),
-            self._loop,
+        self._dispatcher_fiber = dispatcher_fiber = greenlet(greenlet_main)
+        self._connection = connection = Connection(
+            dispatcher_fiber, create_remote_object, self._loop
         )
+        self._transport = transport = PipeTransport(
+            self._loop, compute_driver_executable()
+        )
+        connection.on_message = transport.send
+        transport.on_message = connection.dispatch
+        self._loop.run_until_complete(self._transport.connect())
+        self._loop.run_until_complete(self._connection.init_sync())
 
         g_self = greenlet.getcurrent()
 
@@ -94,7 +101,9 @@ Please use the Async API instead."""
         return self.__enter__()
 
     def __exit__(self, *args: Any) -> None:
-        self._connection.stop_sync()
+        # self._connection.stop_sync()
+        self._transport.request_stop()
+        self._dispatcher_fiber.switch()
         if self._watcher:
             self._watcher.close()
         if self._own_loop:

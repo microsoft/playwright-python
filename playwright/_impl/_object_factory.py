@@ -26,6 +26,7 @@ from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._js_handle import JSHandle
+from playwright._impl._json_pipe import JsonPipe
 from playwright._impl._local_utils import LocalUtils
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import BindingCall, Page, Worker
@@ -40,7 +41,7 @@ class DummyObject(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
-        super().__init__(parent, type, guid, initializer)
+        pass
 
 
 def create_remote_object(
@@ -70,6 +71,8 @@ def create_remote_object(
         return Frame(parent, type, guid, initializer)
     if type == "JSHandle":
         return JSHandle(parent, type, guid, initializer)
+    if type == "JsonPipe":
+        return JsonPipe(parent, type, guid, initializer)
     if type == "LocalUtils":
         local_utils = LocalUtils(parent, type, guid, initializer)
         if not local_utils._connection._local_utils:

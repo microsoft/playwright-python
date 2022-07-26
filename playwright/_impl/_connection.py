@@ -18,14 +18,23 @@ import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+    cast,
+)
 
 from greenlet import greenlet
 from pyee import AsyncIOEventEmitter, EventEmitter
 
 import playwright
 from playwright._impl._helper import ParsedMessagePayload, parse_error
-from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
     from playwright._impl._local_utils import LocalUtils
@@ -66,16 +75,7 @@ class Channel(AsyncIOEventEmitter):
             error = self._connection._error
             self._connection._error = None
             raise error
-        done, _ = await asyncio.wait(
-            {
-                self._connection._transport.on_error_future,
-                callback.future,
-            },
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if not callback.future.done():
-            callback.future.cancel()
-        result = next(iter(done)).result()
+        result = await callback.future
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:
@@ -172,25 +172,24 @@ class Connection(EventEmitter):
         self,
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
-        transport: Transport,
         loop: asyncio.AbstractEventLoop,
+        on_close: Callable[[], Awaitable[None]] = None,
         local_utils: Optional["LocalUtils"] = None,
     ) -> None:
         super().__init__()
+        self._loop = loop
         self._dispatcher_fiber = dispatcher_fiber
-        self._transport = transport
-        self._transport.on_message = lambda msg: self.dispatch(msg)
         self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
-        self._object_factory = object_factory
         self._is_sync = False
-        self._child_ws_connections: List["Connection"] = []
-        self._loop = loop
-        self.playwright_future: asyncio.Future["Playwright"] = loop.create_future()
+        self.playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
+        self.on_message: Callable[[Dict], Union[Awaitable[None], None]]
+        self.on_close = on_close
         self._error: Optional[BaseException] = None
         self.is_remote = False
+        self._object_factory = object_factory
         self._init_task: Optional[asyncio.Task] = None
         self._api_zone: contextvars.ContextVar[Optional[Dict]] = contextvars.ContextVar(
             "ApiZone", default=None
@@ -205,38 +204,18 @@ class Connection(EventEmitter):
     def mark_as_remote(self) -> None:
         self.is_remote = True
 
-    async def run_as_sync(self) -> None:
+    async def init_sync(self) -> None:
         self._is_sync = True
-        await self.run()
+        await self.init()
 
-    async def run(self) -> None:
-        self._loop = asyncio.get_running_loop()
+    async def init(self) -> None:
         self._root_object = RootChannelOwner(self)
 
         async def init() -> None:
             self.playwright_future.set_result(await self._root_object.initialize())
 
-        await self._transport.connect()
-        self._init_task = self._loop.create_task(init())
-        await self._transport.run()
-
-    def stop_sync(self) -> None:
-        self._transport.request_stop()
-        self._dispatcher_fiber.switch()
-        self._loop.run_until_complete(self._transport.wait_until_stopped())
-        self.cleanup()
-
-    async def stop_async(self) -> None:
-        self._transport.request_stop()
-        await self._transport.wait_until_stopped()
-        self.cleanup()
-
-    def cleanup(self) -> None:
-        if self._init_task and not self._init_task.done():
-            self._init_task.cancel()
-        for ws_connection in self._child_ws_connections:
-            ws_connection._transport.dispose()
-        self.emit("close")
+        asyncio.create_task(init())
+        # self.emit("close")
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]
@@ -262,7 +241,16 @@ class Connection(EventEmitter):
             "params": self._replace_channels_with_guids(params),
             "metadata": self._api_zone.get(),
         }
-        self._transport.send(message)
+        result = self.on_message(message)
+        if result is not None and inspect.iscoroutine(result):
+            task = asyncio.create_task(result)
+
+            @task.add_done_callback
+            def task_callback(task: asyncio.Task) -> None:
+                exc = task.exception()
+                if exc:
+                    callback.future.set_exception(exc)
+
         self._callbacks[id] = callback
         return callback
 
@@ -299,19 +287,28 @@ class Connection(EventEmitter):
             return
         object = self._objects[guid]
         try:
+            params = (
+                params
+                if object._type == "JsonPipe"
+                else self._replace_guids_with_channels(params)
+            )
             if self._is_sync:
                 for listener in object._channel.listeners(method):
                     # Each event handler is a potentilly blocking context, create a fiber for each
                     # and switch to them in order, until they block inside and pass control to each
                     # other and then eventually back to dispatcher as listener functions return.
                     g = greenlet(listener)
-                    g.switch(self._replace_guids_with_channels(params))
+                    g.switch(params)
             else:
-                object._channel.emit(method, self._replace_guids_with_channels(params))
+                object._channel.emit(method, params)
         except BaseException as exc:
             print("Error occured in event listener", file=sys.stderr)
             traceback.print_exc()
             self._error = exc
+
+    async def stop(self) -> None:
+        if self.on_close:
+            await self.on_close()
 
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict

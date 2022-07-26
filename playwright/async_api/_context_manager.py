@@ -25,25 +25,23 @@ from playwright.async_api._generated import Playwright as AsyncPlaywright
 class PlaywrightContextManager:
     def __init__(self) -> None:
         self._connection: Connection
+        self._transport: PipeTransport
 
     async def __aenter__(self) -> AsyncPlaywright:
         loop = asyncio.get_running_loop()
-        self._connection = Connection(
-            None,
-            create_remote_object,
-            PipeTransport(loop, compute_driver_executable()),
-            loop,
-        )
-        loop.create_task(self._connection.run())
-        playwright_future = self._connection.playwright_future
 
-        done, _ = await asyncio.wait(
-            {self._connection._transport.on_error_future, playwright_future},
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if not playwright_future.done():
-            playwright_future.cancel()
-        playwright = AsyncPlaywright(next(iter(done)).result())
+        self._connection = Connection(None, create_remote_object, loop)
+        self._transport = PipeTransport(loop, compute_driver_executable())
+        self._connection = connection = Connection(None, create_remote_object, loop)
+        self._transport = transport = PipeTransport(loop, compute_driver_executable())
+        connection.on_message = transport.send
+        transport.on_message = connection.dispatch
+
+        await transport.connect()
+        loop.create_task(transport.run())
+        await connection.init()
+        playwright_future = connection.playwright_future
+        playwright = AsyncPlaywright(await playwright_future)
         playwright.stop = self.__aexit__  # type: ignore
         return playwright
 
@@ -51,4 +49,5 @@ class PlaywrightContextManager:
         return await self.__aenter__()
 
     async def __aexit__(self, *args: Any) -> None:
-        await self._connection.stop_async()
+        self._transport.request_stop()
+        await self._transport.wait_until_stopped()

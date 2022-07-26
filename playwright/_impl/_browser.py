@@ -191,7 +191,7 @@ class Browser(ChannelOwner):
             if not is_safe_close_error(e):
                 raise e
         if self._should_close_connection_on_close:
-            await self._connection.stop_async()
+            await self._connection.stop()
 
     @property
     def version(self) -> str:
