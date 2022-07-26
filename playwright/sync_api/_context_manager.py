@@ -68,7 +68,6 @@ Please use the Async API instead."""
         def greenlet_main() -> None:
             self._loop.run_until_complete(self._transport.run())
 
-        # dispatcher_fiber = greenlet(greenlet_main)
 
         self._dispatcher_fiber = dispatcher_fiber = greenlet(greenlet_main)
         self._connection = connection = Connection(
