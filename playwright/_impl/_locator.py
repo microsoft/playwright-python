@@ -75,7 +75,9 @@ class Locator:
         if has_text:
             if isinstance(has_text, Pattern):
                 js_regex = f"/{has_text.pattern}/{escape_regex_flags(has_text)}"
-                self._selector += f' >> has={json.dumps("text=" + js_regex)}'
+                self._selector += (
+                    f' >> has={json.dumps("text=" + js_regex, ensure_ascii=False)}'
+                )
             else:
                 escaped = escape_with_quotes(has_text, '"')
                 self._selector += f" >> :scope:has-text({escaped})"
@@ -83,7 +85,7 @@ class Locator:
         if has:
             if has._frame != frame:
                 raise Error('Inner "has" locator must belong to the same frame.')
-            self._selector += " >> has=" + json.dumps(has._selector)
+            self._selector += " >> has=" + json.dumps(has._selector, ensure_ascii=False)
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"

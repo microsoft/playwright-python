@@ -711,3 +711,16 @@ def test_should_support_locator_filter(page: Page) -> None:
             has_text="world",
         )
     ).to_have_count(1)
+
+
+def test_locators_has_does_not_encode_unicode(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
+    locators = [
+        page.locator("button", has_text="Драматург"),
+        page.locator("button", has_text=re.compile("Драматург")),
+        page.locator("button", has=page.locator("text=Драматург")),
+    ]
+    for locator in locators:
+        with pytest.raises(Error) as exc_info:
+            locator.click(timeout=1_000)
+        assert "Драматург" in exc_info.value.message
