@@ -184,7 +184,9 @@ class Connection(EventEmitter):
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._is_sync = False
-        self.playwright_future: asyncio.Future["Playwright"] = asyncio.Future()
+        self.playwright_future: asyncio.Future[
+            "Playwright"
+        ] = self._loop.create_future()
         self.on_message: Callable[[Dict], Union[Awaitable[None], None]]
         self.on_close = on_close
         self._error: Optional[BaseException] = None
