@@ -55,8 +55,6 @@ class PipeTransport:
 
         self.on_message: Callable[[ParsedMessagePayload], None]
         self._stopped_event = asyncio.Event()
-        # self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
-        # self.on_error_future: asyncio.Future = loop.create_future()
 
     def request_stop(self) -> None:
         assert self._output
