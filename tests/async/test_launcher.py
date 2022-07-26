@@ -21,7 +21,7 @@ from playwright.async_api import BrowserType, Error
 
 
 async def test_browser_type_launch_should_reject_all_promises_when_browser_is_closed(
-    browser_type: BrowserType, launch_arguments
+    browser_type: BrowserType, launch_arguments, is_chromium
 ):
     browser = await browser_type.launch(**launch_arguments)
     page = await (await browser.new_context()).new_page()
@@ -29,7 +29,10 @@ async def test_browser_type_launch_should_reject_all_promises_when_browser_is_cl
     await page.close()
     with pytest.raises(Error) as exc:
         await never_resolves
-    assert "Target closed" in exc.value.message
+    if is_chromium:
+        assert "Target page, context or browser has been closed" in exc.value.message
+    else:
+        assert "Target closed" in exc.value.message
 
 
 @pytest.mark.skip_browser("firefox")
