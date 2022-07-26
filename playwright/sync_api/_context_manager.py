@@ -101,7 +101,6 @@ Please use the Async API instead."""
         return self.__enter__()
 
     def __exit__(self, *args: Any) -> None:
-        # self._connection.stop_sync()
         self._transport.request_stop()
         self._dispatcher_fiber.switch()
         if self._watcher:
