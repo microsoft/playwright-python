@@ -54,7 +54,7 @@ class PipeTransport:
         self._loop = loop
 
         self.on_message: Callable[[ParsedMessagePayload], None]
-        self._stopped_event = asyncio.Event()
+        self._stopped_event = asyncio.Event(loop=self._loop)
 
     def request_stop(self) -> None:
         assert self._output
