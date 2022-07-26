@@ -809,3 +809,16 @@ async def test_should_filter_by_regex_with_special_symbols(page):
     await expect(
         page.locator("div", has_text=re.compile(r'^first\/".*"second\\$', re.S | re.I))
     ).to_have_class("test")
+
+
+async def test_locators_has_does_not_encode_unicode(page: Page, server: Server):
+    await page.goto(server.EMPTY_PAGE)
+    locators = [
+        page.locator("button", has_text="Драматург"),
+        page.locator("button", has_text=re.compile("Драматург")),
+        page.locator("button", has=page.locator("text=Драматург")),
+    ]
+    for locator in locators:
+        with pytest.raises(Error) as exc_info:
+            await locator.click(timeout=1_000)
+        assert "Драматург" in exc_info.value.message

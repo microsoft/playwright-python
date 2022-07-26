@@ -18,7 +18,7 @@ from typing import Pattern
 
 
 def escape_with_quotes(text: str, char: str = "'") -> str:
-    stringified = json.dumps(text)
+    stringified = json.dumps(text, ensure_ascii=False)
     escaped_text = stringified[1:-1].replace('\\"', '"')
     if char == "'":
         return char + escaped_text.replace("'", "\\'") + char
