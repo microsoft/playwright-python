@@ -215,7 +215,6 @@ class Connection(EventEmitter):
             self.playwright_future.set_result(await self._root_object.initialize())
 
         asyncio.create_task(init())
-        # self.emit("close")
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]
