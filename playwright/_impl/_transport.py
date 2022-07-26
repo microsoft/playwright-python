@@ -54,7 +54,10 @@ class PipeTransport:
         self._loop = loop
 
         self.on_message: Callable[[ParsedMessagePayload], None]
-        self._stopped_event = asyncio.Event(loop=self._loop)
+        if sys.version_info >= (3, 10):
+            self._stopped_event = asyncio.Event()
+        else:
+            self._stopped_event = asyncio.Event(loop=self._loop)
 
     def request_stop(self) -> None:
         assert self._output
