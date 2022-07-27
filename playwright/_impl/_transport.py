@@ -18,7 +18,6 @@ import json
 import os
 import subprocess
 import sys
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, Optional, Union
 
@@ -46,54 +45,13 @@ def _get_stderr_fileno() -> Optional[int]:
         return sys.__stderr__.fileno()
 
 
-class Transport(ABC):
-    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
-        self._loop = loop
-        self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
-        self.on_error_future: asyncio.Future = loop.create_future()
-
-    @abstractmethod
-    def request_stop(self) -> None:
-        pass
-
-    def dispose(self) -> None:
-        pass
-
-    @abstractmethod
-    async def wait_until_stopped(self) -> None:
-        pass
-
-    @abstractmethod
-    async def connect(self) -> None:
-        pass
-
-    @abstractmethod
-    async def run(self) -> None:
-        pass
-
-    @abstractmethod
-    def send(self, message: Dict) -> None:
-        pass
-
-    def serialize_message(self, message: Dict) -> bytes:
-        msg = json.dumps(message)
-        if "DEBUGP" in os.environ:  # pragma: no cover
-            print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
-        return msg.encode()
-
-    def deserialize_message(self, data: Union[str, bytes]) -> ParsedMessagePayload:
-        obj = json.loads(data)
-
-        if "DEBUGP" in os.environ:  # pragma: no cover
-            print("\x1b[33mRECV>\x1b[0m", json.dumps(obj, indent=2))
-        return obj
-
-
-class PipeTransport(Transport):
+class PipeTransport:
     def __init__(
         self, loop: asyncio.AbstractEventLoop, driver_executable: Path
     ) -> None:
-        super().__init__(loop)
+        self._loop = loop
+        self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
+        self.on_error_future: asyncio.Future = loop.create_future()
         self._stopped = False
         self._driver_executable = driver_executable
 
@@ -172,3 +130,16 @@ class PipeTransport(Transport):
         self._output.write(
             len(data).to_bytes(4, byteorder="little", signed=False) + data
         )
+
+    def serialize_message(self, message: Dict) -> bytes:
+        msg = json.dumps(message)
+        if "DEBUGP" in os.environ:  # pragma: no cover
+            print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
+        return msg.encode()
+
+    def deserialize_message(self, data: Union[str, bytes]) -> ParsedMessagePayload:
+        obj = json.loads(data)
+
+        if "DEBUGP" in os.environ:  # pragma: no cover
+            print("\x1b[33mRECV>\x1b[0m", json.dumps(obj, indent=2))
+        return obj

@@ -25,7 +25,7 @@ from pyee import AsyncIOEventEmitter, EventEmitter
 
 import playwright
 from playwright._impl._helper import ParsedMessagePayload, parse_error
-from playwright._impl._transport import Transport
+from playwright._impl._transport import PipeTransport
 
 if TYPE_CHECKING:
     from playwright._impl._local_utils import LocalUtils
@@ -172,7 +172,7 @@ class Connection(EventEmitter):
         self,
         dispatcher_fiber: Any,
         object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
-        transport: Transport,
+        transport: PipeTransport,
         loop: asyncio.AbstractEventLoop,
         local_utils: Optional["LocalUtils"] = None,
     ) -> None:
@@ -186,7 +186,6 @@ class Connection(EventEmitter):
         self._callbacks: Dict[int, ProtocolCallback] = {}
         self._object_factory = object_factory
         self._is_sync = False
-        self._child_ws_connections: List["Connection"] = []
         self._loop = loop
         self.playwright_future: asyncio.Future["Playwright"] = loop.create_future()
         self._error: Optional[BaseException] = None
@@ -234,8 +233,6 @@ class Connection(EventEmitter):
     def cleanup(self) -> None:
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
-        for ws_connection in self._child_ws_connections:
-            ws_connection._transport.dispose()
         self.emit("close")
 
     def call_on_object_with_known_name(
