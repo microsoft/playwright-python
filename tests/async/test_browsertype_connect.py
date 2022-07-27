@@ -22,6 +22,8 @@ from playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
 from tests.server import Server
 
+pytest.skip(allow_module_level=True)
+
 
 async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
     server: Server, browser_type: BrowserType, launch_server
