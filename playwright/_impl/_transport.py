@@ -22,12 +22,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, Optional, Union
 
-import websockets
-import websockets.exceptions
-from pyee import AsyncIOEventEmitter
-from websockets.client import connect as websocket_connect
-
-from playwright._impl._api_types import Error
 from playwright._impl._driver import get_driver_env
 from playwright._impl._helper import ParsedMessagePayload
 
@@ -178,75 +172,3 @@ class PipeTransport(Transport):
         self._output.write(
             len(data).to_bytes(4, byteorder="little", signed=False) + data
         )
-
-
-class WebSocketTransport(AsyncIOEventEmitter, Transport):
-    def __init__(
-        self,
-        loop: asyncio.AbstractEventLoop,
-        ws_endpoint: str,
-        headers: Dict[str, str] = None,
-        slow_mo: float = None,
-    ) -> None:
-        super().__init__(loop)
-        Transport.__init__(self, loop)
-
-        self._stopped = False
-        self.ws_endpoint = ws_endpoint
-        self.headers = headers
-        self.slow_mo = slow_mo
-
-    def request_stop(self) -> None:
-        self._stopped = True
-        self.emit("close")
-        self._loop.create_task(self._connection.close())
-
-    def dispose(self) -> None:
-        self.on_error_future.cancel()
-
-    async def wait_until_stopped(self) -> None:
-        await self._connection.wait_closed()
-
-    async def connect(self) -> None:
-        try:
-            self._connection = await websocket_connect(
-                self.ws_endpoint,
-                extra_headers=self.headers,
-                max_size=256 * 1024 * 1024,  # 256Mb
-            )
-        except Exception as exc:
-            self.on_error_future.set_exception(Error(f"websocket.connect: {str(exc)}"))
-            raise exc
-
-    async def run(self) -> None:
-        while not self._stopped:
-            try:
-                message = await self._connection.recv()
-                if self.slow_mo is not None:
-                    await asyncio.sleep(self.slow_mo / 1000)
-                if self._stopped:
-                    self.on_error_future.set_exception(
-                        Error("Playwright connection closed")
-                    )
-                    break
-                obj = self.deserialize_message(message)
-                self.on_message(obj)
-            except (
-                websockets.exceptions.ConnectionClosed,
-                websockets.exceptions.ConnectionClosedError,
-            ):
-                if not self._stopped:
-                    self.emit("close")
-                self.on_error_future.set_exception(
-                    Error("Playwright connection closed")
-                )
-                break
-            except Exception as exc:
-                self.on_error_future.set_exception(exc)
-                break
-
-    def send(self, message: Dict) -> None:
-        if self._stopped or (hasattr(self, "_connection") and self._connection.closed):
-            raise Error("Playwright connection closed")
-        data = self.serialize_message(message)
-        self._loop.create_task(self._connection.send(data))
