@@ -129,6 +129,11 @@ class ChannelOwner(AsyncIOEventEmitter):
             object._dispose()
         self._objects.clear()
 
+    def _adopt(self, child: "ChannelOwner") -> None:
+        del cast("ChannelOwner", child._parent)._objects[child._guid]
+        self._objects[child._guid] = child
+        child._parent = self
+
 
 class ProtocolCallback:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
@@ -294,6 +299,19 @@ class Connection(EventEmitter):
                 parent, params["type"], params["guid"], params["initializer"]
             )
             return
+
+        object = self._objects.get(guid)
+        if not object:
+            raise Exception(f'Cannot find object to "{method}": {guid}')
+
+        if method == "__adopt__":
+            child_guid = cast(Dict[str, str], params)["guid"]
+            child = self._objects.get(child_guid)
+            if not child:
+                raise Exception(f"Unknown new child: {child_guid}")
+            object._adopt(child)
+            return
+
         if method == "__dispose__":
             self._objects[guid]._dispose()
             return

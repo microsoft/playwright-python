@@ -100,9 +100,7 @@ class BrowserContext(ChannelOwner):
         self._service_workers: Set[Worker] = set()
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
-        self._request: APIRequestContext = from_channel(
-            initializer["APIRequestContext"]
-        )
+        self._request: APIRequestContext = from_channel(initializer["requestContext"])
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
