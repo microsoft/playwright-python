@@ -60,4 +60,5 @@ async def test_should_not_error_if_page_not_closed_before_save_as(
     saved = page.video.save_as(out_path)
     await page.close()
     await saved
-    os.path.exists(out_path)
+    await page.context.close()
+    assert os.path.exists(out_path)

@@ -106,3 +106,8 @@ def test_should_error_if_page_not_closed_before_save_as(
         assert video
         video.save_as(out_path)
     assert "Page is not yet closed. Close the page prior to calling save_as" in str(err)
+    assert not os.path.exists(out_path)
+    page.context.close()
+
+    video.save_as(out_path)
+    assert os.path.exists(out_path)
