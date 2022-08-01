@@ -3,7 +3,7 @@ requires = ["setuptools-scm==6.3.2", "wheel==0.37.0", "auditwheel==5.0.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "-Wall -rsx -vv -s"
+addopts = "-Wall -rsx -vv -s --numprocesses=auto"
 markers = [
     "skip_browser",
     "only_browser",
