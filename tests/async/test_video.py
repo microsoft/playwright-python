@@ -49,3 +49,16 @@ async def test_short_video_should_throw_persistent_context(
 
     path = await page.video.path()
     assert str(tmpdir) in str(path)
+
+
+async def test_should_not_error_if_page_not_closed_before_save_as(
+    browser, tmpdir, server
+):
+    page = await browser.new_page(record_video_dir=tmpdir)
+    await page.goto(server.PREFIX + "/grid.html")
+    out_path = tmpdir / "some-video.webm"
+    saved = page.video.save_as(out_path)
+    await page.close()
+    await saved
+    await page.context.close()
+    assert os.path.exists(out_path)
