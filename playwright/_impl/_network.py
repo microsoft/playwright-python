@@ -237,9 +237,11 @@ class Route(ChannelOwner):
         return from_channel(self._initializer["request"])
 
     async def abort(self, errorCode: str = None) -> None:
+        self._check_not_handled()
         await self._race_with_page_close(
             self._channel.send("abort", locals_to_params(locals()))
         )
+        self._report_handled(True)
 
     async def fulfill(
         self,
