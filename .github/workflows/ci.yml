@@ -98,7 +98,7 @@ jobs:
         python setup.py bdist_wheel
         python -m playwright install --with-deps ${{ matrix.browser }}
     - name: Common Tests
-      run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
+      run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90 --numprocesses=1
     - name: Test Reference count
       run: pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
     - name: Test Wheel Installation
