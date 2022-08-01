@@ -55,6 +55,10 @@ class Video:
         return artifact.absolute_path
 
     async def save_as(self, path: Union[str, pathlib.Path]) -> None:
+        if self._page._connection._is_sync and not self._page._is_closed:
+            raise Error(
+                "Page is not yet closed. Close the page prior to calling save_as"
+            )
         artifact = await self._artifact_future
         if not artifact:
             raise Error("Page did not produce any video frames")
