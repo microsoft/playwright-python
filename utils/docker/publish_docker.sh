@@ -123,11 +123,16 @@ publish_docker_manifest () {
   done
 }
 
+# Bionic
 publish_docker_images_with_arch_suffix bionic amd64
 publish_docker_manifest bionic amd64
 
+# Focal
 publish_docker_images_with_arch_suffix focal amd64
 publish_docker_images_with_arch_suffix focal arm64
+publish_docker_manifest focal amd64 arm64
+
+# Jammy
 publish_docker_images_with_arch_suffix jammy amd64
 publish_docker_images_with_arch_suffix jammy arm64
-publish_docker_manifest focal amd64 arm64
+publish_docker_manifest jammy amd64 arm64
