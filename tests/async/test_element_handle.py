@@ -402,11 +402,6 @@ async def test_should_wait_for_display_none_to_become_visible(page):
     await waiting_helper(page, 'div => div.style.display = "block"')
 
 
-async def test_should_wait_for_display_contents_to_become_visible(page):
-    await page.set_content('<div style="display:contents">Hello</div>')
-    await waiting_helper(page, 'div => div.style.display = "block"')
-
-
 async def test_should_work_for_visibility_hidden_element(page):
     await page.set_content('<div style="visibility:hidden">Hello</div>')
     div = await page.query_selector("div")
