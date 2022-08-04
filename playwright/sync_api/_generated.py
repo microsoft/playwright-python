@@ -12025,7 +12025,9 @@ class BrowserType(SyncBase):
     ) -> "Browser":
         """BrowserType.connect
 
-        This method attaches Playwright to an existing browser instance.
+        This method attaches Playwright to an existing browser instance. When connecting to another browser launched via
+        `BrowserType.launchServer` in Node.js, the major and minor version needs to match the client version (1.2.3 → is
+        compatible with 1.2.x).
 
         Parameters
         ----------
