@@ -427,7 +427,7 @@ class Response(AsyncBase):
     def from_service_worker(self) -> bool:
         """Response.from_service_worker
 
-        Indicates whether this Response was fullfilled by a Service Worker's Fetch Handler (i.e. via
+        Indicates whether this Response was fulfilled by a Service Worker's Fetch Handler (i.e. via
         [FetchEvent.respondWith](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith)).
 
         Returns
@@ -2528,7 +2528,7 @@ class ElementHandle(JSHandle):
 
             Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
-            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box
             `#FF00FF` that completely covers its bounding box.
 
         Returns
@@ -7995,7 +7995,7 @@ class Page(AsyncContextManager):
 
             Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
-            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box
             `#FF00FF` that completely covers its bounding box.
 
         Returns
@@ -9263,7 +9263,7 @@ class Page(AsyncContextManager):
         User can inspect selectors or perform manual steps while paused. Resume will continue running the original script from
         the place it was paused.
 
-        > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
+        > NOTE: This method requires Playwright to be started in a headed mode, with a falsely `headless` value in the
         `browser_type.launch()`.
         """
 
@@ -11047,7 +11047,7 @@ class Browser(AsyncContextManager):
 
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
 
-        > NOTE: If directly using this method to create `BrowserContext`s, it is best practice to explicilty close the returned
+        > NOTE: If directly using this method to create `BrowserContext`s, it is best practice to explicitly close the returned
         context via `browser_context.close()` when your code is done with the `BrowserContext`, and before calling
         `browser.close()`. This will ensure the `context` is closed gracefully and any artifacts—like HARs and
         videos—are fully flushed and saved.
@@ -13317,7 +13317,7 @@ class Locator(AsyncBase):
 
             Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
-            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box
             `#FF00FF` that completely covers its bounding box.
 
         Returns
