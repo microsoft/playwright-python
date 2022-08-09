@@ -427,7 +427,7 @@ class Response(AsyncBase):
     def from_service_worker(self) -> bool:
         """Response.from_service_worker
 
-        Indicates whether this Response was fullfilled by a Service Worker's Fetch Handler (i.e. via
+        Indicates whether this Response was fulfilled by a Service Worker's Fetch Handler (i.e. via
         [FetchEvent.respondWith](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith)).
 
         Returns
@@ -2528,7 +2528,7 @@ class ElementHandle(JSHandle):
 
             Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
-            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box
             `#FF00FF` that completely covers its bounding box.
 
         Returns
@@ -7995,7 +7995,7 @@ class Page(AsyncContextManager):
 
             Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
-            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box
             `#FF00FF` that completely covers its bounding box.
 
         Returns
@@ -11047,7 +11047,7 @@ class Browser(AsyncContextManager):
 
         Creates a new browser context. It won't share cookies/cache with other browser contexts.
 
-        > NOTE: If directly using this method to create `BrowserContext`s, it is best practice to explicilty close the returned
+        > NOTE: If directly using this method to create `BrowserContext`s, it is best practice to explicitly close the returned
         context via `browser_context.close()` when your code is done with the `BrowserContext`, and before calling
         `browser.close()`. This will ensure the `context` is closed gracefully and any artifacts—like HARs and
         videos—are fully flushed and saved.
@@ -13317,7 +13317,7 @@ class Locator(AsyncBase):
 
             Defaults to `"device"`.
         mask : Union[List[Locator], NoneType]
-            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with a pink box
+            Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink box
             `#FF00FF` that completely covers its bounding box.
 
         Returns
@@ -14649,14 +14649,38 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_contain_text(re.compile(r\"\\d messages\"))
         ```
 
-        Note that if array is passed as an expected value, entire lists of elements can be asserted:
+        If you pass an array as an expected value, the expectations are:
+        1. Locator resolves to a list of elements.
+        1. Elements from a **subset** of this list contain text from the expected array, respectively.
+        1. The matching subset of elements has the same order as the expected array.
+        1. Each text value from the expected array is matched by some element from the list.
+
+        For example, consider the following list:
+
+        ```html
+        <ul>
+          <li>Item Text 1</li>
+          <li>Item Text 2</li>
+          <li>Item Text 3</li>
+        </ul>
+        ```
+
+        Let's see how we can use the assertion:
 
         ```py
-        import re
         from playwright.async_api import expect
 
-        locator = page.locator(\"list > .list-item\")
-        await expect(locator).to_contain_text([\"Text 1\", \"Text 4\", \"Text 5\"])
+        # ✓ Contains the right items in the right order
+        await expect(page.locator(\"ul > li\")).to_contain_text([\"Text 1\", \"Text 3\", \"Text 4\"])
+
+        # ✖ Wrong order
+        await expect(page.locator(\"ul > li\")).to_contain_text([\"Text 3\", \"Text 2\"])
+
+        # ✖ No item contains this text
+        await expect(page.locator(\"ul > li\")).to_contain_text([\"Some 33\"])
+
+        # ✖ Locator points to the outer list element, not to the list items
+        await expect(page.locator(\"ul\")).to_contain_text([\"Text 3\"])
         ```
 
         Parameters
@@ -15231,13 +15255,37 @@ class LocatorAssertions(AsyncBase):
         await expect(locator).to_have_text(re.compile(r\"Welcome, .*\"))
         ```
 
-        Note that if array is passed as an expected value, entire lists of elements can be asserted:
+        If you pass an array as an expected value, the expectations are:
+        1. Locator resolves to a list of elements.
+        1. The number of elements equals the number of expected values in the array.
+        1. Elements from the list have text matching expected array values, one by one, in order.
+
+        For example, consider the following list:
+
+        ```html
+        <ul>
+          <li>Text 1</li>
+          <li>Text 2</li>
+          <li>Text 3</li>
+        </ul>
+        ```
+
+        Let's see how we can use the assertion:
 
         ```py
         from playwright.async_api import expect
 
-        locator = page.locator(\"list > .component\")
-        await expect(locator).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
+        # ✓ Has the right items in the right order
+        await expect(page.locator(\"ul > li\")).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
+
+        # ✖ Wrong order
+        await expect(page.locator(\"ul > li\")).to_have_text([\"Text 3\", \"Text 2\", \"Text 1\"])
+
+        # ✖ Last item does not match
+        await expect(page.locator(\"ul > li\")).to_have_text([\"Text 1\", \"Text 2\", \"Text\"])
+
+        # ✖ Locator points to the outer list element, not to the list items
+        await expect(page.locator(\"ul\")).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
         ```
 
         Parameters
