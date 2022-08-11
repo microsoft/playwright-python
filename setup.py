@@ -30,7 +30,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.25.0-alpha-1659629898000"
+driver_version = "1.25.0-alpha-1660067092000"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -232,7 +232,7 @@ setup(
         "write_to": "playwright/_repo_version.py",
         "write_to_template": 'version = "{version}"\n',
     },
-    setup_requires=["setuptools-scm==6.3.2", "wheel==0.37.0"],
+    setup_requires=["setuptools-scm==7.0.5", "wheel==0.37.1"],
     entry_points={
         "console_scripts": [
             "playwright=playwright.__main__:main",
