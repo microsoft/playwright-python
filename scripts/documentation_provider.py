@@ -205,7 +205,8 @@ class DocumentationProvider:
 
     def print_events(self, class_name: str) -> None:
         clazz = self.classes[class_name]
-        if events := clazz["events"]:
+        events = clazz["events"]
+        if events:
             doc = []
             for event_type in ["on", "once"]:
                 for event in events:
