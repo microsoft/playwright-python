@@ -9263,7 +9263,7 @@ class Page(AsyncContextManager):
         User can inspect selectors or perform manual steps while paused. Resume will continue running the original script from
         the place it was paused.
 
-        > NOTE: This method requires Playwright to be started in a headed mode, with a falsely `headless` value in the
+        > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
         `browser_type.launch()`.
         """
 
