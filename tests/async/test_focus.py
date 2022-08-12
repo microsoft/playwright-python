@@ -83,7 +83,7 @@ async def test_should_traverse_only_form_elements(page):
     await page.set_content(
         """
       <input id="input-1">
-      <button id="button">buttton</button>
+      <button id="button">button</button>
       <a href id="link">link</a>
       <input id="input-2">
     """

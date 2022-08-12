@@ -327,7 +327,7 @@ class Connection(EventEmitter):
             else:
                 object._channel.emit(method, self._replace_guids_with_channels(params))
         except BaseException as exc:
-            print("Error occured in event listener", file=sys.stderr)
+            print("Error occurred in event listener", file=sys.stderr)
             traceback.print_exc()
             self._error = exc
 

@@ -28,7 +28,7 @@ async def launch_persistent(tmpdir, launch_arguments, browser_type):
     async def _launch(**options):
         nonlocal context
         if context:
-            raise ValueError("can only launch one persitent context")
+            raise ValueError("can only launch one persistent context")
         context = await browser_type.launch_persistent_context(
             str(tmpdir), **{**launch_arguments, **options}
         )
