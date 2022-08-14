@@ -146,6 +146,7 @@ __all__ = [
     "PdfMargins",
     "Position",
     "Playwright",
+    "PlaywrightContextManager",
     "ProxySettings",
     "Request",
     "ResourceTiming",
