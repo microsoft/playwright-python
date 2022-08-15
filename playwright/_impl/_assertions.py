@@ -597,7 +597,6 @@ class APIResponseAssertions:
             message += f"\n Call log:\n{log}"
 
         content_type = self._actual.headers.get("content-type")
-        print(f">>> content-type {content_type}")
         is_text_encoding = content_type and is_textual_mime_type(content_type)
         text = await self._actual.text() if is_text_encoding else None
         if text is not None:
