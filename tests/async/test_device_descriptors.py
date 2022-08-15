@@ -2,10 +2,10 @@ import pytest
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_work(playwright) -> None:
+async def test_should_work(playwright, launch_arguments) -> None:
     device_descriptor = playwright.devices["Pixel 2"]
     device_type = device_descriptor["default_browser_type"]
-    browser = await playwright[device_type].launch()
+    browser = await playwright[device_type].launch(**launch_arguments)
     context = await browser.new_context(
         **device_descriptor,
     )
