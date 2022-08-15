@@ -81,4 +81,5 @@ def parse_device_descriptor(dict: Dict) -> Dict:
         "device_scale_factor": dict["deviceScaleFactor"],
         "is_mobile": dict["isMobile"],
         "has_touch": dict["hasTouch"],
+        "default_browser_type": dict["defaultBrowserType"],
     }
