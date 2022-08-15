@@ -362,3 +362,12 @@ def is_file_payload(value: Optional[Any]) -> bool:
         and "mimeType" in value
         and "buffer" in value
     )
+
+
+TEXTUAL_MIME_TYPE = re.compile(
+    r"^(text\/.*?|application\/(json|(x-)?javascript|xml.*?|ecmascript|graphql|x-www-form-urlencoded)|image\/svg(\+xml)?|application\/.*?(\+json|\+xml))(;\s*charset=.*)?$"
+)
+
+
+def is_textual_mime_type(mime_type: str) -> bool:
+    return bool(TEXTUAL_MIME_TYPE.match(mime_type))
