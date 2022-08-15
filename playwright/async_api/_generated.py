@@ -2791,6 +2791,10 @@ class Accessibility(AsyncBase):
     ) -> typing.Optional[typing.Dict]:
         """Accessibility.snapshot
 
+        **DEPRECATED** This method is deprecated. Please use other libraries such as [Axe](https://www.deque.com/axe/) if you
+        need to test page accessibility. See our Node.js [guide](https://playwright.dev/docs/accessibility-testing) for
+        integration with Axe.
+
         Captures the current state of the accessibility tree. The returned object represents the root accessible node of the
         page.
 
@@ -6232,6 +6236,10 @@ class Page(AsyncContextManager):
     @property
     def accessibility(self) -> "Accessibility":
         """Page.accessibility
+
+        **DEPRECATED** This property is deprecated. Please use other libraries such as [Axe](https://www.deque.com/axe/) if you
+        need to test page accessibility. See our Node.js [guide](https://playwright.dev/docs/accessibility-testing) for
+        integration with Axe.
 
         Returns
         -------

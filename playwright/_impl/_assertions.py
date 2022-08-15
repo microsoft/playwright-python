@@ -17,6 +17,7 @@ from urllib.parse import urljoin
 
 from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
 from playwright._impl._fetch import APIResponse
+from playwright._impl._helper import is_textual_mime_type
 from playwright._impl._locator import Locator
 from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
@@ -594,6 +595,13 @@ class APIResponseAssertions:
         log = "\n".join(log_list).strip()
         if log:
             message += f"\n Call log:\n{log}"
+
+        content_type = self._actual.headers.get("content-type")
+        is_text_encoding = content_type and is_textual_mime_type(content_type)
+        text = await self._actual.text() if is_text_encoding else None
+        if text is not None:
+            message += f"\n Response Text:\n{text[:1000]}"
+
         raise AssertionError(message)
 
     async def not_to_be_ok(self) -> None:
