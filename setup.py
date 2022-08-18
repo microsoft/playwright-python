@@ -22,7 +22,7 @@ import zipfile
 from pathlib import Path
 from typing import Dict, List
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 try:
     from auditwheel.wheeltools import InWheel
@@ -205,7 +205,7 @@ setup(
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     url="https://github.com/Microsoft/playwright-python",
-    packages=find_packages(exclude=["tests*"]),
+    packages=["playwright"],
     include_package_data=True,
     install_requires=[
         "websockets==10.1",
