@@ -47,15 +47,15 @@ FOCAL_TAGS=(
 JAMMY_TAGS=(
   "next-jammy"
 )
-if [[ "$RELEASE_CHANNEL" == "stable" ]]; then
-  JAMMY_TAGS+=("jammy")
-fi
 
 if [[ "$RELEASE_CHANNEL" == "stable" ]]; then
   FOCAL_TAGS+=("latest")
   FOCAL_TAGS+=("focal")
   FOCAL_TAGS+=("v${PW_VERSION}-focal")
   FOCAL_TAGS+=("v${PW_VERSION}")
+
+  JAMMY_TAGS+=("jammy")
+  JAMMY_TAGS+=("v${PW_VERSION}-jammy")
 fi
 
 tag_and_push() {
