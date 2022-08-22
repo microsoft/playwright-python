@@ -193,3 +193,22 @@ jobs:
         run: conda install conda-build conda-verify
       - name: Build
         run: conda build .
+
+  test_examples:
+    name: Examples
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: examples/todomvc/
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install dependencies & browsers
+      run: |
+        pip install -r requirements.txt
+        python -m playwright install --with-deps chromium
+    - name: Common Tests
+      run: pytest
