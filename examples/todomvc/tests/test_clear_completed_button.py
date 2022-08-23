@@ -9,9 +9,12 @@ from .utils import TODO_ITEMS, create_default_todos
 
 @pytest.fixture(autouse=True)
 def run_around_tests(page: Page) -> Generator[None, None, None]:
+    # setup before a test
     page.goto("https://demo.playwright.dev/todomvc")
     create_default_todos(page)
+    # run the actual test
     yield
+    # run any cleanup code
 
 
 def test_should_display_the_correct_text(page: Page) -> None:

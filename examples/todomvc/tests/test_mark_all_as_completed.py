@@ -13,8 +13,11 @@ from .utils import (
 
 @pytest.fixture(autouse=True)
 def run_around_tests(page: Page) -> Generator[None, None, None]:
+    # setup before a test
     page.goto("https://demo.playwright.dev/todomvc")
+    # run the actual test
     yield
+    # run any cleanup code
 
 
 def test_should_allow_me_to_mark_all_items_as_completed(page: Page) -> None:

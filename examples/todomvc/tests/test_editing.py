@@ -14,10 +14,13 @@ from .utils import (
 
 @pytest.fixture(autouse=True)
 def run_around_tests(page: Page) -> Generator[None, None, None]:
+    # setup before a test
     page.goto("https://demo.playwright.dev/todomvc")
     create_default_todos(page)
     assert_number_of_todos_in_local_storage(page, 3)
+    # run the actual test
     yield
+    # run any cleanup code
 
 
 def test_should_hide_other_controls_when_editing(page: Page) -> None:

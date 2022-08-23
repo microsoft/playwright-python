@@ -19,7 +19,7 @@ def check_number_of_completed_todos_in_local_storage(page: Page, expected: int) 
 
 
 def assert_number_of_todos_in_local_storage(page: Page, expected: int) -> None:
-    assert page.evaluate("JSON.parse(localStorage['react-todos']).length") == expected
+    assert len(page.evaluate("JSON.parse(localStorage['react-todos'])")) == expected
 
 
 def check_todos_in_local_storage(page: Page, title: str) -> None:

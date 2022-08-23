@@ -9,8 +9,11 @@ from .utils import TODO_ITEMS, assert_number_of_todos_in_local_storage
 
 @pytest.fixture(autouse=True)
 def run_around_tests(page: Page) -> Generator[None, None, None]:
+    # setup before a test
     page.goto("https://demo.playwright.dev/todomvc")
+    # run the actual test
     yield
+    # run any cleanup code
 
 
 def test_should_display_the_current_number_of_todo_items(page: Page) -> None:
