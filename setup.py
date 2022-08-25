@@ -209,7 +209,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "websockets==10.1",
-        "greenlet==1.1.2",
+        "greenlet==1.1.3",
         "pyee==8.1.0",
         "typing-extensions;python_version<='3.8'",
     ],
@@ -222,6 +222,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
