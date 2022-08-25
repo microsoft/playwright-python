@@ -83,6 +83,15 @@ jobs:
         - os: macos-11.0
           python-version: '3.10'
           browser: chromium
+        - os: windows-latest
+          python-version: '3.11.0-rc.1'
+          browser: chromium
+        - os: macos-latest
+          python-version: '3.11.0-rc.1'
+          browser: chromium
+        - os: ubuntu-latest
+          python-version: '3.11.0-rc.1'
+          browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
