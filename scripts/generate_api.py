@@ -13,17 +13,20 @@
 # limitations under the License.
 
 import re
+import sys
 from types import FunctionType
 from typing import (  # type: ignore
     Any,
+    Dict,
     List,
     Match,
+    Optional,
     Union,
     cast,
     get_args,
     get_origin,
-    get_type_hints,
 )
+from typing import get_type_hints as typing_get_type_hints
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._assertions import (
@@ -287,3 +290,34 @@ all_types = [
 
 api_globals = globals()
 assert Serializable
+
+# Python 3.11+ does not treat default args with None as Optional anymore, this wrapper will still wrap them.
+# https://github.com/python/cpython/issues/90353
+def get_type_hints(func: Any, globalns: Any) -> Dict[str, Any]:
+    original_value = typing_get_type_hints(func, globalns)
+    if sys.version_info < (3, 11):
+        return original_value
+    for key, value in _get_defaults(func).items():
+        if value is None and original_value[key] is not Optional:
+            original_value[key] = Optional[original_value[key]]
+    return original_value
+
+
+def _get_defaults(func: Any) -> Dict[str, Any]:
+    """Internal helper to extract the default arguments, by name."""
+    try:
+        code = func.__code__
+    except AttributeError:
+        # Some built-in functions don't have __code__, __defaults__, etc.
+        return {}
+    pos_count = code.co_argcount
+    arg_names = code.co_varnames
+    arg_names = arg_names[:pos_count]
+    defaults = func.__defaults__ or ()
+    kwdefaults = func.__kwdefaults__
+    res = dict(kwdefaults) if kwdefaults else {}
+    pos_offset = pos_count - len(defaults)
+    for name, value in zip(arg_names[pos_offset:], defaults):
+        assert name not in res
+        res[name] = value
+    return res

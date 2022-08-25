@@ -16,13 +16,14 @@
 import inspect
 import re
 from types import FunctionType
-from typing import Any, get_type_hints
+from typing import Any
 
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
     api_globals,
     arguments,
+    get_type_hints,
     header,
     process_type,
     return_type,
