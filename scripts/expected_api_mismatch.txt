@@ -18,3 +18,8 @@ Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
 Method not implemented: PlaywrightAssertions.expect
+
+# Ignore for now
+Method not documented: LocatorAssertions.to_have_attribute
+Method not implemented: LocatorAssertions.to_have_attribute#1
+Method not implemented: LocatorAssertions.to_have_attribute#2
