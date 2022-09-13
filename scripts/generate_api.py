@@ -60,16 +60,17 @@ from playwright._impl._video import Video
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
+    value = re.sub(r"NoneType", "None", value)
     value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)
     value = re.sub(r"playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
-        value = re.sub(r"^typing.Union\[([^,]+), NoneType\]$", r"\1 = None", value)
+        value = re.sub(r"^typing.Union\[([^,]+), None\]$", r"\1 = None", value)
         value = re.sub(
-            r"typing.Union\[(Literal\[[^\]]+\]), NoneType\]", r"\1 = None", value
+            r"typing.Union\[(Literal\[[^\]]+\]), None\]", r"\1 = None", value
         )
         value = re.sub(
-            r"^typing.Union\[(.+), NoneType\]$", r"typing.Union[\1] = None", value
+            r"^typing.Union\[(.+), None\]$", r"typing.Union[\1] = None", value
         )
         value = re.sub(
             r"^typing.Optional\[(.+)\]$", r"typing.Optional[\1] = None", value
@@ -121,17 +122,14 @@ def signature(func: FunctionType, indent: int) -> str:
                 "Positional exception is not first in the list "
                 + f"{func.__name__}.{name}"
             )
+        processed = process_type(value, True)
         if (
             not positional_exception
             and not saw_optional
-            and (
-                str(value).endswith("NoneType]")
-                or str(value).startswith("typing.Optional")
-            )
+            and processed.startswith("typing.Optional")
         ):
             saw_optional = True
             tokens.append("*")
-        processed = process_type(value, True)
         tokens.append(f"{to_snake_case(name)}: {processed}")
     return split.join(tokens)
 

@@ -295,10 +295,10 @@ class DocumentationProvider:
 
     def make_optional(self, text: str) -> str:
         if text.startswith("Union["):
-            if text.endswith("NoneType]"):
+            if text.endswith("None]"):
                 return text
-            return text[:-1] + ", NoneType]"
-        return f"Union[{text}, NoneType]"
+            return text[:-1] + ", None]"
+        return f"Union[{text}, None]"
 
     def compare_types(
         self, value: Any, doc_value: Any, fqname: str, direction: str
@@ -321,6 +321,8 @@ class DocumentationProvider:
             return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a), value)))}]"
         if str_value == "<class 'playwright._impl._types.Error'>":
             return "Error"
+        if str_value == "<class 'NoneType'>":
+            return "None"
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
@@ -361,7 +363,7 @@ class DocumentationProvider:
             if len(args) == 2 and str(args[1]) == "<class 'NoneType'>":
                 return self.make_optional(self.serialize_python_type(args[0]))
             ll = list(map(lambda a: self.serialize_python_type(a), args))
-            ll.sort(key=lambda item: "}" if item == "NoneType" else item)
+            ll.sort(key=lambda item: "}" if item == "None" else item)
             return f"Union[{', '.join(ll)}]"
         if str(origin) == "<class 'dict'>":
             args = get_args(value)
@@ -394,7 +396,7 @@ class DocumentationProvider:
 
         if "union" in type:
             ll = [self.serialize_doc_type(t, direction) for t in type["union"]]
-            ll.sort(key=lambda item: "}" if item == "NoneType" else item)
+            ll.sort(key=lambda item: "}" if item == "None" else item)
             for i in range(len(ll)):
                 if ll[i].startswith("Union["):
                     ll[i] = ll[i][6:-1]
@@ -456,7 +458,7 @@ class DocumentationProvider:
         if type_name == "RegExp":
             return "Pattern[str]"
         if type_name == "null":
-            return "NoneType"
+            return "None"
         if type_name == "EvaluationArgument":
             return "Dict"
         return type["name"]
