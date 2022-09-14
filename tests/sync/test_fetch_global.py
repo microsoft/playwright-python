@@ -187,3 +187,51 @@ def test_storage_state_should_round_trip_through_file(
     request2 = playwright.request.new_context(storage_state=path)
     state2 = request2.storage_state()
     assert state2 == expected
+
+
+def test_should_throw_an_error_when_max_redirects_is_exceeded(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_redirect("/a/redirect1", "/b/c/redirect2")
+    server.set_redirect("/b/c/redirect2", "/b/c/redirect3")
+    server.set_redirect("/b/c/redirect3", "/b/c/redirect4")
+    server.set_redirect("/b/c/redirect4", "/simple.json")
+
+    request = playwright.request.new_context()
+    for method in ["GET", "PUT", "POST", "OPTIONS", "HEAD", "PATCH"]:
+        for max_redirects in [1, 2, 3]:
+            with pytest.raises(Error) as exc_info:
+                request.fetch(
+                    server.PREFIX + "/a/redirect1",
+                    method=method,
+                    max_redirects=max_redirects,
+                )
+            assert "Max redirect count exceeded" in str(exc_info)
+
+
+def test_should_not_follow_redirects_when_max_redirects_is_set_to_0(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_redirect("/a/redirect1", "/b/c/redirect2")
+    server.set_redirect("/b/c/redirect2", "/simple.json")
+
+    request = playwright.request.new_context()
+    for method in ["GET", "PUT", "POST", "OPTIONS", "HEAD", "PATCH"]:
+        response = request.fetch(
+            server.PREFIX + "/a/redirect1", method=method, max_redirects=0
+        )
+        assert response.headers["location"] == "/b/c/redirect2"
+        assert response.status == 302
+
+
+def test_should_throw_an_error_when_max_redirects_is_less_than_0(
+    playwright: Playwright,
+    server: Server,
+) -> None:
+    request = playwright.request.new_context()
+    for method in ["GET", "PUT", "POST", "OPTIONS", "HEAD", "PATCH"]:
+        with pytest.raises(AssertionError) as exc_info:
+            request.fetch(
+                server.PREFIX + "/a/redirect1", method=method, max_redirects=-1
+            )
+        assert "'max_redirects' must be greater than or equal to '0'" in str(exc_info)

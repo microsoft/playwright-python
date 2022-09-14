@@ -271,7 +271,7 @@ class RouteHandler:
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
-    async def handle(self, route: "Route", request: "Request") -> bool:
+    async def handle(self, route: "Route") -> bool:
         handled_future = route._start_handling()
         handler_task = []
 
@@ -279,7 +279,7 @@ class RouteHandler:
             self._handled_count += 1
             result = cast(
                 Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
-            )(route, request)
+            )(route, route.request)
             if inspect.iscoroutine(result):
                 handler_task.append(asyncio.create_task(result))
 

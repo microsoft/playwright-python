@@ -114,7 +114,6 @@ class BrowserContext(ChannelOwner):
             lambda params: asyncio.create_task(
                 self._on_route(
                     from_channel(params.get("route")),
-                    from_channel(params.get("request")),
                 )
             ),
         )
@@ -174,15 +173,15 @@ class BrowserContext(ChannelOwner):
         if page._opener and not page._opener.is_closed():
             page._opener.emit(Page.Events.Popup, page)
 
-    async def _on_route(self, route: Route, request: Request) -> None:
+    async def _on_route(self, route: Route) -> None:
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
-            if not route_handler.matches(request.url):
+            if not route_handler.matches(route.request.url):
                 continue
             if route_handler.will_expire:
                 self._routes.remove(route_handler)
             try:
-                handled = await route_handler.handle(route, request)
+                handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
                     asyncio.create_task(self._disable_interception())
