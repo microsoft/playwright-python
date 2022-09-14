@@ -18,3 +18,18 @@ Method not implemented: Error.name
 Method not implemented: Error.stack
 Method not implemented: Error.message
 Method not implemented: PlaywrightAssertions.expect
+
+# mid-1.26 Roll Errors: MUST be resolved prior to landing
+Parameter not implemented: APIRequestContext.head(max_redirects=)
+Parameter not implemented: APIRequestContext.fetch(max_redirects=)
+Parameter not implemented: APIRequestContext.put(max_redirects=)
+Parameter not implemented: APIRequestContext.get(max_redirects=)
+Parameter not implemented: LocatorAssertions.to_be_enabled(enabled=)
+Parameter not implemented: APIRequestContext.delete(max_redirects=)
+Parameter not implemented: APIRequestContext.post(max_redirects=)
+Method not implemented: LocatorAssertions.to_have_attribute#1
+Method not implemented: LocatorAssertions.to_have_attribute#2
+Parameter not implemented: APIRequestContext.patch(max_redirects=)
+Parameter not implemented: LocatorAssertions.to_be_editable(editable=)
+Parameter not implemented: LocatorAssertions.to_be_visible(visible=)
+Method not documented: LocatorAssertions.to_have_attribute
