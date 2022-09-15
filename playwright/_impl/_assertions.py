@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, List, Optional, Pattern, Union
+from typing import Any, List, Optional, Pattern, Union, cast
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
 from playwright._impl._fetch import APIResponse
 from playwright._impl._helper import is_textual_mime_type
 from playwright._impl._locator import Locator
+from playwright._impl._overload_utils import mark_overload
 from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
 
@@ -171,31 +172,77 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_contain_text(expected, use_inner_text, timeout, ignore_case)
 
+    @mark_overload(overload_name="to_have_attribute#1")
+    async def to_have_attribute_1(
+        self,
+        name: str,
+        value: Union[str, Pattern[str]],
+        timeout: float = None,
+    ) -> None:
+        pass
+
+    @mark_overload(overload_name="to_have_attribute#2")
+    async def to_have_attribute_2(
+        self,
+        name: str,
+        timeout: float = None,
+    ) -> None:
+        pass
+
+    @mark_overload(is_impl=True)
     async def to_have_attribute(
         self,
         name: str,
-        value: Union[str, Pattern[str]],
+        *args: Any,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        expected_text = to_expected_text_values([value])
-        await self._expect_impl(
-            "to.have.attribute",
-            FrameExpectOptions(
-                expressionArg=name, expectedText=expected_text, timeout=timeout
-            ),
-            value,
-            "Locator expected to have attribute",
-        )
+        if not args:
+            await self._expect_impl(
+                "to.have.attribute",
+                FrameExpectOptions(
+                    expressionArg=name, expectedText=[], timeout=timeout
+                ),
+                None,
+                "Locator expected to have attribute",
+            )
+        else:
+            value = cast(str, args[0])
+            expected_text = to_expected_text_values([value])
+            await self._expect_impl(
+                "to.have.attribute.value",
+                FrameExpectOptions(
+                    expressionArg=name, expectedText=expected_text, timeout=timeout
+                ),
+                value,
+                "Locator expected to have attribute",
+            )
 
-    async def not_to_have_attribute(
+    @mark_overload(overload_name="not_to_have_attribute#1")
+    async def not_to_have_attribute_1(
         self,
         name: str,
         value: Union[str, Pattern[str]],
         timeout: float = None,
     ) -> None:
+        pass
+
+    @mark_overload(overload_name="not_to_have_attribute#2")
+    async def not_to_have_attribute_2(
+        self,
+        name: str,
+        timeout: float = None,
+    ) -> None:
+        pass
+
+    @mark_overload(is_impl=True)
+    async def not_to_have_attribute(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_attribute(name, value, timeout)
+        await self._not.to_have_attribute(*args, **kwargs)
 
     async def to_have_class(
         self,

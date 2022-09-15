@@ -95,12 +95,21 @@ def test_assertions_locator_to_contain_text(page: Page, server: Server) -> None:
 
 def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.set_content("<div id=foobar>kek</div>")
-    expect(page.locator("div#foobar")).to_have_attribute("id", "foobar")
-    expect(page.locator("div#foobar")).to_have_attribute("id", re.compile("foobar"))
-    expect(page.locator("div#foobar")).not_to_have_attribute("id", "kek", timeout=100)
+    page.set_content("<div checked id=foobar>kek</div>")
+    locator = page.locator("div#foobar")
+    expect(locator).to_have_attribute("id", "foobar")
+    expect(locator).to_have_attribute("id")
+    expect(locator).to_have_attribute("checked")
+    expect(locator).not_to_have_attribute("open")
+    expect(locator).not_to_have_attribute("data-nope")
+    expect(locator).to_have_attribute("id", re.compile("foobar"))
+    expect(locator).not_to_have_attribute("id", "kek", timeout=100)
     with pytest.raises(AssertionError):
-        expect(page.locator("div#foobar")).to_have_attribute("id", "koko", timeout=100)
+        expect(locator).to_have_attribute("id", "koko", timeout=100)
+    with pytest.raises(AssertionError):
+        expect(locator).to_have_attribute("open", timeout=100)
+    with pytest.raises(AssertionError):
+        expect(locator).to_have_attribute("data-nope", timeout=100)
 
 
 def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:

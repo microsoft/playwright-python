@@ -19,6 +19,12 @@ import sys
 from types import FunctionType
 from typing import Any
 
+from playwright._impl._overload_utils import (
+    get_is_overload,
+    get_is_overload_impl,
+    get_public_name,
+    get_upstream_name,
+)
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -87,14 +93,24 @@ def generate(t: Any) -> None:
             return_type_value = return_type(value)
             return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
             print("")
+            name = get_public_name(value)
+            is_overload_impl = get_is_overload_impl(value)
+            is_overload = get_is_overload(value)
+            if is_overload:
+                print("    @typing.overload")
             print(
-                f"    def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
+                f"    def {name}({'self, *args: typing.Any, **kwargs: typing.Any' if is_overload_impl else signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
             # Allow dunder methods without docs
             if name not in allow_without_docs_methods:
                 documentation_provider.print_entry(
-                    class_name, name, get_type_hints(value, api_globals)
+                    class_name,
+                    get_upstream_name(value),
+                    get_type_hints(value, api_globals),
                 )
+            if is_overload:
+                print("        ...")
+                continue
             if class_name in [
                 "LocatorAssertions",
                 "PageAssertions",
@@ -118,7 +134,7 @@ def generate(t: Any) -> None:
 
                 print(
                     f"""
-        return {prefix}{arguments(value, len(prefix))}{suffix}"""
+        return {prefix}{"*args, **kwargs" if is_overload_impl else arguments(value, len(prefix))}{suffix}"""
                 )
     print("")
     print(f"mapping.register({class_name}Impl, {class_name})")

@@ -18,6 +18,12 @@ import re
 from types import FunctionType
 from typing import Any
 
+from playwright._impl._overload_utils import (
+    get_is_overload,
+    get_is_overload_impl,
+    get_public_name,
+    get_upstream_name,
+)
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
     all_types,
@@ -89,15 +95,25 @@ def generate(t: Any) -> None:
                 "EventContextManager", "AsyncEventContextManager"
             )
             print("")
+            name = get_public_name(value)
+            is_overload_impl = get_is_overload_impl(value)
+            is_overload = get_is_overload(value)
+            if is_overload:
+                print("    @typing.overload")
             async_prefix = "async " if is_async else ""
             print(
-                f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
+                f"    {async_prefix}def {name}({'self, *args: typing.Any, **kwargs: typing.Any' if is_overload_impl else signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
             # Allow dunder methods without docs
-            if name not in allow_without_docs_methods:
+            if name not in allow_without_docs_methods and not is_overload_impl:
                 documentation_provider.print_entry(
-                    class_name, name, get_type_hints(value, api_globals)
+                    class_name,
+                    get_upstream_name(value),
+                    get_type_hints(value, api_globals),
                 )
+            if is_overload:
+                print("        ...")
+                continue
             if class_name in [
                 "LocatorAssertions",
                 "PageAssertions",
@@ -119,7 +135,7 @@ def generate(t: Any) -> None:
                 suffix = ")" + suffix
                 print(
                     f"""
-        return {prefix}{arguments(value, len(prefix))}{suffix}"""
+        return {prefix}{"*args, **kwargs" if is_overload_impl else arguments(value, len(prefix))}{suffix}"""
                 )
     print("")
     print(f"mapping.register({class_name}Impl, {class_name})")

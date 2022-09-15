@@ -14743,6 +14743,7 @@ class LocatorAssertions(AsyncBase):
             )
         )
 
+    @typing.overload
     async def to_have_attribute(
         self,
         name: str,
@@ -14750,24 +14751,16 @@ class LocatorAssertions(AsyncBase):
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
-        __tracebackhide__ = True
+        """LocatorAssertions.to_have_attribute#1
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_attribute(
-                name=name, value=value, timeout=timeout
-            )
-        )
+        Ensures the `Locator` points to an element with given attribute value.
 
-    async def not_to_have_attribute(
-        self,
-        name: str,
-        value: typing.Union[str, typing.Pattern[str]],
-        *,
-        timeout: typing.Optional[float] = None
-    ) -> None:
-        """LocatorAssertions.not_to_have_attribute
+        ```py
+        from playwright.async_api import expect
 
-        The opposite of `locator_assertions.to_have_attribute#1()`.
+        locator = page.locator(\"input\")
+        await expect(locator).to_have_attribute(\"type\", \"text\")
+        ```
 
         Parameters
         ----------
@@ -14778,12 +14771,63 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
+        ...
+
+    @typing.overload
+    async def to_have_attribute(
+        self, name: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_have_attribute#2
+
+        Ensures the `Locator` points to an element with given attribute. The method will assert attribute presence.
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.locator(\"input\")
+        await expect(locator).to_have_attribute(\"disabled\")
+        await expect(locator).not_to_have_attribute(\"open\")
+        ```
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
+        ...
+
+    async def to_have_attribute(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_attribute(
-                name=name, value=value, timeout=timeout
-            )
+            await self._impl_obj.to_have_attribute(*args, **kwargs)
+        )
+
+    @typing.overload
+    async def not_to_have_attribute(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern[str]],
+        *,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        ...
+
+    @typing.overload
+    async def not_to_have_attribute(
+        self, name: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        ...
+
+    async def not_to_have_attribute(
+        self, *args: typing.Any, **kwargs: typing.Any
+    ) -> None:
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_have_attribute(*args, **kwargs)
         )
 
     async def to_have_class(

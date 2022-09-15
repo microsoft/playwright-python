@@ -14876,6 +14876,7 @@ class LocatorAssertions(SyncBase):
             )
         )
 
+    @typing.overload
     def to_have_attribute(
         self,
         name: str,
@@ -14883,26 +14884,16 @@ class LocatorAssertions(SyncBase):
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
-        __tracebackhide__ = True
+        """LocatorAssertions.to_have_attribute#1
 
-        return mapping.from_maybe_impl(
-            self._sync(
-                self._impl_obj.to_have_attribute(
-                    name=name, value=value, timeout=timeout
-                )
-            )
-        )
+        Ensures the `Locator` points to an element with given attribute value.
 
-    def not_to_have_attribute(
-        self,
-        name: str,
-        value: typing.Union[str, typing.Pattern[str]],
-        *,
-        timeout: typing.Optional[float] = None
-    ) -> None:
-        """LocatorAssertions.not_to_have_attribute
+        ```py
+        from playwright.sync_api import expect
 
-        The opposite of `locator_assertions.to_have_attribute#1()`.
+        locator = page.locator(\"input\")
+        expect(locator).to_have_attribute(\"type\", \"text\")
+        ```
 
         Parameters
         ----------
@@ -14913,14 +14904,61 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
+        ...
+
+    @typing.overload
+    def to_have_attribute(
+        self, name: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_have_attribute#2
+
+        Ensures the `Locator` points to an element with given attribute. The method will assert attribute presence.
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"input\")
+        expect(locator).to_have_attribute(\"disabled\")
+        expect(locator).not_to_have_attribute(\"open\")
+        ```
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
+        ...
+
+    def to_have_attribute(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(
-                self._impl_obj.not_to_have_attribute(
-                    name=name, value=value, timeout=timeout
-                )
-            )
+            self._sync(self._impl_obj.to_have_attribute(*args, **kwargs))
+        )
+
+    @typing.overload
+    def not_to_have_attribute(
+        self,
+        name: str,
+        value: typing.Union[str, typing.Pattern[str]],
+        *,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        ...
+
+    @typing.overload
+    def not_to_have_attribute(
+        self, name: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        ...
+
+    def not_to_have_attribute(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.not_to_have_attribute(*args, **kwargs))
         )
 
     def to_have_class(
