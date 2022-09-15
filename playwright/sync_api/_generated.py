@@ -14946,12 +14946,36 @@ class LocatorAssertions(SyncBase):
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
+        """LocatorAssertions.not_to_have_attribute#1
+
+        The opposite of `locator_assertions.to_have_attribute#1()`.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        value : Union[Pattern[str], str]
+            Expected attribute value.
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
         ...
 
     @typing.overload
     def not_to_have_attribute(
         self, name: str, *, timeout: typing.Optional[float] = None
     ) -> None:
+        """LocatorAssertions.not_to_have_attribute#2
+
+        The opposite of `locator_assertions.to_have_attribute#2()`.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name.
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
         ...
 
     def not_to_have_attribute(self, *args: typing.Any, **kwargs: typing.Any) -> None:

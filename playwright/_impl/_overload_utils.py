@@ -4,8 +4,10 @@ from typing import Any, Optional, cast
 def mark_overload(is_impl: bool = False, overload_name: Optional[str] = None) -> Any:
     def decorate(func: Any) -> Any:
         f = getattr(func, "__func__", func)
-        setattr(f, "__pw_overload_impl__", is_impl)
-        setattr(f, "__pw_overload_name__", overload_name)
+        if is_impl:
+            setattr(f, "__pw_overload_impl__", True)
+        if overload_name:
+            setattr(f, "__pw_overload_name__", overload_name)
         return func
 
     return decorate

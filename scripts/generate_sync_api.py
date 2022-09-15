@@ -102,7 +102,7 @@ def generate(t: Any) -> None:
                 f"    def {name}({'self, *args: typing.Any, **kwargs: typing.Any' if is_overload_impl else signature(value, len(name) + 9)}) -> {return_type_value}:"
             )
             # Allow dunder methods without docs
-            if name not in allow_without_docs_methods:
+            if name not in allow_without_docs_methods and not is_overload_impl:
                 documentation_provider.print_entry(
                     class_name,
                     get_upstream_name(value),

@@ -30,9 +30,3 @@ Parameter not implemented: APIRequestContext.post(max_redirects=)
 Parameter not implemented: APIRequestContext.patch(max_redirects=)
 Parameter not implemented: LocatorAssertions.to_be_editable(editable=)
 Parameter not implemented: LocatorAssertions.to_be_visible(visible=)
-
-# Blocked on https://github.com/microsoft/playwright/pull/17371
-Method not implemented: LocatorAssertions.not_to_have_attribute
-Method not documented: LocatorAssertions.not_to_have_attribute#2
-Method not documented: LocatorAssertions.not_to_have_attribute#1
-Method not documented: LocatorAssertions.None
