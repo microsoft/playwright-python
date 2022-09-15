@@ -150,7 +150,9 @@ class DocumentationProvider:
             return
 
         indent = " " * 8
-        print(f'{indent}"""{class_name}.{to_snake_case(original_method_name)}')
+        print(
+            f'{indent}"""{class_name}.{to_snake_case(remove_overload_suffix(original_method_name))}'
+        )
         if method.get("comment"):
             print(f"{indent}{self.beautify_method_comment(method['comment'], indent)}")
         signature_no_return = {**signature} if signature else None
@@ -175,7 +177,6 @@ class DocumentationProvider:
                     self.errors.add(f"Parameter not documented: {fqname}({name}=)")
                 else:
                     code_type = self.serialize_python_type(value)
-
                     print(f"{indent}{to_snake_case(original_name)} : {code_type}")
                     if doc_value.get("comment"):
                         print(
@@ -513,3 +514,7 @@ def self_or_override(item: Any) -> Any:
 def apply_type_or_override(member: Any) -> Any:
     if member["langs"].get("types") and member["langs"]["types"].get("python"):
         member["type"] = member["langs"]["types"]["python"]
+
+
+def remove_overload_suffix(name: str) -> str:
+    return re.sub(r"(.*)(#\d+)$", r"\1", name)

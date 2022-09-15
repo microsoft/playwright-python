@@ -14751,7 +14751,7 @@ class LocatorAssertions(AsyncBase):
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
-        """LocatorAssertions.to_have_attribute#1
+        """LocatorAssertions.to_have_attribute
 
         Ensures the `Locator` points to an element with given attribute value.
 
@@ -14777,7 +14777,7 @@ class LocatorAssertions(AsyncBase):
     async def to_have_attribute(
         self, name: str, *, timeout: typing.Optional[float] = None
     ) -> None:
-        """LocatorAssertions.to_have_attribute#2
+        """LocatorAssertions.to_have_attribute
 
         Ensures the `Locator` points to an element with given attribute. The method will assert attribute presence.
 
@@ -14813,7 +14813,7 @@ class LocatorAssertions(AsyncBase):
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
-        """LocatorAssertions.not_to_have_attribute#1
+        """LocatorAssertions.not_to_have_attribute
 
         The opposite of `locator_assertions.to_have_attribute#1()`.
 
@@ -14832,7 +14832,7 @@ class LocatorAssertions(AsyncBase):
     async def not_to_have_attribute(
         self, name: str, *, timeout: typing.Optional[float] = None
     ) -> None:
-        """LocatorAssertions.not_to_have_attribute#2
+        """LocatorAssertions.not_to_have_attribute
 
         The opposite of `locator_assertions.to_have_attribute#2()`.
 
