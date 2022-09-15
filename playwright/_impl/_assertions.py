@@ -172,7 +172,7 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_contain_text(expected, use_inner_text, timeout, ignore_case)
 
-    @mark_overload(overload_name="to_have_attribute#1")
+    @mark_overload()
     async def to_have_attribute_1(
         self,
         name: str,
@@ -181,7 +181,7 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         pass
 
-    @mark_overload(overload_name="to_have_attribute#2")
+    @mark_overload()
     async def to_have_attribute_2(
         self,
         name: str,
@@ -218,7 +218,7 @@ class LocatorAssertions(AssertionsBase):
                 "Locator expected to have attribute",
             )
 
-    @mark_overload(overload_name="not_to_have_attribute#1")
+    @mark_overload()
     async def not_to_have_attribute_1(
         self,
         name: str,
@@ -227,7 +227,7 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         pass
 
-    @mark_overload(overload_name="not_to_have_attribute#2")
+    @mark_overload()
     async def not_to_have_attribute_2(
         self,
         name: str,

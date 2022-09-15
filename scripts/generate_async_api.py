@@ -19,8 +19,8 @@ from types import FunctionType
 from typing import Any
 
 from playwright._impl._overload_utils import (
-    get_is_overload,
     get_is_overload_impl,
+    get_is_overload_signature,
     get_public_name,
     get_upstream_name,
 )
@@ -97,8 +97,8 @@ def generate(t: Any) -> None:
             print("")
             name = get_public_name(value)
             is_overload_impl = get_is_overload_impl(value)
-            is_overload = get_is_overload(value)
-            if is_overload:
+            is_overload_signature = get_is_overload_signature(value)
+            if is_overload_signature:
                 print("    @typing.overload")
             async_prefix = "async " if is_async else ""
             print(
@@ -111,7 +111,7 @@ def generate(t: Any) -> None:
                     get_upstream_name(value),
                     get_type_hints(value, api_globals),
                 )
-            if is_overload:
+            if is_overload_signature:
                 print("        ...")
                 continue
             if class_name in [

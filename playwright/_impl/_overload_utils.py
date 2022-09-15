@@ -1,34 +1,40 @@
-from typing import Any, Optional, cast
+import re
+from typing import Any
 
 
-def mark_overload(is_impl: bool = False, overload_name: Optional[str] = None) -> Any:
+def mark_overload(is_impl: bool = False) -> Any:
     def decorate(func: Any) -> Any:
         f = getattr(func, "__func__", func)
-        if is_impl:
-            setattr(f, "__pw_overload_impl__", True)
-        if overload_name:
-            setattr(f, "__pw_overload_name__", overload_name)
+        variant = "impl" if is_impl else "signature"
+        setattr(f, "__pw_overload__", variant)
+        name = getattr(func, "__name__")
+        if variant == "signature" and not re.match(r".*_\d+$", name):
+            raise Exception(
+                f"Error: {name}. Overload signatures must include a _\\d+ suffix."
+            )
         return func
 
     return decorate
 
 
 def get_is_overload_impl(f: Any) -> bool:
-    return getattr(f, "__pw_overload_impl__", False)
+    return getattr(f, "__pw_overload__", None) == "impl"
 
 
-def get_is_overload(f: Any) -> bool:
-    return getattr(f, "__pw_overload_name__", False)
+def get_is_overload_signature(f: Any) -> bool:
+    return getattr(f, "__pw_overload__", None) == "signature"
 
 
 def get_upstream_name(f: Any) -> str:
-    return getattr(f, "__pw_overload_name__", cast(str, getattr(f, "__name__")))
+    name = getattr(f, "__name__")
+    if getattr(f, "__pw_overload__", None) == "signature":
+        return re.sub(r"(.*)_(\d+)$", r"\1#\2", name)
+    return name
 
 
 def get_public_name(f: Any) -> str:
     name = getattr(f, "__name__")
-    if getattr(f, "__pw_overload_name__", None):
-        parts = name.split("_")
-        return "_".join(parts[:-1])
+    if getattr(f, "__pw_overload__", None) == "signature":
+        return re.sub(r"(.*)(_\d+)$", r"\1", name)
 
     return name
