@@ -102,6 +102,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -114,6 +115,7 @@ class APIRequestContext(ChannelOwner):
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
+            maxRedirects=maxRedirects,
         )
 
     async def head(
@@ -124,6 +126,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -133,6 +136,7 @@ class APIRequestContext(ChannelOwner):
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
+            maxRedirects=maxRedirects,
         )
 
     async def get(
@@ -143,6 +147,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -152,6 +157,7 @@ class APIRequestContext(ChannelOwner):
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
+            maxRedirects=maxRedirects,
         )
 
     async def patch(
@@ -165,6 +171,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -177,6 +184,7 @@ class APIRequestContext(ChannelOwner):
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
+            maxRedirects=maxRedirects,
         )
 
     async def put(
@@ -190,6 +198,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -202,6 +211,7 @@ class APIRequestContext(ChannelOwner):
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
+            maxRedirects=maxRedirects,
         )
 
     async def post(
@@ -215,6 +225,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -227,6 +238,7 @@ class APIRequestContext(ChannelOwner):
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
+            maxRedirects=maxRedirects,
         )
 
     async def fetch(
@@ -241,6 +253,7 @@ class APIRequestContext(ChannelOwner):
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         request = (
             cast(network.Request, to_impl(urlOrRequest))
@@ -253,6 +266,9 @@ class APIRequestContext(ChannelOwner):
         assert (
             (1 if data else 0) + (1 if form else 0) + (1 if multipart else 0)
         ) <= 1, "Only one of 'data', 'form' or 'multipart' can be specified"
+        assert (
+            maxRedirects is None or maxRedirects >= 0
+        ), "'max_redirects' must be greater than or equal to '0'"
         url = request.url if request else urlOrRequest
         method = method or (request.method if request else "GET")
         # Cannot call allHeaders() here as the request may be paused inside route handler.
@@ -319,6 +335,7 @@ class APIRequestContext(ChannelOwner):
                     "timeout": timeout,
                     "failOnStatusCode": failOnStatusCode,
                     "ignoreHTTPSErrors": ignoreHTTPSErrors,
+                    "maxRedirects": maxRedirects,
                 }
             ),
         )

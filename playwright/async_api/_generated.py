@@ -13967,7 +13967,8 @@ class APIRequestContext(AsyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.delete
 
@@ -14002,6 +14003,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14019,6 +14023,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
@@ -14032,7 +14037,8 @@ class APIRequestContext(AsyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.head
 
@@ -14054,6 +14060,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14068,6 +14077,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
@@ -14081,7 +14091,8 @@ class APIRequestContext(AsyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.get
 
@@ -14103,6 +14114,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14117,6 +14131,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
@@ -14135,7 +14150,8 @@ class APIRequestContext(AsyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.patch
 
@@ -14170,6 +14186,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14187,6 +14206,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
@@ -14205,7 +14225,8 @@ class APIRequestContext(AsyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.put
 
@@ -14240,6 +14261,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14257,6 +14281,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
@@ -14275,7 +14300,8 @@ class APIRequestContext(AsyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.post
 
@@ -14310,6 +14336,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14327,6 +14356,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
@@ -14346,7 +14376,8 @@ class APIRequestContext(AsyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.fetch
 
@@ -14383,6 +14414,9 @@ class APIRequestContext(AsyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14401,6 +14435,7 @@ class APIRequestContext(AsyncBase):
                 timeout=timeout,
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
+                maxRedirects=max_redirects,
             )
         )
 
