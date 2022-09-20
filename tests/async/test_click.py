@@ -485,7 +485,7 @@ async def test_click_the_button_with_offset_with_page_scale(
     expected = {"x": 28, "y": 18}
     if is_webkit:
         # WebKit rounds up during css -> dip -> css conversion.
-        expected = {"x": 29, "y": 19}
+        expected = {"x": 26, "y": 17}
     elif is_chromium:
         # Chromium rounds down during css -> dip -> css conversion.
         expected = {"x": 27, "y": 18}

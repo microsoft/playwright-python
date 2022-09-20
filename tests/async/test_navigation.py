@@ -542,11 +542,18 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     assert page.url == server.PREFIX + "/second.html"
 
 
-async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(page, server):
+async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(
+    page, server, is_webkit
+):
     server.set_route("/frames/style.css", lambda _: None)
-    navigation_promise = asyncio.create_task(
-        page.goto(server.PREFIX + "/frames/one-frame.html")
-    )
+    done = False
+
+    async def nav_and_mark_done():
+        nonlocal done
+        await page.goto(server.PREFIX + "/frames/one-frame.html")
+        done = True
+
+    task = asyncio.create_task(nav_and_mark_done())
     await asyncio.sleep(0)
     async with page.expect_event("frameattached") as frame_info:
         pass
@@ -554,7 +561,13 @@ async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(page, s
 
     async with page.expect_event("framenavigated", lambda f: f == frame):
         pass
-    await asyncio.gather(frame.evaluate("() => window.stop()"), navigation_promise)
+    await frame.evaluate("() => window.stop()")
+    await page.wait_for_timeout(2000)  # give it some time to erroneously resolve
+    assert done == (
+        not is_webkit
+    )  # Chromium and Firefox issue load event in this case.
+    if is_webkit:
+        task.cancel()
 
 
 async def test_wait_for_nav_should_work_with_url_match(page, server):

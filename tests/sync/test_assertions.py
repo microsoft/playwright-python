@@ -514,6 +514,47 @@ def test_assertions_locator_to_be_disabled_enabled(page: Page, server: Server) -
         expect(my_checkbox).to_be_enabled(timeout=100)
 
 
+def test_assertions_locator_to_be_enabled_with_true(page: Page) -> None:
+    page.set_content("<button>Text</button>")
+    expect(page.locator("button")).to_be_enabled(enabled=True)
+
+
+def test_assertions_locator_to_be_enabled_with_false(page: Page) -> None:
+    page.set_content("<button disabled>Text</button>")
+    expect(page.locator("button")).to_be_enabled(enabled=False)
+
+
+def test_assertions_locator_to_be_enabled_with_not_and_false(page: Page) -> None:
+    page.set_content("<button>Text</button>")
+    expect(page.locator("button")).not_to_be_enabled(enabled=False)
+
+
+def test_assertions_locator_to_be_enabled_eventually(page: Page) -> None:
+    page.set_content("<button disabled>Text</button>")
+    page.eval_on_selector(
+        "button",
+        """
+        button => setTimeout(() => {
+            button.removeAttribute('disabled');
+        }, 700);
+    """,
+    )
+    expect(page.locator("button")).to_be_enabled()
+
+
+def test_assertions_locator_to_be_enabled_eventually_with_not(page: Page) -> None:
+    page.set_content("<button>Text</button>")
+    page.eval_on_selector(
+        "button",
+        """
+        button => setTimeout(() => {
+            button.setAttribute('disabled', '');
+        }, 700);
+    """,
+    )
+    expect(page.locator("button")).not_to_be_enabled()
+
+
 def test_assertions_locator_to_be_editable(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     page.set_content("<input></input><button disabled>Text</button>")
@@ -521,6 +562,21 @@ def test_assertions_locator_to_be_editable(page: Page, server: Server) -> None:
     expect(page.locator("input")).to_be_editable()
     with pytest.raises(AssertionError):
         expect(page.locator("button")).to_be_editable(timeout=100)
+
+
+def test_assertions_locator_to_be_editable_with_true(page: Page) -> None:
+    page.set_content("<input></input>")
+    expect(page.locator("input")).to_be_editable(editable=True)
+
+
+def test_assertions_locator_to_be_editable_with_false(page: Page) -> None:
+    page.set_content("<input readonly></input>")
+    expect(page.locator("input")).to_be_editable(editable=False)
+
+
+def test_assertions_locator_to_be_editable_with_not_and_false(page: Page) -> None:
+    page.set_content("<input></input>")
+    expect(page.locator("input")).not_to_be_editable(editable=False)
 
 
 def test_assertions_locator_to_be_empty(page: Page, server: Server) -> None:
@@ -555,6 +611,47 @@ def test_assertions_locator_to_be_hidden_visible(page: Page, server: Server) -> 
     expect(my_checkbox).to_be_hidden()
     with pytest.raises(AssertionError):
         expect(my_checkbox).to_be_visible(timeout=100)
+
+
+def test_assertions_locator_to_be_visible_with_true(page: Page) -> None:
+    page.set_content("<button>hello</button>")
+    expect(page.locator("button")).to_be_visible(visible=True)
+
+
+def test_assertions_locator_to_be_visible_with_false(page: Page) -> None:
+    page.set_content("<button hidden>hello</button>")
+    expect(page.locator("button")).to_be_visible(visible=False)
+
+
+def test_assertions_locator_to_be_visible_with_not_and_false(page: Page) -> None:
+    page.set_content("<button>hello</button>")
+    expect(page.locator("button")).not_to_be_visible(visible=False)
+
+
+def test_assertions_locator_to_be_visible_eventually(page: Page) -> None:
+    page.set_content("<div></div>")
+    page.eval_on_selector(
+        "div",
+        """
+        div => setTimeout(() => {
+            div.innerHTML = '<span>Hello</span>';
+        }, 700);
+    """,
+    )
+    expect(page.locator("span")).to_be_visible()
+
+
+def test_assertions_locator_to_be_visible_eventually_with_not(page: Page) -> None:
+    page.set_content("<div><span>Hello</span></div>")
+    page.eval_on_selector(
+        "span",
+        """
+        span => setTimeout(() => {
+            span.textContent = '';
+        }, 700);
+    """,
+    )
+    expect(page.locator("span")).not_to_be_visible()
 
 
 def test_assertions_should_serialize_regexp_correctly(

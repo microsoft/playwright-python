@@ -458,11 +458,14 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_be_editable(
         self,
+        editable: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
+        if editable is None:
+            editable = True
         await self._expect_impl(
-            "to.be.editable",
+            "to.be.editable" if editable else "to.be.readonly",
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be editable",
@@ -470,10 +473,11 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_editable(
         self,
+        editable: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_editable(timeout)
+        await self._not.to_be_editable(editable, timeout)
 
     async def to_be_empty(
         self,
@@ -496,11 +500,14 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_be_enabled(
         self,
+        enabled: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
+        if enabled is None:
+            enabled = True
         await self._expect_impl(
-            "to.be.enabled",
+            "to.be.enabled" if enabled else "to.be.disabled",
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be enabled",
@@ -508,10 +515,11 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_enabled(
         self,
+        enabled: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_enabled(timeout)
+        await self._not.to_be_enabled(enabled, timeout)
 
     async def to_be_hidden(
         self,
@@ -534,11 +542,14 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_be_visible(
         self,
+        visible: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
+        if visible is None:
+            visible = True
         await self._expect_impl(
-            "to.be.visible",
+            "to.be.visible" if visible else "to.be.hidden",
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be visible",
@@ -546,10 +557,11 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_visible(
         self,
+        visible: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_visible(timeout)
+        await self._not.to_be_visible(visible, timeout)
 
     async def to_be_focused(
         self,

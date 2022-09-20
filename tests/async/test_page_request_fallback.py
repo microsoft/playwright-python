@@ -270,7 +270,8 @@ async def test_should_override_request_url(page: Page, server: Server) -> None:
     )
 
     assert url == [server.PREFIX + "/global-var.html"]
-    assert response.url == server.PREFIX + "/foo"
+    assert response.url == server.PREFIX + "/global-var.html"
+    assert response.request.url == server.PREFIX + "/global-var.html"
     assert await page.evaluate("() => window['globalVar']") == 123
     assert server_request.uri == b"/global-var.html"
     assert server_request.method == b"GET"

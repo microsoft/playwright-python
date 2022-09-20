@@ -2794,7 +2794,7 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -3379,7 +3379,7 @@ class Frame(SyncBase):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -3461,7 +3461,7 @@ class Frame(SyncBase):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3505,7 +3505,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3541,7 +3541,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3577,7 +3577,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3613,7 +3613,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3650,7 +3650,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             **DEPRECATED** This option is ignored. `frame.is_hidden()` does not wait for the element to become hidden and
@@ -3687,7 +3687,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             **DEPRECATED** This option is ignored. `frame.is_visible()` does not wait for the element to become visible and
@@ -3755,7 +3755,7 @@ class Frame(SyncBase):
         event_init : Union[Dict, None]
             Optional event-specific initialization properties.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -3814,7 +3814,7 @@ class Frame(SyncBase):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -4070,7 +4070,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -4152,7 +4152,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -4226,7 +4226,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -4286,7 +4286,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
@@ -4387,7 +4387,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4417,7 +4417,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4453,7 +4453,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4489,7 +4489,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4528,7 +4528,7 @@ class Frame(SyncBase):
         name : str
             Attribute name to get the value for.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4590,7 +4590,7 @@ class Frame(SyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -4647,7 +4647,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4732,7 +4732,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
@@ -4778,7 +4778,7 @@ class Frame(SyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4829,7 +4829,7 @@ class Frame(SyncBase):
             [working with selectors](../selectors.md) for more details.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4884,7 +4884,7 @@ class Frame(SyncBase):
         delay : Union[float, None]
             Time to wait between key presses in milliseconds. Defaults to 0.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -4947,7 +4947,7 @@ class Frame(SyncBase):
         delay : Union[float, None]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -5016,7 +5016,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -5082,7 +5082,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -5247,7 +5247,7 @@ class Frame(SyncBase):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -6476,7 +6476,7 @@ class Page(SyncContextManager):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -6528,7 +6528,7 @@ class Page(SyncContextManager):
         `detached`.
 
         > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
-        web-first assertions make the code wait-for-selector-free.
+        web-first assertions makes the code wait-for-selector-free.
 
         Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
         the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
@@ -6569,7 +6569,7 @@ class Page(SyncContextManager):
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
               This is opposite to the `'visible'` option.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -6602,7 +6602,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -6638,7 +6638,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -6674,7 +6674,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -6710,7 +6710,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -6747,7 +6747,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             **DEPRECATED** This option is ignored. `page.is_hidden()` does not wait for the element to become hidden and
@@ -6784,7 +6784,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             **DEPRECATED** This option is ignored. `page.is_visible()` does not wait for the element to become visible and
@@ -6855,7 +6855,7 @@ class Page(SyncContextManager):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
 
@@ -7022,7 +7022,7 @@ class Page(SyncContextManager):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -7738,8 +7738,6 @@ class Page(SyncContextManager):
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'` and `'none'`. Passing `null` disables forced
             colors emulation.
-
-            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         """
 
         return mapping.from_maybe_impl(
@@ -8169,7 +8167,7 @@ class Page(SyncContextManager):
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
             `false`. Useful to wait until the element is ready for the action without performing it.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
 
@@ -8250,7 +8248,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -8326,7 +8324,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -8388,7 +8386,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
@@ -8493,7 +8491,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8523,7 +8521,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8559,7 +8557,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8595,7 +8593,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8634,7 +8632,7 @@ class Page(SyncContextManager):
         name : str
             Attribute name to get the value for.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8698,7 +8696,7 @@ class Page(SyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -8758,7 +8756,7 @@ class Page(SyncContextManager):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -8845,7 +8843,7 @@ class Page(SyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
@@ -8889,7 +8887,7 @@ class Page(SyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
             [working with selectors](../selectors.md) for more details.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
@@ -8943,7 +8941,7 @@ class Page(SyncContextManager):
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
@@ -9004,7 +9002,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
 
@@ -9081,7 +9079,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
 
@@ -9145,7 +9143,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -9213,7 +9211,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -9927,7 +9925,7 @@ class Page(SyncContextManager):
             opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
             inaccessible pages. Defaults to `false`.
         strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more then one
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults to
@@ -11151,8 +11149,6 @@ class Browser(SyncContextManager):
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
             for more details. Defaults to `'none'`.
-
-            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -11347,8 +11343,6 @@ class Browser(SyncContextManager):
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
             for more details. Defaults to `'none'`.
-
-            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         reduced_motion : Union["no-preference", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Defaults to `'no-preference'`.
@@ -11864,8 +11858,6 @@ class BrowserType(SyncBase):
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
             for more details. Defaults to `'none'`.
-
-            > NOTE: It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         traces_dir : Union[pathlib.Path, str, None]
@@ -11986,6 +11978,12 @@ class BrowserType(SyncBase):
         The default browser context is accessible via `browser.contexts()`.
 
         > NOTE: Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
+
+        ```py
+        browser = playwright.chromium.connect_over_cdp(\"http://localhost:9222\")
+        default_context = browser.contexts[0]
+        page = default_context.pages[0]
+        ```
 
         Parameters
         ----------
@@ -14074,7 +14072,8 @@ class APIRequestContext(SyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.delete
 
@@ -14109,6 +14108,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14127,6 +14129,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -14141,7 +14144,8 @@ class APIRequestContext(SyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.head
 
@@ -14163,6 +14167,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14178,6 +14185,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -14192,7 +14200,8 @@ class APIRequestContext(SyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.get
 
@@ -14214,6 +14223,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14229,6 +14241,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -14248,7 +14261,8 @@ class APIRequestContext(SyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.patch
 
@@ -14283,6 +14297,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14301,6 +14318,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -14320,7 +14338,8 @@ class APIRequestContext(SyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.put
 
@@ -14355,6 +14374,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14373,6 +14395,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -14392,7 +14415,8 @@ class APIRequestContext(SyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.post
 
@@ -14427,6 +14451,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14445,6 +14472,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -14465,7 +14493,8 @@ class APIRequestContext(SyncBase):
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
-        ignore_https_errors: typing.Optional[bool] = None
+        ignore_https_errors: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.fetch
 
@@ -14502,6 +14531,9 @@ class APIRequestContext(SyncBase):
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -14521,6 +14553,7 @@ class APIRequestContext(SyncBase):
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -15592,7 +15625,12 @@ class LocatorAssertions(SyncBase):
             self._sync(self._impl_obj.not_to_be_disabled(timeout=timeout))
         )
 
-    def to_be_editable(self, *, timeout: typing.Optional[float] = None) -> None:
+    def to_be_editable(
+        self,
+        *,
+        editable: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
         """LocatorAssertions.to_be_editable
 
         Ensures the `Locator` points to an editable element.
@@ -15606,29 +15644,40 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
+        editable : Union[bool, None]
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.to_be_editable(timeout=timeout))
+            self._sync(
+                self._impl_obj.to_be_editable(editable=editable, timeout=timeout)
+            )
         )
 
-    def not_to_be_editable(self, *, timeout: typing.Optional[float] = None) -> None:
+    def not_to_be_editable(
+        self,
+        *,
+        editable: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
         """LocatorAssertions.not_to_be_editable
 
         The opposite of `locator_assertions.to_be_editable()`.
 
         Parameters
         ----------
+        editable : Union[bool, None]
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.not_to_be_editable(timeout=timeout))
+            self._sync(
+                self._impl_obj.not_to_be_editable(editable=editable, timeout=timeout)
+            )
         )
 
     def to_be_empty(self, *, timeout: typing.Optional[float] = None) -> None:
@@ -15670,7 +15719,12 @@ class LocatorAssertions(SyncBase):
             self._sync(self._impl_obj.not_to_be_empty(timeout=timeout))
         )
 
-    def to_be_enabled(self, *, timeout: typing.Optional[float] = None) -> None:
+    def to_be_enabled(
+        self,
+        *,
+        enabled: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
         """LocatorAssertions.to_be_enabled
 
         Ensures the `Locator` points to an enabled element.
@@ -15684,35 +15738,45 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
+        enabled : Union[bool, None]
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.to_be_enabled(timeout=timeout))
+            self._sync(self._impl_obj.to_be_enabled(enabled=enabled, timeout=timeout))
         )
 
-    def not_to_be_enabled(self, *, timeout: typing.Optional[float] = None) -> None:
+    def not_to_be_enabled(
+        self,
+        *,
+        enabled: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
         """LocatorAssertions.not_to_be_enabled
 
         The opposite of `locator_assertions.to_be_enabled()`.
 
         Parameters
         ----------
+        enabled : Union[bool, None]
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.not_to_be_enabled(timeout=timeout))
+            self._sync(
+                self._impl_obj.not_to_be_enabled(enabled=enabled, timeout=timeout)
+            )
         )
 
     def to_be_hidden(self, *, timeout: typing.Optional[float] = None) -> None:
         """LocatorAssertions.to_be_hidden
 
-        Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](https://playwright.dev/python/docs/api/actionability#visible).
+        Ensures that `Locator` either does not resolve to any DOM node, or resolves to a
+        [non-visible](https://playwright.dev/python/docs/api/actionability#visible) one.
 
         ```py
         from playwright.sync_api import expect
@@ -15748,10 +15812,16 @@ class LocatorAssertions(SyncBase):
             self._sync(self._impl_obj.not_to_be_hidden(timeout=timeout))
         )
 
-    def to_be_visible(self, *, timeout: typing.Optional[float] = None) -> None:
+    def to_be_visible(
+        self,
+        *,
+        visible: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
         """LocatorAssertions.to_be_visible
 
-        Ensures the `Locator` points to a [visible](https://playwright.dev/python/docs/api/actionability#visible) DOM node.
+        Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/api/actionability#visible) and [visible](https://playwright.dev/python/docs/api/actionability#visible) DOM
+        node.
 
         ```py
         from playwright.sync_api import expect
@@ -15762,29 +15832,38 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
+        visible : Union[bool, None]
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.to_be_visible(timeout=timeout))
+            self._sync(self._impl_obj.to_be_visible(visible=visible, timeout=timeout))
         )
 
-    def not_to_be_visible(self, *, timeout: typing.Optional[float] = None) -> None:
+    def not_to_be_visible(
+        self,
+        *,
+        visible: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
         """LocatorAssertions.not_to_be_visible
 
         The opposite of `locator_assertions.to_be_visible()`.
 
         Parameters
         ----------
+        visible : Union[bool, None]
         timeout : Union[float, None]
             Time to retry the assertion for.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.not_to_be_visible(timeout=timeout))
+            self._sync(
+                self._impl_obj.not_to_be_visible(visible=visible, timeout=timeout)
+            )
         )
 
     def to_be_focused(self, *, timeout: typing.Optional[float] = None) -> None:
@@ -15834,7 +15913,7 @@ class APIResponseAssertions(SyncBase):
     def to_be_ok(self) -> None:
         """APIResponseAssertions.to_be_ok
 
-        Ensures the response status code is within [200..299] range.
+        Ensures the response status code is within `200..299` range.
 
         ```py
         import re
