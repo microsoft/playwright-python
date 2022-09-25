@@ -40,24 +40,24 @@ async def test_jshandle_evaluate_accept_handle_to_primitive_types(page):
 
 
 async def test_jshandle_evaluate_accept_nested_handle(page):
-    foo = await page.evaluate_handle('({ x: 1, y: "foo" })')
-    result = await page.evaluate("({ foo }) => foo", {"foo": foo})
+    foofoo = await page.evaluate_handle('({ x: 1, y: "foo" })')
+    result = await page.evaluate("({ foo }) => foo", {"foo": foofoo})
     assert result == {"x": 1, "y": "foo"}
 
 
 async def test_jshandle_evaluate_accept_nested_window_handle(page):
-    foo = await page.evaluate_handle("window")
-    result = await page.evaluate("({ foo }) => foo === window", {"foo": foo})
+    foofoo = await page.evaluate_handle("window")
+    result = await page.evaluate("({ foo }) => foo === window", {"foo": foofoo})
     assert result
 
 
 async def test_jshandle_evaluate_accept_multiple_nested_handles(page):
-    foo = await page.evaluate_handle('({ x: 1, y: "foo" })')
-    bar = await page.evaluate_handle("5")
-    baz = await page.evaluate_handle('["baz"]')
+    foofoo = await page.evaluate_handle('({ x: 1, y: "foo" })')
+    barra = await page.evaluate_handle("5")
+    bazza = await page.evaluate_handle('["baz"]')
     result = await page.evaluate(
         "x => JSON.stringify(x)",
-        {"a1": {"foo": foo}, "a2": {"bar": bar, "arr": [{"baz": baz}]}},
+        {"a1": {"foo": foofoo}, "a2": {"bar": barra, "arr": [{"baz": bazza}]}},
     )
     assert json.loads(result) == {
         "a1": {"foo": {"x": 1, "y": "foo"}},
@@ -75,9 +75,9 @@ async def test_jshandle_evaluate_should_work_for_circular_objects(page):
 
 
 async def test_jshandle_evaluate_accept_same_nested_object_multiple_times(page):
-    foo = {"x": 1}
+    foofoo = {"x": 1}
     assert await page.evaluate(
-        "x => x", {"foo": foo, "bar": [foo], "baz": {"foo": foo}}
+        "x => x", {"foo": foofoo, "bar": [foofoo], "baz": {"foo": foofoo}}
     ) == {"foo": {"x": 1}, "bar": [{"x": 1}], "baz": {"foo": {"x": 1}}}
 
 
@@ -154,8 +154,8 @@ async def test_jshandle_properties_get_properties(page):
     handle = await page.evaluate_handle('() => ({ foo: "bar" })')
     properties = await handle.get_properties()
     assert "foo" in properties
-    foo = properties["foo"]
-    assert await foo.json_value() == "bar"
+    foofoo = properties["foo"]
+    assert await foofoo.json_value() == "bar"
 
 
 async def test_jshandle_properties_return_empty_map_for_non_objects(page):

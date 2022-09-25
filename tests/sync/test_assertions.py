@@ -691,7 +691,7 @@ def test_assertions_response_is_ok_fail(page: Page, server: Server) -> None:
     with pytest.raises(AssertionError) as excinfo:
         expect(response).to_be_ok()
     error_message = str(excinfo.value)
-    assert ("→ GET " + server.PREFIX + "/unknown") in error_message
+    assert "→ GET " + server.PREFIX + "/unknown" in error_message
     assert "← 404 Not Found" in error_message
 
 
@@ -729,7 +729,7 @@ def test_should_print_response_with_text_content_type_if_to_be_ok_fails(
     with pytest.raises(AssertionError) as excinfo:
         expect(response).to_be_ok()
     error_message = str(excinfo.value)
-    assert ("→ GET " + server.PREFIX + "/text-content-type") in error_message
+    assert "→ GET " + server.PREFIX + "/text-content-type" in error_message
     assert "← 404 Not Found" in error_message
     assert "Response Text:" in error_message
     assert "Text error" in error_message
@@ -738,7 +738,7 @@ def test_should_print_response_with_text_content_type_if_to_be_ok_fails(
     with pytest.raises(AssertionError) as excinfo:
         expect(response).to_be_ok()
     error_message = str(excinfo.value)
-    assert ("→ GET " + server.PREFIX + "/no-content-type") in error_message
+    assert "→ GET " + server.PREFIX + "/no-content-type" in error_message
     assert "← 404 Not Found" in error_message
     assert "Response Text:" not in error_message
     assert "No content type error" not in error_message
@@ -747,7 +747,7 @@ def test_should_print_response_with_text_content_type_if_to_be_ok_fails(
     with pytest.raises(AssertionError) as excinfo:
         expect(response).to_be_ok()
     error_message = str(excinfo.value)
-    assert ("→ GET " + server.PREFIX + "/binary-content-type") in error_message
+    assert "→ GET " + server.PREFIX + "/binary-content-type" in error_message
     assert "← 404 Not Found" in error_message
     assert "Response Text:" not in error_message
     assert "Image content type error" not in error_message

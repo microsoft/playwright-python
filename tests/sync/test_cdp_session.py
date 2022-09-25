@@ -29,8 +29,8 @@ def test_should_work(page: Page) -> None:
         {"expression": "window.foo = 'bar'; console.log('log'); 'result'"},
     )
     assert result == {"result": {"type": "string", "value": "result"}}
-    foo = page.evaluate("() => window.foo")
-    assert foo == "bar"
+    foofoo = page.evaluate("() => window.foo")
+    assert foofoo == "bar"
     assert events[0]["args"][0]["value"] == "log"
 
 

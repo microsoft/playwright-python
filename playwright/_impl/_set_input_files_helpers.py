@@ -3,20 +3,18 @@ import os
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
+from playwright._impl._connection import Channel, from_channel
+from playwright._impl._helper import Error, async_readfile
+from playwright._impl._writable_stream import WritableStream
+from playwright._impl._api_structures import FilePayload
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import TypedDict
 else:  # pragma: no cover
     from typing_extensions import TypedDict
 
-from playwright._impl._connection import Channel, from_channel
-from playwright._impl._helper import Error, async_readfile
-from playwright._impl._writable_stream import WritableStream
-
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
-
-from playwright._impl._api_structures import FilePayload
 
 SIZE_LIMIT_IN_BYTES = 50 * 1024 * 1024
 

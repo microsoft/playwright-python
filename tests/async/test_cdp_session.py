@@ -28,8 +28,8 @@ async def test_should_work(page):
         {"expression": "window.foo = 'bar'; console.log('log'); 'result'"},
     )
     assert result == {"result": {"type": "string", "value": "result"}}
-    foo = await page.evaluate("() => window.foo")
-    assert foo == "bar"
+    foofoo= await page.evaluate("() => window.foo")
+    assert foofoo == "bar"
     assert events[0]["args"][0]["value"] == "log"
 
 

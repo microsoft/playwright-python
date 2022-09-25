@@ -485,7 +485,7 @@ class DocumentationProvider:
         if len(self.errors) > 0:
             for error in self.errors:
                 print(error, file=stderr)
-            exit(1)
+            sys.exit(1)
 
 
 def works_for_python(item: Any) -> bool:
