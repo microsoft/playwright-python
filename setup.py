@@ -206,7 +206,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Microsoft/playwright-python",
     project_urls={
-        "Release notes": "https://playwright.dev/python/docs/release-notes",
+        "Release notes": "https://github.com/microsoft/playwright-python/releases",
     },
     packages=["playwright"],
     include_package_data=True,
