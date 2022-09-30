@@ -430,6 +430,25 @@ async def test_locators_should_respect_nth(page: Page):
     assert await page.locator("div").nth(2).locator("p").count() == 3
 
 
+async def test_locators_should_respect_to_array(page: Page):
+    await page.set_content(
+        """
+    <section>
+    <div></div>
+    <div><p>Nested 0</p></div>
+    <div><p>Nested 1</p><p>Nested 2</p></div>
+    <div><p>Nested 3</p><p>Nested 4</p><p>Nested 5</p></div>
+  </section>"""
+    )
+    divs = page.locator('div >> p')
+    array = await divs.to_array()
+    count = await divs.count()
+    i = 0;
+    assert len(array) === count
+    for div in divs:
+        assert await div.textContent() === f"Nested {i}"
+        i++;
+
 async def test_locators_should_throw_on_capture_without_nth(page: Page):
     await page.set_content(
         """

@@ -237,6 +237,15 @@ class Locator:
     def nth(self, index: int) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> nth={index}")
 
+    def __iter__(self):
+        return LocatorIterator(self)
+
+    def to_array(self) -> List["Locator"]:
+        arr: list[Locator] = [];
+        for locator in self:
+            arr.append(locator)
+        return arr
+
     def filter(
         self,
         has_text: Union[str, Pattern[str]] = None,
@@ -608,3 +617,19 @@ class FrameLocator:
 
     def __repr__(self) -> str:
         return f"<FrameLocator frame={self._frame!r} selector={self._frame_selector!r}>"
+
+
+class LocatorIterator:
+
+    def __init__(self, locator: "Locator"):
+        self._currentIndex = 0
+        self._count = locator.count()
+        self.locator = locator
+
+    def __next__(self):
+        if self._current_index < self._count:
+            locator = self.locator.nth(self._currentIndex)
+            self._currentIndex += 1
+            return locator
+
+        raise StopIteration
