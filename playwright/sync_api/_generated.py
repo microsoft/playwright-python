@@ -1342,8 +1342,8 @@ class JSHandle(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -1378,8 +1378,8 @@ class JSHandle(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -2641,8 +2641,8 @@ class ElementHandle(JSHandle):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -2691,8 +2691,8 @@ class ElementHandle(JSHandle):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -3292,8 +3292,8 @@ class Frame(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -3344,8 +3344,8 @@ class Frame(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -3809,8 +3809,8 @@ class Frame(SyncBase):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         strict : Union[bool, None]
@@ -3860,8 +3860,8 @@ class Frame(SyncBase):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -4314,9 +4314,11 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.locator
 
-        The method returns an element locator that can be used to perform actions in the frame. Locator is resolved to the
-        element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
-        different DOM elements. That would happen if the DOM structure between those actions has changed.
+        The method returns an element locator that can be used to perform actions on this page / frame. Locator is resolved to
+        the element immediately before performing an action, so a series of actions on the same locator can in fact be performed
+        on different DOM elements. That would happen if the DOM structure between those actions has changed.
+
+        [Learn more about locators](https://playwright.dev/python/docs/locators).
 
         [Learn more about locators](https://playwright.dev/python/docs/locators).
 
@@ -4345,6 +4347,250 @@ class Frame(SyncBase):
             )
         )
 
+    def get_by_alt_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Frame.get_by_alt_text
+
+        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+
+        ```html
+        <img alt='Castle'>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_alt_text(text=text, exact=exact))
+
+    def get_by_label(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Frame.get_by_label
+
+        Allows locating input elements by the text of the associated label. For example, this method will find the input by
+        label text Password in the following DOM:
+
+        ```html
+        <label for=\"password-input\">Password:</label>
+        <input id=\"password-input\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_label(text=text, exact=exact))
+
+    def get_by_placeholder(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Frame.get_by_placeholder
+
+        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
+        \"Country\":
+
+        ```html
+        <input placeholder=\"Country\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_placeholder(text=text, exact=exact)
+        )
+
+    def get_by_role(
+        self,
+        role: str,
+        *,
+        checked: typing.Optional[bool] = None,
+        disabled: typing.Optional[bool] = None,
+        expanded: typing.Optional[bool] = None,
+        include_hidden: typing.Optional[bool] = None,
+        level: typing.Optional[int] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        pressed: typing.Optional[bool] = None,
+        selected: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Frame.get_by_role
+
+        Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+        [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
+        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+
+        Note that many html elements have an implicitly
+        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector. You
+        can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not
+        recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+
+        Parameters
+        ----------
+        role : str
+            Required aria role.
+        checked : Union[bool, None]
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
+            checked are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+        disabled : Union[bool, None]
+            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+
+            > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
+            [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+        expanded : Union[bool, None]
+            A boolean attribute that is usually set by `aria-expanded`.
+
+            Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+        include_hidden : Union[bool, None]
+            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
+
+            Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+        level : Union[int, None]
+            A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values for
+            `<h1>-<h6>` elements.
+
+            Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+        name : Union[Pattern[str], str, None]
+            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+
+            Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+        pressed : Union[bool, None]
+            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+        selected : Union[bool, None]
+            A boolean attribute that is usually set by `aria-selected`.
+
+            Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_role(
+                role=role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=include_hidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, test_id: str) -> "Locator":
+        """Frame.get_by_test_id
+
+        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
+        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+
+        Parameters
+        ----------
+        test_id : str
+            Id to locate the element by.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+
+    def get_by_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Frame.get_by_text
+
+        Allows locating elements that contain given text.
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_text(text=text, exact=exact))
+
+    def get_by_title(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Frame.get_by_title
+
+        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+
+        ```html
+        <button title='Place the order'>Order Now</button>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_title(text=text, exact=exact))
+
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Frame.frame_locator
 
@@ -4353,7 +4599,7 @@ class Frame(SyncBase):
         id=\"my-frame\">`:
 
         ```py
-        locator = frame.frame_locator(\"#my-iframe\").locator(\"text=Submit\")
+        locator = frame.frame_locator(\"#my-iframe\").get_by_text(\"Submit\")
         locator.click()
         ```
 
@@ -5160,8 +5406,8 @@ class Frame(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
@@ -5307,7 +5553,10 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.locator
 
-        The method finds an element matching the specified selector in the FrameLocator's subtree.
+        The method finds an element matching the specified selector in the locator's subtree. It also accepts filter options,
+        similar to `locator.filter()` method.
+
+        [Learn more about locators](https://playwright.dev/python/docs/locators).
 
         Parameters
         ----------
@@ -5333,6 +5582,250 @@ class FrameLocator(SyncBase):
                 selector=selector, has_text=has_text, has=has._impl_obj if has else None
             )
         )
+
+    def get_by_alt_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """FrameLocator.get_by_alt_text
+
+        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+
+        ```html
+        <img alt='Castle'>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_alt_text(text=text, exact=exact))
+
+    def get_by_label(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """FrameLocator.get_by_label
+
+        Allows locating input elements by the text of the associated label. For example, this method will find the input by
+        label text Password in the following DOM:
+
+        ```html
+        <label for=\"password-input\">Password:</label>
+        <input id=\"password-input\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_label(text=text, exact=exact))
+
+    def get_by_placeholder(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """FrameLocator.get_by_placeholder
+
+        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
+        \"Country\":
+
+        ```html
+        <input placeholder=\"Country\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_placeholder(text=text, exact=exact)
+        )
+
+    def get_by_role(
+        self,
+        role: str,
+        *,
+        checked: typing.Optional[bool] = None,
+        disabled: typing.Optional[bool] = None,
+        expanded: typing.Optional[bool] = None,
+        include_hidden: typing.Optional[bool] = None,
+        level: typing.Optional[int] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        pressed: typing.Optional[bool] = None,
+        selected: typing.Optional[bool] = None
+    ) -> "Locator":
+        """FrameLocator.get_by_role
+
+        Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+        [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
+        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+
+        Note that many html elements have an implicitly
+        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector. You
+        can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not
+        recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+
+        Parameters
+        ----------
+        role : str
+            Required aria role.
+        checked : Union[bool, None]
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
+            checked are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+        disabled : Union[bool, None]
+            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+
+            > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
+            [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+        expanded : Union[bool, None]
+            A boolean attribute that is usually set by `aria-expanded`.
+
+            Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+        include_hidden : Union[bool, None]
+            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
+
+            Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+        level : Union[int, None]
+            A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values for
+            `<h1>-<h6>` elements.
+
+            Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+        name : Union[Pattern[str], str, None]
+            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+
+            Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+        pressed : Union[bool, None]
+            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+        selected : Union[bool, None]
+            A boolean attribute that is usually set by `aria-selected`.
+
+            Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_role(
+                role=role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=include_hidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, test_id: str) -> "Locator":
+        """FrameLocator.get_by_test_id
+
+        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
+        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+
+        Parameters
+        ----------
+        test_id : str
+            Id to locate the element by.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+
+    def get_by_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """FrameLocator.get_by_text
+
+        Allows locating elements that contain given text.
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_text(text=text, exact=exact))
+
+    def get_by_title(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """FrameLocator.get_by_title
+
+        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+
+        ```html
+        <button title='Place the order'>Order Now</button>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_title(text=text, exact=exact))
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         """FrameLocator.frame_locator
@@ -5414,8 +5907,8 @@ class Worker(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -5446,8 +5939,8 @@ class Worker(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -5538,6 +6031,21 @@ class Selectors(SyncBase):
                     name=name, script=script, path=path, contentScript=content_script
                 )
             )
+        )
+
+    def set_test_id_attribute(self, attribute_name: str) -> None:
+        """Selectors.set_test_id_attribute
+
+        Defines custom attribute name to be used in `page.get_by_test_id()`. `data-testid` is used by default.
+
+        Parameters
+        ----------
+        attribute_name : str
+            Test id attribute name.
+        """
+
+        return mapping.from_maybe_impl(
+            self._impl_obj.set_test_id_attribute(attribute_name=attribute_name)
         )
 
 
@@ -6913,8 +7421,8 @@ class Page(SyncContextManager):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -6965,8 +7473,8 @@ class Page(SyncContextManager):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -7017,8 +7525,8 @@ class Page(SyncContextManager):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         strict : Union[bool, None]
@@ -7066,8 +7574,8 @@ class Page(SyncContextManager):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -7486,13 +7994,13 @@ class Page(SyncContextManager):
         when this method is called. If current document has already reached the required state, resolves immediately.
 
         ```py
-        page.click(\"button\") # click triggers navigation.
+        page.get_by_role(\"button\").click() # click triggers navigation.
         page.wait_for_load_state() # the promise resolves after \"load\" event.
         ```
 
         ```py
         with page.expect_popup() as page_info:
-            page.click(\"button\") # click triggers a popup.
+            page.get_by_role(\"button\").click() # click triggers a popup.
         popup = page_info.value
          # Following resolves after \"domcontentloaded\" event.
         popup.wait_for_load_state(\"domcontentloaded\")
@@ -8414,13 +8922,11 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.locator
 
-        The method returns an element locator that can be used to perform actions on the page. Locator is resolved to the
-        element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
-        different DOM elements. That would happen if the DOM structure between those actions has changed.
+        The method returns an element locator that can be used to perform actions on this page / frame. Locator is resolved to
+        the element immediately before performing an action, so a series of actions on the same locator can in fact be performed
+        on different DOM elements. That would happen if the DOM structure between those actions has changed.
 
         [Learn more about locators](https://playwright.dev/python/docs/locators).
-
-        Shortcut for main frame's `frame.locator()`.
 
         Parameters
         ----------
@@ -8447,6 +8953,250 @@ class Page(SyncContextManager):
             )
         )
 
+    def get_by_alt_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Page.get_by_alt_text
+
+        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+
+        ```html
+        <img alt='Castle'>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_alt_text(text=text, exact=exact))
+
+    def get_by_label(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Page.get_by_label
+
+        Allows locating input elements by the text of the associated label. For example, this method will find the input by
+        label text Password in the following DOM:
+
+        ```html
+        <label for=\"password-input\">Password:</label>
+        <input id=\"password-input\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_label(text=text, exact=exact))
+
+    def get_by_placeholder(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Page.get_by_placeholder
+
+        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
+        \"Country\":
+
+        ```html
+        <input placeholder=\"Country\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_placeholder(text=text, exact=exact)
+        )
+
+    def get_by_role(
+        self,
+        role: str,
+        *,
+        checked: typing.Optional[bool] = None,
+        disabled: typing.Optional[bool] = None,
+        expanded: typing.Optional[bool] = None,
+        include_hidden: typing.Optional[bool] = None,
+        level: typing.Optional[int] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        pressed: typing.Optional[bool] = None,
+        selected: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Page.get_by_role
+
+        Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+        [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
+        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+
+        Note that many html elements have an implicitly
+        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector. You
+        can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not
+        recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+
+        Parameters
+        ----------
+        role : str
+            Required aria role.
+        checked : Union[bool, None]
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
+            checked are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+        disabled : Union[bool, None]
+            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+
+            > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
+            [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+        expanded : Union[bool, None]
+            A boolean attribute that is usually set by `aria-expanded`.
+
+            Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+        include_hidden : Union[bool, None]
+            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
+
+            Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+        level : Union[int, None]
+            A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values for
+            `<h1>-<h6>` elements.
+
+            Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+        name : Union[Pattern[str], str, None]
+            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+
+            Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+        pressed : Union[bool, None]
+            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+        selected : Union[bool, None]
+            A boolean attribute that is usually set by `aria-selected`.
+
+            Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_role(
+                role=role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=include_hidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, test_id: str) -> "Locator":
+        """Page.get_by_test_id
+
+        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
+        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+
+        Parameters
+        ----------
+        test_id : str
+            Id to locate the element by.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+
+    def get_by_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Page.get_by_text
+
+        Allows locating elements that contain given text.
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_text(text=text, exact=exact))
+
+    def get_by_title(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Page.get_by_title
+
+        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+
+        ```html
+        <button title='Place the order'>Order Now</button>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_title(text=text, exact=exact))
+
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Page.frame_locator
 
@@ -8455,7 +9205,7 @@ class Page(SyncContextManager):
         id=\"my-frame\">`:
 
         ```py
-        locator = page.frame_locator(\"#my-iframe\").locator(\"text=Submit\")
+        locator = page.frame_locator(\"#my-iframe\").get_by_text(\"Submit\")
         locator.click()
         ```
 
@@ -8731,6 +9481,20 @@ class Page(SyncContextManager):
         trial: typing.Optional[bool] = None
     ) -> None:
         """Page.drag_and_drop
+
+        This method drags the source element to the target element. It will first move to the source element, perform a
+        `mousedown`, then move to the target element and perform a `mouseup`.
+
+        ```py
+        page.drag_and_drop(\"#source\", \"#target\")
+        # or specify exact positions relative to the top-left corners of the elements:
+        page.drag_and_drop(
+          \"#source\",
+          \"#target\",
+          source_position={\"x\": 34, \"y\": 7},
+          target_position={\"x\": 10, \"y\": 20}
+        )
+        ```
 
         Parameters
         ----------
@@ -9298,8 +10062,8 @@ class Page(SyncContextManager):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
@@ -9481,7 +10245,7 @@ class Page(SyncContextManager):
 
         ```py
         with page.expect_event(\"framenavigated\") as event_info:
-            page.click(\"button\")
+            page.get_by_role(\"button\")
         frame = event_info.value
         ```
 
@@ -10505,7 +11269,7 @@ class BrowserContext(SyncContextManager):
             <button onclick=\"onClick()\">Click me</button>
             <div></div>
             \"\"\")
-            page.locator(\"button\").click()
+            page.get_by_role(\"button\").click()
 
         with sync_playwright() as playwright:
             run(playwright)
@@ -10582,7 +11346,7 @@ class BrowserContext(SyncContextManager):
                 <button onclick=\"onClick()\">Click me</button>
                 <div></div>
             \"\"\")
-            page.locator(\"button\").click()
+            page.get_by_role(\"button\").click()
 
         with sync_playwright() as playwright:
             run(playwright)
@@ -10774,7 +11538,7 @@ class BrowserContext(SyncContextManager):
 
         ```py
         with context.expect_event(\"page\") as event_info:
-            page.locator(\"button\").click()
+            page.get_by_role(\"button\").click()
         page = event_info.value
         ```
 
@@ -11197,7 +11961,7 @@ class Browser(SyncContextManager):
             security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
         record_har_content : Union["attach", "embed", "omit", None]
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach`
-            is specified, resources are persistet as separate files and all of these files are archived along with the HAR file.
+            is specified, resources are persisted as separate files and all of these files are archived along with the HAR file.
             Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
 
         Returns
@@ -11394,7 +12158,7 @@ class Browser(SyncContextManager):
             security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
         record_har_content : Union["attach", "embed", "omit", None]
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach`
-            is specified, resources are persistet as separate files and all of these files are archived along with the HAR file.
+            is specified, resources are persisted as separate files and all of these files are archived along with the HAR file.
             Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
 
         Returns
@@ -11900,7 +12664,7 @@ class BrowserType(SyncBase):
             security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
         record_har_content : Union["attach", "embed", "omit", None]
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach`
-            is specified, resources are persistet as separate files and all of these files are archived along with the HAR file.
+            is specified, resources are persisted as separate files and all of these files are archived along with the HAR file.
             Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
 
         Returns
@@ -12246,7 +13010,7 @@ class Tracing(SyncBase):
         page.goto(\"https://playwright.dev\")
 
         context.tracing.start_chunk()
-        page.locator(\"text=Get Started\").click()
+        page.get_by_text(\"Get Started\").click()
         # Everything between start_chunk and stop_chunk will be recorded in the trace.
         context.tracing.stop_chunk(path = \"trace1.zip\")
 
@@ -12655,8 +13419,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
@@ -12697,8 +13461,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
 
@@ -12739,8 +13503,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If it looks like a function declaration, it is interpreted
-            as a function. Otherwise, evaluated as an expression.
+            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
@@ -12812,8 +13576,10 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.locator
 
-        The method finds an element matching the specified selector in the `Locator`'s subtree. It also accepts filter options,
+        The method finds an element matching the specified selector in the locator's subtree. It also accepts filter options,
         similar to `locator.filter()` method.
+
+        [Learn more about locators](https://playwright.dev/python/docs/locators).
 
         Parameters
         ----------
@@ -12840,6 +13606,250 @@ class Locator(SyncBase):
             )
         )
 
+    def get_by_alt_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Locator.get_by_alt_text
+
+        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+
+        ```html
+        <img alt='Castle'>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_alt_text(text=text, exact=exact))
+
+    def get_by_label(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Locator.get_by_label
+
+        Allows locating input elements by the text of the associated label. For example, this method will find the input by
+        label text Password in the following DOM:
+
+        ```html
+        <label for=\"password-input\">Password:</label>
+        <input id=\"password-input\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_label(text=text, exact=exact))
+
+    def get_by_placeholder(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Locator.get_by_placeholder
+
+        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
+        \"Country\":
+
+        ```html
+        <input placeholder=\"Country\">
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_placeholder(text=text, exact=exact)
+        )
+
+    def get_by_role(
+        self,
+        role: str,
+        *,
+        checked: typing.Optional[bool] = None,
+        disabled: typing.Optional[bool] = None,
+        expanded: typing.Optional[bool] = None,
+        include_hidden: typing.Optional[bool] = None,
+        level: typing.Optional[int] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        pressed: typing.Optional[bool] = None,
+        selected: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Locator.get_by_role
+
+        Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+        [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
+        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+
+        Note that many html elements have an implicitly
+        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector. You
+        can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not
+        recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+
+        Parameters
+        ----------
+        role : str
+            Required aria role.
+        checked : Union[bool, None]
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
+            checked are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+        disabled : Union[bool, None]
+            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+
+            > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
+            [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+        expanded : Union[bool, None]
+            A boolean attribute that is usually set by `aria-expanded`.
+
+            Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+        include_hidden : Union[bool, None]
+            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
+
+            Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+        level : Union[int, None]
+            A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values for
+            `<h1>-<h6>` elements.
+
+            Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+        name : Union[Pattern[str], str, None]
+            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+
+            Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+        pressed : Union[bool, None]
+            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+
+            Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+        selected : Union[bool, None]
+            A boolean attribute that is usually set by `aria-selected`.
+
+            Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(
+            self._impl_obj.get_by_role(
+                role=role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=include_hidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, test_id: str) -> "Locator":
+        """Locator.get_by_test_id
+
+        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
+        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+
+        Parameters
+        ----------
+        test_id : str
+            Id to locate the element by.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+
+    def get_by_text(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Locator.get_by_text
+
+        Allows locating elements that contain given text.
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_text(text=text, exact=exact))
+
+    def get_by_title(
+        self,
+        text: typing.Union[str, typing.Pattern[str]],
+        *,
+        exact: typing.Optional[bool] = None
+    ) -> "Locator":
+        """Locator.get_by_title
+
+        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+
+        ```html
+        <button title='Place the order'>Order Now</button>
+        ```
+
+        Parameters
+        ----------
+        text : Union[Pattern[str], str]
+            Text to locate the element for.
+        exact : Union[bool, None]
+            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_title(text=text, exact=exact))
+
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Locator.frame_locator
 
@@ -12847,7 +13857,7 @@ class Locator(SyncBase):
         that iframe:
 
         ```py
-        locator = page.frame_locator(\"iframe\").locator(\"text=Submit\")
+        locator = page.frame_locator(\"iframe\").get_by_text(\"Submit\")
         locator.click()
         ```
 
@@ -12930,7 +13940,7 @@ class Locator(SyncBase):
         # ...
         row_locator
             .filter(has_text=\"text in column 1\")
-            .filter(has=page.locator(\"tr\", has_text=\"column 2 button\"))
+            .filter(has=page.get_by_role(\"button\", name=\"column 2 button\"))
             .screenshot()
         ```
 
@@ -12995,6 +14005,22 @@ class Locator(SyncBase):
         target_position: typing.Optional[Position] = None
     ) -> None:
         """Locator.drag_to
+
+        This method drags the locator to another target locator or target position. It will first move to the source element,
+        perform a `mousedown`, then move to the target element or position and perform a `mouseup`.
+
+        ```py
+        source = page.locator(\"#source\")
+        target = page.locator(\"#target\")
+
+        source.drag_to(target)
+        # or specify exact positions relative to the top-left corners of the elements:
+        source.drag_to(
+          target,
+          source_position={\"x\": 34, \"y\": 7},
+          target_position={\"x\": 10, \"y\": 20}
+        )
+        ```
 
         Parameters
         ----------
@@ -13703,8 +14729,8 @@ class Locator(SyncBase):
         An example of typing into a text field and then submitting the form:
 
         ```py
-        element = page.locator(\"input\")
-        element.type(\"some text\")
+        element = page.get_by_label(\"Password\")
+        element.type(\"my password\")
         element.press(\"Enter\")
         ```
 
@@ -14142,6 +15168,11 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
@@ -14161,6 +15192,19 @@ class APIRequestContext(SyncBase):
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers.
+        data : Union[Any, bytes, str, None]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], None]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -14182,6 +15226,9 @@ class APIRequestContext(SyncBase):
                     url=url,
                     params=mapping.to_impl(params),
                     headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
@@ -14198,6 +15245,11 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        multipart: typing.Optional[
+            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
@@ -14209,6 +15261,16 @@ class APIRequestContext(SyncBase):
         method will populate request cookies from the context and update context cookies from the response. The method will
         automatically follow redirects.
 
+        Request parameters can be configured with `params` option, they will be serialized into the URL search parameters:
+
+        ```python
+        query_params = {
+          \"isbn\": \"1234\",
+          \"page\": \"23\"
+        }
+        api_request_context.get(\"https://example.com/api/getText\", params=query_params)
+        ```
+
         Parameters
         ----------
         url : str
@@ -14217,6 +15279,19 @@ class APIRequestContext(SyncBase):
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers.
+        data : Union[Any, bytes, str, None]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+            `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+            be set to `application/octet-stream` if not explicitly set.
+        form : Union[Dict[str, Union[bool, float, str]], None]
+            Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+            this request body. If this parameter is specified `content-type` header will be set to
+            `application/x-www-form-urlencoded` unless explicitly provided.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+            body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+            provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+            or as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -14238,6 +15313,9 @@ class APIRequestContext(SyncBase):
                     url=url,
                     params=mapping.to_impl(params),
                     headers=mapping.to_impl(headers),
+                    data=mapping.to_impl(data),
+                    form=mapping.to_impl(form),
+                    multipart=mapping.to_impl(multipart),
                     timeout=timeout,
                     failOnStatusCode=fail_on_status_code,
                     ignoreHTTPSErrors=ignore_https_errors,
@@ -14424,6 +15502,42 @@ class APIRequestContext(SyncBase):
         The method will populate request cookies from the context and update context cookies from the response. The method will
         automatically follow redirects.
 
+        JSON objects can be passed directly to the request:
+
+        ```python
+        data = {
+            \"title\": \"Book Title\",
+            \"body\": \"John Doe\",
+        }
+        api_request_context.post(\"https://example.com/api/createBook\", data=data)
+        ```
+
+        To send form data to the server use `form` option. Its value will be encoded into the request body with
+        `application/x-www-form-urlencoded` encoding (see below how to use `multipart/form-data` form encoding to send files):
+
+        ```python
+        formData = {
+            \"title\": \"Book Title\",
+            \"body\": \"John Doe\",
+        }
+        api_request_context.post(\"https://example.com/api/findBook\", form=formData)
+        ```
+
+        The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
+        encoding. You can achieve that with Playwright API like this:
+
+        ```python
+        api_request_context.post(
+          \"https://example.com/api/uploadScrip'\",
+          multipart={
+            \"fileField\": {
+              \"name\": \"f.js\",
+              \"mimeType\": \"text/javascript\",
+              \"buffer\": b\"console.log(2022);\",
+            },
+          })
+        ```
+
         Parameters
         ----------
         url : str
@@ -14500,6 +15614,32 @@ class APIRequestContext(SyncBase):
 
         Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and update
         context cookies from the response. The method will automatically follow redirects.
+
+        JSON objects can be passed directly to the request:
+
+        ```python
+        data = {
+            \"title\": \"Book Title\",
+            \"body\": \"John Doe\",
+        }
+        api_request_context.fetch(\"https://example.com/api/createBook\", method=\"post\", data=data)
+        ```
+
+        The common way to send file(s) in the body of a request is to encode it as form fields with `multipart/form-data`
+        encoding. You can achieve that with Playwright API like this:
+
+        ```python
+        api_request_context.fetch(
+          \"https://example.com/api/uploadScrip'\",
+          method=\"post\",
+          multipart={
+            \"fileField\": {
+              \"name\": \"f.js\",
+              \"mimeType\": \"text/javascript\",
+              \"buffer\": b\"console.log(2022);\",
+            },
+          })
+        ```
 
         Parameters
         ----------
@@ -15123,7 +16263,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator(\"button\")
+        locator = page.get_by_role(\"button\")
         expect(locator).to_have_css(\"display\", \"flex\")
         ```
 
@@ -15185,7 +16325,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator(\"input\")
+        locator = page.get_by_role(\"textbox\")
         expect(locator).to_have_id(\"lastname\")
         ```
 
@@ -15551,7 +16691,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator(\".subscribe\")
+        locator = page.get_by_label(\"Subscribe to newsletter\")
         expect(locator).to_be_checked()
         ```
 
@@ -15638,7 +16778,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator(\".input\")
+        locator = page.get_by_role(\"textbox\")
         expect(locator).to_be_editable()
         ```
 
@@ -15820,8 +16960,8 @@ class LocatorAssertions(SyncBase):
     ) -> None:
         """LocatorAssertions.to_be_visible
 
-        Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/api/actionability#visible) and [visible](https://playwright.dev/python/docs/api/actionability#visible) DOM
-        node.
+        Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/api/actionability#attached) and [visible](https://playwright.dev/python/docs/api/actionability#visible)
+        DOM node.
 
         ```py
         from playwright.sync_api import expect
@@ -15874,7 +17014,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator('input')
+        locator = page.get_by_role(\"textbox\")
         expect(locator).to_be_focused()
         ```
 

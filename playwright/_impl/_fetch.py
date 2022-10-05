@@ -48,6 +48,12 @@ if typing.TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
 
 
+FormType = Dict[str, Union[bool, float, str]]
+DataType = Union[Any, bytes, str]
+MultipartType = Dict[str, Union[bytes, bool, float, str, FilePayload]]
+ParamsType = Dict[str, Union[bool, float, str]]
+
+
 class APIRequest:
     def __init__(self, playwright: "Playwright") -> None:
         self.playwright = playwright
@@ -94,11 +100,11 @@ class APIRequestContext(ChannelOwner):
     async def delete(
         self,
         url: str,
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         headers: Headers = None,
-        data: Union[Any, bytes, str] = None,
-        form: Dict[str, Union[bool, float, str]] = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        data: DataType = None,
+        form: FormType = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -121,8 +127,11 @@ class APIRequestContext(ChannelOwner):
     async def head(
         self,
         url: str,
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         headers: Headers = None,
+        data: DataType = None,
+        form: FormType = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -133,6 +142,9 @@ class APIRequestContext(ChannelOwner):
             method="HEAD",
             params=params,
             headers=headers,
+            data=data,
+            form=form,
+            multipart=multipart,
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
@@ -142,8 +154,11 @@ class APIRequestContext(ChannelOwner):
     async def get(
         self,
         url: str,
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         headers: Headers = None,
+        data: DataType = None,
+        form: FormType = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -154,6 +169,9 @@ class APIRequestContext(ChannelOwner):
             method="GET",
             params=params,
             headers=headers,
+            data=data,
+            form=form,
+            multipart=multipart,
             timeout=timeout,
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
@@ -163,10 +181,10 @@ class APIRequestContext(ChannelOwner):
     async def patch(
         self,
         url: str,
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         headers: Headers = None,
-        data: Union[Any, bytes, str] = None,
-        form: Dict[str, Union[bool, float, str]] = None,
+        data: DataType = None,
+        form: FormType = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
@@ -190,10 +208,10 @@ class APIRequestContext(ChannelOwner):
     async def put(
         self,
         url: str,
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         headers: Headers = None,
-        data: Union[Any, bytes, str] = None,
-        form: Dict[str, Union[bool, float, str]] = None,
+        data: DataType = None,
+        form: FormType = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
@@ -217,10 +235,10 @@ class APIRequestContext(ChannelOwner):
     async def post(
         self,
         url: str,
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         headers: Headers = None,
-        data: Union[Any, bytes, str] = None,
-        form: Dict[str, Union[bool, float, str]] = None,
+        data: DataType = None,
+        form: FormType = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
@@ -244,11 +262,11 @@ class APIRequestContext(ChannelOwner):
     async def fetch(
         self,
         urlOrRequest: Union[str, network.Request],
-        params: Dict[str, Union[bool, float, str]] = None,
+        params: ParamsType = None,
         method: str = None,
         headers: Headers = None,
-        data: Union[Any, bytes, str] = None,
-        form: Dict[str, Union[bool, float, str]] = None,
+        data: DataType = None,
+        form: FormType = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
         timeout: float = None,
         failOnStatusCode: bool = None,

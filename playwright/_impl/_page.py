@@ -735,6 +735,58 @@ class Page(ChannelOwner):
     ) -> "Locator":
         return self._main_frame.locator(selector, has_text=has_text, has=has)
 
+    def get_by_alt_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self._main_frame.get_by_alt_text(text, exact=exact)
+
+    def get_by_label(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self._main_frame.get_by_label(text, exact=exact)
+
+    def get_by_placeholder(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self._main_frame.get_by_placeholder(text, exact=exact)
+
+    def get_by_role(
+        self,
+        role: str,
+        checked: bool = None,
+        disabled: bool = None,
+        expanded: bool = None,
+        includeHidden: bool = None,
+        level: int = None,
+        name: Union[str, Pattern[str]] = None,
+        pressed: bool = None,
+        selected: bool = None,
+    ) -> "Locator":
+        return self._main_frame.get_by_role(
+            role,
+            checked=checked,
+            disabled=disabled,
+            expanded=expanded,
+            includeHidden=includeHidden,
+            level=level,
+            name=name,
+            pressed=pressed,
+            selected=selected,
+        )
+
+    def get_by_test_id(self, testId: str) -> "Locator":
+        return self._main_frame.get_by_test_id(testId)
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self._main_frame.get_by_text(text, exact=exact)
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self._main_frame.get_by_title(text, exact=exact)
+
     def frame_locator(self, selector: str) -> "FrameLocator":
         return self.main_frame.frame_locator(selector)
 

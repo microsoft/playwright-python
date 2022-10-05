@@ -14,7 +14,7 @@
 
 import json
 import re
-from typing import Pattern
+from typing import Pattern, Union
 
 
 def escape_with_quotes(text: str, char: str = "'") -> str:
@@ -45,3 +45,28 @@ def escape_regex_flags(pattern: Pattern) -> str:
         == 0
     ), "Unexpected re.Pattern flag, only MULTILINE, IGNORECASE and DOTALL are supported."
     return flags
+
+
+def escape_for_regex(text: str) -> str:
+    return re.sub(r"[.*+?^>${}()|[\]\\]", "\\$&", text)
+
+
+def escape_for_text_selector(
+    text: Union[str, Pattern[str]], exact: bool = None, case_sensitive: bool = None
+) -> str:
+    if isinstance(text, Pattern):
+        return f"/{text.pattern}/{escape_regex_flags(text)}"
+    if exact:
+        return '"' + text.replace('"', '\\"') + '"'
+    if '"' in text or ">>" in text or text[0] == "/":
+        suffix = "" if case_sensitive else "i"
+        return re.sub(r"\s+", "\\s+", escape_for_regex(text)) + suffix
+    return text
+
+
+def escape_for_attribute_selector(value: str) -> str:
+    # TODO: this should actually be
+    #   cssEscape(value).replace(/\\ /g, ' ')
+    # However, our attribute selectors do not conform to CSS parsing spec,
+    # so we escape them differently.
+    return '"' + value.replace('"', '\\"') + '"'

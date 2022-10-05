@@ -45,7 +45,17 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
-from playwright._impl._locator import FrameLocator, Locator
+from playwright._impl._locator import (
+    FrameLocator,
+    Locator,
+    get_by_alt_text_selector,
+    get_by_label_selector,
+    get_by_placeholder_selector,
+    get_by_role_selector,
+    get_by_test_id_selector,
+    get_by_text_selector,
+    get_by_title_selector,
+)
 from playwright._impl._network import Response
 from playwright._impl._set_input_files_helpers import convert_input_files
 from playwright._impl._wait_helper import WaitHelper
@@ -519,6 +529,60 @@ class Frame(ChannelOwner):
         has: Locator = None,
     ) -> Locator:
         return Locator(self, selector, has_text=has_text, has=has)
+
+    def get_by_alt_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_alt_text_selector(text, exact=exact))
+
+    def get_by_label(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_label_selector(text, exact=exact))
+
+    def get_by_placeholder(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_placeholder_selector(text, exact=exact))
+
+    def get_by_role(
+        self,
+        role: str,
+        checked: bool = None,
+        disabled: bool = None,
+        expanded: bool = None,
+        includeHidden: bool = None,
+        level: int = None,
+        name: Union[str, Pattern[str]] = None,
+        pressed: bool = None,
+        selected: bool = None,
+    ) -> "Locator":
+        return self.locator(
+            get_by_role_selector(
+                role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=includeHidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, testId: str) -> "Locator":
+        return self.locator(get_by_test_id_selector(testId))
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_text_selector(text, exact=exact))
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_title_selector(text, exact=exact))
 
     def frame_locator(self, selector: str) -> FrameLocator:
         return FrameLocator(self, selector)

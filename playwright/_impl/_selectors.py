@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Set, Union
 from playwright._impl._api_types import Error
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._helper import async_readfile
+from playwright._impl._locator import set_test_id_attribute_name
 
 
 class Selectors:
@@ -45,6 +46,9 @@ class Selectors:
         for channel in self._channels:
             await channel._channel.send("register", params)
         self._registrations.append(params)
+
+    def set_test_id_attribute(self, attribute_name: str) -> None:
+        set_test_id_attribute_name(attribute_name)
 
     def _add_channel(self, channel: "SelectorsOwner") -> None:
         self._channels.add(channel)

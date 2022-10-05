@@ -450,8 +450,7 @@ class BrowserContext(ChannelOwner):
         page: Optional[Page],
     ) -> None:
         request._failure_text = failure_text
-        if request._timing:
-            request._timing["responseEnd"] = response_end_timing
+        request._set_response_end_timing(response_end_timing)
         self.emit(BrowserContext.Events.RequestFailed, request)
         if page:
             page.emit(Page.Events.RequestFailed, request)
@@ -463,8 +462,7 @@ class BrowserContext(ChannelOwner):
         response_end_timing: float,
         page: Optional[Page],
     ) -> None:
-        if request._timing:
-            request._timing["responseEnd"] = response_end_timing
+        request._set_response_end_timing(response_end_timing)
         self.emit(BrowserContext.Events.RequestFinished, request)
         if page:
             page.emit(Page.Events.RequestFinished, request)

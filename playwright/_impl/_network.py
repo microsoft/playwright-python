@@ -181,6 +181,11 @@ class Request(ChannelOwner):
     def timing(self) -> ResourceTiming:
         return self._timing
 
+    def _set_response_end_timing(self, response_end_timing: float) -> None:
+        self._timing["responseEnd"] = response_end_timing
+        if self._timing["responseStart"] == -1:
+            self._timing["responseStart"] = response_end_timing
+
     @property
     def headers(self) -> Headers:
         override = self._fallback_overrides.get("headers")
