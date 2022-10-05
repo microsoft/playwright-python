@@ -24,6 +24,7 @@ from typing import (
     List,
     Optional,
     Pattern,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -44,7 +45,12 @@ from playwright._impl._helper import (
     monotonic_time,
 )
 from playwright._impl._js_handle import Serializable, parse_value, serialize_argument
-from playwright._impl._str_utils import escape_regex_flags, escape_with_quotes
+from playwright._impl._str_utils import (
+    escape_for_attribute_selector,
+    escape_for_text_selector,
+    escape_regex_flags,
+    escape_with_quotes,
+)
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -208,6 +214,60 @@ class Locator:
             has_text=has_text,
             has=has,
         )
+
+    def get_by_alt_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_alt_text_selector(text, exact=exact))
+
+    def get_by_label(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_label_selector(text, exact=exact))
+
+    def get_by_placeholder(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_placeholder_selector(text, exact=exact))
+
+    def get_by_role(
+        self,
+        role: str,
+        checked: bool = None,
+        disabled: bool = None,
+        expanded: bool = None,
+        includeHidden: bool = None,
+        level: int = None,
+        name: Union[str, Pattern[str]] = None,
+        pressed: bool = None,
+        selected: bool = None,
+    ) -> "Locator":
+        return self.locator(
+            get_by_role_selector(
+                role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=includeHidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, testId: str) -> "Locator":
+        return self.locator(get_by_test_id_selector(testId))
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_text_selector(text, exact=exact))
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_title_selector(text, exact=exact))
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector + " >> " + selector)
@@ -590,6 +650,60 @@ class FrameLocator:
             has=has,
         )
 
+    def get_by_alt_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_alt_text_selector(text, exact=exact))
+
+    def get_by_label(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_label_selector(text, exact=exact))
+
+    def get_by_placeholder(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_placeholder_selector(text, exact=exact))
+
+    def get_by_role(
+        self,
+        role: str,
+        checked: bool = None,
+        disabled: bool = None,
+        expanded: bool = None,
+        includeHidden: bool = None,
+        level: int = None,
+        name: Union[str, Pattern[str]] = None,
+        pressed: bool = None,
+        selected: bool = None,
+    ) -> "Locator":
+        return self.locator(
+            get_by_role_selector(
+                role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                includeHidden=includeHidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+            )
+        )
+
+    def get_by_test_id(self, testId: str) -> "Locator":
+        return self.locator(get_by_test_id_selector(testId))
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_text_selector(text, exact=exact))
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: bool = None
+    ) -> "Locator":
+        return self.locator(get_by_title_selector(text, exact=exact))
+
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(
             self._frame, f"{self._frame_selector} >> control=enter-frame >> {selector}"
@@ -608,3 +722,85 @@ class FrameLocator:
 
     def __repr__(self) -> str:
         return f"<FrameLocator frame={self._frame!r} selector={self._frame_selector!r}>"
+
+
+test_id_attribute_name: str = "data-testid"
+
+
+def set_test_id_attribute_name(attribute_name: str) -> None:
+    global test_id_attribute_name
+    test_id_attribute_name = attribute_name
+
+
+def get_by_test_id_selector(test_id: str) -> str:
+    return get_by_attribute_text_selector(test_id_attribute_name, test_id, exact=True)
+
+
+def get_by_attribute_text_selector(
+    attr_name: str, text: Union[str, Pattern[str]], exact: bool = None
+) -> str:
+    if isinstance(text, Pattern):
+        return f"attr=[{attr_name}=/{text.pattern}/{escape_regex_flags(text)}]"
+    suffix = "s" if exact else "i"
+    return f"attr=[{attr_name}={escape_for_attribute_selector(text)}{suffix}]"
+
+
+def get_by_label_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
+    return get_by_text_selector(text, exact=exact) + " >> control=resolve-label"
+
+
+def get_by_alt_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
+    return get_by_attribute_text_selector("alt", text, exact=exact)
+
+
+def get_by_title_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
+    return get_by_attribute_text_selector("title", text, exact=exact)
+
+
+def get_by_placeholder_selector(
+    text: Union[str, Pattern[str]], exact: bool = None
+) -> str:
+    return get_by_attribute_text_selector("placeholder", text, exact=exact)
+
+
+def get_by_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
+    return "text=" + escape_for_text_selector(text, exact=exact)
+
+
+def get_by_role_selector(
+    role: str,
+    checked: bool = None,
+    disabled: bool = None,
+    expanded: bool = None,
+    includeHidden: bool = None,
+    level: int = None,
+    name: Union[str, Pattern[str]] = None,
+    pressed: bool = None,
+    selected: bool = None,
+) -> str:
+    props: List[Tuple[str, str]] = []
+    if checked is not None:
+        props.append(("checked", str(checked)))
+    if disabled is not None:
+        props.append(("disabled", str(disabled)))
+    if selected is not None:
+        props.append(("selected", str(selected)))
+    if expanded is not None:
+        props.append(("expanded", str(expanded)))
+    if includeHidden is not None:
+        props.append(("include-hiddenen", str(includeHidden)))
+    if level is not None:
+        props.append(("level", str(level)))
+    if name is not None:
+        props.append(
+            (
+                "name",
+                f"/{name.pattern}/{escape_regex_flags(name)}"
+                if isinstance(name, Pattern)
+                else escape_for_attribute_selector(name),
+            )
+        )
+    if pressed is not None:
+        props.append(("pressed", str(pressed)))
+    props_str = "".join([f"[{t[0]}={t[1]}]" for t in props])
+    return f"role={role}{props_str}"
