@@ -49,7 +49,6 @@ from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
     escape_regex_flags,
-    escape_with_quotes,
 )
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -79,19 +78,17 @@ class Locator:
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
 
         if has_text:
-            if isinstance(has_text, Pattern):
-                js_regex = f"/{has_text.pattern}/{escape_regex_flags(has_text)}"
-                self._selector += (
-                    f' >> has={json.dumps("text=" + js_regex, ensure_ascii=False)}'
-                )
-            else:
-                escaped = escape_with_quotes(has_text, '"')
-                self._selector += f" >> :scope:has-text({escaped})"
+            text_selector = "text=" + escape_for_text_selector(has_text, exact=False)
+            self._selector += (
+                f" >> internal:has={json.dumps(text_selector, ensure_ascii=False)}"
+            )
 
         if has:
             if has._frame != frame:
                 raise Error('Inner "has" locator must belong to the same frame.')
-            self._selector += " >> has=" + json.dumps(has._selector, ensure_ascii=False)
+            self._selector += " >> internal:has=" + json.dumps(
+                has._selector, ensure_ascii=False
+            )
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
@@ -645,7 +642,7 @@ class FrameLocator:
     ) -> Locator:
         return Locator(
             self._frame,
-            f"{self._frame_selector} >> control=enter-frame >> {selector}",
+            f"{self._frame_selector} >> internal:control=enter-frame >> {selector}",
             has_text=has_text,
             has=has,
         )
@@ -706,7 +703,8 @@ class FrameLocator:
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(
-            self._frame, f"{self._frame_selector} >> control=enter-frame >> {selector}"
+            self._frame,
+            f"{self._frame_selector} >> internal:control=enter-frame >> {selector}",
         )
 
     @property
@@ -740,13 +738,13 @@ def get_by_attribute_text_selector(
     attr_name: str, text: Union[str, Pattern[str]], exact: bool = None
 ) -> str:
     if isinstance(text, Pattern):
-        return f"attr=[{attr_name}=/{text.pattern}/{escape_regex_flags(text)}]"
+        return f"internal:attr=[{attr_name}=/{text.pattern}/{escape_regex_flags(text)}]"
     suffix = "s" if exact else "i"
-    return f"attr=[{attr_name}={escape_for_attribute_selector(text)}{suffix}]"
+    return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text)}{suffix}]"
 
 
 def get_by_label_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return get_by_text_selector(text, exact=exact) + " >> control=resolve-label"
+    return "internal:label=" + escape_for_text_selector(text, exact=exact)
 
 
 def get_by_alt_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
