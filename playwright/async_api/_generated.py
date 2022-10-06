@@ -4285,7 +4285,8 @@ class Frame(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -4315,7 +4316,8 @@ class Frame(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -4344,7 +4346,8 @@ class Frame(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -4357,7 +4360,90 @@ class Frame(AsyncBase):
 
     def get_by_role(
         self,
-        role: str,
+        role: Literal[
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "directory",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeite",
+        ],
         *,
         checked: typing.Optional[bool] = None,
         disabled: typing.Optional[bool] = None,
@@ -4382,7 +4468,7 @@ class Frame(AsyncBase):
 
         Parameters
         ----------
-        role : str
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -4473,7 +4559,8 @@ class Frame(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -4501,7 +4588,8 @@ class Frame(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -5494,7 +5582,8 @@ class FrameLocator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -5524,7 +5613,8 @@ class FrameLocator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -5553,7 +5643,8 @@ class FrameLocator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -5566,7 +5657,90 @@ class FrameLocator(AsyncBase):
 
     def get_by_role(
         self,
-        role: str,
+        role: Literal[
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "directory",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeite",
+        ],
         *,
         checked: typing.Optional[bool] = None,
         disabled: typing.Optional[bool] = None,
@@ -5591,7 +5765,7 @@ class FrameLocator(AsyncBase):
 
         Parameters
         ----------
-        role : str
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -5682,7 +5856,8 @@ class FrameLocator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -5710,7 +5885,8 @@ class FrameLocator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -8924,7 +9100,8 @@ class Page(AsyncContextManager):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -8954,7 +9131,8 @@ class Page(AsyncContextManager):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -8983,7 +9161,8 @@ class Page(AsyncContextManager):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -8996,7 +9175,90 @@ class Page(AsyncContextManager):
 
     def get_by_role(
         self,
-        role: str,
+        role: Literal[
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "directory",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeite",
+        ],
         *,
         checked: typing.Optional[bool] = None,
         disabled: typing.Optional[bool] = None,
@@ -9021,7 +9283,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        role : str
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -9112,7 +9374,8 @@ class Page(AsyncContextManager):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -9140,7 +9403,8 @@ class Page(AsyncContextManager):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -13558,7 +13822,8 @@ class Locator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -13588,7 +13853,8 @@ class Locator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -13617,7 +13883,8 @@ class Locator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -13630,7 +13897,90 @@ class Locator(AsyncBase):
 
     def get_by_role(
         self,
-        role: str,
+        role: Literal[
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "directory",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeite",
+        ],
         *,
         checked: typing.Optional[bool] = None,
         disabled: typing.Optional[bool] = None,
@@ -13655,7 +14005,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        role : str
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -13746,7 +14096,8 @@ class Locator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------
@@ -13774,7 +14125,8 @@ class Locator(AsyncBase):
         text : Union[Pattern[str], str]
             Text to locate the element for.
         exact : Union[bool, None]
-            Whether to find an exact match: case-sensitive and whole-string. Default to false.
+            Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
+            expression.
 
         Returns
         -------

@@ -33,6 +33,7 @@ from typing import (
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
+    AriaRole,
     FilePayload,
     FloatRect,
     PdfMargins,
@@ -752,7 +753,7 @@ class Page(ChannelOwner):
 
     def get_by_role(
         self,
-        role: str,
+        role: AriaRole,
         checked: bool = None,
         disabled: bool = None,
         expanded: bool = None,

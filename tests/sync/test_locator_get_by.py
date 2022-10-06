@@ -195,3 +195,19 @@ world</label><input id=control />"""
     )
     expect(page.get_by_alt_text("hello my\nworld")).to_have_attribute("id", "control")
     expect(page.get_by_title("hello my\nworld")).to_have_attribute("id", "control")
+
+
+def test_get_by_role(page: Page) -> None:
+    page.set_content(
+        """
+    <button>Hello</button>
+    <button>Hel"lo</button>
+    <div role="dialog">I am a dialog</div>
+  """
+    )
+    expect(page.get_by_role("button", name="hello")).to_have_count(1)
+    expect(page.get_by_role("button", name='Hel"lo')).to_have_count(1)
+    expect(
+        page.get_by_role("button", name=re.compile(r"he", re.IGNORECASE))
+    ).to_have_count(2)
+    expect(page.get_by_role("dialog")).to_have_count(1)
