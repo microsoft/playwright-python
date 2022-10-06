@@ -12,21 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import re
 from typing import Pattern, Union
-
-
-def escape_with_quotes(text: str, char: str = "'") -> str:
-    stringified = json.dumps(text, ensure_ascii=False)
-    escaped_text = stringified[1:-1].replace('\\"', '"')
-    if char == "'":
-        return char + escaped_text.replace("'", "\\'") + char
-    if char == '"':
-        return char + escaped_text.replace('"', '\\"') + char
-    if char == "`":
-        return char + escaped_text.replace("`", "\\`") + char
-    raise ValueError("Invalid escape char")
 
 
 def escape_regex_flags(pattern: Pattern) -> str:
@@ -60,7 +47,7 @@ def escape_for_text_selector(
         return '"' + text.replace('"', '\\"') + '"'
     if '"' in text or ">>" in text or text[0] == "/":
         suffix = "" if case_sensitive else "i"
-        return re.sub(r"\s+", "\\s+", escape_for_regex(text)) + suffix
+        return "/" + re.sub(r"\s+", "\\\\s+", escape_for_regex(text)) + "/" + suffix
     return text
 
 
