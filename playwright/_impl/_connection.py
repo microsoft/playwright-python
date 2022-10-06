@@ -316,6 +316,7 @@ class Connection(EventEmitter):
             self._objects[guid]._dispose()
             return
         object = self._objects[guid]
+        should_replace_guids_with_channels = "jsonPipe@" not in guid
         try:
             if self._is_sync:
                 for listener in object._channel.listeners(method):
@@ -323,9 +324,17 @@ class Connection(EventEmitter):
                     # and switch to them in order, until they block inside and pass control to each
                     # other and then eventually back to dispatcher as listener functions return.
                     g = greenlet(listener)
-                    g.switch(self._replace_guids_with_channels(params))
+                    if should_replace_guids_with_channels:
+                        g.switch(self._replace_guids_with_channels(params))
+                    else:
+                        g.switch(params)
             else:
-                object._channel.emit(method, self._replace_guids_with_channels(params))
+                if should_replace_guids_with_channels:
+                    object._channel.emit(
+                        method, self._replace_guids_with_channels(params)
+                    )
+                else:
+                    object._channel.emit(method, params)
         except BaseException as exc:
             print("Error occurred in event listener", file=sys.stderr)
             traceback.print_exc()

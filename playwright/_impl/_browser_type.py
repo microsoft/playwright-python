@@ -42,7 +42,7 @@ from playwright._impl._helper import (
     ServiceWorkersPolicy,
     locals_to_params,
 )
-from playwright._impl._transport import WebSocketTransport
+from playwright._impl._json_pipe import JsonPipeTransport
 from playwright._impl._wait_helper import throw_on_timeout
 
 if TYPE_CHECKING:
@@ -188,12 +188,22 @@ class BrowserType(ChannelOwner):
     ) -> Browser:
         if timeout is None:
             timeout = 30000
+        if slow_mo is None:
+            slow_mo = 0
 
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
-
-        transport = WebSocketTransport(
-            self._connection._loop, ws_endpoint, headers, slow_mo
+        local_utils = self._connection.local_utils
+        pipe_channel = await local_utils._channel.send(
+            "connect",
+            {
+                "wsEndpoint": ws_endpoint,
+                "headers": headers,
+                "slowMo": slow_mo,
+                "timeout": timeout,
+            },
         )
+        transport = JsonPipeTransport(self._connection._loop, pipe_channel)
+
         connection = Connection(
             self._connection._dispatcher_fiber,
             self._connection._object_factory,

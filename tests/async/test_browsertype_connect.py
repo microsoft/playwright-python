@@ -213,7 +213,7 @@ async def test_connect_to_closed_server_without_hangs(
     remote_server.kill()
     with pytest.raises(Error) as exc:
         await browser_type.connect(remote_server.ws_endpoint)
-    assert "websocket.connect: " in exc.value.message
+    assert "WebSocket error: " in exc.value.message
 
 
 async def test_should_fulfill_with_global_fetch_result(
