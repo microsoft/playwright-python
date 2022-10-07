@@ -30,6 +30,7 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
+    AriaRole,
     FilePayload,
     FloatRect,
     FrameExpectOptions,
@@ -229,7 +230,7 @@ class Locator:
 
     def get_by_role(
         self,
-        role: str,
+        role: AriaRole,
         checked: bool = None,
         disabled: bool = None,
         expanded: bool = None,
@@ -664,7 +665,7 @@ class FrameLocator:
 
     def get_by_role(
         self,
-        role: str,
+        role: AriaRole,
         checked: bool = None,
         disabled: bool = None,
         expanded: bool = None,
@@ -739,8 +740,7 @@ def get_by_attribute_text_selector(
 ) -> str:
     if isinstance(text, Pattern):
         return f"internal:attr=[{attr_name}=/{text.pattern}/{escape_regex_flags(text)}]"
-    suffix = "s" if exact else "i"
-    return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text)}{suffix}]"
+    return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text, exact=exact)}]"
 
 
 def get_by_label_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
@@ -766,7 +766,7 @@ def get_by_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> 
 
 
 def get_by_role_selector(
-    role: str,
+    role: AriaRole,
     checked: bool = None,
     disabled: bool = None,
     expanded: bool = None,
