@@ -153,35 +153,45 @@ def test_get_by_title(page: Page) -> None:
 
 def test_get_by_escaping(page: Page) -> None:
     page.set_content(
-        """<label id=label for=control>Hello
+        """<label id=label for=control>Hello my
 wo"rld</label><input id=control />"""
     )
     page.locator("input").evaluate(
         """input => {
-    input.setAttribute('placeholder', 'hello\\nwo"rld');
-    input.setAttribute('title', 'hello\\nwo"rld');
-    input.setAttribute('alt', 'hello\\nwo"rld');
+    input.setAttribute('placeholder', 'hello my\\nwo"rld');
+    input.setAttribute('title', 'hello my\\nwo"rld');
+    input.setAttribute('alt', 'hello my\\nwo"rld');
   }"""
     )
-    expect(page.get_by_text('hello\nwo"rld')).to_have_attribute("id", "label")
-    expect(page.get_by_label('hello\nwo"rld')).to_have_attribute("id", "control")
-    expect(page.get_by_placeholder('hello\nwo"rld')).to_have_attribute("id", "control")
-    expect(page.get_by_alt_text('hello\nwo"rld')).to_have_attribute("id", "control")
-    expect(page.get_by_title('hello\nwo"rld')).to_have_attribute("id", "control")
+    expect(page.get_by_text('hello my\nwo"rld')).to_have_attribute("id", "label")
+    expect(page.get_by_text('hello     my         wo"rld')).to_have_attribute(
+        "id", "label"
+    )
+    expect(page.get_by_label('hello my\nwo"rld')).to_have_attribute("id", "control")
+    expect(page.get_by_placeholder('hello my\nwo"rld')).to_have_attribute(
+        "id", "control"
+    )
+    expect(page.get_by_alt_text('hello my\nwo"rld')).to_have_attribute("id", "control")
+    expect(page.get_by_title('hello my\nwo"rld')).to_have_attribute("id", "control")
 
     page.set_content(
-        """<label id=label for=control>Hello
+        """<label id=label for=control>Hello my
 world</label><input id=control />"""
     )
     page.locator("input").evaluate(
         """input => {
-    input.setAttribute('placeholder', 'hello\\nworld');
-    input.setAttribute('title', 'hello\\nworld');
-    input.setAttribute('alt', 'hello\\nworld');
+    input.setAttribute('placeholder', 'hello my\\nworld');
+    input.setAttribute('title', 'hello my\\nworld');
+    input.setAttribute('alt', 'hello my\\nworld');
   }"""
     )
-    expect(page.get_by_text("hello\nworld")).to_have_attribute("id", "label")
-    expect(page.get_by_label("hello\nworld")).to_have_attribute("id", "control")
-    expect(page.get_by_placeholder("hello\nworld")).to_have_attribute("id", "control")
-    expect(page.get_by_alt_text("hello\nworld")).to_have_attribute("id", "control")
-    expect(page.get_by_title("hello\nworld")).to_have_attribute("id", "control")
+    expect(page.get_by_text("hello my\nworld")).to_have_attribute("id", "label")
+    expect(page.get_by_text("hello      my       world")).to_have_attribute(
+        "id", "label"
+    )
+    expect(page.get_by_label("hello my\nworld")).to_have_attribute("id", "control")
+    expect(page.get_by_placeholder("hello my\nworld")).to_have_attribute(
+        "id", "control"
+    )
+    expect(page.get_by_alt_text("hello my\nworld")).to_have_attribute("id", "control")
+    expect(page.get_by_title("hello my\nworld")).to_have_attribute("id", "control")
