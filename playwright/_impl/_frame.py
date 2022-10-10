@@ -746,8 +746,12 @@ class Frame(ChannelOwner):
         timeout: float = None,
         polling: Union[float, Literal["raf"]] = None,
     ) -> JSHandle:
+        if isinstance(polling, str) and polling != "raf":
+            raise Error(f"Unknown polling option: {polling}")
         params = locals_to_params(locals())
         params["arg"] = serialize_argument(arg)
+        if polling is not None and polling != "raf":
+            params["pollingInterval"] = polling
         return from_channel(await self._channel.send("waitForFunction", params))
 
     async def title(self) -> str:
