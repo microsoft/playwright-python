@@ -24,7 +24,6 @@ from greenlet import greenlet
 from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
-
 import playwright
 from playwright._impl._helper import ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
