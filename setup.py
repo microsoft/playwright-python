@@ -212,7 +212,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "greenlet==1.1.3",
-        "pyee==8.1.0",
+        "pyee>=9.0.0",
         "typing-extensions;python_version<='3.8'",
     ],
     classifiers=[

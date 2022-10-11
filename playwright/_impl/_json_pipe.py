@@ -15,7 +15,7 @@
 import asyncio
 from typing import Dict, Optional, cast
 
-from pyee import AsyncIOEventEmitter
+from pyee.asyncio import AsyncIOEventEmitter
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import Channel
