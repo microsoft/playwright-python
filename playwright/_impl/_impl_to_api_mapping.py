@@ -38,8 +38,12 @@ class ImplToApiMapping:
         self._mapping[impl_class] = api_class
 
     def from_maybe_impl(
-        self, obj: Any, visited: Map[Any, Union[List, Dict]] = Map()
+        self, obj: Any, visited: Optional[Map[Any, Union[List, Dict]]] = None
     ) -> Any:
+        # Python does share default arguments between calls, so we need to
+        # create a new map if it is not provided.
+        if not visited:
+            visited = Map()
         if not obj:
             return obj
         if isinstance(obj, dict):
