@@ -36,17 +36,18 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
 
         await page.route("**/*", lambda route, _: route.fulfill(body="OK"))
 
-        # https://github.com/microsoft/playwright-python/issues/1602
-        client = await page.context.new_cdp_session(page)
-        await client.send("Network.enable")
-
         def handle_network_response_received(event: Any) -> None:
             event["__pw__is_last_network_response_received_event"] = True
 
-        client.on(
-            "Network.responseReceived",
-            handle_network_response_received,
-        )
+        if browser_name == "chromium":
+            # https://github.com/microsoft/playwright-python/issues/1602
+            client = await page.context.new_cdp_session(page)
+            await client.send("Network.enable")
+
+            client.on(
+                "Network.responseReceived",
+                handle_network_response_received,
+            )
 
         for _ in range(100):
             response = await page.evaluate("""async () => (await fetch("/")).text()""")
@@ -57,17 +58,15 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
     gc.collect()
 
     pw_objects: defaultdict = defaultdict(int)
-    found_cdp_network_events = False
     for o in objgraph.by_type("dict"):
         name = o.get("_type")
+        # https://github.com/microsoft/playwright-python/issues/1602
         if o.get("__pw__is_last_network_response_received_event", False):
-            found_cdp_network_events = True
+            assert False
         if not name:
             continue
         pw_objects[name] += 1
 
-    # https://github.com/microsoft/playwright-python/issues/1602
-    assert found_cdp_network_events is False
     assert "Dialog" not in pw_objects
     assert "Request" not in pw_objects
     assert "Route" not in pw_objects
