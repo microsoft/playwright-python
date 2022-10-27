@@ -14,6 +14,7 @@
 
 import gc
 from collections import defaultdict
+from typing import Any
 
 import objgraph
 import pytest
@@ -33,7 +34,20 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
         for _ in range(100):
             await page.evaluate("""async () => alert()""")
 
-        await page.route("**/", lambda route, _: route.fulfill(body="OK"))
+        await page.route("**/*", lambda route, _: route.fulfill(body="OK"))
+
+        def handle_network_response_received(event: Any) -> None:
+            event["__pw__is_last_network_response_received_event"] = True
+
+        if browser_name == "chromium":
+            # https://github.com/microsoft/playwright-python/issues/1602
+            client = await page.context.new_cdp_session(page)
+            await client.send("Network.enable")
+
+            client.on(
+                "Network.responseReceived",
+                handle_network_response_received,
+            )
 
         for _ in range(100):
             response = await page.evaluate("""async () => (await fetch("/")).text()""")
@@ -46,6 +60,9 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
     pw_objects: defaultdict = defaultdict(int)
     for o in objgraph.by_type("dict"):
         name = o.get("_type")
+        # https://github.com/microsoft/playwright-python/issues/1602
+        if o.get("__pw__is_last_network_response_received_event", False):
+            assert False
         if not name:
             continue
         pw_objects[name] += 1
