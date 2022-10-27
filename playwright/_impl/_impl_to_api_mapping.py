@@ -87,7 +87,11 @@ class ImplToApiMapping:
     def from_impl_dict(self, map: Dict[str, Any]) -> Dict[str, Any]:
         return {name: self.from_impl(value) for name, value in map.items()}
 
-    def to_impl(self, obj: Any, visited: Map[Any, Union[List, Dict]] = Map()) -> Any:
+    def to_impl(
+        self, obj: Any, visited: Optional[Map[Any, Union[List, Dict]]] = None
+    ) -> Any:
+        if visited is None:
+            visited = Map()
         try:
             if not obj:
                 return obj
