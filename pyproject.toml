@@ -36,3 +36,4 @@ ignore = ["tests/async/", "scripts/", "examples/"]
 pythonVersion = "3.7"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false
+reportCallInDefaultInitializer = true

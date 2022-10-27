@@ -105,8 +105,10 @@ class JSHandle(ChannelOwner):
 
 
 def serialize_value(
-    value: Any, handles: List[JSHandle], visitor_info: VisitorInfo = VisitorInfo()
+    value: Any, handles: List[JSHandle], visitor_info: Optional[VisitorInfo] = None
 ) -> Any:
+    if visitor_info is None:
+        visitor_info = VisitorInfo()
     if isinstance(value, JSHandle):
         h = len(handles)
         handles.append(value._channel)
@@ -160,7 +162,9 @@ def serialize_argument(arg: Serializable = None) -> Any:
     return dict(value=value, handles=handles)
 
 
-def parse_value(value: Any, refs: Dict[int, Any] = {}) -> Any:
+def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
+    if refs is None:
+        refs = {}
     if value is None:
         return None
     if isinstance(value, dict):
