@@ -204,6 +204,7 @@ setup(
     description="A high-level API to automate web browsers",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
+    license="Apache-2.0",
     url="https://github.com/Microsoft/playwright-python",
     project_urls={
         "Release notes": "https://github.com/microsoft/playwright-python/releases",
