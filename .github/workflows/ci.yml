@@ -84,13 +84,13 @@ jobs:
           python-version: '3.10'
           browser: chromium
         - os: windows-latest
-          python-version: '3.11.0-rc.1'
+          python-version: '3.11'
           browser: chromium
         - os: macos-latest
-          python-version: '3.11.0-rc.1'
+          python-version: '3.11'
           browser: chromium
         - os: ubuntu-latest
-          python-version: '3.11.0-rc.1'
+          python-version: '3.11'
           browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
