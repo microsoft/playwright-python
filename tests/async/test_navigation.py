@@ -464,7 +464,7 @@ async def test_wait_for_nav_should_work_with_clicking_on_anchor_links(page, serv
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<a href="#foobar">foobar</a>')
     async with page.expect_navigation() as response_info:
-        await page.click("a"),
+        await page.click("a")
     response = await response_info.value
     assert response is None
     assert page.url == server.EMPTY_PAGE + "#foobar"
@@ -477,7 +477,7 @@ async def test_wait_for_nav_should_work_with_clicking_on_links_which_do_not_comm
     await page.set_content(f"<a href='{https_server.EMPTY_PAGE}'>foobar</a>")
     with pytest.raises(Error) as exc_info:
         async with page.expect_navigation():
-            await page.click("a"),
+            await page.click("a")
     expect_ssl_error(exc_info.value.message, browser_name)
 
 
@@ -492,7 +492,7 @@ async def test_wait_for_nav_should_work_with_history_push_state(page, server):
     """
     )
     async with page.expect_navigation() as response_info:
-        await page.click("a"),
+        await page.click("a")
     response = await response_info.value
     assert response is None
     assert page.url == server.PREFIX + "/wow.html"
@@ -509,7 +509,7 @@ async def test_wait_for_nav_should_work_with_history_replace_state(page, server)
     """
     )
     async with page.expect_navigation() as response_info:
-        await page.click("a"),
+        await page.click("a")
     response = await response_info.value
     assert response is None
     assert page.url == server.PREFIX + "/replaced.html"
@@ -531,12 +531,12 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     )
     assert page.url == server.PREFIX + "/second.html"
     async with page.expect_navigation() as back_response_info:
-        await page.click("a#back"),
+        await page.click("a#back")
     back_response = await back_response_info.value
     assert back_response is None
     assert page.url == server.PREFIX + "/first.html"
     async with page.expect_navigation() as forward_response_info:
-        await page.click("a#forward"),
+        await page.click("a#forward")
     forward_response = await forward_response_info.value
     assert forward_response is None
     assert page.url == server.PREFIX + "/second.html"

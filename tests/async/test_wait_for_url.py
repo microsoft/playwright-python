@@ -102,11 +102,11 @@ async def test_wait_for_url_should_work_with_dom_history_back_forward(
 
     assert page.url == server.PREFIX + "/second.html"
 
-    await page.click("a#back"),
+    await page.click("a#back")
     await page.wait_for_url("**/first.html")
     assert page.url == server.PREFIX + "/first.html"
 
-    await page.click("a#forward"),
+    await page.click("a#forward")
     await page.wait_for_url("**/second.html")
     assert page.url == server.PREFIX + "/second.html"
 

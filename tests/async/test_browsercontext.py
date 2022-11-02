@@ -681,7 +681,7 @@ async def test_page_event_should_have_an_opener(context, server):
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     async with context.expect_page() as page_info:
-        await page.goto(server.PREFIX + "/popup/window-open.html"),
+        await page.goto(server.PREFIX + "/popup/window-open.html")
     popup = await page_info.value
     assert popup.url == server.PREFIX + "/popup/popup.html"
     assert await popup.opener() == page

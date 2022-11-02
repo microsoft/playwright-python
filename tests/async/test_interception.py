@@ -103,7 +103,7 @@ async def test_page_route_should_work_when_POST_is_redirected_with_302(page, ser
     """
     )
     async with page.expect_navigation():
-        await page.eval_on_selector("form", "form => form.submit()"),
+        await page.eval_on_selector("form", "form => form.submit()")
 
 
 # @see https://github.com/GoogleChrome/puppeteer/issues/3973

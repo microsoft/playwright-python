@@ -21,15 +21,15 @@ async def test_should_work(playwright, launch_arguments) -> None:
 
     assert device_descriptor["viewport"]["height"] > 700
     assert device_descriptor["viewport"]["height"] < 800
-    inner_height = await page.evaluate("window.innerHeight")
-    inner_height > 700
-    inner_height < 800
+    inner_height = await page.evaluate("window.screen.availHeight")
+    assert inner_height > 700
+    assert inner_height < 800
 
     assert device_descriptor["viewport"]["width"] > 400
     assert device_descriptor["viewport"]["width"] < 500
-    inner_width = await page.evaluate("window.innerWidth")
-    inner_width > 400
-    inner_width < 500
+    inner_width = await page.evaluate("window.screen.availWidth")
+    assert inner_width > 400
+    assert inner_width < 500
 
     assert device_descriptor["has_touch"]
     assert device_descriptor["is_mobile"]
