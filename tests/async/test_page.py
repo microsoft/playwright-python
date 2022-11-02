@@ -174,7 +174,7 @@ async def test_async_stacks_should_work(page, server):
 
 async def test_opener_should_provide_access_to_the_opener_page(page):
     async with page.expect_popup() as popup_info:
-        await page.evaluate("window.open('about:blank')"),
+        await page.evaluate("window.open('about:blank')")
     popup = await popup_info.value
     opener = await popup.opener()
     assert opener == page
@@ -182,7 +182,7 @@ async def test_opener_should_provide_access_to_the_opener_page(page):
 
 async def test_opener_should_return_null_if_parent_page_has_been_closed(page):
     async with page.expect_popup() as popup_info:
-        await page.evaluate("window.open('about:blank')"),
+        await page.evaluate("window.open('about:blank')")
     popup = await popup_info.value
     await page.close()
     opener = await popup.opener()

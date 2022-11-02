@@ -327,7 +327,7 @@ async def test_locators_should_upload_a_file(page: Page, server: Server):
 async def test_locators_should_press(page: Page):
     await page.set_content("<input type='text' />")
     await page.locator("input").press("h")
-    await page.eval_on_selector("input", "input => input.value") == "h"
+    assert await page.eval_on_selector("input", "input => input.value") == "h"
 
 
 async def test_locators_should_scroll_into_view(page: Page, server: Server):
@@ -363,7 +363,7 @@ async def test_locators_should_select_textarea(
 async def test_locators_should_type(page: Page):
     await page.set_content("<input type='text' />")
     await page.locator("input").type("hello")
-    await page.eval_on_selector("input", "input => input.value") == "hello"
+    assert await page.eval_on_selector("input", "input => input.value") == "hello"
 
 
 async def test_locators_should_screenshot(

@@ -320,7 +320,7 @@ def test_locators_should_upload_a_file(page: Page, server: Server) -> None:
 def test_locators_should_press(page: Page) -> None:
     page.set_content("<input type='text' />")
     page.locator("input").press("h")
-    page.eval_on_selector("input", "input => input.value") == "h"
+    assert page.eval_on_selector("input", "input => input.value") == "h"
 
 
 def test_locators_should_scroll_into_view(page: Page, server: Server) -> None:
@@ -356,7 +356,7 @@ def test_locators_should_select_textarea(
 def test_locators_should_type(page: Page) -> None:
     page.set_content("<input type='text' />")
     page.locator("input").type("hello")
-    page.eval_on_selector("input", "input => input.value") == "hello"
+    assert page.eval_on_selector("input", "input => input.value") == "hello"
 
 
 def test_locators_should_screenshot(

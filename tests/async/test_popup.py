@@ -54,7 +54,7 @@ async def test_link_navigation_respect_routes_from_browser_context(context, serv
 
     await context.route("**/empty.html", handle_request)
     async with context.expect_page():
-        await page.click("a"),
+        await page.click("a")
     assert intercepted == [True]
 
 

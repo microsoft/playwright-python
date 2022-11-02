@@ -112,9 +112,9 @@ async def test_watch_position_should_be_notified(page, server, context):
         await context.set_geolocation({"latitude": 40, "longitude": 50})
 
     all_messages = "|".join(messages)
-    "latitude=0 lng=10" in all_messages
-    "latitude=20 lng=30" in all_messages
-    "latitude=40 lng=50" in all_messages
+    assert "lat=0 lng=10" in all_messages
+    assert "lat=20 lng=30" in all_messages
+    assert "lat=40 lng=50" in all_messages
 
 
 async def test_should_use_context_options_for_popup(page, context, server):

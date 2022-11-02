@@ -111,7 +111,7 @@ async def test_console_should_trigger_correct_log(page, server):
 async def test_console_should_have_location_for_console_api_calls(page, server):
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_console_message() as message_info:
-        await page.goto(server.PREFIX + "/consolelog.html"),
+        await page.goto(server.PREFIX + "/consolelog.html")
     message = await message_info.value
     assert message.text == "yellow"
     assert message.type == "log"
