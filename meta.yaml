@@ -24,7 +24,7 @@ requirements:
   run:
     - python
     - greenlet ==1.1.3
-    - pyee ==8.1.0
+    - pyee ==9.0.4
     - typing_extensions # [py<39]
 test:
   requires:
