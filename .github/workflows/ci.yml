@@ -34,7 +34,7 @@ jobs:
         python setup.py bdist_wheel
         python -m playwright install --with-deps
     - name: Lint
-      uses: pre-commit/action@v2.0.3
+      run: pre-commit run --show-diff-on-failure --color=always --all-files
     - name: Generate APIs
       run: bash scripts/update_api.sh
     - name: Verify generated API is up to date
