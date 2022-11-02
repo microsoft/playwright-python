@@ -280,5 +280,5 @@ AriaRole = Literal[
     "tooltip",
     "tree",
     "treegrid",
-    "treeite",
+    "treeitem",
 ]

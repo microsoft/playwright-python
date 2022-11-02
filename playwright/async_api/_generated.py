@@ -1346,7 +1346,7 @@ class JSHandle(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -1382,7 +1382,7 @@ class JSHandle(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -1423,7 +1423,7 @@ class JSHandle(AsyncBase):
         The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 
         ```py
-        handle = await page.evaluate_handle(\"{window, document}\")
+        handle = await page.evaluate_handle(\"({window, document})\")
         properties = await handle.get_properties()
         window_handle = properties.get(\"window\")
         document_handle = properties.get(\"document\")
@@ -1716,6 +1716,7 @@ class ElementHandle(JSHandle):
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None
     ) -> None:
@@ -1743,6 +1744,10 @@ class ElementHandle(JSHandle):
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         trial : Union[bool, None]
@@ -1755,6 +1760,7 @@ class ElementHandle(JSHandle):
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
                 timeout=timeout,
+                noWaitAfter=no_wait_after,
                 force=force,
                 trial=trial,
             )
@@ -2222,6 +2228,42 @@ class ElementHandle(JSHandle):
             )
         )
 
+    async def clear(
+        self,
+        *,
+        timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
+        force: typing.Optional[bool] = None
+    ) -> None:
+        """ElementHandle.clear
+
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, clears it and triggers an
+        `input` event after clearing.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
+        instead.
+
+        Parameters
+        ----------
+        timeout : Union[float, None]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        force : Union[bool, None]
+            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.clear(
+                timeout=timeout, noWaitAfter=no_wait_after, force=force
+            )
+        )
+
     async def press(
         self,
         key: str,
@@ -2517,7 +2559,7 @@ class ElementHandle(JSHandle):
             Defaults to `"hide"`.
         scale : Union["css", "device", None]
             When set to `"css"`, screenshot will have a single pixel per each css pixel on the page. For high-dpi devices, this will
-            keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenhots of
+            keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenshots of
             high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
@@ -2611,7 +2653,7 @@ class ElementHandle(JSHandle):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -2659,7 +2701,7 @@ class ElementHandle(JSHandle):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -3244,7 +3286,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -3296,7 +3338,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -3746,7 +3788,7 @@ class Frame(AsyncBase):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -3795,7 +3837,7 @@ class Frame(AsyncBase):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -4286,7 +4328,7 @@ class Frame(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -4304,7 +4346,7 @@ class Frame(AsyncBase):
         """Frame.get_by_label
 
         Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text Password in the following DOM:
+        label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
@@ -4317,7 +4359,7 @@ class Frame(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -4347,7 +4389,7 @@ class Frame(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -4442,7 +4484,7 @@ class Frame(AsyncBase):
             "tooltip",
             "tree",
             "treegrid",
-            "treeite",
+            "treeitem",
         ],
         *,
         checked: typing.Optional[bool] = None,
@@ -4468,7 +4510,7 @@ class Frame(AsyncBase):
 
         Parameters
         ----------
-        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -4552,7 +4594,39 @@ class Frame(AsyncBase):
     ) -> "Locator":
         """Frame.get_by_text
 
-        Allows locating elements that contain given text.
+        Allows locating elements that contain given text. Consider the following DOM structure:
+
+        ```html
+        <div>Hello <span>world</span></div>
+        <div>Hello</div>
+        ```
+
+        You can locate by text substring, exact string, or a regular expression:
+
+        ```py
+        # Matches <span>
+        page.get_by_text(\"world\")
+
+        # Matches first <div>
+        page.get_by_text(\"Hello world\")
+
+        # Matches second <div>
+        page.get_by_text(\"Hello\", exact=True)
+
+        # Matches both <div>s
+        page.get_by_text(re.compile(\"Hello\"))
+
+        # Matches second <div>
+        page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
+        ```
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then filter
+        by the text content.
+
+        > NOTE: Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        > NOTE: Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -4560,7 +4634,7 @@ class Frame(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -4577,7 +4651,7 @@ class Frame(AsyncBase):
     ) -> "Locator":
         """Frame.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+        Allows locating elements by their title. For example, this method will find the button by its title \"Place the order\":
 
         ```html
         <button title='Place the order'>Order Now</button>
@@ -4589,7 +4663,7 @@ class Frame(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -4801,6 +4875,7 @@ class Frame(AsyncBase):
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None
@@ -4832,6 +4907,10 @@ class Frame(AsyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
@@ -4848,6 +4927,7 @@ class Frame(AsyncBase):
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
                 timeout=timeout,
+                noWaitAfter=no_wait_after,
                 force=force,
                 strict=strict,
                 trial=trial,
@@ -5390,7 +5470,7 @@ class Frame(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -5495,6 +5575,54 @@ class Frame(AsyncBase):
             )
         )
 
+    async def clear(
+        self,
+        selector: str,
+        *,
+        timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
+        force: typing.Optional[bool] = None,
+        strict: typing.Optional[bool] = None
+    ) -> None:
+        """Frame.clear
+
+        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the
+        element, clears it and triggers an `input` event after clearing.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
+        instead.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](../selectors.md) for more details.
+        timeout : Union[float, None]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        force : Union[bool, None]
+            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
+        strict : Union[bool, None]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
+            element, the call throws an exception.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.clear(
+                selector=selector,
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
+                force=force,
+                strict=strict,
+            )
+        )
+
 
 mapping.register(FrameImpl, Frame)
 
@@ -5583,7 +5711,7 @@ class FrameLocator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -5601,7 +5729,7 @@ class FrameLocator(AsyncBase):
         """FrameLocator.get_by_label
 
         Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text Password in the following DOM:
+        label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
@@ -5614,7 +5742,7 @@ class FrameLocator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -5644,7 +5772,7 @@ class FrameLocator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -5739,7 +5867,7 @@ class FrameLocator(AsyncBase):
             "tooltip",
             "tree",
             "treegrid",
-            "treeite",
+            "treeitem",
         ],
         *,
         checked: typing.Optional[bool] = None,
@@ -5765,7 +5893,7 @@ class FrameLocator(AsyncBase):
 
         Parameters
         ----------
-        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -5849,7 +5977,39 @@ class FrameLocator(AsyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_text
 
-        Allows locating elements that contain given text.
+        Allows locating elements that contain given text. Consider the following DOM structure:
+
+        ```html
+        <div>Hello <span>world</span></div>
+        <div>Hello</div>
+        ```
+
+        You can locate by text substring, exact string, or a regular expression:
+
+        ```py
+        # Matches <span>
+        page.get_by_text(\"world\")
+
+        # Matches first <div>
+        page.get_by_text(\"Hello world\")
+
+        # Matches second <div>
+        page.get_by_text(\"Hello\", exact=True)
+
+        # Matches both <div>s
+        page.get_by_text(re.compile(\"Hello\"))
+
+        # Matches second <div>
+        page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
+        ```
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then filter
+        by the text content.
+
+        > NOTE: Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        > NOTE: Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -5857,7 +6017,7 @@ class FrameLocator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -5874,7 +6034,7 @@ class FrameLocator(AsyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+        Allows locating elements by their title. For example, this method will find the button by its title \"Place the order\":
 
         ```html
         <button title='Place the order'>Order Now</button>
@@ -5886,7 +6046,7 @@ class FrameLocator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -5979,7 +6139,7 @@ class Worker(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -6011,7 +6171,7 @@ class Worker(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -7584,7 +7744,7 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -7636,7 +7796,7 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -7686,7 +7846,7 @@ class Page(AsyncContextManager):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -7733,7 +7893,7 @@ class Page(AsyncContextManager):
         selector : str
             A selector to query for. See [working with selectors](../selectors.md) for more details.
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -8613,7 +8773,8 @@ class Page(AsyncContextManager):
 
             Defaults to abort.
         update : Union[bool, None]
-            If specified, updates the given HAR with the actual network information instead of serving from file.
+            If specified, updates the given HAR with the actual network information instead of serving from file. The file is
+            written to disk when `browser_context.close()` is called.
         """
 
         return mapping.from_maybe_impl(
@@ -8674,7 +8835,7 @@ class Page(AsyncContextManager):
             Defaults to `"hide"`.
         scale : Union["css", "device", None]
             When set to `"css"`, screenshot will have a single pixel per each css pixel on the page. For high-dpi devices, this will
-            keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenhots of
+            keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenshots of
             high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
@@ -9041,6 +9202,55 @@ class Page(AsyncContextManager):
             )
         )
 
+    async def clear(
+        self,
+        selector: str,
+        *,
+        timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
+        force: typing.Optional[bool] = None,
+        strict: typing.Optional[bool] = None
+    ) -> None:
+        """Page.clear
+
+        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the
+        element, clears it and triggers an `input` event after clearing. Note that you can pass an empty string to clear the
+        input field.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
+        instead.
+
+        Parameters
+        ----------
+        selector : str
+            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
+            [working with selectors](../selectors.md) for more details.
+        timeout : Union[float, None]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        force : Union[bool, None]
+            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
+        strict : Union[bool, None]
+            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
+            element, the call throws an exception.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.clear(
+                selector=selector,
+                timeout=timeout,
+                noWaitAfter=no_wait_after,
+                force=force,
+                strict=strict,
+            )
+        )
+
     def locator(
         self,
         selector: str,
@@ -9101,7 +9311,7 @@ class Page(AsyncContextManager):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -9119,7 +9329,7 @@ class Page(AsyncContextManager):
         """Page.get_by_label
 
         Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text Password in the following DOM:
+        label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
@@ -9132,7 +9342,7 @@ class Page(AsyncContextManager):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -9162,7 +9372,7 @@ class Page(AsyncContextManager):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -9257,7 +9467,7 @@ class Page(AsyncContextManager):
             "tooltip",
             "tree",
             "treegrid",
-            "treeite",
+            "treeitem",
         ],
         *,
         checked: typing.Optional[bool] = None,
@@ -9283,7 +9493,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -9367,7 +9577,39 @@ class Page(AsyncContextManager):
     ) -> "Locator":
         """Page.get_by_text
 
-        Allows locating elements that contain given text.
+        Allows locating elements that contain given text. Consider the following DOM structure:
+
+        ```html
+        <div>Hello <span>world</span></div>
+        <div>Hello</div>
+        ```
+
+        You can locate by text substring, exact string, or a regular expression:
+
+        ```py
+        # Matches <span>
+        page.get_by_text(\"world\")
+
+        # Matches first <div>
+        page.get_by_text(\"Hello world\")
+
+        # Matches second <div>
+        page.get_by_text(\"Hello\", exact=True)
+
+        # Matches both <div>s
+        page.get_by_text(re.compile(\"Hello\"))
+
+        # Matches second <div>
+        page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
+        ```
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then filter
+        by the text content.
+
+        > NOTE: Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        > NOTE: Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -9375,7 +9617,7 @@ class Page(AsyncContextManager):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -9392,7 +9634,7 @@ class Page(AsyncContextManager):
     ) -> "Locator":
         """Page.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+        Allows locating elements by their title. For example, this method will find the button by its title \"Place the order\":
 
         ```html
         <button title='Place the order'>Order Now</button>
@@ -9404,7 +9646,7 @@ class Page(AsyncContextManager):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -9618,6 +9860,7 @@ class Page(AsyncContextManager):
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None
@@ -9651,6 +9894,10 @@ class Page(AsyncContextManager):
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
@@ -9667,6 +9914,7 @@ class Page(AsyncContextManager):
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
                 timeout=timeout,
+                noWaitAfter=no_wait_after,
                 force=force,
                 strict=strict,
                 trial=trial,
@@ -10255,7 +10503,7 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -11743,7 +11991,8 @@ class BrowserContext(AsyncContextManager):
 
             Defaults to abort.
         update : Union[bool, None]
-            If specified, updates the given HAR with the actual network information instead of serving from file.
+            If specified, updates the given HAR with the actual network information instead of serving from file. The file is
+            written to disk when `browser_context.close()` is called.
         """
 
         return mapping.from_maybe_impl(
@@ -12134,13 +12383,15 @@ class Browser(AsyncContextManager):
             Specifies if viewport supports touch events. Defaults to false.
         color_scheme : Union["dark", "light", "no-preference", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to `'light'`.
+            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `'light'`.
         reduced_motion : Union["no-preference", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to `'no-preference'`.
+            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `'no-preference'`.
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
-            for more details. Defaults to `'none'`.
+            for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -12329,13 +12580,15 @@ class Browser(AsyncContextManager):
             Specifies if viewport supports touch events. Defaults to false.
         color_scheme : Union["dark", "light", "no-preference", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to `'light'`.
+            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `'light'`.
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
-            for more details. Defaults to `'none'`.
+            for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
         reduced_motion : Union["no-preference", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to `'no-preference'`.
+            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `'no-preference'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -12835,13 +13088,15 @@ class BrowserType(AsyncBase):
             Specifies if viewport supports touch events. Defaults to false.
         color_scheme : Union["dark", "light", "no-preference", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to `'light'`.
+            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `'light'`.
         reduced_motion : Union["no-preference", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Defaults to `'no-preference'`.
+            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `'no-preference'`.
         forced_colors : Union["active", "none", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
-            for more details. Defaults to `'none'`.
+            for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         traces_dir : Union[pathlib.Path, str, None]
@@ -13624,7 +13879,7 @@ class Locator(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -13664,7 +13919,7 @@ class Locator(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -13704,7 +13959,7 @@ class Locator(AsyncBase):
         Parameters
         ----------
         expression : str
-            JavaScript expression to be evaluated in the browser context. If the expresion evaluates to a function, the function is
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the function is
             automatically invoked.
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
@@ -13761,6 +14016,42 @@ class Locator(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.fill(
                 value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+            )
+        )
+
+    async def clear(
+        self,
+        *,
+        timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
+        force: typing.Optional[bool] = None
+    ) -> None:
+        """Locator.clear
+
+        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, clears it and triggers an
+        `input` event after clearing.
+
+        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+        However, if the element is inside the `<label>` element that has an associated
+        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
+        instead.
+
+        Parameters
+        ----------
+        timeout : Union[float, None]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
+        force : Union[bool, None]
+            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.clear(
+                timeout=timeout, noWaitAfter=no_wait_after, force=force
             )
         )
 
@@ -13823,7 +14114,7 @@ class Locator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -13841,7 +14132,7 @@ class Locator(AsyncBase):
         """Locator.get_by_label
 
         Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text Password in the following DOM:
+        label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
@@ -13854,7 +14145,7 @@ class Locator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -13884,7 +14175,7 @@ class Locator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -13979,7 +14270,7 @@ class Locator(AsyncBase):
             "tooltip",
             "tree",
             "treegrid",
-            "treeite",
+            "treeitem",
         ],
         *,
         checked: typing.Optional[bool] = None,
@@ -14005,7 +14296,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeite"]
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
@@ -14089,7 +14380,39 @@ class Locator(AsyncBase):
     ) -> "Locator":
         """Locator.get_by_text
 
-        Allows locating elements that contain given text.
+        Allows locating elements that contain given text. Consider the following DOM structure:
+
+        ```html
+        <div>Hello <span>world</span></div>
+        <div>Hello</div>
+        ```
+
+        You can locate by text substring, exact string, or a regular expression:
+
+        ```py
+        # Matches <span>
+        page.get_by_text(\"world\")
+
+        # Matches first <div>
+        page.get_by_text(\"Hello world\")
+
+        # Matches second <div>
+        page.get_by_text(\"Hello\", exact=True)
+
+        # Matches both <div>s
+        page.get_by_text(re.compile(\"Hello\"))
+
+        # Matches second <div>
+        page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
+        ```
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then filter
+        by the text content.
+
+        > NOTE: Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        > NOTE: Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -14097,7 +14420,7 @@ class Locator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -14114,7 +14437,7 @@ class Locator(AsyncBase):
     ) -> "Locator":
         """Locator.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Submit\":
+        Allows locating elements by their title. For example, this method will find the button by its title \"Place the order\":
 
         ```html
         <button title='Place the order'>Order Now</button>
@@ -14126,7 +14449,7 @@ class Locator(AsyncBase):
             Text to locate the element for.
         exact : Union[bool, None]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a regular
-            expression.
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -14262,6 +14585,20 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(await self._impl_obj.focus(timeout=timeout))
 
+    async def blur(self, *, timeout: typing.Optional[float] = None) -> None:
+        """Locator.blur
+
+        Calls [blur](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/blur) on the element.
+
+        Parameters
+        ----------
+        timeout : Union[float, None]
+            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
+            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.blur(timeout=timeout))
+
     async def count(self) -> int:
         """Locator.count
 
@@ -14371,6 +14708,7 @@ class Locator(AsyncBase):
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None
     ) -> None:
@@ -14398,6 +14736,10 @@ class Locator(AsyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
             using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
+            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
+            inaccessible pages. Defaults to `false`.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         trial : Union[bool, None]
@@ -14410,6 +14752,7 @@ class Locator(AsyncBase):
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
                 timeout=timeout,
+                noWaitAfter=no_wait_after,
                 force=force,
                 trial=trial,
             )
@@ -14688,7 +15031,7 @@ class Locator(AsyncBase):
             Defaults to `"hide"`.
         scale : Union["css", "device", None]
             When set to `"css"`, screenshot will have a single pixel per each css pixel on the page. For high-dpi devices, this will
-            keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenhots of
+            keep screenshots small. Using `"device"` option will produce a single pixel per each device pixel, so screenshots of
             high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.

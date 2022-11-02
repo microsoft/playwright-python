@@ -268,6 +268,15 @@ def test_locators_fill_should_work(page: Page, server: Server) -> None:
     assert page.evaluate("result") == "some value"
 
 
+def test_locators_clear_should_work(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/textarea.html")
+    button = page.locator("input")
+    button.fill("some value")
+    assert page.evaluate("result") == "some value"
+    button.clear()
+    assert page.evaluate("result") == ""
+
+
 def test_locators_check_should_work(page: Page) -> None:
     page.set_content("<input id='checkbox' type='checkbox'></input>")
     button = page.locator("input")
@@ -724,3 +733,39 @@ def test_locators_has_does_not_encode_unicode(page: Page, server: Server) -> Non
         with pytest.raises(Error) as exc_info:
             locator.click(timeout=1_000)
         assert "Драматург" in exc_info.value.message
+
+
+def test_locators_should_focus_and_blur_a_button(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/button.html")
+    button = page.locator("button")
+    assert not button.evaluate("button => document.activeElement === button")
+
+    focused = False
+    blurred = False
+
+    async def focus_event() -> None:
+        nonlocal focused
+        focused = True
+
+    async def blur_event() -> None:
+        nonlocal blurred
+        blurred = True
+
+    page.expose_function("focusEvent", focus_event)
+    page.expose_function("blurEvent", blur_event)
+    button.evaluate(
+        """button => {
+        button.addEventListener('focus', window['focusEvent']);
+        button.addEventListener('blur', window['blurEvent']);
+    }"""
+    )
+
+    button.focus()
+    assert focused
+    assert not blurred
+    assert button.evaluate("button => document.activeElement === button")
+
+    button.blur()
+    assert focused
+    assert blurred
+    assert not button.evaluate("button => document.activeElement === button")
