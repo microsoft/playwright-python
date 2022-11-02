@@ -21,9 +21,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     - name: Install dependencies & browsers
@@ -34,7 +34,7 @@ jobs:
         python setup.py bdist_wheel
         python -m playwright install --with-deps
     - name: Lint
-      uses: pre-commit/action@v2.0.3
+      run: pre-commit run --show-diff-on-failure --color=always --all-files
     - name: Generate APIs
       run: bash scripts/update_api.sh
     - name: Verify generated API is up to date
@@ -94,9 +94,9 @@ jobs:
           browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies & browsers
@@ -126,7 +126,7 @@ jobs:
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: ${{ matrix.browser }}-${{ matrix.os }}-${{ matrix.python-version }}
@@ -150,9 +150,9 @@ jobs:
           browser-channel: msedge
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     - name: Install dependencies & browsers
@@ -176,7 +176,7 @@ jobs:
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: ${{ matrix.browser-channel }}-${{ matrix.os }}
@@ -190,7 +190,7 @@ jobs:
         os: [ubuntu-20.04, macos-10.15, windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Get conda
