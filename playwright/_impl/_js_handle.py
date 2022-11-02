@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import math
-from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import ParseResult, urlparse, urlunparse
@@ -28,10 +27,13 @@ if TYPE_CHECKING:  # pragma: no cover
 Serializable = Any
 
 
-@dataclass
 class VisitorInfo:
-    visited: Map[Any, int] = Map()
-    last_id: int = 0
+    visited: Map[Any, int]
+    last_id: int
+
+    def __init__(self) -> None:
+        self.visited = Map()
+        self.last_id = 0
 
     def visit(self, obj: Any) -> int:
         assert obj not in self.visited
