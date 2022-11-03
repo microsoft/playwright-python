@@ -242,9 +242,9 @@ async def prepare_browser_context_params(params: Dict) -> None:
             params["storageState"] = json.loads(
                 (await async_readfile(storageState)).decode()
             )
-    if params.get("colorScheme", None) is None:
+    if params.get("colorScheme", None) == "null":
         params["colorScheme"] = "no-override"
-    if params.get("reducedMotion", None) is None:
+    if params.get("reducedMotion", None) == "null":
         params["reducedMotion"] = "no-override"
-    if params.get("forcedColors", None) is None:
+    if params.get("forcedColors", None) == "null":
         params["forcedColors"] = "no-override"

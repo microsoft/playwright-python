@@ -551,15 +551,18 @@ class Page(ChannelOwner):
         forcedColors: ForcedColors = None,
     ) -> None:
         params = locals_to_params(locals())
-        params["colorScheme"] = (
-            "no-override" if "colorScheme" not in params else colorScheme
-        )
-        params["reducedMotion"] = (
-            "no-override" if "reducedMotion" not in params else reducedMotion
-        )
-        params["forcedColors"] = (
-            "no-override" if "forcedColors" not in params else forcedColors
-        )
+        if "colorScheme" in params:
+            params["colorScheme"] = (
+                "no-override" if params["colorScheme"] == "null" else colorScheme
+            )
+        if "reducedMotion" in params:
+            params["reducedMotion"] = (
+                "no-override" if params["reducedMotion"] == "null" else reducedMotion
+            )
+        if "forcedColors" in params:
+            params["forcedColors"] = (
+                "no-override" if params["forcedColors"] == "null" else forcedColors
+            )
         await self._channel.send("emulateMedia", params)
 
     async def set_viewport_size(self, viewportSize: ViewportSize) -> None:

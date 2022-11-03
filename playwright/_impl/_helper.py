@@ -60,9 +60,9 @@ RouteHandlerCallback = Union[
     Callable[["Route"], Any], Callable[["Route", "Request"], Any]
 ]
 
-ColorScheme = Literal["dark", "light", "no-preference"]
-ForcedColors = Literal["active", "none"]
-ReducedMotion = Literal["no-preference", "reduce"]
+ColorScheme = Literal["dark", "light", "no-preference", "null"]
+ForcedColors = Literal["active", "none", "null"]
+ReducedMotion = Literal["no-preference", "null", "reduce"]
 DocumentLoadState = Literal["commit", "domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "Meta", "Shift"]
 MouseButton = Literal["left", "middle", "right"]

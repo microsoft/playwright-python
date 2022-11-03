@@ -8535,9 +8535,13 @@ class Page(SyncContextManager):
         self,
         *,
         media: typing.Optional[Literal["print", "screen"]] = None,
-        color_scheme: typing.Optional[Literal["dark", "light", "no-preference"]] = None,
-        reduced_motion: typing.Optional[Literal["no-preference", "reduce"]] = None,
-        forced_colors: typing.Optional[Literal["active", "none"]] = None
+        color_scheme: typing.Optional[
+            Literal["dark", "light", "no-preference", "null"]
+        ] = None,
+        reduced_motion: typing.Optional[
+            Literal["no-preference", "null", "reduce"]
+        ] = None,
+        forced_colors: typing.Optional[Literal["active", "none", "null"]] = None
     ) -> None:
         """Page.emulate_media
 
@@ -8577,15 +8581,13 @@ class Page(SyncContextManager):
         media : Union["print", "screen", None]
             Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null`
             disables CSS media emulation.
-        color_scheme : Union["dark", "light", "no-preference", None]
+        color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-            `null` disables color scheme emulation.
-        reduced_motion : Union["no-preference", "reduce", None]
+            `'Null'` disables color scheme emulation.
+        reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null`
             disables reduced motion emulation.
-        forced_colors : Union["active", "none", None]
-            Emulates `'forced-colors'` media feature, supported values are `'active'` and `'none'`. Passing `null` disables forced
-            colors emulation.
+        forced_colors : Union["active", "none", "null", None]
         """
 
         return mapping.from_maybe_impl(
@@ -12338,9 +12340,13 @@ class Browser(SyncContextManager):
         device_scale_factor: typing.Optional[float] = None,
         is_mobile: typing.Optional[bool] = None,
         has_touch: typing.Optional[bool] = None,
-        color_scheme: typing.Optional[Literal["dark", "light", "no-preference"]] = None,
-        reduced_motion: typing.Optional[Literal["no-preference", "reduce"]] = None,
-        forced_colors: typing.Optional[Literal["active", "none"]] = None,
+        color_scheme: typing.Optional[
+            Literal["dark", "light", "no-preference", "null"]
+        ] = None,
+        reduced_motion: typing.Optional[
+            Literal["no-preference", "null", "reduce"]
+        ] = None,
+        forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
@@ -12423,17 +12429,17 @@ class Browser(SyncContextManager):
             in Firefox.
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false.
-        color_scheme : Union["dark", "light", "no-preference", None]
+        color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'light'`.
-        reduced_motion : Union["no-preference", "reduce", None]
+        reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'no-preference'`.
-        forced_colors : Union["active", "none", None]
+        forced_colors : Union["active", "none", "null", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
-            for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
+            for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'none'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -12551,9 +12557,13 @@ class Browser(SyncContextManager):
         device_scale_factor: typing.Optional[float] = None,
         is_mobile: typing.Optional[bool] = None,
         has_touch: typing.Optional[bool] = None,
-        color_scheme: typing.Optional[Literal["dark", "light", "no-preference"]] = None,
-        forced_colors: typing.Optional[Literal["active", "none"]] = None,
-        reduced_motion: typing.Optional[Literal["no-preference", "reduce"]] = None,
+        color_scheme: typing.Optional[
+            Literal["dark", "light", "no-preference", "null"]
+        ] = None,
+        forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
+        reduced_motion: typing.Optional[
+            Literal["no-preference", "null", "reduce"]
+        ] = None,
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
@@ -12622,16 +12632,16 @@ class Browser(SyncContextManager):
             in Firefox.
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false.
-        color_scheme : Union["dark", "light", "no-preference", None]
+        color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'light'`.
-        forced_colors : Union["active", "none", None]
+        forced_colors : Union["active", "none", "null", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
-            for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
-        reduced_motion : Union["no-preference", "reduce", None]
+            for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'none'`.
+        reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'no-preference'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
@@ -13022,9 +13032,13 @@ class BrowserType(SyncBase):
         device_scale_factor: typing.Optional[float] = None,
         is_mobile: typing.Optional[bool] = None,
         has_touch: typing.Optional[bool] = None,
-        color_scheme: typing.Optional[Literal["dark", "light", "no-preference"]] = None,
-        reduced_motion: typing.Optional[Literal["no-preference", "reduce"]] = None,
-        forced_colors: typing.Optional[Literal["active", "none"]] = None,
+        color_scheme: typing.Optional[
+            Literal["dark", "light", "no-preference", "null"]
+        ] = None,
+        reduced_motion: typing.Optional[
+            Literal["no-preference", "null", "reduce"]
+        ] = None,
+        forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
         accept_downloads: typing.Optional[bool] = None,
         traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
@@ -13136,17 +13150,17 @@ class BrowserType(SyncBase):
             in Firefox.
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false.
-        color_scheme : Union["dark", "light", "no-preference", None]
+        color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'light'`.
-        reduced_motion : Union["no-preference", "reduce", None]
+        reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `null` resets emulation to system defaults. Defaults to
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'no-preference'`.
-        forced_colors : Union["active", "none", None]
+        forced_colors : Union["active", "none", "null", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See `page.emulate_media()`
-            for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
+            for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'none'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         traces_dir : Union[pathlib.Path, str, None]
