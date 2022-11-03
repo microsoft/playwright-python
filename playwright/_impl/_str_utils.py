@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import re
 from typing import Pattern, Union
 
@@ -43,12 +44,7 @@ def escape_for_text_selector(
 ) -> str:
     if isinstance(text, Pattern):
         return f"/{text.pattern}/{escape_regex_flags(text)}"
-    if exact:
-        return '"' + text.replace('"', '\\"') + '"'
-    if '"' in text or ">>" in text or text[0] == "/":
-        suffix = "" if case_sensitive else "i"
-        return "/" + re.sub(r"\s+", "\\\\s+", escape_for_regex(text)) + "/" + suffix
-    return text
+    return json.dumps(text) + ("s" if exact else "i")
 
 
 def escape_for_attribute_selector(value: str, exact: bool = None) -> str:

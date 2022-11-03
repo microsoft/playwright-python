@@ -122,7 +122,7 @@ class Browser(ChannelOwner):
         recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        await normalize_context_params(self._connection._is_sync, params)
+        await prepare_browser_context_params(params)
 
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))
@@ -219,7 +219,7 @@ class Browser(ChannelOwner):
         return base64.b64decode(encoded_binary)
 
 
-async def normalize_context_params(is_sync: bool, params: Dict) -> None:
+async def prepare_browser_context_params(params: Dict) -> None:
     if params.get("noViewport"):
         del params["noViewport"]
         params["noDefaultViewport"] = True
@@ -242,3 +242,9 @@ async def normalize_context_params(is_sync: bool, params: Dict) -> None:
             params["storageState"] = json.loads(
                 (await async_readfile(storageState)).decode()
             )
+    if params.get("colorScheme", None) == "null":
+        params["colorScheme"] = "no-override"
+    if params.get("reducedMotion", None) == "null":
+        params["reducedMotion"] = "no-override"
+    if params.get("forcedColors", None) == "null":
+        params["forcedColors"] = "no-override"

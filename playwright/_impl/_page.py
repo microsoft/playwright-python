@@ -550,7 +550,20 @@ class Page(ChannelOwner):
         reducedMotion: ReducedMotion = None,
         forcedColors: ForcedColors = None,
     ) -> None:
-        await self._channel.send("emulateMedia", locals_to_params(locals()))
+        params = locals_to_params(locals())
+        if "colorScheme" in params:
+            params["colorScheme"] = (
+                "no-override" if params["colorScheme"] == "null" else colorScheme
+            )
+        if "reducedMotion" in params:
+            params["reducedMotion"] = (
+                "no-override" if params["reducedMotion"] == "null" else reducedMotion
+            )
+        if "forcedColors" in params:
+            params["forcedColors"] = (
+                "no-override" if params["forcedColors"] == "null" else forcedColors
+            )
+        await self._channel.send("emulateMedia", params)
 
     async def set_viewport_size(self, viewportSize: ViewportSize) -> None:
         self._viewport_size = viewportSize
@@ -728,6 +741,23 @@ class Page(ChannelOwner):
     ) -> None:
         return await self._main_frame.fill(**locals_to_params(locals()))
 
+    async def clear(
+        self,
+        selector: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
+        strict: bool = None,
+    ) -> None:
+        await self.fill(
+            selector,
+            "",
+            timeout=timeout,
+            noWaitAfter=noWaitAfter,
+            force=force,
+            strict=strict,
+        )
+
     def locator(
         self,
         selector: str,
@@ -822,6 +852,7 @@ class Page(ChannelOwner):
         modifiers: List[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
+        noWaitAfter: bool = None,
         force: bool = None,
         strict: bool = None,
         trial: bool = None,

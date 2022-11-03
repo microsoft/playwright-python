@@ -84,3 +84,11 @@ def test_emitted_for_domcontentloaded_and_load(page: Page, server: Server) -> No
             page.goto(server.EMPTY_PAGE)
     assert isinstance(dom_info.value, Page)
     assert isinstance(load_info.value, Page)
+
+
+def test_fill_should_be_able_to_clear_using_clear(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/textarea.html")
+    page.fill("input", "some value")
+    assert page.evaluate("result") == "some value"
+    page.clear("input")
+    assert page.evaluate("result") == ""

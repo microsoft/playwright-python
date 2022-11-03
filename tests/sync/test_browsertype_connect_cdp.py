@@ -29,7 +29,7 @@ def test_connect_to_an_existing_cdp_session(
     browser_server = browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    cdp_browser = browser_type.connect_over_cdp(f"http://localhost:{port}")
+    cdp_browser = browser_type.connect_over_cdp(f"http://127.0.0.1:{port}")
     assert len(cdp_browser.contexts) == 1
     cdp_browser.close()
     browser_server.close()

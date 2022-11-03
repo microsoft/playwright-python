@@ -79,10 +79,7 @@ class Locator:
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
 
         if has_text:
-            text_selector = "text=" + escape_for_text_selector(has_text, exact=False)
-            self._selector += (
-                f" >> internal:has={json.dumps(text_selector, ensure_ascii=False)}"
-            )
+            self._selector += f" >> internal:has-text={escape_for_text_selector(has_text, exact=False)}"
 
         if has:
             if has._frame != frame:
@@ -200,6 +197,14 @@ class Locator:
         params = locals_to_params(locals())
         return await self._frame.fill(self._selector, strict=True, **params)
 
+    async def clear(
+        self,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
+    ) -> None:
+        await self.fill("", timeout=timeout, noWaitAfter=noWaitAfter, force=force)
+
     def locator(
         self,
         selector: str,
@@ -311,6 +316,16 @@ class Locator:
         params = locals_to_params(locals())
         return await self._frame.focus(self._selector, strict=True, **params)
 
+    async def blur(self, timeout: float = None) -> None:
+        await self._frame._channel.send(
+            "blur",
+            {
+                "selector": self._selector,
+                "strict": True,
+                **locals_to_params(locals()),
+            },
+        )
+
     async def count(
         self,
     ) -> int:
@@ -345,6 +360,7 @@ class Locator:
         modifiers: List[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
+        noWaitAfter: bool = None,
         force: bool = None,
         trial: bool = None,
     ) -> None:
@@ -762,7 +778,7 @@ def get_by_placeholder_selector(
 
 
 def get_by_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return "text=" + escape_for_text_selector(text, exact=exact)
+    return "internal:text=" + escape_for_text_selector(text, exact=exact)
 
 
 def get_by_role_selector(
@@ -801,4 +817,4 @@ def get_by_role_selector(
     if pressed is not None:
         props.append(("pressed", str(pressed)))
     props_str = "".join([f"[{t[0]}={t[1]}]" for t in props])
-    return f"role={role}{props_str}"
+    return f"internal:role={role}{props_str}"

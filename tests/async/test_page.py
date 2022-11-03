@@ -1230,11 +1230,19 @@ async def test_fill_should_not_be_able_to_fill_text_into_the_input_type_number_(
     assert "Cannot type text into input[type=number]" in exc_info.value.message
 
 
-async def test_fill_should_be_able_to_clear(page, server):
+async def test_fill_should_be_able_to_clear_using_fill(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.fill("input", "some value")
     assert await page.evaluate("result") == "some value"
     await page.fill("input", "")
+    assert await page.evaluate("result") == ""
+
+
+async def test_fill_should_be_able_to_clear_using_clear(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.fill("input", "some value")
+    assert await page.evaluate("result") == "some value"
+    await page.clear("input")
     assert await page.evaluate("result") == ""
 
 

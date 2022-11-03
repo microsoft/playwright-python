@@ -230,15 +230,6 @@ async def test_to_have_js_property_fail_boolean_2(page: Page) -> None:
         await expect(locator).to_have_js_property("foo", True, timeout=500)
 
 
-@pytest.mark.skip("https://github.com/microsoft/playwright/issues/14909")
-async def test_to_have_js_property_pass_undefined(page: Page) -> None:
-    await page.set_content("<div></div>")
-    locator = page.locator("div")
-    await expect(locator).to_have_js_property(
-        "foo", None
-    )  # Python does not have an undefined
-
-
 async def test_to_have_js_property_pass_null(page: Page) -> None:
     await page.set_content("<div></div>")
     await page.eval_on_selector("div", "e => e.foo = null")

@@ -249,19 +249,23 @@ class Frame(ChannelOwner):
             raise Error(
                 "state: expected one of (load|domcontentloaded|networkidle|commit)"
             )
-        if state in self._load_states:
-            return
         wait_helper = self._setup_navigation_wait_helper("wait_for_load_state", timeout)
 
-        def handle_load_state_event(actual_state: str) -> bool:
-            wait_helper.log(f'"{actual_state}" event fired')
-            return actual_state == state
+        if state in self._load_states:
+            wait_helper.log(f'  not waiting, "{state}" event already fired')
+            # TODO: align with upstream
+            wait_helper._fulfill(None)
+        else:
 
-        wait_helper.wait_for_event(
-            self._event_emitter,
-            "loadstate",
-            handle_load_state_event,
-        )
+            def handle_load_state_event(actual_state: str) -> bool:
+                wait_helper.log(f'"{actual_state}" event fired')
+                return actual_state == state
+
+            wait_helper.wait_for_event(
+                self._event_emitter,
+                "loadstate",
+                handle_load_state_event,
+            )
         await wait_helper.result()
 
     async def frame_element(self) -> ElementHandle:
@@ -618,6 +622,7 @@ class Frame(ChannelOwner):
         modifiers: List[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
+        noWaitAfter: bool = None,
         force: bool = None,
         strict: bool = None,
         trial: bool = None,
@@ -788,6 +793,23 @@ class Frame(ChannelOwner):
                 strict=strict,
                 trial=trial,
             )
+
+    async def clear(
+        self,
+        selector: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
+        strict: bool = None,
+    ) -> None:
+        await self.fill(
+            selector,
+            "",
+            timeout=timeout,
+            noWaitAfter=noWaitAfter,
+            force=force,
+            strict=strict,
+        )
 
     async def _highlight(self, selector: str) -> None:
         await self._channel.send("highlight", {"selector": selector})

@@ -19,7 +19,7 @@ from tests.server import Server
 
 
 def test_response_server_addr(page: Page, server: Server) -> None:
-    response = page.goto(server.EMPTY_PAGE)
+    response = page.goto(f"http://127.0.0.1:{server.PORT}")
     assert response
     server_addr = response.server_addr()
     assert server_addr

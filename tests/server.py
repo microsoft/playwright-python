@@ -209,7 +209,11 @@ class Server:
 
 class HTTPServer(Server):
     def listen(self, factory: ClientFactory) -> None:
-        reactor.listenTCP(self.PORT, factory)
+        reactor.listenTCP(self.PORT, factory, interface="127.0.0.1")
+        try:
+            reactor.listenTCP(self.PORT, factory, interface="::1")
+        except Exception:
+            pass
 
 
 class HTTPSServer(Server):
@@ -225,7 +229,11 @@ class HTTPSServer(Server):
             ),
         )
         contextFactory = cert.options()
-        reactor.listenSSL(self.PORT, factory, contextFactory)
+        reactor.listenSSL(self.PORT, factory, contextFactory, interface="127.0.0.1")
+        try:
+            reactor.listenSSL(self.PORT, factory, contextFactory, interface="::1")
+        except Exception:
+            pass
 
 
 class WebSocketServerServer(WebSocketServerProtocol):

@@ -442,6 +442,16 @@ async def test_fill_input_when_Node_is_removed(page, server):
     assert await page.evaluate("result") == "some value"
 
 
+async def test_clear_input(page: Page, server: Server) -> None:
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    handle = await page.query_selector("input")
+    assert handle
+    await handle.fill("some value")
+    assert await page.evaluate("result") == "some value"
+    await handle.clear()
+    assert await page.evaluate("result") == ""
+
+
 async def test_select_textarea(page, server, is_firefox):
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")

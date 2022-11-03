@@ -106,6 +106,7 @@ class ElementHandle(JSHandle):
         modifiers: List[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
+        noWaitAfter: bool = None,
         force: bool = None,
         trial: bool = None,
     ) -> None:
@@ -216,6 +217,14 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
     ) -> None:
         await self._channel.send("type", locals_to_params(locals()))
+
+    async def clear(
+        self,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        force: bool = None,
+    ) -> None:
+        await self.fill("", **locals_to_params(locals()))
 
     async def press(
         self,
