@@ -175,8 +175,16 @@ async def test_should_use_viewport_size_from_window_features(browser: Browser, s
     size = None
     async with page.expect_popup() as popup_info:
         size = await page.evaluate(
-            """() => {
-                win = window.open(window.location.href, 'Title', 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=300,top=0,left=0')
+            """async () => {
+                const win = window.open(window.location.href, 'Title', 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=300,top=0,left=0');
+                await new Promise(resolve => {
+                    const interval = setInterval(() => {
+                    if (win.innerWidth === 600 && win.innerHeight === 300) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                    }, 10);
+                });
                 return { width: win.innerWidth, height: win.innerHeight }
             }"""
         )
