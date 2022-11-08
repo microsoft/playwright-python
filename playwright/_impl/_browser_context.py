@@ -320,7 +320,7 @@ class BrowserContext(ChannelOwner):
         page: Optional[Page] = None,
         url: Union[Pattern[str], str] = None,
     ) -> None:
-        params = {
+        params: Dict[str, Any] = {
             "options": prepare_record_har_options(
                 {
                     "recordHarPath": har,

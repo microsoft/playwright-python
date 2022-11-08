@@ -133,7 +133,7 @@ class Page(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._browser_context: BrowserContext = parent
+        self._browser_context = cast("BrowserContext", parent)
         self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)
@@ -1268,7 +1268,7 @@ class BindingCall(ChannelOwner):
             )
 
 
-def trim_url(param: URLMatchRequest) -> Optional[str]:
+def trim_url(param: Union[URLMatchRequest, URLMatchResponse]) -> Optional[str]:
     if isinstance(param, re.Pattern):
         return trim_end(param.pattern)
     if isinstance(param, str):

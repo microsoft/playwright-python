@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import ParseResult, urlparse, urlunparse
 
-from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._connection import Channel, ChannelOwner, from_channel
 from playwright._impl._map import Map
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -107,7 +107,7 @@ class JSHandle(ChannelOwner):
 
 
 def serialize_value(
-    value: Any, handles: List[JSHandle], visitor_info: Optional[VisitorInfo] = None
+    value: Any, handles: List[Channel], visitor_info: Optional[VisitorInfo] = None
 ) -> Any:
     if visitor_info is None:
         visitor_info = VisitorInfo()
@@ -159,7 +159,7 @@ def serialize_value(
 
 
 def serialize_argument(arg: Serializable = None) -> Any:
-    handles: List[JSHandle] = []
+    handles: List[Channel] = []
     value = serialize_value(arg, handles)
     return dict(value=value, handles=handles)
 

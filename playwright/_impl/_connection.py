@@ -290,7 +290,7 @@ class Connection(EventEmitter):
             return
 
         guid = msg["guid"]
-        method = msg.get("method")
+        method = msg["method"]
         params = msg.get("params")
         if method == "__create__":
             assert params
