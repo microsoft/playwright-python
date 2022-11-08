@@ -21,7 +21,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from greenlet import greenlet
-from pyee import AsyncIOEventEmitter, EventEmitter
+from pyee import EventEmitter
+from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
 from playwright._impl._helper import ParsedMessagePayload, parse_error
