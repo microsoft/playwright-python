@@ -24,7 +24,7 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._api_types import Error
-from playwright._impl._browser import Browser, normalize_context_params
+from playwright._impl._browser import Browser, prepare_browser_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import (
     ChannelOwner,
@@ -54,7 +54,7 @@ class BrowserType(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        _playwright: "Playwright"
+        self._playwright: "Playwright"
 
     def __repr__(self) -> str:
         return f"<BrowserType name={self.name} executable_path={self.executable_path}>"
@@ -148,7 +148,7 @@ class BrowserType(ChannelOwner):
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir)) if userDataDir else ""
         params = locals_to_params(locals())
-        await normalize_context_params(self._connection._is_sync, params)
+        await prepare_browser_context_params(params)
         normalize_launch_params(params)
         context = cast(
             BrowserContext,

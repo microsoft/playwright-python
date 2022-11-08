@@ -270,7 +270,7 @@ def test_should_amend_post_data(page: Page, server: Server) -> None:
     page.route("**/*", lambda route: route.fallback(post_data="doggo"))
 
     with server.expect_request("/sleep.zzz") as server_request_info:
-        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"),
+        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })")
     server_request = server_request_info.value
     assert post_data == ["doggo"]
     assert server_request.post_body == b"doggo"

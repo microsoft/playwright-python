@@ -206,6 +206,27 @@ async def test_should_work_with_playwright_context_managers(
     ]
 
 
+async def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
+    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+) -> None:
+    await context.tracing.start(screenshots=True, snapshots=True)
+
+    await page.goto(server.EMPTY_PAGE)
+    await page.wait_for_load_state("load")
+    await page.wait_for_load_state("load")
+
+    trace_file_path = tmpdir / "trace.zip"
+    await context.tracing.stop(path=trace_file_path)
+
+    (_, events) = parse_trace(trace_file_path)
+    assert get_actions(events) == [
+        "Page.goto",
+        "Page.wait_for_load_state",
+        "Page.wait_for_load_state",
+        "Tracing.stop",
+    ]
+
+
 def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
     resources: Dict[str, bytes] = {}
     with zipfile.ZipFile(path, "r") as zip:

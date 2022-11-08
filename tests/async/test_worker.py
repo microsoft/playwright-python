@@ -139,7 +139,7 @@ async def test_workers_should_clear_upon_cross_process_navigation(server, page):
 
 async def test_workers_should_report_network_activity(page, server):
     async with page.expect_worker() as worker_info:
-        await page.goto(server.PREFIX + "/worker/worker.html"),
+        await page.goto(server.PREFIX + "/worker/worker.html")
     worker = await worker_info.value
     url = server.PREFIX + "/one-style.css"
     async with page.expect_request(url) as request_info, page.expect_response(

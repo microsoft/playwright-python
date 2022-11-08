@@ -24,7 +24,7 @@ def test_console_should_work(page: Page, browser_name: str) -> None:
     messages: List[ConsoleMessage] = []
     page.once("console", lambda m: messages.append(m))
     with page.expect_console_message():
-        page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
+        page.evaluate('() => console.log("hello", 5, {foo: "bar"})')
     assert len(messages) == 1
     message = messages[0]
     if browser_name != "firefox":
@@ -108,7 +108,7 @@ def test_console_should_not_fail_for_window_object(
 def test_console_should_trigger_correct_Log(page: Page, server: Server) -> None:
     page.goto("about:blank")
     with page.expect_console_message() as message:
-        page.evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE),
+        page.evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
     assert "Access-Control-Allow-Origin" in message.value.text
     assert message.value.type == "error"
 

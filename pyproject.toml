@@ -37,3 +37,6 @@ pythonVersion = "3.7"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false
 reportCallInDefaultInitializer = true
+reportOptionalSubscript = false
+reportUnboundVariable = false
+strictParameterNoneValue = false

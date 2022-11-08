@@ -79,7 +79,7 @@ def test_should_propagate_extra_http_headers_with_redirects(
     with server.expect_request("/a/redirect1") as server_req1:
         with server.expect_request("/b/c/redirect2") as server_req2:
             with server.expect_request("/simple.json") as server_req3:
-                request.get(f"{server.PREFIX}/a/redirect1"),
+                request.get(f"{server.PREFIX}/a/redirect1")
     assert server_req1.value.getHeader("my-secret") == "Value"
     assert server_req2.value.getHeader("my-secret") == "Value"
     assert server_req3.value.getHeader("my-secret") == "Value"
@@ -142,7 +142,7 @@ def test_should_use_playwright_as_a_user_agent(
 ) -> None:
     request = playwright.request.new_context()
     with server.expect_request("/empty.html") as server_req:
-        request.get(server.EMPTY_PAGE),
+        request.get(server.EMPTY_PAGE)
     assert str(server_req.value.getHeader("User-Agent")).startswith("Playwright/")
     request.dispose()
 

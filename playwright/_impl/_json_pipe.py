@@ -15,7 +15,7 @@
 import asyncio
 from typing import Dict, Optional, cast
 
-from pyee import AsyncIOEventEmitter
+from pyee.asyncio import AsyncIOEventEmitter
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import Channel
@@ -33,6 +33,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         Transport.__init__(self, loop)
         self._stop_requested = False
         self._pipe_channel = pipe_channel
+        self._loop: asyncio.AbstractEventLoop
 
     def request_stop(self) -> None:
         self._stop_requested = True

@@ -190,7 +190,7 @@ def test_sync_network_events(page: Page, server: Server) -> None:
 def test_console_should_work(page: Page, browser_name: str) -> None:
     messages = []
     page.once("console", lambda m: messages.append(m))
-    page.evaluate('() => console.log("hello", 5, {foo: "bar"})'),
+    page.evaluate('() => console.log("hello", 5, {foo: "bar"})')
     assert len(messages) == 1
     message = messages[0]
     if browser_name != "firefox":

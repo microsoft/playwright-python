@@ -174,7 +174,7 @@ async def test_async_stacks_should_work(page, server):
 
 async def test_opener_should_provide_access_to_the_opener_page(page):
     async with page.expect_popup() as popup_info:
-        await page.evaluate("window.open('about:blank')"),
+        await page.evaluate("window.open('about:blank')")
     popup = await popup_info.value
     opener = await popup.opener()
     assert opener == page
@@ -182,7 +182,7 @@ async def test_opener_should_provide_access_to_the_opener_page(page):
 
 async def test_opener_should_return_null_if_parent_page_has_been_closed(page):
     async with page.expect_popup() as popup_info:
-        await page.evaluate("window.open('about:blank')"),
+        await page.evaluate("window.open('about:blank')")
     popup = await popup_info.value
     await page.close()
     opener = await popup.opener()
@@ -1230,11 +1230,19 @@ async def test_fill_should_not_be_able_to_fill_text_into_the_input_type_number_(
     assert "Cannot type text into input[type=number]" in exc_info.value.message
 
 
-async def test_fill_should_be_able_to_clear(page, server):
+async def test_fill_should_be_able_to_clear_using_fill(page, server):
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.fill("input", "some value")
     assert await page.evaluate("result") == "some value"
     await page.fill("input", "")
+    assert await page.evaluate("result") == ""
+
+
+async def test_fill_should_be_able_to_clear_using_clear(page, server):
+    await page.goto(server.PREFIX + "/input/textarea.html")
+    await page.fill("input", "some value")
+    assert await page.evaluate("result") == "some value"
+    await page.clear("input")
     assert await page.evaluate("result") == ""
 
 

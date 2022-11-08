@@ -30,7 +30,7 @@ async def test_connect_to_an_existing_cdp_session(
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    cdp_browser = await browser_type.connect_over_cdp(f"http://localhost:{port}")
+    cdp_browser = await browser_type.connect_over_cdp(f"http://127.0.0.1:{port}")
     assert len(cdp_browser.contexts) == 1
     await cdp_browser.close()
     await browser_server.close()
@@ -43,7 +43,7 @@ async def test_connect_to_an_existing_cdp_session_twice(
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    endpoint_url = f"http://localhost:{port}"
+    endpoint_url = f"http://127.0.0.1:{port}"
     cdp_browser1 = await browser_type.connect_over_cdp(endpoint_url)
     cdp_browser2 = await browser_type.connect_over_cdp(endpoint_url)
     assert len(cdp_browser1.contexts) == 1
@@ -76,7 +76,7 @@ async def test_conect_over_a_ws_endpoint(
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
     )
-    ws_endpoint = _ws_endpoint_from_url(f"http://localhost:{port}/json/version/")
+    ws_endpoint = _ws_endpoint_from_url(f"http://127.0.0.1:{port}/json/version/")
 
     cdp_browser1 = await browser_type.connect_over_cdp(ws_endpoint)
     assert len(cdp_browser1.contexts) == 1

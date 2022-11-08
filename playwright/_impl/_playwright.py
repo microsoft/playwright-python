@@ -64,7 +64,7 @@ class Playwright(ChannelOwner):
             return self.webkit
         raise ValueError("Invalid browser " + value)
 
-    def _set_selectors(self, selectors: SelectorsOwner) -> None:
+    def _set_selectors(self, selectors: Selectors) -> None:
         selectors_owner = from_channel(self._initializer["selectors"])
         self.selectors._remove_channel(selectors_owner)
         self.selectors = selectors
