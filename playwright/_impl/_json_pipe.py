@@ -33,6 +33,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         Transport.__init__(self, loop)
         self._stop_requested = False
         self._pipe_channel = pipe_channel
+        self._loop: asyncio.AbstractEventLoop
 
     def request_stop(self) -> None:
         self._stop_requested = True

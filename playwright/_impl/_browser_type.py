@@ -54,7 +54,7 @@ class BrowserType(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        _playwright: "Playwright"
+        self._playwright: "Playwright"
 
     def __repr__(self) -> str:
         return f"<BrowserType name={self.name} executable_path={self.executable_path}>"

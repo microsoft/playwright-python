@@ -54,6 +54,7 @@ from playwright._impl._wait_helper import WaitHelper
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
+    from playwright._impl._page import Page
 
 
 def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
@@ -513,6 +514,7 @@ class WebSocket(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._is_closed = False
+        self._page = cast("Page", parent)
         self._channel.on(
             "frameSent",
             lambda params: self._on_frame_sent(params["opcode"], params["data"]),
@@ -555,7 +557,7 @@ class WebSocket(ChannelOwner):
             wait_helper.reject_on_event(
                 self, WebSocket.Events.Error, Error("Socket error")
             )
-        wait_helper.reject_on_event(self._parent, "close", Error("Page closed"))
+        wait_helper.reject_on_event(self._page, "close", Error("Page closed"))
         wait_helper.wait_for_event(self, event, predicate)
         return EventContextManagerImpl(wait_helper.result())
 
