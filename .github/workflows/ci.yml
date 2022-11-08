@@ -92,6 +92,9 @@ jobs:
         - os: ubuntu-latest
           python-version: '3.11'
           browser: chromium
+        - os: windows-latest
+          python-version: '3.11'
+          browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
