@@ -212,7 +212,7 @@ setup(
     packages=["playwright"],
     include_package_data=True,
     install_requires=[
-        "greenlet==2.0.0",
+        "greenlet==2.0.1",
         "pyee==8.1.0",
         "typing-extensions;python_version<='3.8'",
     ],
