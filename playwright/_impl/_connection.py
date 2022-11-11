@@ -148,12 +148,14 @@ class ChannelOwner(AsyncIOEventEmitter):
             )
 
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
-        self._update_subscription(event, True)
+        if not self.listeners(event):
+            self._update_subscription(event, True)
         super()._add_event_handler(event, k, v)
 
     def remove_listener(self, event: str, f: Any) -> None:
         super().remove_listener(event, f)
-        self._update_subscription(event, len(self.listeners(event)) > 0)
+        if not len(self.listeners(event)):
+            self._update_subscription(event, False)
 
 
 class ProtocolCallback:
