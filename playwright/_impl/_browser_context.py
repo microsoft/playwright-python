@@ -163,6 +163,14 @@ class BrowserContext(ChannelOwner):
         self.once(
             self.Events.Close, lambda context: self._closed_future.set_result(True)
         )
+        self._set_event_to_subscription_mapping(
+            {
+                BrowserContext.Events.Request: "request",
+                BrowserContext.Events.Response: "response",
+                BrowserContext.Events.RequestFinished: "requestFinished",
+                BrowserContext.Events.RequestFailed: "requestFailed",
+            }
+        )
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"

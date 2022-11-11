@@ -579,7 +579,7 @@ async def test_locator_frame_locator_should_throw_on_ambiguity(
     button = page.locator("body").frame_locator("iframe").locator("button")
     with pytest.raises(
         Error,
-        match='.*strict mode violation: "body >> iframe" resolved to 3 elements.*',
+        match=r'.*strict mode violation: locator\("body"\)\.locator\("iframe"\) resolved to 3 elements.*',
     ):
         await button.wait_for()
 

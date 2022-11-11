@@ -30,7 +30,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.28.0-alpha-1667504282000"
+driver_version = "1.28.0-alpha-nov-11-2022"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:

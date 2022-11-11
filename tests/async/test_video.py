@@ -56,6 +56,7 @@ async def test_should_not_error_if_page_not_closed_before_save_as(
 ):
     page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
+    await page.wait_for_timeout(1000)  # make sure video has some data
     out_path = tmpdir / "some-video.webm"
     saved = page.video.save_as(out_path)
     await page.close()

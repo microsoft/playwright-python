@@ -100,6 +100,7 @@ def test_should_error_if_page_not_closed_before_save_as(
 ) -> None:
     page = browser.new_page(record_video_dir=tmpdir)
     page.goto(server.PREFIX + "/grid.html")
+    page.wait_for_timeout(1000)  # Give it some time to record.
     out_path = tmpdir / "some-video.webm"
     with pytest.raises(Error) as err:
         video = page.video
@@ -108,7 +109,7 @@ def test_should_error_if_page_not_closed_before_save_as(
     assert video
     assert "Page is not yet closed. Close the page prior to calling save_as" in str(err)
     assert not os.path.exists(out_path)
-    page.context.close()
+    page.close()
 
     video.save_as(out_path)
     assert os.path.exists(out_path)

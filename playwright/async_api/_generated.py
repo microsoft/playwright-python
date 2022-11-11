@@ -8499,7 +8499,7 @@ class Page(AsyncContextManager):
     async def emulate_media(
         self,
         *,
-        media: typing.Optional[Literal["print", "screen"]] = None,
+        media: typing.Optional[Literal["null", "print", "screen"]] = None,
         color_scheme: typing.Optional[
             Literal["dark", "light", "no-preference", "null"]
         ] = None,
@@ -8544,8 +8544,8 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        media : Union["print", "screen", None]
-            Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null`
+        media : Union["null", "print", "screen", None]
+            Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`. Passing `'Null'`
             disables CSS media emulation.
         color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
