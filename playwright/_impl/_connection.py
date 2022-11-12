@@ -154,7 +154,7 @@ class ChannelOwner(AsyncIOEventEmitter):
 
     def remove_listener(self, event: str, f: Any) -> None:
         super().remove_listener(event, f)
-        if not len(self.listeners(event)):
+        if not self.listeners(event):
             self._update_subscription(event, False)
 
 
