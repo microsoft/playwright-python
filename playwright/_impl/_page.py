@@ -221,6 +221,16 @@ class Page(ChannelOwner):
             else None,
         )
 
+        self._set_event_to_subscription_mapping(
+            {
+                Page.Events.Request: "request",
+                Page.Events.Response: "response",
+                Page.Events.RequestFinished: "requestFinished",
+                Page.Events.RequestFailed: "requestFailed",
+                Page.Events.FileChooser: "fileChooser",
+            }
+        )
+
     def __repr__(self) -> str:
         return f"<Page url={self.url!r}>"
 
@@ -293,20 +303,6 @@ class Page(ChannelOwner):
     def _on_video(self, params: Any) -> None:
         artifact = from_channel(params["artifact"])
         cast(Video, self.video)._artifact_ready(artifact)
-
-    def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
-        if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
-            self._channel.send_no_reply(
-                "setFileChooserInterceptedNoReply", {"intercepted": True}
-            )
-        super()._add_event_handler(event, k, v)
-
-    def remove_listener(self, event: str, f: Any) -> None:
-        super().remove_listener(event, f)
-        if event == Page.Events.FileChooser and len(self.listeners(event)) == 0:
-            self._channel.send_no_reply(
-                "setFileChooserInterceptedNoReply", {"intercepted": False}
-            )
 
     @property
     def context(self) -> "BrowserContext":
@@ -545,12 +541,14 @@ class Page(ChannelOwner):
 
     async def emulate_media(
         self,
-        media: Literal["print", "screen"] = None,
+        media: Literal["null", "print", "screen"] = None,
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
         forcedColors: ForcedColors = None,
     ) -> None:
         params = locals_to_params(locals())
+        if "media" in params:
+            params["media"] = "no-override" if params["media"] == "null" else media
         if "colorScheme" in params:
             params["colorScheme"] = (
                 "no-override" if params["colorScheme"] == "null" else colorScheme
@@ -740,23 +738,6 @@ class Page(ChannelOwner):
         force: bool = None,
     ) -> None:
         return await self._main_frame.fill(**locals_to_params(locals()))
-
-    async def clear(
-        self,
-        selector: str,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
-        strict: bool = None,
-    ) -> None:
-        await self.fill(
-            selector,
-            "",
-            timeout=timeout,
-            noWaitAfter=noWaitAfter,
-            force=force,
-            strict=strict,
-        )
 
     def locator(
         self,

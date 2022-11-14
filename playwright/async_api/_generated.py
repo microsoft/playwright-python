@@ -2228,42 +2228,6 @@ class ElementHandle(JSHandle):
             )
         )
 
-    async def clear(
-        self,
-        *,
-        timeout: typing.Optional[float] = None,
-        no_wait_after: typing.Optional[bool] = None,
-        force: typing.Optional[bool] = None
-    ) -> None:
-        """ElementHandle.clear
-
-        This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, clears it and triggers an
-        `input` event after clearing.
-
-        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
-        However, if the element is inside the `<label>` element that has an associated
-        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
-        instead.
-
-        Parameters
-        ----------
-        timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
-            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
-            inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
-            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._impl_obj.clear(
-                timeout=timeout, noWaitAfter=no_wait_after, force=force
-            )
-        )
-
     async def press(
         self,
         key: str,
@@ -5575,54 +5539,6 @@ class Frame(AsyncBase):
             )
         )
 
-    async def clear(
-        self,
-        selector: str,
-        *,
-        timeout: typing.Optional[float] = None,
-        no_wait_after: typing.Optional[bool] = None,
-        force: typing.Optional[bool] = None,
-        strict: typing.Optional[bool] = None
-    ) -> None:
-        """Frame.clear
-
-        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the
-        element, clears it and triggers an `input` event after clearing.
-
-        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
-        However, if the element is inside the `<label>` element that has an associated
-        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
-        instead.
-
-        Parameters
-        ----------
-        selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](../selectors.md) for more details.
-        timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
-            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
-            inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
-            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
-            element, the call throws an exception.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._impl_obj.clear(
-                selector=selector,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
-                force=force,
-                strict=strict,
-            )
-        )
-
 
 mapping.register(FrameImpl, Frame)
 
@@ -8499,7 +8415,7 @@ class Page(AsyncContextManager):
     async def emulate_media(
         self,
         *,
-        media: typing.Optional[Literal["print", "screen"]] = None,
+        media: typing.Optional[Literal["null", "print", "screen"]] = None,
         color_scheme: typing.Optional[
             Literal["dark", "light", "no-preference", "null"]
         ] = None,
@@ -8544,8 +8460,8 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        media : Union["print", "screen", None]
-            Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `null`. Passing `null`
+        media : Union["null", "print", "screen", None]
+            Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`. Passing `'Null'`
             disables CSS media emulation.
         color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
@@ -9201,55 +9117,6 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 force=force,
-            )
-        )
-
-    async def clear(
-        self,
-        selector: str,
-        *,
-        timeout: typing.Optional[float] = None,
-        no_wait_after: typing.Optional[bool] = None,
-        force: typing.Optional[bool] = None,
-        strict: typing.Optional[bool] = None
-    ) -> None:
-        """Page.clear
-
-        This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the
-        element, clears it and triggers an `input` event after clearing. Note that you can pass an empty string to clear the
-        input field.
-
-        If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
-        However, if the element is inside the `<label>` element that has an associated
-        [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
-        instead.
-
-        Parameters
-        ----------
-        selector : str
-            A selector to search for an element. If there are multiple elements satisfying the selector, the first will be used. See
-            [working with selectors](../selectors.md) for more details.
-        timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by
-            using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can
-            opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to
-            inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
-            Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        strict : Union[bool, None]
-            When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
-            element, the call throws an exception.
-        """
-
-        return mapping.from_maybe_impl(
-            await self._impl_obj.clear(
-                selector=selector,
-                timeout=timeout,
-                noWaitAfter=no_wait_after,
-                force=force,
-                strict=strict,
             )
         )
 

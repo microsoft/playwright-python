@@ -421,16 +421,6 @@ def test_fill_input_when_Node_is_removed(page: Page, server: Server) -> None:
     assert page.evaluate("result") == "some value"
 
 
-def test_clear_input(page: Page, server: Server) -> None:
-    page.goto(server.PREFIX + "/input/textarea.html")
-    handle = page.query_selector("input")
-    assert handle
-    handle.fill("some value")
-    assert page.evaluate("result") == "some value"
-    handle.clear()
-    assert page.evaluate("result") == ""
-
-
 def test_select_textarea(page: Page, server: Server, is_firefox: bool) -> None:
     page.goto(server.PREFIX + "/input/textarea.html")
     textarea = page.query_selector("textarea")

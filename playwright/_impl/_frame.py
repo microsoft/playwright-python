@@ -794,22 +794,5 @@ class Frame(ChannelOwner):
                 trial=trial,
             )
 
-    async def clear(
-        self,
-        selector: str,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
-        strict: bool = None,
-    ) -> None:
-        await self.fill(
-            selector,
-            "",
-            timeout=timeout,
-            noWaitAfter=noWaitAfter,
-            force=force,
-            strict=strict,
-        )
-
     async def _highlight(self, selector: str) -> None:
         await self._channel.send("highlight", {"selector": selector})

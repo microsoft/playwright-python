@@ -1238,14 +1238,6 @@ async def test_fill_should_be_able_to_clear_using_fill(page, server):
     assert await page.evaluate("result") == ""
 
 
-async def test_fill_should_be_able_to_clear_using_clear(page, server):
-    await page.goto(server.PREFIX + "/input/textarea.html")
-    await page.fill("input", "some value")
-    assert await page.evaluate("result") == "some value"
-    await page.clear("input")
-    assert await page.evaluate("result") == ""
-
-
 async def test_close_event_should_work_with_window_close(page, server):
     async with page.expect_popup() as popup_info:
         await page.evaluate("window['newPage'] = window.open('about:blank')")

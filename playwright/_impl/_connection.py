@@ -119,6 +119,8 @@ class ChannelOwner(AsyncIOEventEmitter):
         if self._parent:
             self._parent._objects[guid] = self
 
+        self._event_to_subscription_mapping: Dict[str, str] = {}
+
     def _dispose(self) -> None:
         # Clean up from parent and connection.
         if self._parent:
@@ -134,6 +136,26 @@ class ChannelOwner(AsyncIOEventEmitter):
         del cast("ChannelOwner", child._parent)._objects[child._guid]
         self._objects[child._guid] = child
         child._parent = self
+
+    def _set_event_to_subscription_mapping(self, mapping: Dict[str, str]) -> None:
+        self._event_to_subscription_mapping = mapping
+
+    def _update_subscription(self, event: str, enabled: bool) -> None:
+        protocol_event = self._event_to_subscription_mapping.get(event)
+        if protocol_event:
+            self._channel.send_no_reply(
+                "updateSubscription", {"event": protocol_event, "enabled": enabled}
+            )
+
+    def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
+        if not self.listeners(event):
+            self._update_subscription(event, True)
+        super()._add_event_handler(event, k, v)
+
+    def remove_listener(self, event: str, f: Any) -> None:
+        super().remove_listener(event, f)
+        if not self.listeners(event):
+            self._update_subscription(event, False)
 
 
 class ProtocolCallback:
