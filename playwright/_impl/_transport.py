@@ -107,9 +107,8 @@ class PipeTransport(Transport):
 
     async def connect(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
-        # Hide the command-line window on Windows when using Pythonw.exe
         creationflags = 0
-        if sys.platform == "win32" and sys.stdout is None:
+        if sys.platform == "win32":
             creationflags = subprocess.CREATE_NO_WINDOW
 
         try:
