@@ -4539,7 +4539,8 @@ class Frame(SyncBase):
         level: typing.Optional[int] = None,
         name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
-        selected: typing.Optional[bool] = None
+        selected: typing.Optional[bool] = None,
+        exact: typing.Optional[bool] = None
     ) -> "Locator":
         """Frame.get_by_role
 
@@ -4558,21 +4559,20 @@ class Frame(SyncBase):
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
-            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
-            checked are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
         disabled : Union[bool, None]
-            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+            An attribute that is usually set by `aria-disabled` or `disabled`.
 
             > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
         expanded : Union[bool, None]
-            A boolean attribute that is usually set by `aria-expanded`.
+            An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
         include_hidden : Union[bool, None]
-            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
@@ -4582,17 +4582,21 @@ class Frame(SyncBase):
 
             Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
         name : Union[Pattern[str], str, None]
-            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+            Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). By default, matching is
+            case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
         pressed : Union[bool, None]
-            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
         selected : Union[bool, None]
-            A boolean attribute that is usually set by `aria-selected`.
+            An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+        exact : Union[bool, None]
+            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a regular
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -4610,6 +4614,7 @@ class Frame(SyncBase):
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
@@ -5901,7 +5906,8 @@ class FrameLocator(SyncBase):
         level: typing.Optional[int] = None,
         name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
-        selected: typing.Optional[bool] = None
+        selected: typing.Optional[bool] = None,
+        exact: typing.Optional[bool] = None
     ) -> "Locator":
         """FrameLocator.get_by_role
 
@@ -5920,21 +5926,20 @@ class FrameLocator(SyncBase):
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
-            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
-            checked are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
         disabled : Union[bool, None]
-            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+            An attribute that is usually set by `aria-disabled` or `disabled`.
 
             > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
         expanded : Union[bool, None]
-            A boolean attribute that is usually set by `aria-expanded`.
+            An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
         include_hidden : Union[bool, None]
-            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
@@ -5944,17 +5949,21 @@ class FrameLocator(SyncBase):
 
             Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
         name : Union[Pattern[str], str, None]
-            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+            Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). By default, matching is
+            case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
         pressed : Union[bool, None]
-            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
         selected : Union[bool, None]
-            A boolean attribute that is usually set by `aria-selected`.
+            An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+        exact : Union[bool, None]
+            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a regular
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -5972,6 +5981,7 @@ class FrameLocator(SyncBase):
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
@@ -9394,7 +9404,8 @@ class Page(SyncContextManager):
         level: typing.Optional[int] = None,
         name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
-        selected: typing.Optional[bool] = None
+        selected: typing.Optional[bool] = None,
+        exact: typing.Optional[bool] = None
     ) -> "Locator":
         """Page.get_by_role
 
@@ -9413,21 +9424,20 @@ class Page(SyncContextManager):
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
-            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
-            checked are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
         disabled : Union[bool, None]
-            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+            An attribute that is usually set by `aria-disabled` or `disabled`.
 
             > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
         expanded : Union[bool, None]
-            A boolean attribute that is usually set by `aria-expanded`.
+            An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
         include_hidden : Union[bool, None]
-            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
@@ -9437,17 +9447,21 @@ class Page(SyncContextManager):
 
             Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
         name : Union[Pattern[str], str, None]
-            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+            Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). By default, matching is
+            case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
         pressed : Union[bool, None]
-            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
         selected : Union[bool, None]
-            A boolean attribute that is usually set by `aria-selected`.
+            An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+        exact : Union[bool, None]
+            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a regular
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -9465,6 +9479,7 @@ class Page(SyncContextManager):
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
@@ -14230,7 +14245,8 @@ class Locator(SyncBase):
         level: typing.Optional[int] = None,
         name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
-        selected: typing.Optional[bool] = None
+        selected: typing.Optional[bool] = None,
+        exact: typing.Optional[bool] = None
     ) -> "Locator":
         """Locator.get_by_role
 
@@ -14249,21 +14265,20 @@ class Locator(SyncBase):
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
         checked : Union[bool, None]
-            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls. Available values for
-            checked are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
         disabled : Union[bool, None]
-            A boolean attribute that is usually set by `aria-disabled` or `disabled`.
+            An attribute that is usually set by `aria-disabled` or `disabled`.
 
             > NOTE: Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
         expanded : Union[bool, None]
-            A boolean attribute that is usually set by `aria-expanded`.
+            An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
         include_hidden : Union[bool, None]
-            A boolean attribute that controls whether hidden elements are matched. By default, only non-hidden elements, as
+            Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
@@ -14273,17 +14288,21 @@ class Locator(SyncBase):
 
             Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
         name : Union[Pattern[str], str, None]
-            A string attribute that matches [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+            Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). By default, matching is
+            case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
         pressed : Union[bool, None]
-            An attribute that is usually set by `aria-pressed`. Available values for pressed are `true`, `false` and `"mixed"`.
+            An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
         selected : Union[bool, None]
-            A boolean attribute that is usually set by `aria-selected`.
+            An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+        exact : Union[bool, None]
+            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a regular
+            expression. Note that exact match still trims whitespace.
 
         Returns
         -------
@@ -14301,6 +14320,7 @@ class Locator(SyncBase):
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
