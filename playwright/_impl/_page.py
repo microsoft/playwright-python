@@ -773,6 +773,7 @@ class Page(ChannelOwner):
         name: Union[str, Pattern[str]] = None,
         pressed: bool = None,
         selected: bool = None,
+        exact: bool = None,
     ) -> "Locator":
         return self._main_frame.get_by_role(
             role,
@@ -784,6 +785,7 @@ class Page(ChannelOwner):
             name=name,
             pressed=pressed,
             selected=selected,
+            exact=exact,
         )
 
     def get_by_test_id(self, testId: str) -> "Locator":

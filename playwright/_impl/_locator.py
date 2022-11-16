@@ -244,6 +244,7 @@ class Locator:
         name: Union[str, Pattern[str]] = None,
         pressed: bool = None,
         selected: bool = None,
+        exact: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -256,11 +257,12 @@ class Locator:
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
     def get_by_test_id(self, testId: str) -> "Locator":
-        return self.locator(get_by_test_id_selector(testId))
+        return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
 
     def get_by_text(
         self, text: Union[str, Pattern[str]], exact: bool = None
@@ -690,6 +692,7 @@ class FrameLocator:
         name: Union[str, Pattern[str]] = None,
         pressed: bool = None,
         selected: bool = None,
+        exact: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -702,11 +705,12 @@ class FrameLocator:
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
     def get_by_test_id(self, testId: str) -> "Locator":
-        return self.locator(get_by_test_id_selector(testId))
+        return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
 
     def get_by_text(
         self, text: Union[str, Pattern[str]], exact: bool = None
@@ -739,16 +743,20 @@ class FrameLocator:
         return f"<FrameLocator frame={self._frame!r} selector={self._frame_selector!r}>"
 
 
-test_id_attribute_name: str = "data-testid"
+_test_id_attribute_name: str = "data-testid"
+
+
+def test_id_attribute_name() -> str:
+    return _test_id_attribute_name
 
 
 def set_test_id_attribute_name(attribute_name: str) -> None:
-    global test_id_attribute_name
-    test_id_attribute_name = attribute_name
+    global _test_id_attribute_name
+    _test_id_attribute_name = attribute_name
 
 
-def get_by_test_id_selector(test_id: str) -> str:
-    return get_by_attribute_text_selector(test_id_attribute_name, test_id, exact=True)
+def get_by_test_id_selector(test_id_attribute_name: str, test_id: str) -> str:
+    return f"internal:testid=[{test_id_attribute_name}={escape_for_attribute_selector(test_id, True)}]"
 
 
 def get_by_attribute_text_selector(
@@ -791,6 +799,7 @@ def get_by_role_selector(
     name: Union[str, Pattern[str]] = None,
     pressed: bool = None,
     selected: bool = None,
+    exact: bool = None,
 ) -> str:
     props: List[Tuple[str, str]] = []
     if checked is not None:
@@ -811,7 +820,7 @@ def get_by_role_selector(
                 "name",
                 f"/{name.pattern}/{escape_regex_flags(name)}"
                 if isinstance(name, Pattern)
-                else escape_for_attribute_selector(name),
+                else escape_for_attribute_selector(name, exact),
             )
         )
     if pressed is not None:

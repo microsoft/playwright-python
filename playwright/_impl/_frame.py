@@ -55,6 +55,7 @@ from playwright._impl._locator import (
     get_by_test_id_selector,
     get_by_text_selector,
     get_by_title_selector,
+    test_id_attribute_name,
 )
 from playwright._impl._network import Response
 from playwright._impl._set_input_files_helpers import convert_input_files
@@ -560,6 +561,7 @@ class Frame(ChannelOwner):
         name: Union[str, Pattern[str]] = None,
         pressed: bool = None,
         selected: bool = None,
+        exact: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -572,11 +574,12 @@ class Frame(ChannelOwner):
                 name=name,
                 pressed=pressed,
                 selected=selected,
+                exact=exact,
             )
         )
 
     def get_by_test_id(self, testId: str) -> "Locator":
-        return self.locator(get_by_test_id_selector(testId))
+        return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
 
     def get_by_text(
         self, text: Union[str, Pattern[str]], exact: bool = None
