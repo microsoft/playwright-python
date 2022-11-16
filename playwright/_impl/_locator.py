@@ -756,7 +756,7 @@ def set_test_id_attribute_name(attribute_name: str) -> None:
 
 
 def get_by_test_id_selector(test_id_attribute_name: str, test_id: str) -> str:
-    return f"internal:testid=[{test_id_attribute_name}=${escape_for_attribute_selector(test_id, True)}]"
+    return f"internal:testid=[{test_id_attribute_name}={escape_for_attribute_selector(test_id, True)}]"
 
 
 def get_by_attribute_text_selector(
