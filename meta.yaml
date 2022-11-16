@@ -23,7 +23,7 @@ requirements:
     - setuptools_scm
   run:
     - python
-    - greenlet ==1.1.3
+    - greenlet ==2.0.1
     - pyee ==9.0.4
     - typing_extensions # [py<39]
 test:
@@ -34,7 +34,6 @@ test:
     - playwright.sync_api
     - playwright.async_api
   commands:
-    - pip check
     - playwright --help
 
 about:
