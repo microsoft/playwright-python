@@ -23,7 +23,6 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-pyOpenSSL==22.1.0.1]
-        exclude: examples/
   - repo: https://github.com/pycqa/flake8
     rev: 5.0.4
     hooks:

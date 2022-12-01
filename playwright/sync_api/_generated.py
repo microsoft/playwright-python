@@ -16526,6 +16526,8 @@ class LocatorAssertions(SyncBase):
     def to_contain_text(
         self,
         expected: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
             typing.List[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
@@ -16585,7 +16587,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Union[Pattern[str], str]], Pattern[str], str]
+        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected substring or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
@@ -16611,6 +16613,8 @@ class LocatorAssertions(SyncBase):
     def not_to_contain_text(
         self,
         expected: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
             typing.List[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
@@ -16626,7 +16630,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Union[Pattern[str], str]], Pattern[str], str]
+        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected substring or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
@@ -16719,6 +16723,8 @@ class LocatorAssertions(SyncBase):
     def to_have_class(
         self,
         expected: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
             typing.List[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
@@ -16754,7 +16760,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Union[Pattern[str], str]], Pattern[str], str]
+        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected class or RegExp or a list of those.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -16772,6 +16778,8 @@ class LocatorAssertions(SyncBase):
     def not_to_have_class(
         self,
         expected: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
             typing.List[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
@@ -16785,7 +16793,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Union[Pattern[str], str]], Pattern[str], str]
+        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected class or RegExp or a list of those.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -17080,7 +17088,11 @@ class LocatorAssertions(SyncBase):
 
     def to_have_values(
         self,
-        values: typing.List[typing.Union[typing.Pattern[str], str]],
+        values: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
+            typing.List[typing.Union[typing.Pattern[str], str]],
+        ],
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
@@ -17110,7 +17122,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        values : List[Union[Pattern[str], str]]
+        values : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str]]
             Expected options currently selected.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -17127,7 +17139,11 @@ class LocatorAssertions(SyncBase):
 
     def not_to_have_values(
         self,
-        values: typing.List[typing.Union[typing.Pattern[str], str]],
+        values: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
+            typing.List[typing.Union[typing.Pattern[str], str]],
+        ],
         *,
         timeout: typing.Optional[float] = None
     ) -> None:
@@ -17137,7 +17153,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        values : List[Union[Pattern[str], str]]
+        values : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str]]
             Expected options currently selected.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -17155,6 +17171,8 @@ class LocatorAssertions(SyncBase):
     def to_have_text(
         self,
         expected: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
             typing.List[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
@@ -17212,7 +17230,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Union[Pattern[str], str]], Pattern[str], str]
+        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected substring or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
@@ -17238,6 +17256,8 @@ class LocatorAssertions(SyncBase):
     def not_to_have_text(
         self,
         expected: typing.Union[
+            typing.List[str],
+            typing.List[typing.Pattern[str]],
             typing.List[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
@@ -17253,7 +17273,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Union[Pattern[str], str]], Pattern[str], str]
+        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected substring or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
