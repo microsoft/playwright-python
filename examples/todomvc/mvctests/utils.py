@@ -23,4 +23,6 @@ def assert_number_of_todos_in_local_storage(page: Page, expected: int) -> None:
 
 
 def check_todos_in_local_storage(page: Page, title: str) -> None:
-    title in page.evaluate("JSON.parse(localStorage['react-todos']).map(i => i.title)")
+    assert title in page.evaluate(
+        "JSON.parse(localStorage['react-todos']).map(i => i.title)"
+    )

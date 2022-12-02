@@ -120,7 +120,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_contain_text(
         self,
-        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
+        expected: Union[
+            List[str],
+            List[Pattern[str]],
+            List[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -163,7 +169,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_contain_text(
         self,
-        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
+        expected: Union[
+            List[str],
+            List[Pattern[str]],
+            List[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -199,7 +211,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_class(
         self,
-        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
+        expected: Union[
+            List[str],
+            List[Pattern[str]],
+            List[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -222,7 +240,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_class(
         self,
-        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
+        expected: Union[
+            List[str],
+            List[Pattern[str]],
+            List[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -346,7 +370,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_values(
         self,
-        values: List[Union[Pattern[str], str]],
+        values: Union[List[str], List[Pattern[str]], List[Union[Pattern[str], str]]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -360,7 +384,7 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_values(
         self,
-        values: List[Union[Pattern[str], str]],
+        values: Union[List[str], List[Pattern[str]], List[Union[Pattern[str], str]]],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -368,7 +392,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_text(
         self,
-        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
+        expected: Union[
+            List[str],
+            List[Pattern[str]],
+            List[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,
@@ -407,7 +437,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_text(
         self,
-        expected: Union[List[Union[Pattern[str], str]], Pattern[str], str],
+        expected: Union[
+            List[str],
+            List[Pattern[str]],
+            List[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
         use_inner_text: bool = None,
         timeout: float = None,
         ignore_case: bool = None,

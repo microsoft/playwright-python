@@ -42,6 +42,10 @@ def find_free_port() -> int:
         return s.getsockname()[1]
 
 
+class HttpRequestWitPostBody(http.Request):
+    post_body = None
+
+
 T = TypeVar("T")
 
 
@@ -158,20 +162,20 @@ class Server:
 
         self.listen(MyHttpFactory())
 
-    async def wait_for_request(self, path: str) -> http.Request:
+    async def wait_for_request(self, path: str) -> HttpRequestWitPostBody:
         if path in self.request_subscribers:
             return await self.request_subscribers[path]
-        future: asyncio.Future["http.Request"] = asyncio.Future()
+        future: asyncio.Future["HttpRequestWitPostBody"] = asyncio.Future()
         self.request_subscribers[path] = future
         return await future
 
     @contextlib.contextmanager
     def expect_request(
         self, path: str
-    ) -> Generator[ExpectResponse[http.Request], None, None]:
+    ) -> Generator[ExpectResponse[HttpRequestWitPostBody], None, None]:
         future = asyncio.create_task(self.wait_for_request(path))
 
-        cb_wrapper: ExpectResponse[http.Request] = ExpectResponse()
+        cb_wrapper: ExpectResponse[HttpRequestWitPostBody] = ExpectResponse()
 
         def done_cb(task: asyncio.Task) -> None:
             cb_wrapper._value = future.result()

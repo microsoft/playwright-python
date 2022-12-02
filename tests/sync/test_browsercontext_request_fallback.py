@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# mypy: ignore-errors
-# pyright: reportUndefinedVariable=false, reportGeneralTypeIssues=false, reportOptionalMemberAccess=false
+from typing import Any, Callable, List
 
 import pytest
 
 from playwright.sync_api import BrowserContext, Error, Page, Request, Route
 from tests.server import Server
+
+
+def _append_with_return_value(values: List, value: Any) -> Any:
+    values.append(value)
 
 
 def test_should_work(page: Page, context: BrowserContext, server: Server) -> None:
@@ -27,25 +30,25 @@ def test_should_work(page: Page, context: BrowserContext, server: Server) -> Non
 
 
 def test_should_fall_back(page: Page, context: BrowserContext, server: Server) -> None:
-    intercepted = []
+    intercepted: List[int] = []
     context.route(
         "**/empty.html",
         lambda route: (
-            intercepted.append(1),
+            _append_with_return_value(intercepted, 1),
             route.fallback(),
         ),
     )
     context.route(
         "**/empty.html",
         lambda route: (
-            intercepted.append(2),
+            _append_with_return_value(intercepted, 2),
             route.fallback(),
         ),
     )
     context.route(
         "**/empty.html",
         lambda route: (
-            intercepted.append(3),
+            _append_with_return_value(intercepted, 3),
             route.fallback(),
         ),
     )
@@ -59,8 +62,8 @@ def test_should_fall_back_async_delayed(
 ) -> None:
     intercepted = []
 
-    def create_handler(i: int):
-        def handler(route):
+    def create_handler(i: int) -> Callable[[Route], None]:
+        def handler(route: Route) -> None:
             intercepted.append(i)
             page.wait_for_timeout(500)
             route.fallback()
@@ -83,6 +86,7 @@ def test_should_chain_once(page: Page, context: BrowserContext, server: Server) 
     context.route("**/madeup.txt", lambda route: route.fallback(), times=1)
 
     resp = page.goto(server.PREFIX + "/madeup.txt")
+    assert resp
     body = resp.body()
     assert body == b"fulfilled one"
 
@@ -92,7 +96,7 @@ def test_should_not_chain_fulfill(
 ) -> None:
     failed = [False]
 
-    def handler(route: Route):
+    def handler(route: Route) -> None:
         failed[0] = True
 
     context.route("**/empty.html", handler)
@@ -103,6 +107,7 @@ def test_should_not_chain_fulfill(
     context.route("**/empty.html", lambda route: route.fallback())
 
     response = page.goto(server.EMPTY_PAGE)
+    assert response
     body = response.body()
     assert body == b"fulfilled"
     assert not failed[0]
@@ -117,7 +122,7 @@ def test_should_not_chain_abort(
 ) -> None:
     failed = [False]
 
-    def handler(route: Route):
+    def handler(route: Route) -> None:
         failed[0] = True
 
     context.route("**/empty.html", handler)
@@ -140,9 +145,9 @@ def test_should_fall_back_after_exception(
 ) -> None:
     context.route("**/empty.html", lambda route: route.continue_())
 
-    def handler(route: Route):
+    def handler(route: Route) -> None:
         try:
-            route.fulfill(response=47)
+            route.fulfill(response=47)  # type: ignore
         except Exception:
             route.fallback()
 
@@ -156,14 +161,14 @@ def test_should_amend_http_headers(
 ) -> None:
     values = []
 
-    def handler(route: Route):
+    def handler(route: Route) -> None:
         values.append(route.request.headers.get("foo"))
         values.append(route.request.header_value("FOO"))
         route.continue_()
 
     context.route("**/sleep.zzz", handler)
 
-    def handler_with_header_mods(route: Route):
+    def handler_with_header_mods(route: Route) -> None:
         route.fallback(headers={**route.request.headers, "FOO": "bar"})
 
     context.route("**/*", handler_with_header_mods)
@@ -191,15 +196,15 @@ def test_should_delete_header_with_undefined_value(
 
     intercepted_request = []
 
-    def capture_and_continue(route: Route, request: Request):
+    def capture_and_continue(route: Route, request: Request) -> None:
         intercepted_request.append(request)
         route.continue_()
 
     context.route("**/*", capture_and_continue)
 
-    def delete_foo_header(route: Route, request: Request):
+    def delete_foo_header(route: Route, request: Request) -> None:
         headers = request.all_headers()
-        route.fallback(headers={**headers, "foo": None})
+        route.fallback(headers={**headers, "foo": None})  # type: ignore
 
     context.route(server.PREFIX + "/something", delete_foo_header)
     with server.expect_request("/something") as server_req_info:
@@ -229,11 +234,11 @@ def test_should_amend_method(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
     page.goto(server.EMPTY_PAGE)
-    method = []
+    method: List[str] = []
     context.route(
         "**/*",
         lambda route: (
-            method.append(route.request.method),
+            _append_with_return_value(method, route.request.method),
             route.continue_(),
         ),
     )
@@ -249,11 +254,11 @@ def test_should_amend_method(
 def test_should_override_request_url(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
-    url = []
+    url: List[str] = []
     context.route(
         "**/global-var.html",
         lambda route: (
-            url.append(route.request.url),
+            _append_with_return_value(url, route.request.url),
             route.continue_(),
         ),
     )
@@ -279,11 +284,11 @@ def test_should_amend_post_data(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
     page.goto(server.EMPTY_PAGE)
-    post_data = []
+    post_data: List[str] = []
     context.route(
         "**/*",
         lambda route: (
-            post_data.append(route.request.post_data),
+            _append_with_return_value(post_data, route.request.post_data),
             route.continue_(),
         ),
     )
@@ -300,11 +305,11 @@ def test_should_amend_binary_post_data(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
     page.goto(server.EMPTY_PAGE)
-    post_data_buffer = []
+    post_data_buffer: List[str] = []
     context.route(
         "**/*",
         lambda route: (
-            post_data_buffer.append(route.request.post_data),
+            _append_with_return_value(post_data_buffer, route.request.post_data),
             route.continue_(),
         ),
     )
@@ -324,19 +329,31 @@ def test_should_amend_binary_post_data(
 def test_should_chain_fallback_into_page(
     context: BrowserContext, page: Page, server: Server
 ) -> None:
-    intercepted = []
+    intercepted: List[int] = []
     context.route(
-        "**/empty.html", lambda route: (intercepted.append(1), route.fallback())
+        "**/empty.html",
+        lambda route: (_append_with_return_value(intercepted, 1), route.fallback()),
     )
     context.route(
-        "**/empty.html", lambda route: (intercepted.append(2), route.fallback())
+        "**/empty.html",
+        lambda route: (_append_with_return_value(intercepted, 2), route.fallback()),
     )
     context.route(
-        "**/empty.html", lambda route: (intercepted.append(3), route.fallback())
+        "**/empty.html",
+        lambda route: (_append_with_return_value(intercepted, 3), route.fallback()),
     )
-    page.route("**/empty.html", lambda route: (intercepted.append(4), route.fallback()))
-    page.route("**/empty.html", lambda route: (intercepted.append(5), route.fallback()))
-    page.route("**/empty.html", lambda route: (intercepted.append(6), route.fallback()))
+    page.route(
+        "**/empty.html",
+        lambda route: (_append_with_return_value(intercepted, 4), route.fallback()),
+    )
+    page.route(
+        "**/empty.html",
+        lambda route: (_append_with_return_value(intercepted, 5), route.fallback()),
+    )
+    page.route(
+        "**/empty.html",
+        lambda route: (_append_with_return_value(intercepted, 6), route.fallback()),
+    )
 
     page.goto(server.EMPTY_PAGE)
     assert intercepted == [6, 5, 4, 3, 2, 1]
