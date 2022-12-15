@@ -578,7 +578,7 @@ class Frame(ChannelOwner):
             )
         )
 
-    def get_by_test_id(self, testId: str) -> "Locator":
+    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
         return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
 
     def get_by_text(

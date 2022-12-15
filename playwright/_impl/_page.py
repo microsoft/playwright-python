@@ -788,7 +788,7 @@ class Page(ChannelOwner):
             exact=exact,
         )
 
-    def get_by_test_id(self, testId: str) -> "Locator":
+    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
         return self._main_frame.get_by_test_id(testId)
 
     def get_by_text(

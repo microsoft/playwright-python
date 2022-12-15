@@ -261,7 +261,7 @@ class Locator:
             )
         )
 
-    def get_by_test_id(self, testId: str) -> "Locator":
+    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
         return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
 
     def get_by_text(
@@ -327,6 +327,14 @@ class Locator:
                 **locals_to_params(locals()),
             },
         )
+
+    async def all(
+        self,
+    ) -> List["Locator"]:
+        result = []
+        for index in range(await self.count()):
+            result.append(self.nth(index))
+        return result
 
     async def count(
         self,
@@ -709,7 +717,7 @@ class FrameLocator:
             )
         )
 
-    def get_by_test_id(self, testId: str) -> "Locator":
+    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
         return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
 
     def get_by_text(
@@ -755,7 +763,11 @@ def set_test_id_attribute_name(attribute_name: str) -> None:
     _test_id_attribute_name = attribute_name
 
 
-def get_by_test_id_selector(test_id_attribute_name: str, test_id: str) -> str:
+def get_by_test_id_selector(
+    test_id_attribute_name: str, test_id: Union[str, Pattern[str]]
+) -> str:
+    if isinstance(test_id, Pattern):
+        return f"internal:testid=[{test_id_attribute_name}=/{test_id.pattern}/{escape_regex_flags(test_id)}]"
     return f"internal:testid=[{test_id_attribute_name}={escape_for_attribute_selector(test_id, True)}]"
 
 

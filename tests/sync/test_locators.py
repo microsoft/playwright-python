@@ -769,3 +769,11 @@ def test_locators_should_focus_and_blur_a_button(page: Page, server: Server) -> 
     assert focused
     assert blurred
     assert not button.evaluate("button => document.activeElement === button")
+
+
+def test_locator_all_should_work(page: Page) -> None:
+    page.set_content("<div><p>A</p><p>B</p><p>C</p></div>")
+    texts = []
+    for p in page.locator("p").all():
+        texts.append(p.text_content())
+    assert texts == ["A", "B", "C"]

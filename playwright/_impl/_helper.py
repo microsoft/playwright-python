@@ -79,13 +79,6 @@ class ErrorPayload(TypedDict, total=False):
     value: Optional[Any]
 
 
-class FallbackOverrideParameters(TypedDict, total=False):
-    url: Optional[str]
-    method: Optional[str]
-    headers: Optional[Dict[str, str]]
-    postData: Optional[Union[str, bytes]]
-
-
 class HarRecordingMetadata(TypedDict, total=False):
     path: str
     content: Optional[HarContentPolicy]
