@@ -869,3 +869,11 @@ async def test_locators_should_focus_and_blur_a_button(
     assert focused
     assert blurred
     assert not await button.evaluate("button => document.activeElement === button")
+
+
+async def test_locator_all_should_work(page: Page) -> None:
+    await page.set_content("<div><p>A</p><p>B</p><p>C</p></div>")
+    texts = []
+    for p in await page.locator("p").all():
+        texts.append(await p.text_content())
+    assert texts == ["A", "B", "C"]

@@ -328,3 +328,23 @@ def test_should_chain_fallback_with_dynamic_url(server: Server, page: Page) -> N
 
     page.goto(server.EMPTY_PAGE)
     assert intercepted == [3, 2, 1]
+
+
+def test_should_amend_json_post_data(server: Server, page: Page) -> None:
+    page.goto(server.EMPTY_PAGE)
+    post_data = []
+
+    def handler(route: Route) -> None:
+        post_data.append(route.request.post_data)
+        route.continue_()
+
+    page.route("**/*", handler)
+    page.route(
+        "**/*",
+        lambda route: route.fallback(post_data={"foo": "bar"}),
+    )
+
+    with server.expect_request("/sleep.zzz") as server_request:
+        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"),
+    assert post_data == ['{"foo": "bar"}']
+    assert server_request.value.post_body == b'{"foo": "bar"}'

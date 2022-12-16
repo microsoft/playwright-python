@@ -17,6 +17,7 @@ import base64
 import inspect
 import json
 import mimetypes
+import sys
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
@@ -31,6 +32,11 @@ from typing import (
     Union,
     cast,
 )
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import TypedDict
+else:  # pragma: no cover
+    from typing_extensions import TypedDict
 from urllib import parse
 
 from playwright._impl._api_structures import (
@@ -48,13 +54,28 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._helper import FallbackOverrideParameters, locals_to_params
+from playwright._impl._helper import locals_to_params
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
     from playwright._impl._page import Page
+
+
+class FallbackOverrideParameters(TypedDict, total=False):
+    url: Optional[str]
+    method: Optional[str]
+    headers: Optional[Dict[str, str]]
+    postData: Optional[Union[str, bytes]]
+
+
+class SerializedFallbackOverrides:
+    def __init__(self) -> None:
+        self.url: Optional[str] = None
+        self.method: Optional[str] = None
+        self.headers: Optional[Dict[str, str]] = None
+        self.post_data_buffer: Optional[bytes] = None
 
 
 def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
@@ -90,21 +111,39 @@ class Request(ChannelOwner):
         }
         self._provisional_headers = RawHeaders(self._initializer["headers"])
         self._all_headers_future: Optional[asyncio.Future[RawHeaders]] = None
-        self._fallback_overrides: FallbackOverrideParameters = (
-            FallbackOverrideParameters()
+        self._fallback_overrides: SerializedFallbackOverrides = (
+            SerializedFallbackOverrides()
         )
+        base64_post_data = initializer.get("postData")
+        if base64_post_data is not None:
+            self._fallback_overrides.post_data_buffer = base64.b64decode(
+                base64_post_data
+            )
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
 
     def _apply_fallback_overrides(self, overrides: FallbackOverrideParameters) -> None:
-        self._fallback_overrides = cast(
-            FallbackOverrideParameters, {**self._fallback_overrides, **overrides}
+        self._fallback_overrides.url = overrides.get(
+            "url", self._fallback_overrides.url
         )
+        self._fallback_overrides.method = overrides.get(
+            "method", self._fallback_overrides.method
+        )
+        self._fallback_overrides.headers = overrides.get(
+            "headers", self._fallback_overrides.headers
+        )
+        post_data = overrides.get("postData")
+        if isinstance(post_data, str):
+            self._fallback_overrides.post_data_buffer = post_data.encode()
+        elif isinstance(post_data, bytes):
+            self._fallback_overrides.post_data_buffer = post_data
+        elif post_data is not None:
+            self._fallback_overrides.post_data_buffer = json.dumps(post_data).encode()
 
     @property
     def url(self) -> str:
-        return cast(str, self._fallback_overrides.get("url", self._initializer["url"]))
+        return cast(str, self._fallback_overrides.url or self._initializer["url"])
 
     @property
     def resource_type(self) -> str:
@@ -112,9 +151,7 @@ class Request(ChannelOwner):
 
     @property
     def method(self) -> str:
-        return cast(
-            str, self._fallback_overrides.get("method", self._initializer["method"])
-        )
+        return cast(str, self._fallback_overrides.method or self._initializer["method"])
 
     async def sizes(self) -> RequestSizes:
         response = await self.response()
@@ -124,7 +161,7 @@ class Request(ChannelOwner):
 
     @property
     def post_data(self) -> Optional[str]:
-        data = self._fallback_overrides.get("postData", self.post_data_buffer)
+        data = self._fallback_overrides.post_data_buffer
         if not data:
             return None
         return data.decode() if isinstance(data, bytes) else data
@@ -144,17 +181,7 @@ class Request(ChannelOwner):
 
     @property
     def post_data_buffer(self) -> Optional[bytes]:
-        override = self._fallback_overrides.get("post_data")
-        if override:
-            return (
-                override.encode()
-                if isinstance(override, str)
-                else cast(bytes, override)
-            )
-        b64_content = self._initializer.get("postData")
-        if b64_content is None:
-            return None
-        return base64.b64decode(b64_content)
+        return self._fallback_overrides.post_data_buffer
 
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
@@ -189,7 +216,7 @@ class Request(ChannelOwner):
 
     @property
     def headers(self) -> Headers:
-        override = self._fallback_overrides.get("headers")
+        override = self._fallback_overrides.headers
         if override:
             return RawHeaders._from_headers_dict_lossy(override).headers()
         return self._provisional_headers.headers()
@@ -204,7 +231,7 @@ class Request(ChannelOwner):
         return (await self._actual_headers()).get(name)
 
     async def _actual_headers(self) -> "RawHeaders":
-        override = self._fallback_overrides.get("headers")
+        override = self._fallback_overrides.headers
         if override:
             return RawHeaders(serialize_headers(override))
         if not self._all_headers_future:
@@ -254,6 +281,7 @@ class Route(ChannelOwner):
         status: int = None,
         headers: Dict[str, str] = None,
         body: Union[str, bytes] = None,
+        json: Any = None,
         path: Union[str, Path] = None,
         contentType: str = None,
         response: "APIResponse" = None,
@@ -270,6 +298,8 @@ class Route(ChannelOwner):
             )
             from playwright._impl._fetch import APIResponse
 
+            if json is not None:
+                body = json.dumps(json)
             if body is None and path is None and isinstance(response, APIResponse):
                 if response._request._connection is self._connection:
                     params["fetchResponseUid"] = response._fetch_uid
@@ -295,6 +325,8 @@ class Route(ChannelOwner):
         headers = {k.lower(): str(v) for k, v in params.get("headers", {}).items()}
         if params.get("contentType"):
             headers["content-type"] = params["contentType"]
+        elif json:
+            headers["content-type"] = "application/json"
         elif path:
             headers["content-type"] = (
                 mimetypes.guess_type(str(Path(path)))[0] or "application/octet-stream"
@@ -305,12 +337,24 @@ class Route(ChannelOwner):
         await self._race_with_page_close(self._channel.send("fulfill", params))
         self._report_handled(True)
 
+    async def fetch(
+        self,
+        url: str = None,
+        method: str = None,
+        headers: Dict[str, str] = None,
+        postData: Union[Any, str, bytes] = None,
+    ) -> "APIResponse":
+        page = self.request.frame._page
+        return await page.context.request._inner_fetch(
+            self.request, url, method, headers, postData
+        )
+
     async def fallback(
         self,
         url: str = None,
         method: str = None,
         headers: Dict[str, str] = None,
-        postData: Union[str, bytes] = None,
+        postData: Union[Any, str, bytes] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
         self._check_not_handled()
@@ -322,7 +366,7 @@ class Route(ChannelOwner):
         url: str = None,
         method: str = None,
         headers: Dict[str, str] = None,
-        postData: Union[str, bytes] = None,
+        postData: Union[Any, str, bytes] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
         self._check_not_handled()
@@ -335,23 +379,18 @@ class Route(ChannelOwner):
     ) -> Coroutine[Any, Any, None]:
         async def continue_route() -> None:
             try:
-                post_data_for_wire: Optional[str] = None
-                post_data_from_overrides = self.request._fallback_overrides.get(
-                    "postData"
-                )
-                if post_data_from_overrides is not None:
-                    post_data_for_wire = (
-                        base64.b64encode(post_data_from_overrides.encode()).decode()
-                        if isinstance(post_data_from_overrides, str)
-                        else base64.b64encode(post_data_from_overrides).decode()
-                    )
-                params = locals_to_params(
-                    cast(Dict[str, str], self.request._fallback_overrides)
-                )
+                params: Dict[str, Any] = {}
+                params["url"] = self.request._fallback_overrides.url
+                params["method"] = self.request._fallback_overrides.method
+                params["headers"] = self.request._fallback_overrides.headers
+                if self.request._fallback_overrides.post_data_buffer is not None:
+                    params["postData"] = base64.b64encode(
+                        self.request._fallback_overrides.post_data_buffer
+                    ).decode()
+                params = locals_to_params(params)
+
                 if "headers" in params:
                     params["headers"] = serialize_headers(params["headers"])
-                if post_data_for_wire is not None:
-                    params["postData"] = post_data_for_wire
                 await self._connection.wrap_api_call(
                     lambda: self._race_with_page_close(
                         self._channel.send(

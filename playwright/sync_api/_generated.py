@@ -676,6 +676,7 @@ class Route(SyncBase):
         status: typing.Optional[int] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         body: typing.Optional[typing.Union[str, bytes]] = None,
+        json: typing.Optional[typing.Any] = None,
         path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         content_type: typing.Optional[str] = None,
         response: typing.Optional["APIResponse"] = None
@@ -720,6 +721,8 @@ class Route(SyncBase):
             Response headers. Header values will be converted to a string.
         body : Union[bytes, str, None]
             Response body.
+        json : Union[Any, None]
+            JSON response. This method will set the content type to `application/json` if not set.
         path : Union[pathlib.Path, str, None]
             File path to respond with. The content type will be inferred from file extension. If `path` is a relative path,
             then it is resolved relative to the current working directory.
@@ -736,9 +739,74 @@ class Route(SyncBase):
                     status=status,
                     headers=mapping.to_impl(headers),
                     body=body,
+                    json=mapping.to_impl(json),
                     path=path,
                     contentType=content_type,
                     response=response._impl_obj if response else None,
+                )
+            )
+        )
+
+    def fetch(
+        self,
+        *,
+        url: typing.Optional[str] = None,
+        method: typing.Optional[str] = None,
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None
+    ) -> "APIResponse":
+        """Route.fetch
+
+        Performs the request and fetches result without fulfilling it, so that the response could be modified and then
+        fulfilled.
+
+        **Usage**
+
+        ```py
+        async def handle(route):
+            response = await route.fulfill()
+            json = await response.json()
+            json[\"message\"][\"big_red_dog\"] = []
+            await route.fulfill(response=response, json=json)
+
+        await page.route(\"https://dog.ceo/api/breeds/list/all\", handle)
+        ```
+
+        ```py
+        def handle(route):
+            response = route.fulfill()
+            json = response.json()
+            json[\"message\"][\"big_red_dog\"] = []
+            route.fulfill(response=response, json=json)
+
+        page.route(\"https://dog.ceo/api/breeds/list/all\", handle)
+        ```
+
+        Parameters
+        ----------
+        url : Union[str, None]
+            If set changes the request URL. New URL must have same protocol as original one.
+        method : Union[str, None]
+            If set changes the request method (e.g. GET or POST).
+        headers : Union[Dict[str, str], None]
+            If set changes the request HTTP headers. Header values will be converted to a string.
+        post_data : Union[Any, bytes, str, None]
+            Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
+            and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
+            header will be set to `application/octet-stream` if not explicitly set.
+
+        Returns
+        -------
+        APIResponse
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                self._impl_obj.fetch(
+                    url=url,
+                    method=method,
+                    headers=mapping.to_impl(headers),
+                    postData=mapping.to_impl(post_data),
                 )
             )
         )
@@ -749,7 +817,7 @@ class Route(SyncBase):
         url: typing.Optional[str] = None,
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        post_data: typing.Optional[typing.Union[str, bytes]] = None
+        post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None
     ) -> None:
         """Route.fallback
 
@@ -829,7 +897,7 @@ class Route(SyncBase):
                 \"bar\": None # remove \"bar\" header
             }
             await route.fallback(headers=headers)
-        }
+
         await page.route(\"**/*\", handle)
         ```
 
@@ -842,7 +910,7 @@ class Route(SyncBase):
                 \"bar\": None # remove \"bar\" header
             }
             route.fallback(headers=headers)
-        }
+
         page.route(\"**/*\", handle)
         ```
 
@@ -852,11 +920,11 @@ class Route(SyncBase):
             If set changes the request URL. New URL must have same protocol as original one. Changing the URL won't affect the
             route matching, all the routes are matched using the original request URL.
         method : Union[str, None]
-            If set changes the request method (e.g. GET or POST)
+            If set changes the request method (e.g. GET or POST).
         headers : Union[Dict[str, str], None]
             If set changes the request HTTP headers. Header values will be converted to a string.
-        post_data : Union[bytes, str, None]
-            If set changes the post data of request
+        post_data : Union[Any, bytes, str, None]
+            If set changes the post data of request.
         """
 
         return mapping.from_maybe_impl(
@@ -865,7 +933,7 @@ class Route(SyncBase):
                     url=url,
                     method=method,
                     headers=mapping.to_impl(headers),
-                    postData=post_data,
+                    postData=mapping.to_impl(post_data),
                 )
             )
         )
@@ -876,7 +944,7 @@ class Route(SyncBase):
         url: typing.Optional[str] = None,
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        post_data: typing.Optional[typing.Union[str, bytes]] = None
+        post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None
     ) -> None:
         """Route.continue_
 
@@ -893,7 +961,7 @@ class Route(SyncBase):
                 \"bar\": None # remove \"bar\" header
             }
             await route.continue_(headers=headers)
-        }
+
         await page.route(\"**/*\", handle)
         ```
 
@@ -906,7 +974,7 @@ class Route(SyncBase):
                 \"bar\": None # remove \"bar\" header
             }
             route.continue_(headers=headers)
-        }
+
         page.route(\"**/*\", handle)
         ```
 
@@ -915,11 +983,11 @@ class Route(SyncBase):
         url : Union[str, None]
             If set changes the request URL. New URL must have same protocol as original one.
         method : Union[str, None]
-            If set changes the request method (e.g. GET or POST)
+            If set changes the request method (e.g. GET or POST).
         headers : Union[Dict[str, str], None]
             If set changes the request HTTP headers. Header values will be converted to a string.
-        post_data : Union[bytes, str, None]
-            If set changes the post data of request
+        post_data : Union[Any, bytes, str, None]
+            If set changes the post data of request.
         """
 
         return mapping.from_maybe_impl(
@@ -928,7 +996,7 @@ class Route(SyncBase):
                     url=url,
                     method=method,
                     headers=mapping.to_impl(headers),
-                    postData=post_data,
+                    postData=mapping.to_impl(post_data),
                 )
             )
         )
@@ -2777,13 +2845,13 @@ class ElementHandle(JSHandle):
     def query_selector(self, selector: str) -> typing.Optional["ElementHandle"]:
         """ElementHandle.query_selector
 
-        The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
-        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns `null`.
+        The method finds an element matching the specified selector in the `ElementHandle`'s subtree. If no elements match
+        the selector, returns `null`.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
 
         Returns
         -------
@@ -2797,13 +2865,13 @@ class ElementHandle(JSHandle):
     def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
         """ElementHandle.query_selector_all
 
-        The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See
-        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns empty array.
+        The method finds all elements matching the specified selector in the `ElementHandle`s subtree. If no elements match
+        the selector, returns empty array.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
 
         Returns
         -------
@@ -2822,8 +2890,7 @@ class ElementHandle(JSHandle):
         Returns the return value of `expression`.
 
         The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a
-        first argument to `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements
-        match the selector, the method throws an error.
+        first argument to `expression`. If no elements match the selector, the method throws an error.
 
         If `expression` returns a [Promise], then `element_handle.eval_on_selector()` would wait for the promise to
         resolve and return its value.
@@ -2845,7 +2912,7 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
@@ -2873,8 +2940,7 @@ class ElementHandle(JSHandle):
         Returns the return value of `expression`.
 
         The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array
-        of matched elements as a first argument to `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more
-        details.
+        of matched elements as a first argument to `expression`.
 
         If `expression` returns a [Promise], then `element_handle.eval_on_selector_all()` would wait for the promise to
         resolve and return its value.
@@ -2901,7 +2967,7 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
@@ -3003,7 +3069,7 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         state : Union["attached", "detached", "hidden", "visible", None]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
@@ -3689,13 +3755,13 @@ class Frame(SyncBase):
 
         **NOTE** The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 
-        The method finds an element matching the specified selector within the frame. See
-        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns `null`.
+        The method finds an element matching the specified selector within the frame. If no elements match the selector,
+        returns `null`.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3716,13 +3782,13 @@ class Frame(SyncBase):
 
         **NOTE** The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 
-        The method finds all elements matching the specified selector within the frame. See
-        [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector, returns empty array.
+        The method finds all elements matching the specified selector within the frame. If no elements match the selector,
+        returns empty array.
 
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
 
         Returns
         -------
@@ -3799,7 +3865,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3843,7 +3909,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3879,7 +3945,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3915,7 +3981,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3951,7 +4017,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3988,7 +4054,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -4023,7 +4089,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -4097,7 +4163,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         event_init : Union[Dict, None]
@@ -4135,8 +4201,7 @@ class Frame(SyncBase):
         Returns the return value of `expression`.
 
         The method finds an element matching the specified selector within the frame and passes it as a first argument to
-        `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details. If no elements match the selector,
-        the method throws an error.
+        `expression`. If no elements match the selector, the method throws an error.
 
         If `expression` returns a [Promise], then `frame.eval_on_selector()` would wait for the promise to resolve
         and return its value.
@@ -4158,7 +4223,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
@@ -4192,7 +4257,7 @@ class Frame(SyncBase):
         Returns the return value of `expression`.
 
         The method finds all elements matching the specified selector within the frame and passes an array of matched
-        elements as a first argument to `expression`. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more details.
+        elements as a first argument to `expression`.
 
         If `expression` returns a [Promise], then `frame.eval_on_selector_all()` would wait for the promise to resolve
         and return its value.
@@ -4210,7 +4275,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
@@ -4401,7 +4466,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -4485,7 +4550,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -4563,7 +4628,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -4629,7 +4694,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, None]
@@ -4679,7 +4744,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
         has_text : Union[Pattern[str], str, None]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
@@ -4967,7 +5032,9 @@ class Frame(SyncBase):
             )
         )
 
-    def get_by_test_id(self, test_id: str) -> "Locator":
+    def get_by_test_id(
+        self, test_id: typing.Union[str, typing.Pattern[str]]
+    ) -> "Locator":
         """Frame.get_by_test_id
 
         Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
@@ -4975,7 +5042,7 @@ class Frame(SyncBase):
 
         Parameters
         ----------
-        test_id : str
+        test_id : Union[Pattern[str], str]
             Id to locate the element by.
 
         Returns
@@ -5114,7 +5181,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
 
         Returns
         -------
@@ -5139,7 +5206,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5169,7 +5236,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5205,7 +5272,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5241,7 +5308,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5278,7 +5345,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         name : str
             Attribute name to get the value for.
         strict : Union[bool, None]
@@ -5332,7 +5399,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -5390,10 +5457,10 @@ class Frame(SyncBase):
         ----------
         source : str
             A selector to search for an element to drag. If there are multiple elements satisfying the selector, the first will
-            be used. See [working with selectors](../selectors.md) for more details.
+            be used.
         target : str
             A selector to search for an element to drop onto. If there are multiple elements satisfying the selector, the first
-            will be used. See [working with selectors](../selectors.md) for more details.
+            will be used.
         source_position : Union[{x: float, y: float}, None]
             Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
@@ -5485,7 +5552,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         value : Union[List[str], str, None]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
@@ -5549,7 +5616,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5599,7 +5666,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
@@ -5658,7 +5725,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         text : str
             A text to type into a focused element.
         delay : Union[float, None]
@@ -5723,7 +5790,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Union[float, None]
@@ -5784,7 +5851,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -5850,7 +5917,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -6039,7 +6106,7 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         checked : bool
             Whether to check or uncheck the checkbox.
         position : Union[{x: float, y: float}, None]
@@ -6123,7 +6190,7 @@ class FrameLocator(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
         has_text : Union[Pattern[str], str, None]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
@@ -6411,7 +6478,9 @@ class FrameLocator(SyncBase):
             )
         )
 
-    def get_by_test_id(self, test_id: str) -> "Locator":
+    def get_by_test_id(
+        self, test_id: typing.Union[str, typing.Pattern[str]]
+    ) -> "Locator":
         """FrameLocator.get_by_test_id
 
         Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
@@ -6419,7 +6488,7 @@ class FrameLocator(SyncBase):
 
         Parameters
         ----------
-        test_id : str
+        test_id : Union[Pattern[str], str]
             Id to locate the element by.
 
         Returns
@@ -6543,7 +6612,7 @@ class FrameLocator(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
 
         Returns
         -------
@@ -7233,14 +7302,14 @@ class Page(SyncContextManager):
 
         ```py
         async with page.expect_event(\"popup\") as page_info:
-            page.evaluate(\"window.open('https://example.com')\")
+            await page.get_by_text(\"open the popup\").click()
         popup = await page_info.value
         print(await popup.evaluate(\"location.href\"))
         ```
 
         ```py
         with page.expect_event(\"popup\") as page_info:
-            page.evaluate(\"window.open('https://example.com')\")
+            page.get_by_text(\"open the popup\").click()
         popup = page_info.value
         print(popup.evaluate(\"location.href\"))
         ```
@@ -7484,14 +7553,14 @@ class Page(SyncContextManager):
 
         ```py
         async with page.expect_event(\"popup\") as page_info:
-            page.evaluate(\"window.open('https://example.com')\")
+            await page.get_by_text(\"open the popup\").click()
         popup = await page_info.value
         print(await popup.evaluate(\"location.href\"))
         ```
 
         ```py
         with page.expect_event(\"popup\") as page_info:
-            page.evaluate(\"window.open('https://example.com')\")
+            page.get_by_text(\"open the popup\").click()
         popup = page_info.value
         print(popup.evaluate(\"location.href\"))
         ```
@@ -7797,7 +7866,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -7820,7 +7889,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
 
         Returns
         -------
@@ -7897,7 +7966,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
             by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -7941,7 +8010,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -7977,7 +8046,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -8013,7 +8082,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -8049,7 +8118,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -8086,7 +8155,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -8121,7 +8190,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -8195,7 +8264,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
         event_init : Union[Dict, None]
@@ -8400,7 +8469,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
@@ -8450,7 +8519,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to query for. See [working with selectors](../selectors.md) for more details.
+            A selector to query for.
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
@@ -8967,7 +9036,7 @@ class Page(SyncContextManager):
         async with page.expect_popup() as page_info:
             await page.get_by_role(\"button\").click() # click triggers a popup.
         popup = await page_info.value
-         # Following resolves after \"domcontentloaded\" event.
+        # Wait for the \"DOMContentLoaded\" event.
         await popup.wait_for_load_state(\"domcontentloaded\")
         print(await popup.title()) # popup is ready to use.
         ```
@@ -8976,7 +9045,7 @@ class Page(SyncContextManager):
         with page.expect_popup() as page_info:
             page.get_by_role(\"button\").click() # click triggers a popup.
         popup = page_info.value
-         # Following resolves after \"domcontentloaded\" event.
+        # Wait for the \"DOMContentLoaded\" event.
         popup.wait_for_load_state(\"domcontentloaded\")
         print(popup.title()) # popup is ready to use.
         ```
@@ -9707,7 +9776,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -9791,7 +9860,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -9869,7 +9938,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -9935,7 +10004,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, None]
@@ -9983,7 +10052,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
         has_text : Union[Pattern[str], str, None]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
@@ -10271,7 +10340,9 @@ class Page(SyncContextManager):
             )
         )
 
-    def get_by_test_id(self, test_id: str) -> "Locator":
+    def get_by_test_id(
+        self, test_id: typing.Union[str, typing.Pattern[str]]
+    ) -> "Locator":
         """Page.get_by_test_id
 
         Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
@@ -10279,7 +10350,7 @@ class Page(SyncContextManager):
 
         Parameters
         ----------
-        test_id : str
+        test_id : Union[Pattern[str], str]
             Id to locate the element by.
 
         Returns
@@ -10418,7 +10489,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
 
         Returns
         -------
@@ -10443,7 +10514,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -10473,7 +10544,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -10509,7 +10580,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -10545,7 +10616,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -10582,7 +10653,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         name : str
             Attribute name to get the value for.
         strict : Union[bool, None]
@@ -10636,7 +10707,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
@@ -10721,10 +10792,10 @@ class Page(SyncContextManager):
         ----------
         source : str
             A selector to search for an element to drag. If there are multiple elements satisfying the selector, the first will
-            be used. See [working with selectors](../selectors.md) for more details.
+            be used.
         target : str
             A selector to search for an element to drop onto. If there are multiple elements satisfying the selector, the first
-            will be used. See [working with selectors](../selectors.md) for more details.
+            will be used.
         source_position : Union[{x: float, y: float}, None]
             Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
@@ -10817,7 +10888,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         value : Union[List[str], str, None]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
@@ -10881,7 +10952,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -10931,7 +11002,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
             Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
@@ -10990,7 +11061,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         text : str
             A text to type into a focused element.
         delay : Union[float, None]
@@ -11083,7 +11154,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         delay : Union[float, None]
@@ -11144,7 +11215,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -11210,7 +11281,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -11683,13 +11754,15 @@ class Page(SyncContextManager):
 
         ```py
         async with page.expect_navigation():
-            await page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+            # This action triggers the navigation after a timeout.
+            await page.get_by_text(\"Navigate after timeout\").click()
         # Resolves after navigation has finished
         ```
 
         ```py
         with page.expect_navigation():
-            page.click(\"a.delayed-navigation\") # clicking the link will indirectly cause a navigation
+            # This action triggers the navigation after a timeout.
+            page.get_by_text(\"Navigate after timeout\").click()
         # Resolves after navigation has finished
         ```
 
@@ -11775,23 +11848,23 @@ class Page(SyncContextManager):
 
         ```py
         async with page.expect_request(\"http://example.com/resource\") as first:
-            await page.click('button')
+            await page.get_by_text(\"trigger request\").click()
         first_request = await first.value
 
         # or with a lambda
         async with page.expect_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\") as second:
-            await page.click('img')
+            await page.get_by_text(\"trigger request\").click()
         second_request = await second.value
         ```
 
         ```py
         with page.expect_request(\"http://example.com/resource\") as first:
-            page.click('button')
+            page.get_by_text(\"trigger request\").click()
         first_request = first.value
 
         # or with a lambda
         with page.expect_request(lambda request: request.url == \"http://example.com\" and request.method == \"get\") as second:
-            page.click('img')
+            page.get_by_text(\"trigger request\").click()
         second_request = second.value
         ```
 
@@ -11864,26 +11937,26 @@ class Page(SyncContextManager):
 
         ```py
         async with page.expect_response(\"https://example.com/resource\") as response_info:
-            await page.click(\"input\")
+            await page.get_by_text(\"trigger response\").click()
         response = await response_info.value
         return response.ok
 
         # or with a lambda
         async with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200) as response_info:
-            await page.click(\"input\")
+            await page.get_by_text(\"trigger response\").click()
         response = await response_info.value
         return response.ok
         ```
 
         ```py
         with page.expect_response(\"https://example.com/resource\") as response_info:
-            page.click(\"input\")
+            page.get_by_text(\"trigger response\").click()
         response = response_info.value
         return response.ok
 
         # or with a lambda
         with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200) as response_info:
-            page.click(\"input\")
+            page.get_by_text(\"trigger response\").click()
         response = response_info.value
         return response.ok
         ```
@@ -12003,7 +12076,7 @@ class Page(SyncContextManager):
         ----------
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
-            used. See [working with selectors](../selectors.md) for more details.
+            used.
         checked : bool
             Whether to check or uncheck the checkbox.
         position : Union[{x: float, y: float}, None]
@@ -12086,14 +12159,14 @@ class BrowserContext(SyncContextManager):
 
         ```py
         async with context.expect_page() as page_info:
-            await page.locator(\"a[target=_blank]\").click(),
+            await page.get_by_text(\"open new page\").click(),
         page = await page_info.value
         print(await page.evaluate(\"location.href\"))
         ```
 
         ```py
         with context.expect_page() as page_info:
-            page.locator(\"a[target=_blank]\").click(),
+            page.get_by_text(\"open new page\").click(),
         page = page_info.value
         print(page.evaluate(\"location.href\"))
         ```
@@ -12195,14 +12268,14 @@ class BrowserContext(SyncContextManager):
 
         ```py
         async with context.expect_page() as page_info:
-            await page.locator(\"a[target=_blank]\").click(),
+            await page.get_by_text(\"open new page\").click(),
         page = await page_info.value
         print(await page.evaluate(\"location.href\"))
         ```
 
         ```py
         with context.expect_page() as page_info:
-            page.locator(\"a[target=_blank]\").click(),
+            page.get_by_text(\"open new page\").click(),
         page = page_info.value
         print(page.evaluate(\"location.href\"))
         ```
@@ -13484,9 +13557,10 @@ class Browser(SyncContextManager):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, None]
-            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on
-            selectors that imply single target DOM element will throw when more than one element matches the selector. See
-            `Locator` to learn more about the strict mode.
+            If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
+            selectors that imply single target DOM element will throw when more than one element matches the selector. This
+            option does not affect any Locator APIs (Locators are always strict). See `Locator` to learn more about the strict
+            mode.
         service_workers : Union["allow", "block", None]
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be
@@ -13691,9 +13765,10 @@ class Browser(SyncContextManager):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, None]
-            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on
-            selectors that imply single target DOM element will throw when more than one element matches the selector. See
-            `Locator` to learn more about the strict mode.
+            If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
+            selectors that imply single target DOM element will throw when more than one element matches the selector. This
+            option does not affect any Locator APIs (Locators are always strict). See `Locator` to learn more about the strict
+            mode.
         service_workers : Union["allow", "block", None]
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be
@@ -14227,9 +14302,10 @@ class BrowserType(SyncBase):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         strict_selectors : Union[bool, None]
-            If specified, enables strict selectors mode for this context. In the strict selectors mode all operations on
-            selectors that imply single target DOM element will throw when more than one element matches the selector. See
-            `Locator` to learn more about the strict mode.
+            If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
+            selectors that imply single target DOM element will throw when more than one element matches the selector. This
+            option does not affect any Locator APIs (Locators are always strict). See `Locator` to learn more about the strict
+            mode.
         service_workers : Union["allow", "block", None]
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be
@@ -14464,7 +14540,7 @@ class Playwright(SyncBase):
     def selectors(self) -> "Selectors":
         """Playwright.selectors
 
-        Selectors can be used to install custom selector engines. See [Working with selectors](https://playwright.dev/python/docs/selectors) for more
+        Selectors can be used to install custom selector engines. See [extensibility](https://playwright.dev/python/docs/extensibility) for more
         information.
 
         Returns
@@ -14850,6 +14926,10 @@ class Locator(SyncBase):
         trial: typing.Optional[bool] = None
     ) -> None:
         """Locator.click
+
+        Click an element.
+
+        **Details**
 
         This method clicks the element by performing the following steps:
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
@@ -15284,7 +15364,7 @@ class Locator(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
         has_text : Union[Pattern[str], str, None]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
@@ -15572,7 +15652,9 @@ class Locator(SyncBase):
             )
         )
 
-    def get_by_test_id(self, test_id: str) -> "Locator":
+    def get_by_test_id(
+        self, test_id: typing.Union[str, typing.Pattern[str]]
+    ) -> "Locator":
         """Locator.get_by_test_id
 
         Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
@@ -15580,7 +15662,7 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        test_id : str
+        test_id : Union[Pattern[str], str]
             Id to locate the element by.
 
         Returns
@@ -15716,7 +15798,7 @@ class Locator(SyncBase):
         Parameters
         ----------
         selector : str
-            A selector to use when resolving DOM element. See [working with selectors](../selectors.md) for more details.
+            A selector to use when resolving DOM element.
 
         Returns
         -------
@@ -15857,6 +15939,30 @@ class Locator(SyncBase):
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.blur(timeout=timeout)))
+
+    def all(self) -> typing.List["Locator"]:
+        """Locator.all
+
+        When locator points to a list of elements, returns array of locators, pointing to respective elements.
+
+        **Usage**
+
+        ```py
+        for li in await page.get_by_role('listitem').all():
+          await li.click();
+        ```
+
+        ```py
+        for li in page.get_by_role('listitem').all():
+          li.click();
+        ```
+
+        Returns
+        -------
+        List[Locator]
+        """
+
+        return mapping.from_impl_list(self._sync(self._impl_obj.all()))
 
     def count(self) -> int:
         """Locator.count
@@ -16386,6 +16492,10 @@ class Locator(SyncBase):
     ) -> typing.List[str]:
         """Locator.select_option
 
+        Selects option or options in `<select>`.
+
+        **Details**
+
         This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits until all specified options are present in
         the `<select>` element and selects these options.
 
@@ -16400,21 +16510,29 @@ class Locator(SyncBase):
 
         **Usage**
 
+        ```html
+        <select multiple>
+          <option value=\"red\">Red</div>
+          <option value=\"green\">Green</div>
+          <option value=\"blue\">Blue</div>
+        </select>
+        ```
+
         ```py
-        # single selection matching the value
+        # single selection matching the value or label
         await element.select_option(\"blue\")
         # single selection matching the label
         await element.select_option(label=\"blue\")
-        # multiple selection
+        # multiple selection for blue, red and second option
         await element.select_option(value=[\"red\", \"green\", \"blue\"])
         ```
 
         ```py
-        # single selection matching the value
+        # single selection matching the value or label
         element.select_option(\"blue\")
-        # single selection matching both the label
+        # single selection matching the label
         element.select_option(label=\"blue\")
-        # multiple selection
+        # multiple selection for blue, red and second option
         element.select_option(value=[\"red\", \"green\", \"blue\"])
         ```
 
@@ -17021,7 +17139,7 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -17100,7 +17218,7 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -17179,7 +17297,7 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -17270,7 +17388,7 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -17349,7 +17467,7 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -17428,7 +17546,7 @@ class APIRequestContext(SyncBase):
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -17547,7 +17665,7 @@ class APIRequestContext(SyncBase):
         ] = None,
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
+        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18742,7 +18860,7 @@ class LocatorAssertions(SyncBase):
         Parameters
         ----------
         expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
-            Expected substring or RegExp or a list of those.
+            Expected string or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, None]
@@ -18785,7 +18903,7 @@ class LocatorAssertions(SyncBase):
         Parameters
         ----------
         expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
-            Expected substring or RegExp or a list of those.
+            Expected string or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, None]

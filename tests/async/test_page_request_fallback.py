@@ -353,3 +353,26 @@ async def test_should_chain_fallback_with_dynamic_url(
 
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [3, 2, 1]
+
+
+async def test_should_amend_json_post_data(server, page):
+    await page.goto(server.EMPTY_PAGE)
+    post_data = []
+    await page.route(
+        "**/*",
+        lambda route: (
+            post_data.append(route.request.post_data),
+            asyncio.create_task(route.continue_()),
+        ),
+    )
+    await page.route(
+        "**/*",
+        lambda route: asyncio.create_task(route.fallback(post_data={"foo": "bar"})),
+    )
+
+    [server_request, _] = await asyncio.gather(
+        server.wait_for_request("/sleep.zzz"),
+        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"),
+    )
+    assert post_data == ['{"foo": "bar"}']
+    assert server_request.post_body == b'{"foo": "bar"}'
