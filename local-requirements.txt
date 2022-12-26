@@ -21,4 +21,4 @@ setuptools==65.5.0
 twine==4.0.1
 twisted==22.10.0
 types-pyOpenSSL==22.1.0.1
-wheel==0.37.1
+wheel==0.38.1
