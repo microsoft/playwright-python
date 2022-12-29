@@ -236,7 +236,7 @@ setup(
         "write_to": "playwright/_repo_version.py",
         "write_to_template": 'version = "{version}"\n',
     },
-    setup_requires=["setuptools-scm==7.0.5", "wheel==0.37.1"],
+    setup_requires=["setuptools-scm==7.0.5", "wheel==0.38.1"],
     entry_points={
         "console_scripts": [
             "playwright=playwright.__main__:main",
