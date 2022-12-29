@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from playwright.sync_api import Page, Route
 from tests.server import Server
 
@@ -26,3 +28,48 @@ def test_should_fetch_original_request_and_fulfill(page: Page, server: Server) -
     assert response
     assert response.status == 200
     assert page.title() == "Woof-Woof"
+
+
+def test_should_fulfill_json(page: Page, server: Server) -> None:
+    def handle(route: Route) -> None:
+        route.fulfill(status=201, headers={"foo": "bar"}, json={"bar": "baz"})
+
+    page.route("**/*", handle)
+
+    response = page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 201
+    assert response.headers["content-type"] == "application/json"
+    assert json.loads(page.evaluate("document.body.textContent")) == {"bar": "baz"}
+
+
+def test_should_fulfill_json_overriding_existing_response(
+    page: Page, server: Server
+) -> None:
+    server.set_route(
+        "/tags",
+        lambda request: (
+            request.setHeader("foo", "bar"),
+            request.write('{"tags": ["a", "b"]}'.encode()),
+            request.finish(),
+        ),
+    )
+
+    original = {}
+
+    def handle(route: Route) -> None:
+        response = route.fetch()
+        json = response.json()
+        original["tags"] = json["tags"]
+        json["tags"] = ["c"]
+        route.fulfill(response=response, json=json)
+
+    page.route("**/*", handle)
+
+    response = page.goto(server.PREFIX + "/tags")
+    assert response
+    assert response.status == 200
+    assert response.headers["content-type"] == "application/json"
+    assert response.headers["foo"] == "bar"
+    assert original["tags"] == ["a", "b"]
+    assert json.loads(page.evaluate("document.body.textContent")) == {"tags": ["c"]}

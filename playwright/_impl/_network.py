@@ -16,6 +16,7 @@ import asyncio
 import base64
 import inspect
 import json
+import json as json_utils
 import mimetypes
 import sys
 from collections import defaultdict
@@ -288,6 +289,12 @@ class Route(ChannelOwner):
     ) -> None:
         self._check_not_handled()
         params = locals_to_params(locals())
+
+        if json is not None:
+            if body is not None:
+                raise Error("Can specify either body or json parameters")
+            body = json_utils.dumps(json)
+
         if response:
             del params["response"]
             params["status"] = (
@@ -298,8 +305,6 @@ class Route(ChannelOwner):
             )
             from playwright._impl._fetch import APIResponse
 
-            if json is not None:
-                body = json.dumps(json)
             if body is None and path is None and isinstance(response, APIResponse):
                 if response._request._connection is self._connection:
                     params["fetchResponseUid"] = response._fetch_uid
