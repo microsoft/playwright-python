@@ -16,7 +16,6 @@ import asyncio
 import io
 import json
 import os
-import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
