@@ -16,7 +16,6 @@ import asyncio
 import io
 import json
 import os
-import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -107,9 +106,6 @@ class PipeTransport(Transport):
 
     async def connect(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
-        creationflags = 0
-        if sys.platform == "win32":
-            creationflags = subprocess.CREATE_NO_WINDOW
 
         try:
             # For pyinstaller
@@ -124,7 +120,6 @@ class PipeTransport(Transport):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=_get_stderr_fileno(),
                 limit=32768,
-                creationflags=creationflags,
                 env=env,
             )
         except Exception as exc:
