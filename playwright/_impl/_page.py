@@ -954,7 +954,10 @@ class Page(ChannelOwner):
         return self.context.request
 
     async def pause(self) -> None:
-        await self._browser_context._pause()
+        await asyncio.wait(
+            [self._browser_context._pause(), self._closed_or_crashed_future],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
 
     async def pdf(
         self,
