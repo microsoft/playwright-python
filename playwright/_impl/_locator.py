@@ -823,7 +823,7 @@ def get_by_role_selector(
     if expanded is not None:
         props.append(("expanded", str(expanded)))
     if includeHidden is not None:
-        props.append(("include-hiddenen", str(includeHidden)))
+        props.append(("include-hidden", str(includeHidden)))
     if level is not None:
         props.append(("level", str(level)))
     if name is not None:
