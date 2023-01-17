@@ -764,7 +764,7 @@ class Route(SyncBase):
 
         ```py
         async def handle(route):
-            response = await route.fulfill()
+            response = await route.fetch()
             json = await response.json()
             json[\"message\"][\"big_red_dog\"] = []
             await route.fulfill(response=response, json=json)
@@ -774,7 +774,7 @@ class Route(SyncBase):
 
         ```py
         def handle(route):
-            response = route.fulfill()
+            response = route.fetch()
             json = response.json()
             json[\"message\"][\"big_red_dog\"] = []
             route.fulfill(response=response, json=json)
@@ -4774,10 +4774,22 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.get_by_alt_text
 
-        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+        Allows locating elements by their alt text.
+
+        **Usage**
+
+        For example, this method will find the image by alt text \"Playwright logo\":
 
         ```html
-        <img alt='Castle'>
+        <img alt='Playwright logo'>
+        ```
+
+        ```py
+        await page.get_by_alt_text(\"Playwright logo\").click()
+        ```
+
+        ```py
+        page.get_by_alt_text(\"Playwright logo\").click()
         ```
 
         Parameters
@@ -4803,12 +4815,23 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.get_by_label
 
-        Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text \"Password\" in the following DOM:
+        Allows locating input elements by the text of the associated label.
+
+        **Usage**
+
+        For example, this method will find the input by label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
+        ```
+
+        ```py
+        await page.get_by_label(\"Password\").fill(\"secret\")
+        ```
+
+        ```py
+        page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         Parameters
@@ -4834,11 +4857,24 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.get_by_placeholder
 
-        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
-        \"Country\":
+        Allows locating input elements by the placeholder text.
+
+        **Usage**
+
+        For example, consider the following DOM structure.
 
         ```html
-        <input placeholder=\"Country\">
+        <input type=\"email\" placeholder=\"name@example.com\" />
+        ```
+
+        You can fill the input after locating it by the placeholder text:
+
+        ```py
+        await page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
+        ```
+
+        ```py
+        page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
         ```
 
         Parameters
@@ -4959,14 +4995,48 @@ class Frame(SyncBase):
 
         Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
         [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
-        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
-        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
 
-        Note that many html elements have an implicitly
-        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector.
-        You can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines
-        **do not recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to
-        default values.
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <h3>Sign up</h3>
+        <label>
+          <input type=\"checkbox\" /> Subscribe
+        </label>
+        <br/>
+        <button>Submit</button>
+        ```
+
+        You can locate each element by it's implicit role:
+
+        ```py
+        await expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        await page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        await page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        ```py
+        expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        **Details**
+
+        Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+        about the ARIA guidelines.
+
+        Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+        that is recognized by the role selector. You can find all the
+        [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+        duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 
         Parameters
         ----------
@@ -5037,8 +5107,30 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.get_by_test_id
 
-        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
-        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+        Locate element by the test id.
+
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <button data-testid=\"directions\">Itinéraire</button>
+        ```
+
+        You can locate the element by it's test id:
+
+        ```py
+        await page.get_by_test_id(\"directions\").click()
+        ```
+
+        ```py
+        page.get_by_test_id(\"directions\").click()
+        ```
+
+        **Details**
+
+        By default, the `data-testid` attribute is used as a test id. Use `selectors.set_test_id_attribute()` to
+        configure a different test id attribute if necessary.
 
         Parameters
         ----------
@@ -5060,7 +5152,14 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.get_by_text
 
-        Allows locating elements that contain given text. Consider the following DOM structure:
+        Allows locating elements that contain given text.
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
+        filter by the text content.
+
+        **Usage**
+
+        Consider the following DOM structure:
 
         ```html
         <div>Hello <span>world</span></div>
@@ -5103,14 +5202,13 @@ class Frame(SyncBase):
         page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
         ```
 
-        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
-        filter by the text content.
+        **Details**
 
-        **NOTE** Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple
-        spaces into one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
 
-        **NOTE** Input elements of the type `button` and `submit` are matched by their `value` instead of the text content.
-        For example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
+        Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -5135,11 +5233,24 @@ class Frame(SyncBase):
     ) -> "Locator":
         """Frame.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Place the
-        order\":
+        Allows locating elements by their title attribute.
+
+        **Usage**
+
+        Consider the following DOM structure.
 
         ```html
-        <button title='Place the order'>Order Now</button>
+        <span title='Issues count'>25 issues</span>
+        ```
+
+        You can check the issues count after locating it by the title text:
+
+        ```py
+        await expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
+        ```
+
+        ```py
+        expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
         ```
 
         Parameters
@@ -6220,10 +6331,22 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_alt_text
 
-        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+        Allows locating elements by their alt text.
+
+        **Usage**
+
+        For example, this method will find the image by alt text \"Playwright logo\":
 
         ```html
-        <img alt='Castle'>
+        <img alt='Playwright logo'>
+        ```
+
+        ```py
+        await page.get_by_alt_text(\"Playwright logo\").click()
+        ```
+
+        ```py
+        page.get_by_alt_text(\"Playwright logo\").click()
         ```
 
         Parameters
@@ -6249,12 +6372,23 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_label
 
-        Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text \"Password\" in the following DOM:
+        Allows locating input elements by the text of the associated label.
+
+        **Usage**
+
+        For example, this method will find the input by label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
+        ```
+
+        ```py
+        await page.get_by_label(\"Password\").fill(\"secret\")
+        ```
+
+        ```py
+        page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         Parameters
@@ -6280,11 +6414,24 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_placeholder
 
-        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
-        \"Country\":
+        Allows locating input elements by the placeholder text.
+
+        **Usage**
+
+        For example, consider the following DOM structure.
 
         ```html
-        <input placeholder=\"Country\">
+        <input type=\"email\" placeholder=\"name@example.com\" />
+        ```
+
+        You can fill the input after locating it by the placeholder text:
+
+        ```py
+        await page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
+        ```
+
+        ```py
+        page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
         ```
 
         Parameters
@@ -6405,14 +6552,48 @@ class FrameLocator(SyncBase):
 
         Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
         [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
-        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
-        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
 
-        Note that many html elements have an implicitly
-        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector.
-        You can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines
-        **do not recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to
-        default values.
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <h3>Sign up</h3>
+        <label>
+          <input type=\"checkbox\" /> Subscribe
+        </label>
+        <br/>
+        <button>Submit</button>
+        ```
+
+        You can locate each element by it's implicit role:
+
+        ```py
+        await expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        await page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        await page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        ```py
+        expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        **Details**
+
+        Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+        about the ARIA guidelines.
+
+        Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+        that is recognized by the role selector. You can find all the
+        [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+        duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 
         Parameters
         ----------
@@ -6483,8 +6664,30 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_test_id
 
-        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
-        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+        Locate element by the test id.
+
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <button data-testid=\"directions\">Itinéraire</button>
+        ```
+
+        You can locate the element by it's test id:
+
+        ```py
+        await page.get_by_test_id(\"directions\").click()
+        ```
+
+        ```py
+        page.get_by_test_id(\"directions\").click()
+        ```
+
+        **Details**
+
+        By default, the `data-testid` attribute is used as a test id. Use `selectors.set_test_id_attribute()` to
+        configure a different test id attribute if necessary.
 
         Parameters
         ----------
@@ -6506,7 +6709,14 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_text
 
-        Allows locating elements that contain given text. Consider the following DOM structure:
+        Allows locating elements that contain given text.
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
+        filter by the text content.
+
+        **Usage**
+
+        Consider the following DOM structure:
 
         ```html
         <div>Hello <span>world</span></div>
@@ -6549,14 +6759,13 @@ class FrameLocator(SyncBase):
         page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
         ```
 
-        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
-        filter by the text content.
+        **Details**
 
-        **NOTE** Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple
-        spaces into one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
 
-        **NOTE** Input elements of the type `button` and `submit` are matched by their `value` instead of the text content.
-        For example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
+        Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -6581,11 +6790,24 @@ class FrameLocator(SyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Place the
-        order\":
+        Allows locating elements by their title attribute.
+
+        **Usage**
+
+        Consider the following DOM structure.
 
         ```html
-        <button title='Place the order'>Order Now</button>
+        <span title='Issues count'>25 issues</span>
+        ```
+
+        You can check the issues count after locating it by the title text:
+
+        ```py
+        await expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
+        ```
+
+        ```py
+        expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
         ```
 
         Parameters
@@ -10082,10 +10304,22 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.get_by_alt_text
 
-        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+        Allows locating elements by their alt text.
+
+        **Usage**
+
+        For example, this method will find the image by alt text \"Playwright logo\":
 
         ```html
-        <img alt='Castle'>
+        <img alt='Playwright logo'>
+        ```
+
+        ```py
+        await page.get_by_alt_text(\"Playwright logo\").click()
+        ```
+
+        ```py
+        page.get_by_alt_text(\"Playwright logo\").click()
         ```
 
         Parameters
@@ -10111,12 +10345,23 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.get_by_label
 
-        Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text \"Password\" in the following DOM:
+        Allows locating input elements by the text of the associated label.
+
+        **Usage**
+
+        For example, this method will find the input by label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
+        ```
+
+        ```py
+        await page.get_by_label(\"Password\").fill(\"secret\")
+        ```
+
+        ```py
+        page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         Parameters
@@ -10142,11 +10387,24 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.get_by_placeholder
 
-        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
-        \"Country\":
+        Allows locating input elements by the placeholder text.
+
+        **Usage**
+
+        For example, consider the following DOM structure.
 
         ```html
-        <input placeholder=\"Country\">
+        <input type=\"email\" placeholder=\"name@example.com\" />
+        ```
+
+        You can fill the input after locating it by the placeholder text:
+
+        ```py
+        await page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
+        ```
+
+        ```py
+        page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
         ```
 
         Parameters
@@ -10267,14 +10525,48 @@ class Page(SyncContextManager):
 
         Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
         [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
-        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
-        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
 
-        Note that many html elements have an implicitly
-        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector.
-        You can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines
-        **do not recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to
-        default values.
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <h3>Sign up</h3>
+        <label>
+          <input type=\"checkbox\" /> Subscribe
+        </label>
+        <br/>
+        <button>Submit</button>
+        ```
+
+        You can locate each element by it's implicit role:
+
+        ```py
+        await expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        await page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        await page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        ```py
+        expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        **Details**
+
+        Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+        about the ARIA guidelines.
+
+        Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+        that is recognized by the role selector. You can find all the
+        [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+        duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 
         Parameters
         ----------
@@ -10345,8 +10637,30 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.get_by_test_id
 
-        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
-        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+        Locate element by the test id.
+
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <button data-testid=\"directions\">Itinéraire</button>
+        ```
+
+        You can locate the element by it's test id:
+
+        ```py
+        await page.get_by_test_id(\"directions\").click()
+        ```
+
+        ```py
+        page.get_by_test_id(\"directions\").click()
+        ```
+
+        **Details**
+
+        By default, the `data-testid` attribute is used as a test id. Use `selectors.set_test_id_attribute()` to
+        configure a different test id attribute if necessary.
 
         Parameters
         ----------
@@ -10368,7 +10682,14 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.get_by_text
 
-        Allows locating elements that contain given text. Consider the following DOM structure:
+        Allows locating elements that contain given text.
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
+        filter by the text content.
+
+        **Usage**
+
+        Consider the following DOM structure:
 
         ```html
         <div>Hello <span>world</span></div>
@@ -10411,14 +10732,13 @@ class Page(SyncContextManager):
         page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
         ```
 
-        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
-        filter by the text content.
+        **Details**
 
-        **NOTE** Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple
-        spaces into one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
 
-        **NOTE** Input elements of the type `button` and `submit` are matched by their `value` instead of the text content.
-        For example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
+        Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -10443,11 +10763,24 @@ class Page(SyncContextManager):
     ) -> "Locator":
         """Page.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Place the
-        order\":
+        Allows locating elements by their title attribute.
+
+        **Usage**
+
+        Consider the following DOM structure.
 
         ```html
-        <button title='Place the order'>Order Now</button>
+        <span title='Issues count'>25 issues</span>
+        ```
+
+        You can check the issues count after locating it by the title text:
+
+        ```py
+        await expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
+        ```
+
+        ```py
+        expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
         ```
 
         Parameters
@@ -14803,6 +15136,16 @@ class Locator(SyncBase):
 
         Returns locator to the last matching element.
 
+        **Usage**
+
+        ```py
+        banana = await page.get_by_role(\"listitem\").last()
+        ```
+
+        ```py
+        banana = page.get_by_role(\"listitem\").last()
+        ```
+
         Returns
         -------
         Locator
@@ -14814,8 +15157,11 @@ class Locator(SyncBase):
     ) -> typing.Optional[FloatRect]:
         """Locator.bounding_box
 
-        This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
-        calculated relative to the main frame viewport - which is usually the same as the browser window.
+        This method returns the bounding box of the element matching the locator, or `null` if the element is not visible.
+        The bounding box is calculated relative to the main frame viewport - which is usually the same as the browser
+        window.
+
+        **Details**
 
         Scrolling affects the returned bounding box, similarly to
         [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
@@ -14830,12 +15176,12 @@ class Locator(SyncBase):
         **Usage**
 
         ```py
-        box = await element.bounding_box()
+        box = await page.get_by_role(\"button\").bounding_box()
         await page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
         ```
 
         ```py
-        box = element.bounding_box()
+        box = page.get_by_role(\"button\").bounding_box()
         page.mouse.click(box[\"x\"] + box[\"width\"] / 2, box[\"y\"] + box[\"height\"] / 2)
         ```
 
@@ -14865,7 +15211,11 @@ class Locator(SyncBase):
     ) -> None:
         """Locator.check
 
-        This method checks the element by performing the following steps:
+        Ensure that checkbox or radio element is checked.
+
+        **Details**
+
+        Performs the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
            checked, this method returns immediately.
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
@@ -14878,6 +15228,16 @@ class Locator(SyncBase):
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"checkbox\").check()
+        ```
+
+        ```py
+        page.get_by_role(\"checkbox\").check()
+        ```
 
         Parameters
         ----------
@@ -14942,6 +15302,32 @@ class Locator(SyncBase):
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
 
+        **Usage**
+
+        Click a button:
+
+        ```py
+        await page.get_by_role(\"button\").click()
+        ```
+
+        ```py
+        page.get_by_role(\"button\").click()
+        ```
+
+        Shift-right-click at a specific position on a canvas:
+
+        ```py
+        await page.locator(\"canvas\").click(
+            button=\"right\", modifiers=[\"Shift\"], position={\"x\": 23, \"y\": 32}
+        )
+        ```
+
+        ```py
+        page.locator(\"canvas\").click(
+            button=\"right\", modifiers=[\"Shift\"], position={\"x\": 23, \"y\": 32}
+        )
+        ```
+
         Parameters
         ----------
         modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
@@ -15001,6 +15387,10 @@ class Locator(SyncBase):
         trial: typing.Optional[bool] = None
     ) -> None:
         """Locator.dblclick
+
+        Double-click an element.
+
+        **Details**
 
         This method double clicks the element by performing the following steps:
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
@@ -15066,19 +15456,23 @@ class Locator(SyncBase):
     ) -> None:
         """Locator.dispatch_event
 
-        The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
-        `click` is dispatched. This is equivalent to calling
-        [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+        Programmaticaly dispatch an event on the matching element.
 
         **Usage**
 
         ```py
-        await element.dispatch_event(\"click\")
+        await locator.dispatch_event(\"click\")
         ```
 
         ```py
-        element.dispatch_event(\"click\")
+        locator.dispatch_event(\"click\")
         ```
+
+        **Details**
+
+        The snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,
+        `click` is dispatched. This is equivalent to calling
+        [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
         Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
@@ -15097,13 +15491,13 @@ class Locator(SyncBase):
         ```py
         # note you can only create data_transfer in chromium and firefox
         data_transfer = await page.evaluate_handle(\"new DataTransfer()\")
-        await element.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
+        await locator.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
         ```
 
         ```py
         # note you can only create data_transfer in chromium and firefox
         data_transfer = page.evaluate_handle(\"new DataTransfer()\")
-        element.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
+        locator.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
         ```
 
         Parameters
@@ -15134,12 +15528,16 @@ class Locator(SyncBase):
     ) -> typing.Any:
         """Locator.evaluate
 
-        Returns the return value of `expression`.
+        Execute JavaScript code in the page, taking the matching element as an argument.
 
-        This method passes this handle as the first argument to `expression`.
+        **Details**
 
-        If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its
-        value.
+        Returns the return value of `expression`, called with the matching element as a first argument, and `arg` as a
+        second argument.
+
+        If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
+
+        If `expression` throws or rejects, this method throws.
 
         **Usage**
 
@@ -15182,22 +15580,27 @@ class Locator(SyncBase):
     ) -> typing.Any:
         """Locator.evaluate_all
 
-        The method finds all elements matching the specified locator and passes an array of matched elements as a first
-        argument to `expression`. Returns the result of `expression` invocation.
+        Execute JavaScript code in the page, taking all matching elements as an argument.
 
-        If `expression` returns a [Promise], then `locator.evaluate_all()` would wait for the promise to resolve and
-        return its value.
+        **Details**
+
+        Returns the return value of `expression`, called with an array of all matching elements as a first argument, and
+        `arg` as a second argument.
+
+        If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
+
+        If `expression` throws or rejects, this method throws.
 
         **Usage**
 
         ```py
-        elements = page.locator(\"div\")
-        div_counts = await elements.evaluate_all(\"(divs, min) => divs.length >= min\", 10)
+        locator = page.locator(\"div\")
+        more_than_ten = await locator.evaluate_all(\"(divs, min) => divs.length > min\", 10)
         ```
 
         ```py
-        elements = page.locator(\"div\")
-        div_counts = elements.evaluate_all(\"(divs, min) => divs.length >= min\", 10)
+        locator = page.locator(\"div\")
+        more_than_ten = locator.evaluate_all(\"(divs, min) => divs.length > min\", 10)
         ```
 
         Parameters
@@ -15230,15 +15633,20 @@ class Locator(SyncBase):
     ) -> "JSHandle":
         """Locator.evaluate_handle
 
-        Returns the return value of `expression` as a `JSHandle`.
+        Execute JavaScript code in the page, taking the matching element as an argument, and return a `JSHandle` with the
+        result.
 
-        This method passes this handle as the first argument to `expression`.
+        **Details**
+
+        Returns the return value of `expression` as a`JSHandle`, called with the matching element as a first argument, and
+        `arg` as a second argument.
 
         The only difference between `locator.evaluate()` and `locator.evaluate_handle()` is that
         `locator.evaluate_handle()` returns `JSHandle`.
 
-        If the function passed to the `locator.evaluate_handle()` returns a [Promise], then
-        `locator.evaluate_handle()` would wait for the promise to resolve and return its value.
+        If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
+
+        If `expression` throws or rejects, this method throws.
 
         See `page.evaluate_handle()` for more details.
 
@@ -15275,6 +15683,20 @@ class Locator(SyncBase):
         force: typing.Optional[bool] = None
     ) -> None:
         """Locator.fill
+
+        Set a value to the input field.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"textbox\").fill(\"example value\")
+        ```
+
+        ```py
+        page.get_by_role(\"textbox\").fill(\"example value\")
+        ```
+
+        **Details**
 
         This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, fills it and triggers an
         `input` event after filling. Note that you can pass an empty string to clear the input field.
@@ -15318,6 +15740,10 @@ class Locator(SyncBase):
     ) -> None:
         """Locator.clear
 
+        Clear the input field.
+
+        **Details**
+
         This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, focuses the element, clears it and triggers an
         `input` event after clearing.
 
@@ -15325,6 +15751,16 @@ class Locator(SyncBase):
         error. However, if the element is inside the `<label>` element that has an associated
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
         instead.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"textbox\").clear()
+        ```
+
+        ```py
+        page.get_by_role(\"textbox\").clear()
+        ```
 
         Parameters
         ----------
@@ -15394,10 +15830,22 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.get_by_alt_text
 
-        Allows locating elements by their alt text. For example, this method will find the image by alt text \"Castle\":
+        Allows locating elements by their alt text.
+
+        **Usage**
+
+        For example, this method will find the image by alt text \"Playwright logo\":
 
         ```html
-        <img alt='Castle'>
+        <img alt='Playwright logo'>
+        ```
+
+        ```py
+        await page.get_by_alt_text(\"Playwright logo\").click()
+        ```
+
+        ```py
+        page.get_by_alt_text(\"Playwright logo\").click()
         ```
 
         Parameters
@@ -15423,12 +15871,23 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.get_by_label
 
-        Allows locating input elements by the text of the associated label. For example, this method will find the input by
-        label text \"Password\" in the following DOM:
+        Allows locating input elements by the text of the associated label.
+
+        **Usage**
+
+        For example, this method will find the input by label text \"Password\" in the following DOM:
 
         ```html
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
+        ```
+
+        ```py
+        await page.get_by_label(\"Password\").fill(\"secret\")
+        ```
+
+        ```py
+        page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         Parameters
@@ -15454,11 +15913,24 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.get_by_placeholder
 
-        Allows locating input elements by the placeholder text. For example, this method will find the input by placeholder
-        \"Country\":
+        Allows locating input elements by the placeholder text.
+
+        **Usage**
+
+        For example, consider the following DOM structure.
 
         ```html
-        <input placeholder=\"Country\">
+        <input type=\"email\" placeholder=\"name@example.com\" />
+        ```
+
+        You can fill the input after locating it by the placeholder text:
+
+        ```py
+        await page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
+        ```
+
+        ```py
+        page.get_by_placeholder(\"name@example.com\").fill(\"playwright@microsoft.com\")
         ```
 
         Parameters
@@ -15579,14 +16051,48 @@ class Locator(SyncBase):
 
         Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
         [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
-        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name). Note that role selector **does not replace**
-        accessibility audits and conformance tests, but rather gives early feedback about the ARIA guidelines.
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
 
-        Note that many html elements have an implicitly
-        [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings) that is recognized by the role selector.
-        You can find all the [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines
-        **do not recommend** duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to
-        default values.
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <h3>Sign up</h3>
+        <label>
+          <input type=\"checkbox\" /> Subscribe
+        </label>
+        <br/>
+        <button>Submit</button>
+        ```
+
+        You can locate each element by it's implicit role:
+
+        ```py
+        await expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        await page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        await page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        ```py
+        expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
+
+        page.get_by_role(\"checkbox\", name=\"Subscribe\").check()
+
+        page.get_by_role(\"button\", name=re.compile(\"submit\", re.IGNORECASE)).click()
+        ```
+
+        **Details**
+
+        Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+        about the ARIA guidelines.
+
+        Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+        that is recognized by the role selector. You can find all the
+        [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+        duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 
         Parameters
         ----------
@@ -15657,8 +16163,30 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.get_by_test_id
 
-        Locate element by the test id. By default, the `data-testid` attribute is used as a test id. Use
-        `selectors.set_test_id_attribute()` to configure a different test id attribute if necessary.
+        Locate element by the test id.
+
+        **Usage**
+
+        Consider the following DOM structure.
+
+        ```html
+        <button data-testid=\"directions\">Itinéraire</button>
+        ```
+
+        You can locate the element by it's test id:
+
+        ```py
+        await page.get_by_test_id(\"directions\").click()
+        ```
+
+        ```py
+        page.get_by_test_id(\"directions\").click()
+        ```
+
+        **Details**
+
+        By default, the `data-testid` attribute is used as a test id. Use `selectors.set_test_id_attribute()` to
+        configure a different test id attribute if necessary.
 
         Parameters
         ----------
@@ -15680,7 +16208,14 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.get_by_text
 
-        Allows locating elements that contain given text. Consider the following DOM structure:
+        Allows locating elements that contain given text.
+
+        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
+        filter by the text content.
+
+        **Usage**
+
+        Consider the following DOM structure:
 
         ```html
         <div>Hello <span>world</span></div>
@@ -15723,14 +16258,13 @@ class Locator(SyncBase):
         page.get_by_text(re.compile(\"^hello$\", re.IGNORECASE))
         ```
 
-        See also `locator.filter()` that allows to match by another criteria, like an accessible role, and then
-        filter by the text content.
+        **Details**
 
-        **NOTE** Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple
-        spaces into one, turns line breaks into spaces and ignores leading and trailing whitespace.
+        Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+        one, turns line breaks into spaces and ignores leading and trailing whitespace.
 
-        **NOTE** Input elements of the type `button` and `submit` are matched by their `value` instead of the text content.
-        For example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
+        Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+        example, locating by text `\"Log in\"` matches `<input type=button value=\"Log in\">`.
 
         Parameters
         ----------
@@ -15755,11 +16289,24 @@ class Locator(SyncBase):
     ) -> "Locator":
         """Locator.get_by_title
 
-        Allows locating elements by their title. For example, this method will find the button by its title \"Place the
-        order\":
+        Allows locating elements by their title attribute.
+
+        **Usage**
+
+        Consider the following DOM structure.
 
         ```html
-        <button title='Place the order'>Order Now</button>
+        <span title='Issues count'>25 issues</span>
+        ```
+
+        You can check the issues count after locating it by the title text:
+
+        ```py
+        await expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
+        ```
+
+        ```py
+        expect(page.get_by_title(\"Issues count\")).to_have_text(\"25 issues\")
         ```
 
         Parameters
@@ -15780,10 +16327,10 @@ class Locator(SyncBase):
     def frame_locator(self, selector: str) -> "FrameLocator":
         """Locator.frame_locator
 
-        **Usage**
+        When working with iframes, you can create a frame locator that will enter the iframe and allow locating elements in
+        that iframe:
 
-        When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
-        in that iframe:
+        **Usage**
 
         ```py
         locator = page.frame_locator(\"iframe\").get_by_text(\"Submit\")
@@ -15812,8 +16359,8 @@ class Locator(SyncBase):
     ) -> "ElementHandle":
         """Locator.element_handle
 
-        Resolves given locator to the first matching DOM element. If no elements matching the query are visible, waits for
-        them up to a given timeout. If multiple elements match the selector, throws.
+        Resolves given locator to the first matching DOM element. If there are no matching elements, waits for one. If
+        multiple elements match the locator, throws.
 
         Parameters
         ----------
@@ -15833,7 +16380,7 @@ class Locator(SyncBase):
     def element_handles(self) -> typing.List["ElementHandle"]:
         """Locator.element_handles
 
-        Resolves given locator to all matching DOM elements.
+        Resolves given locator to all matching DOM elements. If there are no matching elements, returns an empty list.
 
         Returns
         -------
@@ -15846,6 +16393,16 @@ class Locator(SyncBase):
         """Locator.nth
 
         Returns locator to the n-th matching element. It's zero based, `nth(0)` selects the first element.
+
+        **Usage**
+
+        ```py
+        banana = await page.get_by_role(\"listitem\").nth(2)
+        ```
+
+        ```py
+        banana = page.get_by_role(\"listitem\").nth(2)
+        ```
 
         Parameters
         ----------
@@ -15913,7 +16470,7 @@ class Locator(SyncBase):
     def focus(self, *, timeout: typing.Optional[float] = None) -> None:
         """Locator.focus
 
-        Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
+        Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the matching element.
 
         Parameters
         ----------
@@ -15967,7 +16524,17 @@ class Locator(SyncBase):
     def count(self) -> int:
         """Locator.count
 
-        Returns the number of elements matching given selector.
+        Returns the number of elements matching the locator.
+
+        **Usage**
+
+        ```py
+        count = await page.get_by_role(\"listitem\").count()
+        ```
+
+        ```py
+        count = page.get_by_role(\"listitem\").count()
+        ```
 
         Returns
         -------
@@ -15988,6 +16555,10 @@ class Locator(SyncBase):
         target_position: typing.Optional[Position] = None
     ) -> None:
         """Locator.drag_to
+
+        Drag the source element towards the target element and drop it.
+
+        **Details**
 
         This method drags the locator to another target locator or target position. It will first move to the source
         element, perform a `mousedown`, then move to the target element or position and perform a `mouseup`.
@@ -16063,7 +16634,7 @@ class Locator(SyncBase):
     ) -> typing.Optional[str]:
         """Locator.get_attribute
 
-        Returns element attribute value.
+        Returns the matching element's attribute value.
 
         Parameters
         ----------
@@ -16095,6 +16666,20 @@ class Locator(SyncBase):
         trial: typing.Optional[bool] = None
     ) -> None:
         """Locator.hover
+
+        Hover over the matching element.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"link\").hover()
+        ```
+
+        ```py
+        page.get_by_role(\"link\").hover()
+        ```
+
+        **Details**
 
         This method hovers over the element by performing the following steps:
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
@@ -16145,7 +16730,7 @@ class Locator(SyncBase):
     def inner_html(self, *, timeout: typing.Optional[float] = None) -> str:
         """Locator.inner_html
 
-        Returns the `element.innerHTML`.
+        Returns the [`element.innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
 
         Parameters
         ----------
@@ -16165,7 +16750,7 @@ class Locator(SyncBase):
     def inner_text(self, *, timeout: typing.Optional[float] = None) -> str:
         """Locator.inner_text
 
-        Returns the `element.innerText`.
+        Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
 
         Parameters
         ----------
@@ -16185,9 +16770,22 @@ class Locator(SyncBase):
     def input_value(self, *, timeout: typing.Optional[float] = None) -> str:
         """Locator.input_value
 
-        Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+        Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
 
-        Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+        **Usage**
+
+        ```py
+        value = await page.get_by_role(\"textbox\").input_value()
+        ```
+
+        ```py
+        value = page.get_by_role(\"textbox\").input_value()
+        ```
+
+        **Details**
+
+        Throws elements that are not an input, textarea or a select. However, if the element is inside the `<label>`
+        element that has an associated
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the
         control.
 
@@ -16211,6 +16809,16 @@ class Locator(SyncBase):
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 
+        **Usage**
+
+        ```py
+        checked = await page.get_by_role(\"checkbox\").is_checked()
+        ```
+
+        ```py
+        checked = page.get_by_role(\"checkbox\").is_checked()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -16230,6 +16838,16 @@ class Locator(SyncBase):
         """Locator.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
+
+        **Usage**
+
+        ```py
+        disabled = await page.get_by_role(\"button\").is_disabled()
+        ```
+
+        ```py
+        disabled = page.get_by_role(\"button\").is_disabled()
+        ```
 
         Parameters
         ----------
@@ -16251,6 +16869,16 @@ class Locator(SyncBase):
 
         Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
+        **Usage**
+
+        ```py
+        editable = await page.get_by_role(\"textbox\").is_editable()
+        ```
+
+        ```py
+        editable = page.get_by_role(\"textbox\").is_editable()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -16270,6 +16898,16 @@ class Locator(SyncBase):
         """Locator.is_enabled
 
         Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
+
+        **Usage**
+
+        ```py
+        enabled = await page.get_by_role(\"button\").is_enabled()
+        ```
+
+        ```py
+        enabled = page.get_by_role(\"button\").is_enabled()
+        ```
 
         Parameters
         ----------
@@ -16291,6 +16929,16 @@ class Locator(SyncBase):
 
         Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).
 
+        **Usage**
+
+        ```py
+        hidden = await page.get_by_role(\"button\").is_hidden()
+        ```
+
+        ```py
+        hidden = page.get_by_role(\"button\").is_hidden()
+        ```
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -16308,6 +16956,16 @@ class Locator(SyncBase):
         """Locator.is_visible
 
         Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible).
+
+        **Usage**
+
+        ```py
+        visible = await page.get_by_role(\"button\").is_visible()
+        ```
+
+        ```py
+        visible = page.get_by_role(\"button\").is_visible()
+        ```
 
         Parameters
         ----------
@@ -16331,6 +16989,20 @@ class Locator(SyncBase):
         no_wait_after: typing.Optional[bool] = None
     ) -> None:
         """Locator.press
+
+        Focuses the mathing element and presses a combintation of the keys.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"textbox\").press(\"Backspace\")
+        ```
+
+        ```py
+        page.get_by_role(\"textbox\").press(\"Backspace\")
+        ```
+
+        **Details**
 
         Focuses the element, and then uses `keyboard.down()` and `keyboard.up()`.
 
@@ -16390,6 +17062,30 @@ class Locator(SyncBase):
         mask: typing.Optional[typing.List["Locator"]] = None
     ) -> bytes:
         """Locator.screenshot
+
+        Take a screenshot of the element matching the locator.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"link\").screenshot()
+        ```
+
+        ```py
+        page.get_by_role(\"link\").screenshot()
+        ```
+
+        Disable animations and save screenshot to a file:
+
+        ```py
+        await page.get_by_role(\"link\").screenshot(animations=\"disabled\", path=\"link.png\")
+        ```
+
+        ```py
+        page.get_by_role(\"link\").screenshot(animations=\"disabled\", path=\"link.png\")
+        ```
+
+        **Details**
 
         This method captures a screenshot of the page, clipped to the size and position of a particular element matching
         the locator. If the element is covered by other elements, it will not be actually visible on the screenshot. If the
@@ -16620,6 +17316,48 @@ class Locator(SyncBase):
     ) -> None:
         """Locator.set_input_files
 
+        Upload file or multiple files into `<input type=file>`.
+
+        **Usage**
+
+        ```py
+        # Select one file
+        await page.get_by_label(\"Upload file\").set_input_files('myfile.pdf')
+
+        # Select multiple files
+        await page.get_by_label(\"Upload files\").set_input_files(['file1.txt', 'file2.txt'])
+
+        # Remove all the selected files
+        await page.get_by_label(\"Upload file\").set_input_files([])
+
+        # Upload buffer from memory
+        await page.get_by_label(\"Upload file\").set_input_files(
+            files=[
+                {\"name\": \"test.txt\", \"mimeType\": \"text/plain\", \"buffer\": b\"this is a test\"}
+            ],
+        )
+        ```
+
+        ```py
+        # Select one file
+        page.get_by_label(\"Upload file\").set_input_files('myfile.pdf')
+
+        # Select multiple files
+        page.get_by_label(\"Upload files\").set_input_files(['file1.txt', 'file2.txt'])
+
+        # Remove all the selected files
+        page.get_by_label(\"Upload file\").set_input_files([])
+
+        # Upload buffer from memory
+        page.get_by_label(\"Upload file\").set_input_files(
+            files=[
+                {\"name\": \"test.txt\", \"mimeType\": \"text/plain\", \"buffer\": b\"this is a test\"}
+            ],
+        )
+        ```
+
+        **Details**
+
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
         they are resolved relative to the current working directory. For empty array, clears the selected files.
 
@@ -16663,6 +17401,10 @@ class Locator(SyncBase):
         trial: typing.Optional[bool] = None
     ) -> None:
         """Locator.tap
+
+        Perform a tap gesture on the element matching the locator.
+
+        **Details**
 
         This method taps the element by performing the following steps:
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
@@ -16717,7 +17459,7 @@ class Locator(SyncBase):
     ) -> typing.Optional[str]:
         """Locator.text_content
 
-        Returns the `node.textContent`.
+        Returns the [`node.textContent`](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent).
 
         Parameters
         ----------
@@ -16809,7 +17551,21 @@ class Locator(SyncBase):
     ) -> None:
         """Locator.uncheck
 
-        This method checks the element by performing the following steps:
+        Ensure that checkbox or radio element is unchecked.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"checkbox\").uncheck()
+        ```
+
+        ```py
+        page.get_by_role(\"checkbox\").uncheck()
+        ```
+
+        **Details**
+
+        This method unchecks the element by performing the following steps:
         1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
            unchecked, this method returns immediately.
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
@@ -16859,6 +17615,16 @@ class Locator(SyncBase):
 
         Returns an array of `node.innerText` values for all matching nodes.
 
+        **Usage**
+
+        ```py
+        texts = await page.get_by_role(\"link\").all_inner_texts()
+        ```
+
+        ```py
+        texts = page.get_by_role(\"link\").all_inner_texts()
+        ```
+
         Returns
         -------
         List[str]
@@ -16870,6 +17636,16 @@ class Locator(SyncBase):
         """Locator.all_text_contents
 
         Returns an array of `node.textContent` values for all matching nodes.
+
+        **Usage**
+
+        ```py
+        texts = await page.get_by_role(\"link\").all_text_contents()
+        ```
+
+        ```py
+        texts = page.get_by_role(\"link\").all_text_contents()
+        ```
 
         Returns
         -------
@@ -16935,6 +17711,20 @@ class Locator(SyncBase):
         trial: typing.Optional[bool] = None
     ) -> None:
         """Locator.set_checked
+
+        Set the state of a checkbox or a radio element.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"checkbox\").set_checked(True)
+        ```
+
+        ```py
+        page.get_by_role(\"checkbox\").set_checked(True)
+        ```
+
+        **Details**
 
         This method checks or unchecks an element by performing the following steps:
         1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
