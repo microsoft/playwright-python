@@ -7433,7 +7433,8 @@ class Page(SyncContextManager):
         page.on(\"dialog\", lambda dialog: dialog.accept())
         ```
 
-        **NOTE** When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed."""
+        **NOTE** When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed.
+        """
 
     @typing.overload
     def on(
@@ -7441,7 +7442,8 @@ class Page(SyncContextManager):
     ) -> None:
         """
         Emitted when the JavaScript
-        [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded) event is dispatched."""
+        [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded) event is dispatched.
+        """
 
     @typing.overload
     def on(
@@ -7487,7 +7489,8 @@ class Page(SyncContextManager):
     @typing.overload
     def on(self, event: Literal["load"], f: typing.Callable[["Page"], "None"]) -> None:
         """
-        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched."""
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched.
+        """
 
     @typing.overload
     def on(
@@ -7680,7 +7683,8 @@ class Page(SyncContextManager):
         page.on(\"dialog\", lambda dialog: dialog.accept())
         ```
 
-        **NOTE** When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed."""
+        **NOTE** When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed.
+        """
 
     @typing.overload
     def once(
@@ -7688,7 +7692,8 @@ class Page(SyncContextManager):
     ) -> None:
         """
         Emitted when the JavaScript
-        [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded) event is dispatched."""
+        [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded) event is dispatched.
+        """
 
     @typing.overload
     def once(
@@ -7736,7 +7741,8 @@ class Page(SyncContextManager):
         self, event: Literal["load"], f: typing.Callable[["Page"], "None"]
     ) -> None:
         """
-        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched."""
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched.
+        """
 
     @typing.overload
     def once(
@@ -12515,7 +12521,8 @@ class BrowserContext(SyncContextManager):
         Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To
         only listen for requests from a particular page, use `page.on('request')`.
 
-        In order to intercept and mutate requests, see `browser_context.route()` or `page.route()`."""
+        In order to intercept and mutate requests, see `browser_context.route()` or `page.route()`.
+        """
 
     @typing.overload
     def on(
@@ -12624,7 +12631,8 @@ class BrowserContext(SyncContextManager):
         Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To
         only listen for requests from a particular page, use `page.on('request')`.
 
-        In order to intercept and mutate requests, see `browser_context.route()` or `page.route()`."""
+        In order to intercept and mutate requests, see `browser_context.route()` or `page.route()`.
+        """
 
     @typing.overload
     def once(
@@ -14931,7 +14939,6 @@ class Playwright(SyncBase):
         return mapping.from_impl(self._impl_obj.request)
 
     def __getitem__(self, value: str) -> "BrowserType":
-
         return mapping.from_impl(self._impl_obj.__getitem__(value=value))
 
     def stop(self) -> None:

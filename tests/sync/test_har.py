@@ -425,7 +425,6 @@ def test_should_fulfill_from_har_with_content_in_a_file(
 def test_should_round_trip_har_zip(
     browser: Browser, server: Server, assetdir: Path, tmpdir: Path
 ) -> None:
-
     har_path = tmpdir / "har.zip"
     context_1 = browser.new_context(record_har_mode="minimal", record_har_path=har_path)
     page_1 = context_1.new_page()

@@ -545,7 +545,6 @@ class Response(ChannelOwner):
 
 
 class WebSocket(ChannelOwner):
-
     Events = SimpleNamespace(
         Close="close",
         FrameReceived="framereceived",

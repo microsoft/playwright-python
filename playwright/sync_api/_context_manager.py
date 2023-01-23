@@ -14,7 +14,7 @@
 
 import asyncio
 import sys
-from typing import Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from greenlet import greenlet
 
@@ -26,13 +26,16 @@ from playwright._impl._playwright import Playwright
 from playwright._impl._transport import PipeTransport
 from playwright.sync_api._generated import Playwright as SyncPlaywright
 
+if TYPE_CHECKING:
+    from asyncio.unix_events import AbstractChildWatcher
+
 
 class PlaywrightContextManager:
     def __init__(self) -> None:
         self._playwright: SyncPlaywright
         self._loop: asyncio.AbstractEventLoop
         self._own_loop = False
-        self._watcher: Optional[asyncio.AbstractChildWatcher] = None
+        self._watcher: Optional[AbstractChildWatcher] = None
 
     def __enter__(self) -> SyncPlaywright:
         try:

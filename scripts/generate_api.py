@@ -289,6 +289,7 @@ all_types = [
 api_globals = globals()
 assert Serializable
 
+
 # Python 3.11+ does not treat default args with None as Optional anymore, this wrapper will still wrap them.
 # https://github.com/python/cpython/issues/90353
 def get_type_hints(func: Any, globalns: Any) -> Dict[str, Any]:
