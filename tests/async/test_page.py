@@ -822,7 +822,7 @@ async def test_fill_should_throw_on_unsupported_inputs(page, server):
         )
         with pytest.raises(Error) as exc_info:
             await page.fill("input", "")
-        assert f'input of type "{type}" cannot be filled' in exc_info.value.message
+        assert f'Input of type "{type}" cannot be filled' in exc_info.value.message
 
 
 async def test_fill_should_fill_different_input_types(page, server):
