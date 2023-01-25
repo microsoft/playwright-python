@@ -18,7 +18,7 @@ Firefox and WebKit with a single API. Playwright is built to enable cross-browse
 web automation that is ever-green, capable, reliable and fast.
 """
 
-from typing import Union, overload, Optional
+from typing import Optional, Union, overload
 
 import playwright._impl._api_structures
 import playwright._impl._api_types
@@ -103,15 +103,18 @@ def expect(actual: APIResponse, message: Optional[str] = None) -> APIResponseAss
 
 
 def expect(
-    actual: Union[Page, Locator, APIResponse],
-    message: Optional[str] = None
+    actual: Union[Page, Locator, APIResponse], message: Optional[str] = None
 ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
     if isinstance(actual, Page):
         return PageAssertions(PageAssertionsImpl(actual._impl_obj, message=message))
     elif isinstance(actual, Locator):
-        return LocatorAssertions(LocatorAssertionsImpl(actual._impl_obj, message=message))
+        return LocatorAssertions(
+            LocatorAssertionsImpl(actual._impl_obj, message=message)
+        )
     elif isinstance(actual, APIResponse):
-        return APIResponseAssertions(APIResponseAssertionsImpl(actual._impl_obj, message=message))
+        return APIResponseAssertions(
+            APIResponseAssertionsImpl(actual._impl_obj, message=message)
+        )
     raise ValueError(f"Unsupported type: {type(actual)}")
 
 

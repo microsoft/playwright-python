@@ -660,12 +660,14 @@ async def test_should_print_response_with_text_content_type_if_to_be_ok_fails(
     assert "Image content type error" not in error_message
 
 
-async def test_should_print_users_message_for_page_based_assertion(page: Page, server: Server) -> None:
+async def test_should_print_users_message_for_page_based_assertion(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<title>new title</title>")
     with pytest.raises(AssertionError) as excinfo:
-        await expect(page, 'Title is not new').to_have_title("old title")
-    assert 'Title is not new' in str(excinfo.value)
+        await expect(page, "Title is not new").to_have_title("old title")
+    assert "Title is not new" in str(excinfo.value)
     with pytest.raises(AssertionError) as excinfo:
         await expect(page).to_have_title("old title")
-    assert 'Page title expected to be' in str(excinfo.value)
+    assert "Page title expected to be" in str(excinfo.value)
