@@ -18,7 +18,7 @@ Firefox and WebKit with a single API. Playwright is built to enable cross-browse
 web automation that is ever-green, capable, reliable and fast.
 """
 
-from typing import Union, overload
+from typing import Union, overload, Optional
 
 import playwright._impl._api_structures
 import playwright._impl._api_types
@@ -88,29 +88,30 @@ def sync_playwright() -> PlaywrightContextManager:
 
 
 @overload
-def expect(actual: Page) -> PageAssertions:
+def expect(actual: Page, message: Optional[str] = None) -> PageAssertions:
     ...
 
 
 @overload
-def expect(actual: Locator) -> LocatorAssertions:
+def expect(actual: Locator, message: Optional[str] = None) -> LocatorAssertions:
     ...
 
 
 @overload
-def expect(actual: APIResponse) -> APIResponseAssertions:
+def expect(actual: APIResponse, message: Optional[str] = None) -> APIResponseAssertions:
     ...
 
 
 def expect(
-    actual: Union[Page, Locator, APIResponse]
+    actual: Union[Page, Locator, APIResponse],
+    message: Optional[str] = None
 ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
     if isinstance(actual, Page):
-        return PageAssertions(PageAssertionsImpl(actual._impl_obj))
+        return PageAssertions(PageAssertionsImpl(actual._impl_obj, message=message))
     elif isinstance(actual, Locator):
-        return LocatorAssertions(LocatorAssertionsImpl(actual._impl_obj))
+        return LocatorAssertions(LocatorAssertionsImpl(actual._impl_obj, message=message))
     elif isinstance(actual, APIResponse):
-        return APIResponseAssertions(APIResponseAssertionsImpl(actual._impl_obj))
+        return APIResponseAssertions(APIResponseAssertionsImpl(actual._impl_obj, message=message))
     raise ValueError(f"Unsupported type: {type(actual)}")
 
 

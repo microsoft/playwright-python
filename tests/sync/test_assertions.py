@@ -16,7 +16,6 @@ import re
 from datetime import datetime
 
 import pytest
-
 from playwright.sync_api import Browser, Error, Page, expect
 from tests.server import Server
 
@@ -74,6 +73,7 @@ def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
 def test_assertions_page_to_have_url_with_base_url(
     browser: Browser, server: Server
 ) -> None:
+
     page = browser.new_page(base_url=server.PREFIX)
     page.goto("/empty.html")
     expect(page).to_have_url("/empty.html")
@@ -746,3 +746,15 @@ def test_should_print_response_with_text_content_type_if_to_be_ok_fails(
     assert "← 404 Not Found" in error_message
     assert "Response Text:" not in error_message
     assert "Image content type error" not in error_message
+
+
+def test_should_print_users_message_for_page_based_assertion(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.set_content("<title>new title</title>")
+    with pytest.raises(AssertionError) as excinfo:
+        expect(page, 'Title is not new').to_have_title("old title")
+    assert 'Title is not new' in str(excinfo.value)
+    with pytest.raises(AssertionError) as excinfo:
+        expect(page).to_have_title("old title")
+    assert 'Page title expected to be' in str(excinfo.value)
+
