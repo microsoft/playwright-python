@@ -955,7 +955,10 @@ class Page(ChannelOwner):
 
     async def pause(self) -> None:
         await asyncio.wait(
-            [self._browser_context._pause(), self._closed_or_crashed_future],
+            [
+                asyncio.create_task(self._browser_context._pause()),
+                self._closed_or_crashed_future,
+            ],
             return_when=asyncio.FIRST_COMPLETED,
         )
 
