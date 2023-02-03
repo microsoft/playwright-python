@@ -102,7 +102,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Page(ChannelOwner):
-
     Events = SimpleNamespace(
         Close="close",
         Crash="crash",

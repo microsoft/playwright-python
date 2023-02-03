@@ -48,7 +48,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Browser(ChannelOwner):
-
     Events = SimpleNamespace(
         Disconnected="disconnected",
     )

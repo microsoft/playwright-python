@@ -73,7 +73,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class BrowserContext(ChannelOwner):
-
     Events = SimpleNamespace(
         BackgroundPage="backgroundpage",
         Close="close",
