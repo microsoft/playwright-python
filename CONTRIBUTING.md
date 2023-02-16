@@ -22,7 +22,7 @@ pip install -r local-requirements.txt
 Build and install drivers:
 
 ```sh
-pip install -e.
+pip install -e .
 python setup.py bdist_wheel
 # For all platforms
 python setup.py bdist_wheel --all
