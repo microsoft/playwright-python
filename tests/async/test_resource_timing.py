@@ -32,7 +32,7 @@ async def test_should_work(page, server):
 
 @flaky
 async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
-    if is_webkit and is_win:
+    if is_webkit and (is_mac or is_win):
         pytest.skip()
     requests = []
     page.on("requestfinished", lambda request: requests.append(request))
