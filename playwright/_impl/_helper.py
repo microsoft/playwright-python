@@ -291,6 +291,28 @@ class RouteHandler:
     def will_expire(self) -> bool:
         return self._handled_count + 1 >= self._times
 
+    @staticmethod
+    def prepare_interception_patterns(
+        handlers: List["RouteHandler"],
+    ) -> List[Dict[str, str]]:
+        patterns = []
+        all = False
+        for handler in handlers:
+            if isinstance(handler.matcher.match, str):
+                patterns.append({"glob": handler.matcher.match})
+            elif isinstance(handler.matcher._regex_obj, re.Pattern):
+                patterns.append(
+                    {
+                        "regexSource": handler.matcher._regex_obj.pattern,
+                        "regexFlags": escape_regex_flags(handler.matcher._regex_obj),
+                    }
+                )
+            else:
+                all = True
+        if all:
+            return [{"glob": "**/*"}]
+        return patterns
+
 
 def is_safe_close_error(error: Exception) -> bool:
     message = str(error)

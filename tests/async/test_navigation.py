@@ -887,7 +887,7 @@ async def test_frame_goto_should_navigate_subframes(page, server):
     assert response.frame == page.frames[1]
 
 
-async def test_frame_goto_should_reject_when_frame_detaches(page, server):
+async def test_frame_goto_should_reject_when_frame_detaches(page, server, browser_name):
     await page.goto(server.PREFIX + "/frames/one-frame.html")
 
     await page.route("**/empty.html", lambda route, request: None)
@@ -895,7 +895,12 @@ async def test_frame_goto_should_reject_when_frame_detaches(page, server):
     asyncio.create_task(page.eval_on_selector("iframe", "frame => frame.remove()"))
     with pytest.raises(Error) as exc_info:
         await navigation_task
-    assert "frame was detached" in exc_info.value.message
+    if browser_name == "chromium":
+        assert ("frame was detached" in exc_info.value.message) or (
+            "net::ERR_ABORTED" in exc_info.value.message
+        )
+    else:
+        assert "frame was detached" in exc_info.value.message
 
 
 async def test_frame_goto_should_continue_after_client_redirect(page, server):

@@ -48,5 +48,13 @@ def escape_for_text_selector(
 
 
 def escape_for_attribute_selector(value: str, exact: bool = None) -> str:
-    suffix = "" if exact else "i"
-    return '"' + value.replace('"', '\\"') + '"' + suffix
+    # TODO: this should actually be
+    #   cssEscape(value).replace(/\\ /g, ' ')
+    # However, our attribute selectors do not conform to CSS parsing spec,
+    # so we escape them differently.
+    return (
+        '"'
+        + value.replace("\\", "\\\\").replace('"', '\\"')
+        + '"'
+        + ("s" if exact else "i")
+    )

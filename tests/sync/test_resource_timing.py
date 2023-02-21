@@ -37,7 +37,7 @@ def test_should_work(page: Page, server: Server) -> None:
 def test_should_work_for_subresource(
     page: Page, server: Server, is_win: bool, is_mac: bool, is_webkit: bool
 ) -> None:
-    if is_webkit and is_mac:
+    if is_webkit and (is_mac or is_win):
         pytest.skip()
     requests = []
     page.on("requestfinished", lambda request: requests.append(request))

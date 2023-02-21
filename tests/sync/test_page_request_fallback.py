@@ -345,6 +345,6 @@ def test_should_amend_json_post_data(server: Server, page: Page) -> None:
     )
 
     with server.expect_request("/sleep.zzz") as server_request:
-        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"),
+        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })")
     assert post_data == ['{"foo": "bar"}']
     assert server_request.value.post_body == b'{"foo": "bar"}'

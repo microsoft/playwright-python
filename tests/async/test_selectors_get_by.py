@@ -12,7 +12,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.async_api import Page
+from playwright.async_api import Page, expect
+
+
+async def test_get_by_escaping(page: Page) -> None:
+    await page.set_content(
+        """
+        <label id=label for=control>Hello my
+wo"rld</label><input id=control />"""
+    )
+    await page.eval_on_selector(
+        "input",
+        """input => {
+        input.setAttribute('placeholder', 'hello my\\nwo"rld');
+        input.setAttribute('title', 'hello my\\nwo"rld');
+        input.setAttribute('alt', 'hello my\\nwo"rld');
+    }""",
+    )
+    await expect(page.get_by_text('hello my\nwo"rld')).to_have_attribute("id", "label")
+    await expect(page.get_by_text('hello       my     wo"rld')).to_have_attribute(
+        "id", "label"
+    )
+    await expect(page.get_by_label('hello my\nwo"rld')).to_have_attribute(
+        "id", "control"
+    )
+    await expect(page.get_by_placeholder('hello my\nwo"rld')).to_have_attribute(
+        "id", "control"
+    )
+    await expect(page.get_by_alt_text('hello my\nwo"rld')).to_have_attribute(
+        "id", "control"
+    )
+    await expect(page.get_by_title('hello my\nwo"rld')).to_have_attribute(
+        "id", "control"
+    )
+
+    await page.set_content(
+        """
+        <label id=label for=control>Hello my
+world</label><input id=control />"""
+    )
+    await page.eval_on_selector(
+        "input",
+        """input => {
+        input.setAttribute('placeholder', 'hello my\\nworld');
+        input.setAttribute('title', 'hello my\\nworld');
+        input.setAttribute('alt', 'hello my\\nworld');
+    }""",
+    )
+    await expect(page.get_by_text("hello my\nworld")).to_have_attribute("id", "label")
+    await expect(page.get_by_text("hello        my    world")).to_have_attribute(
+        "id", "label"
+    )
+    await expect(page.get_by_label("hello my\nworld")).to_have_attribute(
+        "id", "control"
+    )
+    await expect(page.get_by_placeholder("hello my\nworld")).to_have_attribute(
+        "id", "control"
+    )
+    await expect(page.get_by_alt_text("hello my\nworld")).to_have_attribute(
+        "id", "control"
+    )
+    await expect(page.get_by_title("hello my\nworld")).to_have_attribute(
+        "id", "control"
+    )
+
+    await page.set_content("""<div id=target title="my title">Text here</div>""")
+    await expect(page.get_by_title("my title", exact=True)).to_have_count(
+        1, timeout=500
+    )
+    await expect(page.get_by_title("my t\\itle", exact=True)).to_have_count(
+        0, timeout=500
+    )
+    await expect(page.get_by_title("my t\\\\itle", exact=True)).to_have_count(
+        0, timeout=500
+    )
 
 
 async def test_get_by_role_escaping(
@@ -70,3 +143,21 @@ async def test_get_by_role_escaping(
     ).evaluate_all("els => els.map(e => e.outerHTML)") == [
         """<a href="https://playwright.dev">he llo 56</a>""",
     ]
+
+    assert await page.get_by_role("button", name="Click me", exact=True).evaluate_all(
+        "els => els.map(e => e.outerHTML)"
+    ) == [
+        "<button>Click me</button>",
+    ]
+    assert (
+        await page.get_by_role("button", name="Click \\me", exact=True).evaluate_all(
+            "els => els.map(e => e.outerHTML)"
+        )
+        == []
+    )
+    assert (
+        await page.get_by_role("button", name="Click \\\\me", exact=True).evaluate_all(
+            "els => els.map(e => e.outerHTML)"
+        )
+        == []
+    )

@@ -618,6 +618,25 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_be_focused(timeout)
 
+    async def to_be_in_viewport(
+        self,
+        ratio: float = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.in.viewport",
+            FrameExpectOptions(timeout=timeout, expectedNumber=ratio),
+            None,
+            "Locator expected to be in viewport",
+        )
+
+    async def not_to_be_in_viewport(
+        self, ratio: float = None, timeout: float = None
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_in_viewport(ratio=ratio, timeout=timeout)
+
 
 class APIResponseAssertions:
     def __init__(self, response: APIResponse, is_not: bool = False) -> None:
