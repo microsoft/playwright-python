@@ -643,7 +643,7 @@ class Locator:
             {
                 "selector": self._selector,
                 "expression": expression,
-                **options,
+                **({k: v for k, v in options.items() if v is not None}),
             },
         )
         if result.get("received"):

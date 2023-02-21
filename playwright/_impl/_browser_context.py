@@ -191,7 +191,11 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(self._disable_interception())
+                    asyncio.create_task(
+                        self._connection.wrap_api_call(
+                            lambda: self._update_interception_patterns(), True
+                        )
+                    )
             if handled:
                 return
         await route._internal_continue(is_internal=True)
@@ -304,10 +308,7 @@ class BrowserContext(ChannelOwner):
                 times,
             ),
         )
-        if len(self._routes) == 1:
-            await self._channel.send(
-                "setNetworkInterceptionEnabled", dict(enabled=True)
-            )
+        await self._update_interception_patterns()
 
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
@@ -318,8 +319,7 @@ class BrowserContext(ChannelOwner):
                 self._routes,
             )
         )
-        if len(self._routes) == 0:
-            await self._disable_interception()
+        await self._update_interception_patterns()
 
     async def _record_into_har(
         self,
@@ -360,8 +360,11 @@ class BrowserContext(ChannelOwner):
         )
         await router.add_context_route(self)
 
-    async def _disable_interception(self) -> None:
-        await self._channel.send("setNetworkInterceptionEnabled", dict(enabled=False))
+    async def _update_interception_patterns(self) -> None:
+        patterns = RouteHandler.prepare_interception_patterns(self._routes)
+        await self._channel.send(
+            "setNetworkInterceptionPatterns", {"patterns": patterns}
+        )
 
     def expect_event(
         self,

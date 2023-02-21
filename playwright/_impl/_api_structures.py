@@ -185,7 +185,7 @@ class ExpectedTextValue(TypedDict, total=False):
 class FrameExpectOptions(TypedDict, total=False):
     expressionArg: Any
     expectedText: Optional[List[ExpectedTextValue]]
-    expectedNumber: Optional[int]
+    expectedNumber: Optional[float]
     expectedValue: Optional[Any]
     useInnerText: Optional[bool]
     isNot: bool

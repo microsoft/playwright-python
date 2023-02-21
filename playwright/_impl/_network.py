@@ -241,6 +241,11 @@ class Request(ChannelOwner):
             self._all_headers_future.set_result(RawHeaders(headers))
         return await self._all_headers_future
 
+    def _target_closed_future(self) -> asyncio.Future:
+        if not hasattr(self.frame, "_page"):
+            return asyncio.Future()
+        return self.frame._page._closed_or_crashed_future
+
 
 class Route(ChannelOwner):
     def __init__(
@@ -348,10 +353,11 @@ class Route(ChannelOwner):
         method: str = None,
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
+        maxRedirects: int = None,
     ) -> "APIResponse":
         page = self.request.frame._page
         return await page.context.request._inner_fetch(
-            self.request, url, method, headers, postData
+            self.request, url, method, headers, postData, maxRedirects=maxRedirects
         )
 
     async def fallback(
@@ -419,30 +425,22 @@ class Route(ChannelOwner):
         self._report_handled(True)
 
     async def _race_with_page_close(self, future: Coroutine) -> None:
-        if hasattr(self.request.frame, "_page"):
-            page = self.request.frame._page
-            # When page closes or crashes, we catch any potential rejects from this Route.
-            # Note that page could be missing when routing popup's initial request that
-            # does not have a Page initialized just yet.
-            fut = asyncio.create_task(future)
-            # Rewrite the user's stack to the new task which runs in the background.
-            setattr(
-                fut,
-                "__pw_stack__",
-                getattr(
-                    asyncio.current_task(self._loop), "__pw_stack__", inspect.stack()
-                ),
-            )
-            await asyncio.wait(
-                [fut, page._closed_or_crashed_future],
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-            if fut.done() and fut.exception():
-                raise cast(BaseException, fut.exception())
-            if page._closed_or_crashed_future.done():
-                await asyncio.gather(fut, return_exceptions=True)
-        else:
-            await future
+        fut = asyncio.create_task(future)
+        # Rewrite the user's stack to the new task which runs in the background.
+        setattr(
+            fut,
+            "__pw_stack__",
+            getattr(asyncio.current_task(self._loop), "__pw_stack__", inspect.stack()),
+        )
+        target_closed_future = self.request._target_closed_future()
+        await asyncio.wait(
+            [fut, target_closed_future],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if fut.done() and fut.exception():
+            raise cast(BaseException, fut.exception())
+        if target_closed_future.done():
+            await asyncio.gather(fut, return_exceptions=True)
 
 
 class Response(ChannelOwner):
@@ -522,7 +520,20 @@ class Response(ChannelOwner):
         return await self._channel.send("securityDetails")
 
     async def finished(self) -> None:
-        await self._finished_future
+        async def on_finished() -> None:
+            await self._request._target_closed_future()
+            raise Error("Target closed")
+
+        on_finished_task = asyncio.create_task(on_finished())
+        await asyncio.wait(
+            cast(
+                List[Union[asyncio.Task, asyncio.Future]],
+                [self._finished_future, on_finished_task],
+            ),
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if on_finished_task.done():
+            await on_finished_task
 
     async def body(self) -> bytes:
         binary = await self._channel.send("body")

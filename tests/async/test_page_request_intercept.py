@@ -18,6 +18,22 @@ from playwright.async_api import Page, Route
 from tests.server import Server
 
 
+async def test_should_not_follow_redirects_when_max_redirects_is_set_to_0_in_route_fetch(
+    server: Server, page: Page
+):
+    server.set_redirect("/foo", "/empty.html")
+
+    async def handle(route: Route):
+        response = await route.fetch(max_redirects=0)
+        assert response.headers["location"] == "/empty.html"
+        assert response.status == 302
+        await route.fulfill(body="hello")
+
+    await page.route("**/*", lambda route: handle(route))
+    await page.goto(server.PREFIX + "/foo")
+    assert "hello" in await page.content()
+
+
 async def test_should_intercept_with_url_override(server: Server, page: Page):
     async def handle(route: Route):
         response = await route.fetch(url=server.PREFIX + "/one-style.html")

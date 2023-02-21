@@ -743,7 +743,8 @@ class Route(AsyncBase):
         url: typing.Optional[str] = None,
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None
+        post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        max_redirects: typing.Optional[int] = None
     ) -> "APIResponse":
         """Route.fetch
 
@@ -772,6 +773,12 @@ class Route(AsyncBase):
         page.route(\"https://dog.ceo/api/breeds/list/all\", handle)
         ```
 
+        **Details**
+
+        Note that `headers` option will apply to the fetched request as well as any redirects initiated by it. If you want
+        to only apply `headers` to the original request, but not to redirects, look into `route.continue_()`
+        instead.
+
         Parameters
         ----------
         url : Union[str, None]
@@ -784,6 +791,9 @@ class Route(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
         Returns
         -------
@@ -796,6 +806,7 @@ class Route(AsyncBase):
                 method=method,
                 headers=mapping.to_impl(headers),
                 postData=mapping.to_impl(post_data),
+                maxRedirects=max_redirects,
             )
         )
 
@@ -963,6 +974,12 @@ class Route(AsyncBase):
 
         page.route(\"**/*\", handle)
         ```
+
+        **Details**
+
+        Note that any overrides such as `url` or `headers` only apply to the request being routed. If this request results
+        in a redirect, overrides will not be applied to the new redirected request. If you want to propagate a header
+        through redirects, use the combination of `route.fetch()` and `route.fulfill()` instead.
 
         Parameters
         ----------
@@ -1507,6 +1524,8 @@ class Touchscreen(AsyncBase):
         """Touchscreen.tap
 
         Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+
+        **NOTE** `page.tap()` the method will throw if `hasTouch` option of the browser context is false.
 
         Parameters
         ----------
@@ -6858,6 +6877,8 @@ class Selectors(AsyncBase):
     ) -> None:
         """Selectors.register
 
+        Selectors must be registered before creating the page.
+
         **Usage**
 
         An example of registering selector engine that queries elements based on a tag name:
@@ -6887,8 +6908,8 @@ class Selectors(AsyncBase):
 
             # Use the selector prefixed with its name.
             button = await page.query_selector('tag=button')
-            # Combine it with other selector engines.
-            await page.locator('tag=div >> text=\"Click me\"').click()
+            # Combine it with built-in locators.
+            await page.locator('tag=div').get_by_text('Click me').click()
             # Can use it in any methods supporting selectors.
             button_count = await page.locator('tag=button').count()
             print(button_count)
@@ -6925,8 +6946,8 @@ class Selectors(AsyncBase):
 
             # Use the selector prefixed with its name.
             button = page.locator('tag=button')
-            # Combine it with other selector engines.
-            page.locator('tag=div >> text=\"Click me\"').click()
+            # Combine it with built-in locators.
+            page.locator('tag=div').get_by_text('Click me').click()
             # Can use it in any methods supporting selectors.
             button_count = page.locator('tag=button').count()
             print(button_count)
@@ -10090,7 +10111,7 @@ class Page(AsyncContextManager):
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
 
-        **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+        **NOTE** `page.tap()` the method will throw if `hasTouch` option of the browser context is false.
 
         Parameters
         ----------
@@ -15369,7 +15390,7 @@ class Locator(AsyncBase):
     ) -> None:
         """Locator.dispatch_event
 
-        Programmaticaly dispatch an event on the matching element.
+        Programmatically dispatch an event on the matching element.
 
         **Usage**
 
@@ -16871,7 +16892,7 @@ class Locator(AsyncBase):
     ) -> None:
         """Locator.press
 
-        Focuses the mathing element and presses a combintation of the keys.
+        Focuses the matching element and presses a combination of the keys.
 
         **Usage**
 
@@ -17815,7 +17836,8 @@ class APIRequestContext(AsyncBase):
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -17892,7 +17914,8 @@ class APIRequestContext(AsyncBase):
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -17981,7 +18004,8 @@ class APIRequestContext(AsyncBase):
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -18058,7 +18082,8 @@ class APIRequestContext(AsyncBase):
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -18135,7 +18160,8 @@ class APIRequestContext(AsyncBase):
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -18251,7 +18277,8 @@ class APIRequestContext(AsyncBase):
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -18358,7 +18385,8 @@ class APIRequestContext(AsyncBase):
             If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
             [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)). If not specified, GET method is used.
         headers : Union[Dict[str, str], None]
-            Allows to set HTTP headers.
+            Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
+            it.
         data : Union[Any, bytes, str, None]
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -19964,6 +19992,79 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_be_focused(timeout=timeout)
+        )
+
+    async def to_be_in_viewport(
+        self,
+        *,
+        ratio: typing.Optional[float] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_be_in_viewport
+
+        Ensures the `Locator` points to an element that intersects viewport, according to the
+        [intersection observer API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API).
+
+        **Usage**
+
+        ```py
+        from playwright.async_api import expect
+
+        locator = page.get_by_role(\"button\")
+        # Make sure at least some part of element intersects viewport.
+        await expect(locator).to_be_in_viewport()
+        # Make sure element is fully outside of viewport.
+        await expect(locator).not_to_be_in_viewport()
+        # Make sure that at least half of the element intersects viewport.
+        await expect(locator).to_be_in_viewport(ratio=0.5)
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.get_by_role(\"button\")
+        # Make sure at least some part of element intersects viewport.
+        expect(locator).to_be_in_viewport()
+        # Make sure element is fully outside of viewport.
+        expect(locator).not_to_be_in_viewport()
+        # Make sure that at least half of the element intersects viewport.
+        expect(locator).to_be_in_viewport(ratio=0.5)
+        ```
+
+        Parameters
+        ----------
+        ratio : Union[float, None]
+            The minimal ratio of the element to intersect viewport. If equals to `0`, then element should intersect viewport at
+            any positive ratio. Defaults to `0`.
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_be_in_viewport(ratio=ratio, timeout=timeout)
+        )
+
+    async def not_to_be_in_viewport(
+        self,
+        *,
+        ratio: typing.Optional[float] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.not_to_be_in_viewport
+
+        The opposite of `locator_assertions.to_be_in_viewport()`.
+
+        Parameters
+        ----------
+        ratio : Union[float, None]
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_be_in_viewport(ratio=ratio, timeout=timeout)
         )
 
 

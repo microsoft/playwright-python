@@ -20,6 +20,22 @@ from playwright.sync_api import Page, Route
 from tests.server import Server
 
 
+def test_should_not_follow_redirects_when_max_redirects_is_set_to_0_in_route_fetch(
+    server: Server, page: Page
+) -> None:
+    server.set_redirect("/foo", "/empty.html")
+
+    def handle(route: Route) -> None:
+        response = route.fetch(max_redirects=0)
+        assert response.headers["location"] == "/empty.html"
+        assert response.status == 302
+        route.fulfill(body="hello")
+
+    page.route("**/*", lambda route: handle(route))
+    page.goto(server.PREFIX + "/foo")
+    assert "hello" in page.content()
+
+
 def test_should_fulfill_intercepted_response(page: Page, server: Server) -> None:
     def handle(route: Route) -> None:
         response = page.request.fetch(route.request)
