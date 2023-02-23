@@ -4,6 +4,8 @@ playwright/driver/
 playwright.egg-info/
 build/
 dist/
+venv/
+.idea/
 **/*.pyc
 env/
 htmlcov/

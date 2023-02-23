@@ -24,11 +24,14 @@ from playwright._impl._str_utils import escape_regex_flags
 
 
 class AssertionsBase:
-    def __init__(self, locator: Locator, is_not: bool = False) -> None:
+    def __init__(
+        self, locator: Locator, is_not: bool = False, message: Optional[str] = None
+    ) -> None:
         self._actual_locator = locator
         self._loop = locator._loop
         self._dispatcher_fiber = locator._dispatcher_fiber
         self._is_not = is_not
+        self._custom_message = message
 
     async def _expect_impl(
         self,
@@ -51,21 +54,27 @@ class AssertionsBase:
             log = "\n".join(result.get("log", "")).strip()
             if log:
                 log = "\nCall log:\n" + log
-            if expected is not None:
-                raise AssertionError(
-                    f"{message} '{expected}'\nActual value: {actual} {log}"
+            if self._custom_message:
+                out_message = (
+                    f"{self._custom_message}\nExpected value: {expected or '<None>'}"
                 )
-            raise AssertionError(f"{message}\nActual value: {actual} {log}")
+            else:
+                out_message = (
+                    f"{message} '{expected}'" if expected is not None else f"{message}"
+                )
+            raise AssertionError(f"{out_message}\nActual value: {actual} {log}")
 
 
 class PageAssertions(AssertionsBase):
-    def __init__(self, page: Page, is_not: bool = False) -> None:
-        super().__init__(page.locator(":root"), is_not)
+    def __init__(
+        self, page: Page, is_not: bool = False, message: Optional[str] = None
+    ) -> None:
+        super().__init__(page.locator(":root"), is_not, message)
         self._actual_page = page
 
     @property
     def _not(self) -> "PageAssertions":
-        return PageAssertions(self._actual_page, not self._is_not)
+        return PageAssertions(self._actual_page, not self._is_not, self._custom_message)
 
     async def to_have_title(
         self, title_or_reg_exp: Union[Pattern[str], str], timeout: float = None
@@ -110,13 +119,17 @@ class PageAssertions(AssertionsBase):
 
 
 class LocatorAssertions(AssertionsBase):
-    def __init__(self, locator: Locator, is_not: bool = False) -> None:
-        super().__init__(locator, is_not)
+    def __init__(
+        self, locator: Locator, is_not: bool = False, message: Optional[str] = None
+    ) -> None:
+        super().__init__(locator, is_not, message)
         self._actual_locator = locator
 
     @property
     def _not(self) -> "LocatorAssertions":
-        return LocatorAssertions(self._actual_locator, not self._is_not)
+        return LocatorAssertions(
+            self._actual_locator, not self._is_not, self._custom_message
+        )
 
     async def to_contain_text(
         self,
@@ -639,15 +652,20 @@ class LocatorAssertions(AssertionsBase):
 
 
 class APIResponseAssertions:
-    def __init__(self, response: APIResponse, is_not: bool = False) -> None:
+    def __init__(
+        self, response: APIResponse, is_not: bool = False, message: Optional[str] = None
+    ) -> None:
         self._loop = response._loop
         self._dispatcher_fiber = response._dispatcher_fiber
         self._is_not = is_not
         self._actual = response
+        self._custom_message = message
 
     @property
     def _not(self) -> "APIResponseAssertions":
-        return APIResponseAssertions(self._actual, not self._is_not)
+        return APIResponseAssertions(
+            self._actual, not self._is_not, self._custom_message
+        )
 
     async def to_be_ok(
         self,
@@ -658,18 +676,19 @@ class APIResponseAssertions:
         message = f"Response status expected to be within [200..299] range, was '{self._actual.status}'"
         if self._is_not:
             message = message.replace("expected to", "expected not to")
+        out_message = self._custom_message or message
         log_list = await self._actual._fetch_log()
         log = "\n".join(log_list).strip()
         if log:
-            message += f"\n Call log:\n{log}"
+            out_message += f"\n Call log:\n{log}"
 
         content_type = self._actual.headers.get("content-type")
         is_text_encoding = content_type and is_textual_mime_type(content_type)
         text = await self._actual.text() if is_text_encoding else None
         if text is not None:
-            message += f"\n Response Text:\n{text[:1000]}"
+            out_message += f"\n Response Text:\n{text[:1000]}"
 
-        raise AssertionError(message)
+        raise AssertionError(out_message)
 
     async def not_to_be_ok(self) -> None:
         __tracebackhide__ = True
