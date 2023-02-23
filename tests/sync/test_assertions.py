@@ -755,8 +755,8 @@ def test_should_print_users_message_for_page_based_assertion(
     page.goto(server.EMPTY_PAGE)
     page.set_content("<title>new title</title>")
     with pytest.raises(AssertionError) as excinfo:
-        expect(page, "Title is not new").to_have_title("old title")
+        expect(page, "Title is not new").to_have_title("old title", timeout=100)
     assert "Title is not new" in str(excinfo.value)
     with pytest.raises(AssertionError) as excinfo:
-        expect(page).to_have_title("old title")
+        expect(page).to_have_title("old title", timeout=100)
     assert "Page title expected to be" in str(excinfo.value)
