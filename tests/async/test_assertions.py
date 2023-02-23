@@ -672,6 +672,7 @@ async def test_should_print_users_message_for_page_based_assertion(
         await expect(page).to_have_title("old title", timeout=100)
     assert "Page title expected to be" in str(excinfo.value)
 
+
 async def test_should_print_expected_value_with_custom_message(
     page: Page, server: Server
 ) -> None:
@@ -682,6 +683,8 @@ async def test_should_print_expected_value_with_custom_message(
     assert "custom-message" in str(excinfo.value)
     assert "Expected value: 'old title'" in str(excinfo.value)
     with pytest.raises(AssertionError) as excinfo:
-        await expect(page.get_by_text('hello'), "custom-message").to_be_visible(timeout=100)
+        await expect(page.get_by_text("hello"), "custom-message").to_be_visible(
+            timeout=100
+        )
     assert "custom-message" in str(excinfo.value)
     assert "Expected value" not in str(excinfo.value)
