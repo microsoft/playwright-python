@@ -74,7 +74,6 @@ def test_assertions_page_to_have_url(page: Page, server: Server) -> None:
 def test_assertions_page_to_have_url_with_base_url(
     browser: Browser, server: Server
 ) -> None:
-
     page = browser.new_page(base_url=server.PREFIX)
     page.goto("/empty.html")
     expect(page).to_have_url("/empty.html")
