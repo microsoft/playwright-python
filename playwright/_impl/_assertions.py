@@ -55,9 +55,9 @@ class AssertionsBase:
             if log:
                 log = "\nCall log:\n" + log
             if self._custom_message:
-                out_message = (
-                    f"{self._custom_message}\nExpected value: {expected or '<None>'}"
-                )
+                out_message = self._custom_message
+                if expected is not None:
+                    out_message += f"\nExpected value: '{expected or '<None>'}'"
             else:
                 out_message = (
                     f"{message} '{expected}'" if expected is not None else f"{message}"
