@@ -153,7 +153,10 @@ class PipeTransport(Transport):
 
                 obj = self.deserialize_message(buffer)
                 self.on_message(obj)
-            except asyncio.IncompleteReadError:
+            except asyncio.IncompleteReadError as exc:
+                self.on_error_future.set_exception(
+                    Exception("Connection closed while reading from the driver")
+                )
                 break
             await asyncio.sleep(0)
 
