@@ -76,11 +76,13 @@ class Tracing(ChannelOwner):
         is_local = not self._connection.is_remote
 
         if is_local:
-            entries = await self._channel.send("tracingStopChunk", {"mode": "entries"})
+            result = await self._channel.send_return_as_dict(
+                "tracingStopChunk", {"mode": "entries"}
+            )
             await self._connection.local_utils.zip(
                 {
                     "zipFile": str(file_path),
-                    "entries": entries,
+                    "entries": result["entries"],
                     "metadata": metadata,
                     "mode": "write",
                     "includeSources": self._include_sources,
