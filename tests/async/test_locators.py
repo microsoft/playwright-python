@@ -362,7 +362,7 @@ async def test_locators_should_select_textarea(
     textarea = page.locator("textarea")
     await textarea.evaluate("textarea => textarea.value = 'some value'")
     await textarea.select_text()
-    if browser_name == "firefox":
+    if browser_name == "firefox" or browser_name == "webkit":
         assert await textarea.evaluate("el => el.selectionStart") == 0
         assert await textarea.evaluate("el => el.selectionEnd") == 10
     else:
@@ -485,6 +485,73 @@ async def test_locators_wait_for(page: Page) -> None:
     await page.eval_on_selector("div", "div => div.innerHTML = '<span>target</span>'")
     await task
     assert await locator.text_content() == "target"
+
+
+async def test_should_wait_for_hidden(page):
+    await page.set_content("<div><span>target</span></div>")
+    locator = page.locator("span")
+    task = locator.wait_for(state="hidden")
+    await page.eval_on_selector("div", "div => div.innerHTML = ''")
+    await task
+
+
+async def test_should_combine_visible_with_other_selectors(page):
+    await page.set_content(
+        """<div>
+        <div class="item" style="display: none">Hidden data0</div>
+        <div class="item">visible data1</div>
+        <div class="item" style="display: none">Hidden data1</div>
+        <div class="item">visible data2</div>
+        <div class="item" style="display: none">Hidden data1</div>
+        <div class="item">visible data3</div>
+        </div>
+    """
+    )
+    locator = page.locator(".item >> visible=true").nth(1)
+    await expect(locator).to_have_text("visible data2")
+    await expect(page.locator(".item >> visible=true >> text=data3")).to_have_text(
+        "visible data3"
+    )
+
+
+async def test_locator_count_should_work_with_deleted_map_in_main_world(page):
+    await page.evaluate("Map = 1")
+    await page.locator("#searchResultTableDiv .x-grid3-row").count()
+    await expect(page.locator("#searchResultTableDiv .x-grid3-row")).to_have_count(0)
+
+
+async def test_locator_locator_and_framelocator_locator_should_accept_locator(page):
+    await page.set_content(
+        """
+        <div><input value=outer></div>
+        <iframe srcdoc="<div><input value=inner></div>"></iframe>
+    """
+    )
+
+    input_locator = page.locator("input")
+    assert await input_locator.input_value() == "outer"
+    assert await page.locator("div").locator(input_locator).input_value() == "outer"
+    assert (
+        await page.frame_locator("iframe").locator(input_locator).input_value()
+        == "inner"
+    )
+    assert (
+        await page.frame_locator("iframe")
+        .locator("div")
+        .locator(input_locator)
+        .input_value()
+        == "inner"
+    )
+
+    div_locator = page.locator("div")
+    assert await div_locator.locator("input").input_value() == "outer"
+    assert (
+        await page.frame_locator("iframe")
+        .locator(div_locator)
+        .locator("input")
+        .input_value()
+        == "inner"
+    )
 
 
 async def route_iframe(page: Page) -> None:

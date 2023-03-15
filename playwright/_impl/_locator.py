@@ -44,6 +44,7 @@ from playwright._impl._helper import (
     MouseButton,
     locals_to_params,
     monotonic_time,
+    to_impl,
 )
 from playwright._impl._js_handle import Serializable, parse_value, serialize_argument
 from playwright._impl._str_utils import (
@@ -207,13 +208,23 @@ class Locator:
 
     def locator(
         self,
-        selector: str,
+        selector_or_locator: Union[str, "Locator"],
         has_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
     ) -> "Locator":
+        if isinstance(selector_or_locator, str):
+            return Locator(
+                self._frame,
+                f"{self._selector} >> {selector_or_locator}",
+                has_text=has_text,
+                has=has,
+            )
+        selector_or_locator = to_impl(selector_or_locator)
+        if selector_or_locator._frame != self._frame:
+            raise Error("Locators must belong to the same frame.")
         return Locator(
             self._frame,
-            f"{self._selector} >> {selector}",
+            f"{self._selector} >> {selector_or_locator._selector}",
             has_text=has_text,
             has=has,
         )
@@ -663,13 +674,23 @@ class FrameLocator:
 
     def locator(
         self,
-        selector: str,
+        selector_or_locator: Union["Locator", str],
         has_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
     ) -> Locator:
+        if isinstance(selector_or_locator, str):
+            return Locator(
+                self._frame,
+                f"{self._frame_selector} >> internal:control=enter-frame >> {selector_or_locator}",
+                has_text=has_text,
+                has=has,
+            )
+        selector_or_locator = to_impl(selector_or_locator)
+        if selector_or_locator._frame != self._frame:
+            raise ValueError("Locators must belong to the same frame.")
         return Locator(
             self._frame,
-            f"{self._frame_selector} >> internal:control=enter-frame >> {selector}",
+            f"{self._frame_selector} >> internal:control=enter-frame >> {selector_or_locator._selector}",
             has_text=has_text,
             has=has,
         )

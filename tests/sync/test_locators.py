@@ -355,7 +355,7 @@ def test_locators_should_select_textarea(
     textarea = page.locator("textarea")
     textarea.evaluate("textarea => textarea.value = 'some value'")
     textarea.select_text()
-    if browser_name == "firefox":
+    if browser_name == "firefox" or browser_name == "webkit":
         assert textarea.evaluate("el => el.selectionStart") == 0
         assert textarea.evaluate("el => el.selectionEnd") == 10
     else:
