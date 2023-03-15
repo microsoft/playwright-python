@@ -111,7 +111,7 @@ class Tracing(ChannelOwner):
             await self._connection.local_utils.zip(
                 {
                     "zipFile": str(file_path),
-                    "entries": result["entries"],
+                    "entries": [],
                     "metadata": metadata,
                     "mode": "append",
                     "includeSources": self._include_sources,
