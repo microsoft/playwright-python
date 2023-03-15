@@ -469,6 +469,58 @@ def test_locators_set_checked(page: Page) -> None:
     assert page.evaluate("checkbox.checked") is False
 
 
+def test_should_combine_visible_with_other_selectors(page: Page) -> None:
+    page.set_content(
+        """<div>
+        <div class="item" style="display: none">Hidden data0</div>
+        <div class="item">visible data1</div>
+        <div class="item" style="display: none">Hidden data1</div>
+        <div class="item">visible data2</div>
+        <div class="item" style="display: none">Hidden data1</div>
+        <div class="item">visible data3</div>
+        </div>
+    """
+    )
+    locator = page.locator(".item >> visible=true").nth(1)
+    expect(locator).to_have_text("visible data2")
+    expect(page.locator(".item >> visible=true >> text=data3")).to_have_text(
+        "visible data3"
+    )
+
+
+def test_locator_count_should_work_with_deleted_map_in_main_world(page: Page) -> None:
+    page.evaluate("Map = 1")
+    page.locator("#searchResultTableDiv .x-grid3-row").count()
+    expect(page.locator("#searchResultTableDiv .x-grid3-row")).to_have_count(0)
+
+
+def test_locator_locator_and_framelocator_locator_should_accept_locator(
+    page: Page,
+) -> None:
+    page.set_content(
+        """
+        <div><input value=outer></div>
+        <iframe srcdoc="<div><input value=inner></div>"></iframe>
+    """
+    )
+
+    input_locator = page.locator("input")
+    assert input_locator.input_value() == "outer"
+    assert page.locator("div").locator(input_locator).input_value() == "outer"
+    assert page.frame_locator("iframe").locator(input_locator).input_value() == "inner"
+    assert (
+        page.frame_locator("iframe").locator("div").locator(input_locator).input_value()
+        == "inner"
+    )
+
+    div_locator = page.locator("div")
+    assert div_locator.locator("input").input_value() == "outer"
+    assert (
+        page.frame_locator("iframe").locator(div_locator).locator("input").input_value()
+        == "inner"
+    )
+
+
 def route_iframe(page: Page) -> None:
     page.route(
         "**/empty.html",
@@ -743,11 +795,11 @@ def test_locators_should_focus_and_blur_a_button(page: Page, server: Server) -> 
     focused = False
     blurred = False
 
-    async def focus_event() -> None:
+    def focus_event() -> None:
         nonlocal focused
         focused = True
 
-    async def blur_event() -> None:
+    def blur_event() -> None:
         nonlocal blurred
         blurred = True
 
