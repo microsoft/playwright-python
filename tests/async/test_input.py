@@ -14,8 +14,8 @@
 
 import asyncio
 import os
-import sys
 import re
+import sys
 
 import pytest
 
