@@ -14,6 +14,7 @@
 
 import asyncio
 import os
+import sys
 import re
 
 import pytest
@@ -241,7 +242,21 @@ async def test_should_work_for_webkitdirectory(page):
     assert file_chooser.is_multiple()
 
 
-async def test_wheel_should_work(page: Page, server):
+def _assert_wheel_event(expected, received, browser_name):
+    # Chromium reports deltaX/deltaY scaled by host device scale factor.
+    # https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
+    # https://github.com/microsoft/playwright/issues/7362
+    # Different bots have different scale factors (usually 1 or 2), so we just ignore the values
+    # instead of guessing the host scale factor.
+    if sys.platform == "darwin" and browser_name == "chromium":
+        del expected["deltaX"]
+        del expected["deltaY"]
+        del received["deltaX"]
+        del received["deltaY"]
+    assert received == expected
+
+
+async def test_wheel_should_work(page: Page, server, browser_name: str):
     await page.set_content(
         """
         <div style="width: 5000px; height: 5000px;"></div>
@@ -250,17 +265,21 @@ async def test_wheel_should_work(page: Page, server):
     await page.mouse.move(50, 60)
     await _listen_for_wheel_events(page, "div")
     await page.mouse.wheel(0, 100)
-    assert await page.evaluate("window.lastEvent") == {
-        "deltaX": 0,
-        "deltaY": 100,
-        "clientX": 50,
-        "clientY": 60,
-        "deltaMode": 0,
-        "ctrlKey": False,
-        "shiftKey": False,
-        "altKey": False,
-        "metaKey": False,
-    }
+    _assert_wheel_event(
+        await page.evaluate("window.lastEvent"),
+        {
+            "deltaX": 0,
+            "deltaY": 100,
+            "clientX": 50,
+            "clientY": 60,
+            "deltaMode": 0,
+            "ctrlKey": False,
+            "shiftKey": False,
+            "altKey": False,
+            "metaKey": False,
+        },
+        browser_name,
+    )
     await page.wait_for_function("window.scrollY === 100")
 
 
