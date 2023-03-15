@@ -48,6 +48,8 @@ from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
+    HarContentPolicy,
+    HarMode,
     HarRecordingMetadata,
     RouteFromHarNotFoundPolicy,
     RouteHandler,
@@ -61,8 +63,6 @@ from playwright._impl._helper import (
     locals_to_params,
     prepare_record_har_options,
     to_impl,
-    HarContentPolicy,
-    HarMode,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker

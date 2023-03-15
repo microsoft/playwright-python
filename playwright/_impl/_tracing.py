@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pathlib
-from typing import Dict, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
@@ -25,6 +25,9 @@ class Tracing(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._include_sources: bool = False
+        self._metadata_collector: List[Dict[str, Any]] = []
+        self._metadata_collector_id: Optional[int] = None
 
     async def start(
         self,
@@ -35,12 +38,21 @@ class Tracing(ChannelOwner):
         sources: bool = None,
     ) -> None:
         params = locals_to_params(locals())
+        self._include_sources = bool(sources)
         await self._channel.send("tracingStart", params)
         await self.start_chunk(title)
+        self._metadata_collector = []
+        self._metadata_collector_id = self._connection.start_collecting_call_metadata(
+            self._metadata_collector
+        )
 
     async def start_chunk(self, title: str = None) -> None:
         params = locals_to_params(locals())
         await self._channel.send("tracingStartChunk", params)
+        self._metadata_collector = []
+        self._metadata_collector_id = self._connection.start_collecting_call_metadata(
+            self._metadata_collector
+        )
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._do_stop_chunk(path)
@@ -50,32 +62,46 @@ class Tracing(ChannelOwner):
         await self._channel.send("tracingStop")
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
+        if self._metadata_collector_id:
+            self._connection.stop_collecting_call_metadata(self._metadata_collector_id)
+        metadata = self._metadata_collector
+        self._metadata_collector = []
+        self._metadata_collector_id = None
+
+        if not file_path:
+            await self._channel.send("tracingStopChunk", {"mode": "discard"})
+            # Not interested in any artifacts
+            return
+
         is_local = not self._connection.is_remote
 
-        mode = "doNotSave"
-        if file_path:
-            if is_local:
-                mode = "compressTraceAndSources"
-            else:
-                mode = "compressTrace"
+        if is_local:
+            entries = await self._channel.send("tracingStopChunk", {"mode": "entries"})
+            await self._connection.local_utils.zip(
+                {
+                    "zipFile": str(file_path),
+                    "entries": entries,
+                    "metadata": metadata,
+                    "mode": "write",
+                    "includeSources": self._include_sources,
+                }
+            )
+            return
 
         result = await self._channel.send_return_as_dict(
             "tracingStopChunk",
             {
-                "mode": mode,
+                "mode": "archive",
             },
         )
-        if not file_path:
-            # Not interested in artifacts.
-            return
 
         artifact = cast(
             Optional[Artifact],
             from_nullable_channel(result.get("artifact")),
         )
 
+        # The artifact may be missing if the browser closed while stopping tracing.
         if not artifact:
-            # The artifact may be missing if the browser closed while stopping tracing.
             return
 
         # Save trace to the final local file.
@@ -83,7 +109,13 @@ class Tracing(ChannelOwner):
         await artifact.delete()
 
         # Add local sources to the remote trace if necessary.
-        if result.get("sourceEntries", []):
+        if len(metadata) > 0:
             await self._connection.local_utils.zip(
-                str(file_path), result["sourceEntries"]
+                {
+                    "zipFile": str(file_path),
+                    "entries": result["entries"],
+                    "metadata": metadata,
+                    "mode": "append",
+                    "includeSources": self._include_sources,
+                }
             )
