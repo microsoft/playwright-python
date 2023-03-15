@@ -27,7 +27,6 @@ class Tracing(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self._include_sources: bool = False
         self._metadata_collector: List[Dict[str, Any]] = []
-        self._metadata_collector_id: Optional[int] = None
 
     async def start(
         self,
@@ -42,17 +41,13 @@ class Tracing(ChannelOwner):
         await self._channel.send("tracingStart", params)
         await self.start_chunk(title)
         self._metadata_collector = []
-        self._metadata_collector_id = self._connection.start_collecting_call_metadata(
-            self._metadata_collector
-        )
+        self._connection.start_collecting_call_metadata(self._metadata_collector)
 
     async def start_chunk(self, title: str = None) -> None:
         params = locals_to_params(locals())
         await self._channel.send("tracingStartChunk", params)
         self._metadata_collector = []
-        self._metadata_collector_id = self._connection.start_collecting_call_metadata(
-            self._metadata_collector
-        )
+        self._connection.start_collecting_call_metadata(self._metadata_collector)
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._do_stop_chunk(path)
@@ -62,11 +57,10 @@ class Tracing(ChannelOwner):
         await self._channel.send("tracingStop")
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
-        if self._metadata_collector_id:
-            self._connection.stop_collecting_call_metadata(self._metadata_collector_id)
+        if self._metadata_collector:
+            self._connection.stop_collecting_call_metadata(self._metadata_collector)
         metadata = self._metadata_collector
         self._metadata_collector = []
-        self._metadata_collector_id = None
 
         if not file_path:
             await self._channel.send("tracingStopChunk", {"mode": "discard"})

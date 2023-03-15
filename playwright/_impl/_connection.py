@@ -19,19 +19,7 @@ import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Set,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from greenlet import greenlet
 from pyee import EventEmitter
@@ -243,7 +231,7 @@ class Connection(EventEmitter):
             Optional[ParsedStackTrace]
         ] = contextvars.ContextVar("ApiZone", default=None)
         self._local_utils: Optional["LocalUtils"] = local_utils
-        self._stack_collector = MutableSet[List[Dict[str, Any]]]()
+        self._stack_collector: List[List[Dict[str, Any]]] = []
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -291,11 +279,11 @@ class Connection(EventEmitter):
     ) -> None:
         self._waiting_for_object[guid] = callback
 
-    def start_collecting_call_metadata(self, collector: Any) -> int:
-        return self._stack_collector.add(collector)
+    def start_collecting_call_metadata(self, collector: Any) -> None:
+        self._stack_collector.append(collector)
 
-    def stop_collecting_call_metadata(self, collector_id: Any) -> None:
-        self._stack_collector.remove_by_id(collector_id)
+    def stop_collecting_call_metadata(self, collector: Any) -> None:
+        self._stack_collector.remove(collector)
 
     def _send_message_to_server(
         self, guid: str, method: str, params: Dict
@@ -310,7 +298,7 @@ class Connection(EventEmitter):
         )
         self._callbacks[id] = callback
         stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
-        for collector in self._stack_collector.all():
+        for collector in self._stack_collector:
             collector.append({"stack": stack_trace_information["frames"], "id": id})
         frames = stack_trace_information.get("frames", [])
         location = (
@@ -539,27 +527,3 @@ def _extract_stack_trace_information_from_stack(
         "frameTexts": [frame["frameText"] for frame in parsed_frames],
         "apiName": "" if is_internal else api_name,
     }
-
-
-T = TypeVar("T")
-
-
-class MutableSet(Generic[T]):
-    def __init__(self) -> None:
-        self._counter = 0
-        self._set: Set[int] = set()
-        self._set_items: Dict[int, T] = {}
-
-    def add(self, item: T) -> int:
-        self._counter += 1
-        new_id = self._counter
-        self._set.add(new_id)
-        self._set_items[new_id] = item
-        return new_id
-
-    def remove_by_id(self, item_id: int) -> None:
-        self._set.remove(item_id)
-        self._set_items.pop(item_id)
-
-    def all(self) -> List[T]:
-        return list(self._set_items.values())
