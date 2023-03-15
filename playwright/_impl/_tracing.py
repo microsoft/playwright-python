@@ -40,8 +40,6 @@ class Tracing(ChannelOwner):
         self._include_sources = bool(sources)
         await self._channel.send("tracingStart", params)
         await self.start_chunk(title)
-        self._metadata_collector = []
-        self._connection.start_collecting_call_metadata(self._metadata_collector)
 
     async def start_chunk(self, title: str = None) -> None:
         params = locals_to_params(locals())

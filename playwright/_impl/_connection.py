@@ -280,7 +280,8 @@ class Connection(EventEmitter):
         self._waiting_for_object[guid] = callback
 
     def start_collecting_call_metadata(self, collector: Any) -> None:
-        self._stack_collector.append(collector)
+        if collector not in self._stack_collector:
+            self._stack_collector.append(collector)
 
     def stop_collecting_call_metadata(self, collector: Any) -> None:
         self._stack_collector.remove(collector)
@@ -480,9 +481,7 @@ class StackFrame(TypedDict):
 
 
 class ParsedStackTrace(TypedDict):
-    allFrames: List[StackFrame]
     frames: List[StackFrame]
-    frameTexts: List[str]
     apiName: Optional[str]
 
 
@@ -492,7 +491,7 @@ def _extract_stack_trace_information_from_stack(
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
     api_name = ""
-    parsed_frames: List[Dict] = []
+    parsed_frames: List[StackFrame] = []
     for frame in st:
         is_playwright_internal = frame.filename.startswith(playwright_module_path)
 
@@ -504,13 +503,10 @@ def _extract_stack_trace_information_from_stack(
         if not is_playwright_internal:
             parsed_frames.append(
                 {
-                    "frame": {
-                        "file": frame.filename,
-                        "line": frame.lineno,
-                        "column": 0,
-                        "function": method_name,
-                    },
-                    "frameText": f"{method_name} at {frame.filename}:{frame.lineno}",
+                    "file": frame.filename,
+                    "line": frame.lineno,
+                    "column": 0,
+                    "function": method_name,
                 }
             )
         if is_playwright_internal:
@@ -522,8 +518,6 @@ def _extract_stack_trace_information_from_stack(
         api_name = last_internal_api_name
 
     return {
-        "allFrames": [frame["frame"] for frame in parsed_frames],
-        "frames": [frame["frame"] for frame in parsed_frames],
-        "frameTexts": [frame["frameText"] for frame in parsed_frames],
+        "frames": parsed_frames,
         "apiName": "" if is_internal else api_name,
     }
