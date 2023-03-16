@@ -822,6 +822,10 @@ def get_by_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> 
     return "internal:text=" + escape_for_text_selector(text, exact=exact)
 
 
+def bool_to_js_bool(value: bool) -> str:
+    return "true" if value else "false"
+
+
 def get_by_role_selector(
     role: AriaRole,
     checked: bool = None,
@@ -836,15 +840,15 @@ def get_by_role_selector(
 ) -> str:
     props: List[Tuple[str, str]] = []
     if checked is not None:
-        props.append(("checked", str(checked)))
+        props.append(("checked", bool_to_js_bool(checked)))
     if disabled is not None:
-        props.append(("disabled", str(disabled)))
+        props.append(("disabled", bool_to_js_bool(disabled)))
     if selected is not None:
-        props.append(("selected", str(selected)))
+        props.append(("selected", bool_to_js_bool(selected)))
     if expanded is not None:
-        props.append(("expanded", str(expanded)))
+        props.append(("expanded", bool_to_js_bool(expanded)))
     if includeHidden is not None:
-        props.append(("include-hidden", str(includeHidden)))
+        props.append(("include-hidden", bool_to_js_bool(includeHidden)))
     if level is not None:
         props.append(("level", str(level)))
     if name is not None:
@@ -857,6 +861,6 @@ def get_by_role_selector(
             )
         )
     if pressed is not None:
-        props.append(("pressed", str(pressed)))
+        props.append(("pressed", bool_to_js_bool(pressed)))
     props_str = "".join([f"[{t[0]}={t[1]}]" for t in props])
     return f"internal:role={role}{props_str}"
