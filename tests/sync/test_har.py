@@ -423,7 +423,7 @@ def test_should_fulfill_from_har_with_content_in_a_file(
 
 
 def test_should_round_trip_har_zip(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.zip"
     context_1 = browser.new_context(record_har_mode="minimal", record_har_path=har_path)
@@ -440,7 +440,7 @@ def test_should_round_trip_har_zip(
 
 
 def test_should_round_trip_har_with_post_data(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     server.set_route(
         "/echo", lambda req: (req.write(cast(Any, req).post_body), req.finish())
@@ -473,7 +473,7 @@ def test_should_round_trip_har_with_post_data(
 
 
 def test_should_disambiguate_by_header(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     server.set_route(
         "/echo",
@@ -514,7 +514,7 @@ def test_should_disambiguate_by_header(
 
 
 def test_should_produce_extracted_zip(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.har"
     context = browser.new_context(
@@ -539,7 +539,7 @@ def test_should_produce_extracted_zip(
 
 
 def test_should_update_har_zip_for_context(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.zip"
     context = browser.new_context()
@@ -559,7 +559,7 @@ def test_should_update_har_zip_for_context(
 
 
 def test_should_update_har_zip_for_page(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.zip"
     context = browser.new_context()
@@ -578,8 +578,27 @@ def test_should_update_har_zip_for_page(
     expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
 
 
+def test_should_update_har_zip_for_page_with_different_options(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.zip"
+    context1 = browser.new_context()
+    page1 = context1.new_page()
+    page1.route_from_har(har_path, update=True, content="embed", mode="full")
+    page1.goto(server.PREFIX + "/one-style.html")
+    context1.close()
+
+    context2 = browser.new_context()
+    page2 = context2.new_page()
+    page2.route_from_har(har_path, not_found="abort")
+    page2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in page2.content()
+    expect(page2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+    context2.close()
+
+
 def test_should_update_extracted_har_zip_for_page(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.har"
     context = browser.new_context()

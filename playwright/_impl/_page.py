@@ -59,6 +59,8 @@ from playwright._impl._helper import (
     ColorScheme,
     DocumentLoadState,
     ForcedColors,
+    HarContentPolicy,
+    HarMode,
     KeyboardModifier,
     MouseButton,
     ReducedMotion,
@@ -617,9 +619,13 @@ class Page(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
+        content: HarContentPolicy = None,
+        mode: HarMode = None,
     ) -> None:
         if update:
-            await self._browser_context._record_into_har(har=har, page=self, url=url)
+            await self._browser_context._record_into_har(
+                har=har, page=self, url=url, content=content, mode=mode
+            )
             return
         router = await HarRouter.create(
             local_utils=self._connection.local_utils,

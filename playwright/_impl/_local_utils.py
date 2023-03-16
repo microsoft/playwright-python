@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import base64
-from typing import Dict, List, Optional, cast
+from typing import Dict, Optional, cast
 
-from playwright._impl._api_structures import HeadersArray, NameValue
+from playwright._impl._api_structures import HeadersArray
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._helper import HarLookupResult, locals_to_params
 
@@ -26,8 +26,8 @@ class LocalUtils(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
-    async def zip(self, zip_file: str, entries: List[NameValue]) -> None:
-        await self._channel.send("zip", {"zipFile": zip_file, "entries": entries})
+    async def zip(self, params: Dict) -> None:
+        await self._channel.send("zip", params)
 
     async def har_open(self, file: str) -> None:
         params = locals_to_params(locals())

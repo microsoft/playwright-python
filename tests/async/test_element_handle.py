@@ -442,12 +442,12 @@ async def test_fill_input_when_Node_is_removed(page, server):
     assert await page.evaluate("result") == "some value"
 
 
-async def test_select_textarea(page, server, is_firefox):
+async def test_select_textarea(page, server, is_firefox, is_webkit):
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
     await textarea.evaluate('textarea => textarea.value = "some value"')
     await textarea.select_text()
-    if is_firefox:
+    if is_firefox or is_webkit:
         assert await textarea.evaluate("el => el.selectionStart") == 0
         assert await textarea.evaluate("el => el.selectionEnd") == 10
     else:
@@ -457,12 +457,12 @@ async def test_select_textarea(page, server, is_firefox):
         )
 
 
-async def test_select_input(page, server, is_firefox):
+async def test_select_input(page, server, is_firefox, is_webkit):
     await page.goto(server.PREFIX + "/input/textarea.html")
     input = await page.query_selector("input")
     await input.evaluate('input => input.value = "some value"')
     await input.select_text()
-    if is_firefox:
+    if is_firefox or is_webkit:
         assert await input.evaluate("el => el.selectionStart") == 0
         assert await input.evaluate("el => el.selectionEnd") == 10
     else:

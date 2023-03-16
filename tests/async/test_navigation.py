@@ -890,9 +890,16 @@ async def test_frame_goto_should_navigate_subframes(page, server):
 async def test_frame_goto_should_reject_when_frame_detaches(page, server, browser_name):
     await page.goto(server.PREFIX + "/frames/one-frame.html")
 
-    await page.route("**/empty.html", lambda route, request: None)
-    navigation_task = asyncio.create_task(page.frames[1].goto(server.EMPTY_PAGE))
-    asyncio.create_task(page.eval_on_selector("iframe", "frame => frame.remove()"))
+    server.set_route("/one-style.css", lambda _: None)
+    wait_for_request_task = asyncio.create_task(
+        server.wait_for_request("/one-style.css")
+    )
+    navigation_task = asyncio.create_task(
+        page.frames[1].goto(server.PREFIX + "/one-style.html")
+    )
+    await wait_for_request_task
+
+    await page.eval_on_selector("iframe", "frame => frame.remove()")
     with pytest.raises(Error) as exc_info:
         await navigation_task
     if browser_name == "chromium":
@@ -934,11 +941,12 @@ async def test_frame_wait_for_nav_should_fail_when_frame_detaches(page, server: 
     await page.goto(server.PREFIX + "/frames/one-frame.html")
     frame = page.frames[1]
     server.set_route("/empty.html", lambda _: None)
+    server.set_route("/one-style.css", lambda _: None)
     with pytest.raises(Error) as exc_info:
         async with frame.expect_navigation():
 
             async def after_it():
-                await server.wait_for_request("/empty.html")
+                await server.wait_for_request("/one-style.html")
                 await page.eval_on_selector(
                     "iframe", "frame => setTimeout(() => frame.remove(), 0)"
                 )
@@ -946,7 +954,7 @@ async def test_frame_wait_for_nav_should_fail_when_frame_detaches(page, server: 
             await asyncio.gather(
                 page.eval_on_selector(
                     "iframe",
-                    "frame => frame.contentWindow.location.href = '/empty.html'",
+                    "frame => frame.contentWindow.location.href = '/one-style.html'",
                 ),
                 after_it(),
             )

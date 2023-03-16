@@ -115,7 +115,6 @@ def test_should_collect_trace_with_resources_but_no_js(
         "Route.continue_",
         "Page.goto",
         "Page.close",
-        "Tracing.stop",
     ]
 
     assert len(list(filter(lambda e: e["type"] == "frame-snapshot", events))) >= 1
@@ -162,12 +161,11 @@ def test_should_collect_two_traces(
         "Page.goto",
         "Page.set_content",
         "Page.click",
-        "Tracing.stop",
     ]
 
     (_, events) = parse_trace(tracing2_path)
     assert events[0]["type"] == "context-options"
-    assert get_actions(events) == ["Page.dblclick", "Page.close", "Tracing.stop"]
+    assert get_actions(events) == ["Page.dblclick", "Page.close"]
 
 
 def test_should_not_throw_when_stopping_without_start_but_not_exporting(
@@ -202,7 +200,6 @@ def test_should_work_with_playwright_context_managers(
         "Page.click",
         "Page.expect_popup",
         "Page.evaluate",
-        "Tracing.stop",
     ]
 
 
@@ -223,7 +220,6 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
         "Page.goto",
         "Page.wait_for_load_state",
         "Page.wait_for_load_state",
-        "Tracing.stop",
     ]
 
 
@@ -243,11 +239,10 @@ def get_actions(events: List[Any]) -> List[str]:
     action_events = sorted(
         list(
             filter(
-                lambda e: e["type"] == "action"
-                and e["metadata"].get("internal", False) is False,
+                lambda e: e["type"] == "action",
                 events,
             )
         ),
-        key=lambda e: e["metadata"]["startTime"],
+        key=lambda e: e["startTime"],
     )
-    return [e["metadata"]["apiName"] for e in action_events]
+    return [e["apiName"] for e in action_events]

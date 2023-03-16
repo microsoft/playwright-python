@@ -421,26 +421,30 @@ def test_fill_input_when_Node_is_removed(page: Page, server: Server) -> None:
     assert page.evaluate("result") == "some value"
 
 
-def test_select_textarea(page: Page, server: Server, is_firefox: bool) -> None:
+def test_select_textarea(
+    page: Page, server: Server, is_firefox: bool, is_webkit: bool
+) -> None:
     page.goto(server.PREFIX + "/input/textarea.html")
     textarea = page.query_selector("textarea")
     assert textarea
     textarea.evaluate('textarea => textarea.value = "some value"')
     textarea.select_text()
-    if is_firefox:
+    if is_firefox or is_webkit:
         assert textarea.evaluate("el => el.selectionStart") == 0
         assert textarea.evaluate("el => el.selectionEnd") == 10
     else:
         assert page.evaluate("() => window.getSelection().toString()") == "some value"
 
 
-def test_select_input(page: Page, server: Server, is_firefox: bool) -> None:
+def test_select_input(
+    page: Page, server: Server, is_firefox: bool, is_webkit: bool
+) -> None:
     page.goto(server.PREFIX + "/input/textarea.html")
     input = page.query_selector("input")
     assert input
     input.evaluate('input => input.value = "some value"')
     input.select_text()
-    if is_firefox:
+    if is_firefox or is_webkit:
         assert input.evaluate("el => el.selectionStart") == 0
         assert input.evaluate("el => el.selectionEnd") == 10
     else:

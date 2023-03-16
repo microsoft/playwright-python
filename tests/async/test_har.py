@@ -538,7 +538,7 @@ async def test_should_round_trip_har_with_post_data(
 
 
 async def test_should_disambiguate_by_header(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     server.set_route(
         "/echo", lambda req: (req.write(req.getHeader("baz").encode()), req.finish())
@@ -580,7 +580,7 @@ async def test_should_disambiguate_by_header(
 
 
 async def test_should_produce_extracted_zip(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.har"
     context = await browser.new_context(
@@ -607,7 +607,7 @@ async def test_should_produce_extracted_zip(
 
 
 async def test_should_update_har_zip_for_context(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.zip"
     context = await browser.new_context()
@@ -629,7 +629,7 @@ async def test_should_update_har_zip_for_context(
 
 
 async def test_should_update_har_zip_for_page(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.zip"
     context = await browser.new_context()
@@ -650,8 +650,29 @@ async def test_should_update_har_zip_for_page(
     )
 
 
+async def test_should_update_har_zip_for_page_with_different_options(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
+    har_path = tmpdir / "har.zip"
+    context1 = await browser.new_context()
+    page1 = await context1.new_page()
+    await page1.route_from_har(har_path, update=True, content="embed", mode="full")
+    await page1.goto(server.PREFIX + "/one-style.html")
+    await context1.close()
+
+    context2 = await browser.new_context()
+    page2 = await context2.new_page()
+    await page2.route_from_har(har_path, not_found="abort")
+    await page2.goto(server.PREFIX + "/one-style.html")
+    assert "hello, world!" in await page2.content()
+    await expect(page2.locator("body")).to_have_css(
+        "background-color", "rgb(255, 192, 203)"
+    )
+    await context2.close()
+
+
 async def test_should_update_extracted_har_zip_for_page(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     har_path = tmpdir / "har.har"
     context = await browser.new_context()

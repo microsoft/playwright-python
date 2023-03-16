@@ -48,6 +48,8 @@ from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
+    HarContentPolicy,
+    HarMode,
     HarRecordingMetadata,
     RouteFromHarNotFoundPolicy,
     RouteHandler,
@@ -326,13 +328,15 @@ class BrowserContext(ChannelOwner):
         har: Union[Path, str],
         page: Optional[Page] = None,
         url: Union[Pattern[str], str] = None,
+        content: HarContentPolicy = None,
+        mode: HarMode = None,
     ) -> None:
         params: Dict[str, Any] = {
             "options": prepare_record_har_options(
                 {
                     "recordHarPath": har,
-                    "recordHarContent": "attach",
-                    "recordHarMode": "minimal",
+                    "recordHarContent": content or "attach",
+                    "recordHarMode": mode or "minimal",
                     "recordHarUrlFilter": url,
                 }
             )
@@ -340,7 +344,7 @@ class BrowserContext(ChannelOwner):
         if page:
             params["page"] = page._channel
         har_id = await self._channel.send("harStart", params)
-        self._har_recorders[har_id] = {"path": str(har), "content": "attach"}
+        self._har_recorders[har_id] = {"path": str(har), "content": content or "attach"}
 
     async def route_from_har(
         self,
@@ -348,9 +352,13 @@ class BrowserContext(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
+        content: HarContentPolicy = None,
+        mode: HarMode = None,
     ) -> None:
         if update:
-            await self._record_into_har(har=har, page=None, url=url)
+            await self._record_into_har(
+                har=har, page=None, url=url, content=content, mode=mode
+            )
             return
         router = await HarRouter.create(
             local_utils=self._connection.local_utils,

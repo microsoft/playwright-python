@@ -1947,8 +1947,8 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -1989,8 +1989,8 @@ class ElementHandle(JSHandle):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2058,8 +2058,8 @@ class ElementHandle(JSHandle):
         click_count : Union[int, None]
             defaults to 1. See [UIEvent.detail].
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2130,8 +2130,8 @@ class ElementHandle(JSHandle):
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2218,8 +2218,8 @@ class ElementHandle(JSHandle):
         element : Union[ElementHandle, List[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2282,8 +2282,8 @@ class ElementHandle(JSHandle):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2333,8 +2333,8 @@ class ElementHandle(JSHandle):
         value : str
             Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2371,8 +2371,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -2391,8 +2391,8 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -2430,8 +2430,8 @@ class ElementHandle(JSHandle):
         ----------
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2504,8 +2504,8 @@ class ElementHandle(JSHandle):
         delay : Union[float, None]
             Time to wait between key presses in milliseconds. Defaults to 0.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2558,8 +2558,8 @@ class ElementHandle(JSHandle):
         delay : Union[float, None]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2607,8 +2607,8 @@ class ElementHandle(JSHandle):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2664,8 +2664,8 @@ class ElementHandle(JSHandle):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2720,8 +2720,8 @@ class ElementHandle(JSHandle):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -2807,8 +2807,8 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         type : Union["jpeg", "png", None]
             Specify screenshot type, defaults to `png`.
         path : Union[pathlib.Path, str, None]
@@ -3037,8 +3037,8 @@ class ElementHandle(JSHandle):
         state : Union["disabled", "editable", "enabled", "hidden", "stable", "visible"]
             A state to wait for, see below for more details.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -3098,8 +3098,8 @@ class ElementHandle(JSHandle):
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or
               `visibility:hidden`. This is opposite to the `'visible'` option.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -3268,8 +3268,8 @@ class FileChooser(SyncBase):
         ----------
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -3889,8 +3889,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         state : Union["attached", "detached", "hidden", "visible", None]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
@@ -3933,8 +3933,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -3969,8 +3969,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -4005,8 +4005,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -4041,8 +4041,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -4191,8 +4191,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -4499,8 +4499,8 @@ class Frame(SyncBase):
         click_count : Union[int, None]
             defaults to 1. See [UIEvent.detail].
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -4581,8 +4581,8 @@ class Frame(SyncBase):
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -4655,8 +4655,8 @@ class Frame(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -4717,8 +4717,8 @@ class Frame(SyncBase):
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -5341,8 +5341,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -5371,8 +5371,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5407,8 +5407,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5443,8 +5443,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5482,8 +5482,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5537,8 +5537,8 @@ class Frame(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -5607,8 +5607,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -5694,8 +5694,8 @@ class Frame(SyncBase):
         element : Union[ElementHandle, List[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -5751,8 +5751,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -5802,8 +5802,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -5864,8 +5864,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -5929,8 +5929,8 @@ class Frame(SyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -5986,8 +5986,8 @@ class Frame(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -6052,8 +6052,8 @@ class Frame(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -6169,8 +6169,9 @@ class Frame(SyncBase):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
-            default value can be changed by using the `browser_context.set_default_timeout()`.
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
+            default value can be changed by using the `browser_context.set_default_timeout()` or
+            `page.set_default_timeout()` methods.
         polling : Union["raf", float, None]
             If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling`
             is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to
@@ -6243,8 +6244,8 @@ class Frame(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -6305,7 +6306,7 @@ class FrameLocator(SyncBase):
 
     def locator(
         self,
-        selector: str,
+        selector_or_locator: typing.Union["Locator", str],
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None
@@ -6319,8 +6320,8 @@ class FrameLocator(SyncBase):
 
         Parameters
         ----------
-        selector : str
-            A selector to use when resolving DOM element.
+        selector_or_locator : Union[Locator, str]
+            A selector or locator to use when resolving DOM element.
         has_text : Union[Pattern[str], str, None]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
@@ -6338,7 +6339,9 @@ class FrameLocator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector_or_locator=selector_or_locator,
+                has_text=has_text,
+                has=has._impl_obj if has else None,
             )
         )
 
@@ -8217,8 +8220,8 @@ class Page(SyncContextManager):
         selector : str
             A selector to query for.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         state : Union["attached", "detached", "hidden", "visible", None]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
@@ -8264,8 +8267,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -8300,8 +8303,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -8336,8 +8339,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -8372,8 +8375,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -8519,8 +8522,8 @@ class Page(SyncContextManager):
         event_init : Union[Dict, None]
             Optional event-specific initialization properties.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -9825,7 +9828,9 @@ class Page(SyncContextManager):
         *,
         url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
-        update: typing.Optional[bool] = None
+        update: typing.Optional[bool] = None,
+        content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        mode: typing.Optional[Literal["full", "minimal"]] = None
     ) -> None:
         """Page.route_from_har
 
@@ -9852,12 +9857,19 @@ class Page(SyncContextManager):
         update : Union[bool, None]
             If specified, updates the given HAR with the actual network information instead of serving from file. The file is
             written to disk when `browser_context.close()` is called.
+        content : Union["attach", "embed", "omit", None]
+        mode : Union["full", "minimal", None]
         """
 
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.route_from_har(
-                    har=har, url=url, not_found=not_found, update=update
+                    har=har,
+                    url=url,
+                    not_found=not_found,
+                    update=update,
+                    content=content,
+                    mode=mode,
                 )
             )
         )
@@ -9884,8 +9896,8 @@ class Page(SyncContextManager):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         type : Union["jpeg", "png", None]
             Specify screenshot type, defaults to `png`.
         path : Union[pathlib.Path, str, None]
@@ -10039,8 +10051,8 @@ class Page(SyncContextManager):
         click_count : Union[int, None]
             defaults to 1. See [UIEvent.detail].
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -10121,8 +10133,8 @@ class Page(SyncContextManager):
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -10195,8 +10207,8 @@ class Page(SyncContextManager):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -10257,8 +10269,8 @@ class Page(SyncContextManager):
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -10879,8 +10891,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -10909,8 +10921,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -10945,8 +10957,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -10981,8 +10993,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -11020,8 +11032,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -11075,8 +11087,8 @@ class Page(SyncContextManager):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -11169,8 +11181,8 @@ class Page(SyncContextManager):
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -11260,8 +11272,8 @@ class Page(SyncContextManager):
         element : Union[ElementHandle, List[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -11317,8 +11329,8 @@ class Page(SyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -11365,8 +11377,8 @@ class Page(SyncContextManager):
             used.
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -11427,8 +11439,8 @@ class Page(SyncContextManager):
         delay : Union[float, None]
             Time to wait between key presses in milliseconds. Defaults to 0.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -11520,8 +11532,8 @@ class Page(SyncContextManager):
         delay : Union[float, None]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -11580,8 +11592,8 @@ class Page(SyncContextManager):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -11646,8 +11658,8 @@ class Page(SyncContextManager):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -11775,8 +11787,9 @@ class Page(SyncContextManager):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
-            maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
-            default value can be changed by using the `browser_context.set_default_timeout()`.
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
+            default value can be changed by using the `browser_context.set_default_timeout()` or
+            `page.set_default_timeout()` methods.
         polling : Union["raf", float, None]
             If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling`
             is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to
@@ -12443,8 +12456,8 @@ class Page(SyncContextManager):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -13415,7 +13428,9 @@ class BrowserContext(SyncContextManager):
         *,
         url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
-        update: typing.Optional[bool] = None
+        update: typing.Optional[bool] = None,
+        content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        mode: typing.Optional[Literal["full", "minimal"]] = None
     ) -> None:
         """BrowserContext.route_from_har
 
@@ -13442,12 +13457,25 @@ class BrowserContext(SyncContextManager):
         update : Union[bool, None]
             If specified, updates the given HAR with the actual network information instead of serving from file. The file is
             written to disk when `browser_context.close()` is called.
+        content : Union["attach", "embed", "omit", None]
+            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
+            `attach` is specified, resources are persisted as separate files or entries in the ZIP archive. If `embed` is
+            specified, content is stored inline the HAR file
+        mode : Union["full", "minimal", None]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
+            cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
+            `minimal`.
         """
 
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.route_from_har(
-                    har=har, url=url, not_found=not_found, update=update
+                    har=har,
+                    url=url,
+                    not_found=not_found,
+                    update=update,
+                    content=content,
+                    mode=mode,
                 )
             )
         )
@@ -15216,8 +15244,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -15273,8 +15301,8 @@ class Locator(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -15371,8 +15399,8 @@ class Locator(SyncBase):
         click_count : Union[int, None]
             defaults to 1. See [UIEvent.detail].
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -15447,8 +15475,8 @@ class Locator(SyncBase):
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -15535,8 +15563,8 @@ class Locator(SyncBase):
         event_init : Union[Dict, None]
             Optional event-specific initialization properties.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -15587,8 +15615,8 @@ class Locator(SyncBase):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -15686,8 +15714,8 @@ class Locator(SyncBase):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -15741,8 +15769,8 @@ class Locator(SyncBase):
         value : str
             Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -15793,8 +15821,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -15813,7 +15841,7 @@ class Locator(SyncBase):
 
     def locator(
         self,
-        selector: str,
+        selector_or_locator: typing.Union[str, "Locator"],
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None
@@ -15827,8 +15855,8 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        selector : str
-            A selector to use when resolving DOM element.
+        selector_or_locator : Union[Locator, str]
+            A selector or locator to use when resolving DOM element.
         has_text : Union[Pattern[str], str, None]
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
@@ -15846,7 +15874,9 @@ class Locator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector_or_locator=selector_or_locator,
+                has_text=has_text,
+                has=has._impl_obj if has else None,
             )
         )
 
@@ -16393,8 +16423,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16503,8 +16533,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -16519,8 +16549,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.blur(timeout=timeout)))
@@ -16529,6 +16559,10 @@ class Locator(SyncBase):
         """Locator.all
 
         When locator points to a list of elements, returns array of locators, pointing to respective elements.
+
+        Note that `locator.all()` does not wait for elements to match the locator, and instead immediately returns
+        whatever is present in the page. To avoid flakiness when elements are loaded dynamically, wait for the loading to
+        finish before calling `locator.all()`.
 
         **Usage**
 
@@ -16630,8 +16664,8 @@ class Locator(SyncBase):
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -16669,8 +16703,8 @@ class Locator(SyncBase):
         name : str
             Attribute name to get the value for.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16729,8 +16763,8 @@ class Locator(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -16763,8 +16797,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16783,8 +16817,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16820,8 +16854,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16850,8 +16884,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16880,8 +16914,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16910,8 +16944,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -16940,8 +16974,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -17060,8 +17094,8 @@ class Locator(SyncBase):
         delay : Union[float, None]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -17127,8 +17161,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         type : Union["jpeg", "png", None]
             Specify screenshot type, defaults to `png`.
         path : Union[pathlib.Path, str, None]
@@ -17193,8 +17227,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -17273,8 +17307,8 @@ class Locator(SyncBase):
         element : Union[ElementHandle, List[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -17321,8 +17355,8 @@ class Locator(SyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
         return mapping.from_maybe_impl(
@@ -17398,8 +17432,8 @@ class Locator(SyncBase):
         ----------
         files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -17456,8 +17490,8 @@ class Locator(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -17492,8 +17526,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
@@ -17552,8 +17586,8 @@ class Locator(SyncBase):
         delay : Union[float, None]
             Time to wait between key presses in milliseconds. Defaults to 0.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -17613,8 +17647,8 @@ class Locator(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
@@ -17712,8 +17746,8 @@ class Locator(SyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         state : Union["attached", "detached", "hidden", "visible", None]
             Defaults to `'visible'`. Can be either:
             - `'attached'` - wait for element to be present in DOM.
@@ -17775,8 +17809,8 @@ class Locator(SyncBase):
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
         timeout : Union[float, None]
-            Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed
-            by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]

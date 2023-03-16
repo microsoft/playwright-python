@@ -14,6 +14,7 @@
 
 import asyncio
 import contextvars
+import datetime
 import inspect
 import sys
 import traceback
@@ -31,6 +32,12 @@ from playwright._impl._transport import Transport
 if TYPE_CHECKING:
     from playwright._impl._local_utils import LocalUtils
     from playwright._impl._playwright import Playwright
+
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import TypedDict
+else:  # pragma: no cover
+    from typing_extensions import TypedDict
 
 
 class Channel(AsyncIOEventEmitter):
@@ -220,10 +227,11 @@ class Connection(EventEmitter):
         self._error: Optional[BaseException] = None
         self.is_remote = False
         self._init_task: Optional[asyncio.Task] = None
-        self._api_zone: contextvars.ContextVar[Optional[Dict]] = contextvars.ContextVar(
-            "ApiZone", default=None
-        )
+        self._api_zone: contextvars.ContextVar[
+            Optional[ParsedStackTrace]
+        ] = contextvars.ContextVar("ApiZone", default=None)
         self._local_utils: Optional["LocalUtils"] = local_utils
+        self._stack_collector: List[List[Dict[str, Any]]] = []
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -271,6 +279,13 @@ class Connection(EventEmitter):
     ) -> None:
         self._waiting_for_object[guid] = callback
 
+    def start_collecting_call_metadata(self, collector: Any) -> None:
+        if collector not in self._stack_collector:
+            self._stack_collector.append(collector)
+
+    def stop_collecting_call_metadata(self, collector: Any) -> None:
+        self._stack_collector.remove(collector)
+
     def _send_message_to_server(
         self, guid: str, method: str, params: Dict
     ) -> ProtocolCallback:
@@ -283,12 +298,30 @@ class Connection(EventEmitter):
             getattr(task, "__pw_stack_trace__", traceback.extract_stack()),
         )
         self._callbacks[id] = callback
+        stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
+        for collector in self._stack_collector:
+            collector.append({"stack": stack_trace_information["frames"], "id": id})
+        frames = stack_trace_information.get("frames", [])
+        location = (
+            {
+                "file": frames[0]["file"],
+                "line": frames[0]["line"],
+                "column": frames[0]["column"],
+            }
+            if len(frames) > 0
+            else None
+        )
         message = {
             "id": id,
             "guid": guid,
             "method": method,
             "params": self._replace_channels_with_guids(params),
-            "metadata": self._api_zone.get(),
+            "metadata": {
+                "wallTime": int(datetime.datetime.now().timestamp() * 1000),
+                "apiName": stack_trace_information["apiName"],
+                "location": location,
+                "internal": not stack_trace_information["apiName"],
+            },
         }
         self._transport.send(message)
         self._callbacks[id] = callback
@@ -412,9 +445,7 @@ class Connection(EventEmitter):
             return await cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        metadata = _extract_metadata_from_stack(st, is_internal)
-        if metadata:
-            self._api_zone.set(metadata)
+        self._api_zone.set(_extract_stack_trace_information_from_stack(st, is_internal))
         try:
             return await cb()
         finally:
@@ -427,9 +458,7 @@ class Connection(EventEmitter):
             return cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        metadata = _extract_metadata_from_stack(st, is_internal)
-        if metadata:
-            self._api_zone.set(metadata)
+        self._api_zone.set(_extract_stack_trace_information_from_stack(st, is_internal))
         try:
             return cb()
         finally:
@@ -444,19 +473,25 @@ def from_nullable_channel(channel: Optional[Channel]) -> Optional[Any]:
     return channel._object if channel else None
 
 
-def _extract_metadata_from_stack(
+class StackFrame(TypedDict):
+    file: str
+    line: int
+    column: int
+    function: Optional[str]
+
+
+class ParsedStackTrace(TypedDict):
+    frames: List[StackFrame]
+    apiName: Optional[str]
+
+
+def _extract_stack_trace_information_from_stack(
     st: List[inspect.FrameInfo], is_internal: bool
-) -> Optional[Dict]:
-    if is_internal:
-        return {
-            "apiName": "",
-            "stack": [],
-            "internal": True,
-        }
+) -> Optional[ParsedStackTrace]:
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
     api_name = ""
-    stack: List[Dict] = []
+    parsed_frames: List[StackFrame] = []
     for frame in st:
         is_playwright_internal = frame.filename.startswith(playwright_module_path)
 
@@ -466,10 +501,11 @@ def _extract_metadata_from_stack(
         method_name += frame[0].f_code.co_name
 
         if not is_playwright_internal:
-            stack.append(
+            parsed_frames.append(
                 {
                     "file": frame.filename,
                     "line": frame.lineno,
+                    "column": 0,
                     "function": method_name,
                 }
             )
@@ -480,9 +516,8 @@ def _extract_metadata_from_stack(
             last_internal_api_name = ""
     if not api_name:
         api_name = last_internal_api_name
-    if api_name:
-        return {
-            "apiName": api_name,
-            "stack": stack,
-        }
-    return None
+
+    return {
+        "frames": parsed_frames,
+        "apiName": "" if is_internal else api_name,
+    }
