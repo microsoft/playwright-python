@@ -161,3 +161,20 @@ async def test_get_by_role_escaping(
         )
         == []
     )
+
+
+async def test_include_hidden_should_work(
+    page: Page,
+) -> None:
+    await page.set_content("""<button style="display: none">Hidden</button>""")
+    assert (
+        await page.get_by_role("button", name="Hidden").evaluate_all(
+            "els => els.map(e => e.outerHTML)"
+        )
+        == []
+    )
+    assert await page.get_by_role(
+        "button", name="Hidden", include_hidden=True
+    ).evaluate_all("els => els.map(e => e.outerHTML)") == [
+        """<button style="display: none">Hidden</button>""",
+    ]
