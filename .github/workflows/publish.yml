@@ -46,3 +46,10 @@ jobs:
         run: |
           conda config --set anaconda_upload yes
           conda build --user microsoft .
+      - name: Build and Upload macOS Apple Silicon
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        if: matrix.os == 'macos-latest'
+        run: |
+          conda config --set anaconda_upload yes
+          conda build --user microsoft . --variant-config-files ./conda_build_config_osx_arm64.yaml
