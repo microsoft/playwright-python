@@ -173,6 +173,7 @@ class BrowserContext(ChannelOwner):
                 BrowserContext.Events.RequestFailed: "requestFailed",
             }
         )
+        self._close_was_called = False
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
@@ -408,7 +409,10 @@ class BrowserContext(ChannelOwner):
         self.emit(BrowserContext.Events.Close, self)
 
     async def close(self) -> None:
-        try:
+        if self._close_was_called:
+            return
+        self._close_was_called = True
+        async def _inner_close() -> None:
             for har_id, params in self._har_recorders.items():
                 har = cast(
                     Artifact,
@@ -430,11 +434,9 @@ class BrowserContext(ChannelOwner):
                 else:
                     await har.save_as(params["path"])
                 await har.delete()
-            await self._channel.send("close")
-            await self._closed_future
-        except Exception as e:
-            if not is_safe_close_error(e):
-                raise e
+        await self._channel._connection.wrap_api_call(_inner_close, True)
+        await self._channel.send("close")
+        await self._closed_future
 
     async def _pause(self) -> None:
         await self._channel.send("pause")

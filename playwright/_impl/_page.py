@@ -690,7 +690,7 @@ class Page(ChannelOwner):
             if self._owned_context:
                 await self._owned_context.close()
         except Exception as e:
-            if not is_safe_close_error(e):
+            if not is_safe_close_error(e) and not runBeforeUnload:
                 raise e
 
     def is_closed(self) -> bool:
