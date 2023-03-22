@@ -92,7 +92,7 @@ class BrowserType(ChannelOwner):
         browser = cast(
             Browser, from_channel(await self._channel.send("launch", params))
         )
-        self._did_launch_browser(browser, params)
+        self._did_launch_browser(browser)
         return browser
 
     async def launch_persistent_context(
@@ -167,7 +167,7 @@ class BrowserType(ChannelOwner):
         params = locals_to_params(locals())
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
-        self._did_launch_browser(browser, {})
+        self._did_launch_browser(browser)
 
         default_context = cast(
             Optional[BrowserContext],
@@ -229,7 +229,7 @@ class BrowserType(ChannelOwner):
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
-        self._did_launch_browser(browser, {})
+        self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
 
         def handle_transport_close() -> None:
@@ -249,9 +249,8 @@ class BrowserType(ChannelOwner):
     ) -> None:
         context._set_options(context_options, browser_options)
 
-    def _did_launch_browser(self, browser: Browser, browser_options: Dict) -> None:
+    def _did_launch_browser(self, browser: Browser) -> None:
         browser._browser_type = self
-        browser._options = browser_options
 
 
 def normalize_launch_params(params: Dict) -> None:

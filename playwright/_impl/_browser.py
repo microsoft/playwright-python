@@ -57,7 +57,6 @@ class Browser(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._browser_type = parent
-        self._options: Dict = {}
         self._is_connected = True
         self._is_closed_or_closing = False
         self._should_close_connection_on_close = False

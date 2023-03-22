@@ -225,10 +225,13 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
 
 
 def test_should_respect_traces_dir_and_name(
-    browser_type: BrowserType, server: Server, tmpdir: Path
+    browser_type: BrowserType,
+    server: Server,
+    tmpdir: Path,
+    launch_arguments: Any,
 ) -> None:
     traces_dir = tmpdir / "traces"
-    browser = browser_type.launch(traces_dir=traces_dir)
+    browser = browser_type.launch(traces_dir=traces_dir, **launch_arguments)
     context = browser.new_context()
     page = context.new_page()
 
