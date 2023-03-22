@@ -16,7 +16,7 @@ import pathlib
 from typing import Any, Dict, List, Optional, Union, cast
 
 from playwright._impl._artifact import Artifact
-from playwright._impl._connection import ChannelOwner, from_nullable_channel
+from playwright._impl._connection import ChannelOwner, from_nullable_channel, filter_none
 from playwright._impl._helper import locals_to_params
 
 
@@ -40,12 +40,12 @@ class Tracing(ChannelOwner):
         self._include_sources = bool(sources)
         await self._channel.send("tracingStart", params)
         await self._channel.send(
-            "tracingStartChunk", {"title": title} if title else None
+            "tracingStartChunk", filter_none({"title": title, "name": name})
         )
         self._metadata_collector = []
         self._connection.start_collecting_call_metadata(self._metadata_collector)
 
-    async def start_chunk(self, title: str = None) -> None:
+    async def start_chunk(self, title: str = None, name: str = None) -> None:
         params = locals_to_params(locals())
         await self._channel.send("tracingStartChunk", params)
         self._metadata_collector = []

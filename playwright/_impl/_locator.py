@@ -52,6 +52,7 @@ from playwright._impl._str_utils import (
     escape_for_text_selector,
     escape_regex_flags,
 )
+from playwright._impl._connection import filter_none
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -654,7 +655,7 @@ class Locator:
             {
                 "selector": self._selector,
                 "expression": expression,
-                **({k: v for k, v in options.items() if v is not None}),
+                **(filter_none(options)),
             },
         )
         if result.get("received"):

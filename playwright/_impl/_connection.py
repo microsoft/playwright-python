@@ -521,3 +521,6 @@ def _extract_stack_trace_information_from_stack(
         "frames": parsed_frames,
         "apiName": "" if is_internal else api_name,
     }
+
+def filter_none(d: Dict) -> Dict:
+    return {k: v for k, v in d.items() if v is not None}
