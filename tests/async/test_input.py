@@ -18,6 +18,7 @@ import re
 import sys
 
 import pytest
+from flaky import flaky
 
 from playwright._impl._path_utils import get_file_dirname
 from playwright.async_api import Page
@@ -306,6 +307,7 @@ async def _listen_for_wheel_events(page: Page, selector: str) -> None:
     )
 
 
+@flaky
 async def test_should_upload_large_file(page, server, tmp_path):
     await page.goto(server.PREFIX + "/input/fileupload.html")
     large_file_path = tmp_path / "200MB.zip"

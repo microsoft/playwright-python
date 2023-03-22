@@ -14,6 +14,7 @@
 
 import asyncio
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -59,7 +60,6 @@ from playwright._impl._helper import (
     URLMatcher,
     async_readfile,
     async_writefile,
-    is_safe_close_error,
     locals_to_params,
     prepare_record_har_options,
     to_impl,
@@ -71,7 +71,11 @@ from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
-    from playwright._impl._browser_type import BrowserType
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import Literal
+else:  # pragma: no cover
+    from typing_extensions import Literal
 
 
 class BrowserContext(ChannelOwner):
@@ -90,11 +94,15 @@ class BrowserContext(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        # circular import workaround:
+        self._browser: Optional["Browser"] = None
+        if parent.__class__.__name__ == "Browser":
+            self._browser = cast("Browser", parent)
+            self._browser._contexts.append(self)
         self._pages: List[Page] = []
         self._routes: List[RouteHandler] = []
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
-        self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
         self._options: Dict[str, Any] = {}
         self._background_pages: Set[Page] = set()
@@ -172,6 +180,7 @@ class BrowserContext(ChannelOwner):
                 BrowserContext.Events.RequestFailed: "requestFailed",
             }
         )
+        self._close_was_called = False
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
@@ -226,13 +235,14 @@ class BrowserContext(ChannelOwner):
     def browser(self) -> Optional["Browser"]:
         return self._browser
 
-    def _set_browser_type(self, browser_type: "BrowserType") -> None:
-        self._browser_type = browser_type
+    def _set_options(self, context_options: Dict, browser_options: Dict) -> None:
+        self._options = context_options
         if self._options.get("recordHar"):
             self._har_recorders[""] = {
                 "path": self._options["recordHar"]["path"],
                 "content": self._options["recordHar"].get("content"),
             }
+        self._tracing._traces_dir = browser_options.get("tracesDir")
 
     async def new_page(self) -> Page:
         if self._owner_page:
@@ -328,15 +338,15 @@ class BrowserContext(ChannelOwner):
         har: Union[Path, str],
         page: Optional[Page] = None,
         url: Union[Pattern[str], str] = None,
-        content: HarContentPolicy = None,
-        mode: HarMode = None,
+        update_content: HarContentPolicy = None,
+        update_mode: HarMode = None,
     ) -> None:
         params: Dict[str, Any] = {
             "options": prepare_record_har_options(
                 {
                     "recordHarPath": har,
-                    "recordHarContent": content or "attach",
-                    "recordHarMode": mode or "minimal",
+                    "recordHarContent": update_content or "attach",
+                    "recordHarMode": update_mode or "minimal",
                     "recordHarUrlFilter": url,
                 }
             )
@@ -344,7 +354,10 @@ class BrowserContext(ChannelOwner):
         if page:
             params["page"] = page._channel
         har_id = await self._channel.send("harStart", params)
-        self._har_recorders[har_id] = {"path": str(har), "content": content or "attach"}
+        self._har_recorders[har_id] = {
+            "path": str(har),
+            "content": update_content or "attach",
+        }
 
     async def route_from_har(
         self,
@@ -352,12 +365,16 @@ class BrowserContext(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
-        content: HarContentPolicy = None,
-        mode: HarMode = None,
+        update_content: Literal["attach", "embed"] = None,
+        update_mode: HarMode = None,
     ) -> None:
         if update:
             await self._record_into_har(
-                har=har, page=None, url=url, content=content, mode=mode
+                har=har,
+                page=None,
+                url=url,
+                update_content=update_content,
+                update_mode=update_mode,
             )
             return
         router = await HarRouter.create(
@@ -400,7 +417,11 @@ class BrowserContext(ChannelOwner):
         self.emit(BrowserContext.Events.Close, self)
 
     async def close(self) -> None:
-        try:
+        if self._close_was_called:
+            return
+        self._close_was_called = True
+
+        async def _inner_close() -> None:
             for har_id, params in self._har_recorders.items():
                 har = cast(
                     Artifact,
@@ -422,11 +443,10 @@ class BrowserContext(ChannelOwner):
                 else:
                     await har.save_as(params["path"])
                 await har.delete()
-            await self._channel.send("close")
-            await self._closed_future
-        except Exception as e:
-            if not is_safe_close_error(e):
-                raise e
+
+        await self._channel._connection.wrap_api_call(_inner_close, True)
+        await self._channel.send("close")
+        await self._closed_future
 
     async def _pause(self) -> None:
         await self._channel.send("pause")

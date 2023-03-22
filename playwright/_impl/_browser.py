@@ -125,10 +125,7 @@ class Browser(ChannelOwner):
 
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))
-        self._contexts.append(context)
-        context._browser = self
-        context._options = params
-        context._set_browser_type(self._browser_type)
+        self._browser_type._did_create_context(context, params, {})
         return context
 
     async def new_page(
@@ -174,11 +171,6 @@ class Browser(ChannelOwner):
         page._owned_context = context
         context._owner_page = page
         return page
-
-    def _set_browser_type(self, browser_type: "BrowserType") -> None:
-        self._browser_type = browser_type
-        for context in self._contexts:
-            context._set_browser_type(browser_type)
 
     async def close(self) -> None:
         if self._is_closed_or_closing:

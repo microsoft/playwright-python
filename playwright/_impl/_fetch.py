@@ -29,7 +29,7 @@ from playwright._impl._api_structures import (
     ServerFilePayload,
     StorageState,
 )
-from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._connection import ChannelOwner, filter_none, from_channel
 from playwright._impl._helper import (
     Error,
     NameValue,
@@ -365,9 +365,6 @@ class APIRequestContext(ChannelOwner):
         post_data = (
             base64.b64encode(post_data_buffer).decode() if post_data_buffer else None
         )
-
-        def filter_none(input: Dict) -> Dict:
-            return {k: v for k, v in input.items() if v is not None}
 
         response = await self._channel.send(
             "fetch",

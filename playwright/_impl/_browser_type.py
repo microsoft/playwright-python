@@ -92,7 +92,7 @@ class BrowserType(ChannelOwner):
         browser = cast(
             Browser, from_channel(await self._channel.send("launch", params))
         )
-        browser._set_browser_type(self)
+        self._did_launch_browser(browser)
         return browser
 
     async def launch_persistent_context(
@@ -154,8 +154,7 @@ class BrowserType(ChannelOwner):
             BrowserContext,
             from_channel(await self._channel.send("launchPersistentContext", params)),
         )
-        context._options = params
-        context._set_browser_type(self)
+        self._did_create_context(context, params, params)
         return context
 
     async def connect_over_cdp(
@@ -168,15 +167,14 @@ class BrowserType(ChannelOwner):
         params = locals_to_params(locals())
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
+        self._did_launch_browser(browser)
 
         default_context = cast(
             Optional[BrowserContext],
             from_nullable_channel(response.get("defaultContext")),
         )
         if default_context:
-            browser._contexts.append(default_context)
-            default_context._browser = browser
-        browser._set_browser_type(self)
+            self._did_create_context(default_context, {}, {})
         return browser
 
     async def connect(
@@ -231,6 +229,7 @@ class BrowserType(ChannelOwner):
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
+        self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
 
         def handle_transport_close() -> None:
@@ -243,8 +242,15 @@ class BrowserType(ChannelOwner):
 
         transport.once("close", handle_transport_close)
 
-        browser._set_browser_type(self)
         return browser
+
+    def _did_create_context(
+        self, context: BrowserContext, context_options: Dict, browser_options: Dict
+    ) -> None:
+        context._set_options(context_options, browser_options)
+
+    def _did_launch_browser(self, browser: Browser) -> None:
+        browser._browser_type = self
 
 
 def normalize_launch_params(params: Dict) -> None:
@@ -261,3 +267,5 @@ def normalize_launch_params(params: Dict) -> None:
         params["executablePath"] = str(Path(params["executablePath"]))
     if "downloadsPath" in params:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
+    if "tracesDir" in params:
+        params["tracesDir"] = str(Path(params["tracesDir"]))

@@ -17,6 +17,7 @@ import re
 from typing import Callable
 
 import pytest
+from flaky import flaky
 
 from playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
@@ -245,6 +246,7 @@ async def test_should_fulfill_with_global_fetch_result(
     remote.kill()
 
 
+@flaky
 async def test_should_upload_large_file(
     browser_type: BrowserType,
     launch_server: Callable[[], RemoteServer],

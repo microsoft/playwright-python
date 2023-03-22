@@ -13,10 +13,14 @@
 # limitations under the License.
 
 import pathlib
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 from playwright._impl._artifact import Artifact
-from playwright._impl._connection import ChannelOwner, from_nullable_channel
+from playwright._impl._connection import (
+    ChannelOwner,
+    filter_none,
+    from_nullable_channel,
+)
 from playwright._impl._helper import locals_to_params
 
 
@@ -26,7 +30,9 @@ class Tracing(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._include_sources: bool = False
-        self._metadata_collector: List[Dict[str, Any]] = []
+        self._stacks_id: Optional[str] = None
+        self._is_tracing: bool = False
+        self._traces_dir: Optional[str] = None
 
     async def start(
         self,
@@ -38,18 +44,28 @@ class Tracing(ChannelOwner):
     ) -> None:
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
-        await self._channel.send("tracingStart", params)
-        await self._channel.send(
-            "tracingStartChunk", {"title": title} if title else None
-        )
-        self._metadata_collector = []
-        self._connection.start_collecting_call_metadata(self._metadata_collector)
 
-    async def start_chunk(self, title: str = None) -> None:
+        async def _inner_start() -> str:
+            await self._channel.send("tracingStart", params)
+            return await self._channel.send(
+                "tracingStartChunk", filter_none({"title": title, "name": name})
+            )
+
+        trace_name = await self._connection.wrap_api_call(_inner_start)
+        await self._start_collecting_stacks(trace_name)
+
+    async def start_chunk(self, title: str = None, name: str = None) -> None:
         params = locals_to_params(locals())
-        await self._channel.send("tracingStartChunk", params)
-        self._metadata_collector = []
-        self._connection.start_collecting_call_metadata(self._metadata_collector)
+        trace_name = await self._channel.send("tracingStartChunk", params)
+        await self._start_collecting_stacks(trace_name)
+
+    async def _start_collecting_stacks(self, trace_name: str) -> None:
+        if not self._is_tracing:
+            self._is_tracing = True
+            self._connection.set_in_tracing(True)
+        self._stacks_id = await self._connection.local_utils.tracing_started(
+            self._traces_dir, trace_name
+        )
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._do_stop_chunk(path)
@@ -59,14 +75,15 @@ class Tracing(ChannelOwner):
         await self._channel.send("tracingStop")
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
-        if self._metadata_collector:
-            self._connection.stop_collecting_call_metadata(self._metadata_collector)
-        metadata = self._metadata_collector
-        self._metadata_collector = []
+        if self._is_tracing:
+            self._is_tracing = False
+            self._connection.set_in_tracing(False)
 
         if not file_path:
-            await self._channel.send("tracingStopChunk", {"mode": "discard"})
             # Not interested in any artifacts
+            await self._channel.send("tracingStopChunk", {"mode": "discard"})
+            if self._stacks_id:
+                await self._connection.local_utils.trace_discarded(self._stacks_id)
             return
 
         is_local = not self._connection.is_remote
@@ -79,7 +96,7 @@ class Tracing(ChannelOwner):
                 {
                     "zipFile": str(file_path),
                     "entries": result["entries"],
-                    "metadata": metadata,
+                    "stacksId": self._stacks_id,
                     "mode": "write",
                     "includeSources": self._include_sources,
                 }
@@ -100,20 +117,20 @@ class Tracing(ChannelOwner):
 
         # The artifact may be missing if the browser closed while stopping tracing.
         if not artifact:
+            if self._stacks_id:
+                await self._connection.local_utils.trace_discarded(self._stacks_id)
             return
 
         # Save trace to the final local file.
         await artifact.save_as(file_path)
         await artifact.delete()
 
-        # Add local sources to the remote trace if necessary.
-        if len(metadata) > 0:
-            await self._connection.local_utils.zip(
-                {
-                    "zipFile": str(file_path),
-                    "entries": [],
-                    "metadata": metadata,
-                    "mode": "append",
-                    "includeSources": self._include_sources,
-                }
-            )
+        await self._connection.local_utils.zip(
+            {
+                "zipFile": str(file_path),
+                "entries": [],
+                "stacksId": self._stacks_id,
+                "mode": "append",
+                "includeSources": self._include_sources,
+            }
+        )

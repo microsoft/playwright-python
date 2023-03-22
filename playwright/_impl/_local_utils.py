@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import base64
-from typing import Dict, Optional, cast
+from typing import Dict, List, Optional, cast
 
 from playwright._impl._api_structures import HeadersArray
-from playwright._impl._connection import ChannelOwner
+from playwright._impl._connection import ChannelOwner, StackFrame
 from playwright._impl._helper import HarLookupResult, locals_to_params
 
 
@@ -57,3 +57,21 @@ class LocalUtils(ChannelOwner):
     async def har_unzip(self, zipFile: str, harFile: str) -> None:
         params = locals_to_params(locals())
         await self._channel.send("harUnzip", params)
+
+    async def tracing_started(self, tracesDir: Optional[str], traceName: str) -> str:
+        params = locals_to_params(locals())
+        return await self._channel.send("tracingStarted", params)
+
+    async def trace_discarded(self, stacks_id: str) -> None:
+        return await self._channel.send("traceDiscarded", {"stacks_id": stacks_id})
+
+    def add_stack_to_tracing_no_reply(self, id: int, frames: List[StackFrame]) -> None:
+        self._channel.send_no_reply(
+            "addStackToTracingNoReply",
+            {
+                "callData": {
+                    "stack": frames,
+                    "id": id,
+                }
+            },
+        )
