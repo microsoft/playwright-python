@@ -4748,22 +4748,26 @@ class Frame(AsyncBase):
     ) -> "Locator":
         """Frame.get_by_label
 
-        Allows locating input elements by the text of the associated label.
+        Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+        `aria-label` attribute.
 
         **Usage**
 
-        For example, this method will find the input by label text \"Password\" in the following DOM:
+        For example, this method will find inputs by label \"Username\" and \"Password\" in the following DOM:
 
         ```html
+        <input aria-label=\"Username\">
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
         ```
 
         ```py
+        await page.get_by_label(\"Username\").fill(\"john\")
         await page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         ```py
+        page.get_by_label(\"Username\").fill(\"john\")
         page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
@@ -6278,22 +6282,26 @@ class FrameLocator(AsyncBase):
     ) -> "Locator":
         """FrameLocator.get_by_label
 
-        Allows locating input elements by the text of the associated label.
+        Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+        `aria-label` attribute.
 
         **Usage**
 
-        For example, this method will find the input by label text \"Password\" in the following DOM:
+        For example, this method will find inputs by label \"Username\" and \"Password\" in the following DOM:
 
         ```html
+        <input aria-label=\"Username\">
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
         ```
 
         ```py
+        await page.get_by_label(\"Username\").fill(\"john\")
         await page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         ```py
+        page.get_by_label(\"Username\").fill(\"john\")
         page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
@@ -9767,8 +9775,8 @@ class Page(AsyncContextManager):
         url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
-        content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
-        mode: typing.Optional[Literal["full", "minimal"]] = None
+        update_content: typing.Optional[Literal["attach", "embed"]] = None,
+        update_mode: typing.Optional[Literal["full", "minimal"]] = None
     ) -> None:
         """Page.route_from_har
 
@@ -9795,8 +9803,12 @@ class Page(AsyncContextManager):
         update : Union[bool, None]
             If specified, updates the given HAR with the actual network information instead of serving from file. The file is
             written to disk when `browser_context.close()` is called.
-        content : Union["attach", "embed", "omit", None]
-        mode : Union["full", "minimal", None]
+        update_content : Union["attach", "embed", None]
+            Optional setting to control resource content management. If `attach` is specified, resources are persisted as
+            separate files or entries in the ZIP archive. If `embed` is specified, content is stored inline the HAR file.
+        update_mode : Union["full", "minimal", None]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
+            cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
         """
 
         return mapping.from_maybe_impl(
@@ -9805,8 +9817,8 @@ class Page(AsyncContextManager):
                 url=url,
                 not_found=not_found,
                 update=update,
-                content=content,
-                mode=mode,
+                update_content=update_content,
+                update_mode=update_mode,
             )
         )
 
@@ -10310,22 +10322,26 @@ class Page(AsyncContextManager):
     ) -> "Locator":
         """Page.get_by_label
 
-        Allows locating input elements by the text of the associated label.
+        Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+        `aria-label` attribute.
 
         **Usage**
 
-        For example, this method will find the input by label text \"Password\" in the following DOM:
+        For example, this method will find inputs by label \"Username\" and \"Password\" in the following DOM:
 
         ```html
+        <input aria-label=\"Username\">
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
         ```
 
         ```py
+        await page.get_by_label(\"Username\").fill(\"john\")
         await page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         ```py
+        page.get_by_label(\"Username\").fill(\"john\")
         page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
@@ -13361,8 +13377,8 @@ class BrowserContext(AsyncContextManager):
         url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
-        content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
-        mode: typing.Optional[Literal["full", "minimal"]] = None
+        update_content: typing.Optional[Literal["attach", "embed"]] = None,
+        update_mode: typing.Optional[Literal["full", "minimal"]] = None
     ) -> None:
         """BrowserContext.route_from_har
 
@@ -13389,11 +13405,10 @@ class BrowserContext(AsyncContextManager):
         update : Union[bool, None]
             If specified, updates the given HAR with the actual network information instead of serving from file. The file is
             written to disk when `browser_context.close()` is called.
-        content : Union["attach", "embed", "omit", None]
-            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
-            `attach` is specified, resources are persisted as separate files or entries in the ZIP archive. If `embed` is
-            specified, content is stored inline the HAR file
-        mode : Union["full", "minimal", None]
+        update_content : Union["attach", "embed", None]
+            Optional setting to control resource content management. If `attach` is specified, resources are persisted as
+            separate files or entries in the ZIP archive. If `embed` is specified, content is stored inline the HAR file.
+        update_mode : Union["full", "minimal", None]
             When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
             cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
             `minimal`.
@@ -13405,8 +13420,8 @@ class BrowserContext(AsyncContextManager):
                 url=url,
                 not_found=not_found,
                 update=update,
-                content=content,
-                mode=mode,
+                update_content=update_content,
+                update_mode=update_mode,
             )
         )
 
@@ -14990,7 +15005,9 @@ class Tracing(AsyncBase):
             )
         )
 
-    async def start_chunk(self, *, title: typing.Optional[str] = None) -> None:
+    async def start_chunk(
+        self, *, title: typing.Optional[str] = None, name: typing.Optional[str] = None
+    ) -> None:
         """Tracing.start_chunk
 
         Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
@@ -15035,9 +15052,14 @@ class Tracing(AsyncBase):
         ----------
         title : Union[str, None]
             Trace name to be shown in the Trace Viewer.
+        name : Union[str, None]
+            If specified, the trace is going to be saved into the file with the given name inside the `tracesDir` folder
+            specified in `browser_type.launch()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.start_chunk(title=title))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.start_chunk(title=title, name=name)
+        )
 
     async def stop_chunk(
         self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
@@ -15823,22 +15845,26 @@ class Locator(AsyncBase):
     ) -> "Locator":
         """Locator.get_by_label
 
-        Allows locating input elements by the text of the associated label.
+        Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+        `aria-label` attribute.
 
         **Usage**
 
-        For example, this method will find the input by label text \"Password\" in the following DOM:
+        For example, this method will find inputs by label \"Username\" and \"Password\" in the following DOM:
 
         ```html
+        <input aria-label=\"Username\">
         <label for=\"password-input\">Password:</label>
         <input id=\"password-input\">
         ```
 
         ```py
+        await page.get_by_label(\"Username\").fill(\"john\")
         await page.get_by_label(\"Password\").fill(\"secret\")
         ```
 
         ```py
+        page.get_by_label(\"Username\").fill(\"john\")
         page.get_by_label(\"Password\").fill(\"secret\")
         ```
 

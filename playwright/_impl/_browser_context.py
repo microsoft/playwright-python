@@ -71,7 +71,6 @@ from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
-    from playwright._impl._browser_type import BrowserType
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -95,11 +94,15 @@ class BrowserContext(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        # circular import workaround:
+        self._browser: Optional["Browser"] = None
+        if parent.__class__.__name__ == "Browser":
+            self._browser = cast("Browser", parent)
+            self._browser._contexts.append(self)
         self._pages: List[Page] = []
         self._routes: List[RouteHandler] = []
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
-        self._browser: Optional["Browser"] = None
         self._owner_page: Optional[Page] = None
         self._options: Dict[str, Any] = {}
         self._background_pages: Set[Page] = set()
@@ -232,13 +235,14 @@ class BrowserContext(ChannelOwner):
     def browser(self) -> Optional["Browser"]:
         return self._browser
 
-    def _set_browser_type(self, browser_type: "BrowserType") -> None:
-        self._browser_type = browser_type
+    def _set_options(self, context_options: Dict, browser_options: Dict) -> None:
+        self._options = context_options
         if self._options.get("recordHar"):
             self._har_recorders[""] = {
                 "path": self._options["recordHar"]["path"],
                 "content": self._options["recordHar"].get("content"),
             }
+        self._tracing._traces_dir = browser_options.get("tracesDir")
 
     async def new_page(self) -> Page:
         if self._owner_page:
