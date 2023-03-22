@@ -702,13 +702,19 @@ def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
     page.set_content("<div><span>hello</span></div><div><span>world</span></div>")
     expect(page.locator("div", has=page.locator("text=world"))).to_have_count(1)
     assert (
-        page.locator("div", has=page.locator("text=world")).evaluate("e => e.outerHTML")
+        _remove_highlight(
+            page.locator("div", has=page.locator("text=world")).evaluate(
+                "e => e.outerHTML"
+            )
+        )
         == "<div><span>world</span></div>"
     )
     expect(page.locator("div", has=page.locator('text="hello"'))).to_have_count(1)
     assert (
-        page.locator("div", has=page.locator('text="hello"')).evaluate(
-            "e => e.outerHTML"
+        _remove_highlight(
+            page.locator("div", has=page.locator('text="hello"')).evaluate(
+                "e => e.outerHTML"
+            )
         )
         == "<div><span>hello</span></div>"
     )
@@ -718,8 +724,10 @@ def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
         1
     )
     assert (
-        page.locator("div", has=page.locator("span", has_text="wor")).evaluate(
-            "e => e.outerHTML"
+        _remove_highlight(
+            page.locator("div", has=page.locator("span", has_text="wor")).evaluate(
+                "e => e.outerHTML"
+            )
         )
         == "<div><span>world</span></div>"
     )
@@ -730,6 +738,10 @@ def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
             has_text="wor",
         )
     ).to_have_count(1)
+
+
+def _remove_highlight(markup: str) -> str:
+    return re.sub(r"\s__playwright_target__=\"[^\"]+\"", "", markup)
 
 
 def test_locator_should_enforce_same_frame_for_has_locator(

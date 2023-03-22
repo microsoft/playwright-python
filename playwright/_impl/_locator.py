@@ -37,6 +37,7 @@ from playwright._impl._api_structures import (
     FrameExpectResult,
     Position,
 )
+from playwright._impl._connection import filter_none
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._helper import (
     Error,
@@ -52,7 +53,6 @@ from playwright._impl._str_utils import (
     escape_for_text_selector,
     escape_regex_flags,
 )
-from playwright._impl._connection import filter_none
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal

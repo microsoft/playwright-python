@@ -59,7 +59,6 @@ from playwright._impl._helper import (
     ColorScheme,
     DocumentLoadState,
     ForcedColors,
-    HarContentPolicy,
     HarMode,
     KeyboardModifier,
     MouseButton,

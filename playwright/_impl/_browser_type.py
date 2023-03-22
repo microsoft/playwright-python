@@ -261,3 +261,5 @@ def normalize_launch_params(params: Dict) -> None:
         params["executablePath"] = str(Path(params["executablePath"]))
     if "downloadsPath" in params:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
+    if "tracesDir" in params:
+        params["tracesDir"] = str(Path(params["tracesDir"]))

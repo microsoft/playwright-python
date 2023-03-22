@@ -584,7 +584,9 @@ def test_should_update_har_zip_for_page_with_different_options(
     har_path = tmpdir / "har.zip"
     context1 = browser.new_context()
     page1 = context1.new_page()
-    page1.route_from_har(har_path, update=True, content="embed", mode="full")
+    page1.route_from_har(
+        har_path, update=True, update_content="embed", update_mode="full"
+    )
     page1.goto(server.PREFIX + "/one-style.html")
     context1.close()
 

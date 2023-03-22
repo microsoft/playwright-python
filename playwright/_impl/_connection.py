@@ -19,7 +19,17 @@ import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Union,
+    cast,
+)
 
 from greenlet import greenlet
 from pyee import EventEmitter
@@ -231,7 +241,7 @@ class Connection(EventEmitter):
             Optional[ParsedStackTrace]
         ] = contextvars.ContextVar("ApiZone", default=None)
         self._local_utils: Optional["LocalUtils"] = local_utils
-        self._stack_collector: List[List[Dict[str, Any]]] = []
+        self._tracing_count = 0
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -279,12 +289,11 @@ class Connection(EventEmitter):
     ) -> None:
         self._waiting_for_object[guid] = callback
 
-    def start_collecting_call_metadata(self, collector: Any) -> None:
-        if collector not in self._stack_collector:
-            self._stack_collector.append(collector)
-
-    def stop_collecting_call_metadata(self, collector: Any) -> None:
-        self._stack_collector.remove(collector)
+    def set_in_tracing(self, is_tracing: bool) -> None:
+        if is_tracing:
+            self._tracing_count += 1
+        else:
+            self._tracing_count -= 1
 
     def _send_message_to_server(
         self, guid: str, method: str, params: Dict
@@ -299,8 +308,6 @@ class Connection(EventEmitter):
         )
         self._callbacks[id] = callback
         stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
-        for collector in self._stack_collector:
-            collector.append({"stack": stack_trace_information["frames"], "id": id})
         frames = stack_trace_information.get("frames", [])
         location = (
             {
@@ -325,6 +332,10 @@ class Connection(EventEmitter):
         }
         self._transport.send(message)
         self._callbacks[id] = callback
+
+        if self._tracing_count > 0 and frames and guid != "localUtils":
+            self.local_utils.add_stack_to_tracing_no_reply(id, frames)
+
         return callback
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
@@ -522,5 +533,6 @@ def _extract_stack_trace_information_from_stack(
         "apiName": "" if is_internal else api_name,
     }
 
-def filter_none(d: Dict) -> Dict:
+
+def filter_none(d: Mapping) -> Dict:
     return {k: v for k, v in d.items() if v is not None}

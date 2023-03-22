@@ -29,7 +29,7 @@ from playwright._impl._api_structures import (
     ServerFilePayload,
     StorageState,
 )
-from playwright._impl._connection import ChannelOwner, from_channel, filter_none
+from playwright._impl._connection import ChannelOwner, filter_none, from_channel
 from playwright._impl._helper import (
     Error,
     NameValue,

@@ -14,6 +14,7 @@
 
 import asyncio
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -22,7 +23,6 @@ from typing import (
     Callable,
     Dict,
     List,
-    Literal,
     Optional,
     Pattern,
     Set,
@@ -60,7 +60,6 @@ from playwright._impl._helper import (
     URLMatcher,
     async_readfile,
     async_writefile,
-    is_safe_close_error,
     locals_to_params,
     prepare_record_har_options,
     to_impl,
@@ -73,6 +72,11 @@ from playwright._impl._wait_helper import WaitHelper
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
     from playwright._impl._browser_type import BrowserType
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import Literal
+else:  # pragma: no cover
+    from typing_extensions import Literal
 
 
 class BrowserContext(ChannelOwner):
@@ -412,6 +416,7 @@ class BrowserContext(ChannelOwner):
         if self._close_was_called:
             return
         self._close_was_called = True
+
         async def _inner_close() -> None:
             for har_id, params in self._har_recorders.items():
                 har = cast(
@@ -434,6 +439,7 @@ class BrowserContext(ChannelOwner):
                 else:
                     await har.save_as(params["path"])
                 await har.delete()
+
         await self._channel._connection.wrap_api_call(_inner_close, True)
         await self._channel.send("close")
         await self._closed_future

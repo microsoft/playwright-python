@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import json
+import re
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from playwright.sync_api import Browser, BrowserContext, Page
+from playwright.sync_api import Browser, BrowserContext, BrowserType, Page
 from tests.server import Server
 
 
@@ -223,15 +224,81 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     ]
 
 
+def test_should_respect_traces_dir_and_name(
+    browser_type: BrowserType, server: Server, tmpdir: Path
+) -> None:
+    traces_dir = tmpdir / "traces"
+    browser = browser_type.launch(traces_dir=traces_dir)
+    context = browser.new_context()
+    page = context.new_page()
+
+    context.tracing.start(name="name1", snapshots=True)
+    page.goto(server.PREFIX + "/one-style.html")
+    context.tracing.stop_chunk(path=tmpdir / "trace1.zip")
+    assert (traces_dir / "name1.trace").exists()
+    assert (traces_dir / "name1.network").exists()
+
+    context.tracing.start_chunk(name="name2")
+    page.goto(server.PREFIX + "/har.html")
+    context.tracing.stop(path=tmpdir / "trace2.zip")
+    assert (traces_dir / "name2.trace").exists()
+    assert (traces_dir / "name2.network").exists()
+
+    browser.close()
+
+    def resource_names(resources: Dict[str, bytes]) -> List[str]:
+        return sorted(
+            [
+                re.sub(r"^resources/.*\.(html|css)$", r"resources/XXX.\g<1>", file)
+                for file in resources.keys()
+            ]
+        )
+
+    (resources, events) = parse_trace(tmpdir / "trace1.zip")
+    assert get_actions(events) == ["Page.goto"]
+    assert resource_names(resources) == [
+        "resources/XXX.css",
+        "resources/XXX.html",
+        "trace.network",
+        "trace.stacks",
+        "trace.trace",
+    ]
+
+    (resources, events) = parse_trace(tmpdir / "trace2.zip")
+    assert get_actions(events) == ["Page.goto"]
+    assert resource_names(resources) == [
+        "resources/XXX.css",
+        "resources/XXX.html",
+        "resources/XXX.html",
+        "trace.network",
+        "trace.stacks",
+        "trace.trace",
+    ]
+
+
 def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
     resources: Dict[str, bytes] = {}
     with zipfile.ZipFile(path, "r") as zip:
         for name in zip.namelist():
             resources[name] = zip.read(name)
+    action_map: Dict[str, Any] = {}
     events: List[Any] = []
     for name in ["trace.trace", "trace.network"]:
         for line in resources[name].decode().splitlines():
-            events.append(json.loads(line))
+            if not line:
+                continue
+            event = json.loads(line)
+            if event["type"] == "before":
+                event["type"] = "action"
+                action_map[event["callId"]] = event
+                events.append(event)
+            elif event["type"] == "input":
+                pass
+            elif event["type"] == "after":
+                existing = action_map[event["callId"]]
+                existing["error"] = event.get("error", None)
+            else:
+                events.append(event)
     return (resources, events)
 
 
