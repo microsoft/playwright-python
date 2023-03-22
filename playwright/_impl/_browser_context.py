@@ -22,6 +22,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Set,
@@ -328,15 +329,15 @@ class BrowserContext(ChannelOwner):
         har: Union[Path, str],
         page: Optional[Page] = None,
         url: Union[Pattern[str], str] = None,
-        content: HarContentPolicy = None,
-        mode: HarMode = None,
+        update_content: HarContentPolicy = None,
+        update_mode: HarMode = None,
     ) -> None:
         params: Dict[str, Any] = {
             "options": prepare_record_har_options(
                 {
                     "recordHarPath": har,
-                    "recordHarContent": content or "attach",
-                    "recordHarMode": mode or "minimal",
+                    "recordHarContent": update_content or "attach",
+                    "recordHarMode": update_mode or "minimal",
                     "recordHarUrlFilter": url,
                 }
             )
@@ -344,7 +345,10 @@ class BrowserContext(ChannelOwner):
         if page:
             params["page"] = page._channel
         har_id = await self._channel.send("harStart", params)
-        self._har_recorders[har_id] = {"path": str(har), "content": content or "attach"}
+        self._har_recorders[har_id] = {
+            "path": str(har),
+            "content": update_content or "attach",
+        }
 
     async def route_from_har(
         self,
@@ -352,12 +356,16 @@ class BrowserContext(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
-        content: HarContentPolicy = None,
-        mode: HarMode = None,
+        update_content: Literal["attach", "embed"] = None,
+        update_mode: HarMode = None,
     ) -> None:
         if update:
             await self._record_into_har(
-                har=har, page=None, url=url, content=content, mode=mode
+                har=har,
+                page=None,
+                url=url,
+                update_content=update_content,
+                update_mode=update_mode,
             )
             return
         router = await HarRouter.create(

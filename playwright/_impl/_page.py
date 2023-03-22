@@ -619,12 +619,16 @@ class Page(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         not_found: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
-        content: HarContentPolicy = None,
-        mode: HarMode = None,
+        update_content: Literal["attach", "embed"] = None,
+        update_mode: HarMode = None,
     ) -> None:
         if update:
             await self._browser_context._record_into_har(
-                har=har, page=self, url=url, content=content, mode=mode
+                har=har,
+                page=self,
+                url=url,
+                update_content=update_content,
+                update_mode=update_mode,
             )
             return
         router = await HarRouter.create(
