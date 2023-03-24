@@ -235,3 +235,14 @@ def test_should_throw_an_error_when_max_redirects_is_less_than_0(
                 server.PREFIX + "/a/redirect1", method=method, max_redirects=-1
             )
         assert "'max_redirects' must be greater than or equal to '0'" in str(exc_info)
+
+
+def test_should_serialize_null_values_in_json(
+    playwright: Playwright, server: Server
+) -> None:
+    request = playwright.request.new_context()
+    server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
+    response = request.post(server.PREFIX + "/echo", data={"foo": None})
+    assert response.status == 200
+    assert response.text() == '{"foo":null}'
+    request.dispose()
