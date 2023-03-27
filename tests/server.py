@@ -196,7 +196,9 @@ class Server:
         self.gzip_routes.clear()
         self.routes.clear()
 
-    def set_route(self, path: str, callback: Callable[[http.Request], Any]) -> None:
+    def set_route(
+        self, path: str, callback: Callable[[HttpRequestWithPostBody], Any]
+    ) -> None:
         self.routes[path] = callback
 
     def enable_gzip(self, path: str) -> None:
