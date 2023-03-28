@@ -63,7 +63,7 @@ class LocalUtils(ChannelOwner):
         return await self._channel.send("tracingStarted", params)
 
     async def trace_discarded(self, stacks_id: str) -> None:
-        return await self._channel.send("traceDiscarded", {"stacks_id": stacks_id})
+        return await self._channel.send("traceDiscarded", {"stacksId": stacks_id})
 
     def add_stack_to_tracing_no_reply(self, id: int, frames: List[StackFrame]) -> None:
         self._channel.send_no_reply(
