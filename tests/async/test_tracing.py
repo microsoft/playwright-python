@@ -33,6 +33,13 @@ async def test_browser_context_output_trace(
     assert Path(tmp_path / "trace.zip").exists()
 
 
+async def test_start_stop(browser: Browser):
+    context = await browser.new_context()
+    await context.tracing.start()
+    await context.tracing.stop()
+    await context.close()
+
+
 async def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
     context: BrowserContext, server: Server, tmp_path: Path
 ):
