@@ -216,6 +216,8 @@ class DocumentationProvider:
                     func_arg = self.serialize_doc_type(event["type"], "")
                     if func_arg.startswith("{"):
                         func_arg = "typing.Dict"
+                    if "Union[" in func_arg:
+                        func_arg = func_arg.replace("Union[", "typing.Union[")
                     if len(events) > 1:
                         doc.append("    @typing.overload")
                     impl = ""

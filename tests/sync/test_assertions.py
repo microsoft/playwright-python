@@ -774,3 +774,81 @@ def test_should_print_expected_value_with_custom_message(
         expect(page.get_by_text("hello"), "custom-message").to_be_visible(timeout=100)
     assert "custom-message" in str(excinfo.value)
     assert "Expected value" not in str(excinfo.value)
+
+
+def test_should_be_attached_default(page: Page) -> None:
+    page.set_content("<input></input>")
+    locator = page.locator("input")
+    expect(locator).to_be_attached()
+
+
+def test_should_be_attached_with_hidden_element(page: Page) -> None:
+    page.set_content('<button style="display:none">hello</button>')
+    locator = page.locator("button")
+    expect(locator).to_be_attached()
+
+
+def test_should_be_attached_with_not(page: Page) -> None:
+    page.set_content("<button>hello</button>")
+    locator = page.locator("input")
+    expect(locator).not_to_be_attached()
+
+
+def test_should_be_attached_with_attached_true(page: Page) -> None:
+    page.set_content("<button>hello</button>")
+    locator = page.locator("button")
+    expect(locator).to_be_attached(attached=True)
+
+
+def test_should_be_attached_with_attached_false(page: Page) -> None:
+    page.set_content("<button>hello</button>")
+    locator = page.locator("input")
+    expect(locator).to_be_attached(attached=False)
+
+
+def test_should_be_attached_with_not_and_attached_false(page: Page) -> None:
+    page.set_content("<button>hello</button>")
+    locator = page.locator("button")
+    expect(locator).not_to_be_attached(attached=False)
+
+
+def test_should_be_attached_eventually(page: Page) -> None:
+    page.set_content("<div></div>")
+    locator = page.locator("span")
+    page.locator("div").evaluate(
+        "(e) => setTimeout(() => e.innerHTML = '<span>hello</span>', 1000)"
+    )
+    expect(locator).to_be_attached()
+
+
+def test_should_be_attached_eventually_with_not(page: Page) -> None:
+    page.set_content("<div><span>Hello</span></div>")
+    locator = page.locator("span")
+    page.locator("div").evaluate("(e) => setTimeout(() => e.textContent = '', 1000)")
+    expect(locator).not_to_be_attached()
+
+
+def test_should_be_attached_fail(page: Page) -> None:
+    page.set_content("<button>Hello</button>")
+    locator = page.locator("input")
+    with pytest.raises(AssertionError) as exc_info:
+        expect(locator).to_be_attached(timeout=1000)
+    assert "locator resolved to" not in exc_info.value.args[0]
+
+
+def test_should_be_attached_fail_with_not(page: Page) -> None:
+    page.set_content("<input></input>")
+    locator = page.locator("input")
+    with pytest.raises(AssertionError) as exc_info:
+        expect(locator).not_to_be_attached(timeout=1000)
+    assert "locator resolved to <input/>" in exc_info.value.args[0]
+
+
+def test_should_be_attached_with_impossible_timeout(page: Page) -> None:
+    page.set_content("<div id=node>Text content</div>")
+    expect(page.locator("#node")).to_be_attached(timeout=1)
+
+
+def test_should_be_attached_with_impossible_timeout_not(page: Page) -> None:
+    page.set_content("<div id=node>Text content</div>")
+    expect(page.locator("no-such-thing")).not_to_be_attached(timeout=1)

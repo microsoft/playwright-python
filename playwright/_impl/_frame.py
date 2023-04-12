@@ -531,9 +531,18 @@ class Frame(ChannelOwner):
         self,
         selector: str,
         has_text: Union[str, Pattern[str]] = None,
+        has_not_text: Union[str, Pattern[str]] = None,
         has: Locator = None,
+        has_not: Locator = None,
     ) -> Locator:
-        return Locator(self, selector, has_text=has_text, has=has)
+        return Locator(
+            self,
+            selector,
+            has_text=has_text,
+            has_not_text=has_not_text,
+            has=has,
+            has_not=has_not,
+        )
 
     def get_by_alt_text(
         self, text: Union[str, Pattern[str]], exact: bool = None

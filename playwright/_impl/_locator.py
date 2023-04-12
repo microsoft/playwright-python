@@ -73,7 +73,9 @@ class Locator:
         frame: "Frame",
         selector: str,
         has_text: Union[str, Pattern[str]] = None,
+        has_not_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
+        has_not: "Locator" = None,
     ) -> None:
         self._frame = frame
         self._selector = selector
@@ -89,6 +91,15 @@ class Locator:
             self._selector += " >> internal:has=" + json.dumps(
                 has._selector, ensure_ascii=False
             )
+
+        if has_not_text:
+            self._selector += f" >> internal:has-not-text={escape_for_text_selector(has_not_text, exact=False)}"
+
+        if has_not:
+            locator = has_not
+            if locator._frame != frame:
+                raise Error('Inner "has_not" locator must belong to the same frame.')
+            self._selector += " >> internal:has-not=" + json.dumps(locator._selector)
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
@@ -211,13 +222,17 @@ class Locator:
         self,
         selector_or_locator: Union[str, "Locator"],
         has_text: Union[str, Pattern[str]] = None,
+        has_not_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
+        has_not: "Locator" = None,
     ) -> "Locator":
         if isinstance(selector_or_locator, str):
             return Locator(
                 self._frame,
                 f"{self._selector} >> {selector_or_locator}",
                 has_text=has_text,
+                has_not_text=has_not_text,
+                has_not=has_not,
                 has=has,
             )
         selector_or_locator = to_impl(selector_or_locator)
@@ -227,6 +242,8 @@ class Locator:
             self._frame,
             f"{self._selector} >> {selector_or_locator._selector}",
             has_text=has_text,
+            has_not_text=has_not_text,
+            has_not=has_not,
             has=has,
         )
 
@@ -317,13 +334,25 @@ class Locator:
     def filter(
         self,
         has_text: Union[str, Pattern[str]] = None,
+        has_not_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
+        has_not: "Locator" = None,
     ) -> "Locator":
         return Locator(
             self._frame,
             self._selector,
             has_text=has_text,
+            has_not_text=has_not_text,
             has=has,
+            has_not=has_not,
+        )
+
+    def or_(self, locator: "Locator") -> "Locator":
+        if locator._frame != self._frame:
+            raise Error("Locators must belong to the same frame.")
+        return Locator(
+            self._frame,
+            self._selector + " >> internal:or=" + json.dumps(locator._selector),
         )
 
     async def focus(self, timeout: float = None) -> None:
@@ -677,14 +706,18 @@ class FrameLocator:
         self,
         selector_or_locator: Union["Locator", str],
         has_text: Union[str, Pattern[str]] = None,
+        has_not_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
+        has_not: "Locator" = None,
     ) -> Locator:
         if isinstance(selector_or_locator, str):
             return Locator(
                 self._frame,
                 f"{self._frame_selector} >> internal:control=enter-frame >> {selector_or_locator}",
                 has_text=has_text,
+                has_not_text=has_not_text,
                 has=has,
+                has_not=has_not,
             )
         selector_or_locator = to_impl(selector_or_locator)
         if selector_or_locator._frame != self._frame:
@@ -693,7 +726,9 @@ class FrameLocator:
             self._frame,
             f"{self._frame_selector} >> internal:control=enter-frame >> {selector_or_locator._selector}",
             has_text=has_text,
+            has_not_text=has_not_text,
             has=has,
+            has_not=has_not,
         )
 
     def get_by_alt_text(
