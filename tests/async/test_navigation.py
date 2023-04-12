@@ -542,6 +542,9 @@ async def test_wait_for_nav_should_work_with_dom_history_back_forward(page, serv
     assert page.url == server.PREFIX + "/second.html"
 
 
+@pytest.mark.skip_browser(
+    "webkit"
+)  # WebKit issues load event in some cases, but not always
 async def test_wait_for_nav_should_work_when_subframe_issues_window_stop(
     page, server, is_webkit
 ):
