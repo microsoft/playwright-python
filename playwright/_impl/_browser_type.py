@@ -191,15 +191,17 @@ class BrowserType(ChannelOwner):
 
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
-        pipe_channel = await local_utils._channel.send(
-            "connect",
-            {
-                "wsEndpoint": ws_endpoint,
-                "headers": headers,
-                "slowMo": slow_mo,
-                "timeout": timeout,
-            },
-        )
+        pipe_channel = (
+            await local_utils._channel.send_return_as_dict(
+                "connect",
+                {
+                    "wsEndpoint": ws_endpoint,
+                    "headers": headers,
+                    "slowMo": slow_mo,
+                    "timeout": timeout,
+                },
+            )
+        )["pipe"]
         transport = JsonPipeTransport(self._connection._loop, pipe_channel)
 
         connection = Connection(

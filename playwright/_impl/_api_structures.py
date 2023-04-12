@@ -64,9 +64,10 @@ class Geolocation(TypedDict, total=False):
     accuracy: Optional[float]
 
 
-class HttpCredentials(TypedDict):
+class HttpCredentials(TypedDict, total=False):
     username: str
     password: str
+    origin: Optional[str]
 
 
 class LocalStorageEntry(TypedDict):

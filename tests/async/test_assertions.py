@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import re
 from datetime import datetime
 
@@ -688,3 +689,104 @@ async def test_should_print_expected_value_with_custom_message(
         )
     assert "custom-message" in str(excinfo.value)
     assert "Expected value" not in str(excinfo.value)
+
+
+async def test_should_be_attached_default(page: Page) -> None:
+    await page.set_content("<input></input>")
+    locator = page.locator("input")
+    await expect(locator).to_be_attached()
+
+
+async def test_should_be_attached_with_hidden_element(page: Page) -> None:
+    await page.set_content('<button style="display:none">hello</button>')
+    locator = page.locator("button")
+    await expect(locator).to_be_attached()
+
+
+async def test_should_be_attached_with_not(page: Page) -> None:
+    await page.set_content("<button>hello</button>")
+    locator = page.locator("input")
+    await expect(locator).not_to_be_attached()
+
+
+async def test_should_be_attached_with_attached_true(page: Page) -> None:
+    await page.set_content("<button>hello</button>")
+    locator = page.locator("button")
+    await expect(locator).to_be_attached(attached=True)
+
+
+async def test_should_be_attached_with_attached_false(page: Page) -> None:
+    await page.set_content("<button>hello</button>")
+    locator = page.locator("input")
+    await expect(locator).to_be_attached(attached=False)
+
+
+async def test_should_be_attached_with_not_and_attached_false(page: Page) -> None:
+    await page.set_content("<button>hello</button>")
+    locator = page.locator("button")
+    await expect(locator).not_to_be_attached(attached=False)
+
+
+async def test_should_be_attached_eventually(page: Page) -> None:
+    await page.set_content("<div></div>")
+    locator = page.locator("span")
+    await page.locator("div").evaluate(
+        "(e) => setTimeout(() => e.innerHTML = '<span>hello</span>', 1000)"
+    )
+    await expect(locator).to_be_attached()
+
+
+async def test_should_be_attached_eventually_with_not(page: Page) -> None:
+    await page.set_content("<div><span>Hello</span></div>")
+    locator = page.locator("span")
+    await page.locator("div").evaluate(
+        "(e) => setTimeout(() => e.textContent = '', 1000)"
+    )
+    await expect(locator).not_to_be_attached()
+
+
+async def test_should_be_attached_fail(page: Page) -> None:
+    await page.set_content("<button>Hello</button>")
+    locator = page.locator("input")
+    with pytest.raises(AssertionError) as exc_info:
+        await expect(locator).to_be_attached(timeout=1000)
+    assert "locator resolved to" not in exc_info.value.args[0]
+
+
+async def test_should_be_attached_fail_with_not(page: Page) -> None:
+    await page.set_content("<input></input>")
+    locator = page.locator("input")
+    with pytest.raises(AssertionError) as exc_info:
+        await expect(locator).not_to_be_attached(timeout=1000)
+    assert "locator resolved to <input/>" in exc_info.value.args[0]
+
+
+async def test_should_be_attached_with_impossible_timeout(page: Page) -> None:
+    await page.set_content("<div id=node>Text content</div>")
+    await expect(page.locator("#node")).to_be_attached(timeout=1)
+
+
+async def test_should_be_attached_with_impossible_timeout_not(page: Page) -> None:
+    await page.set_content("<div id=node>Text content</div>")
+    await expect(page.locator("no-such-thing")).not_to_be_attached(timeout=1)
+
+
+async def test_should_be_attached_with_frame_locator(page: Page) -> None:
+    await page.set_content("<div></div>")
+    locator = page.frame_locator("iframe").locator("input")
+    task = asyncio.create_task(expect(locator).to_be_attached())
+    await page.wait_for_timeout(1000)
+    assert not task.done()
+    await page.set_content('<iframe srcdoc="<input>"></iframe>')
+    await task
+    assert task.done()
+
+
+async def test_should_be_attached_over_navigation(page: Page, server: Server) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    task = asyncio.create_task(expect(page.locator("input")).to_be_attached())
+    await page.wait_for_timeout(1000)
+    assert not task.done()
+    await page.goto(server.PREFIX + "/input/checkbox.html")
+    await task
+    assert task.done()

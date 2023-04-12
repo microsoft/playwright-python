@@ -782,19 +782,15 @@ async def test_locator_should_support_has_locator(page: Page, server: Server) ->
     await page.set_content("<div><span>hello</span></div><div><span>world</span></div>")
     await expect(page.locator("div", has=page.locator("text=world"))).to_have_count(1)
     assert (
-        _remove_highlight(
-            await page.locator("div", has=page.locator("text=world")).evaluate(
-                "e => e.outerHTML"
-            )
+        await page.locator("div", has=page.locator("text=world")).evaluate(
+            "e => e.outerHTML"
         )
         == "<div><span>world</span></div>"
     )
     await expect(page.locator("div", has=page.locator('text="hello"'))).to_have_count(1)
     assert (
-        _remove_highlight(
-            await page.locator("div", has=page.locator('text="hello"')).evaluate(
-                "e => e.outerHTML"
-            )
+        await page.locator("div", has=page.locator('text="hello"')).evaluate(
+            "e => e.outerHTML"
         )
         == "<div><span>hello</span></div>"
     )
@@ -804,10 +800,8 @@ async def test_locator_should_support_has_locator(page: Page, server: Server) ->
         page.locator("div", has=page.locator("span", has_text="wor"))
     ).to_have_count(1)
     assert (
-        _remove_highlight(
-            await page.locator(
-                "div", has=page.locator("span", has_text="wor")
-            ).evaluate("e => e.outerHTML")
+        await page.locator("div", has=page.locator("span", has_text="wor")).evaluate(
+            "e => e.outerHTML"
         )
         == "<div><span>world</span></div>"
     )
@@ -820,10 +814,6 @@ async def test_locator_should_support_has_locator(page: Page, server: Server) ->
     ).to_have_count(1)
 
 
-def _remove_highlight(markup: str) -> str:
-    return re.sub(r"\s__playwright_target__=\"[^\"]+\"", "", markup)
-
-
 async def test_locator_should_enforce_same_frame_for_has_locator(
     page: Page, server: Server
 ) -> None:
@@ -833,6 +823,26 @@ async def test_locator_should_enforce_same_frame_for_has_locator(
         page.locator("div", has=child.locator("span"))
     assert (
         'Inner "has" locator must belong to the same frame.' in exc_info.value.message
+    )
+
+
+async def test_locator_should_support_locator_or(page: Page, server: Server) -> None:
+    await page.set_content("<div>hello</div><span>world</span>")
+    await expect(page.locator("div").or_(page.locator("span"))).to_have_count(2)
+    await expect(page.locator("div").or_(page.locator("span"))).to_have_text(
+        ["hello", "world"]
+    )
+    await expect(
+        page.locator("span").or_(page.locator("article")).or_(page.locator("div"))
+    ).to_have_text(["hello", "world"])
+    await expect(page.locator("article").or_(page.locator("someting"))).to_have_count(0)
+    await expect(page.locator("article").or_(page.locator("div"))).to_have_text("hello")
+    await expect(page.locator("article").or_(page.locator("span"))).to_have_text(
+        "world"
+    )
+    await expect(page.locator("div").or_(page.locator("article"))).to_have_text("hello")
+    await expect(page.locator("span").or_(page.locator("article"))).to_have_text(
+        "world"
     )
 
 
@@ -895,6 +905,48 @@ async def test_should_filter_by_regex_with_special_symbols(page):
     await expect(
         page.locator("div", has_text=re.compile(r'^first\/".*"second\\$', re.S | re.I))
     ).to_have_class("test")
+
+
+async def test_should_support_locator_filter(page: Page) -> None:
+    await page.set_content(
+        "<section><div><span>hello</span></div><div><span>world</span></div></section>"
+    )
+
+    await expect(page.locator("div").filter(has_text="hello")).to_have_count(1)
+    await expect(
+        page.locator("div", has_text="hello").filter(has_text="hello")
+    ).to_have_count(1)
+    await expect(
+        page.locator("div", has_text="hello").filter(has_text="world")
+    ).to_have_count(0)
+    await expect(
+        page.locator("section", has_text="hello").filter(has_text="world")
+    ).to_have_count(1)
+    await expect(
+        page.locator("div").filter(has_text="hello").locator("span")
+    ).to_have_count(1)
+    await expect(
+        page.locator("div").filter(has=page.locator("span", has_text="world"))
+    ).to_have_count(1)
+    await expect(page.locator("div").filter(has=page.locator("span"))).to_have_count(2)
+    await expect(
+        page.locator("div").filter(
+            has=page.locator("span"),
+            has_text="world",
+        )
+    ).to_have_count(1)
+    await expect(
+        page.locator("div").filter(has_not=page.locator("span", has_text="world"))
+    ).to_have_count(1)
+    await expect(
+        page.locator("div").filter(has_not=page.locator("section"))
+    ).to_have_count(2)
+    await expect(
+        page.locator("div").filter(has_not=page.locator("span"))
+    ).to_have_count(0)
+
+    await expect(page.locator("div").filter(has_not_text="hello")).to_have_count(1)
+    await expect(page.locator("div").filter(has_not_text="foo")).to_have_count(2)
 
 
 async def test_locators_has_does_not_encode_unicode(page: Page, server: Server):

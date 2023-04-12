@@ -754,9 +754,17 @@ class Page(ChannelOwner):
         self,
         selector: str,
         has_text: Union[str, Pattern[str]] = None,
+        has_not_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
+        has_not: "Locator" = None,
     ) -> "Locator":
-        return self._main_frame.locator(selector, has_text=has_text, has=has)
+        return self._main_frame.locator(
+            selector,
+            has_text=has_text,
+            has_not_text=has_not_text,
+            has=has,
+            has_not=has_not,
+        )
 
     def get_by_alt_text(
         self, text: Union[str, Pattern[str]], exact: bool = None

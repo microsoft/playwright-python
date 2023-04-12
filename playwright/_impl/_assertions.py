@@ -464,6 +464,21 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_have_text(expected, use_inner_text, timeout, ignore_case)
 
+    async def to_be_attached(
+        self,
+        attached: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.attached"
+            if (attached is None or attached is True)
+            else "to.be.detached",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            "Locator expected to be attached",
+        )
+
     async def to_be_checked(
         self,
         timeout: float = None,
@@ -478,6 +493,14 @@ class LocatorAssertions(AssertionsBase):
             None,
             "Locator expected to be checked",
         )
+
+    async def not_to_be_attached(
+        self,
+        attached: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_attached(attached=attached, timeout=timeout)
 
     async def not_to_be_checked(
         self,

@@ -38,6 +38,7 @@ if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import TypedDict
 else:  # pragma: no cover
     from typing_extensions import TypedDict
+
 from urllib import parse
 
 from playwright._impl._api_structures import (
@@ -51,6 +52,7 @@ from playwright._impl._api_structures import (
 from playwright._impl._api_types import Error
 from playwright._impl._connection import (
     ChannelOwner,
+    filter_none,
     from_channel,
     from_nullable_channel,
 )
@@ -278,7 +280,15 @@ class Route(ChannelOwner):
     async def abort(self, errorCode: str = None) -> None:
         self._check_not_handled()
         await self._race_with_page_close(
-            self._channel.send("abort", locals_to_params(locals()))
+            self._channel.send(
+                "abort",
+                filter_none(
+                    {
+                        "errorCode": errorCode,
+                        "requestUrl": self.request._initializer["url"],
+                    }
+                ),
+            )
         )
         self._report_handled(True)
 
@@ -344,6 +354,8 @@ class Route(ChannelOwner):
         if length and "content-length" not in headers:
             headers["content-length"] = str(length)
         params["headers"] = serialize_headers(headers)
+        params["requestUrl"] = self.request._initializer["url"]
+
         await self._race_with_page_close(self._channel.send("fulfill", params))
         self._report_handled(True)
 
@@ -402,6 +414,7 @@ class Route(ChannelOwner):
 
                 if "headers" in params:
                     params["headers"] = serialize_headers(params["headers"])
+                params["requestUrl"] = self.request._initializer["url"]
                 await self._connection.wrap_api_call(
                     lambda: self._race_with_page_close(
                         self._channel.send(

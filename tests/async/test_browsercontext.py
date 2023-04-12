@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+from urllib.parse import urlparse
 
 import pytest
 
@@ -573,6 +574,86 @@ async def test_auth_should_return_resource_body(browser, server):
     assert response.status == 200
     assert await page.title() == "Playground"
     assert "Playground" in await response.text()
+    await context.close()
+
+
+async def test_should_work_with_correct_credentials_and_matching_origin(
+    browser, server
+):
+    server.set_auth("/empty.html", "user", "pass")
+    context = await browser.new_context(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX,
+        }
+    )
+    page = await context.new_page()
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.status == 200
+    await context.close()
+
+
+async def test_should_work_with_correct_credentials_and_matching_origin_case_insensitive(
+    browser, server
+):
+    server.set_auth("/empty.html", "user", "pass")
+    context = await browser.new_context(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+        }
+    )
+    page = await context.new_page()
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.status == 200
+    await context.close()
+
+
+async def test_should_fail_with_correct_credentials_and_mismatching_scheme(
+    browser, server
+):
+    server.set_auth("/empty.html", "user", "pass")
+    context = await browser.new_context(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.replace("http://", "https://"),
+        }
+    )
+    page = await context.new_page()
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.status == 401
+    await context.close()
+
+
+async def test_should_fail_with_correct_credentials_and_mismatching_hostname(
+    browser, server
+):
+    server.set_auth("/empty.html", "user", "pass")
+    hostname = urlparse(server.PREFIX).hostname
+    origin = server.PREFIX.replace(hostname, "mismatching-hostname")
+    context = await browser.new_context(
+        http_credentials={"username": "user", "password": "pass", "origin": origin}
+    )
+    page = await context.new_page()
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.status == 401
+    await context.close()
+
+
+async def test_should_fail_with_correct_credentials_and_mismatching_port(
+    browser, server
+):
+    server.set_auth("/empty.html", "user", "pass")
+    origin = server.PREFIX.replace(str(server.PORT), str(server.PORT + 1))
+    context = await browser.new_context(
+        http_credentials={"username": "user", "password": "pass", "origin": origin}
+    )
+    page = await context.new_page()
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response.status == 401
     await context.close()
 
 

@@ -702,19 +702,13 @@ def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
     page.set_content("<div><span>hello</span></div><div><span>world</span></div>")
     expect(page.locator("div", has=page.locator("text=world"))).to_have_count(1)
     assert (
-        _remove_highlight(
-            page.locator("div", has=page.locator("text=world")).evaluate(
-                "e => e.outerHTML"
-            )
-        )
+        page.locator("div", has=page.locator("text=world")).evaluate("e => e.outerHTML")
         == "<div><span>world</span></div>"
     )
     expect(page.locator("div", has=page.locator('text="hello"'))).to_have_count(1)
     assert (
-        _remove_highlight(
-            page.locator("div", has=page.locator('text="hello"')).evaluate(
-                "e => e.outerHTML"
-            )
+        page.locator("div", has=page.locator('text="hello"')).evaluate(
+            "e => e.outerHTML"
         )
         == "<div><span>hello</span></div>"
     )
@@ -724,10 +718,8 @@ def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
         1
     )
     assert (
-        _remove_highlight(
-            page.locator("div", has=page.locator("span", has_text="wor")).evaluate(
-                "e => e.outerHTML"
-            )
+        page.locator("div", has=page.locator("span", has_text="wor")).evaluate(
+            "e => e.outerHTML"
         )
         == "<div><span>world</span></div>"
     )
@@ -740,10 +732,6 @@ def test_locator_should_support_has_locator(page: Page, server: Server) -> None:
     ).to_have_count(1)
 
 
-def _remove_highlight(markup: str) -> str:
-    return re.sub(r"\s__playwright_target__=\"[^\"]+\"", "", markup)
-
-
 def test_locator_should_enforce_same_frame_for_has_locator(
     page: Page, server: Server
 ) -> None:
@@ -754,6 +742,83 @@ def test_locator_should_enforce_same_frame_for_has_locator(
     assert (
         'Inner "has" locator must belong to the same frame.' in exc_info.value.message
     )
+
+
+def test_locator_should_support_locator_or(page: Page, server: Server) -> None:
+    page.set_content("<div>hello</div><span>world</span>")
+    expect(page.locator("div").or_(page.locator("span"))).to_have_count(2)
+    expect(page.locator("div").or_(page.locator("span"))).to_have_text(
+        ["hello", "world"]
+    )
+    expect(
+        page.locator("span").or_(page.locator("article")).or_(page.locator("div"))
+    ).to_have_text(["hello", "world"])
+    expect(page.locator("article").or_(page.locator("someting"))).to_have_count(0)
+    expect(page.locator("article").or_(page.locator("div"))).to_have_text("hello")
+    expect(page.locator("article").or_(page.locator("span"))).to_have_text("world")
+    expect(page.locator("div").or_(page.locator("article"))).to_have_text("hello")
+    expect(page.locator("span").or_(page.locator("article"))).to_have_text("world")
+
+
+def test_locator_highlight_should_work(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/grid.html")
+    page.locator(".box").nth(3).highlight()
+    assert page.locator("x-pw-glass").is_visible()
+
+
+def test_should_support_locator_that(page: Page) -> None:
+    page.set_content(
+        "<section><div><span>hello</span></div><div><span>world</span></div></section>"
+    )
+
+    expect(page.locator("div").filter(has_text="hello")).to_have_count(1)
+    expect(
+        page.locator("div", has_text="hello").filter(has_text="hello")
+    ).to_have_count(1)
+    expect(
+        page.locator("div", has_text="hello").filter(has_text="world")
+    ).to_have_count(0)
+    expect(
+        page.locator("section", has_text="hello").filter(has_text="world")
+    ).to_have_count(1)
+    expect(page.locator("div").filter(has_text="hello").locator("span")).to_have_count(
+        1
+    )
+    expect(
+        page.locator("div").filter(has=page.locator("span", has_text="world"))
+    ).to_have_count(1)
+    expect(page.locator("div").filter(has=page.locator("span"))).to_have_count(2)
+    expect(
+        page.locator("div").filter(
+            has=page.locator("span"),
+            has_text="world",
+        )
+    ).to_have_count(1)
+
+
+def test_should_filter_by_case_insensitive_regex_in_a_child(page: Page) -> None:
+    page.set_content('<div class="test"><h5>Title Text</h5></div>')
+    expect(
+        page.locator("div", has_text=re.compile(r"^title text$", re.I))
+    ).to_have_text("Title Text")
+
+
+def test_should_filter_by_case_insensitive_regex_in_multiple_children(
+    page: Page,
+) -> None:
+    page.set_content('<div class="test"><h5>Title</h5> <h2><i>Text</i></h2></div>')
+    expect(
+        page.locator("div", has_text=re.compile(r"^title text$", re.I))
+    ).to_have_class("test")
+
+
+def test_should_filter_by_regex_with_special_symbols(page: Page) -> None:
+    page.set_content(
+        '<div class="test"><h5>First/"and"</h5><h2><i>Second\\</i></h2></div>'
+    )
+    expect(
+        page.locator("div", has_text=re.compile(r'^first\/".*"second\\$', re.S | re.I))
+    ).to_have_class("test")
 
 
 def test_should_support_locator_filter(page: Page) -> None:
@@ -784,6 +849,14 @@ def test_should_support_locator_filter(page: Page) -> None:
             has_text="world",
         )
     ).to_have_count(1)
+    expect(
+        page.locator("div").filter(has_not=page.locator("span", has_text="world"))
+    ).to_have_count(1)
+    expect(page.locator("div").filter(has_not=page.locator("section"))).to_have_count(2)
+    expect(page.locator("div").filter(has_not=page.locator("span"))).to_have_count(0)
+
+    expect(page.locator("div").filter(has_not_text="hello")).to_have_count(1)
+    expect(page.locator("div").filter(has_not_text="foo")).to_have_count(2)
 
 
 def test_locators_has_does_not_encode_unicode(page: Page, server: Server) -> None:

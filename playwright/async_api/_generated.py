@@ -1021,7 +1021,7 @@ class WebSocket(AsyncBase):
         self,
         event: Literal["framereceived"],
         f: typing.Callable[
-            ["typing.Dict"], "typing.Union[typing.Awaitable[None], None]"
+            ["typing.Union[bytes, str]"], "typing.Union[typing.Awaitable[None], None]"
         ],
     ) -> None:
         """
@@ -1032,7 +1032,7 @@ class WebSocket(AsyncBase):
         self,
         event: Literal["framesent"],
         f: typing.Callable[
-            ["typing.Dict"], "typing.Union[typing.Awaitable[None], None]"
+            ["typing.Union[bytes, str]"], "typing.Union[typing.Awaitable[None], None]"
         ],
     ) -> None:
         """
@@ -1068,7 +1068,7 @@ class WebSocket(AsyncBase):
         self,
         event: Literal["framereceived"],
         f: typing.Callable[
-            ["typing.Dict"], "typing.Union[typing.Awaitable[None], None]"
+            ["typing.Union[bytes, str]"], "typing.Union[typing.Awaitable[None], None]"
         ],
     ) -> None:
         """
@@ -1079,7 +1079,7 @@ class WebSocket(AsyncBase):
         self,
         event: Literal["framesent"],
         f: typing.Callable[
-            ["typing.Dict"], "typing.Union[typing.Awaitable[None], None]"
+            ["typing.Union[bytes, str]"], "typing.Union[typing.Awaitable[None], None]"
         ],
     ) -> None:
         """
@@ -3353,8 +3353,8 @@ class Frame(AsyncBase):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         referer : Union[str, None]
@@ -3419,8 +3419,8 @@ class Frame(AsyncBase):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         timeout : Union[float, None]
@@ -3475,8 +3475,8 @@ class Frame(AsyncBase):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         timeout : Union[float, None]
@@ -3527,7 +3527,8 @@ class Frame(AsyncBase):
             document, the method resolves immediately. Can be one of:
             - `'load'` - wait for the `load` event to be fired.
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
-            - `'networkidle'` - wait until there are no network connections for at least `500` ms.
+            - `'networkidle'` - **DISCOURAGED** wait until there are no network connections for at least `500` ms. Don't use
+              this method for testing, rely on web assertions to assess readiness instead.
         timeout : Union[float, None]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
@@ -4278,8 +4279,8 @@ class Frame(AsyncBase):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         """
@@ -4662,7 +4663,9 @@ class Frame(AsyncBase):
         selector: str,
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has: typing.Optional["Locator"] = None
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has: typing.Optional["Locator"] = None,
+        has_not: typing.Optional["Locator"] = None
     ) -> "Locator":
         """Frame.locator
 
@@ -4682,9 +4685,17 @@ class Frame(AsyncBase):
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
             `<article><div>Playwright</div></article>`.
+        has_not_text : Union[Pattern[str], str, None]
+            Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
+            When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
             Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
             one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        has_not : Union[Locator, None]
+            Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
+            outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
@@ -4695,7 +4706,11 @@ class Frame(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector=selector,
+                has_text=has_text,
+                has_not_text=has_not_text,
+                has=has._impl_obj if has else None,
+                has_not=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -6197,7 +6212,9 @@ class FrameLocator(AsyncBase):
         selector_or_locator: typing.Union["Locator", str],
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has: typing.Optional["Locator"] = None
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has: typing.Optional["Locator"] = None,
+        has_not: typing.Optional["Locator"] = None
     ) -> "Locator":
         """FrameLocator.locator
 
@@ -6214,9 +6231,17 @@ class FrameLocator(AsyncBase):
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
             `<article><div>Playwright</div></article>`.
+        has_not_text : Union[Pattern[str], str, None]
+            Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
+            When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
             Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
             one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        has_not : Union[Locator, None]
+            Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
+            outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
@@ -6229,7 +6254,9 @@ class FrameLocator(AsyncBase):
             self._impl_obj.locator(
                 selector_or_locator=selector_or_locator,
                 has_text=has_text,
+                has_not_text=has_not_text,
                 has=has._impl_obj if has else None,
+                has_not=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -9097,8 +9124,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         """
@@ -9156,8 +9183,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         referer : Union[str, None]
@@ -9200,8 +9227,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
 
@@ -9267,7 +9294,8 @@ class Page(AsyncContextManager):
             document, the method resolves immediately. Can be one of:
             - `'load'` - wait for the `load` event to be fired.
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
-            - `'networkidle'` - wait until there are no network connections for at least `500` ms.
+            - `'networkidle'` - **DISCOURAGED** wait until there are no network connections for at least `500` ms. Don't use
+              this method for testing, rely on web assertions to assess readiness instead.
         timeout : Union[float, None]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
@@ -9314,8 +9342,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         timeout : Union[float, None]
@@ -9393,8 +9421,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
 
@@ -9433,8 +9461,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
 
@@ -10238,7 +10266,9 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has: typing.Optional["Locator"] = None
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has: typing.Optional["Locator"] = None,
+        has_not: typing.Optional["Locator"] = None
     ) -> "Locator":
         """Page.locator
 
@@ -10256,9 +10286,17 @@ class Page(AsyncContextManager):
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
             `<article><div>Playwright</div></article>`.
+        has_not_text : Union[Pattern[str], str, None]
+            Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
+            When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
             Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
             one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        has_not : Union[Locator, None]
+            Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
+            outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
@@ -10269,7 +10307,11 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector=selector, has_text=has_text, has=has._impl_obj if has else None
+                selector=selector,
+                has_text=has_text,
+                has_not_text=has_not_text,
+                has=has._impl_obj if has else None,
+                has_not=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -12064,8 +12106,8 @@ class Page(AsyncContextManager):
             When to consider operation succeeded, defaults to `load`. Events can be either:
             - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
             - `'load'` - consider operation to be finished when the `load` event is fired.
-            - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500`
-              ms.
+            - `'networkidle'` - **DISCOURAGED** consider operation to be finished when there are no network connections for
+              at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
         timeout : Union[float, None]
@@ -13835,8 +13877,9 @@ class Browser(AsyncContextManager):
             An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[{username: str, password: str}, None]
-            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
+            origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
         is_mobile : Union[bool, None]
@@ -14041,8 +14084,9 @@ class Browser(AsyncContextManager):
             An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[{username: str, password: str}, None]
-            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
+            origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
         is_mobile : Union[bool, None]
@@ -14578,8 +14622,9 @@ class BrowserType(AsyncBase):
             An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`.
-        http_credentials : Union[{username: str, password: str}, None]
-            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
+            origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`.
         is_mobile : Union[bool, None]
@@ -15760,7 +15805,9 @@ class Locator(AsyncBase):
         selector_or_locator: typing.Union[str, "Locator"],
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has: typing.Optional["Locator"] = None
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has: typing.Optional["Locator"] = None,
+        has_not: typing.Optional["Locator"] = None
     ) -> "Locator":
         """Locator.locator
 
@@ -15777,9 +15824,17 @@ class Locator(AsyncBase):
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
             `<article><div>Playwright</div></article>`.
+        has_not_text : Union[Pattern[str], str, None]
+            Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
+            When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
             Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
             one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        has_not : Union[Locator, None]
+            Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
+            outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
@@ -15792,7 +15847,9 @@ class Locator(AsyncBase):
             self._impl_obj.locator(
                 selector_or_locator=selector_or_locator,
                 has_text=has_text,
+                has_not_text=has_not_text,
                 has=has._impl_obj if has else None,
+                has_not=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -16395,7 +16452,9 @@ class Locator(AsyncBase):
         self,
         *,
         has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has: typing.Optional["Locator"] = None
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has: typing.Optional["Locator"] = None,
+        has_not: typing.Optional["Locator"] = None
     ) -> "Locator":
         """Locator.filter
 
@@ -16428,9 +16487,17 @@ class Locator(AsyncBase):
             Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When
             passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
             `<article><div>Playwright</div></article>`.
+        has_not_text : Union[Pattern[str], str, None]
+            Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
+            When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
             Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
             one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        has_not : Union[Locator, None]
+            Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
+            outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
 
@@ -16440,8 +16507,53 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_impl(
-            self._impl_obj.filter(has_text=has_text, has=has._impl_obj if has else None)
+            self._impl_obj.filter(
+                has_text=has_text,
+                has_not_text=has_not_text,
+                has=has._impl_obj if has else None,
+                has_not=has_not._impl_obj if has_not else None,
+            )
         )
+
+    def or_(self, locator: "Locator") -> "Locator":
+        """Locator.or_
+
+        Creates a locator that matches either of the two locators.
+
+        **Usage**
+
+        Consider a scenario where you'd like to click on a \"New email\" button, but sometimes a security settings dialog
+        shows up instead. In this case, you can wait for either a \"New email\" button, or a dialog and act accordingly.
+
+        ```py
+        new_email = page.get_by_role(\"button\", name=\"New\")
+        dialog = page.get_by_text(\"Confirm security settings\")
+        await expect(new_email.or_(dialog)).to_be_visible()
+        if (await dialog.is_visible())
+          await page.get_by_role(\"button\", name=\"Dismiss\").click()
+        await new_email.click()
+        ```
+
+        ```py
+        new_email = page.get_by_role(\"button\", name=\"New\")
+        dialog = page.get_by_text(\"Confirm security settings\")
+        expect(new_email.or_(dialog)).to_be_visible()
+        if (dialog.is_visible())
+          page.get_by_role(\"button\", name=\"Dismiss\").click()
+        new_email.click()
+        ```
+
+        Parameters
+        ----------
+        locator : Locator
+            Alternative locator to match.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.or_(locator=locator._impl_obj))
 
     async def focus(self, *, timeout: typing.Optional[float] = None) -> None:
         """Locator.focus
@@ -18550,8 +18662,9 @@ class APIRequest(AsyncBase):
               `http://localhost:3000/bar.html`
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request.
-        http_credentials : Union[{username: str, password: str}, None]
-            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+            Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
+            origin is specified, the username and password are sent to any servers upon unauthorized responses.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -19616,6 +19729,38 @@ class LocatorAssertions(AsyncBase):
             )
         )
 
+    async def to_be_attached(
+        self,
+        *,
+        attached: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_be_attached
+
+        Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/actionability#attached) DOM node.
+
+        **Usage**
+
+        ```py
+        await expect(page.get_by_text(\"Hidden text\")).to_be_attached()
+        ```
+
+        ```py
+        expect(page.get_by_text(\"Hidden text\")).to_be_attached()
+        ```
+
+        Parameters
+        ----------
+        attached : Union[bool, None]
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_be_attached(attached=attached, timeout=timeout)
+        )
+
     async def to_be_checked(
         self,
         *,
@@ -19652,6 +19797,28 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_be_checked(timeout=timeout, checked=checked)
+        )
+
+    async def not_to_be_attached(
+        self,
+        *,
+        attached: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.not_to_be_attached
+
+        The opposite of `locator_assertions.to_be_attached()`.
+
+        Parameters
+        ----------
+        attached : Union[bool, None]
+        timeout : Union[float, None]
+            Time to retry the assertion for.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_be_attached(attached=attached, timeout=timeout)
         )
 
     async def not_to_be_checked(
@@ -19957,17 +20124,11 @@ class LocatorAssertions(AsyncBase):
         **Usage**
 
         ```py
-        from playwright.async_api import expect
-
-        locator = page.locator('.my-element')
-        await expect(locator).to_be_visible()
+        await expect(page.get_by_text(\"Welcome\")).to_be_visible()
         ```
 
         ```py
-        from playwright.sync_api import expect
-
-        locator = page.locator('.my-element')
-        expect(locator).to_be_visible()
+        expect(page.get_by_text(\"Welcome\")).to_be_visible()
         ```
 
         Parameters
