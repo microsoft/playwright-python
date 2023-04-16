@@ -23,6 +23,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Coroutine,
     Dict,
     List,
     Optional,
@@ -307,6 +308,24 @@ class Page(ChannelOwner):
     def _on_video(self, params: Any) -> None:
         artifact = from_channel(params["artifact"])
         cast(Video, self.video)._artifact_ready(artifact)
+
+    async def _race_with_page_close(self, future: Coroutine) -> None:
+        fut = asyncio.create_task(future)
+        # Rewrite the user's stack to the new task which runs in the background.
+        setattr(
+            fut,
+            "__pw_stack__",
+            getattr(asyncio.current_task(self._loop), "__pw_stack__", inspect.stack()),
+        )
+        target_closed_future = self._closed_or_crashed_future
+        await asyncio.wait(
+            [fut, target_closed_future],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if fut.done() and fut.exception():
+            raise cast(BaseException, fut.exception())
+        if target_closed_future.done():
+            await asyncio.gather(fut, return_exceptions=True)
 
     @property
     def context(self) -> "BrowserContext":
@@ -640,8 +659,8 @@ class Page(ChannelOwner):
 
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
-        await self._channel.send(
-            "setNetworkInterceptionPatterns", {"patterns": patterns}
+        await self._race_with_page_close(
+            self._channel.send("setNetworkInterceptionPatterns", {"patterns": patterns})
         )
 
     async def screenshot(
