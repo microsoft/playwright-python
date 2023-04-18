@@ -14966,7 +14966,7 @@ class Playwright(AsyncBase):
     def __getitem__(self, value: str) -> "BrowserType":
         return mapping.from_impl(self._impl_obj.__getitem__(value=value))
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Playwright.stop
 
         Terminates this instance of Playwright in case it was created bypassing the Python context manager. This is useful
@@ -14987,7 +14987,7 @@ class Playwright(AsyncBase):
         ```
         """
 
-        return mapping.from_maybe_impl(self._impl_obj.stop())
+        return mapping.from_maybe_impl(await self._impl_obj.stop())
 
 
 mapping.register(PlaywrightImpl, Playwright)

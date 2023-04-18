@@ -70,7 +70,7 @@ class Playwright(ChannelOwner):
         self.selectors = selectors
         self.selectors._add_channel(selectors_owner)
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         pass
 
 
