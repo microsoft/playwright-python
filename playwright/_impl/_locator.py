@@ -517,6 +517,7 @@ class Locator:
         mask: List["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
+        del params["timeout"]
         return await self._with_element(
             lambda h, timeout: h.screenshot(timeout=timeout, **params)
         )
@@ -549,6 +550,7 @@ class Locator:
 
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
         params = locals_to_params(locals())
+        del params["timeout"]
         return await self._with_element(
             lambda h, timeout: h.select_text(timeout=timeout, **params), timeout
         )
