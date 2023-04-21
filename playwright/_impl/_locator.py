@@ -516,10 +516,18 @@ class Locator:
         scale: Literal["css", "device"] = None,
         mask: List["Locator"] = None,
     ) -> bytes:
-        params = locals_to_params(locals())
-        del params["timeout"]
         return await self._with_element(
-            lambda h, timeout: h.screenshot(timeout=timeout, **params)
+            lambda h, timeout: h.screenshot(
+                timeout=timeout,
+                type=type,
+                path=path,
+                quality=quality,
+                omitBackground=omitBackground,
+                animations=animations,
+                caret=caret,
+                scale=scale,
+                mask=mask,
+            )
         )
 
     async def scroll_into_view_if_needed(
@@ -549,10 +557,12 @@ class Locator:
         )
 
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
-        params = locals_to_params(locals())
-        del params["timeout"]
         return await self._with_element(
-            lambda h, timeout: h.select_text(timeout=timeout, **params), timeout
+            lambda h, timeout: h.select_text(
+                force=force,
+                timeout=timeout,
+            ),
+            timeout,
         )
 
     async def set_input_files(
