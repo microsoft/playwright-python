@@ -355,6 +355,7 @@ def test_locators_should_select_textarea(
     textarea = page.locator("textarea")
     textarea.evaluate("textarea => textarea.value = 'some value'")
     textarea.select_text()
+    textarea.select_text(timeout=1_000)
     if browser_name == "firefox" or browser_name == "webkit":
         assert textarea.evaluate("el => el.selectionStart") == 0
         assert textarea.evaluate("el => el.selectionEnd") == 10
@@ -381,6 +382,9 @@ def test_locators_should_screenshot(
     page.evaluate("window.scrollBy(50, 100)")
     element = page.locator(".box:nth-of-type(3)")
     assert_to_be_golden(element.screenshot(), "screenshot-element-bounding-box.png")
+    assert_to_be_golden(
+        element.screenshot(timeout=1_000), "screenshot-element-bounding-box.png"
+    )
 
 
 def test_locators_should_return_bounding_box(page: Page, server: Server) -> None:
