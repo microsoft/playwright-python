@@ -197,7 +197,7 @@ class Locator:
         self, expression: str, arg: Serializable = None, timeout: float = None
     ) -> "JSHandle":
         return await self._with_element(
-            lambda h, o: h.evaluate_handle(expression, arg), timeout
+            lambda h, _: h.evaluate_handle(expression, arg), timeout
         )
 
     async def fill(
@@ -516,18 +516,11 @@ class Locator:
         scale: Literal["css", "device"] = None,
         mask: List["Locator"] = None,
     ) -> bytes:
+        params = locals_to_params(locals())
         return await self._with_element(
             lambda h, timeout: h.screenshot(
-                timeout=timeout,
-                type=type,
-                path=path,
-                quality=quality,
-                omitBackground=omitBackground,
-                animations=animations,
-                caret=caret,
-                scale=scale,
-                mask=mask,
-            )
+                **{**params, "timeout": timeout},  # type: ignore
+            ),
         )
 
     async def scroll_into_view_if_needed(
@@ -557,12 +550,9 @@ class Locator:
         )
 
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
+        params = locals_to_params(locals())
         return await self._with_element(
-            lambda h, timeout: h.select_text(
-                force=force,
-                timeout=timeout,
-            ),
-            timeout,
+            lambda h, timeout: h.select_text(**{**params, "timeout": timeout}), timeout  # type: ignore
         )
 
     async def set_input_files(
