@@ -120,12 +120,10 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
-                self._on_route(
-                    from_channel(params.get("route")),
-                )
+            lambda params: self._on_route(
+                from_channel(params.get("route")),
             ),
-        )
+        ),
 
         self._channel.on(
             "backgroundPage",
@@ -202,20 +200,18 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(
-                        self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
-                        )
+                    await self._connection.wrap_api_call(
+                        lambda: self._update_interception_patterns(), True
                     )
             if handled:
                 return
         await route._internal_continue(is_internal=True)
 
-    def _on_binding(self, binding_call: BindingCall) -> None:
+    async def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func is None:
             return
-        asyncio.create_task(binding_call.call(func))
+        await binding_call.call(func)
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_navigation_timeout(timeout)

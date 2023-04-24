@@ -23,7 +23,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Dict,
     List,
     Optional,
@@ -194,9 +193,7 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
-                self._on_route(from_channel(params["route"]))
-            ),
+            lambda params: self._on_route(from_channel(params["route"])),
         )
         self._channel.on("video", lambda params: self._on_video(params))
         self._channel.on(
@@ -256,20 +253,18 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(
-                        self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
-                        )
+                    await self._connection.wrap_api_call(
+                        lambda: self._update_interception_patterns(), True
                     )
             if handled:
                 return
         await self._browser_context._on_route(route)
 
-    def _on_binding(self, binding_call: "BindingCall") -> None:
+    async def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func:
-            asyncio.create_task(binding_call.call(func))
-        self._browser_context._on_binding(binding_call)
+            await binding_call.call(func)
+        await self._browser_context._on_binding(binding_call)
 
     def _on_worker(self, worker: "Worker") -> None:
         self._workers.append(worker)
@@ -287,15 +282,15 @@ class Page(ChannelOwner):
     def _on_crash(self) -> None:
         self.emit(Page.Events.Crash, self)
 
-    def _on_dialog(self, params: Any) -> None:
+    async def _on_dialog(self, params: Any) -> None:
         dialog = cast(Dialog, from_channel(params["dialog"]))
         if self.listeners(Page.Events.Dialog):
             self.emit(Page.Events.Dialog, dialog)
         else:
             if dialog.type == "beforeunload":
-                asyncio.create_task(dialog.accept())
+                await dialog.accept()
             else:
-                asyncio.create_task(dialog.dismiss())
+                await dialog.dismiss()
 
     def _on_download(self, params: Any) -> None:
         url = params["url"]
@@ -308,24 +303,6 @@ class Page(ChannelOwner):
     def _on_video(self, params: Any) -> None:
         artifact = from_channel(params["artifact"])
         cast(Video, self.video)._artifact_ready(artifact)
-
-    async def _race_with_page_close(self, future: Coroutine) -> None:
-        fut = asyncio.create_task(future)
-        # Rewrite the user's stack to the new task which runs in the background.
-        setattr(
-            fut,
-            "__pw_stack__",
-            getattr(asyncio.current_task(self._loop), "__pw_stack__", inspect.stack()),
-        )
-        target_closed_future = self._closed_or_crashed_future
-        await asyncio.wait(
-            [fut, target_closed_future],
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if fut.done() and fut.exception():
-            raise cast(BaseException, fut.exception())
-        if target_closed_future.done():
-            await asyncio.gather(fut, return_exceptions=True)
 
     @property
     def context(self) -> "BrowserContext":
@@ -659,8 +636,8 @@ class Page(ChannelOwner):
 
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
-        await self._race_with_page_close(
-            self._channel.send("setNetworkInterceptionPatterns", {"patterns": patterns})
+        await self._channel.send(
+            "setNetworkInterceptionPatterns", {"patterns": patterns}
         )
 
     async def screenshot(
