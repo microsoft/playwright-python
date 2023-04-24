@@ -15075,7 +15075,7 @@ class Playwright(SyncBase):
         ```
         """
 
-        return mapping.from_maybe_impl(self._impl_obj.stop())
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.stop()))
 
 
 mapping.register(PlaywrightImpl, Playwright)
