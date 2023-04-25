@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -200,9 +201,10 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    await self._connection.wrap_api_call(
-                        lambda: self._update_interception_patterns(), True
-                    )
+                    with contextlib.suppress(Exception):
+                        await self._connection.wrap_api_call(
+                            lambda: self._update_interception_patterns(), True
+                        )
             if handled:
                 return
         await route._internal_continue(is_internal=True)

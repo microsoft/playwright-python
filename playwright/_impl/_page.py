@@ -14,6 +14,7 @@
 
 import asyncio
 import base64
+import contextlib
 import inspect
 import re
 import sys
@@ -253,9 +254,10 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    await self._connection.wrap_api_call(
-                        lambda: self._update_interception_patterns(), True
-                    )
+                    with contextlib.suppress(Exception):
+                        await self._connection.wrap_api_call(
+                            lambda: self._update_interception_patterns(), True
+                        )
             if handled:
                 return
         await self._browser_context._on_route(route)
@@ -287,10 +289,11 @@ class Page(ChannelOwner):
         if self.listeners(Page.Events.Dialog):
             self.emit(Page.Events.Dialog, dialog)
         else:
-            if dialog.type == "beforeunload":
-                await dialog.accept()
-            else:
-                await dialog.dismiss()
+            with contextlib.suppress(Exception):
+                if dialog.type == "beforeunload":
+                    await dialog.accept()
+                else:
+                    await dialog.dismiss()
 
     def _on_download(self, params: Any) -> None:
         url = params["url"]
