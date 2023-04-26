@@ -15,6 +15,7 @@
 import json
 import pathlib
 import sys
+from collections import ChainMap
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -519,7 +520,7 @@ class Locator:
         params = locals_to_params(locals())
         return await self._with_element(
             lambda h, timeout: h.screenshot(
-                **{**params, "timeout": timeout},  # type: ignore
+                **ChainMap({"timeout": timeout}, params),
             ),
         )
 
@@ -552,7 +553,10 @@ class Locator:
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
         params = locals_to_params(locals())
         return await self._with_element(
-            lambda h, timeout: h.select_text(**{**params, "timeout": timeout}), timeout  # type: ignore
+            lambda h, timeout: h.select_text(
+                **ChainMap({"timeout": timeout}, params),
+            ),
+            timeout,
         )
 
     async def set_input_files(
