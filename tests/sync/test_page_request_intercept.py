@@ -12,8 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Page, Route
+import pytest
+
+from playwright.sync_api import Error, Page, Route
 from tests.server import Server
+
+
+def test_should_support_timeout_option_in_route_fetch(
+    server: Server, page: Page
+) -> None:
+    server.set_route(
+        "/slow",
+        lambda request: (
+            request.responseHeaders.addRawHeader("Content-Length", "4096"),
+            request.responseHeaders.addRawHeader("Content-Type", "text/html"),
+            request.write(b""),
+        ),
+    )
+
+    def handle(route: Route) -> None:
+        with pytest.raises(Error) as error:
+            route.fetch(timeout=1000)
+        assert "Request timed out after 1000ms" in error.value.message
+
+    page.route("**/*", lambda route: handle(route))
+    with pytest.raises(Error) as error:
+        page.goto(server.PREFIX + "/slow", timeout=2000)
+    assert "Timeout 2000ms exceeded" in error.value.message
 
 
 def test_should_intercept_with_url_override(server: Server, page: Page) -> None:
