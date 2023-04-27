@@ -482,15 +482,15 @@ async def test_click_the_button_with_offset_with_page_scale(
 
     await page.click("button", position={"x": 20, "y": 10})
     assert await page.evaluate("result") == "Clicked"
-    expected = {"x": 28, "y": 18}
-    if is_webkit:
-        # WebKit rounds up during css -> dip -> css conversion.
-        expected = {"x": 26, "y": 17}
-    elif is_chromium:
-        # Chromium rounds down during css -> dip -> css conversion.
-        expected = {"x": 27, "y": 18}
-    assert await page.evaluate("pageX") == expected["x"]
-    assert await page.evaluate("pageY") == expected["y"]
+
+    def _assert_close_to(expected: int, actual: int) -> None:
+        if abs(expected - actual) > 2:
+            raise AssertionError(f"Expected: {expected}, received: {actual}")
+
+    # Expect 20;10 + 8px of border in each direction. Allow some delta as different
+    # browsers round up or down differently during css -> dip -> css conversion.
+    _assert_close_to(28, await page.evaluate("pageX"))
+    _assert_close_to(18, await page.evaluate("pageY"))
     await context.close()
 
 
@@ -676,7 +676,15 @@ async def test_wait_for_input_to_be_enabled(page, server):
 
 async def test_wait_for_select_to_be_enabled(page, server):
     await page.set_content(
-        '<select onclick="javascript:window.__CLICKED=true;" disabled><option selected>Hello</option></select>'
+        """
+        <select disabled><option selected>Hello</option></select>
+        <script>
+        document.querySelector('select').addEventListener('mousedown', event => {
+            window.__CLICKED=true;
+            event.preventDefault();
+        });
+        </script>
+    """
     )
     done = []
 
