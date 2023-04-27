@@ -751,6 +751,7 @@ def test_locator_should_enforce_same_frame_for_has_locator(
 def test_locator_should_support_locator_or(page: Page, server: Server) -> None:
     page.set_content("<div>hello</div><span>world</span>")
     expect(page.locator("div").or_(page.locator("span"))).to_have_count(2)
+    expect(page.locator("div") | (page.locator("span"))).to_have_count(2)
     expect(page.locator("div").or_(page.locator("span"))).to_have_text(
         ["hello", "world"]
     )

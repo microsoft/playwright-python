@@ -105,6 +105,9 @@ class Locator:
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
 
+    def __or__(self, other: "Locator") -> "Locator":
+        return self.or_(other)
+
     async def _with_element(
         self,
         task: Callable[[ElementHandle, float], Awaitable[T]],

@@ -828,6 +828,7 @@ async def test_locator_should_enforce_same_frame_for_has_locator(
 
 async def test_locator_should_support_locator_or(page: Page, server: Server) -> None:
     await page.set_content("<div>hello</div><span>world</span>")
+    await expect(page.locator("div") | (page.locator("span"))).to_have_count(2)
     await expect(page.locator("div").or_(page.locator("span"))).to_have_count(2)
     await expect(page.locator("div").or_(page.locator("span"))).to_have_text(
         ["hello", "world"]

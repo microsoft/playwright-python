@@ -16625,6 +16625,9 @@ class Locator(SyncBase):
             )
         )
 
+    def __or__(self, other: "Locator") -> "Locator":
+        return self.or_(other)
+
     def or_(self, locator: "Locator") -> "Locator":
         """Locator.or_
 
