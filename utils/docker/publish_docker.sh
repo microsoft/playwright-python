@@ -32,23 +32,23 @@ if [[ -z "${GITHUB_SHA}" ]]; then
 fi
 
 FOCAL_TAGS=(
-  "next"
-  "sha-${GITHUB_SHA}"
   "next-focal"
 )
 if [[ "$RELEASE_CHANNEL" == "stable" ]]; then
-  FOCAL_TAGS+=("latest")
   FOCAL_TAGS+=("focal")
   FOCAL_TAGS+=("v${PW_VERSION}-focal")
-  FOCAL_TAGS+=("v${PW_VERSION}")
 fi
 
 JAMMY_TAGS=(
+  "next"
   "next-jammy"
+  "sha-${GITHUB_SHA}"
 )
 if [[ "$RELEASE_CHANNEL" == "stable" ]]; then
+  JAMMY_TAGS+=("latest")
   JAMMY_TAGS+=("jammy")
   JAMMY_TAGS+=("v${PW_VERSION}-jammy")
+  JAMMY_TAGS+=("v${PW_VERSION}")
 fi
 
 tag_and_push() {
