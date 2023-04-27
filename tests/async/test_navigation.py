@@ -918,9 +918,9 @@ async def test_frame_goto_should_continue_after_client_redirect(page, server):
     url = server.PREFIX + "/frames/child-redirect.html"
 
     with pytest.raises(Error) as exc_info:
-        await page.goto(url, timeout=2500, wait_until="networkidle")
+        await page.goto(url, timeout=5000, wait_until="networkidle")
 
-    assert "Timeout 2500ms exceeded." in exc_info.value.message
+    assert "Timeout 5000ms exceeded." in exc_info.value.message
     assert (
         f'navigating to "{url}", waiting until "networkidle"' in exc_info.value.message
     )
