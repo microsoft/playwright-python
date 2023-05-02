@@ -177,8 +177,8 @@ class HarLookupResult(TypedDict, total=False):
 class TimeoutSettings:
     def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
         self._parent = parent
-        self._timeout = 30000.0
-        self._navigation_timeout = 30000.0
+        self._timeout: Optional[float] = None
+        self._navigation_timeout: Optional[float] = None
 
     def set_timeout(self, timeout: float) -> None:
         self._timeout = timeout
