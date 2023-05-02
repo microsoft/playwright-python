@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from playwright.async_api import Error, Page, Route, TimeoutError
+from playwright.async_api import BrowserContext, Error, Page, Route, TimeoutError
 from tests.server import Server
 
 
@@ -329,6 +329,19 @@ async def test_wait_for_response_should_work_with_no_timeout(page, server):
         )
     response = await response_info.value
     assert response.url == server.PREFIX + "/digits/2.png"
+
+
+async def test_wait_for_response_should_use_context_timeout(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    context.set_default_timeout(1_000)
+    with pytest.raises(Error) as exc_info:
+        async with page.expect_response("https://playwright.dev"):
+            pass
+    assert exc_info.type is TimeoutError
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
 
 
 async def test_expose_binding(page):

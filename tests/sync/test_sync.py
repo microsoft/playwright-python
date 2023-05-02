@@ -277,3 +277,16 @@ def test_expect_response_should_work(page: Page, server: Server) -> None:
     assert resp.value.status == 200
     assert resp.value.ok
     assert resp.value.request
+
+
+def test_expect_response_should_use_context_timeout(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+
+    context.set_default_timeout(1_000)
+    with pytest.raises(Error) as exc_info:
+        with page.expect_response("https://playwright.dev"):
+            pass
+    assert exc_info.type is TimeoutError
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
