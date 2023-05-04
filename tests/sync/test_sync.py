@@ -14,6 +14,7 @@
 
 import multiprocessing
 import os
+from typing import Any, Dict
 
 import pytest
 
@@ -301,6 +302,34 @@ def _test_sync_playwright_stop_multiple_times() -> None:
 
 def test_sync_playwright_stop_multiple_times() -> None:
     p = multiprocessing.Process(target=_test_sync_playwright_stop_multiple_times)
+    p.start()
+    p.join()
+    assert p.exitcode == 0
+
+
+def _test_call_sync_method_after_playwright_close_with_own_loop(
+    browser_name: str,
+    launch_arguments: Dict[str, Any],
+    empty_page: str,
+) -> None:
+    playwright = sync_playwright().start()
+    browser = playwright[browser_name].launch(**launch_arguments)
+    context = browser.new_context()
+    page = context.new_page()
+    page.goto(empty_page)
+    playwright.stop()
+    with pytest.raises(Error) as exc:
+        page.evaluate("1+1")
+    assert "Event loop is closed! Is Playwright already stopped?" in str(exc.value)
+
+
+def test_call_sync_method_after_playwright_close_with_own_loop(
+    server: Server, browser_name: str, launch_arguments: Dict[str, Any]
+) -> None:
+    p = multiprocessing.Process(
+        target=_test_call_sync_method_after_playwright_close_with_own_loop,
+        args=[browser_name, launch_arguments, server.EMPTY_PAGE],
+    )
     p.start()
     p.join()
     assert p.exitcode == 0
