@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
 import os
 
 import pytest
@@ -290,3 +291,16 @@ def test_expect_response_should_use_context_timeout(
             pass
     assert exc_info.type is TimeoutError
     assert "Timeout 1000ms exceeded" in exc_info.value.message
+
+
+def _test_sync_playwright_stop_multiple_times() -> None:
+    playwright = sync_playwright().start()
+    playwright.stop()
+    playwright.stop()
+
+
+def test_sync_playwright_stop_multiple_times() -> None:
+    p = multiprocessing.Process(target=_test_sync_playwright_stop_multiple_times)
+    p.start()
+    p.join()
+    assert p.exitcode == 0

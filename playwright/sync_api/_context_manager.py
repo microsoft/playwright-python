@@ -36,6 +36,7 @@ class PlaywrightContextManager:
         self._loop: asyncio.AbstractEventLoop
         self._own_loop = False
         self._watcher: Optional[AbstractChildWatcher] = None
+        self._exit_was_called = False
 
     def __enter__(self) -> SyncPlaywright:
         try:
@@ -98,6 +99,9 @@ Please use the Async API instead."""
         return self.__enter__()
 
     def __exit__(self, *args: Any) -> None:
+        if self._exit_was_called:
+            return
+        self._exit_was_called = True
         self._connection.stop_sync()
         if self._watcher:
             self._watcher.close()
