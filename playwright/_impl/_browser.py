@@ -29,6 +29,7 @@ from playwright._impl._browser_context import BrowserContext
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import (
+    BROWSER_CLOSED_ERROR,
     ColorScheme,
     ForcedColors,
     HarContentPolicy,
@@ -182,7 +183,7 @@ class Browser(ChannelOwner):
             if not is_safe_close_error(e):
                 raise e
         if self._should_close_connection_on_close:
-            await self._connection.stop_async()
+            await self._connection.stop_async(BROWSER_CLOSED_ERROR)
 
     @property
     def version(self) -> str:

@@ -140,7 +140,7 @@ def test_browser_type_connect_should_throw_when_used_after_is_connected_returns_
 
     with pytest.raises(Error) as exc_info:
         page.evaluate("1 + 1")
-    assert "Playwright connection closed" == exc_info.value.message
+    assert "has been closed" in exc_info.value.message
     assert browser.is_connected() is False
 
 
