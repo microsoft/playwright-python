@@ -19,7 +19,7 @@ from pyee.asyncio import AsyncIOEventEmitter
 
 from playwright._impl._api_types import Error
 from playwright._impl._connection import Channel
-from playwright._impl._helper import ParsedMessagePayload, parse_error
+from playwright._impl._helper import BROWSER_CLOSED_ERROR, ParsedMessagePayload
 from playwright._impl._transport import Transport
 
 
@@ -49,16 +49,22 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
     async def connect(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
 
-        def handle_message(message: Dict) -> None:
-            if not self._stop_requested:
-                self.on_message(cast(ParsedMessagePayload, message))
+        close_error: Optional[str] = None
 
-        def handle_closed(error: Optional[Dict]) -> None:
+        def handle_message(message: Dict) -> None:
+            if self._stop_requested:
+                return
+            try:
+                self.on_message(cast(ParsedMessagePayload, message))
+            except Exception as e:
+                nonlocal close_error
+                close_error = str(e)
+                self.request_stop()
+
+        def handle_closed() -> None:
             self.emit("close")
             self.on_error_future.set_exception(
-                parse_error(error["error"])
-                if error
-                else Error("Playwright connection closed")
+                Error(close_error) if close_error else Error(BROWSER_CLOSED_ERROR)
             )
             self._stopped_future.set_result(None)
 
@@ -68,7 +74,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         )
         self._pipe_channel.on(
             "closed",
-            lambda params: handle_closed(params.get("error")),
+            lambda _: handle_closed(),
         )
 
     async def run(self) -> None:

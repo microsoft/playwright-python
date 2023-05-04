@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
 import os
 
 import pytest
@@ -250,6 +251,30 @@ def test_sync_playwright_multiple_times() -> None:
         "It looks like you are using Playwright Sync API inside the asyncio loop."
         in exc.value.message
     )
+
+
+def _test_sync_playwright_api_call_after_close_inner(empty_page: str) -> None:
+    playwright = sync_playwright().start()
+    browser = playwright.chromium.launch()
+    context = browser.new_context()
+    page = context.new_page()
+    page.goto(empty_page)
+    browser.close()
+    playwright.stop()
+    playwright.stop()
+    with pytest.raises(Error) as exc:
+        page.close()
+    assert "Event loop is closed! Is Playwright stopped already?" in str(exc.value)
+
+
+def test_sync_playwright_api_call_after_close(server: Server) -> None:
+    p = multiprocessing.Process(
+        target=_test_sync_playwright_api_call_after_close_inner,
+        args=[server.EMPTY_PAGE],
+    )
+    p.start()
+    p.join()
+    assert p.exitcode == 0
 
 
 def test_sync_set_default_timeout(page: Page) -> None:

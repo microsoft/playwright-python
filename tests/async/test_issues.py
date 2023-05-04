@@ -16,7 +16,9 @@ from asyncio import FIRST_COMPLETED, CancelledError, create_task, wait
 
 import pytest
 
-from playwright.async_api import Page
+from playwright.async_api import Page, async_playwright
+
+from ..server import Server
 
 
 @pytest.mark.only_browser("chromium")
@@ -52,3 +54,20 @@ async def test_connection_task_cancel(page: Page):
         with pytest.raises(CancelledError):
             await task
     assert list(pending)[0].cancelled()
+
+
+async def test_issue_1876_async_playwright_api_call_after_close(server: Server) -> None:
+    playwright = await async_playwright().start()
+    browser = await playwright.chromium.launch()
+    context = await browser.new_context()
+    page = await context.new_page()
+    pending_task = create_task(page.wait_for_timeout(999999999))
+    await page.goto(server.EMPTY_PAGE)
+    await browser.close()
+    await playwright.stop()
+    with pytest.raises(Exception) as exc_info:
+        await page.close()
+    assert "Connection closed" in str(exc_info.value)
+    with pytest.raises(Exception):
+        await pending_task
+    assert "Connection closed" in str(exc_info.value)
