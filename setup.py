@@ -30,7 +30,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.33.0-alpha-apr-12-2023"
+driver_version = "1.33.0"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -212,7 +212,7 @@ setup(
     packages=["playwright"],
     include_package_data=True,
     install_requires=[
-        "greenlet==2.0.2",
+        "greenlet==2.0.1",
         "pyee==9.0.4",
         "typing-extensions;python_version<='3.8'",
     ],

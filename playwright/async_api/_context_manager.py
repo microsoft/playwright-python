@@ -25,6 +25,7 @@ from playwright.async_api._generated import Playwright as AsyncPlaywright
 class PlaywrightContextManager:
     def __init__(self) -> None:
         self._connection: Connection
+        self._exit_was_called = False
 
     async def __aenter__(self) -> AsyncPlaywright:
         loop = asyncio.get_running_loop()
@@ -51,4 +52,7 @@ class PlaywrightContextManager:
         return await self.__aenter__()
 
     async def __aexit__(self, *args: Any) -> None:
+        if self._exit_was_called:
+            return
+        self._exit_was_called = True
         await self._connection.stop_async()

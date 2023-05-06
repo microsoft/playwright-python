@@ -744,7 +744,8 @@ class Route(AsyncBase):
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        timeout: typing.Optional[float] = None
     ) -> "APIResponse":
         """Route.fetch
 
@@ -794,6 +795,8 @@ class Route(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        timeout : Union[float, None]
+            Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 
         Returns
         -------
@@ -807,6 +810,7 @@ class Route(AsyncBase):
                 headers=mapping.to_impl(headers),
                 postData=mapping.to_impl(post_data),
                 maxRedirects=max_redirects,
+                timeout=timeout,
             )
         )
 
@@ -13848,7 +13852,7 @@ class Browser(AsyncContextManager):
         ----------
         viewport : Union[{width: int, height: int}, None]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed
-            viewport.
+            viewport. Learn more about [viewport emulation](../emulation.md#viewport).
         screen : Union[{width: int, height: int}, None]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
             `viewport` is set.
@@ -13857,14 +13861,16 @@ class Browser(AsyncContextManager):
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         java_script_enabled : Union[bool, None]
-            Whether or not to enable JavaScript in the context. Defaults to `true`.
+            Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
+            [disabling JavaScript](../emulation.md#javascript-enabled).
         bypass_csp : Union[bool, None]
             Toggles bypassing page's Content-Security-Policy.
         user_agent : Union[str, None]
             Specific user agent to use in this context.
         locale : Union[str, None]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
-            `Accept-Language` request header value as well as number and date formatting rules.
+            `Accept-Language` request header value as well as number and date formatting rules. Learn more about emulation in
+            our [emulation guide](../emulation.md#locale--timezone).
         timezone_id : Union[str, None]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
@@ -13876,17 +13882,21 @@ class Browser(AsyncContextManager):
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, None]
-            Whether to emulate network being offline. Defaults to `false`.
+            Whether to emulate network being offline. Defaults to `false`. Learn more about
+            [network emulation](../emulation.md#offline).
         http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
-            Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+            Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
+            [emulating devices with device scale factor](../emulation.md#devices).
         is_mobile : Union[bool, None]
-            Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not
-            supported in Firefox.
+            Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
+            so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
+            about [mobile emulation](../emulation.md#isMobile).
         has_touch : Union[bool, None]
-            Specifies if viewport supports touch events. Defaults to false.
+            Specifies if viewport supports touch events. Defaults to false. Learn more about
+            [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -13921,6 +13931,8 @@ class Browser(AsyncContextManager):
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
         storage_state : Union[pathlib.Path, str, {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, None]
+            Learn more about [storage state and auth](../auth.md).
+
             Populates context with given storage state. This option can be used to initialize context with logged-in
             information obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or
             an object with the following fields:
@@ -14055,7 +14067,7 @@ class Browser(AsyncContextManager):
         ----------
         viewport : Union[{width: int, height: int}, None]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed
-            viewport.
+            viewport. Learn more about [viewport emulation](../emulation.md#viewport).
         screen : Union[{width: int, height: int}, None]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
             `viewport` is set.
@@ -14064,14 +14076,16 @@ class Browser(AsyncContextManager):
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         java_script_enabled : Union[bool, None]
-            Whether or not to enable JavaScript in the context. Defaults to `true`.
+            Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
+            [disabling JavaScript](../emulation.md#javascript-enabled).
         bypass_csp : Union[bool, None]
             Toggles bypassing page's Content-Security-Policy.
         user_agent : Union[str, None]
             Specific user agent to use in this context.
         locale : Union[str, None]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
-            `Accept-Language` request header value as well as number and date formatting rules.
+            `Accept-Language` request header value as well as number and date formatting rules. Learn more about emulation in
+            our [emulation guide](../emulation.md#locale--timezone).
         timezone_id : Union[str, None]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
@@ -14083,17 +14097,21 @@ class Browser(AsyncContextManager):
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, None]
-            Whether to emulate network being offline. Defaults to `false`.
+            Whether to emulate network being offline. Defaults to `false`. Learn more about
+            [network emulation](../emulation.md#offline).
         http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
-            Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+            Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
+            [emulating devices with device scale factor](../emulation.md#devices).
         is_mobile : Union[bool, None]
-            Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not
-            supported in Firefox.
+            Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
+            so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
+            about [mobile emulation](../emulation.md#isMobile).
         has_touch : Union[bool, None]
-            Specifies if viewport supports touch events. Defaults to false.
+            Specifies if viewport supports touch events. Defaults to false. Learn more about
+            [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -14128,6 +14146,8 @@ class Browser(AsyncContextManager):
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
         storage_state : Union[pathlib.Path, str, {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, None]
+            Learn more about [storage state and auth](../auth.md).
+
             Populates context with given storage state. This option can be used to initialize context with logged-in
             information obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or
             an object with the following fields:
@@ -14593,7 +14613,7 @@ class BrowserType(AsyncBase):
             on.
         viewport : Union[{width: int, height: int}, None]
             Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed
-            viewport.
+            viewport. Learn more about [viewport emulation](../emulation.md#viewport).
         screen : Union[{width: int, height: int}, None]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
             `viewport` is set.
@@ -14602,14 +14622,16 @@ class BrowserType(AsyncBase):
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         java_script_enabled : Union[bool, None]
-            Whether or not to enable JavaScript in the context. Defaults to `true`.
+            Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
+            [disabling JavaScript](../emulation.md#javascript-enabled).
         bypass_csp : Union[bool, None]
             Toggles bypassing page's Content-Security-Policy.
         user_agent : Union[str, None]
             Specific user agent to use in this context.
         locale : Union[str, None]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
-            `Accept-Language` request header value as well as number and date formatting rules.
+            `Accept-Language` request header value as well as number and date formatting rules. Learn more about emulation in
+            our [emulation guide](../emulation.md#locale--timezone).
         timezone_id : Union[str, None]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
@@ -14621,17 +14643,21 @@ class BrowserType(AsyncBase):
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request.
         offline : Union[bool, None]
-            Whether to emulate network being offline. Defaults to `false`.
+            Whether to emulate network being offline. Defaults to `false`. Learn more about
+            [network emulation](../emulation.md#offline).
         http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
-            Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+            Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
+            [emulating devices with device scale factor](../emulation.md#devices).
         is_mobile : Union[bool, None]
-            Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not
-            supported in Firefox.
+            Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
+            so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
+            about [mobile emulation](../emulation.md#isMobile).
         has_touch : Union[bool, None]
-            Specifies if viewport supports touch events. Defaults to false.
+            Specifies if viewport supports touch events. Defaults to false. Learn more about
+            [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
             Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -16588,9 +16614,10 @@ class Locator(AsyncBase):
 
         When locator points to a list of elements, returns array of locators, pointing to respective elements.
 
-        Note that `locator.all()` does not wait for elements to match the locator, and instead immediately returns
-        whatever is present in the page. To avoid flakiness when elements are loaded dynamically, wait for the loading to
-        finish before calling `locator.all()`.
+        **NOTE** `locator.all()` does not wait for elements to match the locator, and instead immediately returns
+        whatever is present in the page.  When the list of elements changes dynamically, `locator.all()` will
+        produce unpredictable and flaky results.  When the list of elements is stable, but loaded dynamically, wait for the
+        full list to finish loading before calling `locator.all()`.
 
         **Usage**
 

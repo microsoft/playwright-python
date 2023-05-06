@@ -32,6 +32,7 @@ from typing import (
 
 import greenlet
 
+from playwright._impl._helper import Error
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
 mapping = ImplToApiMapping()
@@ -92,6 +93,10 @@ class SyncBase(ImplWrapper):
         coro: Union[Coroutine[Any, Any, Any], Generator[Any, Any, Any]],
     ) -> Any:
         __tracebackhide__ = True
+        if self._loop.is_closed():
+            coro.close()
+            raise Error("Event loop is closed! Is Playwright already stopped?")
+
         g_self = greenlet.getcurrent()
         task: asyncio.tasks.Task[Any] = self._loop.create_task(coro)
         setattr(task, "__pw_stack__", inspect.stack())

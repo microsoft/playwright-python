@@ -48,3 +48,9 @@ async def test_should_cancel_underlying_protocol_calls(
     assert handler_exception is None
 
     asyncio.get_running_loop().set_exception_handler(None)
+
+
+async def test_async_playwright_stop_multiple_times() -> None:
+    playwright = await async_playwright().start()
+    await playwright.stop()
+    await playwright.stop()

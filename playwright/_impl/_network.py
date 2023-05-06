@@ -366,10 +366,17 @@ class Route(ChannelOwner):
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
         maxRedirects: int = None,
+        timeout: float = None,
     ) -> "APIResponse":
         page = self.request.frame._page
         return await page.context.request._inner_fetch(
-            self.request, url, method, headers, postData, maxRedirects=maxRedirects
+            self.request,
+            url,
+            method,
+            headers,
+            postData,
+            maxRedirects=maxRedirects,
+            timeout=timeout,
         )
 
     async def fallback(

@@ -14,8 +14,31 @@
 
 import asyncio
 
+import pytest
+
 from playwright.async_api import Page, Route
 from tests.server import Server
+
+
+async def test_should_support_timeout_option_in_route_fetch(server: Server, page: Page):
+    server.set_route(
+        "/slow",
+        lambda request: (
+            request.responseHeaders.addRawHeader("Content-Length", "4096"),
+            request.responseHeaders.addRawHeader("Content-Type", "text/html"),
+            request.write(b""),
+        ),
+    )
+
+    async def handle(route: Route):
+        with pytest.raises(Exception) as error:
+            await route.fetch(timeout=1000)
+        assert "Request timed out after 1000ms" in error.value.message
+
+    await page.route("**/*", lambda route: handle(route))
+    with pytest.raises(Exception) as error:
+        await page.goto(server.PREFIX + "/slow", timeout=2000)
+    assert "Timeout 2000ms exceeded" in error.value.message
 
 
 async def test_should_not_follow_redirects_when_max_redirects_is_set_to_0_in_route_fetch(

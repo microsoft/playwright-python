@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
 import os
+from typing import Any, Dict
 
 import pytest
 
@@ -277,3 +279,57 @@ def test_expect_response_should_work(page: Page, server: Server) -> None:
     assert resp.value.status == 200
     assert resp.value.ok
     assert resp.value.request
+
+
+def test_expect_response_should_use_context_timeout(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+
+    context.set_default_timeout(1_000)
+    with pytest.raises(Error) as exc_info:
+        with page.expect_response("https://playwright.dev"):
+            pass
+    assert exc_info.type is TimeoutError
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
+
+
+def _test_sync_playwright_stop_multiple_times() -> None:
+    playwright = sync_playwright().start()
+    playwright.stop()
+    playwright.stop()
+
+
+def test_sync_playwright_stop_multiple_times() -> None:
+    p = multiprocessing.Process(target=_test_sync_playwright_stop_multiple_times)
+    p.start()
+    p.join()
+    assert p.exitcode == 0
+
+
+def _test_call_sync_method_after_playwright_close_with_own_loop(
+    browser_name: str,
+    launch_arguments: Dict[str, Any],
+    empty_page: str,
+) -> None:
+    playwright = sync_playwright().start()
+    browser = playwright[browser_name].launch(**launch_arguments)
+    context = browser.new_context()
+    page = context.new_page()
+    page.goto(empty_page)
+    playwright.stop()
+    with pytest.raises(Error) as exc:
+        page.evaluate("1+1")
+    assert "Event loop is closed! Is Playwright already stopped?" in str(exc.value)
+
+
+def test_call_sync_method_after_playwright_close_with_own_loop(
+    server: Server, browser_name: str, launch_arguments: Dict[str, Any]
+) -> None:
+    p = multiprocessing.Process(
+        target=_test_call_sync_method_after_playwright_close_with_own_loop,
+        args=[browser_name, launch_arguments, server.EMPTY_PAGE],
+    )
+    p.start()
+    p.join()
+    assert p.exitcode == 0
