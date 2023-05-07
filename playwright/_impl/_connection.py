@@ -23,6 +23,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Coroutine,
     Dict,
     List,
     Mapping,
@@ -168,6 +169,19 @@ class ChannelOwner(AsyncIOEventEmitter):
         if not self.listeners(event):
             self._update_subscription(event, True)
         super()._add_event_handler(event, k, v)
+
+    def _emit_sync(self, coro: Coroutine, ignore_errors: bool = True) -> None:
+        fut = asyncio.ensure_future(coro, loop=self._loop)
+
+        def cb(f: asyncio.Task) -> None:
+            if f.cancelled():
+                return
+
+            exc: Optional[BaseException] = f.exception()
+            if exc and not ignore_errors:
+                self.emit("error", exc)
+
+        fut.add_done_callback(cb)
 
     def remove_listener(self, event: str, f: Any) -> None:
         super().remove_listener(event, f)

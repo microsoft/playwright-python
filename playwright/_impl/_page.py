@@ -14,7 +14,6 @@
 
 import asyncio
 import base64
-import contextlib
 import inspect
 import re
 import sys
@@ -194,7 +193,9 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: self._on_route(from_channel(params["route"])),
+            lambda params: self._emit_sync(
+                self._on_route(from_channel(params["route"]))
+            ),
         )
         self._channel.on("video", lambda params: self._on_video(params))
         self._channel.on(
@@ -254,19 +255,20 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    with contextlib.suppress(Exception):
-                        await self._connection.wrap_api_call(
+                    self._emit_sync(
+                        self._connection.wrap_api_call(
                             lambda: self._update_interception_patterns(), True
                         )
+                    )
             if handled:
                 return
         await self._browser_context._on_route(route)
 
-    async def _on_binding(self, binding_call: "BindingCall") -> None:
+    def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func:
-            await binding_call.call(func)
-        await self._browser_context._on_binding(binding_call)
+            self._emit_sync(binding_call.call(func))
+        self._browser_context._on_binding(binding_call)
 
     def _on_worker(self, worker: "Worker") -> None:
         self._workers.append(worker)
@@ -284,16 +286,15 @@ class Page(ChannelOwner):
     def _on_crash(self) -> None:
         self.emit(Page.Events.Crash, self)
 
-    async def _on_dialog(self, params: Any) -> None:
+    def _on_dialog(self, params: Any) -> None:
         dialog = cast(Dialog, from_channel(params["dialog"]))
         if self.listeners(Page.Events.Dialog):
             self.emit(Page.Events.Dialog, dialog)
         else:
-            with contextlib.suppress(Exception):
-                if dialog.type == "beforeunload":
-                    await dialog.accept()
-                else:
-                    await dialog.dismiss()
+            if dialog.type == "beforeunload":
+                self._emit_sync(dialog.accept())
+            else:
+                self._emit_sync(dialog.dismiss())
 
     def _on_download(self, params: Any) -> None:
         url = params["url"]
@@ -1268,7 +1269,7 @@ class BindingCall(ChannelOwner):
             await self._channel.send("resolve", dict(result=serialize_argument(result)))
         except Exception as e:
             tb = sys.exc_info()[2]
-            asyncio.create_task(
+            self._emit_sync(
                 self._channel.send(
                     "reject", dict(error=dict(error=serialize_error(e, tb)))
                 )
