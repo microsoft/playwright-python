@@ -314,10 +314,14 @@ class RouteHandler:
         return patterns
 
 
+BROWSER_CLOSED_ERROR = "Browser has been closed"
+BROWSER_OR_CONTEXT_CLOSED_ERROR = "Target page, context or browser has been closed"
+
+
 def is_safe_close_error(error: Exception) -> bool:
     message = str(error)
-    return message.endswith("Browser has been closed") or message.endswith(
-        "Target page, context or browser has been closed"
+    return message.endswith(BROWSER_CLOSED_ERROR) or message.endswith(
+        BROWSER_OR_CONTEXT_CLOSED_ERROR
     )
 
 

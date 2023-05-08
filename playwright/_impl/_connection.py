@@ -36,7 +36,7 @@ from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
-from playwright._impl._helper import ParsedMessagePayload, parse_error
+from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
@@ -242,6 +242,7 @@ class Connection(EventEmitter):
         ] = contextvars.ContextVar("ApiZone", default=None)
         self._local_utils: Optional["LocalUtils"] = local_utils
         self._tracing_count = 0
+        self._closed_error_message: Optional[str] = None
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -272,16 +273,24 @@ class Connection(EventEmitter):
         self._loop.run_until_complete(self._transport.wait_until_stopped())
         self.cleanup()
 
-    async def stop_async(self) -> None:
+    async def stop_async(self, error_message: str = None) -> None:
         self._transport.request_stop()
         await self._transport.wait_until_stopped()
-        self.cleanup()
+        self.cleanup(error_message)
 
-    def cleanup(self) -> None:
+    def cleanup(self, error_message: str = None) -> None:
+        if not error_message:
+            error_message = "Connection closed"
+        self._closed_error_message = error_message
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
+        for callback in self._callbacks.values():
+            callback.future.set_exception(Error(error_message))
+            # Prevent 'Task exception was never retrieved'
+            callback.future.exception()
+        self._callbacks.clear()
         self.emit("close")
 
     def call_on_object_with_known_name(
@@ -298,6 +307,8 @@ class Connection(EventEmitter):
     def _send_message_to_server(
         self, guid: str, method: str, params: Dict
     ) -> ProtocolCallback:
+        if self._closed_error_message:
+            raise Error(self._closed_error_message)
         self._last_id += 1
         id = self._last_id
         callback = ProtocolCallback(self._loop)
@@ -339,6 +350,8 @@ class Connection(EventEmitter):
         return callback
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
+        if self._closed_error_message:
+            return
         id = msg.get("id")
         if id:
             callback = self._callbacks.pop(id)
