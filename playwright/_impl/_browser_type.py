@@ -33,6 +33,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._helper import (
+    BROWSER_CLOSED_ERROR,
     ColorScheme,
     Env,
     ForcedColors,
@@ -218,7 +219,7 @@ class BrowserType(ChannelOwner):
 
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
-            {transport.on_error_future, playwright_future, timeout_future},
+            {playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
         )
         if not playwright_future.done():
@@ -234,13 +235,13 @@ class BrowserType(ChannelOwner):
         self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
 
-        def handle_transport_close() -> None:
+        def handle_transport_close(transport_exception: str) -> None:
             for context in browser.contexts:
                 for page in context.pages:
                     page._on_close()
                 context._on_close()
             browser._on_close()
-            connection.cleanup()
+            connection.cleanup(transport_exception or BROWSER_CLOSED_ERROR)
 
         transport.once("close", handle_transport_close)
 

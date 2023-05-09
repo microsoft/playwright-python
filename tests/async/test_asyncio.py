@@ -19,6 +19,8 @@ import pytest
 
 from playwright.async_api import async_playwright
 
+from ..server import Server
+
 
 async def test_should_cancel_underlying_protocol_calls(
     browser_name: str, launch_arguments: Dict
@@ -54,3 +56,14 @@ async def test_async_playwright_stop_multiple_times() -> None:
     playwright = await async_playwright().start()
     await playwright.stop()
     await playwright.stop()
+
+
+async def test_cancel_pending_protocol_call_on_playwright_stop(server: Server) -> None:
+    server.set_route("/hang", lambda _: None)
+    playwright = await async_playwright().start()
+    api_request_context = await playwright.request.new_context()
+    pending_task = asyncio.create_task(api_request_context.get(server.PREFIX + "/hang"))
+    await playwright.stop()
+    with pytest.raises(Exception) as exc_info:
+        await pending_task
+    assert "Connection closed" in str(exc_info.value)
