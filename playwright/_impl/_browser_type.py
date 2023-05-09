@@ -219,7 +219,7 @@ class BrowserType(ChannelOwner):
 
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
-            {playwright_future, timeout_future},
+            {transport.on_error_future, playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
         )
         if not playwright_future.done():
@@ -235,13 +235,13 @@ class BrowserType(ChannelOwner):
         self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
 
-        def handle_transport_close(transport_exception: str) -> None:
+        def handle_transport_close() -> None:
             for context in browser.contexts:
                 for page in context.pages:
                     page._on_close()
                 context._on_close()
             browser._on_close()
-            connection.cleanup(transport_exception or BROWSER_CLOSED_ERROR)
+            connection.cleanup(BROWSER_CLOSED_ERROR)
 
         transport.once("close", handle_transport_close)
 

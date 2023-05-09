@@ -290,8 +290,6 @@ class Connection(EventEmitter):
             ws_connection._transport.dispose()
         for callback in self._callbacks.values():
             callback.future.set_exception(Error(error_message))
-            # Prevent 'Task exception was never retrieved'
-            callback.future.exception()
         self._callbacks.clear()
         self.emit("close")
 
