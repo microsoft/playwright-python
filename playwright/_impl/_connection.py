@@ -68,9 +68,10 @@ class Channel(AsyncIOEventEmitter):
         )
 
     def send_no_reply(self, method: str, params: Dict = None) -> None:
+        # No reply messages are used to e.g. waitForEventInfo(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
-                self._guid, method, {} if params is None else params
+                self._guid, method, {} if params is None else params, True
             )
         )
 
@@ -178,6 +179,7 @@ class ChannelOwner(AsyncIOEventEmitter):
 class ProtocolCallback:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.stack_trace: traceback.StackSummary
+        self.no_reply: bool
         self.future = loop.create_future()
         # The outer task can get cancelled by the user, this forwards the cancellation to the inner task.
         current_task = asyncio.current_task()
@@ -305,7 +307,7 @@ class Connection(EventEmitter):
             self._tracing_count -= 1
 
     def _send_message_to_server(
-        self, guid: str, method: str, params: Dict
+        self, guid: str, method: str, params: Dict, no_reply: bool = False
     ) -> ProtocolCallback:
         if self._closed_error_message:
             raise Error(self._closed_error_message)
@@ -317,6 +319,7 @@ class Connection(EventEmitter):
             traceback.StackSummary,
             getattr(task, "__pw_stack_trace__", traceback.extract_stack()),
         )
+        callback.no_reply = no_reply
         self._callbacks[id] = callback
         stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
         frames = stack_trace_information.get("frames", [])
@@ -356,6 +359,10 @@ class Connection(EventEmitter):
         if id:
             callback = self._callbacks.pop(id)
             if callback.future.cancelled():
+                return
+            # No reply messages are used to e.g. waitForEventInfo(after) which returns exceptions on page close.
+            # To prevent 'Future exception was never retrieved' we just ignore such messages.
+            if callback.no_reply:
                 return
             error = msg.get("error")
             if error:
