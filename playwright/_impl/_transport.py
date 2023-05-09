@@ -121,6 +121,7 @@ class PipeTransport(Transport):
                 stderr=_get_stderr_fileno(),
                 limit=32768,
                 env=env,
+                preexec_fn=os.setpgrp if sys.platform != "win32" else None,
             )
         except Exception as exc:
             self.on_error_future.set_exception(exc)
