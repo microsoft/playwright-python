@@ -68,6 +68,8 @@ class Channel(AsyncIOEventEmitter):
         )
 
     def send_no_reply(self, method: str, params: Dict = None) -> None:
+        # No reply messages are used to e.g. waitForEventInfo(after) which returns exceptions on page close.
+        # To prevent 'Future exception was never retrieved' we just ignore such messages.
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
                 self._guid, method, {} if params is None else params, True
@@ -359,6 +361,8 @@ class Connection(EventEmitter):
             callback = self._callbacks.pop(id)
             if callback.future.cancelled():
                 return
+            # No reply messages are used to e.g. waitForEventInfo(after) which returns exceptions on page close.
+            # To prevent 'Future exception was never retrieved' we just ignore such messages.
             if callback.no_reply:
                 return
             error = msg.get("error")
