@@ -179,6 +179,10 @@ class DocumentationProvider:
                         print(
                             f"{indent}    {self.indent_paragraph(self.render_links(doc_value['comment']), f'{indent}    ')}"
                         )
+                    if doc_value.get("deprecated"):
+                        print(
+                            f"{indent}    Deprecated: {self.render_links(doc_value['deprecated'])}"
+                        )
                     self.compare_types(code_type, doc_value, f"{fqname}({name}=)", "in")
         if (
             signature

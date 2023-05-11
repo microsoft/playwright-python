@@ -4021,6 +4021,7 @@ class Frame(AsyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
+            Deprecated: This option is ignored. `frame.is_hidden()` does not wait for the element to become hidden and returns immediately.
 
         Returns
         -------
@@ -4054,6 +4055,7 @@ class Frame(AsyncBase):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
+            Deprecated: This option is ignored. `frame.is_visible()` does not wait for the element to become visible and returns immediately.
 
         Returns
         -------
@@ -8425,6 +8427,7 @@ class Page(AsyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
+            Deprecated: This option is ignored. `page.is_hidden()` does not wait for the↵element to become hidden and returns immediately.
 
         Returns
         -------
@@ -8458,6 +8461,7 @@ class Page(AsyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         timeout : Union[float, None]
+            Deprecated: This option is ignored. `page.is_visible()` does not wait↵for the element to become visible and returns immediately.
 
         Returns
         -------
@@ -17047,6 +17051,7 @@ class Locator(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
+            Deprecated: This option is ignored. `locator.is_hidden()` does not wait for the element to become hidden and returns immediately.
 
         Returns
         -------
@@ -17073,6 +17078,7 @@ class Locator(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
+            Deprecated: This option is ignored. `locator.is_visible()` does not wait for the element to become visible and returns immediately.
 
         Returns
         -------
