@@ -44,6 +44,7 @@ from playwright._impl._helper import (
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
+from playwright._impl._network import serialize_headers
 from playwright._impl._wait_helper import throw_on_timeout
 
 if TYPE_CHECKING:
@@ -166,6 +167,8 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
+        if params.get("headers"):
+            params["headers"] = serialize_headers(params["headers"])
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
         self._did_launch_browser(browser)
