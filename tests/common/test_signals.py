@@ -2,7 +2,10 @@ import asyncio
 import multiprocessing
 import os
 import signal
+import sys
 from typing import Any, Dict
+
+import pytest
 
 from playwright.async_api import async_playwright
 from playwright.sync_api import sync_playwright
@@ -110,9 +113,11 @@ def _create_signals_test(
     assert process.exitcode == 0
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="there is no SIGINT on Windows")
 def test_signals_sync(browser_name: str, launch_arguments: Dict) -> None:
     _create_signals_test(_test_signals_sync, browser_name, launch_arguments)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="there is no SIGINT on Windows")
 def test_signals_async(browser_name: str, launch_arguments: Dict) -> None:
     _create_signals_test(_test_signals_async, browser_name, launch_arguments)
