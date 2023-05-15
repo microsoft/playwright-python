@@ -14,6 +14,7 @@ from playwright.sync_api import sync_playwright
 def _test_signals_async(
     browser_name: str, launch_arguments: Dict, wait_queue: "multiprocessing.Queue[str]"
 ) -> None:
+    os.setpgrp()
     sigint_received = False
 
     def my_sig_handler(signum: int, frame: Any) -> None:
@@ -25,10 +26,8 @@ def _test_signals_async(
     async def main() -> None:
         playwright = await async_playwright().start()
         browser = await playwright[browser_name].launch(
-            handle_sighup=False,
+            **launch_arguments,
             handle_sigint=False,
-            handle_sigterm=False,
-            **launch_arguments
         )
         context = await browser.new_context()
         page = await context.new_page()
@@ -55,6 +54,7 @@ def _test_signals_async(
 def _test_signals_sync(
     browser_name: str, launch_arguments: Dict, wait_queue: "multiprocessing.Queue[str]"
 ) -> None:
+    os.setpgrp()
     sigint_received = False
 
     def my_sig_handler(signum: int, frame: Any) -> None:
@@ -65,10 +65,8 @@ def _test_signals_sync(
 
     playwright = sync_playwright().start()
     browser = playwright[browser_name].launch(
-        handle_sighup=False,
+        **launch_arguments,
         handle_sigint=False,
-        handle_sigterm=False,
-        **launch_arguments
     )
     context = browser.new_context()
     page = context.new_page()
@@ -99,7 +97,7 @@ def _create_signals_test(
     process.start()
     assert process.pid is not None
     wait_queue.get()
-    os.kill(process.pid, signal.SIGINT)
+    os.killpg(os.getpgid(process.pid), signal.SIGINT)
     process.join()
     logs = []
     while not wait_queue.empty():
