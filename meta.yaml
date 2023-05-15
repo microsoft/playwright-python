@@ -29,6 +29,7 @@ requirements:
 test:
   requires:
     - pip
+    - numpy >=1.17.0
   imports:
     - playwright
     - playwright.sync_api
