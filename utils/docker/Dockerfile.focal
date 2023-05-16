@@ -35,6 +35,9 @@ COPY ./dist/*-manylinux*.whl /tmp/
 RUN mkdir /ms-playwright && \
     mkdir /ms-playwright-agent && \
     cd /ms-playwright-agent && \
+    pip install virtualenv && \
+    virtualenv venv && \
+    . venv/bin/activate && \
     # if its amd64 then install the manylinux1_x86_64 pip package
     if [ "$(uname -m)" = "x86_64" ]; then pip install /tmp/*manylinux1_x86_64*.whl; fi && \
     # if its arm64 then install the manylinux1_aarch64 pip package
