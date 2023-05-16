@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass, field
 from typing import Any, List, Optional, Pattern, Union
 from urllib.parse import urljoin
 
@@ -24,23 +23,18 @@ from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
 
 
-@dataclass
-class ExpectOptions:
-    timeout: float = field(default=5_000)
-
-
 class AssertionsBase:
     def __init__(
         self,
         locator: Locator,
-        options: ExpectOptions,
+        timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
     ) -> None:
         self._actual_locator = locator
         self._loop = locator._loop
         self._dispatcher_fiber = locator._dispatcher_fiber
-        self._options = options
+        self._timeout = timeout
         self._is_not = is_not
         self._custom_message = message
 
@@ -54,7 +48,7 @@ class AssertionsBase:
         __tracebackhide__ = True
         expect_options["isNot"] = self._is_not
         if expect_options.get("timeout") is None:
-            expect_options["timeout"] = self._options.timeout
+            expect_options["timeout"] = self._timeout or 5_000
         if expect_options["isNot"]:
             message = message.replace("expected to", "expected not to")
         if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
@@ -80,17 +74,17 @@ class PageAssertions(AssertionsBase):
     def __init__(
         self,
         page: Page,
-        options: ExpectOptions,
+        timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
     ) -> None:
-        super().__init__(page.locator(":root"), options, is_not, message)
+        super().__init__(page.locator(":root"), timeout, is_not, message)
         self._actual_page = page
 
     @property
     def _not(self) -> "PageAssertions":
         return PageAssertions(
-            self._actual_page, self._options, not self._is_not, self._custom_message
+            self._actual_page, self._timeout, not self._is_not, self._custom_message
         )
 
     async def to_have_title(
@@ -139,17 +133,17 @@ class LocatorAssertions(AssertionsBase):
     def __init__(
         self,
         locator: Locator,
-        options: ExpectOptions,
+        timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
     ) -> None:
-        super().__init__(locator, options, is_not, message)
+        super().__init__(locator, timeout, is_not, message)
         self._actual_locator = locator
 
     @property
     def _not(self) -> "LocatorAssertions":
         return LocatorAssertions(
-            self._actual_locator, self._options, not self._is_not, self._custom_message
+            self._actual_locator, self._timeout, not self._is_not, self._custom_message
         )
 
     async def to_contain_text(
@@ -699,13 +693,13 @@ class APIResponseAssertions:
     def __init__(
         self,
         response: APIResponse,
-        options: ExpectOptions,
+        timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
     ) -> None:
         self._loop = response._loop
         self._dispatcher_fiber = response._dispatcher_fiber
-        self._options = options
+        self._timeout = timeout
         self._is_not = is_not
         self._actual = response
         self._custom_message = message
@@ -713,7 +707,7 @@ class APIResponseAssertions:
     @property
     def _not(self) -> "APIResponseAssertions":
         return APIResponseAssertions(
-            self._actual, self._options, not self._is_not, self._custom_message
+            self._actual, self._timeout, not self._is_not, self._custom_message
         )
 
     async def to_be_ok(

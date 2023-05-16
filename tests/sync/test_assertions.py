@@ -862,11 +862,11 @@ def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
 
 def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
     try:
-        expect.set_options(timeout=111)
+        expect.set_timeout(111)
         with pytest.raises(AssertionError) as exc_info:
             expect(page.locator("#a1")).to_be_visible()
         assert "LocatorAssertions.to_be_visible with timeout 111ms" in str(
             exc_info.value
         )
     finally:
-        expect.set_options(timeout=5_000)
+        expect.set_timeout(5_000)

@@ -26,7 +26,6 @@ import playwright.sync_api._generated
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
 )
-from playwright._impl._assertions import ExpectOptions
 from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright.sync_api._context_manager import PlaywrightContextManager
@@ -90,11 +89,10 @@ def sync_playwright() -> PlaywrightContextManager:
 
 class Expect:
     def __init__(self) -> None:
-        self._options = ExpectOptions()
+        self._timeout: Optional[float] = None
 
-    def set_options(self, timeout: float = None) -> None:
-        if timeout is not None:
-            self._options.timeout = timeout
+    def set_timeout(self, timeout: float) -> None:
+        self._timeout = timeout
 
     @overload
     def __call__(self, actual: Page, message: Optional[str] = None) -> PageAssertions:
@@ -117,16 +115,16 @@ class Expect:
     ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
         if isinstance(actual, Page):
             return PageAssertions(
-                PageAssertionsImpl(actual._impl_obj, self._options, message=message)
+                PageAssertionsImpl(actual._impl_obj, self._timeout, message=message)
             )
         elif isinstance(actual, Locator):
             return LocatorAssertions(
-                LocatorAssertionsImpl(actual._impl_obj, self._options, message=message)
+                LocatorAssertionsImpl(actual._impl_obj, self._timeout, message=message)
             )
         elif isinstance(actual, APIResponse):
             return APIResponseAssertions(
                 APIResponseAssertionsImpl(
-                    actual._impl_obj, self._options, message=message
+                    actual._impl_obj, self._timeout, message=message
                 )
             )
         raise ValueError(f"Unsupported type: {type(actual)}")
