@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import asyncio
-from typing import Dict, Optional, cast
+from typing import Dict, cast
 
 from pyee.asyncio import AsyncIOEventEmitter
 
 from playwright._impl._connection import Channel
-from playwright._impl._helper import ParsedMessagePayload
+from playwright._impl._helper import Error, ParsedMessagePayload
 from playwright._impl._transport import Transport
 
 
@@ -48,17 +48,13 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
     async def connect(self) -> None:
         self._stopped_future: asyncio.Future = asyncio.Future()
 
-        close_error: Optional[str] = None
-
         def handle_message(message: Dict) -> None:
-            try:
-                self.on_message(cast(ParsedMessagePayload, message))
-            except Exception as e:
-                nonlocal close_error
-                close_error = str(e)
+            if self._stop_requested:
+                return
+            self.on_message(cast(ParsedMessagePayload, message))
 
         def handle_closed() -> None:
-            self.emit("close", close_error)
+            self.emit("close")
             self._stopped_future.set_result(None)
 
         self._pipe_channel.on(
@@ -74,4 +70,6 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         await self._stopped_future
 
     def send(self, message: Dict) -> None:
+        if self._stop_requested:
+            raise Error("Playwright connection closed")
         self._pipe_channel.send_no_reply("send", {"message": message})

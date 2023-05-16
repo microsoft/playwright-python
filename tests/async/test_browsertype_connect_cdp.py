@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from typing import Dict
 
 import pytest
 import requests
 
-from playwright.async_api import BrowserType
+from playwright.async_api import BrowserType, Error
 from tests.server import Server, find_free_port
 
 pytestmark = pytest.mark.only_browser("chromium")
@@ -86,3 +87,14 @@ async def test_conect_over_a_ws_endpoint(
     assert len(cdp_browser2.contexts) == 1
     await cdp_browser2.close()
     await browser_server.close()
+
+
+async def test_connect_over_cdp_passing_header_works(
+    launch_arguments: Dict, browser_type: BrowserType, server: Server
+):
+    request = asyncio.create_task(server.wait_for_request("/ws"))
+    with pytest.raises(Error):
+        await browser_type.connect_over_cdp(
+            f"ws://127.0.0.1:{server.PORT}/ws", headers={"foo": "bar"}
+        )
+    assert (await request).getHeader("foo") == "bar"

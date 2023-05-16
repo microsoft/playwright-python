@@ -44,6 +44,7 @@ from playwright._impl._helper import (
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
+from playwright._impl._network import serialize_headers
 from playwright._impl._wait_helper import throw_on_timeout
 
 if TYPE_CHECKING:
@@ -166,6 +167,8 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
+        if params.get("headers"):
+            params["headers"] = serialize_headers(params["headers"])
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
         self._did_launch_browser(browser)
@@ -219,7 +222,7 @@ class BrowserType(ChannelOwner):
 
         timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
         done, pending = await asyncio.wait(
-            {playwright_future, timeout_future},
+            {transport.on_error_future, playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
         )
         if not playwright_future.done():
@@ -235,13 +238,13 @@ class BrowserType(ChannelOwner):
         self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
 
-        def handle_transport_close(transport_exception: str) -> None:
+        def handle_transport_close() -> None:
             for context in browser.contexts:
                 for page in context.pages:
                     page._on_close()
                 context._on_close()
             browser._on_close()
-            connection.cleanup(transport_exception or BROWSER_CLOSED_ERROR)
+            connection.cleanup(BROWSER_CLOSED_ERROR)
 
         transport.once("close", handle_transport_close)
 
