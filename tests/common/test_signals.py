@@ -96,13 +96,13 @@ def _create_signals_test(
     )
     process.start()
     assert process.pid is not None
-    wait_queue.get()
+    logs = [wait_queue.get()]
     os.killpg(os.getpgid(process.pid), signal.SIGINT)
     process.join()
-    logs = []
     while not wait_queue.empty():
         logs.append(wait_queue.get())
     assert logs == [
+        "ready",
         "close context",
         "close browser",
         "close playwright",
