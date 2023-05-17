@@ -139,6 +139,8 @@ async def test_dialog_event_should_work_in_popup_2(
     await promise
 
 
+# console message from javascript: url is not reported at all
+@pytest.mark.skip_browser("firefox")
 async def test_dialog_event_should_work_in_immdiately_closed_popup(page: Page) -> None:
     prompt_task = None
 
