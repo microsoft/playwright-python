@@ -44,6 +44,8 @@ from playwright._impl._connection import (
     from_channel,
     from_nullable_channel,
 )
+from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._dialog import Dialog
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
@@ -82,6 +84,8 @@ class BrowserContext(ChannelOwner):
     Events = SimpleNamespace(
         BackgroundPage="backgroundpage",
         Close="close",
+        Console="console",
+        Dialog="dialog",
         Page="page",
         ServiceWorker="serviceworker",
         Request="request",
@@ -137,6 +141,14 @@ class BrowserContext(ChannelOwner):
             lambda params: self._on_service_worker(from_channel(params["worker"])),
         )
         self._channel.on(
+            "console",
+            lambda params: self._on_console_message(from_channel(params["message"])),
+        )
+
+        self._channel.on(
+            "dialog", lambda params: self._on_dialog(from_channel(params["dialog"]))
+        )
+        self._channel.on(
             "request",
             lambda params: self._on_request(
                 from_channel(params["request"]),
@@ -174,6 +186,8 @@ class BrowserContext(ChannelOwner):
         )
         self._set_event_to_subscription_mapping(
             {
+                BrowserContext.Events.Console: "console",
+                BrowserContext.Events.Dialog: "dialog",
                 BrowserContext.Events.Request: "request",
                 BrowserContext.Events.Response: "response",
                 BrowserContext.Events.RequestFinished: "requestFinished",
@@ -506,6 +520,27 @@ class BrowserContext(ChannelOwner):
             page.emit(Page.Events.RequestFinished, request)
         if response:
             response._finished_future.set_result(True)
+
+    def _on_console_message(self, message: ConsoleMessage) -> None:
+        self.emit(BrowserContext.Events.Console, message)
+        page = message.page
+        if page:
+            page.emit(Page.Events.Console, message)
+
+    def _on_dialog(self, dialog: Dialog) -> None:
+        has_listeners = self.emit(BrowserContext.Events.Dialog, dialog)
+        page = dialog.page
+        if page:
+            has_listeners = page.emit(Page.Events.Dialog, dialog) or has_listeners
+        if not has_listeners:
+            # Although we do similar handling on the server side, we still need this logic
+            # on the client side due to a possible race condition between two async calls:
+            # a) removing "dialog" listener subscription (client->server)
+            # b) actual "dialog" event (server->client)
+            if dialog.type == "beforeunload":
+                asyncio.create_task(dialog.accept())
+            else:
+                asyncio.create_task(dialog.dismiss())
 
     def _on_request(self, request: Request, page: Optional[Page]) -> None:
         self.emit(BrowserContext.Events.Request, request)

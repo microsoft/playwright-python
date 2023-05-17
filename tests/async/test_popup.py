@@ -316,20 +316,27 @@ async def test_should_emit_for_immediately_closed_popups(context, server):
 
 async def test_should_be_able_to_capture_alert(context):
     page = await context.new_page()
-    evaluate_promise = asyncio.create_task(
-        page.evaluate(
-            """() => {
+    evaluate_task = None
+
+    async def evaluate() -> None:
+        nonlocal evaluate_task
+        evaluate_task = asyncio.create_task(
+            page.evaluate(
+                """() => {
                 const win = window.open('')
                 win.alert('hello')
             }"""
+            )
         )
+
+    [popup, dialog, _] = await asyncio.gather(
+        page.wait_for_event("popup"), context.wait_for_event("dialog"), evaluate()
     )
 
-    popup = await page.wait_for_event("popup")
-    dialog = await popup.wait_for_event("dialog")
     assert dialog.message == "hello"
+    assert dialog.page == popup
     await dialog.dismiss()
-    await evaluate_promise
+    await evaluate_task
 
 
 async def test_should_work_with_empty_url(context):

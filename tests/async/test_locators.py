@@ -949,6 +949,31 @@ async def test_should_support_locator_filter(page: Page) -> None:
     await expect(page.locator("div").filter(has_not_text="foo")).to_have_count(2)
 
 
+async def test_locators_should_support_locator_and(page: Page, server: Server):
+    await page.set_content(
+        """
+        <div data-testid=foo>hello</div><div data-testid=bar>world</div>
+        <span data-testid=foo>hello2</span><span data-testid=bar>world2</span>
+    """
+    )
+    await expect(page.locator("div").and_(page.locator("div"))).to_have_count(2)
+    await expect(page.locator("div").and_(page.get_by_test_id("foo"))).to_have_text(
+        ["hello"]
+    )
+    await expect(page.locator("div").and_(page.get_by_test_id("bar"))).to_have_text(
+        ["world"]
+    )
+    await expect(page.get_by_test_id("foo").and_(page.locator("div"))).to_have_text(
+        ["hello"]
+    )
+    await expect(page.get_by_test_id("bar").and_(page.locator("span"))).to_have_text(
+        ["world2"]
+    )
+    await expect(
+        page.locator("span").and_(page.get_by_test_id(re.compile("bar|foo")))
+    ).to_have_count(2)
+
+
 async def test_locators_has_does_not_encode_unicode(page: Page, server: Server):
     await page.goto(server.EMPTY_PAGE)
     locators = [

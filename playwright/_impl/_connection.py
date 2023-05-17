@@ -161,8 +161,11 @@ class ChannelOwner(AsyncIOEventEmitter):
     def _update_subscription(self, event: str, enabled: bool) -> None:
         protocol_event = self._event_to_subscription_mapping.get(event)
         if protocol_event:
-            self._channel.send_no_reply(
-                "updateSubscription", {"event": protocol_event, "enabled": enabled}
+            self._connection.wrap_api_call_sync(
+                lambda: self._channel.send_no_reply(
+                    "updateSubscription", {"event": protocol_event, "enabled": enabled}
+                ),
+                True,
             )
 
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
