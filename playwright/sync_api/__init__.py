@@ -91,8 +91,18 @@ class Expect:
     def __init__(self) -> None:
         self._timeout: Optional[float] = None
 
-    def set_timeout(self, timeout: float) -> None:
-        self._timeout = timeout
+    def set_options(self, timeout: float = None) -> None:
+        """
+        This method sets global `expect()` options.
+
+        Args:
+            timeout (float): Timeout value in milliseconds. Default to 5000 milliseconds.
+
+        Returns:
+            None
+        """
+        if timeout is not None:
+            self._timeout = timeout
 
     @overload
     def __call__(self, actual: Page, message: Optional[str] = None) -> PageAssertions:
