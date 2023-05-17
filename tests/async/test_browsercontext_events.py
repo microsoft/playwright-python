@@ -142,24 +142,16 @@ async def test_dialog_event_should_work_in_popup_2(
 # console message from javascript: url is not reported at all
 @pytest.mark.skip_browser("firefox")
 async def test_dialog_event_should_work_in_immdiately_closed_popup(page: Page) -> None:
-    prompt_task = None
-
-    async def open_dialog() -> None:
-        nonlocal prompt_task
-        prompt_task = asyncio.create_task(
-            page.evaluate(
-                """() => {
+    [message, popup, _] = await asyncio.gather(
+        page.context.wait_for_event("console"),
+        page.wait_for_event("popup"),
+        page.evaluate(
+            """() => {
             const win = window.open();
             win.console.log('hello');
             win.close();
         }"""
-            )
-        )
-
-    [message, popup, _] = await asyncio.gather(
-        page.context.wait_for_event("console"),
-        page.wait_for_event("popup"),
-        open_dialog(),
+        ),
     )
     assert message.text == "hello"
     assert message.page == popup
