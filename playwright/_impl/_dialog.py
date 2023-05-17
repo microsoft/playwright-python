@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
+from typing import TYPE_CHECKING, Dict, Optional
 
-from playwright._impl._connection import ChannelOwner
+from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._helper import locals_to_params
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._page import Page
 
 
 class Dialog(ChannelOwner):
@@ -23,6 +26,7 @@ class Dialog(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._page: Optional["Page"] = from_nullable_channel(initializer.get("page"))
 
     def __repr__(self) -> str:
         return f"<Dialog type={self.type} message={self.message} default_value={self.default_value}>"
@@ -38,6 +42,10 @@ class Dialog(ChannelOwner):
     @property
     def default_value(self) -> str:
         return self._initializer["defaultValue"]
+
+    @property
+    def page(self) -> Optional["Page"]:
+        return self._page
 
     async def accept(self, promptText: str = None) -> None:
         await self._channel.send("accept", locals_to_params(locals()))

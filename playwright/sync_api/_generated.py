@@ -860,7 +860,7 @@ class Route(SyncBase):
 
         ```py
         # Handle GET requests.
-        def handle_post(route):
+        def handle_get(route):
             if route.request.method != \"GET\":
                 route.fallback()
                 return
@@ -881,7 +881,7 @@ class Route(SyncBase):
 
         ```py
         # Handle GET requests.
-        def handle_post(route):
+        def handle_get(route):
             if route.request.method != \"GET\":
                 route.fallback()
                 return
@@ -7211,6 +7211,18 @@ class ConsoleMessage(SyncBase):
         """
         return mapping.from_impl(self._impl_obj.location)
 
+    @property
+    def page(self) -> typing.Optional["Page"]:
+        """ConsoleMessage.page
+
+        The page that produced this console message, if any.
+
+        Returns
+        -------
+        Union[Page, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.page)
+
 
 mapping.register(ConsoleMessageImpl, ConsoleMessage)
 
@@ -7251,6 +7263,18 @@ class Dialog(SyncBase):
         str
         """
         return mapping.from_maybe_impl(self._impl_obj.default_value)
+
+    @property
+    def page(self) -> typing.Optional["Page"]:
+        """Dialog.page
+
+        The page that initiated this dialog, if available.
+
+        Returns
+        -------
+        Union[Page, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.page)
 
     def accept(self, prompt_text: typing.Optional[str] = None) -> None:
         """Dialog.accept
@@ -7436,9 +7460,9 @@ class Page(SyncContextManager):
         Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
         emitted if the page throws an error or a warning.
 
-        The arguments passed into `console.log` appear as arguments on the event handler.
+        The arguments passed into `console.log` are available on the `ConsoleMessage` event handler argument.
 
-        An example of handling `console` event:
+        **Usage**
 
         ```py
         async def print_args(msg):
@@ -7448,7 +7472,7 @@ class Page(SyncContextManager):
             print(values)
 
         page.on(\"console\", print_args)
-        await page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        await page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
         ```
 
         ```py
@@ -7457,7 +7481,7 @@ class Page(SyncContextManager):
                 print(arg.json_value())
 
         page.on(\"console\", print_args)
-        page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
         ```"""
 
     @typing.overload
@@ -7498,12 +7522,14 @@ class Page(SyncContextManager):
         [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog,
         and actions like click will never finish.
 
+        **Usage**
+
         ```python
         page.on(\"dialog\", lambda dialog: dialog.accept())
         ```
 
-        **NOTE** When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed.
-        """
+        **NOTE** When no `page.on('dialog')` or `browser_context.on('dialog')` listeners are present, all dialogs are
+        automatically dismissed."""
 
     @typing.overload
     def on(
@@ -7684,9 +7710,9 @@ class Page(SyncContextManager):
         Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
         emitted if the page throws an error or a warning.
 
-        The arguments passed into `console.log` appear as arguments on the event handler.
+        The arguments passed into `console.log` are available on the `ConsoleMessage` event handler argument.
 
-        An example of handling `console` event:
+        **Usage**
 
         ```py
         async def print_args(msg):
@@ -7696,7 +7722,7 @@ class Page(SyncContextManager):
             print(values)
 
         page.on(\"console\", print_args)
-        await page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        await page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
         ```
 
         ```py
@@ -7705,7 +7731,7 @@ class Page(SyncContextManager):
                 print(arg.json_value())
 
         page.on(\"console\", print_args)
-        page.evaluate(\"console.log('hello', 5, {foo: 'bar'})\")
+        page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
         ```"""
 
     @typing.overload
@@ -7748,12 +7774,14 @@ class Page(SyncContextManager):
         [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog,
         and actions like click will never finish.
 
+        **Usage**
+
         ```python
         page.on(\"dialog\", lambda dialog: dialog.accept())
         ```
 
-        **NOTE** When no `page.on('dialog')` listeners are present, all dialogs are automatically dismissed.
-        """
+        **NOTE** When no `page.on('dialog')` or `browser_context.on('dialog')` listeners are present, all dialogs are
+        automatically dismissed."""
 
     @typing.overload
     def once(
@@ -9965,7 +9993,7 @@ class Page(SyncContextManager):
             When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to
             `false`.
         clip : Union[{x: float, y: float, width: float, height: float}, None]
-            An object which specifies clipping of the resulting image. Should have the following fields:
+            An object which specifies clipping of the resulting image.
         animations : Union["allow", "disabled", None]
             When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different
             treatment depending on their duration:
@@ -12590,6 +12618,57 @@ class BrowserContext(SyncContextManager):
         - The `browser.close()` method was called."""
 
     @typing.overload
+    def on(
+        self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
+    ) -> None:
+        """
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
+        emitted if the page throws an error or a warning.
+
+        The arguments passed into `console.log` and the page are available on the `ConsoleMessage` event handler argument.
+
+        **Usage**
+
+        ```py
+        async def print_args(msg):
+            values = []
+            for arg in msg.args:
+                values.append(await arg.json_value())
+            print(values)
+
+        context.on(\"console\", print_args)
+        await page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
+        ```
+
+        ```py
+        def print_args(msg):
+            for arg in msg.args:
+                print(arg.json_value())
+
+        context.on(\"console\", print_args)
+        page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
+        ```"""
+
+    @typing.overload
+    def on(
+        self, event: Literal["dialog"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
+        either `dialog.accept()` or `dialog.dismiss()` the dialog - otherwise the page will
+        [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog,
+        and actions like click will never finish.
+
+        **Usage**
+
+        ```python
+        context.on(\"dialog\", lambda dialog: dialog.accept())
+        ```
+
+        **NOTE** When no `page.on('dialog')` or `browser_context.on('dialog')` listeners are present, all dialogs are
+        automatically dismissed."""
+
+    @typing.overload
     def on(self, event: Literal["page"], f: typing.Callable[["Page"], "None"]) -> None:
         """
         The event is emitted when a new Page is created in the BrowserContext. The page may still be loading. The event
@@ -12696,6 +12775,57 @@ class BrowserContext(SyncContextManager):
         - Browser context is closed.
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
+    ) -> None:
+        """
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
+        emitted if the page throws an error or a warning.
+
+        The arguments passed into `console.log` and the page are available on the `ConsoleMessage` event handler argument.
+
+        **Usage**
+
+        ```py
+        async def print_args(msg):
+            values = []
+            for arg in msg.args:
+                values.append(await arg.json_value())
+            print(values)
+
+        context.on(\"console\", print_args)
+        await page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
+        ```
+
+        ```py
+        def print_args(msg):
+            for arg in msg.args:
+                print(arg.json_value())
+
+        context.on(\"console\", print_args)
+        page.evaluate(\"console.log('hello', 5, { foo: 'bar' })\")
+        ```"""
+
+    @typing.overload
+    def once(
+        self, event: Literal["dialog"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
+        either `dialog.accept()` or `dialog.dismiss()` the dialog - otherwise the page will
+        [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog,
+        and actions like click will never finish.
+
+        **Usage**
+
+        ```python
+        context.on(\"dialog\", lambda dialog: dialog.accept())
+        ```
+
+        **NOTE** When no `page.on('dialog')` or `browser_context.on('dialog')` listeners are present, all dialogs are
+        automatically dismissed."""
 
     @typing.overload
     def once(
@@ -12950,6 +13080,9 @@ class BrowserContext(SyncContextManager):
         Parameters
         ----------
         cookies : List[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
+            Adds cookies to the browser context.
+
+            For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com".
         """
 
         return mapping.from_maybe_impl(
@@ -14012,8 +14145,7 @@ class Browser(SyncContextManager):
             Learn more about [storage state and auth](../auth.md).
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
-            information obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or
-            an object with the following fields:
+            information obtained via `browser_context.storage_state()`.
         base_url : Union[str, None]
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
@@ -14229,8 +14361,7 @@ class Browser(SyncContextManager):
             Learn more about [storage state and auth](../auth.md).
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
-            information obtained via `browser_context.storage_state()`. Either a path to the file with saved storage, or
-            an object with the following fields:
+            information obtained via `browser_context.storage_state()`.
         base_url : Union[str, None]
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
@@ -16694,6 +16825,35 @@ class Locator(SyncBase):
         """
 
         return mapping.from_impl(self._impl_obj.or_(locator=locator._impl_obj))
+
+    def and_(self, locator: "Locator") -> "Locator":
+        """Locator.and_
+
+        Creates a locator that matches both this locator and the argument locator.
+
+        **Usage**
+
+        The following example finds a button with a specific title.
+
+        ```py
+        button = page.get_by_role(\"button\").and_(page.getByTitle(\"Subscribe\"))
+        ```
+
+        ```py
+        button = page.get_by_role(\"button\").and_(page.getByTitle(\"Subscribe\"))
+        ```
+
+        Parameters
+        ----------
+        locator : Locator
+            Additional locator to match.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.and_(locator=locator._impl_obj))
 
     def focus(self, *, timeout: typing.Optional[float] = None) -> None:
         """Locator.focus
