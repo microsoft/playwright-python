@@ -13799,6 +13799,38 @@ class BrowserContext(SyncContextManager):
             )
         )
 
+    def expect_console_message(
+        self,
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None
+    ) -> EventContextManager["ConsoleMessage"]:
+        """BrowserContext.expect_console_message
+
+        Performs action and waits for a `ConsoleMessage` to be logged by in the pages in the context. If predicate is
+        provided, it passes `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to
+        return a truthy value. Will throw an error if the page is closed before the `browser_context.on('console')` event
+        is fired.
+
+        Parameters
+        ----------
+        predicate : Union[Callable[[ConsoleMessage], bool], None]
+            Receives the `ConsoleMessage` object and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, None]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
+            default value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager[ConsoleMessage]
+        """
+        return EventContextManager(
+            self,
+            self._impl_obj.expect_console_message(
+                predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future,
+        )
+
     def expect_page(
         self,
         predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
