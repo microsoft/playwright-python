@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import re
 from urllib.parse import urlparse
 
 import pytest
@@ -477,13 +478,13 @@ async def test_route_should_unroute(context, server):
     def handler4(route, request):
         handler(route, request, 4)
 
-    await context.route("**/empty.html", handler4)
+    await context.route(re.compile("empty.html"), handler4)
 
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [4]
 
     intercepted = []
-    await context.unroute("**/empty.html", handler4)
+    await context.unroute(re.compile("empty.html"), handler4)
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [3]
 

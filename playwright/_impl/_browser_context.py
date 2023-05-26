@@ -478,6 +478,13 @@ class BrowserContext(ChannelOwner):
             pass
         return await event_info
 
+    def expect_console_message(
+        self,
+        predicate: Callable[[ConsoleMessage], bool] = None,
+        timeout: float = None,
+    ) -> EventContextManagerImpl[ConsoleMessage]:
+        return self.expect_event(Page.Events.Console, predicate, timeout)
+
     def expect_page(
         self,
         predicate: Callable[[Page], bool] = None,

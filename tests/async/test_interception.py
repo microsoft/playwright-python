@@ -14,6 +14,7 @@
 
 import asyncio
 import json
+import re
 
 import pytest
 
@@ -75,13 +76,13 @@ async def test_page_route_should_unroute(page: Page, server):
         intercepted.append(4)
         asyncio.create_task(route.continue_())
 
-    await page.route("**/empty.html", handler4)
+    await page.route(re.compile("empty.html"), handler4)
 
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [4]
 
     intercepted = []
-    await page.unroute("**/empty.html", handler4)
+    await page.unroute(re.compile("empty.html"), handler4)
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [3]
 

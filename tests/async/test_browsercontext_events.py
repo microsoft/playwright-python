@@ -180,3 +180,11 @@ async def test_dialog_event_should_work_with_inline_script_tag(
     await dialog.accept("hello")
     await promise
     await popup.evaluate("window.result") == "hello"
+
+
+async def test_console_event_should_work_with_context_manager(page: Page) -> None:
+    async with page.context.expect_console_message() as cm_info:
+        await page.evaluate("() => console.log('hello')")
+    message = await cm_info.value
+    assert message.text == "hello"
+    assert message.page == page
