@@ -280,16 +280,6 @@ class Page(ChannelOwner):
     def _on_crash(self) -> None:
         self.emit(Page.Events.Crash, self)
 
-    def _on_dialog(self, params: Any) -> None:
-        dialog = cast(Dialog, from_channel(params["dialog"]))
-        if self.listeners(Page.Events.Dialog):
-            self.emit(Page.Events.Dialog, dialog)
-        else:
-            if dialog.type == "beforeunload":
-                self._emit_sync(dialog.accept())
-            else:
-                self._emit_sync(dialog.dismiss())
-
     def _on_download(self, params: Any) -> None:
         url = params["url"]
         suggested_filename = params["suggestedFilename"]

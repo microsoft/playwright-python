@@ -18,7 +18,6 @@ import datetime
 import inspect
 import sys
 import traceback
-from asyncio import AbstractEventLoop
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -30,14 +29,13 @@ from typing import (
     Mapping,
     Optional,
     Set,
-    Tuple,
     Union,
     cast,
 )
 
 from greenlet import greenlet
 from pyee import EventEmitter
-from pyee.asyncio import AsyncIOEventEmitter as PyeeAsyncIOEventEmitter
+from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
 from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
@@ -52,53 +50,6 @@ if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import TypedDict
 else:  # pragma: no cover
     from typing_extensions import TypedDict
-
-
-class AsyncIOEventEmitter(PyeeAsyncIOEventEmitter):
-    # https://github.com/python/cpython/issues/88831
-    # https://stackoverflow.com/questions/71938799/python-asyncio-create-task-really-need-to-keep-a-reference
-    # https://github.com/jfhbrook/pyee/issues/120
-    # https://github.com/microsoft/playwright/issues/12182
-    def __init__(self, loop: Optional[AbstractEventLoop] = None):
-        super(AsyncIOEventEmitter, self).__init__()
-        self._loop: Optional[AbstractEventLoop] = loop
-        self._running_tasks: Set[asyncio.Task] = set()
-
-    def _emit_run(
-        self,
-        f: Callable,
-        args: Tuple[Any, ...],
-        kwargs: Dict[str, Any],
-    ) -> None:
-        try:
-            coro: Any = f(*args, **kwargs)
-        except Exception as exc:
-            self.emit("error", exc)
-        else:
-            if asyncio.iscoroutine(coro):
-                if self._loop:
-                    # ensure_future is *extremely* cranky about the types here,
-                    # but this is relatively well-tested and I think the types
-                    # are more strict than they should be
-                    fut: Any = asyncio.ensure_future(cast(Any, coro), loop=self._loop)
-                else:
-                    fut = asyncio.ensure_future(cast(Any, coro))
-            elif isinstance(coro, asyncio.Future):
-                fut = cast(Any, coro)
-            else:
-                return
-
-            def callback(f: asyncio.Task) -> None:
-                self._running_tasks.remove(f)
-                if f.cancelled():
-                    return
-
-                exc: Optional[BaseException] = f.exception()
-                if exc:
-                    self.emit("error", exc)
-
-            self._running_tasks.add(fut)
-            fut.add_done_callback(callback)
 
 
 class Channel(AsyncIOEventEmitter):
@@ -214,8 +165,11 @@ class ChannelOwner(AsyncIOEventEmitter):
     def _update_subscription(self, event: str, enabled: bool) -> None:
         protocol_event = self._event_to_subscription_mapping.get(event)
         if protocol_event:
-            self._channel.send_no_reply(
-                "updateSubscription", {"event": protocol_event, "enabled": enabled}
+            self._connection.wrap_api_call_sync(
+                lambda: self._channel.send_no_reply(
+                    "updateSubscription", {"event": protocol_event, "enabled": enabled}
+                ),
+                True,
             )
 
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
