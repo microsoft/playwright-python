@@ -167,11 +167,15 @@ class Browser(ChannelOwner):
         recordHarContent: HarContentPolicy = None,
     ) -> Page:
         params = locals_to_params(locals())
-        context = await self.new_context(**params)
-        page = await context.new_page()
-        page._owned_context = context
-        context._owner_page = page
-        return page
+
+        async def inner() -> Page:
+            context = await self.new_context(**params)
+            page = await context.new_page()
+            page._owned_context = context
+            context._owner_page = page
+            return page
+
+        return await self._connection.wrap_api_call(inner)
 
     async def close(self) -> None:
         if self._is_closed_or_closing:

@@ -356,6 +356,14 @@ class Locator:
             self._selector + " >> internal:or=" + json.dumps(locator._selector),
         )
 
+    def and_(self, locator: "Locator") -> "Locator":
+        if locator._frame != self._frame:
+            raise Error("Locators must belong to the same frame.")
+        return Locator(
+            self._frame,
+            self._selector + " >> internal:and=" + json.dumps(locator._selector),
+        )
+
     async def focus(self, timeout: float = None) -> None:
         params = locals_to_params(locals())
         return await self._frame.focus(self._selector, strict=True, **params)

@@ -87,35 +87,60 @@ def async_playwright() -> PlaywrightContextManager:
     return PlaywrightContextManager()
 
 
-@overload
-def expect(actual: Page, message: Optional[str] = None) -> PageAssertions:
-    ...
+class Expect:
+    def __init__(self) -> None:
+        self._timeout: Optional[float] = None
+
+    def set_options(self, timeout: float = None) -> None:
+        """
+        This method sets global `expect()` options.
+
+        Args:
+            timeout (float): Timeout value in milliseconds. Default to 5000 milliseconds.
+
+        Returns:
+            None
+        """
+        if timeout is not None:
+            self._timeout = timeout
+
+    @overload
+    def __call__(self, actual: Page, message: Optional[str] = None) -> PageAssertions:
+        ...
+
+    @overload
+    def __call__(
+        self, actual: Locator, message: Optional[str] = None
+    ) -> LocatorAssertions:
+        ...
+
+    @overload
+    def __call__(
+        self, actual: APIResponse, message: Optional[str] = None
+    ) -> APIResponseAssertions:
+        ...
+
+    def __call__(
+        self, actual: Union[Page, Locator, APIResponse], message: Optional[str] = None
+    ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
+        if isinstance(actual, Page):
+            return PageAssertions(
+                PageAssertionsImpl(actual._impl_obj, self._timeout, message=message)
+            )
+        elif isinstance(actual, Locator):
+            return LocatorAssertions(
+                LocatorAssertionsImpl(actual._impl_obj, self._timeout, message=message)
+            )
+        elif isinstance(actual, APIResponse):
+            return APIResponseAssertions(
+                APIResponseAssertionsImpl(
+                    actual._impl_obj, self._timeout, message=message
+                )
+            )
+        raise ValueError(f"Unsupported type: {type(actual)}")
 
 
-@overload
-def expect(actual: Locator, message: Optional[str] = None) -> LocatorAssertions:
-    ...
-
-
-@overload
-def expect(actual: APIResponse, message: Optional[str] = None) -> APIResponseAssertions:
-    ...
-
-
-def expect(
-    actual: Union[Page, Locator, APIResponse], message: Optional[str] = None
-) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
-    if isinstance(actual, Page):
-        return PageAssertions(PageAssertionsImpl(actual._impl_obj, message=message))
-    elif isinstance(actual, Locator):
-        return LocatorAssertions(
-            LocatorAssertionsImpl(actual._impl_obj, message=message)
-        )
-    elif isinstance(actual, APIResponse):
-        return APIResponseAssertions(
-            APIResponseAssertionsImpl(actual._impl_obj, message=message)
-        )
-    raise ValueError(f"Unsupported type: {type(actual)}")
+expect = Expect()
 
 
 __all__ = [

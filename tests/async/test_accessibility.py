@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
+
 import pytest
 
 
@@ -93,7 +96,12 @@ async def test_accessibility_should_work(page, is_firefox, is_chromium):
                 {"role": "textbox", "name": "placeholder", "value": "and a value"},
                 {
                     "role": "textbox",
-                    "name": "This is a description!",
+                    "name": "placeholder"
+                    if (
+                        sys.platform == "darwin"
+                        and int(os.uname().release.split(".")[0]) >= 21
+                    )
+                    else "This is a description!",
                     "value": "and a value",
                 },  # webkit uses the description over placeholder for the name
             ],

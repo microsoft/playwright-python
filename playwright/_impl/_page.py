@@ -48,7 +48,6 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
-from playwright._impl._dialog import Dialog
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._event_context_manager import EventContextManagerImpl
@@ -159,14 +158,7 @@ class Page(ChannelOwner):
             lambda params: self._on_binding(from_channel(params["binding"])),
         )
         self._channel.on("close", lambda _: self._on_close())
-        self._channel.on(
-            "console",
-            lambda params: self.emit(
-                Page.Events.Console, from_channel(params["message"])
-            ),
-        )
         self._channel.on("crash", lambda _: self._on_crash())
-        self._channel.on("dialog", lambda params: self._on_dialog(params))
         self._channel.on("download", lambda params: self._on_download(params))
         self._channel.on(
             "fileChooser",
@@ -223,6 +215,8 @@ class Page(ChannelOwner):
 
         self._set_event_to_subscription_mapping(
             {
+                Page.Events.Console: "console",
+                Page.Events.Dialog: "dialog",
                 Page.Events.Request: "request",
                 Page.Events.Response: "response",
                 Page.Events.RequestFinished: "requestFinished",

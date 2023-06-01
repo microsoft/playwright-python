@@ -790,3 +790,21 @@ async def test_should_be_attached_over_navigation(page: Page, server: Server) ->
     await page.goto(server.PREFIX + "/input/checkbox.html")
     await task
     assert task.done()
+
+
+async def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
+    with pytest.raises(AssertionError) as exc_info:
+        await expect(page.locator("#a1")).to_be_visible(timeout=111)
+    assert "LocatorAssertions.to_be_visible with timeout 111ms" in str(exc_info.value)
+
+
+async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
+    try:
+        expect.set_options(timeout=111)
+        with pytest.raises(AssertionError) as exc_info:
+            await expect(page.locator("#a1")).to_be_visible()
+        assert "LocatorAssertions.to_be_visible with timeout 111ms" in str(
+            exc_info.value
+        )
+    finally:
+        expect.set_options(timeout=None)
