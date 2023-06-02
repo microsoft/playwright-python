@@ -23,6 +23,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Coroutine,
     Dict,
     List,
     Optional,
@@ -249,9 +250,9 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(
+                    create_task_and_ignore_exceptions(
                         self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
+                            lambda: self._update_interception_patterns()
                         )
                     )
             if handled:
@@ -1272,3 +1273,13 @@ def trim_end(s: str) -> str:
     if len(s) > 50:
         return s[:50] + "\u2026"
     return s
+
+
+def create_task_and_ignore_exceptions(coroutine: Coroutine) -> None:
+    async def _wrapper() -> None:
+        try:
+            await coroutine
+        except Exception:
+            pass
+
+    asyncio.create_task(_wrapper())

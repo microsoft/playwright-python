@@ -67,7 +67,12 @@ from playwright._impl._helper import (
     to_impl,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
-from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._page import (
+    BindingCall,
+    Page,
+    Worker,
+    create_task_and_ignore_exceptions,
+)
 from playwright._impl._tracing import Tracing
 from playwright._impl._wait_helper import WaitHelper
 
@@ -216,9 +221,9 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(
+                    create_task_and_ignore_exceptions(
                         self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
+                            lambda: self._update_interception_patterns()
                         )
                     )
             if handled:
