@@ -25,7 +25,7 @@ with sync_playwright() as p:
     for browser_type in [p.chromium, p.firefox, p.webkit]:
         browser = browser_type.launch()
         page = browser.new_page()
-        page.goto('http://whatsmyuseragent.org/')
+        page.goto('http://playwright.dev')
         page.screenshot(path=f'example-{browser_type.name}.png')
         browser.close()
 ```
@@ -39,7 +39,7 @@ async def main():
         for browser_type in [p.chromium, p.firefox, p.webkit]:
             browser = await browser_type.launch()
             page = await browser.new_page()
-            await page.goto('http://whatsmyuseragent.org/')
+            await page.goto('http://playwright.dev')
             await page.screenshot(path=f'example-{browser_type.name}.png')
             await browser.close()
 
