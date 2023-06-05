@@ -15,7 +15,7 @@
 import base64
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Union, cast
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
@@ -187,7 +187,7 @@ class ElementHandle(JSHandle):
 
     async def set_input_files(
         self,
-        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+        files: Union[str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
