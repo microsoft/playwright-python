@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections.abc import Sequence
 from typing import Any, List, Optional, Pattern, Union
 from urllib.parse import urljoin
 
@@ -149,9 +150,9 @@ class LocatorAssertions(AssertionsBase):
     async def to_contain_text(
         self,
         expected: Union[
-            List[str],
-            List[Pattern[str]],
-            List[Union[Pattern[str], str]],
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
             Pattern[str],
             str,
         ],
@@ -160,7 +161,7 @@ class LocatorAssertions(AssertionsBase):
         ignore_case: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        if isinstance(expected, list):
+        if isinstance(expected, Sequence) and not isinstance(expected, str):
             expected_text = to_expected_text_values(
                 expected,
                 match_substring=True,
@@ -198,9 +199,9 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_contain_text(
         self,
         expected: Union[
-            List[str],
-            List[Pattern[str]],
-            List[Union[Pattern[str], str]],
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
             Pattern[str],
             str,
         ],
@@ -240,16 +241,16 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_class(
         self,
         expected: Union[
-            List[str],
-            List[Pattern[str]],
-            List[Union[Pattern[str], str]],
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
             Pattern[str],
             str,
         ],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        if isinstance(expected, list):
+        if isinstance(expected, Sequence) and not isinstance(expected, str):
             expected_text = to_expected_text_values(expected)
             await self._expect_impl(
                 "to.have.class.array",
@@ -269,9 +270,9 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_class(
         self,
         expected: Union[
-            List[str],
-            List[Pattern[str]],
-            List[Union[Pattern[str], str]],
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
             Pattern[str],
             str,
         ],
@@ -398,7 +399,9 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_values(
         self,
-        values: Union[List[str], List[Pattern[str]], List[Union[Pattern[str], str]]],
+        values: Union[
+            Sequence[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]]
+        ],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -412,7 +415,9 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_values(
         self,
-        values: Union[List[str], List[Pattern[str]], List[Union[Pattern[str], str]]],
+        values: Union[
+            Sequence[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]]
+        ],
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
@@ -421,9 +426,9 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_text(
         self,
         expected: Union[
-            List[str],
-            List[Pattern[str]],
-            List[Union[Pattern[str], str]],
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
             Pattern[str],
             str,
         ],
@@ -432,7 +437,7 @@ class LocatorAssertions(AssertionsBase):
         ignore_case: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        if isinstance(expected, list):
+        if isinstance(expected, Sequence) and not isinstance(expected, str):
             expected_text = to_expected_text_values(
                 expected,
                 normalize_white_space=True,
@@ -466,9 +471,9 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_text(
         self,
         expected: Union[
-            List[str],
-            List[Pattern[str]],
-            List[Union[Pattern[str], str]],
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
             Pattern[str],
             str,
         ],
@@ -757,13 +762,15 @@ def expected_regex(
 
 
 def to_expected_text_values(
-    items: Union[List[Pattern[str]], List[str], List[Union[str, Pattern[str]]]],
+    items: Union[
+        Sequence[Pattern[str]], Sequence[str], Sequence[Union[str, Pattern[str]]]
+    ],
     match_substring: bool = False,
     normalize_white_space: bool = False,
     ignore_case: Optional[bool] = None,
 ) -> List[ExpectedTextValue]:
     out: List[ExpectedTextValue] = []
-    assert isinstance(items, list)
+    assert isinstance(items, Sequence) and not isinstance(items, str)
     for item in items:
         if isinstance(item, str):
             o = ExpectedTextValue(

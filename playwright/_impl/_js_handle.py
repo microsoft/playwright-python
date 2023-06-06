@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import math
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import ParseResult, urlparse, urlunparse
@@ -140,7 +141,7 @@ def serialize_value(
     if value in visitor_info.visited:
         return dict(ref=visitor_info.visited[value])
 
-    if isinstance(value, list):
+    if isinstance(value, Sequence) and not isinstance(value, str):
         id = visitor_info.visit(value)
         a = []
         for e in value:

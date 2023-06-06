@@ -48,7 +48,9 @@ class FileChooser:
 
     async def set_files(
         self,
-        files: Union[str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]],
+        files: Union[
+            str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+        ],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:

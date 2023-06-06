@@ -14,8 +14,9 @@
 
 import asyncio
 import pathlib
+from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, Pattern, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -73,8 +74,8 @@ class BrowserType(ChannelOwner):
         self,
         executablePath: Union[str, Path] = None,
         channel: str = None,
-        args: List[str] = None,
-        ignoreDefaultArgs: Union[bool, List[str]] = None,
+        args: Sequence[str] = None,
+        ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
@@ -102,8 +103,8 @@ class BrowserType(ChannelOwner):
         userDataDir: Union[str, Path],
         channel: str = None,
         executablePath: Union[str, Path] = None,
-        args: List[str] = None,
-        ignoreDefaultArgs: Union[bool, List[str]] = None,
+        args: Sequence[str] = None,
+        ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
@@ -124,7 +125,7 @@ class BrowserType(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,

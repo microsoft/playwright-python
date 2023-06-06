@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import sys
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -100,8 +100,8 @@ class ProxySettings(TypedDict, total=False):
 
 
 class StorageState(TypedDict, total=False):
-    cookies: List[Cookie]
-    origins: List[OriginState]
+    cookies: Sequence[Cookie]
+    origins: Sequence[OriginState]
 
 
 class ResourceTiming(TypedDict):
@@ -158,7 +158,7 @@ class NameValue(TypedDict):
     value: str
 
 
-HeadersArray = List[NameValue]
+HeadersArray = Sequence[NameValue]
 Headers = Dict[str, str]
 
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import inspect
+from collections.abc import Sequence
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from playwright._impl._api_types import Error
@@ -54,7 +55,7 @@ class ImplToApiMapping:
             for name, value in obj.items():
                 o[name] = self.from_maybe_impl(value, visited)
             return o
-        if isinstance(obj, list):
+        if isinstance(obj, Sequence) and not isinstance(obj, str):
             if obj in visited:
                 return visited[obj]
             a: List = []
@@ -103,7 +104,7 @@ class ImplToApiMapping:
                 for name, value in obj.items():
                     o[name] = self.to_impl(value, visited)
                 return o
-            if isinstance(obj, list):
+            if isinstance(obj, Sequence) and not isinstance(obj, str):
                 if obj in visited:
                     return visited[obj]
                 a: List = []

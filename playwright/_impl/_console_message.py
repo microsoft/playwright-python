@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Dict, Optional
 
 from playwright._impl._api_structures import SourceLocation
 from playwright._impl._connection import (
@@ -51,7 +52,7 @@ class ConsoleMessage(ChannelOwner):
         return self._initializer["text"]
 
     @property
-    def args(self) -> List[JSHandle]:
+    def args(self) -> Sequence[JSHandle]:
         return list(map(from_channel, self._initializer["args"]))
 
     @property

@@ -17,6 +17,7 @@ import base64
 import inspect
 import re
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -319,7 +320,7 @@ class Page(ChannelOwner):
         return None
 
     @property
-    def frames(self) -> List[Frame]:
+    def frames(self) -> Sequence[Frame]:
         return self._frames.copy()
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
@@ -339,7 +340,7 @@ class Page(ChannelOwner):
     ) -> Optional[ElementHandle]:
         return await self._main_frame.query_selector(selector, strict)
 
-    async def query_selector_all(self, selector: str) -> List[ElementHandle]:
+    async def query_selector_all(self, selector: str) -> Sequence[ElementHandle]:
         return await self._main_frame.query_selector_all(selector)
 
     async def wait_for_selector(
@@ -640,7 +641,7 @@ class Page(ChannelOwner):
         animations: Literal["allow", "disabled"] = None,
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
-        mask: List["Locator"] = None,
+        mask: Sequence["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -682,7 +683,7 @@ class Page(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -698,7 +699,7 @@ class Page(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -713,7 +714,7 @@ class Page(ChannelOwner):
     async def tap(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
@@ -835,7 +836,7 @@ class Page(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -862,15 +863,15 @@ class Page(ChannelOwner):
     async def select_option(
         self,
         selector: str,
-        value: Union[str, List[str]] = None,
-        index: Union[int, List[int]] = None,
-        label: Union[str, List[str]] = None,
-        element: Union["ElementHandle", List["ElementHandle"]] = None,
+        value: Union[str, Sequence[str]] = None,
+        index: Union[int, Sequence[int]] = None,
+        label: Union[str, Sequence[str]] = None,
+        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
         timeout: float = None,
         noWaitAfter: bool = None,
         force: bool = None,
         strict: bool = None,
-    ) -> List[str]:
+    ) -> Sequence[str]:
         params = locals_to_params(locals())
         return await self._main_frame.select_option(**params)
 
@@ -883,7 +884,9 @@ class Page(ChannelOwner):
     async def set_input_files(
         self,
         selector: str,
-        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+        files: Union[
+            str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+        ],
         timeout: float = None,
         strict: bool = None,
         noWaitAfter: bool = None,
@@ -949,7 +952,7 @@ class Page(ChannelOwner):
         return await self._main_frame.wait_for_function(**locals_to_params(locals()))
 
     @property
-    def workers(self) -> List["Worker"]:
+    def workers(self) -> Sequence["Worker"]:
         return self._workers.copy()
 
     @property

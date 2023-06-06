@@ -346,9 +346,9 @@ class DocumentationProvider:
                 return "EventContextManager"
             return match.group(1)
 
-        match = re.match(r"^typing\.(\w+)$", str_value)
+        match = re.match(r"^(typing|collections\.abc)\.(\w+)$", str_value)
         if match:
-            return match.group(1)
+            return match.group(2)
 
         origin = get_origin(value)
         args = get_args(value)
@@ -372,9 +372,9 @@ class DocumentationProvider:
         if str(origin) == "<class 'dict'>":
             args = get_args(value)
             return f"Dict[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
-        if str(origin) == "<class 'list'>":
+        if str(origin) in ("<class 'collections.abc.Sequence'>", "<class 'list'>"):
             args = get_args(value)
-            return f"List[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+            return f"Sequence[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
         if str(origin) == "<class 'collections.abc.Callable'>":
             args = get_args(value)
             return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
@@ -425,7 +425,7 @@ class DocumentationProvider:
         if "templates" in type:
             base = type_name
             if type_name == "Array":
-                base = "List"
+                base = "Sequence"
             if type_name == "Object" or type_name == "Map":
                 base = "Dict"
             return f"{base}[{', '.join(self.serialize_doc_type(t, direction) for t in type['templates'])}]"

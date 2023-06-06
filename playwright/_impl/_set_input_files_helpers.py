@@ -1,6 +1,7 @@
 import base64
 import os
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
@@ -28,10 +29,14 @@ class InputFilesList(TypedDict):
 
 
 async def convert_input_files(
-    files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+    files: Union[
+        str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+    ],
     context: "BrowserContext",
 ) -> InputFilesList:
-    file_list = files if isinstance(files, list) else [files]
+    file_list = (
+        files if isinstance(files, Sequence) and not isinstance(files, str) else [files]
+    )
 
     has_large_buffer = any(
         [
@@ -77,9 +82,13 @@ async def convert_input_files(
 
 
 async def _normalize_file_payloads(
-    files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]]
+    files: Union[
+        str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+    ]
 ) -> List:
-    file_list = files if isinstance(files, list) else [files]
+    file_list = (
+        files if isinstance(files, Sequence) and not isinstance(files, str) else [files]
+    )
     file_payloads: List = []
     for item in file_list:
         if isinstance(item, (str, Path)):

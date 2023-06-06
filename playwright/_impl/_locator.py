@@ -16,6 +16,7 @@ import json
 import pathlib
 import sys
 from collections import ChainMap
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -146,7 +147,7 @@ class Locator:
 
     async def click(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -161,7 +162,7 @@ class Locator:
 
     async def dblclick(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -318,7 +319,7 @@ class Locator:
         assert handle
         return handle
 
-    async def element_handles(self) -> List[ElementHandle]:
+    async def element_handles(self) -> Sequence[ElementHandle]:
         return await self._frame.query_selector_all(self._selector)
 
     @property
@@ -380,7 +381,7 @@ class Locator:
 
     async def all(
         self,
-    ) -> List["Locator"]:
+    ) -> Sequence["Locator"]:
         result = []
         for index in range(await self.count()):
             result.append(self.nth(index))
@@ -417,7 +418,7 @@ class Locator:
 
     async def hover(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -523,7 +524,7 @@ class Locator:
         animations: Literal["allow", "disabled"] = None,
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
-        mask: List["Locator"] = None,
+        mask: Sequence["Locator"] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         return await self._with_element(
@@ -543,14 +544,14 @@ class Locator:
 
     async def select_option(
         self,
-        value: Union[str, List[str]] = None,
-        index: Union[int, List[int]] = None,
-        label: Union[str, List[str]] = None,
-        element: Union["ElementHandle", List["ElementHandle"]] = None,
+        value: Union[str, Sequence[str]] = None,
+        index: Union[int, Sequence[int]] = None,
+        label: Union[str, Sequence[str]] = None,
+        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
         timeout: float = None,
         noWaitAfter: bool = None,
         force: bool = None,
-    ) -> List[str]:
+    ) -> Sequence[str]:
         params = locals_to_params(locals())
         return await self._frame.select_option(
             self._selector,
@@ -573,8 +574,8 @@ class Locator:
             str,
             pathlib.Path,
             FilePayload,
-            List[Union[str, pathlib.Path]],
-            List[FilePayload],
+            Sequence[Union[str, pathlib.Path]],
+            Sequence[FilePayload],
         ],
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -588,7 +589,7 @@ class Locator:
 
     async def tap(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
@@ -641,14 +642,14 @@ class Locator:
 
     async def all_inner_texts(
         self,
-    ) -> List[str]:
+    ) -> Sequence[str]:
         return await self._frame.eval_on_selector_all(
             self._selector, "ee => ee.map(e => e.innerText)"
         )
 
     async def all_text_contents(
         self,
-    ) -> List[str]:
+    ) -> Sequence[str]:
         return await self._frame.eval_on_selector_all(
             self._selector, "ee => ee.map(e => e.textContent || '')"
         )

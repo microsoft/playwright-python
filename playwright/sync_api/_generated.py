@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import collections
 import pathlib
 import sys
 import typing
@@ -349,7 +350,7 @@ class Request(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.all_headers()))
 
-    def headers_array(self) -> typing.List[NameValue]:
+    def headers_array(self) -> typing.Sequence[NameValue]:
         """Request.headers_array
 
         An array with all the request HTTP headers associated with this request. Unlike `request.all_headers()`,
@@ -358,7 +359,7 @@ class Request(SyncBase):
 
         Returns
         -------
-        List[{name: str, value: str}]
+        Sequence[{name: str, value: str}]
         """
 
         return mapping.from_impl_list(self._sync(self._impl_obj.headers_array()))
@@ -498,7 +499,7 @@ class Response(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.all_headers()))
 
-    def headers_array(self) -> typing.List[NameValue]:
+    def headers_array(self) -> typing.Sequence[NameValue]:
         """Response.headers_array
 
         An array with all the request HTTP headers associated with this response. Unlike `response.all_headers()`,
@@ -507,7 +508,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        List[{name: str, value: str}]
+        Sequence[{name: str, value: str}]
         """
 
         return mapping.from_impl_list(self._sync(self._impl_obj.headers_array()))
@@ -533,7 +534,7 @@ class Response(SyncBase):
             self._sync(self._impl_obj.header_value(name=name))
         )
 
-    def header_values(self, name: str) -> typing.List[str]:
+    def header_values(self, name: str) -> collections.abc.Sequence[str]:
         """Response.header_values
 
         Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
@@ -545,7 +546,7 @@ class Response(SyncBase):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(
@@ -1967,7 +1968,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -1990,7 +1991,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -2027,7 +2028,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -2053,7 +2054,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -2099,7 +2100,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -2127,7 +2128,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -2168,17 +2169,17 @@ class ElementHandle(JSHandle):
 
     def select_option(
         self,
-        value: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        value: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         *,
-        index: typing.Optional[typing.Union[int, typing.List[int]]] = None,
-        label: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        index: typing.Optional[typing.Union[int, collections.abc.Sequence[int]]] = None,
+        label: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         element: typing.Optional[
-            typing.Union["ElementHandle", typing.List["ElementHandle"]]
+            typing.Union["ElementHandle", collections.abc.Sequence["ElementHandle"]]
         ] = None,
         timeout: typing.Optional[float] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None
-    ) -> typing.List[str]:
+    ) -> collections.abc.Sequence[str]:
         """ElementHandle.select_option
 
         This method waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits until all specified options are present in
@@ -2215,15 +2216,15 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        value : Union[List[str], str, None]
+        value : Union[Sequence[str], str, None]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, None]
+        index : Union[Sequence[int], int, None]
             Options to select by index. Optional.
-        label : Union[List[str], str, None]
+        label : Union[Sequence[str], str, None]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], None]
+        element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
@@ -2237,7 +2238,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(
@@ -2258,7 +2259,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -2283,7 +2284,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -2417,8 +2418,8 @@ class ElementHandle(JSHandle):
             str,
             pathlib.Path,
             FilePayload,
-            typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[FilePayload],
+            collections.abc.Sequence[typing.Union[str, pathlib.Path]],
+            collections.abc.Sequence[FilePayload],
         ],
         *,
         timeout: typing.Optional[float] = None,
@@ -2436,7 +2437,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -2799,7 +2800,7 @@ class ElementHandle(JSHandle):
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
-        mask: typing.Optional[typing.List["Locator"]] = None
+        mask: typing.Optional[collections.abc.Sequence["Locator"]] = None
     ) -> bytes:
         """ElementHandle.screenshot
 
@@ -2844,7 +2845,7 @@ class ElementHandle(JSHandle):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[List[Locator], None]
+        mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` that completely covers its bounding box.
 
@@ -2889,7 +2890,9 @@ class ElementHandle(JSHandle):
             self._sync(self._impl_obj.query_selector(selector=selector))
         )
 
-    def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
+    def query_selector_all(
+        self, selector: str
+    ) -> collections.abc.Sequence["ElementHandle"]:
         """ElementHandle.query_selector_all
 
         The method finds all elements matching the specified selector in the `ElementHandle`s subtree. If no elements match
@@ -2902,10 +2905,10 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        List[ElementHandle]
+        Sequence[ElementHandle]
         """
 
-        return mapping.from_impl_list(
+        return mapping.from_maybe_impl(
             self._sync(self._impl_obj.query_selector_all(selector=selector))
         )
 
@@ -3274,7 +3277,7 @@ class FileChooser(SyncBase):
 
         Parameters
         ----------
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -3287,9 +3290,7 @@ class FileChooser(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.set_files(
-                    files=mapping.to_impl(files),
-                    timeout=timeout,
-                    noWaitAfter=no_wait_after,
+                    files=files, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )
         )
@@ -3353,14 +3354,14 @@ class Frame(SyncBase):
         return mapping.from_impl_nullable(self._impl_obj.parent_frame)
 
     @property
-    def child_frames(self) -> typing.List["Frame"]:
+    def child_frames(self) -> collections.abc.Sequence["Frame"]:
         """Frame.child_frames
 
         Returns
         -------
-        List[Frame]
+        Sequence[Frame]
         """
-        return mapping.from_impl_list(self._impl_obj.child_frames)
+        return mapping.from_maybe_impl(self._impl_obj.child_frames)
 
     def goto(
         self,
@@ -3803,7 +3804,9 @@ class Frame(SyncBase):
             self._sync(self._impl_obj.query_selector(selector=selector, strict=strict))
         )
 
-    def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
+    def query_selector_all(
+        self, selector: str
+    ) -> collections.abc.Sequence["ElementHandle"]:
         """Frame.query_selector_all
 
         Returns the ElementHandles pointing to the frame elements.
@@ -3820,7 +3823,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        List[ElementHandle]
+        Sequence[ElementHandle]
         """
 
         return mapping.from_impl_list(
@@ -4467,7 +4470,7 @@ class Frame(SyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -4497,7 +4500,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -4549,7 +4552,7 @@ class Frame(SyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -4581,7 +4584,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -4630,7 +4633,7 @@ class Frame(SyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -4659,7 +4662,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -5532,7 +5535,7 @@ class Frame(SyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -5559,7 +5562,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -5662,18 +5665,18 @@ class Frame(SyncBase):
     def select_option(
         self,
         selector: str,
-        value: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        value: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         *,
-        index: typing.Optional[typing.Union[int, typing.List[int]]] = None,
-        label: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        index: typing.Optional[typing.Union[int, collections.abc.Sequence[int]]] = None,
+        label: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         element: typing.Optional[
-            typing.Union["ElementHandle", typing.List["ElementHandle"]]
+            typing.Union["ElementHandle", collections.abc.Sequence["ElementHandle"]]
         ] = None,
         timeout: typing.Optional[float] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None
-    ) -> typing.List[str]:
+    ) -> collections.abc.Sequence[str]:
         """Frame.select_option
 
         This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits
@@ -5712,15 +5715,15 @@ class Frame(SyncBase):
         ----------
         selector : str
             A selector to query for.
-        value : Union[List[str], str, None]
+        value : Union[Sequence[str], str, None]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, None]
+        index : Union[Sequence[int], int, None]
             Options to select by index. Optional.
-        label : Union[List[str], str, None]
+        label : Union[Sequence[str], str, None]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], None]
+        element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
@@ -5737,7 +5740,7 @@ class Frame(SyncBase):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(
@@ -5803,8 +5806,8 @@ class Frame(SyncBase):
             str,
             pathlib.Path,
             FilePayload,
-            typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[FilePayload],
+            collections.abc.Sequence[typing.Union[str, pathlib.Path]],
+            collections.abc.Sequence[FilePayload],
         ],
         *,
         strict: typing.Optional[bool] = None,
@@ -5826,7 +5829,7 @@ class Frame(SyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -7190,14 +7193,14 @@ class ConsoleMessage(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.text)
 
     @property
-    def args(self) -> typing.List["JSHandle"]:
+    def args(self) -> collections.abc.Sequence["JSHandle"]:
         """ConsoleMessage.args
 
         List of arguments passed to a `console` function call. See also `page.on('console')`.
 
         Returns
         -------
-        List[JSHandle]
+        Sequence[JSHandle]
         """
         return mapping.from_impl_list(self._impl_obj.args)
 
@@ -8016,14 +8019,14 @@ class Page(SyncContextManager):
         return mapping.from_impl(self._impl_obj.main_frame)
 
     @property
-    def frames(self) -> typing.List["Frame"]:
+    def frames(self) -> collections.abc.Sequence["Frame"]:
         """Page.frames
 
         An array of all frames attached to the page.
 
         Returns
         -------
-        List[Frame]
+        Sequence[Frame]
         """
         return mapping.from_impl_list(self._impl_obj.frames)
 
@@ -8048,7 +8051,7 @@ class Page(SyncContextManager):
         return mapping.from_impl_nullable(self._impl_obj.viewport_size)
 
     @property
-    def workers(self) -> typing.List["Worker"]:
+    def workers(self) -> collections.abc.Sequence["Worker"]:
         """Page.workers
 
         This method returns all of the dedicated
@@ -8058,9 +8061,9 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        List[Worker]
+        Sequence[Worker]
         """
-        return mapping.from_impl_list(self._impl_obj.workers)
+        return mapping.from_maybe_impl(self._impl_obj.workers)
 
     @property
     def request(self) -> "APIRequestContext":
@@ -8205,7 +8208,9 @@ class Page(SyncContextManager):
             self._sync(self._impl_obj.query_selector(selector=selector, strict=strict))
         )
 
-    def query_selector_all(self, selector: str) -> typing.List["ElementHandle"]:
+    def query_selector_all(
+        self, selector: str
+    ) -> collections.abc.Sequence["ElementHandle"]:
         """Page.query_selector_all
 
         The method finds all elements matching the specified selector within the page. If no elements match the selector,
@@ -8218,7 +8223,7 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        List[ElementHandle]
+        Sequence[ElementHandle]
         """
 
         return mapping.from_impl_list(
@@ -9967,7 +9972,7 @@ class Page(SyncContextManager):
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
-        mask: typing.Optional[typing.List["Locator"]] = None
+        mask: typing.Optional[collections.abc.Sequence["Locator"]] = None
     ) -> bytes:
         """Page.screenshot
 
@@ -10010,7 +10015,7 @@ class Page(SyncContextManager):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[List[Locator], None]
+        mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` that completely covers its bounding box.
 
@@ -10088,7 +10093,7 @@ class Page(SyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -10118,7 +10123,7 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -10170,7 +10175,7 @@ class Page(SyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -10202,7 +10207,7 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -10251,7 +10256,7 @@ class Page(SyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -10280,7 +10285,7 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -11151,7 +11156,7 @@ class Page(SyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -11178,7 +11183,7 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -11308,18 +11313,18 @@ class Page(SyncContextManager):
     def select_option(
         self,
         selector: str,
-        value: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        value: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         *,
-        index: typing.Optional[typing.Union[int, typing.List[int]]] = None,
-        label: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        index: typing.Optional[typing.Union[int, collections.abc.Sequence[int]]] = None,
+        label: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         element: typing.Optional[
-            typing.Union["ElementHandle", typing.List["ElementHandle"]]
+            typing.Union["ElementHandle", collections.abc.Sequence["ElementHandle"]]
         ] = None,
         timeout: typing.Optional[float] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None
-    ) -> typing.List[str]:
+    ) -> collections.abc.Sequence[str]:
         """Page.select_option
 
         This method waits for an element matching `selector`, waits for [actionability](https://playwright.dev/python/docs/actionability) checks, waits
@@ -11359,15 +11364,15 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        value : Union[List[str], str, None]
+        value : Union[Sequence[str], str, None]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, None]
+        index : Union[Sequence[int], int, None]
             Options to select by index. Optional.
-        label : Union[List[str], str, None]
+        label : Union[Sequence[str], str, None]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], None]
+        element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
@@ -11384,7 +11389,7 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(
@@ -11450,8 +11455,8 @@ class Page(SyncContextManager):
             str,
             pathlib.Path,
             FilePayload,
-            typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[FilePayload],
+            collections.abc.Sequence[typing.Union[str, pathlib.Path]],
+            collections.abc.Sequence[FilePayload],
         ],
         *,
         timeout: typing.Optional[float] = None,
@@ -11473,7 +11478,7 @@ class Page(SyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -12911,14 +12916,14 @@ class BrowserContext(SyncContextManager):
         return super().once(event=event, f=f)
 
     @property
-    def pages(self) -> typing.List["Page"]:
+    def pages(self) -> collections.abc.Sequence["Page"]:
         """BrowserContext.pages
 
         Returns all open pages in the context.
 
         Returns
         -------
-        List[Page]
+        Sequence[Page]
         """
         return mapping.from_impl_list(self._impl_obj.pages)
 
@@ -12935,7 +12940,7 @@ class BrowserContext(SyncContextManager):
         return mapping.from_impl_nullable(self._impl_obj.browser)
 
     @property
-    def background_pages(self) -> typing.List["Page"]:
+    def background_pages(self) -> collections.abc.Sequence["Page"]:
         """BrowserContext.background_pages
 
         **NOTE** Background pages are only supported on Chromium-based browsers.
@@ -12944,12 +12949,12 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        List[Page]
+        Sequence[Page]
         """
         return mapping.from_impl_list(self._impl_obj.background_pages)
 
     @property
-    def service_workers(self) -> typing.List["Worker"]:
+    def service_workers(self) -> collections.abc.Sequence["Worker"]:
         """BrowserContext.service_workers
 
         **NOTE** Service workers are only supported on Chromium-based browsers.
@@ -12958,7 +12963,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        List[Worker]
+        Sequence[Worker]
         """
         return mapping.from_impl_list(self._impl_obj.service_workers)
 
@@ -13040,8 +13045,9 @@ class BrowserContext(SyncContextManager):
         return mapping.from_impl(self._sync(self._impl_obj.new_page()))
 
     def cookies(
-        self, urls: typing.Optional[typing.Union[str, typing.List[str]]] = None
-    ) -> typing.List[Cookie]:
+        self,
+        urls: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
+    ) -> collections.abc.Sequence[Cookie]:
         """BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
@@ -13049,19 +13055,19 @@ class BrowserContext(SyncContextManager):
 
         Parameters
         ----------
-        urls : Union[List[str], str, None]
+        urls : Union[Sequence[str], str, None]
             Optional list of URLs.
 
         Returns
         -------
-        List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}]
+        Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}]
         """
 
         return mapping.from_impl_list(
             self._sync(self._impl_obj.cookies(urls=mapping.to_impl(urls)))
         )
 
-    def add_cookies(self, cookies: typing.List[SetCookieParam]) -> None:
+    def add_cookies(self, cookies: collections.abc.Sequence[SetCookieParam]) -> None:
         """BrowserContext.add_cookies
 
         Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies
@@ -13079,7 +13085,7 @@ class BrowserContext(SyncContextManager):
 
         Parameters
         ----------
-        cookies : List[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
+        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
             Adds cookies to the browser context.
 
             For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com".
@@ -13098,7 +13104,10 @@ class BrowserContext(SyncContextManager):
         return mapping.from_maybe_impl(self._sync(self._impl_obj.clear_cookies()))
 
     def grant_permissions(
-        self, permissions: typing.List[str], *, origin: typing.Optional[str] = None
+        self,
+        permissions: collections.abc.Sequence[str],
+        *,
+        origin: typing.Optional[str] = None
     ) -> None:
         """BrowserContext.grant_permissions
 
@@ -13107,7 +13116,7 @@ class BrowserContext(SyncContextManager):
 
         Parameters
         ----------
-        permissions : List[str]
+        permissions : Sequence[str]
             A permission or an array of permissions to grant. Permissions can be one of the following values:
             - `'geolocation'`
             - `'midi'`
@@ -13754,7 +13763,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
+        {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}
         """
 
         return mapping.from_impl(self._sync(self._impl_obj.storage_state(path=path)))
@@ -13945,7 +13954,7 @@ class Browser(SyncContextManager):
         return super().once(event=event, f=f)
 
     @property
-    def contexts(self) -> typing.List["BrowserContext"]:
+    def contexts(self) -> collections.abc.Sequence["BrowserContext"]:
         """Browser.contexts
 
         Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
@@ -13968,7 +13977,7 @@ class Browser(SyncContextManager):
 
         Returns
         -------
-        List[BrowserContext]
+        Sequence[BrowserContext]
         """
         return mapping.from_impl_list(self._impl_obj.contexts)
 
@@ -14021,7 +14030,7 @@ class Browser(SyncContextManager):
         locale: typing.Optional[str] = None,
         timezone_id: typing.Optional[str] = None,
         geolocation: typing.Optional[Geolocation] = None,
-        permissions: typing.Optional[typing.List[str]] = None,
+        permissions: typing.Optional[collections.abc.Sequence[str]] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: typing.Optional[bool] = None,
         http_credentials: typing.Optional[HttpCredentials] = None,
@@ -14119,7 +14128,7 @@ class Browser(SyncContextManager):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
-        permissions : Union[List[str], None]
+        permissions : Union[Sequence[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details.
         extra_http_headers : Union[Dict[str, str], None]
@@ -14173,7 +14182,7 @@ class Browser(SyncContextManager):
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, None]
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Learn more about [storage state and auth](../auth.md).
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
@@ -14266,7 +14275,7 @@ class Browser(SyncContextManager):
         locale: typing.Optional[str] = None,
         timezone_id: typing.Optional[str] = None,
         geolocation: typing.Optional[Geolocation] = None,
-        permissions: typing.Optional[typing.List[str]] = None,
+        permissions: typing.Optional[collections.abc.Sequence[str]] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: typing.Optional[bool] = None,
         http_credentials: typing.Optional[HttpCredentials] = None,
@@ -14335,7 +14344,7 @@ class Browser(SyncContextManager):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
-        permissions : Union[List[str], None]
+        permissions : Union[Sequence[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details.
         extra_http_headers : Union[Dict[str, str], None]
@@ -14389,7 +14398,7 @@ class Browser(SyncContextManager):
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, None]
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Learn more about [storage state and auth](../auth.md).
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
@@ -14507,7 +14516,7 @@ class Browser(SyncContextManager):
         page: typing.Optional["Page"] = None,
         path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         screenshots: typing.Optional[bool] = None,
-        categories: typing.Optional[typing.List[str]] = None
+        categories: typing.Optional[collections.abc.Sequence[str]] = None
     ) -> None:
         """Browser.start_tracing
 
@@ -14541,7 +14550,7 @@ class Browser(SyncContextManager):
             A path to write the trace file to.
         screenshots : Union[bool, None]
             captures screenshots in the trace.
-        categories : Union[List[str], None]
+        categories : Union[Sequence[str], None]
             specify custom categories to use instead of default.
         """
 
@@ -14607,9 +14616,9 @@ class BrowserType(SyncBase):
         *,
         executable_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         channel: typing.Optional[str] = None,
-        args: typing.Optional[typing.List[str]] = None,
+        args: typing.Optional[collections.abc.Sequence[str]] = None,
         ignore_default_args: typing.Optional[
-            typing.Union[bool, typing.List[str]]
+            typing.Union[bool, collections.abc.Sequence[str]]
         ] = None,
         handle_sigint: typing.Optional[bool] = None,
         handle_sigterm: typing.Optional[bool] = None,
@@ -14672,10 +14681,10 @@ class BrowserType(SyncBase):
             Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
             "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
-        args : Union[List[str], None]
+        args : Union[Sequence[str], None]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
-        ignore_default_args : Union[List[str], bool, None]
+        ignore_default_args : Union[Sequence[str], bool, None]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
         handle_sigint : Union[bool, None]
@@ -14749,9 +14758,9 @@ class BrowserType(SyncBase):
         *,
         channel: typing.Optional[str] = None,
         executable_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
-        args: typing.Optional[typing.List[str]] = None,
+        args: typing.Optional[collections.abc.Sequence[str]] = None,
         ignore_default_args: typing.Optional[
-            typing.Union[bool, typing.List[str]]
+            typing.Union[bool, collections.abc.Sequence[str]]
         ] = None,
         handle_sigint: typing.Optional[bool] = None,
         handle_sigterm: typing.Optional[bool] = None,
@@ -14773,7 +14782,7 @@ class BrowserType(SyncBase):
         locale: typing.Optional[str] = None,
         timezone_id: typing.Optional[str] = None,
         geolocation: typing.Optional[Geolocation] = None,
-        permissions: typing.Optional[typing.List[str]] = None,
+        permissions: typing.Optional[collections.abc.Sequence[str]] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: typing.Optional[bool] = None,
         http_credentials: typing.Optional[HttpCredentials] = None,
@@ -14826,10 +14835,10 @@ class BrowserType(SyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
-        args : Union[List[str], None]
+        args : Union[Sequence[str], None]
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
             [here](http://peter.sh/experiments/chromium-command-line-switches/).
-        ignore_default_args : Union[List[str], bool, None]
+        ignore_default_args : Union[Sequence[str], bool, None]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
         handle_sigint : Union[bool, None]
@@ -14886,7 +14895,7 @@ class BrowserType(SyncBase):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
-        permissions : Union[List[str], None]
+        permissions : Union[Sequence[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details.
         extra_http_headers : Union[Dict[str, str], None]
@@ -15592,7 +15601,7 @@ class Locator(SyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -15648,7 +15657,7 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -15694,7 +15703,7 @@ class Locator(SyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -15726,7 +15735,7 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -16713,14 +16722,14 @@ class Locator(SyncBase):
             self._sync(self._impl_obj.element_handle(timeout=timeout))
         )
 
-    def element_handles(self) -> typing.List["ElementHandle"]:
+    def element_handles(self) -> collections.abc.Sequence["ElementHandle"]:
         """Locator.element_handles
 
         Resolves given locator to all matching DOM elements. If there are no matching elements, returns an empty list.
 
         Returns
         -------
-        List[ElementHandle]
+        Sequence[ElementHandle]
         """
 
         return mapping.from_impl_list(self._sync(self._impl_obj.element_handles()))
@@ -16917,7 +16926,7 @@ class Locator(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.blur(timeout=timeout)))
 
-    def all(self) -> typing.List["Locator"]:
+    def all(self) -> collections.abc.Sequence["Locator"]:
         """Locator.all
 
         When locator points to a list of elements, returns array of locators, pointing to respective elements.
@@ -16941,10 +16950,10 @@ class Locator(SyncBase):
 
         Returns
         -------
-        List[Locator]
+        Sequence[Locator]
         """
 
-        return mapping.from_impl_list(self._sync(self._impl_obj.all()))
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.all()))
 
     def count(self) -> int:
         """Locator.count
@@ -17082,7 +17091,7 @@ class Locator(SyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -17119,7 +17128,7 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -17486,7 +17495,7 @@ class Locator(SyncBase):
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
-        mask: typing.Optional[typing.List["Locator"]] = None
+        mask: typing.Optional[collections.abc.Sequence["Locator"]] = None
     ) -> bytes:
         """Locator.screenshot
 
@@ -17555,7 +17564,7 @@ class Locator(SyncBase):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[List[Locator], None]
+        mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` that completely covers its bounding box.
 
@@ -17602,17 +17611,17 @@ class Locator(SyncBase):
 
     def select_option(
         self,
-        value: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        value: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         *,
-        index: typing.Optional[typing.Union[int, typing.List[int]]] = None,
-        label: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        index: typing.Optional[typing.Union[int, collections.abc.Sequence[int]]] = None,
+        label: typing.Optional[typing.Union[str, collections.abc.Sequence[str]]] = None,
         element: typing.Optional[
-            typing.Union["ElementHandle", typing.List["ElementHandle"]]
+            typing.Union["ElementHandle", collections.abc.Sequence["ElementHandle"]]
         ] = None,
         timeout: typing.Optional[float] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None
-    ) -> typing.List[str]:
+    ) -> collections.abc.Sequence[str]:
         """Locator.select_option
 
         Selects option or options in `<select>`.
@@ -17661,15 +17670,15 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        value : Union[List[str], str, None]
+        value : Union[Sequence[str], str, None]
             Options to select by value. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        index : Union[List[int], int, None]
+        index : Union[Sequence[int], int, None]
             Options to select by index. Optional.
-        label : Union[List[str], str, None]
+        label : Union[Sequence[str], str, None]
             Options to select by label. If the `<select>` has the `multiple` attribute, all given options are selected,
             otherwise only the first option matching one of the passed options is selected. Optional.
-        element : Union[ElementHandle, List[ElementHandle], None]
+        element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
@@ -17683,7 +17692,7 @@ class Locator(SyncBase):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(
@@ -17734,8 +17743,8 @@ class Locator(SyncBase):
             str,
             pathlib.Path,
             FilePayload,
-            typing.List[typing.Union[str, pathlib.Path]],
-            typing.List[FilePayload],
+            collections.abc.Sequence[typing.Union[str, pathlib.Path]],
+            collections.abc.Sequence[FilePayload],
         ],
         *,
         timeout: typing.Optional[float] = None,
@@ -17795,7 +17804,7 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        files : Union[List[Union[pathlib.Path, str]], List[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
+        files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -17819,7 +17828,7 @@ class Locator(SyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.List[Literal["Alt", "Control", "Meta", "Shift"]]
+            collections.abc.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -17848,7 +17857,7 @@ class Locator(SyncBase):
 
         Parameters
         ----------
-        modifiers : Union[List[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
             current modifiers back. If not specified, currently pressed modifiers are used.
         position : Union[{x: float, y: float}, None]
@@ -18037,7 +18046,7 @@ class Locator(SyncBase):
             )
         )
 
-    def all_inner_texts(self) -> typing.List[str]:
+    def all_inner_texts(self) -> collections.abc.Sequence[str]:
         """Locator.all_inner_texts
 
         Returns an array of `node.innerText` values for all matching nodes.
@@ -18054,12 +18063,12 @@ class Locator(SyncBase):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.all_inner_texts()))
 
-    def all_text_contents(self) -> typing.List[str]:
+    def all_text_contents(self) -> collections.abc.Sequence[str]:
         """Locator.all_text_contents
 
         Returns an array of `node.textContent` values for all matching nodes.
@@ -18076,7 +18085,7 @@ class Locator(SyncBase):
 
         Returns
         -------
-        List[str]
+        Sequence[str]
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.all_text_contents()))
@@ -18275,7 +18284,7 @@ class APIResponse(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
     @property
-    def headers_array(self) -> typing.List[NameValue]:
+    def headers_array(self) -> typing.Sequence[NameValue]:
         """APIResponse.headers_array
 
         An array with all the request HTTP headers associated with this response. Header names are not lower-cased. Headers
@@ -18283,7 +18292,7 @@ class APIResponse(SyncBase):
 
         Returns
         -------
-        List[{name: str, value: str}]
+        Sequence[{name: str, value: str}]
         """
         return mapping.from_impl_list(self._impl_obj.headers_array)
 
@@ -19006,7 +19015,7 @@ class APIRequestContext(SyncBase):
 
         Returns
         -------
-        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
+        {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}
         """
 
         return mapping.from_impl(self._sync(self._impl_obj.storage_state(path=path)))
@@ -19059,7 +19068,7 @@ class APIRequest(SyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds to wait for the response. Defaults to `30000` (30 seconds). Pass `0` to disable
             timeout.
-        storage_state : Union[pathlib.Path, str, {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}, None]
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Populates context with given storage state. This option can be used to initialize context with logged-in
             information obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`.
             Either a path to the file with saved storage, or the value returned by one of
@@ -19242,9 +19251,9 @@ class LocatorAssertions(SyncBase):
     def to_contain_text(
         self,
         expected: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
         ],
@@ -19330,7 +19339,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
+        expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected substring or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
@@ -19356,9 +19365,9 @@ class LocatorAssertions(SyncBase):
     def not_to_contain_text(
         self,
         expected: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
         ],
@@ -19373,7 +19382,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
+        expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected substring or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
@@ -19475,9 +19484,9 @@ class LocatorAssertions(SyncBase):
     def to_have_class(
         self,
         expected: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
         ],
@@ -19529,7 +19538,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
+        expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected class or RegExp or a list of those.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -19547,9 +19556,9 @@ class LocatorAssertions(SyncBase):
     def not_to_have_class(
         self,
         expected: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
         ],
@@ -19562,7 +19571,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
+        expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected class or RegExp or a list of those.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -19904,9 +19913,9 @@ class LocatorAssertions(SyncBase):
     def to_have_values(
         self,
         values: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
         ],
         *,
         timeout: typing.Optional[float] = None
@@ -19948,7 +19957,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        values : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str]]
+        values : Union[Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str]]
             Expected options currently selected.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -19966,9 +19975,9 @@ class LocatorAssertions(SyncBase):
     def not_to_have_values(
         self,
         values: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
         ],
         *,
         timeout: typing.Optional[float] = None
@@ -19979,7 +19988,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        values : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str]]
+        values : Union[Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str]]
             Expected options currently selected.
         timeout : Union[float, None]
             Time to retry the assertion for.
@@ -19997,9 +20006,9 @@ class LocatorAssertions(SyncBase):
     def to_have_text(
         self,
         expected: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
         ],
@@ -20084,7 +20093,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
+        expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected string or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
@@ -20110,9 +20119,9 @@ class LocatorAssertions(SyncBase):
     def not_to_have_text(
         self,
         expected: typing.Union[
-            typing.List[str],
-            typing.List[typing.Pattern[str]],
-            typing.List[typing.Union[typing.Pattern[str], str]],
+            collections.abc.Sequence[str],
+            collections.abc.Sequence[typing.Pattern[str]],
+            collections.abc.Sequence[typing.Union[typing.Pattern[str], str]],
             typing.Pattern[str],
             str,
         ],
@@ -20127,7 +20136,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
+        expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected string or RegExp or a list of those.
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.

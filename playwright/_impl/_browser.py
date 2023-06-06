@@ -14,6 +14,7 @@
 
 import base64
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Pattern, Union, cast
@@ -74,7 +75,7 @@ class Browser(ChannelOwner):
         self._is_closed_or_closing = True
 
     @property
-    def contexts(self) -> List[BrowserContext]:
+    def contexts(self) -> Sequence[BrowserContext]:
         return self._contexts.copy()
 
     @property
@@ -96,7 +97,7 @@ class Browser(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
@@ -141,7 +142,7 @@ class Browser(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
@@ -201,7 +202,7 @@ class Browser(ChannelOwner):
         page: Page = None,
         path: Union[str, Path] = None,
         screenshots: bool = None,
-        categories: List[str] = None,
+        categories: Sequence[str] = None,
     ) -> None:
         params = locals_to_params(locals())
         if page:

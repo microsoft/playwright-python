@@ -18,6 +18,7 @@ import datetime
 import inspect
 import sys
 import traceback
+from collections.abc import Sequence
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -445,7 +446,7 @@ class Connection(EventEmitter):
             return payload
         if isinstance(payload, Path):
             return str(payload)
-        if isinstance(payload, list):
+        if isinstance(payload, Sequence) and not isinstance(payload, str):
             return list(map(self._replace_channels_with_guids, payload))
         if isinstance(payload, Channel):
             return dict(guid=payload._guid)
@@ -459,7 +460,7 @@ class Connection(EventEmitter):
     def _replace_guids_with_channels(self, payload: Any) -> Any:
         if payload is None:
             return payload
-        if isinstance(payload, list):
+        if isinstance(payload, Sequence) and not isinstance(payload, str):
             return list(map(self._replace_guids_with_channels, payload))
         if isinstance(payload, dict):
             if payload.get("guid") in self._objects:

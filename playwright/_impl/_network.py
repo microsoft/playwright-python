@@ -20,6 +20,7 @@ import json as json_utils
 import mimetypes
 import sys
 from collections import defaultdict
+from collections.abc import Sequence
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -523,7 +524,7 @@ class Response(ChannelOwner):
     async def header_value(self, name: str) -> Optional[str]:
         return (await self._actual_headers()).get(name)
 
-    async def header_values(self, name: str) -> List[str]:
+    async def header_values(self, name: str) -> Sequence[str]:
         return (await self._actual_headers()).get_all(name)
 
     async def _actual_headers(self) -> "RawHeaders":

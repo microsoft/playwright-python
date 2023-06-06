@@ -15,6 +15,7 @@
 import asyncio
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -242,7 +243,7 @@ class BrowserContext(ChannelOwner):
         self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     @property
-    def pages(self) -> List[Page]:
+    def pages(self) -> Sequence[Page]:
         return self._pages.copy()
 
     @property
@@ -263,21 +264,21 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.new_context()")
         return from_channel(await self._channel.send("newPage"))
 
-    async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
+    async def cookies(self, urls: Union[str, Sequence[str]] = None) -> Sequence[Cookie]:
         if urls is None:
             urls = []
-        if not isinstance(urls, list):
+        if not isinstance(urls, Sequence) and not isinstance(urls, str):
             urls = [urls]
         return await self._channel.send("cookies", dict(urls=urls))
 
-    async def add_cookies(self, cookies: List[SetCookieParam]) -> None:
+    async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
         await self._channel.send("addCookies", dict(cookies=cookies))
 
     async def clear_cookies(self) -> None:
         await self._channel.send("clearCookies")
 
     async def grant_permissions(
-        self, permissions: List[str], origin: str = None
+        self, permissions: Sequence[str], origin: str = None
     ) -> None:
         await self._channel.send("grantPermissions", locals_to_params(locals()))
 
@@ -560,11 +561,11 @@ class BrowserContext(ChannelOwner):
             page.emit(Page.Events.Response, response)
 
     @property
-    def background_pages(self) -> List[Page]:
+    def background_pages(self) -> Sequence[Page]:
         return list(self._background_pages)
 
     @property
-    def service_workers(self) -> List[Worker]:
+    def service_workers(self) -> Sequence[Worker]:
         return list(self._service_workers)
 
     async def new_cdp_session(self, page: Union[Page, Frame]) -> CDPSession:
