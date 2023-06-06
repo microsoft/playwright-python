@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-import collections
+import collections.abc
 import pathlib
 import sys
 import typing

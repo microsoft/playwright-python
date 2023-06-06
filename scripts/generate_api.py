@@ -214,7 +214,7 @@ header = """
 # limitations under the License.
 
 
-import collections
+import collections.abc
 import typing
 import sys
 import pathlib
