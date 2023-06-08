@@ -141,7 +141,7 @@ def serialize_value(
     if value in visitor_info.visited:
         return dict(ref=visitor_info.visited[value])
 
-    if isinstance(value, Sequence) and not isinstance(value, str):
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
         id = visitor_info.visit(value)
         a = []
         for e in value:

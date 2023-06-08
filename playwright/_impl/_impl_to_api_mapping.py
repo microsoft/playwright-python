@@ -55,7 +55,7 @@ class ImplToApiMapping:
             for name, value in obj.items():
                 o[name] = self.from_maybe_impl(value, visited)
             return o
-        if isinstance(obj, Sequence) and not isinstance(obj, str):
+        if isinstance(obj, Sequence) and not isinstance(obj, (str, bytes)):
             if obj in visited:
                 return visited[obj]
             a: List = []
@@ -104,7 +104,7 @@ class ImplToApiMapping:
                 for name, value in obj.items():
                     o[name] = self.to_impl(value, visited)
                 return o
-            if isinstance(obj, Sequence) and not isinstance(obj, str):
+            if isinstance(obj, Sequence) and not isinstance(obj, (str, bytes)):
                 if obj in visited:
                     return visited[obj]
                 a: List = []

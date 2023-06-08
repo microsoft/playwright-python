@@ -397,7 +397,7 @@ def convert_select_option_values(
             value = [value]
         options = (options or []) + list(map(lambda e: dict(valueOrLabel=e), value))
     if index:
-        if not isinstance(index, Sequence):
+        if not isinstance(index, Sequence) and not isinstance(index, bytes):
             index = [index]
         options = (options or []) + list(map(lambda e: dict(index=e), index))
     if label:
