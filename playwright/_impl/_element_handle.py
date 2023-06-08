@@ -16,7 +16,7 @@ import base64
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
@@ -397,7 +397,7 @@ def convert_select_option_values(
             value = [value]
         options = (options or []) + list(map(lambda e: dict(valueOrLabel=e), value))
     if index:
-        if not isinstance(index, Sequence) and not isinstance(index, str):
+        if not isinstance(index, Sequence):
             index = [index]
         options = (options or []) + list(map(lambda e: dict(index=e), index))
     if label:
@@ -405,7 +405,7 @@ def convert_select_option_values(
             label = [label]
         options = (options or []) + list(map(lambda e: dict(label=e), label))
     if element:
-        if not isinstance(element, Sequence) and not isinstance(element, str):
+        if not isinstance(element, Sequence):
             element = [element]
         elements = list(map(lambda e: e._channel, element))
 

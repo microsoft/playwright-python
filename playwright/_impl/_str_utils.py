@@ -14,7 +14,7 @@
 
 import json
 import re
-from typing import Pattern, Sequence, Union
+from typing import Pattern, Union
 
 
 def escape_regex_flags(pattern: Pattern) -> str:
