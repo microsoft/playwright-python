@@ -323,13 +323,13 @@ class Page(ChannelOwner):
         return self._frames.copy()
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
-        self._timeout_settings.set_navigation_timeout(timeout)
+        self._timeout_settings.set_default_navigation_timeout(timeout)
         self._channel.send_no_reply(
             "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
         )
 
     def set_default_timeout(self, timeout: float) -> None:
-        self._timeout_settings.set_timeout(timeout)
+        self._timeout_settings.set_default_timeout(timeout)
         self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     async def query_selector(
@@ -641,6 +641,7 @@ class Page(ChannelOwner):
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
         mask: List["Locator"] = None,
+        mask_color: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -957,13 +958,25 @@ class Page(ChannelOwner):
         return self.context.request
 
     async def pause(self) -> None:
-        await asyncio.wait(
-            [
-                asyncio.create_task(self._browser_context._pause()),
-                self._closed_or_crashed_future,
-            ],
-            return_when=asyncio.FIRST_COMPLETED,
+        default_navigation_timeout = (
+            self._browser_context._timeout_settings.default_navigation_timeout()
         )
+        default_timeout = self._browser_context._timeout_settings.default_timeout()
+        self._browser_context.set_default_navigation_timeout(0)
+        self._browser_context.set_default_timeout(0)
+        try:
+            await asyncio.wait(
+                [
+                    asyncio.create_task(self._browser_context._pause()),
+                    self._closed_or_crashed_future,
+                ],
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+        finally:
+            self._browser_context._set_default_navigation_timeout_impl(
+                default_navigation_timeout
+            )
+            self._browser_context._set_default_timeout_impl(default_timeout)
 
     async def pdf(
         self,

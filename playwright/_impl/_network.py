@@ -422,6 +422,7 @@ class Route(ChannelOwner):
                 if "headers" in params:
                     params["headers"] = serialize_headers(params["headers"])
                 params["requestUrl"] = self.request._initializer["url"]
+                params["isFallback"] = is_internal
                 await self._connection.wrap_api_call(
                     lambda: self._race_with_page_close(
                         self._channel.send(

@@ -177,27 +177,35 @@ class HarLookupResult(TypedDict, total=False):
 class TimeoutSettings:
     def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
         self._parent = parent
-        self._timeout: Optional[float] = None
-        self._navigation_timeout: Optional[float] = None
+        self._default_timeout: Optional[float] = None
+        self._default_navigation_timeout: Optional[float] = None
 
-    def set_timeout(self, timeout: float) -> None:
-        self._timeout = timeout
+    def set_default_timeout(self, timeout: Optional[float]) -> None:
+        self._default_timeout = timeout
 
     def timeout(self, timeout: float = None) -> float:
         if timeout is not None:
             return timeout
-        if self._timeout is not None:
-            return self._timeout
+        if self._default_timeout is not None:
+            return self._default_timeout
         if self._parent:
             return self._parent.timeout()
         return 30000
 
-    def set_navigation_timeout(self, navigation_timeout: float) -> None:
-        self._navigation_timeout = navigation_timeout
+    def set_default_navigation_timeout(
+        self, navigation_timeout: Optional[float]
+    ) -> None:
+        self._default_navigation_timeout = navigation_timeout
+
+    def default_navigation_timeout(self) -> Optional[float]:
+        return self._default_navigation_timeout
+
+    def default_timeout(self) -> Optional[float]:
+        return self._default_timeout
 
     def navigation_timeout(self) -> float:
-        if self._navigation_timeout is not None:
-            return self._navigation_timeout
+        if self._default_navigation_timeout is not None:
+            return self._default_navigation_timeout
         if self._parent:
             return self._parent.navigation_timeout()
         return 30000

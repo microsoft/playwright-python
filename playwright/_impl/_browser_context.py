@@ -232,13 +232,19 @@ class BrowserContext(ChannelOwner):
         asyncio.create_task(binding_call.call(func))
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
-        self._timeout_settings.set_navigation_timeout(timeout)
+        return self._set_default_navigation_timeout_impl(timeout)
+
+    def _set_default_navigation_timeout_impl(self, timeout: Optional[float]) -> None:
+        self._timeout_settings.set_default_navigation_timeout(timeout)
         self._channel.send_no_reply(
             "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
         )
 
     def set_default_timeout(self, timeout: float) -> None:
-        self._timeout_settings.set_timeout(timeout)
+        return self._set_default_timeout_impl(timeout)
+
+    def _set_default_timeout_impl(self, timeout: Optional[float]) -> None:
+        self._timeout_settings.set_default_timeout(timeout)
         self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     @property

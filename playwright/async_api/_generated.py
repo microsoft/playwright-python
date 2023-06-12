@@ -2765,7 +2765,8 @@ class ElementHandle(JSHandle):
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
-        mask: typing.Optional[typing.List["Locator"]] = None
+        mask: typing.Optional[typing.List["Locator"]] = None,
+        mask_color: typing.Optional[str] = None
     ) -> bytes:
         """ElementHandle.screenshot
 
@@ -2812,7 +2813,10 @@ class ElementHandle(JSHandle):
             Defaults to `"device"`.
         mask : Union[List[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` that completely covers its bounding box.
+            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
+        mask_color : Union[str, None]
+            Specify the color of the overlay box for masked elements, in
+            [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
 
         Returns
         -------
@@ -2830,6 +2834,7 @@ class ElementHandle(JSHandle):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
+                mask_color=mask_color,
             )
         )
 
@@ -9899,7 +9904,8 @@ class Page(AsyncContextManager):
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
-        mask: typing.Optional[typing.List["Locator"]] = None
+        mask: typing.Optional[typing.List["Locator"]] = None,
+        mask_color: typing.Optional[str] = None
     ) -> bytes:
         """Page.screenshot
 
@@ -9944,7 +9950,10 @@ class Page(AsyncContextManager):
             Defaults to `"device"`.
         mask : Union[List[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` that completely covers its bounding box.
+            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
+        mask_color : Union[str, None]
+            Specify the color of the overlay box for masked elements, in
+            [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
 
         Returns
         -------
@@ -9964,6 +9973,7 @@ class Page(AsyncContextManager):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
+                mask_color=mask_color,
             )
         )
 
@@ -14045,23 +14055,23 @@ class Browser(AsyncContextManager):
             Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
             [disabling JavaScript](../emulation.md#javascript-enabled).
         bypass_csp : Union[bool, None]
-            Toggles bypassing page's Content-Security-Policy.
+            Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
         user_agent : Union[str, None]
             Specific user agent to use in this context.
         locale : Union[str, None]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
-            `Accept-Language` request header value as well as number and date formatting rules. Learn more about emulation in
-            our [emulation guide](../emulation.md#locale--timezone).
+            `Accept-Language` request header value as well as number and date formatting rules. Defaults to the system default
+            locale. Learn more about emulation in our [emulation guide](../emulation.md#locale--timezone).
         timezone_id : Union[str, None]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
-            for a list of supported timezone IDs.
+            for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
         permissions : Union[List[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
-            more details.
+            more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
-            An object containing additional HTTP headers to be sent with every request.
+            An object containing additional HTTP headers to be sent with every request. Defaults to none.
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
@@ -14093,7 +14103,7 @@ class Browser(AsyncContextManager):
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
-            Network proxy settings to use with this context.
+            Network proxy settings to use with this context. Defaults to none.
 
             **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
             all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
@@ -14120,7 +14130,7 @@ class Browser(AsyncContextManager):
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
             using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the
-            corresponding URL. Examples:
+            corresponding URL. Unset by default. Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in
               `http://localhost:3000/foo/bar.html`
@@ -14129,8 +14139,8 @@ class Browser(AsyncContextManager):
         strict_selectors : Union[bool, None]
             If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
             selectors that imply single target DOM element will throw when more than one element matches the selector. This
-            option does not affect any Locator APIs (Locators are always strict). See `Locator` to learn more about the strict
-            mode.
+            option does not affect any Locator APIs (Locators are always strict). Defaults to `false`. See `Locator` to learn
+            more about the strict mode.
         service_workers : Union["allow", "block", None]
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be
@@ -14259,23 +14269,23 @@ class Browser(AsyncContextManager):
             Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
             [disabling JavaScript](../emulation.md#javascript-enabled).
         bypass_csp : Union[bool, None]
-            Toggles bypassing page's Content-Security-Policy.
+            Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
         user_agent : Union[str, None]
             Specific user agent to use in this context.
         locale : Union[str, None]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
-            `Accept-Language` request header value as well as number and date formatting rules. Learn more about emulation in
-            our [emulation guide](../emulation.md#locale--timezone).
+            `Accept-Language` request header value as well as number and date formatting rules. Defaults to the system default
+            locale. Learn more about emulation in our [emulation guide](../emulation.md#locale--timezone).
         timezone_id : Union[str, None]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
-            for a list of supported timezone IDs.
+            for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
         permissions : Union[List[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
-            more details.
+            more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
-            An object containing additional HTTP headers to be sent with every request.
+            An object containing additional HTTP headers to be sent with every request. Defaults to none.
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
@@ -14307,7 +14317,7 @@ class Browser(AsyncContextManager):
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
-            Network proxy settings to use with this context.
+            Network proxy settings to use with this context. Defaults to none.
 
             **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
             all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
@@ -14334,7 +14344,7 @@ class Browser(AsyncContextManager):
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
             using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the
-            corresponding URL. Examples:
+            corresponding URL. Unset by default. Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in
               `http://localhost:3000/foo/bar.html`
@@ -14343,8 +14353,8 @@ class Browser(AsyncContextManager):
         strict_selectors : Union[bool, None]
             If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
             selectors that imply single target DOM element will throw when more than one element matches the selector. This
-            option does not affect any Locator APIs (Locators are always strict). See `Locator` to learn more about the strict
-            mode.
+            option does not affect any Locator APIs (Locators are always strict). Defaults to `false`. See `Locator` to learn
+            more about the strict mode.
         service_workers : Union["allow", "block", None]
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be
@@ -14804,23 +14814,23 @@ class BrowserType(AsyncBase):
             Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
             [disabling JavaScript](../emulation.md#javascript-enabled).
         bypass_csp : Union[bool, None]
-            Toggles bypassing page's Content-Security-Policy.
+            Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
         user_agent : Union[str, None]
             Specific user agent to use in this context.
         locale : Union[str, None]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
-            `Accept-Language` request header value as well as number and date formatting rules. Learn more about emulation in
-            our [emulation guide](../emulation.md#locale--timezone).
+            `Accept-Language` request header value as well as number and date formatting rules. Defaults to the system default
+            locale. Learn more about emulation in our [emulation guide](../emulation.md#locale--timezone).
         timezone_id : Union[str, None]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
-            for a list of supported timezone IDs.
+            for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
         permissions : Union[List[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
-            more details.
+            more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
-            An object containing additional HTTP headers to be sent with every request.
+            An object containing additional HTTP headers to be sent with every request. Defaults to none.
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
@@ -14872,7 +14882,7 @@ class BrowserType(AsyncBase):
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
             using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the
-            corresponding URL. Examples:
+            corresponding URL. Unset by default. Examples:
             - baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
             - baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in
               `http://localhost:3000/foo/bar.html`
@@ -14881,8 +14891,8 @@ class BrowserType(AsyncBase):
         strict_selectors : Union[bool, None]
             If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
             selectors that imply single target DOM element will throw when more than one element matches the selector. This
-            option does not affect any Locator APIs (Locators are always strict). See `Locator` to learn more about the strict
-            mode.
+            option does not affect any Locator APIs (Locators are always strict). Defaults to `false`. See `Locator` to learn
+            more about the strict mode.
         service_workers : Union["allow", "block", None]
             Whether to allow sites to register Service workers. Defaults to `'allow'`.
             - `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) can be
@@ -15184,7 +15194,7 @@ class Playwright(AsyncBase):
 
         >>> browser = playwright.chromium.launch()
         >>> page = browser.new_page()
-        >>> page.goto(\"http://whatsmyuseragent.org/\")
+        >>> page.goto(\"https://playwright.dev/\")
         >>> page.screenshot(path=\"example.png\")
         >>> browser.close()
 
@@ -15379,11 +15389,11 @@ class Locator(AsyncBase):
         **Usage**
 
         ```py
-        banana = await page.get_by_role(\"listitem\").last()
+        banana = await page.get_by_role(\"listitem\").last
         ```
 
         ```py
-        banana = page.get_by_role(\"listitem\").last()
+        banana = page.get_by_role(\"listitem\").last
         ```
 
         Returns
@@ -17368,7 +17378,8 @@ class Locator(AsyncBase):
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
-        mask: typing.Optional[typing.List["Locator"]] = None
+        mask: typing.Optional[typing.List["Locator"]] = None,
+        mask_color: typing.Optional[str] = None
     ) -> bytes:
         """Locator.screenshot
 
@@ -17439,7 +17450,10 @@ class Locator(AsyncBase):
             Defaults to `"device"`.
         mask : Union[List[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` that completely covers its bounding box.
+            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
+        mask_color : Union[str, None]
+            Specify the color of the overlay box for masked elements, in
+            [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
 
         Returns
         -------
@@ -17457,6 +17471,7 @@ class Locator(AsyncBase):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
+                mask_color=mask_color,
             )
         )
 
@@ -18898,7 +18913,7 @@ class APIRequest(AsyncBase):
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
         extra_http_headers : Union[Dict[str, str], None]
-            An object containing additional HTTP headers to be sent with every request.
+            An object containing additional HTTP headers to be sent with every request. Defaults to none.
         http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
@@ -18973,7 +18988,7 @@ class PageAssertions(AsyncBase):
         title_or_reg_exp : Union[Pattern[str], str]
             Expected title or RegExp.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -18998,7 +19013,7 @@ class PageAssertions(AsyncBase):
         title_or_reg_exp : Union[Pattern[str], str]
             Expected title or RegExp.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19041,7 +19056,7 @@ class PageAssertions(AsyncBase):
         url_or_reg_exp : Union[Pattern[str], str]
             Expected URL string or RegExp.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19066,7 +19081,7 @@ class PageAssertions(AsyncBase):
         url_or_reg_exp : Union[Pattern[str], str]
             Expected URL string or RegExp.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19177,7 +19192,7 @@ class LocatorAssertions(AsyncBase):
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
@@ -19218,7 +19233,7 @@ class LocatorAssertions(AsyncBase):
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
@@ -19268,7 +19283,7 @@ class LocatorAssertions(AsyncBase):
         value : Union[Pattern[str], str]
             Expected attribute value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19296,7 +19311,7 @@ class LocatorAssertions(AsyncBase):
         value : Union[Pattern[str], str]
             Expected attribute value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19366,7 +19381,7 @@ class LocatorAssertions(AsyncBase):
         expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected class or RegExp or a list of those.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19397,7 +19412,7 @@ class LocatorAssertions(AsyncBase):
         expected : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str], Pattern[str], str]
             Expected class or RegExp or a list of those.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19435,7 +19450,7 @@ class LocatorAssertions(AsyncBase):
         count : int
             Expected count.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19455,7 +19470,7 @@ class LocatorAssertions(AsyncBase):
         count : int
             Expected count.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19497,7 +19512,7 @@ class LocatorAssertions(AsyncBase):
         value : Union[Pattern[str], str]
             CSS property value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19523,7 +19538,7 @@ class LocatorAssertions(AsyncBase):
         value : Union[Pattern[str], str]
             CSS property value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19564,7 +19579,7 @@ class LocatorAssertions(AsyncBase):
         id : Union[Pattern[str], str]
             Element id.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19587,7 +19602,7 @@ class LocatorAssertions(AsyncBase):
         id : Union[Pattern[str], str]
             Element id.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19626,7 +19641,7 @@ class LocatorAssertions(AsyncBase):
         value : Any
             Property value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19650,7 +19665,7 @@ class LocatorAssertions(AsyncBase):
         value : Any
             Property value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19694,7 +19709,7 @@ class LocatorAssertions(AsyncBase):
         value : Union[Pattern[str], str]
             Expected value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19717,7 +19732,7 @@ class LocatorAssertions(AsyncBase):
         value : Union[Pattern[str], str]
             Expected value.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19775,7 +19790,7 @@ class LocatorAssertions(AsyncBase):
         values : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str]]
             Expected options currently selected.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19804,7 +19819,7 @@ class LocatorAssertions(AsyncBase):
         values : Union[List[Pattern[str]], List[Union[Pattern[str], str]], List[str]]
             Expected options currently selected.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -19909,7 +19924,7 @@ class LocatorAssertions(AsyncBase):
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
@@ -19950,7 +19965,7 @@ class LocatorAssertions(AsyncBase):
         use_inner_text : Union[bool, None]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
@@ -19990,7 +20005,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         attached : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20027,7 +20042,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         checked : Union[bool, None]
         """
         __tracebackhide__ = True
@@ -20050,7 +20065,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         attached : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20068,7 +20083,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20104,7 +20119,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20122,7 +20137,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20160,7 +20175,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         editable : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20182,7 +20197,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         editable : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20214,7 +20229,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20230,7 +20245,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20268,7 +20283,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         enabled : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20290,7 +20305,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         enabled : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20323,7 +20338,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20339,7 +20354,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20372,7 +20387,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         visible : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20394,7 +20409,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         visible : Union[bool, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20426,7 +20441,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20444,7 +20459,7 @@ class LocatorAssertions(AsyncBase):
         Parameters
         ----------
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20495,7 +20510,7 @@ class LocatorAssertions(AsyncBase):
             The minimal ratio of the element to intersect viewport. If equals to `0`, then element should intersect viewport at
             any positive ratio. Defaults to `0`.
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 
@@ -20517,7 +20532,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         ratio : Union[float, None]
         timeout : Union[float, None]
-            Time to retry the assertion for.
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
 

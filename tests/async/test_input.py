@@ -15,6 +15,7 @@
 import asyncio
 import os
 import re
+import shutil
 import sys
 
 import pytest
@@ -348,3 +349,32 @@ async def test_should_upload_large_file(page, server, tmp_path):
     )
     assert match.group("name") == b"file1"
     assert match.group("filename") == b"200MB.zip"
+
+
+@flaky
+async def test_should_upload_multiple_large_file(page: Page, server, tmp_path):
+    files_count = 10
+    await page.goto(server.PREFIX + "/input/fileupload-multi.html")
+    upload_file = tmp_path / "50MB_1.zip"
+    data = b"A" * 1024
+    with upload_file.open("wb") as f:
+        # 49 is close to the actual limit
+        for i in range(0, 49 * 1024):
+            f.write(data)
+    input = page.locator('input[type="file"]')
+    upload_files = [upload_file]
+    for i in range(2, files_count + 1):
+        dst_file = tmp_path / f"50MB_{i}.zip"
+        shutil.copy(upload_file, dst_file)
+        upload_files.append(dst_file)
+    async with page.expect_file_chooser() as fc_info:
+        await input.click()
+    file_chooser = await fc_info.value
+    await file_chooser.set_files(upload_files)
+    files_len = await page.evaluate(
+        'document.getElementsByTagName("input")[0].files.length'
+    )
+    assert file_chooser.is_multiple()
+    assert files_len == files_count
+    for path in upload_files:
+        path.unlink()
