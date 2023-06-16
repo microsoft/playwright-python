@@ -18,7 +18,7 @@ Firefox and WebKit with a single API. Playwright is built to enable cross-browse
 web automation that is ever-green, capable, reliable and fast.
 """
 
-from typing import Optional, Union, overload
+from typing import Any, Optional, Union, overload
 
 import playwright._impl._api_structures
 import playwright._impl._api_types
@@ -88,10 +88,12 @@ def async_playwright() -> PlaywrightContextManager:
 
 
 class Expect:
+    _unset: Any = object()
+
     def __init__(self) -> None:
         self._timeout: Optional[float] = None
 
-    def set_options(self, timeout: float = None) -> None:
+    def set_options(self, timeout: Optional[float] = _unset) -> None:
         """
         This method sets global `expect()` options.
 
@@ -101,7 +103,7 @@ class Expect:
         Returns:
             None
         """
-        if timeout is not None:
+        if timeout is not self._unset:
             self._timeout = timeout
 
     @overload
