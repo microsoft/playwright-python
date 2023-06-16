@@ -15,7 +15,7 @@ asyncio_mode = "auto"
 
 [tool.mypy]
 ignore_missing_imports = true
-python_version = "3.7"
+python_version = "3.8"
 warn_unused_ignores = false
 warn_redundant_casts = true
 warn_unused_configs = true
@@ -32,7 +32,7 @@ profile = "black"
 [tool.pyright]
 include = ["playwright", "tests/sync"]
 ignore = ["tests/async/", "scripts/", "examples/"]
-pythonVersion = "3.7"
+pythonVersion = "3.8"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false
 reportCallInDefaultInitializer = true

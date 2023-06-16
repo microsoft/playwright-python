@@ -43,34 +43,13 @@ jobs:
   build:
     name: Build
     timeout-minutes: 45
-    env:
-      DEBUG: pw:*
-      DEBUG_FILE: pw-log.txt
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7, 3.8]
+        python-version: [3.8, 3.9]
         browser: [chromium, firefox, webkit]
         include:
-        - os: ubuntu-latest
-          python-version: 3.9
-          browser: chromium
-        - os: windows-latest
-          python-version: 3.9
-          browser: chromium
-        - os: macos-latest
-          python-version: 3.9
-          browser: chromium
-        - os: macos-11.0
-          python-version: 3.9
-          browser: chromium
-        - os: macos-11.0
-          python-version: 3.9
-          browser: firefox
-        - os: macos-11.0
-          python-version: 3.9
-          browser: webkit
         - os: ubuntu-latest
           python-version: '3.10'
           browser: chromium
@@ -129,18 +108,10 @@ jobs:
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90
-    - uses: actions/upload-artifact@v3
-      if: failure()
-      with:
-        name: ${{ matrix.browser }}-${{ matrix.os }}-${{ matrix.python-version }}
-        path: pw-log.txt
 
   test-stable:
     name: Stable
     timeout-minutes: 45
-    env:
-      DEBUG: pw:*
-      DEBUG_FILE: pw-log.txt
     strategy:
       fail-fast: false
       matrix:
@@ -179,11 +150,6 @@ jobs:
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
-    - uses: actions/upload-artifact@v3
-      if: failure()
-      with:
-        name: ${{ matrix.browser-channel }}-${{ matrix.os }}
-        path: pw-log.txt
 
   build-conda:
     name: Conda Build

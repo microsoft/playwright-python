@@ -10,7 +10,7 @@ assignees: ''
 **Context:**
 - Playwright Version: [what Playwright version do you use?]
 - Operating System: [e.g. Windows, Linux or Mac]
-- Python version: [e.g. 3.7, 3.9]
+- Python version: [e.g. 3.8, 3.9]
 - Browser: [e.g. All, Chromium, Firefox, WebKit]
 - Extra: [any specific details about your environment]
 
