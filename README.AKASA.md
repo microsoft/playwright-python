@@ -11,7 +11,7 @@ Akasa maintains a small fork of the [Playwright Python](https://github.com/micro
 
 ## Release process
 
-* In playwright repo:
+* In [playwright repo](https://github.com/alpha-health-ai/playwright/blob/akasa-expose-enable-recorder/README.AKASA.md):
   * Change version in package.json with akasa extension: "1.35.1-akasa1"
   * Update README.AKASA.md with description of changes.
   * `./utils/build/build-playwright-driver.sh`
