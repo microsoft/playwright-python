@@ -16,6 +16,7 @@ import asyncio
 import io
 import json
 import os
+import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -113,6 +114,12 @@ class PipeTransport(Transport):
             if getattr(sys, "frozen", False):
                 env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "0")
 
+            startupinfo = None
+            if sys.platform == "win32":
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
+
             self._proc = await asyncio.create_subprocess_exec(
                 str(self._driver_executable),
                 "run-driver",
@@ -121,6 +128,7 @@ class PipeTransport(Transport):
                 stderr=_get_stderr_fileno(),
                 limit=32768,
                 env=env,
+                startupinfo=startupinfo,
             )
         except Exception as exc:
             self.on_error_future.set_exception(exc)
