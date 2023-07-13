@@ -192,6 +192,9 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
         if "u" in value:
             return urlparse(value["u"])
 
+        if "bi" in value:
+            return int(value["bi"])
+
         if "a" in value:
             a: List = []
             refs[value["id"]] = a

@@ -16,7 +16,7 @@ import math
 from datetime import datetime
 from urllib.parse import ParseResult, urlparse
 
-from playwright.async_api import Error
+from playwright.async_api import Error, Page
 
 
 async def test_evaluate_work(page):
@@ -62,6 +62,11 @@ async def test_evaluate_roundtrip_unserializable_values(page):
 async def test_evaluate_transfer_arrays(page):
     result = await page.evaluate("a => a", [1, 2, 3])
     assert result == [1, 2, 3]
+
+
+async def test_evaluate_transfer_bigint(page: Page) -> None:
+    assert await page.evaluate("() => 42n") == 42
+    assert await page.evaluate("a => a", 17) == 17
 
 
 async def test_evaluate_return_undefined_for_objects_with_symbols(page):
