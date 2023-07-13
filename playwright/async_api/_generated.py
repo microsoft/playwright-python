@@ -896,7 +896,7 @@ class Route(AsyncBase):
             # override headers
             headers = {
                 **request.headers,
-                \"foo\": \"foo-value\" # set \"foo\" header
+                \"foo\": \"foo-value\", # set \"foo\" header
                 \"bar\": None # remove \"bar\" header
             }
             await route.fallback(headers=headers)
@@ -909,7 +909,7 @@ class Route(AsyncBase):
             # override headers
             headers = {
                 **request.headers,
-                \"foo\": \"foo-value\" # set \"foo\" header
+                \"foo\": \"foo-value\", # set \"foo\" header
                 \"bar\": None # remove \"bar\" header
             }
             route.fallback(headers=headers)
@@ -958,7 +958,7 @@ class Route(AsyncBase):
             # override headers
             headers = {
                 **request.headers,
-                \"foo\": \"foo-value\" # set \"foo\" header
+                \"foo\": \"foo-value\", # set \"foo\" header
                 \"bar\": None # remove \"bar\" header
             }
             await route.continue_(headers=headers)
@@ -971,7 +971,7 @@ class Route(AsyncBase):
             # override headers
             headers = {
                 **request.headers,
-                \"foo\": \"foo-value\" # set \"foo\" header
+                \"foo\": \"foo-value\", # set \"foo\" header
                 \"bar\": None # remove \"bar\" header
             }
             route.continue_(headers=headers)
@@ -1650,7 +1650,7 @@ class JSHandle(AsyncBase):
         **Usage**
 
         ```py
-        handle = await page.evaluate_handle(\"({window, document})\")
+        handle = await page.evaluate_handle(\"({ window, document })\")
         properties = await handle.get_properties()
         window_handle = properties.get(\"window\")
         document_handle = properties.get(\"document\")
@@ -1658,7 +1658,7 @@ class JSHandle(AsyncBase):
         ```
 
         ```py
-        handle = page.evaluate_handle(\"({window, document})\")
+        handle = page.evaluate_handle(\"({ window, document })\")
         properties = handle.get_properties()
         window_handle = properties.get(\"window\")
         document_handle = properties.get(\"document\")
@@ -2896,13 +2896,13 @@ class ElementHandle(JSHandle):
         ```py
         tweet_handle = await page.query_selector(\".tweet\")
         assert await tweet_handle.eval_on_selector(\".like\", \"node => node.innerText\") == \"100\"
-        assert await tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") = \"10\"
+        assert await tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") == \"10\"
         ```
 
         ```py
         tweet_handle = page.query_selector(\".tweet\")
         assert tweet_handle.eval_on_selector(\".like\", \"node => node.innerText\") == \"100\"
-        assert tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") = \"10\"
+        assert tweet_handle.eval_on_selector(\".retweets\", \"node => node.innerText\") == \"10\"
         ```
 
         Parameters
@@ -3124,11 +3124,11 @@ class Accessibility(AsyncBase):
 
         ```py
         def find_focused_node(node):
-            if (node.get(\"focused\"))
+            if node.get(\"focused\"):
                 return node
             for child in (node.get(\"children\") or []):
                 found_node = find_focused_node(child)
-                if (found_node)
+                if found_node:
                     return found_node
             return None
 
@@ -3140,11 +3140,11 @@ class Accessibility(AsyncBase):
 
         ```py
         def find_focused_node(node):
-            if (node.get(\"focused\"))
+            if node.get(\"focused\"):
                 return node
             for child in (node.get(\"children\") or []):
                 found_node = find_focused_node(child)
-                if (found_node)
+                if found_node:
                     return found_node
             return None
 
@@ -7396,6 +7396,7 @@ class Page(AsyncContextManager):
             # or while waiting for an event.
             await page.wait_for_event(\"popup\")
         except Error as e:
+            pass
             # when the page crashes, exception message contains \"crash\".
         ```
 
@@ -7406,6 +7407,7 @@ class Page(AsyncContextManager):
             # or while waiting for an event.
             page.wait_for_event(\"popup\")
         except Error as e:
+            pass
             # when the page crashes, exception message contains \"crash\".
         ```"""
 
@@ -7698,6 +7700,7 @@ class Page(AsyncContextManager):
             # or while waiting for an event.
             await page.wait_for_event(\"popup\")
         except Error as e:
+            pass
             # when the page crashes, exception message contains \"crash\".
         ```
 
@@ -7708,6 +7711,7 @@ class Page(AsyncContextManager):
             # or while waiting for an event.
             page.wait_for_event(\"popup\")
         except Error as e:
+            pass
             # when the page crashes, exception message contains \"crash\".
         ```"""
 
@@ -9765,18 +9769,18 @@ class Page(AsyncContextManager):
 
         ```py
         def handle_route(route):
-          if (\"my-string\" in route.request.post_data)
+          if (\"my-string\" in route.request.post_data):
             route.fulfill(body=\"mocked-data\")
-          else
+          else:
             route.continue_()
         await page.route(\"/api/**\", handle_route)
         ```
 
         ```py
         def handle_route(route):
-          if (\"my-string\" in route.request.post_data)
+          if (\"my-string\" in route.request.post_data):
             route.fulfill(body=\"mocked-data\")
-          else
+          else:
             route.continue_()
         page.route(\"/api/**\", handle_route)
         ```
@@ -13502,18 +13506,18 @@ class BrowserContext(AsyncContextManager):
 
         ```py
         def handle_route(route):
-          if (\"my-string\" in route.request.post_data)
+          if (\"my-string\" in route.request.post_data):
             route.fulfill(body=\"mocked-data\")
-          else
+          else:
             route.continue_()
         await context.route(\"/api/**\", handle_route)
         ```
 
         ```py
         def handle_route(route):
-          if (\"my-string\" in route.request.post_data)
+          if (\"my-string\" in route.request.post_data):
             route.fulfill(body=\"mocked-data\")
-          else
+          else:
             route.continue_()
         context.route(\"/api/**\", handle_route)
         ```
@@ -15188,17 +15192,17 @@ class Playwright(AsyncBase):
         in REPL applications.
 
         ```py
-        >>> from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright
 
-        >>> playwright = sync_playwright().start()
+        playwright = sync_playwright().start()
 
-        >>> browser = playwright.chromium.launch()
-        >>> page = browser.new_page()
-        >>> page.goto(\"https://playwright.dev/\")
-        >>> page.screenshot(path=\"example.png\")
-        >>> browser.close()
+        browser = playwright.chromium.launch()
+        page = browser.new_page()
+        page.goto(\"https://playwright.dev/\")
+        page.screenshot(path=\"example.png\")
+        browser.close()
 
-        >>> playwright.stop()
+        playwright.stop()
         ```
         """
 
@@ -16681,19 +16685,18 @@ class Locator(AsyncBase):
         ```py
         row_locator = page.locator(\"tr\")
         # ...
-        await row_locator
-            .filter(has_text=\"text in column 1\")
-            .filter(has=page.get_by_role(\"button\", name=\"column 2 button\"))
-            .screenshot()
+        await row_locator.filter(has_text=\"text in column 1\").filter(
+            has=page.get_by_role(\"button\", name=\"column 2 button\")
+        ).screenshot()
+
         ```
 
         ```py
         row_locator = page.locator(\"tr\")
         # ...
-        row_locator
-            .filter(has_text=\"text in column 1\")
-            .filter(has=page.get_by_role(\"button\", name=\"column 2 button\"))
-            .screenshot()
+        row_locator.filter(has_text=\"text in column 1\").filter(
+            has=page.get_by_role(\"button\", name=\"column 2 button\")
+        ).screenshot()
         ```
 
         Parameters
@@ -16744,7 +16747,7 @@ class Locator(AsyncBase):
         new_email = page.get_by_role(\"button\", name=\"New\")
         dialog = page.get_by_text(\"Confirm security settings\")
         await expect(new_email.or_(dialog)).to_be_visible()
-        if (await dialog.is_visible())
+        if (await dialog.is_visible()):
           await page.get_by_role(\"button\", name=\"Dismiss\").click()
         await new_email.click()
         ```
@@ -16753,7 +16756,7 @@ class Locator(AsyncBase):
         new_email = page.get_by_role(\"button\", name=\"New\")
         dialog = page.get_by_text(\"Confirm security settings\")
         expect(new_email.or_(dialog)).to_be_visible()
-        if (dialog.is_visible())
+        if (dialog.is_visible()):
           page.get_by_role(\"button\", name=\"Dismiss\").click()
         new_email.click()
         ```
