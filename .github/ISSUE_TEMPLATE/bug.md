@@ -7,17 +7,34 @@ assignees: ''
 
 ---
 
-**Context:**
-- Playwright Version: [what Playwright version do you use?]
-- Operating System: [e.g. Windows, Linux or Mac]
-- Python version: [e.g. 3.8, 3.9]
-- Browser: [e.g. All, Chromium, Firefox, WebKit]
-- Extra: [any specific details about your environment]
+<!-- ⚠️⚠️ Do not delete this template ⚠️⚠️ -->
 
-**Code Snippet**
+<!-- 🔎 Search existing issues to avoid creating duplicates. -->
+<!-- 🧪 Test using the latest Playwright release to see if your issue has already been fixed -->
+<!-- 💡 Provide enough information for us to be able to reproduce your issue locally -->
 
-Help us help you! Put down a short code snippet that illustrates your bug and
-that we can run and debug locally.
+### System info
+- Playwright Version: [v1.XX]
+- Operating System: [All, Windows 11, Ubuntu 20, macOS 13.2, etc.]
+- Browser: [All, Chromium, Firefox, WebKit]
+- Other info:
+
+### Source code
+
+- [ ] I provided exact source code that allows reproducing the issue locally.
+
+<!-- For simple cases, please provide a self-contained test file along with the config file -->
+<!-- For larger cases, you can provide a GitHub repo you created for this issue -->
+<!-- If we can not reproduce the problem locally, we won't be able to act on it -->
+<!-- You can still file without the exact code and we will try to help, but if we can't repro, it will be closed -->
+
+**Link to the GitHub repository with the repro**
+
+[https://github.com/your_profile/playwright_issue_title]
+
+or
+
+**Test file (self-contained)**
 
 ```python
 from playwright.sync_api import sync_playwright
@@ -28,6 +45,14 @@ with sync_playwright() as p:
     browser.close()
 ```
 
-**Describe the bug**
+**Steps**
+- [Run the test]
+- [...]
 
-Add any other details about the problem here.
+**Expected**
+
+[Describe expected behavior]
+
+**Actual**
+
+[Describe actual behavior]
