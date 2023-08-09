@@ -4353,6 +4353,9 @@ class Frame(SyncBase):
     ) -> None:
         """Frame.set_content
 
+        This method internally calls [document.write()](https://developer.mozilla.org/en-US/docs/Web/API/Document/write),
+        inheriting all its specific characteristics and behaviors.
+
         Parameters
         ----------
         html : str
@@ -9206,6 +9209,9 @@ class Page(SyncContextManager):
     ) -> None:
         """Page.set_content
 
+        This method internally calls [document.write()](https://developer.mozilla.org/en-US/docs/Web/API/Document/write),
+        inheriting all its specific characteristics and behaviors.
+
         Parameters
         ----------
         html : str
@@ -9920,7 +9926,7 @@ class Page(SyncContextManager):
         """Page.route_from_har
 
         If specified the network requests that are made in the page will be served from the HAR file. Read more about
-        [Replaying from HAR](https://playwright.dev/python/docs/network#replaying-from-har).
+        [Replaying from HAR](https://playwright.dev/python/docs/mock#replaying-from-har).
 
         Playwright will not serve requests intercepted by Service Worker from the HAR file. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
@@ -13652,7 +13658,7 @@ class BrowserContext(SyncContextManager):
         """BrowserContext.route_from_har
 
         If specified the network requests that are made in the context will be served from the HAR file. Read more about
-        [Replaying from HAR](https://playwright.dev/python/docs/network#replaying-from-har).
+        [Replaying from HAR](https://playwright.dev/python/docs/mock#replaying-from-har).
 
         Playwright will not serve requests intercepted by Service Worker from the HAR file. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
@@ -14150,7 +14156,7 @@ class Browser(SyncContextManager):
         is_mobile : Union[bool, None]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
             so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
-            about [mobile emulation](../emulation.md#isMobile).
+            about [mobile emulation](../emulation.md#ismobile).
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
@@ -14366,7 +14372,7 @@ class Browser(SyncContextManager):
         is_mobile : Union[bool, None]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
             so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
-            about [mobile emulation](../emulation.md#isMobile).
+            about [mobile emulation](../emulation.md#ismobile).
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
@@ -14917,7 +14923,7 @@ class BrowserType(SyncBase):
         is_mobile : Union[bool, None]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
             so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
-            about [mobile emulation](../emulation.md#isMobile).
+            about [mobile emulation](../emulation.md#ismobile).
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
@@ -15107,7 +15113,8 @@ class BrowserType(SyncBase):
         *,
         timeout: typing.Optional[float] = None,
         slow_mo: typing.Optional[float] = None,
-        headers: typing.Optional[typing.Dict[str, str]] = None
+        headers: typing.Optional[typing.Dict[str, str]] = None,
+        expose_network: typing.Optional[str] = None
     ) -> "Browser":
         """BrowserType.connect
 
@@ -15126,6 +15133,20 @@ class BrowserType(SyncBase):
             on. Defaults to 0.
         headers : Union[Dict[str, str], None]
             Additional HTTP headers to be sent with web socket connect request. Optional.
+        expose_network : Union[str, None]
+            This option exposes network available on the connecting client to the browser being connected to. Consists of a
+            list of rules separated by comma.
+
+            Available rules:
+            1. Hostname pattern, for example: `example.com`, `*.org:99`, `x.*.y.com`, `*foo.org`.
+            1. IP literal, for example: `127.0.0.1`, `0.0.0.0:99`, `[::1]`, `[0:0::1]:99`.
+            1. `<loopback>` that matches local loopback interfaces: `localhost`, `*.localhost`, `127.0.0.1`, `[::1]`.
+
+            Some common examples:
+            1. `"*"` to expose all network.
+            1. `"<loopback>"` to expose localhost network.
+            1. `"*.test.internal-domain,*.staging.internal-domain,<loopback>"` to expose test/staging deployments and
+               localhost.
 
         Returns
         -------
@@ -15139,6 +15160,7 @@ class BrowserType(SyncBase):
                     timeout=timeout,
                     slow_mo=slow_mo,
                     headers=mapping.to_impl(headers),
+                    expose_network=expose_network,
                 )
             )
         )
@@ -16933,7 +16955,8 @@ class Locator(SyncBase):
     def all(self) -> typing.List["Locator"]:
         """Locator.all
 
-        When locator points to a list of elements, returns array of locators, pointing to respective elements.
+        When the locator points to a list of elements, this returns an array of locators, pointing to their respective
+        elements.
 
         **NOTE** `locator.all()` does not wait for elements to match the locator, and instead immediately returns
         whatever is present in the page.  When the list of elements changes dynamically, `locator.all()` will
@@ -17930,6 +17953,9 @@ class Locator(SyncBase):
         no_wait_after: typing.Optional[bool] = None
     ) -> None:
         """Locator.type
+
+        **NOTE** In most cases, you should use `locator.fill()` instead. You only need to type characters if there
+        is special keyboard handling on the page.
 
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
         text.
@@ -20088,16 +20114,16 @@ class LocatorAssertions(SyncBase):
         from playwright.sync_api import expect
 
         # ✓ Has the right items in the right order
-        await expect(page.locator(\"ul > li\")).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
+        expect(page.locator(\"ul > li\")).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
 
         # ✖ Wrong order
-        await expect(page.locator(\"ul > li\")).to_have_text([\"Text 3\", \"Text 2\", \"Text 1\"])
+        expect(page.locator(\"ul > li\")).to_have_text([\"Text 3\", \"Text 2\", \"Text 1\"])
 
         # ✖ Last item does not match
-        await expect(page.locator(\"ul > li\")).to_have_text([\"Text 1\", \"Text 2\", \"Text\"])
+        expect(page.locator(\"ul > li\")).to_have_text([\"Text 1\", \"Text 2\", \"Text\"])
 
         # ✖ Locator points to the outer list element, not to the list items
-        await expect(page.locator(\"ul\")).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
+        expect(page.locator(\"ul\")).to_have_text([\"Text 1\", \"Text 2\", \"Text 3\"])
         ```
 
         Parameters

@@ -47,5 +47,10 @@ class Artifact(ChannelOwner):
     async def delete(self) -> None:
         await self._channel.send("delete")
 
+    async def read_info_buffer(self) -> bytes:
+        stream = cast(Stream, from_channel(await self._channel.send("stream")))
+        buffer = await stream.read_all()
+        return buffer
+
     async def cancel(self) -> None:
         await self._channel.send("cancel")

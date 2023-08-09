@@ -241,7 +241,7 @@ class Locator:
             raise Error("Locators must belong to the same frame.")
         return Locator(
             self._frame,
-            f"{self._selector} >> {selector_or_locator._selector}",
+            f"{self._selector} >> internal:chain={json.dumps(selector_or_locator._selector)}",
             has_text=has_text,
             has_not_text=has_not_text,
             has_not=has_not,
