@@ -168,7 +168,8 @@ jobs:
           python-version: 3.9
           channels: conda-forge
           # TODO: Can be removed after https://github.com/conda/conda/issues/12955 is fixed
-          conda-version: 23.5.2
+          conda-version: 23.7.2
+          conda-build-version: 3.26.0
       - name: Prepare
         run: conda install conda-build conda-verify
       - name: Build
