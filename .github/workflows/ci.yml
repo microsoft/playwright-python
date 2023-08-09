@@ -10,11 +10,6 @@ on:
       - main
       - release-*
 
-concurrency:
-  # For pull requests, cancel all currently-running jobs for this workflow
-  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
 
 jobs:
   build-conda:
@@ -33,7 +28,7 @@ jobs:
         with:
           python-version: 3.9
           channels: conda-forge
-          conda-version: 23.5.2
+          conda-version: 23.7.1
       - name: Prepare
         run: conda install conda-build conda-verify
       - name: Build
