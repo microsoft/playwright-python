@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: 3.9
           channels: conda-forge
-          conda-version: 23.7.1
+          conda-version: 23.7.2
       - name: Prepare
         run: conda install conda-build conda-verify
       - name: Build
