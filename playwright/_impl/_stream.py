@@ -35,3 +35,12 @@ class Stream(ChannelOwner):
                 None, lambda: file.write(base64.b64decode(binary))
             )
         await self._loop.run_in_executor(None, lambda: file.close())
+
+    async def read_all(self) -> bytes:
+        binary = b""
+        while True:
+            chunk = await self._channel.send("read", {"size": 1024 * 1024})
+            if not chunk:
+                break
+            binary += base64.b64decode(chunk)
+        return binary

@@ -906,11 +906,11 @@ async def test_frame_goto_should_reject_when_frame_detaches(page, server, browse
     with pytest.raises(Error) as exc_info:
         await navigation_task
     if browser_name == "chromium":
-        assert ("frame was detached" in exc_info.value.message) or (
-            "net::ERR_ABORTED" in exc_info.value.message
+        assert "net::ERR_FAILED" in exc_info.value.message or (
+            "frame was detached" in exc_info.value.message.lower()
         )
     else:
-        assert "frame was detached" in exc_info.value.message
+        assert "frame was detached" in exc_info.value.message.lower()
 
 
 async def test_frame_goto_should_continue_after_client_redirect(page, server):

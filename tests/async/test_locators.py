@@ -846,6 +846,35 @@ async def test_locator_should_support_locator_or(page: Page, server: Server) -> 
     )
 
 
+async def test_locator_should_support_locator_locator_with_and_or(page: Page) -> None:
+    await page.set_content(
+        """
+        <div>one <span>two</span> <button>three</button> </div>
+        <span>four</span>
+        <button>five</button>
+        """
+    )
+
+    await expect(page.locator("div").locator(page.locator("button"))).to_have_text(
+        ["three"]
+    )
+    await expect(
+        page.locator("div").locator(page.locator("button").or_(page.locator("span")))
+    ).to_have_text(["two", "three"])
+    await expect(page.locator("button").or_(page.locator("span"))).to_have_text(
+        ["two", "three", "four", "five"]
+    )
+
+    await expect(
+        page.locator("div").locator(
+            page.locator("button").and_(page.get_by_role("button"))
+        )
+    ).to_have_text(["three"])
+    await expect(page.locator("button").and_(page.get_by_role("button"))).to_have_text(
+        ["three", "five"]
+    )
+
+
 async def test_locator_highlight_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/grid.html")
     await page.locator(".box").nth(3).highlight()
