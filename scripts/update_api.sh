@@ -6,7 +6,7 @@ function update_api {
     generate_script="$2"
     git checkout HEAD -- "$file_name"
 
-    if python "$generate_script" > .x; then
+    if PYTHONIOENCODING=utf-8 python "$generate_script" > .x; then
         mv .x "$file_name"
         pre-commit run --files $file_name
         echo "Regenerated APIs"
