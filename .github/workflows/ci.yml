@@ -77,6 +77,15 @@ jobs:
         - os: ubuntu-latest
           python-version: '3.13'
           browser: chromium
+        - os: macos-latest
+          python-version: 'pypy3.8'
+          browser: chromium
+        - os: ubuntu-latest
+          python-version: 'pypy3.8'
+          browser: chromium
+        - os: windows-latest
+          python-version: 'pypy3.8'
+          browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
