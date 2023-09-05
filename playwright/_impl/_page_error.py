@@ -12,32 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# These are types that we use in the API. They are public and are a part of the
-# stable API.
-
-
+from asyncio import AbstractEventLoop
 from typing import Optional
 
+from playwright._impl._helper import Error
+from playwright._impl._page import Page
 
-class Error(Exception):
-    def __init__(self, message: str) -> None:
-        self._message = message
-        self._name: Optional[str] = None
-        self._stack: Optional[str] = None
-        super().__init__(message)
 
-    @property
-    def message(self) -> str:
-        return self._message
-
-    @property
-    def name(self) -> Optional[str]:
-        return self._name
+class PageError:
+    def __init__(
+        self, loop: AbstractEventLoop, page: Optional[Page], error: Error
+    ) -> None:
+        self._loop = loop
+        self._page = page
+        self._error = error
 
     @property
-    def stack(self) -> Optional[str]:
-        return self._stack
+    def page(self) -> Optional[Page]:
+        return self._page
 
-
-class TimeoutError(Error):
-    pass
+    @property
+    def error(self) -> Error:
+        return self._error

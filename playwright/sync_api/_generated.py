@@ -73,6 +73,7 @@ from playwright._impl._network import Route as RouteImpl
 from playwright._impl._network import WebSocket as WebSocketImpl
 from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
+from playwright._impl._page_error import PageError as PageErrorImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._sync_base import (
@@ -168,6 +169,21 @@ class Request(SyncBase):
         """Request.frame
 
         Returns the `Frame` that initiated this request.
+
+        **Usage**
+
+        ```py
+        frame_url = request.frame.url
+        ```
+
+        **Details**
+
+        Note that in some cases the frame is not available, and this method will throw.
+        - When request originates in the Service Worker. You can use `request.serviceWorker()` to check that.
+        - When navigation request is issued before the corresponding frame is created. You can use
+          `request.is_navigation_request()` to check that.
+
+        Here is an example that handles all the cases:
 
         Returns
         -------
@@ -329,6 +345,9 @@ class Request(SyncBase):
         """Request.is_navigation_request
 
         Whether this request is driving frame's navigation.
+
+        Some navigation requests are issued before the corresponding frame is created, and therefore do not have
+        `request.frame()` available.
 
         Returns
         -------
@@ -2334,7 +2353,7 @@ class ElementHandle(JSHandle):
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
         instead.
 
-        To send fine-grained keyboard events, use `element_handle.type()`.
+        To send fine-grained keyboard events, use `keyboard.type()`.
 
         Parameters
         ----------
@@ -2480,30 +2499,6 @@ class ElementHandle(JSHandle):
         To press a special key, like `Control` or `ArrowDown`, use `element_handle.press()`.
 
         **Usage**
-
-        ```py
-        await element_handle.type(\"hello\") # types instantly
-        await element_handle.type(\"world\", delay=100) # types slower, like a user
-        ```
-
-        ```py
-        element_handle.type(\"hello\") # types instantly
-        element_handle.type(\"world\", delay=100) # types slower, like a user
-        ```
-
-        An example of typing into a text field and then submitting the form:
-
-        ```py
-        element_handle = await page.query_selector(\"input\")
-        await element_handle.type(\"some text\")
-        await element_handle.press(\"Enter\")
-        ```
-
-        ```py
-        element_handle = page.query_selector(\"input\")
-        element_handle.type(\"some text\")
-        element_handle.press(\"Enter\")
-        ```
 
         Parameters
         ----------
@@ -5878,16 +5873,6 @@ class Frame(SyncBase):
 
         **Usage**
 
-        ```py
-        await frame.type(\"#mytextarea\", \"hello\") # types instantly
-        await frame.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
-        ```
-
-        ```py
-        frame.type(\"#mytextarea\", \"hello\") # types instantly
-        frame.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
-        ```
-
         Parameters
         ----------
         selector : str
@@ -7392,6 +7377,16 @@ class Download(SyncBase):
 
         Copy the download to a user-specified path. It is safe to call this method while the download is still in progress.
         Will wait for the download to finish if necessary.
+
+        **Usage**
+
+        ```py
+        await download.save_as(\"/path/to/save/at/\" + download.suggested_filename)
+        ```
+
+        ```py
+        download.save_as(\"/path/to/save/at/\" + download.suggested_filename)
+        ```
 
         Parameters
         ----------
@@ -11537,16 +11532,6 @@ class Page(SyncContextManager):
 
         **Usage**
 
-        ```py
-        await page.type(\"#mytextarea\", \"hello\") # types instantly
-        await page.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
-        ```
-
-        ```py
-        page.type(\"#mytextarea\", \"hello\") # types instantly
-        page.type(\"#mytextarea\", \"world\", delay=100) # types slower, like a user
-        ```
-
         Parameters
         ----------
         selector : str
@@ -12609,6 +12594,35 @@ class Page(SyncContextManager):
 mapping.register(PageImpl, Page)
 
 
+class PageError(SyncBase):
+    @property
+    def page(self) -> typing.Optional["Page"]:
+        """PageError.page
+
+        The page that produced this unhandled exception, if any.
+
+        Returns
+        -------
+        Union[Page, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.page)
+
+    @property
+    def error(self) -> "Error":
+        """PageError.error
+
+        Unhandled error that was thrown.
+
+        Returns
+        -------
+        Error
+        """
+        return mapping.from_impl(self._impl_obj.error)
+
+
+mapping.register(PageErrorImpl, PageError)
+
+
 class BrowserContext(SyncContextManager):
     @typing.overload
     def on(
@@ -12715,6 +12729,14 @@ class BrowserContext(SyncContextManager):
 
         **NOTE** Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not
         need it in most cases)."""
+
+    @typing.overload
+    def on(
+        self, event: Literal["pageerror"], f: typing.Callable[["PageError"], "None"]
+    ) -> None:
+        """
+        Emitted when unhandled exceptions occur on any pages created through this context. To only listen for `pageError`
+        events from a particular page, use `page.on('page_error')`."""
 
     @typing.overload
     def on(
@@ -12876,6 +12898,14 @@ class BrowserContext(SyncContextManager):
 
         **NOTE** Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not
         need it in most cases)."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["pageerror"], f: typing.Callable[["PageError"], "None"]
+    ) -> None:
+        """
+        Emitted when unhandled exceptions occur on any pages created through this context. To only listen for `pageError`
+        events from a particular page, use `page.on('page_error')`."""
 
     @typing.overload
     def once(
@@ -16060,7 +16090,7 @@ class Locator(SyncBase):
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
         instead.
 
-        To send fine-grained keyboard events, use `locator.type()`.
+        To send fine-grained keyboard events, use `locator.press_sequentially()`.
 
         Parameters
         ----------
@@ -17954,39 +17984,12 @@ class Locator(SyncBase):
     ) -> None:
         """Locator.type
 
-        **NOTE** In most cases, you should use `locator.fill()` instead. You only need to type characters if there
-        is special keyboard handling on the page.
-
         Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
         text.
 
         To press a special key, like `Control` or `ArrowDown`, use `locator.press()`.
 
         **Usage**
-
-        ```py
-        await element.type(\"hello\") # types instantly
-        await element.type(\"world\", delay=100) # types slower, like a user
-        ```
-
-        ```py
-        element.type(\"hello\") # types instantly
-        element.type(\"world\", delay=100) # types slower, like a user
-        ```
-
-        An example of typing into a text field and then submitting the form:
-
-        ```py
-        element = page.get_by_label(\"Password\")
-        await element.type(\"my password\")
-        await element.press(\"Enter\")
-        ```
-
-        ```py
-        element = page.get_by_label(\"Password\")
-        element.type(\"my password\")
-        element.press(\"Enter\")
-        ```
 
         Parameters
         ----------
@@ -18006,6 +18009,73 @@ class Locator(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.type(
+                    text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                )
+            )
+        )
+
+    def press_sequentially(
+        self,
+        text: str,
+        *,
+        delay: typing.Optional[float] = None,
+        timeout: typing.Optional[float] = None,
+        no_wait_after: typing.Optional[bool] = None
+    ) -> None:
+        """Locator.press_sequentially
+
+        **NOTE** In most cases, you should use `locator.fill()` instead. You only need to press keys one by one if
+        there is special keyboard handling on the page.
+
+        Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
+        text.
+
+        To press a special key, like `Control` or `ArrowDown`, use `locator.press()`.
+
+        **Usage**
+
+        ```py
+        await locator.press_sequentially(\"hello\") # types instantly
+        await locator.press_sequentially(\"world\", delay=100) # types slower, like a user
+        ```
+
+        ```py
+        locator.press_sequentially(\"hello\") # types instantly
+        locator.press_sequentially(\"world\", delay=100) # types slower, like a user
+        ```
+
+        An example of typing into a text field and then submitting the form:
+
+        ```py
+        locator = page.get_by_label(\"Password\")
+        await locator.press_sequentially(\"my password\")
+        await locator.press(\"Enter\")
+        ```
+
+        ```py
+        locator = page.get_by_label(\"Password\")
+        locator.press_sequentially(\"my password\")
+        locator.press(\"Enter\")
+        ```
+
+        Parameters
+        ----------
+        text : str
+            String of characters to sequentially press into a focused element.
+        delay : Union[float, None]
+            Time to wait between key presses in milliseconds. Defaults to 0.
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        no_wait_after : Union[bool, None]
+            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
+            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
+            navigating to inaccessible pages. Defaults to `false`.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.press_sequentially(
                     text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
                 )
             )

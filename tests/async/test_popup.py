@@ -396,6 +396,7 @@ async def test_should_work_with_clicking_target__blank(context, server):
     popup = await popup_info.value
     assert await page.evaluate("!!window.opener") is False
     assert await popup.evaluate("!!window.opener")
+    assert popup.main_frame.page == popup
 
 
 async def test_should_work_with_fake_clicking_target__blank_and_rel_noopener(

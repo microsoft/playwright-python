@@ -82,7 +82,7 @@ class Frame(ChannelOwner):
         self._url = initializer["url"]
         self._detached = False
         self._child_frames: List[Frame] = []
-        self._page: "Page"
+        self._page: Optional[Page] = None
         self._load_states: Set[str] = set(initializer["loadStates"])
         self._event_emitter = EventEmitter()
         self._channel.on(
@@ -105,26 +105,16 @@ class Frame(ChannelOwner):
             self._event_emitter.emit("loadstate", add)
         elif remove and remove in self._load_states:
             self._load_states.remove(remove)
-        if (
-            not self._parent_frame
-            and add == "load"
-            and hasattr(self, "_page")
-            and self._page
-        ):
+        if not self._parent_frame and add == "load" and self._page:
             self._page.emit("load", self._page)
-        if (
-            not self._parent_frame
-            and add == "domcontentloaded"
-            and hasattr(self, "_page")
-            and self._page
-        ):
+        if not self._parent_frame and add == "domcontentloaded" and self._page:
             self._page.emit("domcontentloaded", self._page)
 
     def _on_frame_navigated(self, event: FrameNavigatedEvent) -> None:
         self._url = event["url"]
         self._name = event["name"]
         self._event_emitter.emit("navigated", event)
-        if "error" not in event and hasattr(self, "_page") and self._page:
+        if "error" not in event and self._page:
             self._page.emit("framenavigated", self)
 
     async def _query_count(self, selector: str) -> int:
@@ -132,6 +122,7 @@ class Frame(ChannelOwner):
 
     @property
     def page(self) -> "Page":
+        assert self._page
         return self._page
 
     async def goto(
@@ -151,6 +142,7 @@ class Frame(ChannelOwner):
     def _setup_navigation_wait_helper(
         self, wait_name: str, timeout: float = None
     ) -> WaitHelper:
+        assert self._page
         wait_helper = WaitHelper(self._page, f"frame.{wait_name}")
         wait_helper.reject_on_event(
             self._page, "close", Error("Navigation failed because page was closed!")
@@ -175,6 +167,7 @@ class Frame(ChannelOwner):
         wait_until: DocumentLoadState = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
+        assert self._page
         if not wait_until:
             wait_until = "load"
 
@@ -225,6 +218,7 @@ class Frame(ChannelOwner):
         wait_until: DocumentLoadState = None,
         timeout: float = None,
     ) -> None:
+        assert self._page
         matcher = URLMatcher(self._page._browser_context._options.get("baseURL"), url)
         if matcher.matches(self.url):
             await self._wait_for_load_state_impl(state=wait_until, timeout=timeout)

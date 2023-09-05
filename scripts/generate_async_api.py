@@ -20,9 +20,9 @@ from typing import Any
 
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
-    all_types,
     api_globals,
     arguments,
+    generated_types,
     get_type_hints,
     header,
     process_type,
@@ -131,7 +131,7 @@ def main() -> None:
         "from playwright._impl._async_base import AsyncEventContextManager, AsyncBase, AsyncContextManager, mapping"
     )
 
-    for t in all_types:
+    for t in generated_types:
         generate(t)
     documentation_provider.print_remainder()
 

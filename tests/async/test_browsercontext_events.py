@@ -188,3 +188,11 @@ async def test_console_event_should_work_with_context_manager(page: Page) -> Non
     message = await cm_info.value
     assert message.text == "hello"
     assert message.page == page
+
+
+async def test_page_error_event_should_work(page: Page) -> None:
+    async with page.context.expect_event("pageerror") as page_error_info:
+        await page.set_content('<script>throw new Error("boom")</script>')
+    page_error = await page_error_info.value
+    assert page_error.page == page
+    assert "boom" in page_error.error.stack

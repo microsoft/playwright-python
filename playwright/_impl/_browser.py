@@ -254,3 +254,5 @@ async def prepare_browser_context_params(params: Dict) -> None:
         params["reducedMotion"] = "no-override"
     if params.get("forcedColors", None) == "null":
         params["forcedColors"] = "no-override"
+    if "acceptDownloads" in params:
+        params["acceptDownloads"] = "accept" if params["acceptDownloads"] else "deny"

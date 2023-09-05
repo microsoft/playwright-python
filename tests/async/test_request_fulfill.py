@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-
 from playwright.async_api import Page, Route
 from tests.server import Server
 
@@ -39,9 +37,7 @@ async def test_should_fulfill_json(page: Page, server: Server) -> None:
     assert response
     assert response.status == 201
     assert response.headers["content-type"] == "application/json"
-    assert json.loads(await page.evaluate("document.body.textContent")) == {
-        "bar": "baz"
-    }
+    assert await response.json() == {"bar": "baz"}
 
 
 async def test_should_fulfill_json_overriding_existing_response(
@@ -73,6 +69,4 @@ async def test_should_fulfill_json_overriding_existing_response(
     assert response.headers["content-type"] == "application/json"
     assert response.headers["foo"] == "bar"
     assert original["tags"] == ["a", "b"]
-    assert json.loads(await page.evaluate("document.body.textContent")) == {
-        "tags": ["c"]
-    }
+    assert await response.json() == {"tags": ["c"]}

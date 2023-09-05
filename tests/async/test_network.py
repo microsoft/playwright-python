@@ -605,7 +605,10 @@ async def test_network_events_request_failed(
                 == "Server returned nothing (no headers, no data)"
             )
         else:
-            assert failed_requests[0].failure == "Message Corrupt"
+            assert failed_requests[0].failure in [
+                "Message Corrupt",
+                "Connection terminated unexpectedly",
+            ]
     else:
         assert failed_requests[0].failure == "NS_ERROR_NET_RESET"
     assert failed_requests[0].frame

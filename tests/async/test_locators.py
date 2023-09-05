@@ -375,6 +375,12 @@ async def test_locators_should_type(page: Page):
     assert await page.eval_on_selector("input", "input => input.value") == "hello"
 
 
+async def test_locators_should_press_sequentially(page: Page):
+    await page.set_content("<input type='text' />")
+    await page.locator("input").press_sequentially("hello")
+    assert await page.eval_on_selector("input", "input => input.value") == "hello"
+
+
 async def test_locators_should_screenshot(
     page: Page, server: Server, assert_to_be_golden
 ):

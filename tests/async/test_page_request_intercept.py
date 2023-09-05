@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Page, Route
+from playwright.async_api import Page, Route, expect
 from tests.server import Server
 
 
@@ -79,3 +79,18 @@ async def test_should_intercept_with_post_data_override(server: Server, page: Pa
     await page.goto(server.PREFIX + "/empty.html")
     request = await request_promise
     assert request.post_body.decode("utf-8") == '{"foo":"bar"}'
+
+
+async def test_should_fulfill_popup_main_request_using_alias(
+    page: Page, server: Server
+):
+    async def route_handler(route: Route):
+        response = await route.fetch()
+        await route.fulfill(response=response, body="hello")
+
+    await page.context.route("**/*", route_handler)
+    await page.set_content(f'<a target=_blank href="{server.EMPTY_PAGE}">click me</a>')
+    [popup, _] = await asyncio.gather(
+        page.wait_for_event("popup"), page.get_by_text("click me").click()
+    )
+    await expect(popup.locator("body")).to_have_text("hello")
