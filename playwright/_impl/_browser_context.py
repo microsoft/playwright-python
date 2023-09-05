@@ -29,7 +29,7 @@ from typing import (
     Union,
     cast,
 )
-from playwright._impl._page_error import PageError
+
 from playwright._impl._api_structures import (
     Cookie,
     Geolocation,
@@ -51,7 +51,6 @@ from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
-    parse_error,
     HarContentPolicy,
     HarMode,
     HarRecordingMetadata,
@@ -64,11 +63,13 @@ from playwright._impl._helper import (
     async_readfile,
     async_writefile,
     locals_to_params,
+    parse_error,
     prepare_record_har_options,
     to_impl,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._page_error import PageError
 from playwright._impl._tracing import Tracing
 from playwright._impl._wait_helper import WaitHelper
 
@@ -152,7 +153,10 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "pageError",
-            lambda params: self._on_page_error(parse_error(params["error"]["error"]), from_nullable_channel(params["page"]))
+            lambda params: self._on_page_error(
+                parse_error(params["error"]["error"]),
+                from_nullable_channel(params["page"]),
+            ),
         )
         self._channel.on(
             "request",
@@ -563,11 +567,9 @@ class BrowserContext(ChannelOwner):
                 asyncio.create_task(dialog.dismiss())
 
     async def _on_page_error(self, error: Error, page: Optional[Page]) -> None:
-        self.emit(BrowserContext.Events.PageError, PageError(page, error))
+        self.emit(BrowserContext.Events.PageError, PageError(self._loop, page, error))
         if page:
-            self.emit(
-                Page.Events.PageError, error
-            )
+            page.emit(Page.Events.PageError, error)
 
     def _on_request(self, request: Request, page: Optional[Page]) -> None:
         self.emit(BrowserContext.Events.Request, request)

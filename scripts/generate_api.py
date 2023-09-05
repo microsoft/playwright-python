@@ -45,13 +45,12 @@ from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
-from playwright._impl._helper import to_snake_case
+from playwright._impl._helper import Error, to_snake_case
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import JSHandle, Serializable
 from playwright._impl._locator import FrameLocator, Locator
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import Page, Worker
-from playwright._impl._helper import Error
 from playwright._impl._page_error import PageError
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
@@ -292,7 +291,7 @@ generated_types = [
 
 all_types = generated_types + [
     Error,
-] 
+]
 
 api_globals = globals()
 assert Serializable

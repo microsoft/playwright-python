@@ -624,7 +624,7 @@ class Locator:
             strict=True,
             **params,
         )
-    
+
     async def press_sequentially(
         self,
         text: str,

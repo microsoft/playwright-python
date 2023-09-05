@@ -80,22 +80,6 @@ async def test_should_intercept_with_post_data_override(server: Server, page: Pa
     request = await request_promise
     assert request.post_body.decode("utf-8") == '{"foo":"bar"}'
 
-""" it('should fulfill popup main request using alias', async ({ page, server, isElectron, isAndroid }) => {
-  await page.context().route('**/*', async route => {
-    const response = await route.fetch();
-    await route.fulfill({ response, body: 'hello' });
-  });
-  await page.setContent(`<a target=_blank href="${server.EMPTY_PAGE}">click me</a>`);
-  const [popup] = await Promise.all([
-    page.waitForEvent('popup'),
-    page.getByText('click me').click(),
-  ]);
-  await expect(popup.locator('body')).toHaveText('hello');
-});
-
-Conver this test to Python
-"""
-
 
 async def test_should_fulfill_popup_main_request_using_alias(
     page: Page, server: Server
@@ -106,7 +90,7 @@ async def test_should_fulfill_popup_main_request_using_alias(
 
     await page.context.route("**/*", route_handler)
     await page.set_content(f'<a target=_blank href="{server.EMPTY_PAGE}">click me</a>')
-    [popup,_] = await asyncio.gather(
+    [popup, _] = await asyncio.gather(
         page.wait_for_event("popup"), page.get_by_text("click me").click()
     )
     await expect(popup.locator("body")).to_have_text("hello")

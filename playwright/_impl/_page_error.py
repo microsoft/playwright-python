@@ -12,13 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright._impl._page import Page
-from playwright._impl._helper import Error
+from asyncio import AbstractEventLoop
 from typing import Optional
 
+from playwright._impl._helper import Error
+from playwright._impl._page import Page
+
+
 class PageError:
-    def __init__(self, page: Optional[Page], error: Error) -> None:
-        self._loop = page._loop
+    def __init__(
+        self, loop: AbstractEventLoop, page: Optional[Page], error: Error
+    ) -> None:
+        self._loop = loop
         self._page = page
         self._error = error
 

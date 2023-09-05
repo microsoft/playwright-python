@@ -21,9 +21,9 @@ from typing import Any
 
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
-    generated_types,
     api_globals,
     arguments,
+    generated_types,
     get_type_hints,
     header,
     process_type,

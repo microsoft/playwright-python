@@ -61,9 +61,9 @@ from playwright._impl._helper import locals_to_params
 from playwright._impl._wait_helper import WaitHelper
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._browser_context import BrowserContext
     from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
-    from playwright._impl._browser_context import BrowserContext
     from playwright._impl._page import Page
 
 
@@ -258,10 +258,15 @@ class Request(ChannelOwner):
         return await self._all_headers_future
 
     def _target_closed_future(self) -> asyncio.Future:
-        frame = from_nullable_channel(self._initializer.get("frame"))
-        if not frame or not frame._page:
+        frame = cast(
+            Optional["Frame"], from_nullable_channel(self._initializer.get("frame"))
+        )
+        if not frame:
             return asyncio.Future()
-        return self.frame._page._closed_or_crashed_future
+        page = frame._page
+        if not page:
+            return asyncio.Future()
+        return page._closed_or_crashed_future
 
 
 class Route(ChannelOwner):
@@ -270,7 +275,7 @@ class Route(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._handling_future: Optional[asyncio.Future["bool"]] = None
-        self._context: "BrowserContext" = None
+        self._context: "BrowserContext" = cast("BrowserContext", None)
 
     def _start_handling(self) -> "asyncio.Future[bool]":
         self._handling_future = asyncio.Future()
