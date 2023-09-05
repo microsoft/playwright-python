@@ -29,7 +29,7 @@ from typing import (
     Union,
     cast,
 )
-
+from playwright._impl._page_error import PageError
 from playwright._impl._api_structures import (
     Cookie,
     Geolocation,
@@ -51,6 +51,7 @@ from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
+    parse_error,
     HarContentPolicy,
     HarMode,
     HarRecordingMetadata,
@@ -87,6 +88,7 @@ class BrowserContext(ChannelOwner):
         Console="console",
         Dialog="dialog",
         Page="page",
+        PageError="pageerror",
         ServiceWorker="serviceworker",
         Request="request",
         Response="response",
@@ -149,6 +151,10 @@ class BrowserContext(ChannelOwner):
             "dialog", lambda params: self._on_dialog(from_channel(params["dialog"]))
         )
         self._channel.on(
+            "pageError",
+            lambda params: self._on_page_error(parse_error(params["error"]["error"]), from_nullable_channel(params["page"]))
+        )
+        self._channel.on(
             "request",
             lambda params: self._on_request(
                 from_channel(params["request"]),
@@ -206,6 +212,7 @@ class BrowserContext(ChannelOwner):
             page._opener.emit(Page.Events.Popup, page)
 
     async def _on_route(self, route: Route) -> None:
+        route._context = self
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             if not route_handler.matches(route.request.url):
@@ -554,6 +561,13 @@ class BrowserContext(ChannelOwner):
                 asyncio.create_task(dialog.accept())
             else:
                 asyncio.create_task(dialog.dismiss())
+
+    async def _on_page_error(self, error: Error, page: Optional[Page]) -> None:
+        self.emit(BrowserContext.Events.PageError, PageError(page, error))
+        if page:
+            self.emit(
+                Page.Events.PageError, error
+            )
 
     def _on_request(self, request: Request, page: Optional[Page]) -> None:
         self.emit(BrowserContext.Events.Request, request)

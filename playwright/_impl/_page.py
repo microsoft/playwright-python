@@ -75,7 +75,6 @@ from playwright._impl._helper import (
     is_safe_close_error,
     locals_to_params,
     make_dirs_for_file,
-    parse_error,
     serialize_error,
 )
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
@@ -178,12 +177,6 @@ class Page(ChannelOwner):
             lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
         self._channel.on(
-            "pageError",
-            lambda params: self.emit(
-                Page.Events.PageError, parse_error(params["error"]["error"])
-            ),
-        )
-        self._channel.on(
             "route",
             lambda params: asyncio.create_task(
                 self._on_route(from_channel(params["route"]))
@@ -239,6 +232,7 @@ class Page(ChannelOwner):
         self.emit(Page.Events.FrameDetached, frame)
 
     async def _on_route(self, route: Route) -> None:
+        route._context = self.context
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             if not route_handler.matches(route.request.url):

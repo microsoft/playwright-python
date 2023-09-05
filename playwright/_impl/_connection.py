@@ -368,7 +368,7 @@ class Connection(EventEmitter):
             error = msg.get("error")
             if error:
                 parsed_error = parse_error(error["error"])  # type: ignore
-                parsed_error.stack = "".join(
+                parsed_error._stack = "".join(
                     traceback.format_list(callback.stack_trace)[-10:]
                 )
                 callback.future.set_exception(parsed_error)

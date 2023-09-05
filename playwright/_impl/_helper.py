@@ -222,8 +222,8 @@ def parse_error(error: ErrorPayload) -> Error:
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
     exc = base_error_class(cast(str, patch_error_message(error.get("message"))))
-    exc.name = error["name"]
-    exc.stack = error["stack"]
+    exc._name = error["name"]
+    exc._stack = error["stack"]
     return exc
 
 

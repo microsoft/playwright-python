@@ -82,7 +82,7 @@ class Frame(ChannelOwner):
         self._url = initializer["url"]
         self._detached = False
         self._child_frames: List[Frame] = []
-        self._page: "Page"
+        self._page: "Page" = None
         self._load_states: Set[str] = set(initializer["loadStates"])
         self._event_emitter = EventEmitter()
         self._channel.on(

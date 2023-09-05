@@ -624,6 +624,15 @@ class Locator:
             strict=True,
             **params,
         )
+    
+    async def press_sequentially(
+        self,
+        text: str,
+        delay: float = None,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+    ) -> None:
+        await self.type(text, delay=delay, timeout=timeout, noWaitAfter=noWaitAfter)
 
     async def uncheck(
         self,

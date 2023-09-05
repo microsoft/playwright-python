@@ -323,7 +323,7 @@ class DocumentationProvider:
         str_value = str(value)
         if isinstance(value, list):
             return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a), value)))}]"
-        if str_value == "<class 'playwright._impl._types.Error'>":
+        if str_value == "<class 'playwright._impl._api_types.Error'>":
             return "Error"
         if str_value == "<class 'NoneType'>":
             return "None"
@@ -471,6 +471,8 @@ class DocumentationProvider:
         for [class_name, clazz] in self.classes.items():
             for [member_name, member] in clazz["members"].items():
                 if member.get("deprecated"):
+                    continue
+                if class_name in ["Error"]:
                     continue
                 entry = f"{class_name}.{member_name}"
                 if entry not in self.printed_entries:

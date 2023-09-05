@@ -12,8 +12,3 @@ Parameter type mismatch in BrowserContext.route(handler=): documented as Callabl
 Parameter type mismatch in BrowserContext.unroute(handler=): documented as Union[Callable[[Route, Request], Union[Any, Any]], None], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]
 Parameter type mismatch in Page.route(handler=): documented as Callable[[Route, Request], Union[Any, Any]], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
 Parameter type mismatch in Page.unroute(handler=): documented as Union[Callable[[Route, Request], Union[Any, Any]], None], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]
-
-# Temporary Fix
-Method not implemented: Error.name
-Method not implemented: Error.stack
-Method not implemented: Error.message

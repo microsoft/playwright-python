@@ -21,7 +21,7 @@ from typing import Any
 
 from scripts.documentation_provider import DocumentationProvider
 from scripts.generate_api import (
-    all_types,
+    generated_types,
     api_globals,
     arguments,
     get_type_hints,
@@ -132,7 +132,7 @@ def main() -> None:
         "from playwright._impl._sync_base import EventContextManager, SyncBase, SyncContextManager, mapping"
     )
 
-    for t in all_types:
+    for t in generated_types:
         generate(t)
     documentation_provider.print_remainder()
 
