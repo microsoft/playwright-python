@@ -26,7 +26,7 @@ steps:
 
 - task: EsrpRelease@4
   inputs:
-    ConnectedServiceName: 'Playwright-Java-ESRP'
+    ConnectedServiceName: 'Playwright-ESRP'
     Intent: 'PackageDistribution'
     ContentType: 'PyPi'
     ContentSource: 'Folder'
