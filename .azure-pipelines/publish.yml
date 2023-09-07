@@ -35,5 +35,5 @@ steps:
     Owners: 'maxschmitt@microsoft.com'
     Approvers: 'maxschmitt@microsoft.com'
     ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
-    MainPublisher: 'ESRPRELPACMAN'
+    MainPublisher: 'Playwright'
     DomainTenantId: '72f988bf-86f1-41af-91ab-2d7cd011db47'
