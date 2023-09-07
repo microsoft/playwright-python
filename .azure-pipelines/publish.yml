@@ -23,3 +23,17 @@ steps:
 - script: |
     python setup.py bdist_wheel --all
   displayName: 'Build'
+
+- task: EsrpRelease@4
+  inputs:
+    ConnectedServiceName: 'Playwright-Java-ESRP'
+    Intent: 'PackageDistribution'
+    ContentType: 'PyPi'
+    ContentSource: 'Folder'
+    FolderLocation: './dist/'
+    WaitForReleaseCompletion: true
+    Owners: 'maxschmitt@microsoft.com'
+    Approvers: 'maxschmitt@microsoft.com'
+    ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
+    MainPublisher: 'ESRPRELPACMAN'
+    DomainTenantId: '72f988bf-86f1-41af-91ab-2d7cd011db47'
