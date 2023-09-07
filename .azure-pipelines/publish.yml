@@ -1,6 +1,7 @@
-
 trigger:
-- test
+  tags:
+    include:
+    - '*'
 
 pool:
   vmImage: ubuntu-latest
@@ -37,3 +38,4 @@ steps:
     ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
     MainPublisher: 'Playwright'
     DomainTenantId: '72f988bf-86f1-41af-91ab-2d7cd011db47'
+  displayName: 'ESRP Release to PIP'
