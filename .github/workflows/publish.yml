@@ -3,27 +3,6 @@ on:
   release:
     types: [published]
 jobs:
-  deploy-pypi:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r local-requirements.txt
-        pip install -e .
-        python setup.py bdist_wheel --all
-        python -m playwright install-deps
-    - name: Publish package
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: twine upload dist/*
-
   deploy-conda:
     strategy:
       matrix:

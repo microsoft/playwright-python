@@ -198,7 +198,6 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 
 
 setup(
-    version="0.0.1",
     name="playwright",
     author="Microsoft Corporation",
     author_email="",
@@ -231,6 +230,11 @@ setup(
     ],
     python_requires=">=3.8",
     cmdclass={"bdist_wheel": PlaywrightBDistWheelCommand},
+    use_scm_version={
+        "version_scheme": "post-release",
+        "write_to": "playwright/_repo_version.py",
+        "write_to_template": 'version = "{version}"\n',
+    },
     setup_requires=["setuptools-scm==7.0.5", "wheel==0.38.1"],
     entry_points={
         "console_scripts": [
