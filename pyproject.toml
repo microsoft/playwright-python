@@ -21,6 +21,7 @@ warn_redundant_casts = true
 warn_unused_configs = true
 check_untyped_defs = true
 disallow_untyped_defs = true
+no_implicit_optional = false
 
 [[tool.mypy.overrides]]
 module = "tests/async.*"
