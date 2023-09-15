@@ -19,7 +19,7 @@ from playwright._impl._helper import Error
 from playwright._impl._page import Page
 
 
-class PageError:
+class WebError:
     def __init__(
         self, loop: AbstractEventLoop, page: Optional[Page], error: Error
     ) -> None:

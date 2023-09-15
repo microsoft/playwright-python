@@ -69,9 +69,9 @@ from playwright._impl._helper import (
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
-from playwright._impl._page_error import PageError
 from playwright._impl._tracing import Tracing
 from playwright._impl._wait_helper import WaitHelper
+from playwright._impl._web_error import WebError
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
@@ -89,7 +89,7 @@ class BrowserContext(ChannelOwner):
         Console="console",
         Dialog="dialog",
         Page="page",
-        PageError="pageerror",
+        WebError="weberror",
         ServiceWorker="serviceworker",
         Request="request",
         Response="response",
@@ -567,7 +567,7 @@ class BrowserContext(ChannelOwner):
                 asyncio.create_task(dialog.dismiss())
 
     async def _on_page_error(self, error: Error, page: Optional[Page]) -> None:
-        self.emit(BrowserContext.Events.PageError, PageError(self._loop, page, error))
+        self.emit(BrowserContext.Events.WebError, WebError(self._loop, page, error))
         if page:
             page.emit(Page.Events.PageError, error)
 
