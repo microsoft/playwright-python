@@ -191,7 +191,7 @@ async def test_console_event_should_work_with_context_manager(page: Page) -> Non
 
 
 async def test_page_error_event_should_work(page: Page) -> None:
-    async with page.context.expect_event("pageerror") as page_error_info:
+    async with page.context.expect_event("weberror") as page_error_info:
         await page.set_content('<script>throw new Error("boom")</script>')
     page_error = await page_error_info.value
     assert page_error.page == page

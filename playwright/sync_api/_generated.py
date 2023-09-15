@@ -73,7 +73,6 @@ from playwright._impl._network import Route as RouteImpl
 from playwright._impl._network import WebSocket as WebSocketImpl
 from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
-from playwright._impl._page_error import PageError as PageErrorImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._sync_base import (
@@ -84,6 +83,7 @@ from playwright._impl._sync_base import (
 )
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._video import Video as VideoImpl
+from playwright._impl._web_error import WebError as WebErrorImpl
 
 
 class Request(SyncBase):
@@ -1300,6 +1300,9 @@ class Keyboard(SyncBase):
     def type(self, text: str, *, delay: typing.Optional[float] = None) -> None:
         """Keyboard.type
 
+        **NOTE** In most cases, you should use `locator.fill()` instead. You only need to press keys one by one if
+        there is special keyboard handling on the page - in this case use `locator.press_sequentially()`.
+
         Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 
         To press a special key, like `Control` or `ArrowDown`, use `keyboard.press()`.
@@ -1334,6 +1337,8 @@ class Keyboard(SyncBase):
 
     def press(self, key: str, *, delay: typing.Optional[float] = None) -> None:
         """Keyboard.press
+
+        **NOTE** In most cases, you should use `locator.press()` instead.
 
         `key` can specify the intended
         [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
@@ -2353,7 +2358,7 @@ class ElementHandle(JSHandle):
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
         instead.
 
-        To send fine-grained keyboard events, use `keyboard.type()`.
+        To send fine-grained keyboard events, use `locator.press_sequentially()`.
 
         Parameters
         ----------
@@ -4721,7 +4726,7 @@ class Frame(SyncBase):
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
         instead.
 
-        To send fine-grained keyboard events, use `frame.type()`.
+        To send fine-grained keyboard events, use `locator.press_sequentially()`.
 
         Parameters
         ----------
@@ -10354,7 +10359,7 @@ class Page(SyncContextManager):
         [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
         instead.
 
-        To send fine-grained keyboard events, use `page.type()`.
+        To send fine-grained keyboard events, use `locator.press_sequentially()`.
 
         Parameters
         ----------
@@ -12594,10 +12599,10 @@ class Page(SyncContextManager):
 mapping.register(PageImpl, Page)
 
 
-class PageError(SyncBase):
+class WebError(SyncBase):
     @property
     def page(self) -> typing.Optional["Page"]:
-        """PageError.page
+        """WebError.page
 
         The page that produced this unhandled exception, if any.
 
@@ -12609,7 +12614,7 @@ class PageError(SyncBase):
 
     @property
     def error(self) -> "Error":
-        """PageError.error
+        """WebError.error
 
         Unhandled error that was thrown.
 
@@ -12620,7 +12625,7 @@ class PageError(SyncBase):
         return mapping.from_impl(self._impl_obj.error)
 
 
-mapping.register(PageErrorImpl, PageError)
+mapping.register(WebErrorImpl, WebError)
 
 
 class BrowserContext(SyncContextManager):
@@ -12732,11 +12737,11 @@ class BrowserContext(SyncContextManager):
 
     @typing.overload
     def on(
-        self, event: Literal["pageerror"], f: typing.Callable[["PageError"], "None"]
+        self, event: Literal["weberror"], f: typing.Callable[["WebError"], "None"]
     ) -> None:
         """
-        Emitted when unhandled exceptions occur on any pages created through this context. To only listen for `pageError`
-        events from a particular page, use `page.on('page_error')`."""
+        Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
+        page, use `page.on('page_error')` instead."""
 
     @typing.overload
     def on(
@@ -12901,11 +12906,11 @@ class BrowserContext(SyncContextManager):
 
     @typing.overload
     def once(
-        self, event: Literal["pageerror"], f: typing.Callable[["PageError"], "None"]
+        self, event: Literal["weberror"], f: typing.Callable[["WebError"], "None"]
     ) -> None:
         """
-        Emitted when unhandled exceptions occur on any pages created through this context. To only listen for `pageError`
-        events from a particular page, use `page.on('page_error')`."""
+        Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
+        page, use `page.on('page_error')` instead."""
 
     @typing.overload
     def once(

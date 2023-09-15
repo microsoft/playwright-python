@@ -51,11 +51,11 @@ from playwright._impl._js_handle import JSHandle, Serializable
 from playwright._impl._locator import FrameLocator, Locator
 from playwright._impl._network import Request, Response, Route, WebSocket
 from playwright._impl._page import Page, Worker
-from playwright._impl._page_error import PageError
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
 from playwright._impl._tracing import Tracing
 from playwright._impl._video import Video
+from playwright._impl._web_error import WebError
 
 
 def process_type(value: Any, param: bool = False) -> str:
@@ -240,7 +240,7 @@ from playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
 from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
 from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
-from playwright._impl._page_error import PageError as PageErrorImpl
+from playwright._impl._web_error import WebError as WebErrorImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
@@ -273,7 +273,7 @@ generated_types = [
     Download,
     Video,
     Page,
-    PageError,
+    WebError,
     BrowserContext,
     CDPSession,
     Browser,
