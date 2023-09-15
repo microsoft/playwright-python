@@ -126,8 +126,6 @@ def serialize_value(
             return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
-    if isinstance(value, set):
-        return {"se": serialize_value(list(value), handles, visitor_info)}
     if isinstance(value, datetime):
         return dict(d=value.isoformat() + "Z")
     if isinstance(value, bool):
@@ -198,10 +196,14 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
             return int(value["bi"])
 
         if "m" in value:
-            return dict(parse_value(value["m"], refs))
+            v = {}
+            refs[value["m"]["id"]] = v
+            return v
 
         if "se" in value:
-            return set(parse_value(value["se"], refs))
+            v = set()
+            refs[value["se"]["id"]] = v
+            return v
 
         if "a" in value:
             a: List = []
