@@ -566,7 +566,7 @@ class BrowserContext(ChannelOwner):
             else:
                 asyncio.create_task(dialog.dismiss())
 
-    async def _on_page_error(self, error: Error, page: Optional[Page]) -> None:
+    def _on_page_error(self, error: Error, page: Optional[Page]) -> None:
         self.emit(BrowserContext.Events.WebError, WebError(self._loop, page, error))
         if page:
             page.emit(Page.Events.PageError, error)

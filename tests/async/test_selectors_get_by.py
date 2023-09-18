@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 from playwright.async_api import Page, expect
 
 
@@ -85,6 +87,42 @@ world</label><input id=control />"""
     )
     await expect(page.get_by_title("my t\\\\itle", exact=True)).to_have_count(
         0, timeout=500
+    )
+
+    await page.set_content(
+        """<label for=target>foo &gt;&gt; bar</label><input id=target>"""
+    )
+    await page.eval_on_selector(
+        "input",
+        """input => {
+        input.setAttribute('placeholder', 'foo >> bar');
+        input.setAttribute('title', 'foo >> bar');
+        input.setAttribute('alt', 'foo >> bar');
+    }""",
+    )
+    assert await page.get_by_text("foo >> bar").text_content() == "foo >> bar"
+    await expect(page.locator("label")).to_have_text("foo >> bar")
+    await expect(page.get_by_text("foo >> bar")).to_have_text("foo >> bar")
+    assert (
+        await page.get_by_text(re.compile("foo >> bar")).text_content() == "foo >> bar"
+    )
+    await expect(page.get_by_label("foo >> bar")).to_have_attribute("id", "target")
+    await expect(page.get_by_label(re.compile("foo >> bar"))).to_have_attribute(
+        "id", "target"
+    )
+    await expect(page.get_by_placeholder("foo >> bar")).to_have_attribute(
+        "id", "target"
+    )
+    await expect(page.get_by_alt_text("foo >> bar")).to_have_attribute("id", "target")
+    await expect(page.get_by_title("foo >> bar")).to_have_attribute("id", "target")
+    await expect(page.get_by_placeholder(re.compile("foo >> bar"))).to_have_attribute(
+        "id", "target"
+    )
+    await expect(page.get_by_alt_text(re.compile("foo >> bar"))).to_have_attribute(
+        "id", "target"
+    )
+    await expect(page.get_by_title(re.compile("foo >> bar"))).to_have_attribute(
+        "id", "target"
     )
 
 
