@@ -52,7 +52,6 @@ from playwright._impl._js_handle import Serializable, parse_value, serialize_arg
 from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
-    escape_regex_flags,
 )
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -847,16 +846,12 @@ def set_test_id_attribute_name(attribute_name: str) -> None:
 def get_by_test_id_selector(
     test_id_attribute_name: str, test_id: Union[str, Pattern[str]]
 ) -> str:
-    if isinstance(test_id, Pattern):
-        return f"internal:testid=[{test_id_attribute_name}=/{test_id.pattern}/{escape_regex_flags(test_id)}]"
     return f"internal:testid=[{test_id_attribute_name}={escape_for_attribute_selector(test_id, True)}]"
 
 
 def get_by_attribute_text_selector(
     attr_name: str, text: Union[str, Pattern[str]], exact: bool = None
 ) -> str:
-    if isinstance(text, Pattern):
-        return f"internal:attr=[{attr_name}=/{text.pattern}/{escape_regex_flags(text)}]"
     return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text, exact=exact)}]"
 
 
@@ -915,9 +910,7 @@ def get_by_role_selector(
         props.append(
             (
                 "name",
-                f"/{name.pattern}/{escape_regex_flags(name)}"
-                if isinstance(name, Pattern)
-                else escape_for_attribute_selector(name, exact),
+                escape_for_attribute_selector(name, exact=exact),
             )
         )
     if pressed is not None:
