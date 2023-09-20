@@ -603,6 +603,7 @@ class BrowserContext(ChannelOwner):
         # test_id_attribute_name: Optional[str],
         output_file: Optional[str],
         # handle_SIGINT: Optional[bool],
+        hide_highlight: Optional[bool],
     ) -> None:
         params: Dict[str, Any] = {
             "language": language,
@@ -617,6 +618,8 @@ class BrowserContext(ChannelOwner):
         #     params["testIdAttributeName"] = test_id_attribute_name
         if output_file is not None:
             params["outputFile"] = output_file
+        if hide_highlight is not None:
+            params["hideHighlight"] = hide_highlight 
         # if handle_SIGINT is not None:
         #     params["handleSIGINT"] = handle_SIGINT
         await self._channel.send("recorderSupplementEnable", params)

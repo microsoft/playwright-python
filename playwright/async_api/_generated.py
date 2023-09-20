@@ -13833,7 +13833,8 @@ class BrowserContext(AsyncContextManager):
         language: str,
         *,
         mode: typing.Optional[str] = None,
-        output_file: typing.Optional[str] = None
+        output_file: typing.Optional[str] = None,
+        hide_highlight: typing.Optional[bool] = None
     ) -> None:
         """BrowserContext.enable_recorder
 
@@ -13847,11 +13848,16 @@ class BrowserContext(AsyncContextManager):
             Which mode to start recorder in: `recording` | `inspecting`.
         output_file : Union[str, None]
             Where to save generated code output.
+        hide_highlight : Union[bool, None]
+            Toggle the highlight view for user actions when recording
         """
 
         return mapping.from_maybe_impl(
             await self._impl_obj.enable_recorder(
-                language=language, mode=mode, output_file=output_file
+                language=language,
+                mode=mode,
+                output_file=output_file,
+                hide_highlight=hide_highlight,
             )
         )
 

@@ -30,7 +30,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.35.1-akasa1"
+driver_version = "1.35.2-akasa1"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -231,7 +231,7 @@ setup(
     ],
     python_requires=">=3.7",
     cmdclass={"bdist_wheel": PlaywrightBDistWheelCommand},
-    version="1.35.1+akasa1",
+    version="1.35.2+akasa1",
     # use_scm_version={
     #     "version_scheme": "post-release",
     #     "write_to": "playwright/_repo_version.py",
