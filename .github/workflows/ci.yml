@@ -59,9 +59,6 @@ jobs:
         - os: macos-latest
           python-version: '3.10'
           browser: chromium
-        - os: macos-11.0
-          python-version: '3.10'
-          browser: chromium
         - os: windows-latest
           python-version: '3.11'
           browser: chromium
@@ -69,9 +66,6 @@ jobs:
           python-version: '3.11'
           browser: chromium
         - os: ubuntu-latest
-          python-version: '3.11'
-          browser: chromium
-        - os: windows-latest
           python-version: '3.11'
           browser: chromium
     runs-on: ${{ matrix.os }}
@@ -156,7 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11, windows-2019]
+        os: [ubuntu-20.04, macos-12, windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
