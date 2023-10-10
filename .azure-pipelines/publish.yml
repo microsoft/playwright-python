@@ -1,3 +1,6 @@
+# don't trigger for Pull Requests
+pr: none
+
 trigger:
   tags:
     include:
